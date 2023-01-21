@@ -1,0 +1,100 @@
+---
+title: "Graphs and their Subgraphs"
+---
+
+```{r setup, include=FALSE}
+      library(ggraph)
+      library(tidygraph)
+      library(igraph)
+```
+
+## Graphs and Subgraphs
+Consider the graph shown in @fig-simple2. If all the actors that you are interested in studying are included here, we would refer to it as the **whole network**. However, sometimes, even when we collect data on a large number of actors we may be interested in analyzing not the whole network, but only some parts of it. How do we do that?
+
+```{r fig-subgraph1, fig.margin=TRUE, fig.cap="A subgraph of an undirected graph"}
+    set.seed(329)
+    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
+    gr <- mutate(gr, name = toupper(letters[1:6]))
+    l <- ggraph(gr, layout = 'auto')
+    l <- as.matrix(l$data[, 1:2])
+    gr <- induced_subgraph(gr, c(1, 2, 4, 6))
+    p <- ggraph(gr, layout = l[c(1, 2, 4, 6), ]) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() + ylim(-1,1)
+    p
+```
+
+Well, good thing that a graph is actually a set of two sets. If you remember your high school set theory, you can always take a set and consider only a **subset** of the original members.
+
+Since graphs are sets, we can do the same thing. A subset of the original nodes (or edges) of a graph, is called a **subgraph**. So if $G =\{E,V\}$ is the original graph, the subgraph $G' = \{E',V'\}$ is a subset of $G$, which is written $G \subset G'$, with the understanding that $E' \subset E$ and $V' \subset V$.
+
+```{r fig-subgraph2, fig.margin=TRUE, fig.cap="Another subgraph of an undirected graph", echo = FALSE, warning = FALSE, message=FALSE}
+    set.seed(329)
+    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
+    gr <- mutate(gr, name = toupper(letters[1:6]))
+    l <- ggraph(gr, layout = 'auto')
+    l <- as.matrix(l$data[, 1:2])
+    gr <- induced_subgraph(gr, c(3, 5, 6))
+    p <- ggraph(gr, layout = l[c(3, 5, 6), ]) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() + ylim(-1,1)
+    p
+```
+
+For instance, let's say we were interested in just analyzing actors *A*, *B*, *D*, and *F* in the graph shown in @fig-simple2. They seem to be a close-knit group of people. In that case, as noted earlier, if we call the original graph $G$ with vertex and edge sets $\{E, V\}$we can define a new subgraph $G'$, whose node subset $V'$ only includes the actors we are interested in studying, in this case $V' = \{A, B, D, F\}$, where $V' \subset V$.
+
+The subgraph $G'$ is shown in @fig-subgraph1. It looks exactly like we wanted, capturing the relations between an inter-connected subgroup of actors in the original graph. Note that the edge set of the subgraph $E'$ only includes those edges that are incident to the other nodes in the subgraph and omits those in the original graph that connect to nodes that are not in the subgraph, so $E' \subset E$. As we will see in a later lesson, well-connected subgroups of actors of an original graph are called a **cohesive subset**.
+
+### Vertex and Edge-Induced Subgraphs
+For any graph, we can define a subgraph based on *any* old random subset of the original node set. It is completely up to us. For instance, we could define a new subgraph $G''$ of the original graph shown in @fig-simple2, that includes the node set $V'' = \{C, E, F\}$. That is shown in @fig-subgraph2. That subgraph is weird and probably not very useful, but it is a subgraph of the original graph anyways!
+
+Just like we can define subgraphs based on the node set of a graph, we can define subgraphs based on subsets of the original edge set. For instance, we could pick the edges $E' = \{AB, AC, AF\}$ and define a subgraph based on them, which will necessarily include node set $V' = \{A, B, C, F\}$.
+
+```{r fig-subgraph3, fig.margin=TRUE, fig.cap="Yet another subgraph of an undirected graph", echo = FALSE, warning = FALSE, message=FALSE}
+    set.seed(329)
+    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
+    gr <- mutate(gr, name = toupper(letters[1:6]))
+    l <- ggraph(gr, layout = 'auto')
+    l <- as.matrix(l$data[, 1:2])
+    gr <- induced_subgraph(gr, c(-1))
+    p <- ggraph(gr, layout = l[c(-1), ])
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() + ylim(-1, 1)
+    p
+```
+
+When a subgraph is defined by selecting a subset of nodes to keep (the common case) it is called a **node-induced subgraph** of the original graph. When a subgraph is defined by picking a subset of edges from the original graph to keep, it is called (you guessed it) an **edge-induced subgraph** of the original graph.
+
+### Vertex and Edge-Deleted Subgraphs
+A common reason for defining subgraphs in social network analysis is when we wonder what a network would look like if were to get rid of an actor or a tie. Sometimes this is useful, when we want to get a sense of how important an actor is for holding the network together. So it is possible to define a subgraph by *deleting* a node (or an edge). This is written $G' = G - i$, where *i* is the name of the node we are deleting. So this says "give me a subgraph *G'* that is equal to the original graph *G* minus node *i*."
+
+For instance, @fig-subgraph3, shows the subgraph that results when we delete node *A* from the graph in @fig-simple2: $G' = G-A$. This is called a **vertex-deleted subgraph** of the original graph. 
+
+Subgraphs can also be obtained by picking more than one node from the original graph for deletion. The subgraph that results from removing *all* the nodes of the original graph (so that the cardinality of the edge set is now zero) is called the **null graph**. The subgraph that results from removing all the nodes of the original graph *except* for one (so that the node set of the resulting subgraph includes only one node) is called the **singleton graph** (one is indeed a lonely number in social networks).
+
+```{r fig-subgraph4, fig.margin=TRUE, fig.cap="Yet another subgraph of an undirected graph", echo = FALSE, warning = FALSE, message=FALSE}
+    set.seed(329)
+    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
+    gr <- mutate(gr, name = toupper(letters[1:6]))
+    l <- ggraph(gr, layout = 'auto')
+    l <- as.matrix(l$data[, 1:2])
+    gr <- subgraph.edges(gr, c(2:8), delete.vertices = FALSE)
+    p <- ggraph(gr, layout = l)
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() + ylim(-1, 1)
+    p
+```
+
+If we had defined the subgraph by removing a single-edge instead, then it would be called an **edge-deleted subgraph** of the original graph. For instance, the subgraph that results from deleting the edge $AB$ from @fig-simple2, written $G' = G - AB$, is shown in @fig-subgraph4. 
+
+As with nodes, subgraphs can also be obtained by removing more than on edge at at time. The subgraph that results from removing *all* the edges in a graph, such that the cardinality of the edge set turns to zero, is called the **empty graph.**
+
+As we will see later, subgraphs (as well as vertex and edge deletion) are a useful concept for discussing levels at an "in-between" levels, above the node level but "below" the whole network level: subgroups. However, subgraphs are also useful for network concepts at the node level, because there is a special type of subgraph, called the **ego graph** that is defined by picking a central node and the nodes that are connected to it.

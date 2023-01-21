@@ -1,0 +1,191 @@
+---
+title: "What are Networks?"
+---
+
+```{r setup, include=FALSE}
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+```
+
+## What is a Network?
+
+These days, networks and talk about "social networks" is everywhere. It was not always so, the discipline of **social network analysis** (SNA) developed quietly during the 1960s and 1970s out of scattered lines of work in anthropology, sociology, psychology, mathematics, and communication. It wasn't until the 1970s that a formal group was founded to study social networks (the [International Network of Social Network Analysis](https://www.insna.org/) or INSNA). Today, **network science** is an interdisciplinary field uniting physics, computer science, biology, brain science, sociology, anthropology, economics, and a variety of other fields. All are come together around the idea of a "network."
+
+```{r}
+#| label: fig-point-and-line
+#| fig-cap: "Point and line plot of a network."
+#| fig-cap-location: margin
+#| fig-height: 6
+#| fig-width: 10
+
+    set.seed(329)
+    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "tan2") 
+    p <- p + theme_graph() 
+    p
+```
+
+So what is a network? Minimally, a network is composed of a set of units or entities. These are some times called **nodes** or **vertices**, however what makes these units into a *network* is the fact that at least some pairs of them are joined by a set of **links** or **ties**. These are also sometimes called **edges**. So a network is essentially a set of nodes some of which are linked together. In social networks, the nodes can be people and the connections can be any type of social tie (e.g., friendship, enmity, co-working), whether positive or negative, between them. In future lessons, we will discuss the different types of ties that can exist in social networks as well as the major **social network theories** that have been developed by sociologists, anthropologists, and organization theorists to explain why these types of ties exist, how they work, and what benefits (or drawbacks) they have for people and organizations.
+
+```{r}
+#| label: fig-network-types
+#| fig-cap: "Types of Networked Systems."
+#| fig-height: 10
+#| fig-width: 12
+#| fig-cap-location: margin
+
+    g.nodes <- data.frame(name = c("Networks","Social", "Technological", "Biological", "Schools", "Instagram", "Workplaces", "Airports", "The WWW", "The Internet", "The Brain", "Ecosystems"))
+    g.edges <- data.frame(from = c(1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4),
+                          to = c(2, 3, 4, 5, 6, 7, 8, 9, 12, 6, 8, 9, 10, 11, 12))
+    gr <- tbl_graph(nodes = g.nodes, edges = g.edges)
+    p <- ggraph(gr, layout = 'tree') 
+    p <- p + geom_node_label(aes(label = name), size = 5)
+    p <- p + geom_edge_link(aes(start_cap = label_rect(node1.name),
+                     end_cap = label_rect(node2.name)),
+                 arrow = arrow(length = unit(4, 'mm'))) 
+    p <- p + theme_graph() 
+    p
+```
+
+In a **point and line plot** such as the one shown in @fig-point-and-line networks are some times shown as pictures. This kinds of pictures are also sometimes called **sociograms** or **network diagrams**. The convention in these kind of depictions of networks is that the nodes (e.g., people) are drawn as circles (or some other polygon such as a triangles or squares) and the connections, ties, or links between people are drawn as lines or sometimes, if some kind of direction is implied, as arrows. This way of representing networks is some times called a "graph", although we will see that the idea of a graph is a little more abstract than just a picture. So in this class we will make a strong differentiation between pictorial network representations, and the mathematical concept of graph. When referring to the former, we will use the term **plot** or **network diagram**, reserving the term **graph** for the mathematical object. In future lessons, we will get into more details about pictorial (and non-pictorial) ways of thinking about networks and how they connect to other ways of representing them.
+
+
+## Types of Networks
+
+![Network of Characters in Game of Thrones. Image created by Marcos Martins Marchetti *via* [https://www.kaggle.com/code/mmmarchetti/game-of-thrones-network-analysis](https://www.kaggle.com/code/mmmarchetti/game-of-thrones-network-analysis)](images/01-introduction/got.png){#fig-got}
+
+![The U.S. Airport Network. Image created by Jose M Salln *via* [https://jmsallan.netlify.app/blog/plotting-us-airline-airport-networks/](https://jmsallan.netlify.app/blog/plotting-us-airline-airport-networks/)](images/01-introduction/usairport.png){#fig-airport}
+
+![Network of Connectivity Between Brain Regions. Image from [https://www.cam.ac.uk/research/news/wiring-the-brain](https://www.cam.ac.uk/research/news/wiring-the-brain)](images/01-introduction/brain.jpg){#fig-brain}
+
+Given the very broad definition of networks given in preceding, it should start to dawn on you why people think that networks are everywhere. And, come to think of it, they kind of are! *Any* system of interacting parts or entities can be depicted and analyzed as a network. That is why the idea of a network cuts across the human (e.g., networks of words in a text), social (networks of students in a school), physical (networks of computers in the internet) and biological (networks of neurons in the brain) sciences. The diagram in @fig-network-types gives you an idea of the different types of *networked systems* that exist in the world.
+
+For instance, some social networks do not even have to be made up of real people! In fictional worlds, such as the *Game of Thrones* such as the HBO series created from the books written by George R. R. Martin, some characters meet and get to know one another, but others never meet (or more likely in this show, die before they get to meet). So we can construct a social networks of *acquaintance relations* between the characters (who ended up meeting whom) such as the one depicted in @fig-got. This is a **social network** because the links are composed of a psychological or emotional relation between people. In this case the relation "knowing somebody" in the GoT world is an example of a **symmetric tie** between people.
+
+Take for instance, the various airports (large and small, international and regional) in the United States. Everyday, some number of flights departs from one airport and lands on another. This means that airports in the US are linked via **directed** (e.g., from/to) ties in a Socio-Technical network a network that is *both* **Social** and **Technological**) built from the flights that go from airport to the next (see @fig-airport). As we will see later, this is an example of an **asymmetric tie**; some airports fly a lot to other airports (e.g., Small Regional to LAX), but other airports (e.g., LAX) only schedule flights to other big airports). The network is **social** because it is composed of people traveling. The network is also **technological** because its links are made possible by a complex web of air-flight technology, including planes, radars, in-flight computer systems and so forth.
+
+Finally, all of us carry around a very complex and staggeringly large network, composed of millions and millions of nodes and billions of connections. The network is called *the brain* (see @fig-brain). The nodes are a special type of cell called a *neuron*. Neurons are special because they have these filaments called *dendrites* and this long body called an *axon*. The axon of one neuron links up to the dendrites of another one, generating a large-scale complex network that allows you to breath, eat, drink, think, see, smell and read these pages. The brain is a **biological** network, because the nodes are biological units (neurons) as are the connections. Other biological networks include **ecosystems** were the nodes are species and the links are various types of relations between, some antagonistic (predator/prey) and others mutualistic.
+
+## What is A *Social* Network?
+
+As you can see from the tree chart shown in @fig-network-types, only a subset of networks in the world as **social networks**. The key difference between social networks and other networks is that social networks have to involve people (or groups of people) and their perceptions, thoughts, interactions, and behaviors. Sometimes interactions between people are mediated by technologies. For instance, people can connect to one another by texting on their phone or traveling by plane, in which case the differentiation between what is a technological and a social network becomes a matter of degree.
+
+In this class we will deal with networks that are closer to the "purely social" end of the scale: Those involving people, their perceptions, interactions, sentiments, exchanges, memberships, and relations. The primary perspective that we will take is that of social network analysis as developed in the discipline of **sociology** since the 1970s.
+
+```{r}
+#| label: fig-sna
+#| fig-cap: "Social Science Disciplines that Contribute to and Use Social Network Analysis."
+#| fig-width: 18
+#| fig-height: 10
+#| fig-cap-location: margin
+
+    g.nodes <- data.frame(name = c("Social Network Analysis", "Sociology", "Anthropology", "Psychology", "Communication", "Management", "Linguistics"))
+    g.edges <- data.frame(from = c(2, 3, 4, 5, 6, 7),
+                          to = c(1, 1, 1, 1, 1, 1))
+    gr <- tbl_graph(nodes = g.nodes, edges = g.edges)
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_node_text(aes(label = name), 
+                             size = c(8, rep(6, 6)))
+    p <- p + geom_edge_link(aes(start_cap = label_rect(node1.name),
+                     end_cap = label_rect(node2.name)),
+                 arrow = arrow(length = unit(6, 'mm'))) 
+    p <- p + theme_graph() 
+    p
+```
+
+
+
+The inter-disciplinary field in charge of studying social networks is called **social network analysis** (SNA), and is composed of insights from a variety of other social science disciplines such as sociology, anthropology, psychology, communication, and others (see @fig-sna). SNA in its turn, is part of an even larger interdisciplinary field in charge of studying all types of networks called **network science** which includes work in physics, computer science, data science, biology, engineering, mathematics, and other fields. The relationship between these different scientific fields is depicted in @fig-netsci.
+
+```{r}
+#| label: fig-netsci
+#| fig-cap: "Different fields and types of networks."
+#| fig-width: 16
+#| fig-height: 12
+#| fig-cap-location: margin
+
+    g.nodes <- data.frame(name = c("Mathematics", "Network Science", "Computer Science", "Social", "Psychological", "Information", "Biological", "Neural", "SNA"))
+    g.edges <- data.frame(from = c(1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 9, 1),
+                          to = c(2, 3, 4, 5, 6, 7, 8, 4, 6, 7, 8, 4, 9))
+    gr <- tbl_graph(nodes = g.nodes, edges = g.edges)
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_link(aes(start_cap = label_rect(node1.name),
+                     end_cap = label_rect(node2.name)),
+                 arrow = arrow(length = unit(6, 'mm'))) 
+    p <- p + geom_node_label(aes(label = name), nudge_x = 0.1, 
+                             size = c(12, rep(10, 2), rep(6, 5), 10))
+    p <- p + theme_graph() 
+    p <-p + coord_cartesian(clip = "off")
+    p <- p + theme(plot.margin = unit(c(0, 0, 0, -1), "cm"))
+    p
+```
+
+## The Two Faces of Social Network Analysis
+
+Social network analysis has two broad aspects. One, generally referred to as **network theory** is about figuring out how networks work and what networks do to and for people. In essence, social network theories are *general statements about how people behave in networks and how networks themselves "behave""; that is where network relations come from, what they do, and what consequences they have for the people involved*.
+
+For instance, the idea of **social capital** that is, that the connections that you have to others can bring you certain types of benefits, is part of network theory. In fact, as we will see later, a good chunk of network theory (but not all!), such as the theory of **structural holes**, or the **strength of weak ties** theory, can be thought of as theories of social capital [@borgatti11]. Other types of network theory deal with how networks of sentiment relations (e.g. likes and dislikes) form, while other tell us about how things flow through networks.
+
+```{r}
+#| label: fig-faces
+#| fig-cap: "The two faces of social network analysis."
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 15
+
+    g.nodes <- data.frame(name = c("Social Network Analysis", "Theory", "Measurement", "Structural Holes", "Simmelian Ties", "Str. of Weak Ties", "Centrality", "Network Density", "Cohesion"))
+    g.edges <- data.frame(from = c(1, 1, 2, 2, 2, 3, 3, 3),
+                          to = c(2, 3, 4, 5, 6, 7, 8, 9))
+    gr <- tbl_graph(nodes = g.nodes, edges = g.edges)
+    p <- ggraph(gr, layout = 'tree') 
+    p <- p + geom_edge_link(aes(start_cap = label_rect(node1.name),
+                     end_cap = label_rect(node2.name)),
+                 arrow = arrow(length = unit(7, 'mm'))) 
+    p <- p + geom_node_label(aes(label = name), nudge_x = 0.1, 
+                             size = c(10, 8, 8, rep(5,6)))
+    p <- p + theme_graph() 
+    p
+```
+
+Another branch of social network analysis deals with how to *measure* various network properties. This branch of social network analysis, called **network measurement** links social network concepts to some type of mathematical or quantitative representation. Since this branch of network analysis deals with measurement, it is where mathematics and other forms of quantitative representation of networks (such as matrices) come in handy.
+
+If math scares you, don't worry. Our job is to walk you slowly through it. But you still may be asking: Why math though? The beauty of math, is that it allows us to take some *fuzzy* social science concepts, stated in natural language, such as the idea of "popularity" or "social position" or "strength of connection" and give it a *precise* representation. That way we can use networks to learn about what makes the social world go round or predict why some people, organizations, or even whole countries are successful and others are not (among other things).
+
+```{r}
+#| label: fig-levels
+#| fig-cap: "Levels of analysis in social networks."
+#| fig-cap-location: margin
+
+    g.nodes <- data.frame(name = c("Whole Network","Community", "Motif", "Triad", "Dyad", "Node"))
+    g.edges <- data.frame(from = c(1, 2, 3, 4, 5), 
+                          to = c(2, 3, 4, 5, 6))
+    gr <- tbl_graph(nodes = g.nodes, edges = g.edges)
+    p <- ggraph(gr, layout = 'tree') 
+    p <- p + geom_node_label(aes(label = name), size = 6)
+    p <- p + geom_edge_link(aes(start_cap = label_rect(node1.name),
+                      end_cap = label_rect(node2.name)),
+                      arrow = arrow(length = unit(6, 'mm')))  
+    p <- p + theme_graph() 
+    p
+```
+
+The two "faces" of SNA (network theory and network measurement) as well as some choice examples are depicted in @fig-faces. Don't get nervous if you do not know what the things at the bottom of the diagram (e.g., "density"), means. We will explain them to you in the forthcoming lessons We can develop theories or measure network properties at **multiple levels of analysis**. Like other complex systems, social networks feature dynamics at multiple nested levels. We will deal with four such leves in what follows. At the **node level** we may be interested in what properties nodes have by virtue of the connections they have within the network. Both the idea of an **ego network** and various measures of social position based on **centrality** are defined at this level.
+
+At the **dyad** and **triad** levels, we may be interested in the properties that the edges or the links have by virtue of settling into certain configurations. Both the idea of **tie strength** and various theories dealing with triples of nodes such as **Balance Theory** [@davis63], **Strength of Weak Ties Theory** [@granovetter73], the theory of **Structural Holes** [@burt95], and **Simmmelian Tie Theory** [@krackhardt99] are defined this level. At the level of **motifs** may be interested in the network *substructures* or the "lego building blocks" that make up the larger network. For instance, how many configurations of three, four, or five actors can we observe? At the **subgroup** or **community** We may be interested in properties that subsets or clusters or nodes have by virtue of the set of connections they share. Here, theories and measures of **group cohesion**, and **community structure** in networks have been developed.Finally, we may be interested in measuring properties and theorizing the structure and dynamics of the **whole network**. This may includes quantities that are sums or averages of features computed at lower levels, or they may include properties applicable to the system as a whole (e.g., whether it would take a short or a long time to get something from one randomly selected person in the network to another). Ideas of whether human networks constitute **Small Worlds** [@milgram67] are defined at this level.
+
+In @fig-levels we can see how the nested structure of social networks can be depicted. At all levels we can develop specific theories to understand what is happening at that slice or develop special measures designed to link the concepts of those theories to a precise quantitative representation.
+
+## Networks, Graphs, and Matrices
+
+'**Social network analysis** is an influential, and now increasingly widespread, methodological approach for analyzing the social world. Traditionally, sociologists have studied relationships using a variety of observational strategies, both qualitative, such as ethnography and interviews, and quantitative, such as those based on the social survey. However, beginning in earnest in the 1950s, sociologists began to make concerted use of mathematical techniques from a branch of pure mathematics called **graph theory** and a branch of applied mathematics called **matrix algebra** to develop scientific models of social relationships and to come up with measures connecting key concepts from social theory, such as roles, prominence, and prestige, to tangible empirical evidence.
+
+**Social Network Analysis** (SNA) is the use of graph-theoretic and matrix algebraic techniques to study **social structure** and **social relationships**, which exist in real world networks. While much of this activity has to do with the measurement of social network concepts, **Social Network Theory** is the branch of social networks that tells us what social networks are, what they do, how they make a difference (negative or positive) in the world, and where networks come from and how they change over time.
+
+![The 'three-step shuffle' in Social Network Analysis](images/three-step.png){#fig-three-step}
+
+A key skill you will gain by reading this class is to transition swiftly from these three ways of talking about networks, namely, networks as real world systems of social interactions, networks as represented mathematically as graphs, and networks represented quantitatively as matrices. This three-step transition is represented in @fig-three-step. Another skill you will gain by taking this class is how to apply social network theory to understand how real world networks work and change.
+
+## References {.unnumbered}

@@ -1,0 +1,507 @@
+---
+title: "Centrality"
+---
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+What is centrality? In terms of graph theory, a **centrality metric** is a summary index of a node's position in a graph, based on (sometimes weighted) *sums* or *averages* of one of three things [@borgatti_everett06]:
+
+1. The *number* of **edges** that are directly **incident** upon that node.
+1. The *length* of (usually **shortest**) **paths**^[Or trails, or walks.] that have that node as one of their **end nodes**.
+1. The *proportion* of  (usually **shortest**) **paths**^[Or trails, or walks.] that have that node as one their **inner nodes**.^[If you need a refresher on these graph theory concepts, see the lesson indirect connectivity in social networks.]
+
+The basic idea behind all centrality metrics is based on the **more/more principle**. This is the idea that *the higher any of the things above is for a node, then the more central that node is in the graph*. So a node with more nodes incident upon it (the size of the neighbor set) should be more central. In the same way, a node who can **reach** many other nodes via the smallest shortest paths, should be more central. Finally, a node standing in the middle of the largest percentage of paths between other nodes should be more central, and so forth. 
+
+We can refer to all these things as **network goods**. The more/principle has a basic measurement implication, which is that centrality should never *decrease* when a node gains access to more network goods (e.g., one an additional connection) in the network. The **more/more centrality principle** was described by legendary social network theorist [**Linton Freeman**](https://www.socsci.uci.edu/newsevents/news/2018/2018-08-23-freeman.php) in a classic paper [@freeman79.] 
+
+Sociologically, the notion of centrality is tied to such concepts as "status," "prestige," "importance," "influence," "popularity," "reachability," "brokerage," and many more. So the more central nodes have higher status, are more popular, influential, broker more deals, and so forth. However, these english language descriptors map onto distinct metrics. For instance, ``popularity'' cleearly has to do with the number of connections a node has. Brokerage, on the other hand, has more to do with a node stand in-between paths linking others nodes. Influence, on the other hand, seems to have more to do with the capacity to reach others, and so forth.
+
+Accordingly, all these sociological concepts related to centrality have to be kept distinct from any one centrality metric (remember the **three-step shuffle** in social network analysis discussed earlier), because the same concept can be measured by more than one centrality metric, and the same metric can point to many distinct sociological concepts, depending on the context, the type of social ties the network is constructed from, and the way either "goods" (e.g., information, advice, support, etc.) or "bads" (e.g., disease, gossip, violence etc.) "flow" through the network [@borgatti05]. 
+
+## The "big three" centrality metrics
+Linton @freeman79, in the aforementioned paper, defined the "big three" classic centrality metrics, roughly corresponding to the extent that a node accumulates one of the three network goods mentioned above. 
+- So the **degree centrality** metric deal with nodes that have more edges directly incident upon them [@nieminen74].
+- The **closeness centrality** metric has to do with nodes that can reach more nodes via smallest **shortest paths** and thus accumulate as many of these paths in which they figure as the **origin node** as possible [@sabidussi66].
+- Finally, the **betweenness centrality** metric has to do with a node's accumulation of the largest share of shortest paths in which they intermediate between two other nodes, and thus featuring them as one of the **inner nodes** in the paths between others [@freeman77]. 
+
+Other centrality metrics (like **eigenvector centrality** to be discussed later) can be seen as generalizations or special cases of any of these three basic notions. 
+
+The rest of the lesson goes over the basic interpretation and calculation (using the graph theory and matrix algebra tools discussed in previous lessons) of "big three" centrality metrics, as well as selected special cases and extensions to non-standard graphs. 
+
+## The Star Graph
+Freeman showed that the three basic measures reach their theoretical *maximum* for the central node in a **star graph**, such as the one shown in @fig-star). 
+
+
+```{r}
+#| label: fig-star
+#| fig-cap: "A star graph"
+#| fig-cap-location: margin
+#| fig-width: 7
+#| fig-height: 7
+
+    gr <- create_star(7) %>% 
+       mutate(name = toupper(letters[1:7]))
+    p <- ggraph(gr, layout = 'star') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() + ylim(-1.1, 1.1)
+    p
+```
+
+A star graph is a graph containing a **central** or **inner** node (in @fig-star, node *A*), who is connected to all the other nodes in the graph, called the **satellite** or **outer** nodes (in @fig-star, nodes *B* through *F*). These nodes in contrast have only *one* connection and that is to the central node, none among themselves. 
+
+Because of these restrictions, it is easy to see that if $G = (V, E)$ is a star graph of order $n$, then we know that that graph size $m = |E|$ (the size of the edge set), has to be $n-1$. So in the example shown in #fig-star, $n =7$ and $m = n-1 = 7-1=6$. Neat!
+
+## Degree Centrality
+The first way of defining centrality is simply as a measure of how many alters an ego is connected to. This simply takes a node's degree as introduced in the lesson on graph theory, and begins to consider this measure as a reflection of importance of the node in the network. The logic is that those with more direct connections to others, compared to those with fewer, hold a more prominent place in the network. 
+
+Once we have constructed the **adjacency matrix** for the network (**A**), then degree centrality is easy to calculate. As @eq-degcent) for a given node *i* the degree centrality is given by summing the entries of its corresponding row.
+
+$$
+  C_i^{DEG} = \sum_{j= 1}^{n}a_{ij}
+$$ {#eq-degcent}
+
+Although it might seem a simple task to just add up the number of connections of each node, that is essentially what the below mathematical equation is doing! Mathematical notation plays an important role in expressing network measures in succinct formats. 
+
+For instance, if we were to use @eq-degcent) to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in @fig-undirected) then we would end up with the following degree centralities for each node:
+
+```{r degcent}
+#| label: tbl-degcent 
+#| tbl-cap: "Degree centralities of nodes in an undirected graph."
+#| tbl-cap-location: margin
+
+  gr <- create_empty(9, directed = FALSE)
+  gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+  
+    d <- degree(gr)
+    d <- t(d)
+    kbl(d, format = "pipe", align = "c") 
+```
+
+### How to Read Equations for Matrix Operations
+Before we continue, a note on something obvious. A lot of centrality measures are expressed as equations and these coud be hard to interpret initially. Depending on your background in math, you may or may not already know how to interpret @eq-degcenteq). Essentially, the number at the bottom of the sigma is where to start. The number at the top of the Sigma symbol ($\Sigma$) is where to end. The equation to the left is the operation to be performed. Thus, one reads the @eq-degcenteq) as, starting at column $j=1$, and ending at the last possible column $n$ ($n$ is simply the total number of rows in the matrix, $n$ means to go to the final value in the matrix), add up all possible values of the cells designated by the row $i$ and column $j$ combination in matrix **A**. Thus, to calculate the degree centrality of each $j = a, b, c$ in the below matrix, each of the following calculations would be performed.
+
+| |a|b|c|
+|:-------:|:-------:|:-------:|:-------:|
+|**a**|-|1|0|z
+|**b**|1|-|1|
+|**c**|0|1|-|
+ : Simple matrix. {#tbl-simp}
+
+$C_D(a)=aa+ab+ac=1$    
+$C_D(b)=ba+bb+bc=2$    
+$C_D(c)=ca+cb+cb=1$   
+
+In the same way if we had the formula: 
+
+$$\begin{align*}
+C_D(j) = \sum_{i = 1}^{n}a_{ij}
+\end{align*}$$
+
+Then it would be telling us to sum values of each column $j$ **down** each row $i$:
+
+$C_D(a)=aa+ba+ca=1$    
+$C_D(b)=ab+bb+cb=2$    
+$C_D(c)=ac+bc+cc=1$ 
+
+The sigma notation is useful for summarizing this repetitive process in a simple, condensed form.
+
+### Indegree and Outdegree Centrality 
+If we are talking about a **directed graph**, then there are two types of centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of *sociability* or *expansiveness* that is how many other nodes in the graph a given node **sends** links to. This is called the **outdegree centrality** of that node, written as $C_i^{OUT}$. As with the undirected case, this is computed by summing across the rows of the **asymmetric adjacency matrix** corresponding to the directed graph in question, using the same @eq-degcent) above:
+
+$$
+  C_j^{OUT} = \sum_{i = 1}^{n}a_{ij}
+$$  {#eq-outdegcent}
+
+However, in a directed graph, we may also be interested in how *popular* or *sought after* by others a given node is. That is, how many other actors send ties *to* that node. In which case we need to sum across the **columns** of the asymmetric adjacency matrix, and modify the formula as follows:
+
+$$
+  C_j^{IN} = \sum_{j = 1}^{n}a_{ij}
+$$   {#eq-indegcent}
+
+Note that in this version of the equation, we are summing over *j* (the columns) not over *i* (the rows) as given by subscript under the $\sum$ symbol.
+
+For instance, if we were to use equations @eq-outdegcent) and @eq-outdegcent) to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in @fig-directed), then we would up with the following centralities for each node:
+
+```{r}
+#| label: tbl-outindegcent 
+#| tbl-cap: "Out and Indegree centralities of nodes in a directed graph."
+#| tbl-cap-location: margin
+
+    fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+    to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = TRUE)
+    gr <- simplify(gr)
+    d.out <- degree(gr, mode = "out")
+    d.in <- degree(gr, mode = "in")
+    d <- rbind(d.out, d.in)
+    rownames(d) <- c("Outdegre", "Indegree")
+    kbl(d, format = "pipe", align = "c") 
+```
+
+## Closeness Centrality 
+Sometimes it not important how many people you *directly* connected to. Instead, what is important is that you are **indirectly connected** to a lot of others. As we saw in the lesson on indirect connectivity, the best way to conceptualize indirect connectivity in social networks is via the idea of **shortest paths**. So if you can reach the most other people in the network via shortest paths with only a few hops, then you are better connected that someone who has to use longer paths to reach the same other people.
+
+```{r}
+#| label: fig-closfig
+#| fig-cap: "An undirected graph showing the node with the maximum closeness centrality (in red)."
+#| fig-cap-location: margin
+#| fig-width: 12
+#| fig-height: 12
+
+  set.seed(76)
+  fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+  to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+  gr <- as_tbl_graph(simplify(gr))
+  gr <- gr %>%   
+        activate(nodes) %>%
+        mutate(cc = centrality_closeness()) %>% 
+        mutate(col = as.character(cc == max(cc)))
+  p <- ggraph(gr, layout = 'kk') 
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y, colour = col), size = 18)
+  cols <- c("TRUE" = "red", "FALSE" = "tan1")
+  p <- p + scale_discrete_manual(values = cols, aesthetics = "colour")
+  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + theme_graph() + theme(legend.position = "none")
+  p
+```
+
+This insight serves as an inspiration for a measure of centrality based on **closeness**. The closeness between two nodes is the *inverse* of the **geodesic distance** them. Recall that the geodesic distance is given by the *length* of the shortest path linking two nodes in the graph. So the smallest the length of the shortest path separating two nodes in the graph, the closer the two nodes and vice versa.
+
+This information is captured in a network's geodesic **distance matrix**, as discussed in the lesson on matrices. For instance, take the graph shown in @fig-closfig). The distance matrix for which is shown in @tbl-distab). 
+
+```{r}
+#| label: tbl-distab 
+#| tbl-cap: "Geodesic distance matrix for an undirected graph."
+#| tbl-cap-location: margin
+
+    set.seed(76)
+    fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+    to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+    edge.dat <- data.frame(fr, to)
+    edge.dat <- edge.dat[order(fr, to),]
+    node.dat <- data.frame(name = union(edge.dat$fr, edge.dat$to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+    gr <- simplify(gr)
+    d <- distances(gr)
+    kbl(d, format = "pipe", align = "c") 
+```
+
+As shown in the table, a node like *I*, who seems to be at the outskirts of the network, also shows up as having the largest geodesic distances from other nodes in the graph. Other nodes, like *E*, *G*, and *L* seem to be "closer" to others, in terms of having smaller geodesic distances. 
+
+That means that we can use the distance table to come up with a measure of centrality called **closeness centrality** for each node. We can do that by adding up the entries corresponding to each row in the distance matrix ($\sum_i d_{ij}$), to get a summary the total pairwise distances separating the node corresponding to row *i* in the matrix from the other nodes listed in each column. 
+
+Note that because closeness is better than "farness" we would want the node with *highest closeness centrality* to be the one with the *smallest* sum of pairwise distances. This can be calculated using the following equation:
+
+$$
+  C_i^{CLOS} = N\frac{1}{\sum_{i = j}^{n}d_{ij}}
+$$  {#eq-closcenteq}
+
+In @eq-closcenteq), the denominator is the sum of the sum (across columns) for each row in @tbl-distab). We take the mathematical *inverse* (dividing one by the sum of distances) so that way, the smallest number comes out on top and the bigger number comes out of the bottom. We multiply the inverse sum of distances for each node by the constant *N* (the graph order) because dividing one by a big number results in very small numbers, which could be hard to interpret. 
+
+Applying @eq-closcenteq) to the distance matrix shown in @tbl-distab), results in the following closeness centrality scores for each node in @fig-closfig).
+
+```{r}
+#| label: tbl-closcent 
+#| tbl-cap: "Closeness centrality scores."
+#| tbl-cap-location: margin
+
+    set.seed(76)
+    fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+    to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+    edge.dat <- data.frame(fr, to)
+    edge.dat <- edge.dat[order(fr, to),]
+    node.dat <- data.frame(name = union(edge.dat$fr, edge.dat$to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+    gr <- simplify(gr)
+    d <- distances(gr)
+    d <- t(round(length(d)*1/rowSums(d),1))
+    kbl(d, format = "pipe", align = "c") 
+```
+
+The closeness centrality scores listed in @tbl-closcent) agree with our informal impressions. Node *I* comes out at the bottom ($CC_I^{CLOS} = 5.6$), showing it to be the one with the least closenes centrality, given the relatively large geodesic distances separating it from the other nodes in the graph. Node *E* (marked red in @fig-closfig)) comes out on top ($CC_E^{CLOS} = 8.9$), given its relative geodesic proximity to other nodes in the graph.
+
+As we will see later, having closeness centrality information for nodes in a graph can be useful. For instance, if @fig-closfig)) was a social network, and we wanted to spread an innovation or a new product among the actors in the fastest amount of time, we would want to give it to node *E* first. Note however that if something **bad** (like a disease) was spreading across the network, then it would also be very bad if actor *E* got it first!^[See the discussion [here](http://www.analytictech.com/networks/centaids.htm).]
+
+## Betweenness Centrality 
+Recall that in our discussion of shortest paths between pair of nodes in the lesson on indirect connections, we noted the importance of the inner nodes that *intervene* or *mediate* between a node that wants to reach another one. Nodes that stand in these **brokerage** or **gatekeeper** slots in the network, occupy an important position [@marsden83], and this is different from having a lot of contacts (like degree centrality), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality). Instead, this is about being *in-between* the indirect communications of other nodes in graph. We can compute a centrality metric for each node called **betweenness centrality** that captures this idea [@freeman77, @freeman80]. 
+
+```{r}
+#| label: fig-betfig
+#| fig-cap: "An undirected graph showing the node with the maximum betweenness centrality (in red)"
+#| fig-cap-location: margin
+#| fig-width: 12
+#| fig-height: 12
+
+  set.seed(76)
+  fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+  to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+  gr <- as_tbl_graph(simplify(gr))    
+  gr <- gr %>%   
+        activate(nodes) %>%
+        mutate(btc = centrality_betweenness()) %>% 
+        mutate(col = as.character(btc == max(btc)))
+  p <- ggraph(gr, layout = 'kk') 
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y, colour = col), size = 18)
+  cols <- c("TRUE" = "red", "FALSE" = "tan1")
+  p <- p + scale_discrete_manual(values = cols, aesthetics = "colour")
+  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + theme_graph()  
+  p <- p + theme(legend.position = "none")
+  p
+```
+
+For instance, let's say you were actor *K* in the network shown in @fig-closfig), and you wanted to know who is the person that you depend on the most to communicate with actor *J*. Here dependence means that you are forced to "go through them" if *I* wanted to reach *N* via a shortest path. One way *K* could figure this out is by listing every shortest path having them as the **origin node** and having *N* as the **destination node**. After you have this list, you can see which of other other nodes shows up as an **inner node** (an intermediary or gatekeeper) in those paths the most times. 
+
+This shortest path list would look like this: 
+
+1. $\{KH, HF, FJ\}$
+
+1. $\{KD, DF, FJ\}$
+
+1. $\{KH, HN, NJ\}$
+
+1. $\{KA, AC, CJ\}$
+
+1. $\{KA, AE, EJ\}$
+
+1. $\{KH, HE, EJ\}$
+
+There are six shortest paths of length three indirectly connecting actors *K* and *J* in @fig-closfig), with nodes $\{A, C, D, E, F, H, N\}$ showing up as an inner node in at least one of those paths. To see which other actor in the network is the most frequent intermediary between *J* and *K*, we can create a list with the number of times each of these nodes shows up as an intermediary in this shortest path list. This would look like this:
+
+```{r}
+#| label: tbl-pairdep 
+#| tbl-cap: Intermediaries between nodes J and K
+#| tbl-cap-location: margin
+
+    n <- c("A", "C", "D", "E", "F", "H", "N") 
+    t <- c(2, 1, 1, 2, 2, 3, 1)
+    p <- round(t/6, 2)
+    d <-data.frame(n, t, p)
+    names(d) <- c("Node", "Freq.", "Prop.")
+    kbl(d, format = "pipe", align = "c") 
+```
+
+So it looks like, looking at the second column of @tbl-pairdep), that *H* is the other actor that *J* depends on the most to reach *K*. A better way to quantify this, is to actually look at the *proportion* of paths linking *J* and *K* that a particular other node (like *H*) shows up in. Let's call this $p_{KJ}(H)$ which can be read as "the proportion of paths between *K* and *J* featuring *H* as an inner node." This is shown in the third column of @tbl-pairdep) We can write this in equation form like this:
+
+$$
+  p_{KJ}(H) = \frac{g_{KJ}(H)}{G_KJ} = \frac{3}{6} = 0.5
+$$   {#eq-pairdep}
+
+In @eq-pairdep), $g_{KJ}(H)$ is the number of shortest paths linking *K* and *J* featuring *H* as an inner node, and $g_{KJ}$ is the total number of paths linking *K* and *J*. @freeman80 calls this measure the **pair-dependency** of actor *K* on actor *H* to reach a given node *J*. In this case, $g_{KJ}(H) = 3$ and $g_{KJ} = 6$, which means that actor *K* depends on actor *H* for fifty percent of their shortest path access to *J*. Making *H* the actor in the network *J* depends on the most to be able to reach *J*. 
+
+Generalizing this approach, we can do the same for each triplet of actors *i*, *j*, and *k* in the network. This is the basis for calculating betweenness centrality. That is, we can count the number of times *k* stands on the shortest path between two other actors *i* and *j*. We can all this number $g_{ikj}$. We can then divide it by the total number of shortest paths linking actors *i* and *j* in the network, which we refer by $g_{ij}$. Remember that two actors can be indirectly linked by *multiple shortest paths of the same length*, and that we can figure out how many short paths links pairs of actors in the network using the **shortest paths matrix**.
+
+This ratio, written $\frac{g_{ikj}}{g_{ij}}$ then gives us the *proportion* of shortest paths in the network that have *i* and *j* as the end nodes and that feature *k* as an intermediary inner node. This can range from zero (no shortest paths between *i* and *j* feature node *k* as an intermediary) to one (all the shortest paths between *i* and *j* feature node *k* as an intermediary).
+
+We can then use the following equation to compute the average of this proportion for each node *k* across each pair of actors in the network *i* and *j*:
+
+$$
+C_k^{BET} = \sum_i \sum_j \frac{g_{ikj}}{g_{ij}}
+$$ {#eq-betcenteq}
+
+Computing this quantity for the graph shown in @fig-betfig, yields the  betweenness centrality scores shown in @tbl-betcent.
+
+```{r}
+#| label: tbl-betcent 
+#| tbl-cap: "Betweenness centrality scores."
+#| tbl-cap-location: margin
+
+    set.seed(76)
+    fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+    to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+    edge.dat <- edge.dat[order(fr, to),]
+    node.dat <- data.frame(name = union(edge.dat$fr, edge.dat$to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+    gr <- as_tbl_graph(simplify(gr))
+    b <- t(round(betweenness(gr), 1))
+    kbl(b, format = "pipe", align = "c") 
+```
+
+The numbers in the Table can be readily interpreted as percentages. Thus, the fact that node *J* has a a betweenness centrality score of 10.8 tells us that they stand in about 11% of the shortest paths between pairs of nodes in the graph. Interestingly, as shown in @fig-betfig), the node that ends up with the highest betweenness score is *L* ($C_L^{BET} = 16.4$), mostly due to the fact that node *I*, who has the lowest possible betweenness score of zero, depends on this node for access to every other actor in the network. 
+
+Note also that the fact two different nodes end up being ranked first in terms of closeness and betweenness centrality in the same network (compare @fig-closfig) and @fig-betfig)), tells us that these are analytically distinct measures of node position. 
+
+## Centralities in the Star Graph
+Degree, Closeness, and Betweenness centralities have an interesting property that provides a conceptual connection between them. Consider the star graph shown in @fig-star with central node *A*. The degree, closeness, and betweenness centralities of the different nodes are shown in @tbl-startab). 
+
+Of course, by definition, we know beforehand that the central node in a star graph has to have the highest degree, since the degree of peripheral nodes is fixed to one and the degree of the central node is always $n-1$, where $n$ is the graph order. 
+
+However, note also that the central node has to have the highest closeness, since it is directed by a path of length one (and edge) to every peripheral node, but each peripheral node can only reach other peripheral nodes in the graph by a path of length two. They are farther away from other nodes than the central node. 
+
+Finally, note that the central node in the star will also always have the highest betweenness because each of the paths of length two connecting every pair of peripheral nodes to one another *has* to include the central node. So it serves as the intermediary between any communication between peripheral nodes. 
+
+```{r startab}
+#| label: tbl-startab 
+#| tbl-cap: "Centralities in a star graph of order 7."
+#| tbl-cap-location: margin
+
+    gr <- create_star(7) %>% 
+       mutate(name = toupper(letters[1:7]))
+    d <- degree(gr)
+    c <- distances(gr)
+    c <- t(round(length(c)*1/rowSums(c),1))
+    b <- t(round(betweenness(gr), 1))
+    c.tab <- rbind(d, c, b)
+    rownames(c.tab) <- c("Degree", "Closeness", "Betwenness")
+    kbl(c.tab, format = "pipe", align = "c")
+```
+
+The mathematical sociologist **Linton @freeman79** thus thinks that the "big three" centrality measures are the big three precisely because they are maximized for the central node in a star graph. 
+
+## Eigenvector Centrality
+Sometimes, when it comes to being connected, what matter is not *how many* other people you know. Instead, what is important is being connected to well connected others. Degree-based measures don't capture this intuition, because every connection counts the same, regardless of whether that connection goes to a well-connected other or to a poorly connected other. 
+
+```{r}
+#| label: fig-eigenfig1
+#| fig-cap: "An undireced graph with degree centrality indicated by node color."
+#| fig-cap-location: margin
+#| fig-width: 12
+#| fig-height: 12
+
+    fr <- c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 3), rep(20, 3))
+    to <- c(5:9, 10:14, 15:19, 1:3, 5, 21, 22)
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    node.color <- c(rep("magenta",3), "firebrick", "gray50", rep("tan1", 14), "dodgerblue2", rep("tan1", 2))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+    gr <- as_tbl_graph(simplify(gr))
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", width = 0.85) 
+    p <- p + geom_node_point(aes(x = x, y = y), color = node.color, size = 8)
+    p <- p + theme_graph()
+    p
+```
+
+Consider, for instance, the graph shown in @fig-eigenfig1. The corresponding **degree set** of the graph (by node color) is shown as @tbl-eigendegtab (you may need to scroll horizontally to see all the values). In that figure, if we go by the simple degree centrality measure, the nodes shown in magenta, are the best connected ones. Each of these nodes connects to six others. The nodes shown in tan are the least well connected; each of those connect to only one neighbor The node shown in gray is marginally better connected than the tan nodes, featuring two connections. Finally, the nodes in red and blue are tied for "in between" in terms of degree centrality; each connects to three others.
+
+```{r}
+#| label: tbl-eigendegtab 
+#| tbl-cap: "Degree centralities of nodes in an undirected graph."
+
+    fr <- c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 3), rep(20, 3))
+    to <- c(5:9, 10:14, 15:19, 1:3, 5, 21, 22)
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+    gr <- as_tbl_graph(simplify(gr))
+    gr <- simplify(gr)
+    d <- degree(gr)
+    d <- t(d[order(-d)])
+    colnames(d) <- c(rep("Mag",3), "Red", "Blue", "Gray", rep("Tan", 16))
+    kbl(d, format = "pipe", align = "c") 
+```
+
+Yet, given the previous reflections, there's a lingering suspicion that the best connected node in the graph is actually the red node, because even though that node only has three connections, all three go to well connected people. Thus, the centrality "tie" with the blue node (based on degree) is misleading, if we weighed the ties of the red based on the degree of the nodes they connect to, they should count for more than the three ties the blue node has, which go to less well-connected people. 
+
+```{r eigencentab}
+#| label: tbl-eigencentab 
+#| tbl-cap: "Eigenvector centralities of nodes in the graph above"
+
+    fr <- c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 3), rep(20, 3))
+    to <- c(5:9, 10:14, 15:19, 1:3, 5, 21, 22)
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+    gr <- as_tbl_graph(simplify(gr))
+    gr <- simplify(gr)
+    ec <- eigen_centrality(gr, scale = TRUE)$vector
+    dc <- degree(gr)
+    d <-data.frame(ec, dc)
+    d <- t(round(d[order(-dc),]$ec, 2))
+    colnames(d) <- c(rep("Mag",3), "Red", "Blue", "Gray", rep("Tan", 16))
+    kbl(d, format = "pipe", align = "c") 
+```
+
+In the same way, the magenta degree centrality advantage is also misleading, because even though the magenta nodes have a larger number of connections than the red node, these go to less well-connected others. The red node knows three popular people, but the popular people only know other less popular people.
+
+The same reasoning applies to our questioning the presumed advantage that the blue node has over the gray node. Based on degree the blue node is better connected ($C_{Blue}^{DEG} = 3$) than the gray node ($C_{Blk}^{DEG} = 2$), but one of the gray node's connections goes to a well-connected magenta node (who has a connection to the even better-connected red node), so we would like to say that the gray node is actually better-positioned in the network, in the sense of having connections to well-connected others.   
+
+All of these reflections lead us to the conclusion that degree centrality may be an incomplete measure of node position, because it only takes into account the number of connection a node has, not who those connections are to. A more general version of centrality would capture that. 
+
+If we had to express it as an equation using the terms of the network's **adjacency matrix**, then the measure of centrality we are looking for, where the centrality of a node *i* is proportional to the centrality of their neighbors *j* would be:
+
+$$
+  x_i = \sum_j A_{ij}x_j
+$$   {#eq-eigencent}
+
+So what @eq-eigencent) says is that the centrality of node *i* ($x_i$) is just the sum of the centralities ($x_j$) of the nodes they are connected to, as the right-hand side of the sum is only going to be non-zero when $A_{ij} = 1$. But how are we going to figure out the centralities of the other nodes if we don't even node the centrality of the node that we are trying to compute the centrality for? It seems like we are stuck in a circle. To figure out the centrality of node *i* we need to already know the centrality of the other nodes *j*, but we don't know those to begin with!
+
+Phillip Bonacich, a Professor Emeritus in the Sociology Department at UCLA, developed a measure of centrality that solves this conundum and does what we are looking for [@bonacich72]. The measure is based on a **matrix factorization** technique called the **eigenvector decomposition**,^[Also generally known as the [**eigendecomposition**](https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix) of the matrix.] where the matrix in question is the network's **adjacency matrix**. Because of this, this centrality measure carries the (unwieldy) name of **eigenvector centrality**. But don't be scared by the "mathy" name. The concept behind the measure is relatively simple, and it is precisely what we are looking for. 
+
+How does it work? Imagine that we start with regular old degree. This gives us the degree distribution and node ranking shown in @tbl-eigendegtab); for each neighbor they have, each node gets one degree "point." Now in the second step, we can give each node extra points for each of the *friends their first step friends have*. In the third step, we can give node even more extra points for each *friend that their first step friends' friends have*, but discount these points a bit, because friends of friends are less important than friends. Then we keep going and give each node points for each *friend that their second step friends of friends' friends have* but discount these even more because friends of friends of friends are obviously less important than friends of friends. We can continue doing this until we can't go anymore (we reach the mathematical limit of the network in terms of how many friends, of friends, of friends, etc. people can have given the graph order and size). In his classic paper, Bonacich showed that the eigendecomposition of the network's adjacency matrix (technically the **eigenvector** corresponding to the largest **eigenvalue** of the adjacency matrix with all positive numbers) give us these scores, without having to go through the whole friends, of friends, of friends, of friends, etc. thing. Matrix Algebra magic!
+
+ @tbl-eigencentab (you may need to scroll horizontally to see all the values) shows the eigenvector centrality scores for the network shown in @fig-eigenfig1. To aid interpretation, eigenvector centrality scores are *normalized* so that the top node receives an eigenvector centrality of 1.0 and then other nodes receive smaller scores proportional to how close their eigenvector centrality score is to the top node. Nodes with the lowest eigenvector centralities in the graph receive scores closer to zero. 
+
+As we can see by the scores listed in @tbl-eigencentab) the eigenvector centrality procedure recovers our intuitions. The red node comes out on top  ($C_{Blue}^{EIG} = 1.0$), even though it does not have the biggest degree. This is followed by the three magenta nodes. Node that not all three of the magenta nodes have the same eigenvector centrality (even though they have the same the degree), one of them has a slightly larger value. Can you tell which one that is in  @fig-eigenfig1)? Well it's the magenta node connected to the gray node, and the reason it ends up with a higher eigenvector centrality than the other magenta ones is because it gets extra centrality points from the gray nodes' friends!
+
+In the same way, note that the four tan nodes connected to the magenta node who's connected to the gray node get a slightly larger eigenvector centrality score than the other tan nodes ($C_{Tan}^{EIG} = 0.35$). The reason is that these tan nodes get a few extra centrality points from the their indirect (two-step) connection to the gray node and their three-step connection to the gray node's contacts. Note also that the blue node, presumably "tied" with the red node in terms of degree, ends up in the diametrically opposite place from this node in terms of eigenvector centrality: in the bottom three ($C_{Blue}^{EIG} = 0.20$). The reason is that while the blue node, like the red node, has three connections two of those go to nodes with no other friends (so no extra friends of friends points), and the other one goes to a node that only has degree centrality equal to 2. So the blue node is the less well-connected if by that we mean being connected to connected others.
+
+Finally note that two tan nodes receive the lowest eigenvector centrality scores ($C_{Tan}^{EIG} = 0.07$). As you may have guessed, those are the two tan nodes shown in the rightmost area of the network diagram. The reason for this is that in contrast to the other tan nodes, who are connected to more central magenta nodes, those are connected to the not not-very well-connected blue node (who's connected to the not very well-connected gray node), so they derive very little extra points from those connections.
+
+## References {.unnumbered}
+
+<!-- 
+Page Rank
+(Burris 2003)
+
+
+
+
+## K-Path Centrality
+
+Sade (1989) introduced the idea of k-path centrality. Logically, nodes which are near lots of other nodes, even they are not directly connected, are more closely connected to the network than nodes which are loosely connected through other nodes. It is useful for researchers to be able to examine this easily if their research question calls for measuring this.
+
+**K-Path Centrality**
+$$ 
+$$
+C_k(j) = \sum_{j = 1}^{n}A^k_{ij}
+$$
+$$
+
+To do this, we multiply the matrix by itself equivalent to the path length we are interested in solving for. For example, looking for a k-path of k=2 would find all nodes two steps away. To solve, one would simply square the matrix. If you remember from chapter 3, this is the same thing as a reachability matrix! Now, we've simply shifted our thinking about it, to realize that it is interpretable as a measure of centrality. With some manipulation of the graph, we can easily calculate how far away a given node is from alters to which they are not directly connected.  
+
+Note that k-path centrality is actually a generalization of degree centrality. Note that this formula reduces to equivalence wtih degree centrality for k=1, as k=1 is simply the condition which asks if two nodes are adjacent or not. 
+
+```{r kpathcent, echo = FALSE, warning = FALSE, message=FALSE, fig.height=5}
+from <- c("A", "B", "B", "C", "C", "D", "D")
+to <- c("B", "C", "D", "D", "E", "E", "F")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'star')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from, to))), size = 5)
+p <- p + theme_graph() + theme(plot.margin = unit(c(0,0,0,0), "cm"))
+p <- p + expand_limits(x = c(-1.5,1.5), y = c(-1.5, 1.5))
+p
+```
+**Figure 4.1**
+
+Figure 4.1 provides a simple example of how k-path centrality of two provides insights that degree centrality alone fails to provide. Nodes A and F both have a degree centrality of one. However, node F has a 2-path centrality of 3, while node A has a 2-path centrality of 2. We might then think of node F as better connected to the network than node A.   
+
+-->
