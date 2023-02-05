@@ -6,7 +6,6 @@ title: "Indirect Connections in Social Networks"
     require(ggraph)
     require(tidygraph)
     require(igraph)
-    require(patchwork)
 ```
 
 Yes, you have friends. But your friends also have friends (and those people also have friends...). This means that, sometimes, when representing concatenated social relationships in networks as graphs, we are not only interested in the direct connections between **adjacent** nodes. Instead, we are interested in **indirect** connections between nodes. That is, in some settings is important to note not just who you friends are, but also who the *friends of your friends* are, or even the *friends, of your friends, of your friends* (and so on).
@@ -73,8 +72,14 @@ Look at @fig-paths1 again. Are there any **disconnected** pairs of nodes in the 
 
 ```{r}
 #| label: fig-connected1
-#| fig-cap: "A connected versus disconnected graph."
+#| fig-cap: "A connected graph versus a disconnected graph."
 #| fig-cap-location: margin
+#| fig-subcap:
+#|   - "A connected graph."
+#|   - "A disconnected graph." 
+#| layout-ncol: 2
+#| fig-width: 9
+#| fig-height: 10
 
     gr <- create_empty(9, directed = FALSE)
     gr <- gr %>% 
@@ -90,9 +95,10 @@ Look at @fig-paths1 again. Are there any **disconnected** pairs of nodes in the 
     l <- as.matrix(l$data[, 1:2])
     p <- ggraph(gr, layout = l)
     p <- p + geom_edge_link(color = "steelblue", width = 1) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 10, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 4, color = "white")
-    p1 <- p + theme_graph() + xlim(-1.2,1) + ylim(-2,2.1)
+    p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() 
+    p
 
     gr <- create_empty(9, directed = FALSE)
     gr <- gr %>% 
@@ -107,29 +113,32 @@ Look at @fig-paths1 again. Are there any **disconnected** pairs of nodes in the 
     gr <- subgraph.edges(gr, c(1:9, 11:16), delete.vertices = FALSE)
     p <- ggraph(gr, layout = l) 
     p <- p + geom_edge_link(color = "steelblue", width = 1) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 10, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 4, color = "white")
+    p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
     p <- p + theme_graph() 
-    p2 <- p + xlim(-1.2,1) + ylim(-2,2.1)
-    p <- p1 + p2 + plot_annotation(tag_levels = 'A', tag_prefix = 'G(', tag_suffix = ')') & theme(plot.tag = element_text(size = 18))
     p
 ```
 
-For instance, if you compare the undirected graphs $G(A)$ and $G(B)$ shown in @fig-connected1 you can appreciate the difference between a **connected graph** and a **disconnected graph**. The difference between the graph on the left $G(A)$ and the graph on the right $G(B)$, is that the $G(B)$ graph is a subgraph of the $G(A)$ graph, in which the $DF$ edge has been removed (an **edge-deleted subgraph** according to a previous lesson): $G(B) = G(A) - DF$. But removing this edge has resulted in $G(B)$ being disconnected. There is no way we can trace a path connecting any of the vertices in the $\{F, G, H, I\}$ subset with any of the vertices in the $\{A, B, C, D, E\}$ subset. This is different from $G(A)$ where we can trace a finite path between any two vertices, even if it is very long. Thus, we can come up with a formal definition of **graph connectivity**:
+For instance, if you compare the undirected graphs @fig-connected1-1 and @fig-connected1-2 you can appreciate the difference between a **connected graph** and a **disconnected graph**. The difference between @fig-connected1-1 and @fig-connected1-2 is that the @fig-connected1-2 graph is a subgraph of the @fig-connected1-1 graph, in which the $DF$ edge has been removed (an **edge-deleted subgraph** according to a previous lesson): $G(b) = G(a) - DF$. But removing this edge has resulted in $G(b)$ being disconnected. There is no way we can trace a path connecting any of the vertices in the $\{F, G, H, I\}$ subset with any of the vertices in the $\{A, B, C, D, E\}$ subset. This is different from @fig-connected1-1 where we can trace a finite path between any two vertices, even if it is very long. Thus, we can come up with a formal definition of **graph connectivity**:
 
 - A graph is **connected** if there exists a (finite) path between each pair of nodes.
 
 - A graph is **disconnected** if there does not exist a path connecting every pair of nodes
 
 ### Components and the Giant Component
-When a graph goes from connected (like $G(A)$ in @fig-connected1 to disconnected (like $G(B)$ @fig-connected1 it is split into a number of subgraphs that are themselves connected. For instance, in the $G(B)$ shown in @fig-connected1 the set nodes $\{A, B, C, D, E\}$ form a **connected subgraph** of the larger disconnected graph. A connected subgraph that is part of a larger disconnected graph is called a **component**.  In the $G(B)$ graph in @fig-connected1 there are two components, one formed by the connected subgraph with node set $\{A, B, C, D, E\}$, and the other formed by the connected subgraph with node set $\{F, G, H, I\}$. 
+When a graph goes from connected (like @fig-connected1-1) to disconnected (like @fig-connected1-2) it is split into a number of subgraphs that are themselves connected. For instance, in @fig-connected1-2 the set nodes $\{A, B, C, D, E\}$ form a **connected subgraph** of the larger disconnected graph. A connected subgraph that is part of a larger disconnected graph is called a **component**.  In @fig-connected1-2 there are two components, one formed by the connected subgraph with node set $\{A, B, C, D, E\}$, and the other formed by the connected subgraph with node set $\{F, G, H, I\}$. 
 
 ```{r}
 #| label: fig-connected2
 #| fig-cap: "A series of connected and disconnected graphs displaying components and the giant component."
-#| fig-height: 4.5
-#| fig-width: 11
+#| fig-subcap:
+#|   - "A connected graph."
+#|   - "A disconnected graph with three components."
+#|   - "A disconnected graph with a giant component."
+#| fig-height: 4
+#| fig-width: 3
 #| fig-cap-location: margin
+#| layout-ncol: 3
 
     gr <- create_empty(14, directed = FALSE)
     gr <- gr %>%
@@ -147,7 +156,7 @@ When a graph goes from connected (like $G(A)$ in @fig-connected1 to disconnected
       bind_edges(data.frame(from = 1, to = 7))
     ewc <- c(rep("n", 24), rep("r", 2), "p")
     cols <- c("n" = "steelblue", "r" = "red", "p" = "purple")
-    wdts <- c("n" = .7, "r" = 1, "p" = 1)
+    wdts <- c("n" = .7, "r" = 1.5, "p" = 1.5)
     l <- ggraph(gr, layout = "kk")
     l <- as.matrix(l$data[, 1:2])
     p <- ggraph(gr, layout = l)
@@ -155,8 +164,8 @@ When a graph goes from connected (like $G(A)$ in @fig-connected1 to disconnected
     p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
     p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")    
     p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
-    p <- p + theme_graph()
-    p1 <- p + theme(legend.position = "none")
+    p <- p + theme_graph() + theme(legend.position = "none")
+    p 
 
     gr <- create_empty(14, directed = FALSE)
     gr <- gr %>%
@@ -173,7 +182,7 @@ When a graph goes from connected (like $G(A)$ in @fig-connected1 to disconnected
     p <- p + geom_edge_link(color = "steelblue", width = .7) 
     p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
     p <- p + theme_graph()
-    p2 <- p + theme(legend.position = "none")
+    p
     
     gr <- create_empty(14, directed = FALSE)
     gr <- gr %>%
@@ -187,26 +196,36 @@ When a graph goes from connected (like $G(A)$ in @fig-connected1 to disconnected
       bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
       bind_edges(data.frame(from = 13, to = 14)) %>% 
       bind_edges(data.frame(from = 1, to = 7))
-      
     p <- ggraph(gr, layout = l)
     p <- p + geom_edge_link(color = "steelblue", width = .7) 
     p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
     p <- p + theme_graph()
-    p3 <- p + theme(legend.position = "none")
-    p1 + p2  + p3 +
-      plot_annotation(tag_levels = 'A', tag_prefix = 'G(', tag_suffix = ')') & theme(plot.tag = element_text(size = 18))
+    p
 
 ```
 
-It is possible to split a graph into multiple components not just two. For instance, take a look at graph $G(A)$ in @fig-connected2). If were to generate a subgraph from $G(A)$ by deleting the red and purple edges, we would end up with the $G(B)$ graph. The $G(B)$ graph is disconnected, and it features *three* separate components (connected subgraphs). 
+It is possible to split a graph into multiple components not just two. For instance, take a look at @fig-connected2-1. If we were to generate a subgraph from @fig-connected2-1 by deleting the red and purple edges, we would end up with the @fig-connected2-2; this graph is disconnected, and it features *three* separate components (connected subgraphs). If were to delete just the red edges from @fig-connected2-1 and keep the purple edge, we would end up with the graph shown in @fig-connected2-3. Like the @fig-connected2-2, @fig-connected2-3 is also disconnected, but it is split into *two* not three components. 
+
+Note that one of the connected components in @fig-connected2-3 is way larger than the other one. The bigger connected component of graph @fig-connected2-3 is of order ten, but the smaller component is only of order four. When a disconnected graph is split into multiple components, the component containing the largest number of nodes (the connected subgraph of the highest order) is called **the giant component**.
+
+### Bridges
+We went from the connected graph shown in @fig-connected2-1 to the disconnected graphs in @fig-connected2-2 and @fig-connected2-3 by removing or deleting particular edges (like the red and purple ones in @fig-connected2-1). These edges are clearly more important than the other blue ones, because they are responsible for keeping the whole graph together as a connected structure. Edges whose removal results in a graph going from being connected to disconnected are so important that they have a special name: **bridges**.
+
+Thus, in a graph the bridges are (smallest in terms of cardinality) set of edges whose deletion results in the graph becoming disconnected. For instance, in @fig-connected1-1 the $DF$ edge is a bridge. In @fig-connected2-1, on the other hand, any two of the threesome formed by the two red edges and the purple edge count as bridges. Deleting any two of these three edges disconnects the graph.
+
+Note that in contrast to @fig-connected1-1, @fig-connected2-1 doesn't have any *one* edge that is *the* bridge. Instead, it takes deleting at least two edges from the red and purple set to disconnect it. For instance, if we were to remove just the purple edge, @fig-connected2-1 would still be connected, and it would look like @fig-connected3-1, which is a connected graph. The same goes for removing just one of the red edges. If were to do that, we would end up with the graph shown in @fig-connected3-2, which is also a connected graph.
+
 
 ```{r}
 #| label: fig-connected3
-#| fig-cap: "A connected graph."
+#| fig-cap: "Two connected graphs."
+#| fig-subcap:
+#|   - "A connected graph."
+#|   - "Another connected graph."
 #| fig-height: 4
 #| fig-width: 3
 #| fig-cap-location: margin
-
+#| layout-ncol: 2
     gr <- create_empty(14, directed = FALSE)
     gr <- gr %>%
       bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
@@ -223,6 +242,7 @@ It is possible to split a graph into multiple components not just two. For insta
       bind_edges(data.frame(from = 1, to = 7))     
     l <- ggraph(gr, layout = "kk")
     l <- as.matrix(l$data[, 1:2])
+
     gr <- create_empty(14, directed = FALSE)
     gr <- gr %>%
       bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
@@ -242,35 +262,7 @@ It is possible to split a graph into multiple components not just two. For insta
     p <- p + theme_graph()
     p <- p + theme(legend.position = "none")
     p
-```
-
-If were to delete just the red edges from $G(A)$ and keep the purple edge, we would end up with the $G(C)$ graph in in @fig-connected2. Like the $G(B)$ graph, the $G(C)$ graph is also disconnected, but it is split into two not three components. Note that one of the connected components in $G(C)$ is way larger than the other one. The bigger connected component of graph $G(C)$ is of order ten, but the smaller component is of order four. When a disconnected graph is split into multiple components, the component containing the largest number of nodes (the connected subgraph of the highest order) is called **the giant component**.
-
-### Bridges
-
-```{r}
-#| label: fig-connected4
-#| fig-cap: "Anoter connected graph."
-#| fig-height: 4
-#| fig-width: 3
-#| fig-cap-location: margin
-
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 4, to = 11)) %>% 
-      bind_edges(data.frame(from = 8, to = 11)) %>% 
-      bind_edges(data.frame(from = 1, to = 7))     
-    l <- ggraph(gr, layout = "kk")
-    l <- as.matrix(l$data[, 1:2])
+    
     gr <- create_empty(14, directed = FALSE)
     gr <- gr %>%
       bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
@@ -291,12 +283,6 @@ If were to delete just the red edges from $G(A)$ and keep the purple edge, we wo
     p <- p + theme(legend.position = "none")
     p
 ```
-
-Note that we went from the connected graph shown as $G(A)$ in @fig-connected2 by removing or deleting particular edges (like the red and purple ones in $G(A)$). These edges are clearly more important than the blue ones, because they are responsible for keeping the whole graph together as a connected structure. Edges whose removal results in a graph going from being connected to disconnected are so important that they have a special name: **bridges**.
-
-Thus, in a graph the bridges are (smallest in terms of cardinality) set of edges whose deletion results in the graph being disconnected. For instance, in graph $G(A)$ from @fig-connected1 the $DF$ edge is a bridge. In graph $G(A)$ from @fig-connected2), on the other hand, any two of the threesome formed by the two red edges and the purple edge count as bridges. Deleting any two of these three edges disconnects the graph. 
-
-Note that in contrast to $G(A)$ from @fig-connected1, the graph $G(A)$ from @fig-connected2 doesn't have any *one* edge that is *the* bridge. Instead, it takes more the deletion of more at least two edges from the red and purple set to disconnect it. For instance, if we were to remove just the purple edge, the $G(A)$ would still be connected, and it would look like @fig-connected3), which is a connected graph. The same goes for removing just one of the red edges. If were to do that, we would end up with the graph shown in @fig-connected4), which is also a connected graph.
 
 <!--## Graph Diameter-->  
 ## Shortest Paths 

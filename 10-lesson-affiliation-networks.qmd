@@ -101,12 +101,12 @@ If this sort of information was important, we could convert the bipartite into a
     p
 ```
 
-Thus, we could, as shown in @fig-bicircles), create a graph that shows board members who know each other because they work at the same company. The resulting (simple, undirected) graph shows that board members A, B, and C all know each other as a result of serving in the board of company 2 together.
+Thus, we could, as shown in @fig-bicircles, create a graph that shows board members who know each other because they work at the same company. The resulting (simple, undirected) graph shows that board members A, B, and C all know each other as a result of serving in the board of company 2 together.
 
 Likewise, we can transform the bipartite graph into a simple unipartite graph that captures companies that share board members. Company 2 is thus connected to Companies 1 (because of person A), 3 (because of person B), and 4 (because of person 5). This is shown in @fig-bitriangles). In fact, the reason why these are called **interlock** networks, is because it is easy to see that, ultimately, by virtue of sharing members across boards, most big corporations in the U.S. (and other countries), end up [forming part of a single giant network](https://en.wikipedia.org/wiki/Interlocking_directorate).
 
 ## From Biparite Graph to Affiliation Matrix
-Consider the **two-mode network** shown in @fig-twomodeclubs). This is an affiliation network meant to represent the memberships of six students in five college activity clubs. As discussed earlier, we use a **bipartite graph** to represent the network. The bipartite graph represents the two sets of nodes using different shapes or colors (blue and red nodes in @fig-twomodeclubs)), and draws a link between the people and the group if the person is affiliated with the group. 
+Consider the **two-mode network** shown in @fig-twomodeclubs. This is an affiliation network meant to represent the memberships of six students in five college activity clubs. As discussed earlier, we use a **bipartite graph** to represent the network. The bipartite graph represents the two sets of nodes using different shapes or colors (blue and red nodes in @fig-twomodeclubs)), and draws a link between the people and the group if the person is affiliated with the group. 
 
 ```{r}
 #| label: fig-twomodeclubs
@@ -135,7 +135,7 @@ How can we translate the graph representation into a matrix?
 
 The procedure is the same as that used to build the adjacency matrix of the symmetric graph. We build a **rectangular matrix** whose number of rows is the same as the number of people in the affiliation network, and whose number of rows is the same as the number of groups. The matrix is rectangular (as opposed to square) because in a two-mode network, there is no restriction that the size of the two vertex sets be the same (although if *they happen* to be the same then you end up with a square matrix; after all, a square is a special case of a rectangle!).
 
-In graph theory terms, this is a matrix that we call **A**, for **affiliation matrix** of dimensions $R \times C$, where the number of rows $R = |V_1|$ is the cardinality of the first vertex set in the bipartite graph (persons in @fig-twomodeclubs)), and where the number of rows $C = |V_2|$ is the cardinality of the second vertex set (clubs in @fig-twomodeclubs)). The cells of the affiliation matrix, $a_{ij} = 1$ if person *i* belongs to club *j* (there's an symmetric edge in the graph linking the person to the group), otherwise, $a_{ij} = 0$.
+In graph theory terms, this is a matrix that we call **A**, for **affiliation matrix** of dimensions $R \times C$, where the number of rows $R = |V_1|$ is the cardinality of the first vertex set in the bipartite graph (persons in @fig-twomodeclubs), and where the number of rows $C = |V_2|$ is the cardinality of the second vertex set (clubs in @fig-twomodeclubs)). The cells of the affiliation matrix, $a_{ij} = 1$ if person *i* belongs to club *j* (there's an symmetric edge in the graph linking the person to the group), otherwise, $a_{ij} = 0$.
 
 Following these instructions would yield the affiliation matrix shown in @tbl-affmat).
 
@@ -189,7 +189,7 @@ Which leads to the following vector of degree centrality scores for the people:
 The degree centrality scores for the people can be interpreted as giving us a sense of their joining activity (e.g., high versus low). Some people, (like Gabriela) join a lot of clubs; they have multiple interests spread out across many organizations. Other people, (like Minjoo), just have a single interest, and thus join only one club (the Cheese Club). If centrality is defined using the "more/more principle" discussed in lesson on **centrality**, then we would say that Gabriela is more central than Minjoo in the affiliation network. 
 
 ### Group Centralities
-In the same way, if wanted to compute the degree centralities of other mode (the club node set, abbreviated as *G*), then we would calculate the *column sums* of the affiliation matrix using a slight variation of equation \@ref(eq:aff1), like we did when we switched from outdegree to indegree:
+In the same way, if wanted to compute the degree centralities of other mode (the club node set, abbreviated as *G*), then we would calculate the *column sums* of the affiliation matrix using a slight variation of @eq-aff1), like we did when we switched from outdegree to indegree:
 
 $$
     C_G^{DEG} = \sum_i a_{ij}
@@ -217,7 +217,7 @@ Which leads to the following degree centrality scores for the clubs:
 Just like the people, the centrality scores for the clubs tell us something about the *popularity* of each group. Some groups are popular (have lots of members), others are less so. So, it seems like in this student group, the Magic Club is definitely the most popular, containing four members. The Cheese and Fashion Clubs on the other hand, seem to be more niche pursuits, with only two members each. 
 
 ## The Affiliation Matrix Transpose
-As discussed in the lesson on matrices, it is possible to "flip" the rows and columns of any matrix, so what was previously the rows become the columns, and what was previously the columns become the rows. This is called the **matrix transpose** and if the original matrix was called **A**, then the transpose is called **A'**.^[In matrix algebra, **'** is the symbol of the matrix transpose.] If the original matrix **A** was of dimensions $R \times C$ then the transpose **A'** is of dimensions $C \times R$. 
+As discussed in the lesson on matrices, it is possible to "flip" the rows and columns of any matrix, so what was previously the rows become the columns, and what was previously the columns become the rows. This is called the **matrix transpose** and if the original matrix was called **A**, then the transpose is called **A'**.^[In matrix algebra, **'** is the symbol of the matrix transpose. Another symbol for the matrix transpost is $\mathbf{^T}$.] If the original matrix **A** was of dimensions $R \times C$ then the transpose **A'** is of dimensions $C \times R$. 
 
 The transpose of the affiliation matrix shown in @tbl-affmat) is shown in @tbl-affmattrans).
 
@@ -237,7 +237,7 @@ The transpose of the affiliation matrix shown in @tbl-affmat) is shown in @tbl-a
     kbl(gr, format = "pipe", align = "c")
 ```
 
-Note that the transpose of the affiliation matrix contains exactly the *same* information as the original affiliation matrix. The group affiliations of every person are preserved as are memberships of each group. If we used equations \@ref(eq:aff1), and \@ref(eq:aff2) to compute the person and group centralities using the affiliation matrix transpose **A'**, we would get the same results, except that the first equation (summing across the rows) would now give us the group centralities, and the second equation (summing down the columns) would give use the people centralities!
+Note that the transpose of the affiliation matrix contains exactly the *same* information as the original affiliation matrix. The group affiliations of every person are preserved as are memberships of each group. If we used equations @eq-aff1), and @eq-aff2) to compute the person and group centralities using the affiliation matrix transpose **A'**, we would get the same results, except that the first equation (summing across the rows) would now give us the group centralities, and the second equation (summing down the columns) would give use the people centralities!
 
 We learn from matrix algebra that an important property of rectangular matrices is that you can *always multiply a rectangular matrix by its transpose*. Recall a key condition of matrix multiplication is that the two matrices be **conformable** so that the columns of the first matrix need to match the number of rows of the second matrix. Well, it's clear than since any matrix that is of dimensions $R \times C$, will have a transpose of dimensions $C \times A$ then the multiplication of the two matrices will be defined:
 
@@ -281,7 +281,7 @@ Using the rules for matrix multiplication discussed in the lesson on matrices, t
 
 The person overlap matrix transforms the initial rectangular affiliation matrix, which has people in the rows and groups in the columns, to a **square matrix**, which like the usual relationship matrices we have been dealing with, feature people in both the rows and the columns. Each entry in the person overlap matrix $o^P_{ij}$ now gives us the number of groups in which person *i* and *j* mutually belong to [@breiger74]. So we learn that Gabriela and Brandon have three memberships in common (I bet they seen another a lot!) but that Rahul and Parker have no memberships in common (so they are less likely to encounter one another).
 
-Note also that, in the person overlap matrix, (in contrast to the usual adjacency matrix), there are valid entries along the diagonal cells ($o^P_{ii}$). These cells now record the *total number of memberships* that the node corresponding to that row (or column) has. Which we ascertained by computing the node centralities in the original affiliation matrix using \@ref(eq:aff1). You can see that the vector of degree centralities shown in @tbl-affdegcent1) is the same as the vector formed by the diagonal entries in @tbl-comem).
+Note also that, in the person overlap matrix, (in contrast to the usual adjacency matrix), there are valid entries along the diagonal cells ($o^P_{ii}$). These cells now record the *total number of memberships* that the node corresponding to that row (or column) has. Which we ascertained by computing the node centralities in the original affiliation matrix using @eq-aff1). You can see that the vector of degree centralities shown in @tbl-affdegcent1) is the same as the vector formed by the diagonal entries in @tbl-comem).
 
 ### The Group Overlap Matrix
 In the same way we can compute the person overlap matrix, it is possible to calculate another matrix, called the **group overlap matrix** (written $O^G$), this time by multiplying the transpose of the original affiliation matrix times the original We do that using the following equation:  
@@ -291,7 +291,7 @@ $$
 $${#eq-goverlap}
 
 
-Recall from the lesson on matrices that matrix multiplication is *not* commutative (if $A$ is a rectangular matrix, then $A \times A^{'} \neq A^{'} \times A$)), so equation \@ref(eq:goverlap) gives you a different answer than equation \@ref(eq:poverlap). The result is shown in @tbl-goverlap)
+Recall from the lesson on matrices that matrix multiplication is *not* commutative (if $A$ is a rectangular matrix, then $A \times A^{'} \neq A^{'} \times A$)), so @eq-goverlap gives you a different answer than @eq-poverlap. The result is shown in @tbl-goverlap.
 
 ```{r}
 #| label: tbl-goverlap
@@ -367,7 +367,7 @@ Note that both the comembership and group overlap matrices, being square matrix 
     p
 ```
 
-So using formulas \@ref(eq:poverlap) and \@ref(eq:goverlap), it is possible to go from a two-mode network in which no links exist between nodes of the same kind, to a weighted graph, in which the links between nodes of the same kind are defined by the overlap of their neighborhoods in the original bipartite graph. As we noted earlier, this is called the **one mode projection** of the two-mode network. Each two-mode network thus has two one mode projection one for each node set.
+So using formulas @eq-poverlap) and @eq-goverlap), it is possible to go from a two-mode network in which no links exist between nodes of the same kind, to a weighted graph, in which the links between nodes of the same kind are defined by the overlap of their neighborhoods in the original bipartite graph. As we noted earlier, this is called the **one mode projection** of the two-mode network. Each two-mode network thus has two one mode projection one for each node set.
 
 ```{r}
 #| label: fig-onemode2
