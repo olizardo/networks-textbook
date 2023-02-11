@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Social Networks - 2&nbsp; Graph Theory</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./2-2-lesson-node-neighborhoods.html" rel="next">
+<link href="./1-lesson-what-are-networks.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Social Networks</span>
+    </a>
+  </div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graph Theory</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./social-ties1.jpeg" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./1-lesson-what-are-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What are Networks?</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2-1-lesson-graph-theory.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graph Theory</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2-2-lesson-node-neighborhoods.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2-3-lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3-1-lesson-ties-and-graphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3-2-lesson-dyads-and-triads.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Dyads and Triads</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3-3-lesson-other-graphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Other Types of Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./4-1-lesson-graph-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./4-2-lesson-degree-based-graph-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Degree-Based Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./5-lesson-directed-graph-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Directed Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6-lesson-egonet-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./7-lesson-indirect-connections.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Indirect Connections in Social Networks</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./8-1-lesson-from-graph-to-matrix.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">From Graph to Matrix</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./8-2-lesson-special-matrices.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Special Matrices</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-lesson-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-lesson-centrality.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Centrality</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-lesson-groups-cliques.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Clique Analysis</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-lesson-positions-struct-equiv.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Equivalence and Similarity</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-lesson-positions-blockmod.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Blockmodeling</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#from-ties-to-graphs" id="toc-from-ties-to-graphs" class="nav-link active" data-scroll-target="#from-ties-to-graphs"><span class="toc-section-number">2.1</span>  From Ties to Graphs</a></li>
+  <li><a href="#social-ties" id="toc-social-ties" class="nav-link" data-scroll-target="#social-ties"><span class="toc-section-number">2.2</span>  Social Ties</a></li>
+  <li><a href="#network-boundaries" id="toc-network-boundaries" class="nav-link" data-scroll-target="#network-boundaries"><span class="toc-section-number">2.3</span>  Network Boundaries</a></li>
+  <li><a href="#the-building-blocks-of-graphs-edges-and-nodes" id="toc-the-building-blocks-of-graphs-edges-and-nodes" class="nav-link" data-scroll-target="#the-building-blocks-of-graphs-edges-and-nodes"><span class="toc-section-number">2.4</span>  The Building Blocks of Graphs: Edges and Nodes</a>
+  <ul class="collapse">
+  <li><a href="#nodes" id="toc-nodes" class="nav-link" data-scroll-target="#nodes"><span class="toc-section-number">2.4.1</span>  Nodes</a></li>
+  <li><a href="#edges" id="toc-edges" class="nav-link" data-scroll-target="#edges"><span class="toc-section-number">2.4.2</span>  Edges</a></li>
+  </ul></li>
+  <li><a href="#simple-graphs" id="toc-simple-graphs" class="nav-link" data-scroll-target="#simple-graphs"><span class="toc-section-number">2.5</span>  Simple Graphs</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/2-1-lesson-graph-theory.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-graph-theory" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graph Theory</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="from-ties-to-graphs" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="from-ties-to-graphs"><span class="header-section-number">2.1</span> From Ties to Graphs</h2>
+<p>This is likely not your first sociology course. But even if it is, relationships are relatively intuitive for people. They are all around us: you and your parents, you and your siblings, your siblings and your parents, you and your classmates, your classmates to each other. Affiliation, communication, friendship, hatred: these are the <em>content</em> of social relationships. Two people either have a relationship of some kind, or they do not. Essentially, a relationship is a connection between at least two social actors. We will see that sometimes, when relations clump together into networks, two sets of relations can have different content, but still share the same <strong>form</strong> (e.g., arrangement, or pattern).</p>
+<p>The technical social networks term for “relations clumping together into networks” is <strong>concatenation</strong> <span class="citation" data-cites="martin09">(<a href="#ref-martin09" role="doc-biblioref">Martin 2009</a>)</span>. For instance, every time you introduce two previously unrelated acquaintances to one another, you concatenate two previous disconnected ties into a connected triple.</p>
+</section>
+<section id="social-ties" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="social-ties"><span class="header-section-number">2.2</span> Social Ties</h2>
+<p>For example, you are likely enrolled in a social network’s class if you are reading this, and have people you know such as your friends and people you’ve taken prior classes with, but also people you’ve never seen before. It might be obvious that you have a relationship with those people that you know, but do you have a relationship with those you do not know?</p>
+<div id="fig-sociogram" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/moreno-sociogram.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2.1: “The first picture of a social network, then called a ‘sociogram’ was drawn by Jacob Moreno in 1934. It consisted of the relationships between 19 boys (triangles) and 18 girls (circles) in a 5th grade classroom”</figcaption><p></p>
+</figure>
+</div>
+<p>The answer is maybe. It depends on how you define the term social relationship. If you were asked who your friends are, you would tell me that some of your classmates are your friends, and the rest of your classmates are not your friends. If you were asked which of these people in your classroom are your classmates however, everyone would be your classmate, except for your professor or teaching assistants. You share a particular type of relationship with these other people, your classmates, even if you’ve never met them. The word “classmate” even implies a relationship type, one with a different social meaning than “friend.” When analyzing a social network, it is important to first understand what type of social relationship you are analyzing, as it relates directly to what type of conclusions or generalizations you can make about the social world.</p>
+</section>
+<section id="network-boundaries" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="network-boundaries"><span class="header-section-number">2.3</span> Network Boundaries</h2>
+<p>Once you have a type of social relationship you would like to examine, the next step is to <em>bound</em> the context. If you want to map out all the social relationships in the world, well that’s impossible. Imagine how difficult it would be to map out all the people at your school who are friends with one another. That might be feasible if you have only 1,000 undergraduates, but at a school of 30,000, it would be a nightmare. That is in part why it is so important to bound the social context. The other is to exclude relationships that are not meaningful for your study. <strong>Bounding</strong>, or to draw boundaries, is to have a rule about what will or will not be included in the study <span class="citation" data-cites="laumann89">(<a href="#ref-laumann89" role="doc-biblioref">Laumann, Marsden, and Prensky 1989</a>)</span>.</p>
+<div id="fig-karate" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/karate.jpg" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2.2: “The Zachary karate club network study was one of the first data collection probjects in the history of SNA. The data are famous for showing how networks could be used to find groups based on the relations between actors.”</figcaption><p></p>
+</figure>
+</div>
+<p>For example, if you are interested in who is friends with who in your social networks class, you have bound your study to look at only people who are in your social networks class. One of the most famous social network studies was performed by the anthropologist Wayne W. Zachary (see <a href="#fig-karate">Figure&nbsp;<span>2.2</span></a> at a college karate club in the 1970s <span class="citation" data-cites="zachary77">(<a href="#ref-zachary77" role="doc-biblioref">Zachary 1977</a>)</span>. Thus, the 34 members of the karate club and the outside teacher were the actors included in the study because they were the people who were involved in the day to day operations of the karate club at the time data were collected.</p>
+<p>With a type of social relationship in some bounded context, you can begin to map the social world as a graph. In its most basic form, a graph is essentially a picture of the relationships between different types of social actors. This picture becomes incredibly powerful when we begin to use mathematical concepts to understand how actors relate to each other (mostly what this book is concerned with) or upon what social principles the network may have been formed.</p>
+<p>While this class will mostly use the terms node and edge when referring to graphs, these are not the only terms in use among those who use network analysis techniques. Additional names for nodes include, <strong>vertex</strong> or <strong>point</strong>. Relationships between two nodes are, in addition to being called edges, are referred to as <strong>ties</strong> or <strong>links</strong>. Table <a href="8-1-lesson-from-graph-to-matrix.html#tbl-terms">Table&nbsp;<span>13.9</span></a> shows the different network lingo people use across disciplines.</p>
+<div id="tbl-terms" class="anchored">
+<table class="table">
+<caption>Table&nbsp;2.1: Network terminology across disciplines.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Academic Origin</th>
+<th style="text-align: center;">Social Actor</th>
+<th style="text-align: center;">Relationship</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Graph Theory</td>
+<td style="text-align: center;">Point</td>
+<td style="text-align: center;">Line</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Network Science</td>
+<td style="text-align: center;">Vertex</td>
+<td style="text-align: center;">Edge</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sociology</td>
+<td style="text-align: center;">Actor</td>
+<td style="text-align: center;">Tie</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Computer Science</td>
+<td style="text-align: center;">Node</td>
+<td style="text-align: center;">Link</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="the-building-blocks-of-graphs-edges-and-nodes" class="level2 page-columns page-full" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="the-building-blocks-of-graphs-edges-and-nodes"><span class="header-section-number">2.4</span> The Building Blocks of Graphs: Edges and Nodes</h2>
+<p>There is a mathematical definition of a <strong>graph</strong> which is slightly more technical. A graph is a <strong>set</strong>, usually represented by the capital letter <em>G</em>.</p>
+<p>From high school math, you may remember that the mathematical definition of a set is simply a collection of entities, some of which may be ordered and some of which may themselves be other sets (a set can have sets as its members). In the case of graphs, the entities inside the collection are a set of <strong>vertices</strong> (also called <strong>nodes</strong>) and a separate set of <strong>edges</strong> (also called <strong>links</strong>).</p>
+<p>A graph is thus a set containing two sets as its members: a set of nodes (usually represented by the capital letter <em>V</em>) and a set of edges (usually represented by the capital letter <em>E</em>).</p>
+<p>In set theory notation:</p>
+<p><span id="eq-graph"><span class="math display">\[    
+  G = \{V, E\}
+\tag{2.1}\]</span></span></p>
+<p>Which says that the members of the set defined by the graph, which we call <em>G</em>, are two other sets, called <em>E</em> and <em>V</em> (who themselves have a series of members inside). The usual notation, like in <a href="#eq-graph">Equation&nbsp;<span>2.1</span></a>, is to <em>enclose</em> the members of a set in <em>brackets</em> <span class="math inline">\(\{\}\)</span>.</p>
+<section id="nodes" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="nodes"><span class="header-section-number">2.4.1</span> Nodes</h3>
+<p>The set of nodes usually represents actors in the real world social network. <strong>Point and line diagrams</strong> (such as the ones shown in <a href="#fig-karate">Figure&nbsp;<span>2.2</span></a>) are used to represent graphs, these in their turn represent the real social network.</p>
+<p>In these diagrams nodes (representing actors) are usually drawn as a circle, but they could be any shape or symbol. In social network analysis, actors are often either an individual or an organization, but, as we have seen, in wider applications of the network imagery in the physical and biological sciences (usually going under the banner of <strong>network science</strong>), nodes can represent anything that links up to other similar entities in a larger system. These include power generation stations and homes, servers and computers, animals in an ecosystem, towns, really anything of substance that we can define some kind of relation on, or from which some type of content can be said to be exchanged.</p>
+</section>
+<section id="edges" class="level3 page-columns page-full" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="edges"><span class="header-section-number">2.4.2</span> Edges</h3>
+<p>Edges represent the presence of a <em>connection</em> or a <strong>social tie</strong> between two nodes. As we will see this can be a permanent relationship (e.g., “brother of”) or a more fleeting interaction (e.g., a text message, being in the same place at the same time). We will define what social ties are, how many types exist, and what their properties are, in lecture. For now, we can say that in social network analysis, connections are relationships, or links between nodes, and edges in a graph are meant to represent these connections.</p>
+<p>In graph theory, the set of edges is best thought of as a collection of <em>pairs</em> of nodes, where the two members of the pair are the nodes involved in the social tie. So if node <em>A</em> is linked to node <em>B</em> via some social tie (friendship, study group, coworkers), then <em>AB</em> is a member of the edge set of the relevant graph. In set theory notation, this is usually written as <span class="math inline">\(AB \in E\)</span> which is read as “the edge <em>AB</em> is a member of the set <span class="math inline">\(E\)</span>.” Edges can also be referred to by juxtaposing the two nodes that are connected by the edge. Thus, the edge <em>AB</em> can also be written as <span class="math inline">\(V_A V_B\)</span>.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="fig-simple1" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
+<p><img src="2-1-lesson-graph-theory_files/figure-html/fig-simple1-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption margin-caption">Figure&nbsp;2.3: A simple graph with four nodes and two edges.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In the case of power generation stations and homes, the edges can represent power lines. Meanwhile, servers and computers are connected by internet cables and wi-fi access, while towns are connected by roads. The existence of edges signal the potential for content to flow, whether that’s power, computer data, or people in cars. In the case of social networks, the content that flows between two nodes are such things as influence, advice, information, and support. But it may also be disease, bullying, or gossip.</p>
+</section>
+</section>
+<section id="simple-graphs" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="simple-graphs"><span class="header-section-number">2.5</span> Simple Graphs</h2>
+<p><a href="#fig-simple1">Figure&nbsp;<span>2.3</span></a> shows an example of a point and line network diagram of a graph with four <strong>nodes</strong> and two <strong>edges</strong>. Nodes <em>A</em>, <em>B</em>, <em>C</em> and <em>D</em> are circles representing actors <strong>A</strong>, <strong>B</strong>, <strong>C</strong> and <strong>D</strong>, whose real world social relationships we are interested in studying. The lines drawn between <em>A</em> and <em>B</em> and likewise between <em>B</em> and <em>C</em> represent the <strong>edges</strong>, indicating the presence of a social tie. Thus the edges, <em>AB</em> and <em>BC</em> appear in the network diagram. The lack of an edge between nodes <em>B</em> and <em>C</em> reflects the <em>absence</em> of a relationship between actors named <strong>B</strong> and <strong>C</strong> in the real world.</p>
+<p>So if we were to write out the graph shown in <a href="#fig-simple1">Figure&nbsp;<span>2.3</span></a> in terms of the sets that define the graph, we would say:</p>
+<p><span id="eq-graph1"><span class="math display">\[
+  G = \{E, V\}
+\tag{2.2}\]</span></span></p>
+<p><span id="eq-graph2"><span class="math display">\[  
+E = \{AB, AC\}
+\tag{2.3}\]</span></span></p>
+<p><span id="eq-graph3"><span class="math display">\[
+V = \{A, B, C, D\}
+\tag{2.4}\]</span></span></p>
+<p>This says that the graph <em>G</em> shown in <a href="#fig-simple1">Figure&nbsp;<span>2.3</span></a> is a set with two members, <em>E</em> and <em>V</em>, each of which is its own set. The edge set of <em>G</em> has two members, <em>AB</em> and <em>AC</em>. The node set of <em>G</em> has four members, <em>A</em>, <em>B</em>, <em>C</em>, and <em>D</em>.</p>
+<p>Graphs have some basic properties that we need to learn about:</p>
+<ul>
+<li>In a graph, if two nodes are joined together by an edge, they are said be <strong>adjacent</strong>. So in <a href="#fig-simple1">Figure&nbsp;<span>2.3</span></a>, nodes <em>A</em> and <em>B</em> are adjacent, as are nodes <em>A</em> and <em>C</em>. Pairs of nodes that are not linked by an edge, like nodes <em>B</em> and <em>C</em>, are said be <strong>nonadjacent</strong>.</li>
+<li>The nodes at the two ends of each existing edge are said to be the <strong>end vertices</strong> of that edge. Each edge has two end vertices. As we have been doing, edges are named by typing together the names of their two end vertices. So the edge that has nodes <em>A</em> and <em>B</em> as its endpoints is called <em>AB</em>.</li>
+<li>If an edge “touches” a node (e.g., connects it to another node) we say that that edge is <strong>incident</strong> on that node. So in <a href="#fig-simple1">Figure&nbsp;<span>2.3</span></a>, the edge <em>AB</em> is incident on both nodes <em>A</em> and <em>B</em>. The relation of <strong>incidence</strong> will be important in a later lesson when we discuss network metrics computed at the node level like <strong>degree centrality</strong>.</li>
+<li>Finally, in a graph, nodes that are not connected to any other nodes are called <strong>isolates</strong>. This means that in <a href="#fig-simple1">Figure&nbsp;<span>2.3</span></a>, node <em>D</em> is an isolate because it has zero edges incident upon it.</li>
+</ul>
+<p>Graphs like that shown in <a href="#fig-simple1">Figure&nbsp;<span>2.3</span></a> are called <strong>simple graphs</strong>. There are two requirements for a graph to count as a simple graph:</p>
+<ul>
+<li>First, there can only be <em>one edge</em> joining two nodes at any time. That is, there cannot be multiple lines linking together the same pair of nodes. We will see in a later lesson that there are types of graphs that relax this restriction.</li>
+<li>The second requirement is that graph does not contain any edges that have the same node as its two end points. These kind of edges are called <strong>loops</strong>, and they are edges that connect a node to itself! Clearly this does not make sense for most sociological applications.</li>
+</ul>
+<p>With some exceptions, noted in subsequent lessons, simple graphs can represent most social networks.</p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-laumann89" class="csl-entry" role="doc-biblioentry">
+Laumann, Edward O, Peter V Marsden, and David Prensky. 1989. <span>“The Boundary Specification Problem in Network Analysis.”</span> In <em>Research Methods in Social Network Analysis</em>, edited by Linton C. Freeman, Douglas R. White, and Antone Kimball Romney, 61–79. New Brunswick: Transaction Publishers.
+</div>
+<div id="ref-martin09" class="csl-entry" role="doc-biblioentry">
+Martin, John Levi. 2009. <em>Social Structures</em>. Princeton University Press.
+</div>
+<div id="ref-zachary77" class="csl-entry" role="doc-biblioentry">
+Zachary, Wayne W. 1977. <span>“An Information Flow Model for Conflict and Fission in Small Groups.”</span> <em>Journal of Anthropological Research</em> 33 (4): 452–73.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./1-lesson-what-are-networks.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What are Networks?</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./2-2-lesson-node-neighborhoods.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
