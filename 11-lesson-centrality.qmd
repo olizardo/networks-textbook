@@ -281,7 +281,7 @@ The closeness centrality scores listed in @tbl-clos agree with our informal impr
 As we will see later, having closeness centrality information for nodes in a graph can be useful. For instance, if @fig-clos was a social network, and we wanted to spread an innovation or a new product among the actors in the fastest amount of time, we would want to give it to node *E* first. Note however that if something **bad** (like a disease) was spreading across the network, then it would also be very bad if actor *E* got it first!^[See the discussion [here](http://www.analytictech.com/networks/centaids.htm).]
 
 ### Houston, We Have a Problem
-So far, so good. However, what would happen if we tried to compute closeness centrality for a **disconnected graph** like the one shown in Figure @fig-connected1-2? Well, the shortest paths distance matrix for that graph looks like this:
+So far, so good. However, what would happen if we tried to compute closeness centrality for a **disconnected graph** like the one shown in Figure @fig-connected1-2? Well, the shortest paths distance matrix for that graph looks like the one in @tbl-dis2.
 
 
 ```{r}
@@ -306,13 +306,17 @@ So far, so good. However, what would happen if we tried to compute closeness cen
     kbl(d, format = "pipe", align = "c") 
 ```
 
-Note that pairs of nodes that cannot **reach** one another in the disconnected graph, get a geodesic distance of "Inf" (infinity) in the respective cell of the geodesic distance matrix. This is a problem because when we compute the row sums of the geodesic distance matrix to try to calculate centrality according to @eq-clos, we get:
+Note that in @tbl-dis2, pairs of nodes that cannot **reach** one another in the disconnected graph, get a geodesic distance of "Inf" (infinity) in the respective cell of the geodesic distance matrix. This is a problem because when we compute the row sums of the geodesic distance matrix to try to calculate centrality according to @eq-closcen, we get the "numbers" shown in @tbl-inf.
 
 ```{r}
+#| label: tbl-inf
+#| tbl-cap: "Row sums of a geodesic distance matrix from a disconnected graph."
+#| tbl-cap-location: margin
+
     d <- t(rowSums(d))
     kbl(d, format = "pipe", align = "c") 
 ```
-Not to get too philosophical, but the problem is that when you add any number to "infinity," the answer is, well, *infinity*^[see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] This means that closeness centrality is only defined for **connected graphs**. When it comes to disconnected graphs, we are out of luck. 
+So that's a bummer since all the "numbers" in @tbl-inf, are just infinity. Not to get too philosophical, but the problem is that when you add any number to "infinity," the answer is, well, *infinity*.^[For more details, see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] This means that closeness centrality is only defined for **connected graphs**. When it comes to disconnected graphs, we are out of luck. 
 
 Thankfully, there is a solution develoed by @rochat09. It consists of a modification of @eq-closcen called **harmonic closeness centrality**. The formula goes as follows:
 
@@ -325,9 +329,9 @@ Now, this might seem like we just re-arranged the stuff in @eq-closcen, and inde
 
 So, in English, while @eq-closcen says "*first* sum the geodesic distances for each node (to get the denominator), and *then* divide $N-1$ by this sum," @eq-harmcen says "*first* divide one by the geodesic distance, and *then* sum the result of all these divisions, and *then* multiply this sum by one over $N-1$. 
 
-Once again, the philosophy of infinity kicks in here, since the main difference is that one divided by infinity is actually a real number: **zero**.^[Once again, see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] 
+Once again, the philosophy of mathematical infinity kicks in here, since the main difference is that one divided by infinity is actually a real number: **zero**.^[Once again, see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] 
 
-So let's check by taking every entry in @tbl-dis2 and dividing one by the number in each cell (except for the diagonals, which we don't care about). The results are shown in @tbl-dis3
+So let's check by taking every entry in @tbl-dis2 and dividing one by the number in each cell (except for the diagonals, which we don't care about). The results are shown in @tbl-dis3.
 
 ```{r}
 #| label: tbl-dis3
@@ -340,11 +344,11 @@ So let's check by taking every entry in @tbl-dis2 and dividing one by the number
     kbl(d, format = "pipe", align = "c") 
 ```
 
-Beautiful! Now, instead of weird "Inf"s we have zeroes, which is great because we can add stuff to zero and get a real number back. We can then apply @eq-harmcen to the numbers in @tbl-dis2 to get the **harmonic closeness centrality** for each node in @fig-connected1-2. These are shown in @tbl-clos2.
+Beautiful! Now, instead of weird "Inf"s we have zeroes, which is great because we can add stuff to zero and get a real number back. We can then apply @eq-harmcen to the numbers in @tbl-dis3 (e.g., computing the sum of each row and then multiplying that by $\frac{1}{N-1}$) to get the **harmonic closeness centrality** for each node in @fig-connected1-2. These are shown in @tbl-clos2.
 
 ```{r}
 #| label: tbl-clos2 
-#| tbl-cap: "Closeness centrality scores for nodes in a disconnected, undirected graph."
+#| tbl-cap: "Harmonic Closeness Centrality scores for nodes in a disconnected, undirected graph."
 #| tbl-cap-location: margin
 
     d <- round(t(rowSums(d)) * (1/(nrow(d)-1)), 2)
