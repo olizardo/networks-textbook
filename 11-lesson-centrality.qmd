@@ -218,70 +218,71 @@ Sometimes it not important how many people you *directly* connected to. Instead,
   p
 ```
 
-This insight serves as an inspiration for a measure of centrality based on **closeness**. The closeness between two nodes is the *inverse* of the **geodesic distance** them. Recall that the geodesic distance is given by the *length* of the shortest path linking two nodes in the graph. So the smallest the length of the shortest path separating two nodes in the graph, the closer the two nodes and vice versa.
+This insight serves as an inspiration for a measure of centrality based on **closeness**. The closeness between two nodes is the *inverse* of the **geodesic distance** them [@bavelas50]. Recall that the geodesic distance is given by the *length of the shortest path linking two nodes in the graph*. The smallest the length of the shortest path separating two nodes in the graph, the closer the two nodes and vice versa. 
 
-This information is captured in a network's geodesic **distance matrix**, as discussed in @sec-specmats. For instance, take the graph shown in @fig-clos, the distance matrix for which is shown in @tbl-dis. 
+Remember that for any number $n$, the mathematical operation of *taking the inverse* simply means dividing one by that number. So, the inverse of $n$ is $\frac{1}{n}$. This means that if $d_{ij}$ is the geodesic distance between nodes *i* and *j* in graph $G$, then the closeness between two nodes is $\frac{1}{d+_{ij}}$. 
+
+The information on the pairwise geodesic distances between every pair of nodes in a given graph is captured in the geodesic **distance matrix**, as discussed in @sec-specmats. For instance, take the graph shown in @fig-clos. The distance matrix for this graph is shown in @tbl-dis. 
 
 ```{r}
 #| label: tbl-dis 
 #| tbl-cap: "Geodesic distance matrix for an undirected graph."
 #| tbl-cap-location: margin
 
-    set.seed(76)
-    fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
-    to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
-    edge.dat <- data.frame(fr, to)
-    edge.dat <- edge.dat[order(fr, to),]
-    node.dat <- data.frame(name = union(edge.dat$fr, edge.dat$to))
-    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
-    gr <- simplify(gr)
     d <- distances(gr)
     kbl(d, format = "pipe", align = "c") 
 ```
 
 As shown in @tbl-dis, a node like *I*, who seems to be at the outskirts of the network, also shows up as having the largest geodesic distances from other nodes in the graph. Other nodes, like *E*, *G*, and *L* seem to be "closer" to others, in terms of having to traverse smaller geodesic distances to reach them. 
 
-That means that we can use the distance table to come up with a measure of centrality called **closeness centrality** for each node. We can do that by adding up the entries corresponding to each row in the distance matrix ($\sum_i d_{ij}$), to get a summary the total pairwise distances separating the node corresponding to row *i* in the matrix from the other nodes listed in each column. 
+That means that we can use the distance table to come up with a measure of centrality called **closeness centrality** for each node. We can do that by adding up the entries corresponding to each row in the distance matrix ($\sum_j d_{ij}$), to get a summary the total pairwise distances separating the node corresponding to row *i* in the matrix from the other nodes listed in each column *j*. 
 
 Note that because closeness is better than "farness," we would want the node with *highest closeness centrality* to be the one with the *smallest* sum of pairwise distances. This can be calculated using the following equation:
 
 $$
-  C_i^{CLOS} = \frac{N-1}{\sum_jd_{ij}}
+  C_i^{CLOS} = \frac{1}{\sum_jd_{ij}}
 $$  {#eq-closcen}
 
-In @eq-closcen, the denominator is the sum across each column *j*, for each row *i* in @tbl-dis which corresponds to the distance between node *i* and each of the other nodes in the graph *j* (skipping the diagonal cell when $i=j$, because the geodesic distance of node to itself is always zero!). We take the mathematical *inverse*, dividing the sum of the distances by the number of nodes in the graph minus one, so that way, the smallest number comes out on top and the bigger number comes out of the bottom (since, as we said, we want to measure *closeness* not "farness.") 
+In @eq-closcen, the denominator is the sum across each column *j*, for each row *i* in @tbl-dis which corresponds to the distance between node *i* and each of the other nodes in the graph *j* (skipping the diagonal cell when $i=j$, because the geodesic distance of node to itself is always zero!). 
 
-Applying @eq-closcen to the distance matrix shown in @tbl-dis, results in the closeness centrality scores for each node shown in @tbl-clos. 
+As noted, we take the mathematical inverse of this quantity, dividing one by the sum of the distances, so that way, the smallest number comes out on top and the bigger number comes out of the bottom (since, as we said, we want to measure *closeness* not "farness.") 
+
+Let's see how this work for the graph in @fig-clos. First, we get the row sums of geodesic distances from @tbl-dis. These are shown in the first column of @tbl-clos, under the heading "Sum of Distances." This seems to work; node $E$ has the smallest number here ($\sum_j d_{Ej} = 22$) suggesting it can reach the most nodes via the shortest paths. Node $I$ has the largest number ($\sum_j d_{Ij} = 35$) indicating it is the most isolated from the other nodes. 
 
 ```{r}
-#| label: tbl-clos 
-#| tbl-cap: "Closeness centrality scores for an undirected graph."
+#| label: tbl-clos
+#| tbl-cap: "Sum of geodesic distances for each node in an undirected graph and its inverse."
+#| tbl-cap-location: margin
 
-    set.seed(76)
-    fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
-    to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
-    edge.dat <- data.frame(fr, to)
-    edge.dat <- edge.dat[order(fr, to),]
-    node.dat <- data.frame(name = union(edge.dat$fr, edge.dat$to))
-    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
-    gr <- simplify(gr)
-    d <- distances(gr)
-    C <- nrow(d) - 1
-    d <- round(C / rowSums(d), 2)
+    d1 <- rowSums(d)
+    d2 <- round(1/d1, 3)
+    d3 <- round((nrow(d) - 1) / (d1), 2)
+    d <- cbind(d1, d2, d3)
     kbl(d, format = "html", align = "c", padding = 2,
-        col.names = c("Closeness Centrality")) %>% 
-        row_spec(5, background = "salmon", bold = TRUE) %>% 
-        row_spec(14, background = "lightgreen", bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-
+        col.names = c("Sum of Distances (d)", "Inverse (1/d)", "Normalized (N-1/d)")) %>% 
+        row_spec(1, bold = TRUE) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
 
-The closeness centrality scores listed in @tbl-clos agree with our informal impressions. Node *I* comes out at the bottom ($CC_I^{CLOS} = 0.37$), showing it to be the one with the least closeness centrality, given the relatively large geodesic distances separating it from the other nodes in the graph. Node *E* (marked red in @fig-clos) comes out on top ($CC_E^{CLOS} = 0.59$), given its relative geodesic proximity to other nodes in the graph.
+But we want closeness, not farness, so the second column of @tbl-clos shows what happens when we divide one by the number in the second column. Now, node $E$ has the largest score $CC^{CLOS}_E = 0.045$ which is what we want. 
+
+However, because we are dividing one by a relatively large number, we end up with a bunch of small decimal numbers as centrality scores, and like it happened with degree, this number is sensitive to how big the network is (the larger the network, the more likely there is to be really long short paths). So @freeman79 proposes a *normalized* version of closeness that takes into account network size. It is a variation of @eq-closcen:
+
+$$
+  C_i^{CLOS} = \frac{N-1}{\sum_jd_{ij}}
+$$  {#eq-closnorm}
+
+@eq-closnorm is the same as @eq-closcen, except that instead of dividing one by the sum of distances, we divide $N-1$ by the sum of distances, where $N$ is the order of the graph (the number of nodes). In this case, $N=14$. 
+
+Normalizing the sum of distances shown in the second column of @tbl-clos according to @eq-closnorm, gives us the centrality scores shown in the fourth column of the table, under the heading "Normalized." These scores range from zero to one, with one being the maximum possible closeness centrality score for that graph. 
+
+The normalized closeness centrality scores listed in the fourth column of @tbl-clos agree with our informal impressions. Node *I* comes out at the bottom ($CC_I^{CLOS} = 0.37$), showing it to be the one with the least closeness centrality, given the relatively large geodesic distances separating it from the other nodes in the graph. Node *E* (marked red in @fig-clos) comes out on top ($CC_E^{CLOS} = 0.59$), given its relative geodesic proximity to other nodes in the graph.
 
 As we will see later, having closeness centrality information for nodes in a graph can be useful. For instance, if @fig-clos was a social network, and we wanted to spread an innovation or a new product among the actors in the fastest amount of time, we would want to give it to node *E* first. Note however that if something **bad** (like a disease) was spreading across the network, then it would also be very bad if actor *E* got it first!^[See the discussion [here](http://www.analytictech.com/networks/centaids.htm).]
 
-### Houston, We Have a Problem
-So far, so good. However, what would happen if we tried to compute closeness centrality for a **disconnected graph** like the one shown in Figure @fig-connected1-2? Well, the shortest paths distance matrix for that graph looks like the one in @tbl-dis2.
+## Houston, We Have a Problem
+So far, so good. Closeness seems to be a great measure of node importance, giving us a sense of who can reach most others in a network in the most efficient way. However, what would happen if we tried to compute closeness centrality for a **disconnected graph** like the one shown in Figure @fig-connected1-2? Well, the shortest paths distance matrix for that graph looks like the one in @tbl-dis2.
 
 
 ```{r}
@@ -318,16 +319,16 @@ Note that in @tbl-dis2, pairs of nodes that cannot **reach** one another in the 
 ```
 So that's a bummer since all the "numbers" in @tbl-inf, are just infinity. Not to get too philosophical, but the problem is that when you add any number to "infinity," the answer is, well, *infinity*.^[For more details, see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] This means that closeness centrality is only defined for **connected graphs**. When it comes to disconnected graphs, we are out of luck. 
 
-Thankfully, there is a solution develoed by @rochat09. It consists of a modification of @eq-closcen called **harmonic closeness centrality**. The formula goes as follows:
+Thankfully, there is a solution develoed by @beauchamp65. It consists of a modification of @eq-closcen called **harmonic closeness centrality**. The formula goes as follows:
 
 $$
   C_i^{HARM} = \frac{1}{N-1}\sum_j\frac{1}{d_{ij}}
 $$ {#eq-harmcen}
 
 
-Now, this might seem like we just re-arranged the stuff in @eq-closcen, and indeed that's what we did! But the re-arrangement matters, because it changes the *order* in which we do the various arithmetic operations. 
+Now, this might seem like we just re-arranged the stuff in @eq-closnorm, and indeed that's what we did! But the re-arrangement matters a lot, because it changes the *order* in which we do the various arithmetic operations [@boldi14]. 
 
-So, in English, while @eq-closcen says "*first* sum the geodesic distances for each node (to get the denominator), and *then* divide $N-1$ by this sum," @eq-harmcen says "*first* divide one by the geodesic distance, and *then* sum the result of all these divisions, and *then* multiply this sum by one over $N-1$. 
+So, in English, while @eq-closnorm says "*first* sum the geodesic distances for each node (to get the denominator), and *then* divide $N-1$ by this sum," @eq-harmcen says "*first* divide one by the geodesic distance, and *then* sum the result of all these divisions, and *then* multiply this sum by one over $N-1$. 
 
 Once again, the philosophy of mathematical infinity kicks in here, since the main difference is that one divided by infinity is actually a real number: **zero**.^[Once again, see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] 
 
@@ -355,9 +356,10 @@ Beautiful! Now, instead of weird "Inf"s we have zeroes, which is great because w
     kbl(d, format = "pipe", align = "c")
 ```
 
+Great! Now we have a measure of closeness centrality we can apply to all kinds of graphs, whether they are **connected** or **disconnected**. 
 
 ## Betweenness Centrality 
-Recall that in our discussion of shortest paths between pair of nodes in the lesson on indirect connections, we noted the importance of the inner nodes that *intervene* or *mediate* between a node that wants to reach another one. Nodes that stand in these **brokerage** or **gatekeeper** slots in the network, occupy an important position [@marsden83], and this is different from having a lot of contacts (like degree centrality), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality). Instead, this is about being *in-between* the indirect communications of other nodes in graph. We can compute a centrality metric for each node called **betweenness centrality** that captures this idea [@freeman77, @freeman80]. 
+Recall that in our discussion of shortest paths between pair of nodes in the lesson on indirect connections, we noted the importance of the inner nodes that *intervene* or *mediate* between a node that wants to reach another one. Nodes that stand in these **brokerage** or **gatekeeper** slots in the network, occupy an important position [@marsden83], and this is different from having a lot of contacts (like degree centrality), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality). Instead, this is about being *in-between* the indirect communications of other nodes in graph. We can compute a centrality metric for each node called **betweenness centrality** that captures this idea [anthonisse71, @freeman77, @freeman80]. 
 
 ```{r}
 #| label: fig-bet
