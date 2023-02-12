@@ -66,6 +66,8 @@ $$
   C_i^{DEG} = \sum_{j= 1}^{n}a_{ij}
 $$ {#eq-degcen}
 
+@eq-degcen thus *ranks each node in the graph based on the number of other nodes that it is adjacent to*. Just like real life, some nodes will be popular (they will be adjacent to lots of other nodes), while others will be unpopular. 
+
 Although it might seem a simple task to just add up the number of connections of each node, that is essentially what the below mathematical equation is doing! Mathematical notation plays an important role in expressing network measures in succinct formats. 
 
 For instance, if we were to use @eq-degcen to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in @fig-undirected) then we would end up with the following degree centralities for each node:
@@ -119,8 +121,8 @@ $C_D(c)=ac+bc+cc=1$
 
 The sigma notation is useful for summarizing this repetitive process in a simple, condensed form.
 
-### Indegree and Outdegree Centrality 
-If we are talking about a **directed graph**, then there are two types of centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of *sociability* or *expansiveness* that is how many other nodes in the graph a given node **sends** links to. This is called the **outdegree centrality** of that node, written as $C_i^{OUT}$. As with the undirected case, this is computed by summing across the rows of the **asymmetric adjacency matrix** corresponding to the directed graph in question, using @eq-degcen:
+## Indegree and Outdegree Centrality 
+If we are talking about a **directed graph**, then there are two types of degree centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of *sociability* or *expansiveness* that is how many other nodes in the graph a given node **sends** links to. This is called the **outdegree centrality** of that node, written as $C_i^{OUT}$. As with the undirected case, this is computed by summing across the rows of the **asymmetric adjacency matrix** corresponding to the directed graph in question, using @eq-degcen:
 
 $$
   C_i^{OUT} = \sum_ja_{ij}
@@ -153,6 +155,37 @@ For instance, if we were to use equations @eq-outdegcen and @eq-outdegcen to cal
     rownames(d) <- c("Outdegre", "Indegree")
     kbl(d, format = "pipe", align = "c") 
 ```
+
+Just like the degree centrality for undirected graphs, the outdegree and indegree centralities rank each node in a directed graph. The first, outdegree centrality, ranks each node based on the number of other nodes that they are connected to. This is a kind of popularity based on *sociability*, or the tendency to seek out the company of others. The second, indegree centrality, ranks each node in the graph based on the number of other nodes that connect to that node. This is a kind of popularity based on on *being sought after* a kind of status. 
+
+### Normalized Degree Centrality {#sec-normdeg}
+When we compute the degree centrality of a node, are counting the number of other nodes that they are connected to. Obviously, the more nodes there are to connect to, the more opportunities there will be to reach a larger number. But what happens if we wanted to compare the degree centrality of nodes in two very different networks? 
+
+For instance, if your high-school has one thousand people and you have twenty friends, that's very different from having twenty friends in a high-school of only one hundred people. It seems like the second person, with twenty friends (covering 20% of the population) in a high-school of one-hundred people is definitely more popular than the second person with twenty friends (covering 2% of the population), in a high school with one thousand people.
+
+That's why Freeman @freeman79 proposed *normalizing* the degree centrality of each node by the *maximum* possible it can take in a given network. As you may have guessed, the maximum degree in a network is $N-1$ the order of the graph minus one. Essentialy, everyone but you! 
+
+We can compute the normalized degree centrality using the following equation:
+
+$$
+  C_{i(norm)}^{DEG} = \frac{C_{i}^{DEG}}{N-1}
+$$   {#eq-indegcen}
+
+Where we just divide the regular degree centrality computed using @eq-degcen by the order of the graph minus one. This will be equal to $1.0$ if a person knows *everyone* and $0$ is a person knows *no one*. For all the other nodes it will be a number between zero and one. 
+
+Moreover, this measure is sensitive to the order of the graph. Thus, for a person with twenty friends in a high-school of a thousand people, the normalized degree centrality is equal to:
+
+$$
+  C_{i(norm)}^{DEG} = \frac{20}{1000-1}= 0.02
+$$   {#eq-indegcen}
+
+But for the person with the same twenty friends in a high-school of one-hundred people, it is equal to:
+
+$$
+  C_{i(norm)}^{DEG} = \frac{20}{100-1}= 0.20
+$$   {#eq-indegcen}
+
+Indicating that a person with the same number of friends in the smaller place is indeed more central!
 
 ## Closeness Centrality 
 Sometimes it not important how many people you *directly* connected to. Instead, what is important is that you are **indirectly connected** to a lot of others. As we saw in the lesson on indirect connectivity, the best way to conceptualize indirect connectivity in social networks is via the idea of **shortest paths**. So if you can reach the most other people in the network via shortest paths with only a few hops, then you are better connected that someone who has to use longer paths to reach the same other people.
@@ -187,7 +220,7 @@ Sometimes it not important how many people you *directly* connected to. Instead,
 
 This insight serves as an inspiration for a measure of centrality based on **closeness**. The closeness between two nodes is the *inverse* of the **geodesic distance** them. Recall that the geodesic distance is given by the *length* of the shortest path linking two nodes in the graph. So the smallest the length of the shortest path separating two nodes in the graph, the closer the two nodes and vice versa.
 
-This information is captured in a network's geodesic **distance matrix**, as discussed in the lesson on matrices. For instance, take the graph shown in @fig-clos. The distance matrix for which is shown in @tbl-dis). 
+This information is captured in a network's geodesic **distance matrix**, as discussed in @sec-specmats. For instance, take the graph shown in @fig-clos, the distance matrix for which is shown in @tbl-dis. 
 
 ```{r}
 #| label: tbl-dis 
@@ -206,24 +239,23 @@ This information is captured in a network's geodesic **distance matrix**, as dis
     kbl(d, format = "pipe", align = "c") 
 ```
 
-As shown in the table, a node like *I*, who seems to be at the outskirts of the network, also shows up as having the largest geodesic distances from other nodes in the graph. Other nodes, like *E*, *G*, and *L* seem to be "closer" to others, in terms of having smaller geodesic distances. 
+As shown in @tbl-dis, a node like *I*, who seems to be at the outskirts of the network, also shows up as having the largest geodesic distances from other nodes in the graph. Other nodes, like *E*, *G*, and *L* seem to be "closer" to others, in terms of having to traverse smaller geodesic distances to reach them. 
 
 That means that we can use the distance table to come up with a measure of centrality called **closeness centrality** for each node. We can do that by adding up the entries corresponding to each row in the distance matrix ($\sum_i d_{ij}$), to get a summary the total pairwise distances separating the node corresponding to row *i* in the matrix from the other nodes listed in each column. 
 
-Note that because closeness is better than "farness" we would want the node with *highest closeness centrality* to be the one with the *smallest* sum of pairwise distances. This can be calculated using the following equation:
+Note that because closeness is better than "farness," we would want the node with *highest closeness centrality* to be the one with the *smallest* sum of pairwise distances. This can be calculated using the following equation:
 
 $$
-  C_i^{CLOS} = (N-1) \times\frac{1}{\sum_jd_{ij}}
+  C_i^{CLOS} = \frac{N-1}{\sum_jd_{ij}}
 $$  {#eq-closcen}
 
-In @eq-closcen, the denominator is the sum of the sum, across each column *j*, for each row *i* in @tbl-dis which corresponds to the distance between node *i* and each of the other nodes in the graph *j*. We take the mathematical *inverse* (dividing one by the sum of distances) so that way, the smallest number comes out on top and the bigger number comes out of the bottom, since we want to measure *closeness* not "farness." We multiply the inverse sum of distances for each node by the constant *N-1* (the graph order minus one) because dividing one by a big number results in very small numbers, which could be hard to interpret. 
+In @eq-closcen, the denominator is the sum across each column *j*, for each row *i* in @tbl-dis which corresponds to the distance between node *i* and each of the other nodes in the graph *j* (skipping the diagonal cell when $i=j$, because the geodesic distance of node to itself is always zero!). We take the mathematical *inverse*, dividing the sum of the distances by the number of nodes in the graph minus one, so that way, the smallest number comes out on top and the bigger number comes out of the bottom (since, as we said, we want to measure *closeness* not "farness.") 
 
-Applying @eq-closcen to the distance matrix shown in @tbl-dis, results in the following closeness centrality scores for each node in @fig-clos.
+Applying @eq-closcen to the distance matrix shown in @tbl-dis, results in the closeness centrality scores for each node shown in @tbl-clos. 
 
 ```{r}
 #| label: tbl-clos 
-#| tbl-cap: "Closeness centrality scores."
-#| tbl-cap-location: margin
+#| tbl-cap: "Closeness centrality scores for an undirected graph."
 
     set.seed(76)
     fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
@@ -235,13 +267,90 @@ Applying @eq-closcen to the distance matrix shown in @tbl-dis, results in the fo
     gr <- simplify(gr)
     d <- distances(gr)
     C <- nrow(d) - 1
-    d <- t(round(1/rowSums(d),1)) * C
+    d <- round(C / rowSums(d), 2)
+    kbl(d, format = "html", align = "c", padding = 2,
+        col.names = c("Closeness Centrality")) %>% 
+        row_spec(5, background = "salmon", bold = TRUE) %>% 
+        row_spec(14, background = "lightgreen", bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+```
+
+The closeness centrality scores listed in @tbl-clos agree with our informal impressions. Node *I* comes out at the bottom ($CC_I^{CLOS} = 0.37$), showing it to be the one with the least closeness centrality, given the relatively large geodesic distances separating it from the other nodes in the graph. Node *E* (marked red in @fig-clos) comes out on top ($CC_E^{CLOS} = 0.59$), given its relative geodesic proximity to other nodes in the graph.
+
+As we will see later, having closeness centrality information for nodes in a graph can be useful. For instance, if @fig-clos was a social network, and we wanted to spread an innovation or a new product among the actors in the fastest amount of time, we would want to give it to node *E* first. Note however that if something **bad** (like a disease) was spreading across the network, then it would also be very bad if actor *E* got it first!^[See the discussion [here](http://www.analytictech.com/networks/centaids.htm).]
+
+### Houston, We Have a Problem
+So far, so good. However, what would happen if we tried to compute closeness centrality for a **disconnected graph** like the one shown in Figure @fig-connected1-2? Well, the shortest paths distance matrix for that graph looks like this:
+
+
+```{r}
+#| label: tbl-dis2
+#| tbl-cap: "Geodesic distance matrix for an undirected, disconnected graph."
+#| tbl-cap-location: margin
+
+    set.seed(76)
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+        bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+        bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+        bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+        bind_edges(data.frame(from = 8, to = c(9))) %>%
+        mutate(name = toupper(letters[1:9]))
+    gr <- subgraph.edges(gr, c(1:9, 11:16), delete.vertices = FALSE)
+    gr <- simplify(gr)
+    d <- distances(gr)
     kbl(d, format = "pipe", align = "c") 
 ```
 
-The closeness centrality scores listed in @tbl-clos agree with our informal impressions. Node *I* comes out at the bottom ($CC_I^{CLOS} = 5.6$), showing it to be the one with the least closenes centrality, given the relatively large geodesic distances separating it from the other nodes in the graph. Node *E* (marked red in @fig-clos) comes out on top ($CC_E^{CLOS} = 8.9$), given its relative geodesic proximity to other nodes in the graph.
+Note that pairs of nodes that cannot **reach** one another in the disconnected graph, get a geodesic distance of "Inf" (infinity) in the respective cell of the geodesic distance matrix. This is a problem because when we compute the row sums of the geodesic distance matrix to try to calculate centrality according to @eq-clos, we get:
 
-As we will see later, having closeness centrality information for nodes in a graph can be useful. For instance, if @fig-clos was a social network, and we wanted to spread an innovation or a new product among the actors in the fastest amount of time, we would want to give it to node *E* first. Note however that if something **bad** (like a disease) was spreading across the network, then it would also be very bad if actor *E* got it first!^[See the discussion [here](http://www.analytictech.com/networks/centaids.htm).]
+```{r}
+    d <- t(rowSums(d))
+    kbl(d, format = "pipe", align = "c") 
+```
+Not to get too philosophical, but the problem is that when you add any number to "infinity," the answer is, well, *infinity*^[see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] This means that closeness centrality is only defined for **connected graphs**. When it comes to disconnected graphs, we are out of luck. 
+
+Thankfully, there is a solution develoed by @rochat09. It consists of a modification of @eq-closcen called **harmonic closeness centrality**. The formula goes as follows:
+
+$$
+  C_i^{HARM} = \frac{1}{N-1}\sum_j\frac{1}{d_{ij}}
+$$ {#eq-harmcen}
+
+
+Now, this might seem like we just re-arranged the stuff in @eq-closcen, and indeed that's what we did! But the re-arrangement matters, because it changes the *order* in which we do the various arithmetic operations. 
+
+So, in English, while @eq-closcen says "*first* sum the geodesic distances for each node (to get the denominator), and *then* divide $N-1$ by this sum," @eq-harmcen says "*first* divide one by the geodesic distance, and *then* sum the result of all these divisions, and *then* multiply this sum by one over $N-1$. 
+
+Once again, the philosophy of infinity kicks in here, since the main difference is that one divided by infinity is actually a real number: **zero**.^[Once again, see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] 
+
+So let's check by taking every entry in @tbl-dis2 and dividing one by the number in each cell (except for the diagonals, which we don't care about). The results are shown in @tbl-dis3
+
+```{r}
+#| label: tbl-dis3
+#| tbl-cap: "Reciprocal of the geodesic distance matrix for an undirected, disconnected graph."
+#| tbl-cap-location: margin
+
+    d <- distances(gr)
+    d <- round(1/d, 1)
+    diag(d) <- 0
+    kbl(d, format = "pipe", align = "c") 
+```
+
+Beautiful! Now, instead of weird "Inf"s we have zeroes, which is great because we can add stuff to zero and get a real number back. We can then apply @eq-harmcen to the numbers in @tbl-dis2 to get the **harmonic closeness centrality** for each node in @fig-connected1-2. These are shown in @tbl-clos2.
+
+```{r}
+#| label: tbl-clos2 
+#| tbl-cap: "Closeness centrality scores for nodes in a disconnected, undirected graph."
+#| tbl-cap-location: margin
+
+    d <- round(t(rowSums(d)) * (1/(nrow(d)-1)), 2)
+    kbl(d, format = "pipe", align = "c")
+```
+
 
 ## Betweenness Centrality 
 Recall that in our discussion of shortest paths between pair of nodes in the lesson on indirect connections, we noted the importance of the inner nodes that *intervene* or *mediate* between a node that wants to reach another one. Nodes that stand in these **brokerage** or **gatekeeper** slots in the network, occupy an important position [@marsden83], and this is different from having a lot of contacts (like degree centrality), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality). Instead, this is about being *in-between* the indirect communications of other nodes in graph. We can compute a centrality metric for each node called **betweenness centrality** that captures this idea [@freeman77, @freeman80]. 
