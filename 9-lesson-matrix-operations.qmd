@@ -1,0 +1,148 @@
+# Matrix Operations {#sec-matrixops}
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+As we saw in the #sec-grtomat, a matrix is a two-dimensional array of numbers. A matrix is two-dimensional because it arranges numbers according to the intersection of a **row dimension** and a **column dimension**. Matrices, therefore are perfect for storing network information, because we can put the nodes in the row and column dimension and then record characteristics of each **dyad** in the network (like whether they are adjacent in the corresponding graph) in matrix form. We can of course record all kinds of other relationships between dyads, like the length of the shortest paths linking them, the number of shortest paths, the number of common neighbors and so forth. 
+
+
+```{r}
+#| label: fig-rel
+#| fig-cap: "Two undirected graphs representing different social replatinships."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - "A graph representing hanging out relations (blue)."
+#|   - "A graph representing co-working relations (red)." 
+#|   - "A graph representing both hanging out and co-working relations (purple)."
+#| layout-ncol: 3
+#| fig-width: 8
+#| fig-height: 8
+
+set.seed(859)
+
+   gr1 <- play_islands(3, 4, m = 1, p_within = 0.8) %>% 
+     activate(nodes) %>% 
+     mutate(name = toupper(letters[1:12])) %>% 
+     simplify()
+     l <- ggraph(gr1, layout = 'tree')
+     l <- as.matrix(l$data[, 1:2])
+     p <- ggraph(gr1, layout = l)
+     p <- p + geom_edge_link(color = "steelblue", width = 1.15) 
+     p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
+     p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+     p <- p + theme_graph() 
+     p
+     
+   gr2 <- play_islands(4, 3, m = 1, p_within = 1) %>% 
+     activate(nodes) %>% 
+     mutate(name = toupper(letters[1:12])) %>% 
+     simplify()
+     p <- ggraph(gr2, layout = l)
+     p <- p + geom_edge_link(color = "firebrick", width = 1.15) 
+     p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
+     p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+     p <- p + theme_graph() 
+     p
+     
+     A1 <- as.matrix(as_adjacency_matrix(gr1))
+     A2 <- as.matrix(as_adjacency_matrix(gr2))
+     A <- A1 * A2
+     gr <- graph_from_adjacency_matrix(A)
+     p <- ggraph(gr, layout = l)
+     p <- p + geom_edge_link(color = "purple", width = 3) 
+     p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
+     p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+     p <- p + theme_graph() 
+     p
+```
+
+```{r}
+#| label: tbl-rel
+#| tbl-cap: "Adjancency matrices corresponding to networks defined by different relationships." 
+#| tbl-subcap:
+#|   - "Hanging out relationships."
+#|   - "Co-working relationships."
+#| layout-ncol: 1
+
+
+     A1 <- as.matrix(as_adjacency_matrix(gr1))
+     diag(A1) <- "--"
+     kbl(A1, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+    
+     A2 <- as.matrix(as_adjacency_matrix(gr2))
+     diag(A2) <- "--"
+     kbl(A2, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+Of course, since matrices are just array of *numbers* one powerful thing that we can do is arithmetic and algebraic operations on them. These including summing, multiplying, taking powers of matrices and so forth. In this lesson, we discuss some basic matrix operations and their relevance for the analysis of social networks. 
+
+Our running example will be the pair of graphs shown in @fig-rel. Supppose this is a network of twelve people who work at a (very) small company. We have recorded two types of relationships for each pair of persons: Whether *they hang out together* after work, and whether they get assigned to *work together in team projects* (we will call these "hang out" and "co-working" relations for short).
+
+@fig-rel-1, composed of nodes joined by blue edges, represents hanging out relations; @fig-rel-2 represents co-working relations. The corresponding **adjacency matrices** for the @fig-rel networks are shown in @tbl-rel. @tbl-rel-1 (let's call it $\mathbf{H}$) records hanging out relations and @tbl-rel-2 (let's call it $\mathbf{C}$) records co-working relations.  
+
+## Matrix Addition
+Perhaps the simplest operation we can do with matrices is add them up. To add two matrices, we simply add up the corresponding entries in each cell. In matrix notation:
+
+$$
+\mathbf{H} + \mathbf{C} = h_{ij} + c_{ij}
+$$ {#eq-matadd}
+
+Where $h_{ij$ is the corresponding entry for nodes *i* and *j* in the hanging out adjacency matrix, and $c_{ij}$ is the same entry in the co-working adjacency matrix. 
+
+Why would we want to do this? Well, if we were studying the network shown in @fig-rel, we might be interested in which dyads have **uniplex** (or single-stranded) relations, and which ones have **multiplex** (or multi-stranded) relations. That is, while some actors in the network *either* hang out together or work together, some of the do *both*. Adding up the adjacency matrices shown in @tbl-rel, will tell us who these are. The result is shown in @tbl-mult.
+
+```{r}
+#| label: tbl-mult 
+#| tbl-cap: "Uniplex and Multiplex relationship matrix."
+#| tbl-cap-location: margin
+
+     A1 <- as.matrix(as_adjacency_matrix(gr1))
+     A2 <- as.matrix(as_adjacency_matrix(gr2))
+     A <- A1 + A2
+
+     diag(A) <- "--"
+     kbl(A, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+@tbl-mult shows that the $BC$ dyad has a multiplex relation (there is a "2" in the corresponding cell entry) and so does the $AC$, $FH$, $GH$, $EF$, and $JL$ dyads. 
+
+
+## The Matrix Dot Product
+Another way of figuring out which pairs of people in a network have multiplex ties is to compute the **matrix dot product** (symbol: $\cdot$). Just like matrix addition, we find the matrix dot product by *multiplying* the corresponding entries in each of the matrices. In matrix format:
+
+$$
+\mathbf{H} \mathbf{\cdot} \mathbf{C} = h_{ij} \times c_{ij}
+$$ {#eq-matadd}
+
+If we take the dot product of two adjancency matrices like $\mathbf{H}$ and $\mathbf{C}$, then the resulting matrix will have a one in a given cell *only if* $h_{ij} = 1$ and $c_{ij} = 1$. Otherwise, it will have a zero. This means that the dot product of two adjacency matrices will retain *only* the multiplex ties and erase all the other ones. The result of the dot products of the adjancency matrices shown in @tbl-rel is shown in @tlb-dot.  
+
+```{r}
+#| label: tbl-dot
+#| tbl-cap: "Multiplex relationship matrix."
+#| tbl-cap-location: margin
+
+     A1 <- as.matrix(as_adjacency_matrix(gr1))
+     A2 <- as.matrix(as_adjacency_matrix(gr2))
+     A <- A1 * A2
+
+     diag(A) <- "--"
+     kbl(A, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+As we can see, the only dyads tat have non-zero entries in @tbl-dot are the multiplex dyads in @tbl-mult. The resulting network, composed of the combined "hanging + co-working" relation is shown in @fig-rel-3. Note that this network is much more sparse than either of the other two, since there's an edge between nodes only when they are adjacent in *both* the @fig-rel-1 and @fig-rel-2 networks. 
+
+
+
+
