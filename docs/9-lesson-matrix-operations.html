@@ -227,7 +227,9 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#matrix-multiplication" id="toc-matrix-multiplication" class="nav-link" data-scroll-target="#matrix-multiplication"><span class="toc-section-number">15.4</span>  Matrix Multiplication</a>
   <ul class="collapse">
   <li><a href="#matrix-multiplication-rules" id="toc-matrix-multiplication-rules" class="nav-link" data-scroll-target="#matrix-multiplication-rules"><span class="toc-section-number">15.4.1</span>  Matrix Multiplication Rules</a></li>
-  <li><a href="#matrix-multiplication-examples" id="toc-matrix-multiplication-examples" class="nav-link" data-scroll-target="#matrix-multiplication-examples"><span class="toc-section-number">15.4.2</span>  Matrix Multiplication Examples</a></li>
+  <li><a href="#multiplying-a-matrix-times-its-transpose" id="toc-multiplying-a-matrix-times-its-transpose" class="nav-link" data-scroll-target="#multiplying-a-matrix-times-its-transpose"><span class="toc-section-number">15.4.2</span>  Multiplying a Matrix Times its Transpose</a></li>
+  <li><a href="#matrix-powers" id="toc-matrix-powers" class="nav-link" data-scroll-target="#matrix-powers"><span class="toc-section-number">15.4.3</span>  Matrix Powers</a></li>
+  <li><a href="#matrix-multiplication-examples" id="toc-matrix-multiplication-examples" class="nav-link" data-scroll-target="#matrix-multiplication-examples"><span class="toc-section-number">15.4.4</span>  Matrix Multiplication Examples</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/9-lesson-matrix-operations.qmd" class="toc-action">View source</a></p></div></div></nav>
@@ -1229,14 +1231,28 @@ a_{ij} = a^T_{ji}
 <h3 data-number="15.4.1" class="anchored" data-anchor-id="matrix-multiplication-rules"><span class="header-section-number">15.4.1</span> Matrix Multiplication Rules</h3>
 <p>First, we will let out the basic rules of matrix multiplication:</p>
 <ul>
-<li><p>You can always multiply two matrices <em>as long as the number of columns of the first matrix equal the rows of the second matrix</em>.</p></li>
-<li><p>When the number of columns of a matrix equal the number of rows of another matrix we say that the the two matrices are <strong>conformable</strong>. When this is not the case, we say the matrices are <strong>non-conformable</strong>.</p></li>
-<li><p>Thus, another way of stating the first rule is that <em>only the product of conformable matrices is defined</em>. If the matrices are not conformable then their product is not defined (e.g., there is no answer to the question of what we get if we multiply them!)</p></li>
+<li>You can always multiply two matrices <em>as long as the number of columns of the first matrix equal the rows of the second matrix</em>. To check whether this is the case, all you have to do is put the two matrices side by side and list their dimensions.</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}
+\]</span> - The two “fives” in bold are called the <strong>inner dimensions</strong> of the two matrices. The two “threes” are called the <strong>outer dimensions</strong>. So another way of stating the first rule of matrix multiplication is that the product of two matrices is defined <em>as long as their inner dimensions match</em> when you line them up from left to right.</p>
+<ul>
+<li><p>When the number of columns of a matrix equal the number of rows of another matrix so that their inner dimensions match we say that the the two matrices are <strong>conformable</strong>. When this is not the case, we say the matrices are <strong>non-conformable</strong>.</p></li>
+<li><p>Thus, another way of stating the first rule is that <em>only the product of conformable matrices is defined</em>. If the matrices are not conformable then their product is not defined (e.g., there is no answer to the question of what we get if we multiply them!).</p></li>
 <li><p>This means that unlike numbers or the matrix dot product, where the order of the two things you are multiplying doesn’t matter (<span class="math inline">\(4 \times 3 = 3 \times 4\)</span> or <span class="math inline">\(\mathbf{A} \cdot \mathbf{B} = \mathbf{B} \cdot \mathbf{A}\)</span>), in matrix multiplication it <em>does</em> matter. Alas, for any two matrices <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{B}\)</span>,</p></li>
 </ul>
 <p><span class="math display">\[
 \mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}
 \]</span></p>
+<ul>
+<li>When you multiply a matrix times another matrix, the *resulting matrix will have number of rows equal to the number of rows of the first matrix and number of columns equal to the number of columns of the second matrix. Thus:</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = C_{3 \times 6}
+\]</span> - Thus, another way of saying this last rule is that the product of two conformable matrices will have dimensions equal to their <strong>outer dimensions</strong>.</p>
+</section>
+<section id="multiplying-a-matrix-times-its-transpose" class="level3" data-number="15.4.2">
+<h3 data-number="15.4.2" class="anchored" data-anchor-id="multiplying-a-matrix-times-its-transpose"><span class="header-section-number">15.4.2</span> Multiplying a Matrix Times its Transpose</h3>
 <ul>
 <li>Because, by definition, as discussed in <a href="#sec-trans"><span>Section&nbsp;15.3</span></a> the rows of a matrix are equal to the columns of its transpose, and vice versa. The product of a matrix times its transpose and the transpose times the original matrix is always defined, no matter what the dimensions of the original matrix are. Thus,</li>
 </ul>
@@ -1246,20 +1262,25 @@ a_{ij} = a^T_{ji}
 \mathbf{A}^T \times \mathbf{A} = defined!
 \]</span></p>
 <ul>
-<li>When you multiply a matrix times its transpose, the <em>dimensions of the resulting matrix will be equal to the number of rows of the first matrix and the number of columns of the second matrix</em>. For instance, say matrix <span class="math inline">\(\mathbf{A}_{5 \times 3}\)</span> is of dimensions <span class="math inline">\(5 \times 3\)</span> (like the matrix shown in <span class="quarto-unresolved-ref">?tbl-trans1</span>). Then its transpose <span class="math inline">\(A^T_{3 \times 5}\)</span> will be of dimensions <span class="math inline">\(3 \times 5\)</span> (like the matrix shown in <a href="#tbl-trans-2">Table&nbsp;<span>15.4 (b)</span></a>). That means the product of the matrix times its transpose will be:</li>
+<li>When you multiply a matrix times its transpose, the <em>resulting matrix will be a square matrix with number of rows and columns equal to the number of rows of the original matrix</em>. For instance, say matrix <span class="math inline">\(\mathbf{A}_{5 \times 3}\)</span> is of dimensions <span class="math inline">\(5 \times 3\)</span> (like the matrix shown in <span class="quarto-unresolved-ref">?tbl-trans1</span>). Then its transpose <span class="math inline">\(A^T_{3 \times 5}\)</span> will be of dimensions <span class="math inline">\(3 \times 5\)</span> (like the matrix shown in <a href="#tbl-trans-2">Table&nbsp;<span>15.4 (b)</span></a>). That means the product of the matrix times its transpose will be:</li>
 </ul>
 <p><span id="eq-matmult1"><span class="math display">\[
 \mathbf{A}_{5 \times 3} \times \mathbf{A}_{3 \times 5}^T = B_{5 \times 5}
 \tag{15.3}\]</span></span></p>
 <ul>
-<li><a href="#eq-matmult1">Equation&nbsp;<span>15.3</span></a> says that a five by three matrix multiplied by its transposed yields a product matrix <span class="math inline">\(\mathbf{B}\)</span> of dimensions five by five (a square matrix with five rows and five columns). In the same way,</li>
+<li><a href="#eq-matmult1">Equation&nbsp;<span>15.3</span></a> says that a five by three matrix multiplied by its transposed yields a square matrix <span class="math inline">\(\mathbf{B}\)</span> of dimensions five by five (a square matrix with five rows and five columns). In the same way,</li>
 </ul>
 <p><span id="eq-matmult2"><span class="math display">\[
 \mathbf{A}_{3 \times 5}^T \times \mathbf{A}_{5 \times 3} = B_{3 \times 3}
 \tag{15.4}\]</span></span></p>
 <ul>
-<li><p><a href="#eq-matmult2">Equation&nbsp;<span>15.4</span></a> says that the transpose of a five by three matrix multiplied by the original yields a product matrix <span class="math inline">\(\mathbf{B}\)</span> of dimensions thre by three (a square matrix with three rows and three columns).</p></li>
-<li><p>You can multiply a matrix times itself to get <strong>matrix powers</strong> but only if matrix is a <strong>square matrix</strong> (has the same number of rows and columns). Thus,</p></li>
+<li><a href="#eq-matmult2">Equation&nbsp;<span>15.4</span></a> says that the transpose of a five by three matrix multiplied by the original yields a product matrix <span class="math inline">\(\mathbf{B}\)</span> of dimensions three by three (a square matrix with three rows and three columns).</li>
+</ul>
+</section>
+<section id="matrix-powers" class="level3" data-number="15.4.3">
+<h3 data-number="15.4.3" class="anchored" data-anchor-id="matrix-powers"><span class="header-section-number">15.4.3</span> Matrix Powers</h3>
+<ul>
+<li>You can multiply a matrix times itself to get <strong>matrix powers</strong> but only if matrix is a <strong>square matrix</strong> (has the same number of rows and columns). Thus,</li>
 </ul>
 <p><span class="math display">\[
 A^2 = A \times A
@@ -1271,11 +1292,12 @@ A^4 = A \times A \times A \times A
 A^n = A \times A \times A \times A \ldots
 \]</span></p>
 <ul>
-<li>For all square matrices <span class="math inline">\(\mathbf{A}\)</span> of any dimension. Since matrices used to represent social networks, like the <strong>adjacency matrix</strong> are square matrices, that means that you can always find the <strong>matrix powers</strong> of an adjacency matrix.</li>
+<li><p>For all square matrices <span class="math inline">\(\mathbf{A}\)</span> of any dimension. Since matrices used to represent social networks, like the <strong>adjacency matrix</strong> are square matrices, that means that you can always find the <strong>powers of an adjacency matrix</strong>.</p></li>
+<li><p>When you multiply a square matrix times another square matrix of the same dimensions, the resulting matrix is of the same dimensions as the original two matrices.</p></li>
 </ul>
 </section>
-<section id="matrix-multiplication-examples" class="level3 page-columns page-full" data-number="15.4.2">
-<h3 data-number="15.4.2" class="anchored" data-anchor-id="matrix-multiplication-examples"><span class="header-section-number">15.4.2</span> Matrix Multiplication Examples</h3>
+<section id="matrix-multiplication-examples" class="level3 page-columns page-full" data-number="15.4.4">
+<h3 data-number="15.4.4" class="anchored" data-anchor-id="matrix-multiplication-examples"><span class="header-section-number">15.4.4</span> Matrix Multiplication Examples</h3>
 <p>Now let’s see some examples of how matrix multiplication works. <a href="#tbl-prod">Table&nbsp;<span>15.5</span></a> shows the result of multiplying the matrix shown in <a href="#tbl-trans-1">Table&nbsp;<span>15.4 (a)</span></a> times its transpose, shown in <a href="#tbl-trans-2">Table&nbsp;<span>15.4 (b)</span></a>.</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
