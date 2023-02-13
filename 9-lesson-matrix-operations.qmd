@@ -5,6 +5,7 @@
     require(tidygraph)
     require(igraph)
     require(kableExtra)
+    require(expm)
 ```
 
 As we saw in the #sec-grtomat, a matrix is a two-dimensional array of numbers. A matrix is two-dimensional because it arranges numbers according to the intersection of a **row dimension** and a **column dimension**. Matrices, therefore are perfect for storing network information, because we can put the nodes in the row and column dimension and then record characteristics of each **dyad** in the network (like whether they are adjacent in the corresponding graph) in matrix form. We can of course record all kinds of other relationships between dyads, like the length of the shortest paths linking them, the number of shortest paths, the number of common neighbors and so forth. 
@@ -141,8 +142,225 @@ If we take the dot product of two adjancency matrices like $\mathbf{H}$ and $\ma
      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-As we can see, the only dyads tat have non-zero entries in @tbl-dot are the multiplex dyads in @tbl-mult. The resulting network, composed of the combined "hanging + co-working" relation is shown in @fig-rel-3. Note that this network is much more sparse than either of the other two, since there's an edge between nodes only when they are adjacent in *both* the @fig-rel-1 and @fig-rel-2 networks. 
+As we can see, the only dyads that have non-zero entries in @tbl-dot are the multiplex dyads in @tbl-mult. The resulting network, composed of the combined "hanging + co-working" relation is shown in @fig-rel-3. Note that this network is much more sparse than either of the other two, since there's an edge between nodes only when they are adjacent in *both* the @fig-rel-1 and @fig-rel-2 networks. 
 
+## The Matrix Transpose {#sec-trans}
+One thing we can do with a matrix is "turn it 90 degrees" so that the rows of the new matrix are equal to the columns of the resulting matrix and the columns of the first matrix equal the rows of the resulting matrix. This is called the **matrix transpose** (symbol: $^T$). 
+
+For instance, if we have a matrix $\mathbf{A}_{4 \times 5}$ of dimensions $4 \times 5$ (four rows and five columns), then the transpose $A^T_{5 \times 4}$ will have five rows and four columns, with the respective entries in each matrix given by the formula:
+
+$$
+a_{ij} = a^T_{ji}
+$$
+That is the number that in the first matrix appears in the $i^{th}$ row and $j^{th}$ column now appears in the transposed version of the matrix in the $j^{th}$ row and $i^{th}$ column. 
+
+An example of a matrix and its tranpose is shown in @tbl-trans.
+
+```{r}
+#| label: tbl-trans 
+#| tbl-cap: A matrix and its transpose
+#| tbl-subcap: 
+#|   - "Original Matrix."
+#|   - "Transposed Matrix."
+#| layout-ncol: 2
+
+A <- matrix(c(3, 7, 4, 5, 2, 4, 9, 6, 3, 5, 5, 3, 2, 4, 4), nrow = 5)
+B <- t(A)
+
+kbl(A, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1:3, extra_css = "border-right: 0.75px solid;") %>% 
+    row_spec(1:5, extra_css = "border-bottom: 0.75px solid;") %>%
+    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
+    row_spec(1, extra_css = "border-top: 0.75px solid;") 
+
+
+
+kbl(B, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1:5, extra_css = "border-right: 0.75px solid;") %>% 
+    row_spec(1:3, extra_css = "border-bottom: 0.75px solid;") %>%
+    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
+    row_spec(1, extra_css = "border-top: 0.75px solid;")
+```
+
+So let's check out how the transpose works. The original matrix in @tbl-trans-1 has five rows and three columns. The transposed matrix has three rows and five columns. We can find the same numbers in the original and transposed matrices by switching the rows and columns. Thus, in the original matrix, the number in third row and second column is a six ($a_{32} = 6$). In the transposed version of the matrix, that same six is in second row and third column ($a^T_{23} = 6$). If you check, you'll see that's the case for each number! Thus, the transposed version of a matrix has the same information as the original, it is just that the rows and columns are switched. While this might seem like a totally useless thing to do (or learn) at the moment, we will see that the matrix transpose comes in very handy in the analysis of social networks, and particular in the analysis of **two mode networks** and **cliques**. 
+
+## Matrix Multiplication
+Matrix multiplication (symbol: $\times$) is perhaps the more complex of the matrix algebra operations we will cover. It is a bit involved, but relatively easy once you get the hang of it. We will begin with a simple example before doing more complicated stuff. 
+
+### Matrix Multiplication Rules
+
+First, we will let out the basic rules of matrix multiplication:
+
+- You can always multiply two matrices *as long as the number of columns of the first matrix equal the rows of the second matrix*. 
+- When the number of columns of a matrix equal the number of rows of another matrix we say that the the two matrices are **conformable**. When this is not the case, we say the matrices are **non-conformable**.
+
+- Thus, another way of stating the first rule is that *only the product of conformable matrices is defined*. If the matrices are not conformable then their product is not defined (e.g., there is no answer to the question of what we get if we multiply them!)
+
+- This means that unlike numbers or the matrix dot product, where the order of the two things you are multiplying doesn't matter ($4 \times 3 = 3 \times 4$ or $\mathbf{A} \cdot \mathbf{B} = \mathbf{B} \cdot \mathbf{A}$), in matrix multiplication it *does* matter. Alas, for any two matrices $\mathbf{A}$ and $\mathbf{B}$,
+
+$$
+\mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}
+$$
+
+- Because, by definition, as discussed in @sec-trans the rows of a matrix are equal to the columns of its transpose, and vice versa. The product of a matrix times its transpose and the transpose times the original matrix is always defined, no matter what the dimensions of the original matrix are. Thus,
+
+$$
+\mathbf{A} \times \mathbf{A}^T = defined! 
+$$
+$$
+\mathbf{A}^T \times \mathbf{A} = defined!
+$$
+
+- When you multiply a matrix times its transpose, the *dimensions of the resulting matrix will be equal to the number of rows of the first matrix and the number of columns of the second matrix*. For instance, say matrix  $\mathbf{A}_{5 \times 3}$ is of dimensions $5 \times 3$ (like the matrix shown in @tbl-trans1). Then its transpose $A^T_{3 \times 5}$ will be of dimensions $3 \times 5$ (like the matrix shown in @tbl-trans-2). That means the product of the matrix times its transpose will be:
+
+$$
+\mathbf{A}_{5 \times 3} \times \mathbf{A}_{3 \times 5}^T = B_{5 \times 5}
+$$ {#eq-matmult1}
+
+- @eq-matmult1 says that a five by three matrix multiplied by its transposed yields a product matrix $\mathbf{B}$ of dimensions five by five (a square matrix with five rows and five columns). In the same way,
+
+$$
+\mathbf{A}_{3 \times 5}^T \times \mathbf{A}_{5 \times 3} = B_{3 \times 3}
+$$ {#eq-matmult2}
+
+- @eq-matmult2 says that the transpose of a five by three matrix multiplied by the original yields a product matrix $\mathbf{B}$ of dimensions thre by three (a square matrix with three rows and three columns).
+
+- You can multiply a matrix times itself to get **matrix powers** but only if matrix is a **square matrix** (has the same number of rows and columns). Thus,
+
+$$
+A^2 = A \times A 
+$$
+$$
+A^3 = A \times A \times A 
+$$
+$$
+A^4 = A \times A \times A \times A 
+$$
+$$
+A^n = A \times A \times A \times A \ldots 
+$$
+
+- For all square matrices $\mathbf{A}$ of any dimension. Since matrices used to represent social networks, like the **adjacency matrix** are square matrices, that means that you can always find the **matrix powers** of an adjacency matrix. 
+
+### Matrix Multiplication Examples
+Now let's see some examples of how matrix multiplication works. @tbl-prod shows the result of multiplying the matrix shown in @tbl-trans-1 times its transpose, shown in @tbl-trans-2.
+
+```{r}
+#| label: tbl-prod 
+#| tbl-cap: Matrix resulting from multiplying a matrix times its transpose
+#| tbl-cap-location: margin
+
+    B <- A %*% t(A)
+    kbl(B, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1:5, extra_css = "border-right: 0.75px solid;") %>% 
+    row_spec(1:5, extra_css = "border-bottom: 0.75px solid;") %>%
+    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
+    row_spec(1, extra_css = "border-top: 0.75px solid;") 
+```
+
+Now where the heck did these numbers come from? Don't panic. We'll break it down. First, let's begin with the number $50$ in cell corresponding to the *first row* and *first column* of @tbl-prod. To find out where this number came from, let's look at the *first row* of @tbl-trans-1, composed of the vector $\{3, 4, 5\}$, and the *first-column* of @tbl-trans-2, composed of the same vector $\{3, 4, 5\}$. Now, the number $50$ comes from the fact that we multiply each of the corresponding entries of the two vectors, and then add them up, as follows:
+
+$$
+(3 \times 3) + (4 \times 4) + (5 \times 5) = `r 3*3` + `r 4*4` + `r 5*5` = `r 3*3 + 4*4 + 5*5`
+$$
+
+Neat! Now let's see where the number $74$ in the *fourth row* and *second column* of @tbl-prod came from. For that we look at the entries in the *fourth row* of @tbl-trans-1, composed of the vector $\{5, 3, 4\}$ and the *second column* of @tbl-trans-2 composed of the vector $\{7, 9, 3\}$. Like before, we take the first number of the first vector and multiply it by the first number of the second vector, the second number of the first vector and multiply it by the second number of the second vector, and the third number of the first vector and multiply it by the third number of the second vector and add up the results:
+
+
+$$
+(5 \times 7) + (3 \times 9) + (4 \times 3) = `r 5*7` + `r 3*9` + `r 4*3` = `r 5*7 + 3*9 + 4*3`
+$$
+And we keep on going like this to get each of the twenty five numbers in @tbl-prod (there are twenty five numbers because @tbl-prod has five rows and five columns and five times five equal twenty five). In general terms, the number in the $i^{th}$ row and $j^{th}$ column of @tbl-prod is equal to the sum of the products of the numbers in the $i^{th}$ row of the @tbl-trans-1 and the $j^{th}$ column of @tbl-trans-2. 
+
+Note that the resulting product matrix shown in @tbl-prod is **symmetric**. The same numbers that appear in the upper-triangle also appear in the lower triangle, such that $b_{ij} = b_{ji}$. So once you know the numbers in one of the triangles, you can fill up the numbers in the other one without having to do all the multiplying and adding up!
+
+Now, let's multiply the matrix in @tbl-trans-2 times the matrix in @tbl-trans-1. As the rules of matrix multiplication show, this will result in a matrix of dimensions $3 \times 3$ because @tbl-trans-2 has three rows and $tbl-trans-1 has three columns. This is shown in @tbl-prod2.
+
+
+```{r}
+#| label: tbl-prod2
+#| tbl-cap: Matrix resulting from multiplying a matrix times its transpose
+#| tbl-cap-location: margin
+
+    B <- t(A) %*% A
+    kbl(B, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1:3, extra_css = "border-right: 0.75px solid;") %>% 
+    row_spec(1:3, extra_css = "border-bottom: 0.75px solid;") %>%
+    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
+    row_spec(1, extra_css = "border-top: 0.75px solid;") 
+```
+
+Like before, if we want to figure out where the number $72$ in the third row and first column of @tbl-prod2 came from, we go to the first row of @tbl-trans-2 composed of the vector $\{5, 3, 2, 4, 4\}$ and the first column of @tbl-trans-1, composed of the vector $\{3, 7, 4, 5, 2\}$ match up each number in terms of order, multiplying them and add up the result:
+
+$$
+(5 \times 3) + (3 \times 7) + (2 \times 4) + (4 \times 5) + (4 \times 2) = 
+$$
+
+$$
+`r 5*3` + `r 3*7` + `r 2*4` + `r 4*5` + `r 4*2` = `r 5*3 + 3*7 + 2*4 + 4*5 + 4*2`
+$$
+
+```{r}
+#| label: tbl-pow
+#| tbl-cap: Powers of a matrix. 
+#| tbl-subcap: 
+#|   - "A matrix."
+#|   - "Matrix squared."
+#|   - "Matrix cubed."
+#| tbl-cap-location: margin 
+#| layout-ncol: 3
+
+    A <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0), nrow = 4, byrow = TRUE)
+    A2 <- A %*% A
+    A3 <- A2 %*% A
+    
+    kbl(A, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1:4, extra_css = "border-right: 0.75px solid;") %>% 
+    row_spec(1:4, extra_css = "border-bottom: 0.75px solid;") %>%
+    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
+    row_spec(1, extra_css = "border-top: 0.75px solid;") 
+    
+    kbl(A2, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1:4, extra_css = "border-right: 0.75px solid;") %>% 
+    row_spec(1:4, extra_css = "border-bottom: 0.75px solid;") %>%
+    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
+    row_spec(1, extra_css = "border-top: 0.75px solid;") 
+        
+    kbl(A3, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1:4, extra_css = "border-right: 0.75px solid;") %>% 
+    row_spec(1:4, extra_css = "border-bottom: 0.75px solid;") %>%
+    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
+    row_spec(1, extra_css = "border-top: 0.75px solid;") 
+```
+
+Matrix powers work the same as regular matrix multiplication, except that we are working on just one matrix not two. So for instance, the number $2$ in the first row and third column of @tbl-pow-2 comes from the numbers in the first row of @tbl-pow-1 ($\{0, 1, 0, 1\}$) and the numbers in the third column of @tbl-pow-1 ($\{0, 1, 1, 1\}$). We line them up, multiplying them, and add them:
+
+$$
+(0 \times 1) + (1 \times 1) + (0 \times 1) + (1 \times 1) = 0 + 1 + 0 + 1 = 2
+$$
+Since we are working with a binary matrix, the product of each of the cell entries will be either a zero (when at least one of the entries is zero) or a one (when both entries are one). 
+
+To get the cubed entries in @tbl-pow-3, we just take @tbl-pow-2 as the first matrix and @tbl-pow-1 as the second matrix, and do matrix multiplication magic. Thus, to get the number $4$ in the third row and fourth column of @tbl-pow-3, we take the numbers in the third row of @tbl-pow-2 $\{2, 1, 2, 2\}$ and the numbers in the fourth column of @tbl-pow-1 $\{1, 0, 1, 0\}$, line them up, multiply them, and add them:
+
+$$
+(2 \times 1) + (1 \times 0) + (2 \times 1) + (1 \times 0) = 2 + 0 + 2 + 0 = 4
+$$
+
+Pretty easy!
 
 
 
