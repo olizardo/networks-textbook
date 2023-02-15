@@ -19,16 +19,15 @@ As we saw in the #sec-grtomat, a matrix is a two-dimensional array of numbers. A
 #|   - "A graph representing hanging out relations (blue)."
 #|   - "A graph representing co-working relations (red)." 
 #|   - "A graph representing both hanging out and co-working relations (purple)."
-#| layout-ncol: 3
-#| fig-width: 8
-#| fig-height: 8
+#| layout-ncol: 1
+#| fig-width: 10
+#| fig-height: 10
 
 set.seed(859)
 
    gr1 <- play_islands(3, 4, m = 1, p_within = 0.8) %>% 
      activate(nodes) %>% 
-     mutate(name = toupper(letters[1:12])) %>% 
-     simplify()
+     mutate(name = toupper(letters[1:12]))
      l <- ggraph(gr1, layout = 'tree')
      l <- as.matrix(l$data[, 1:2])
      p <- ggraph(gr1, layout = l)
@@ -40,8 +39,7 @@ set.seed(859)
      
    gr2 <- play_islands(4, 3, m = 1, p_within = 1) %>% 
      activate(nodes) %>% 
-     mutate(name = toupper(letters[1:12])) %>% 
-     simplify()
+     mutate(name = toupper(letters[1:12]))
      p <- ggraph(gr2, layout = l)
      p <- p + geom_edge_link(color = "firebrick", width = 1.15) 
      p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
@@ -221,7 +219,6 @@ $$  {#eq-matmult0}
 - @eq-matmult0 says that the product of a three by five matrix $\mathbf{A}$ (three rows and five columns) times a five by six matrix $\mathbf{B}$ (five rows and six columns) is a third matrix $\mathbf{C}$ with three rows and six columns. Another way of saying this last rule is that the product of two conformable matrices will have dimensions equal to their **outer dimensions**. 
 
 ### Multiplying a Matrix Times its Transpose
-
 - By definition, as discussed in @sec-trans, the rows of a matrix are equal to the columns of its transpose, and vice versa. The product of a matrix times its transpose and the transpose times the original matrix is always defined, no matter what the dimensions of the original matrix are. Thus,
 
 $$
@@ -388,7 +385,7 @@ $$
 Pretty easy!
 
 ## Matrix Powers and Cohesive Groups
-It turns out that matrix powers was one of the earliest applications of formal social network analysis in the social sciences, discovered about the same time by mathematicians and social psychologists Duncan Luce, Albert Perry and Leon Festinger [@luce49, @festinger49]. The basic idea is that when we obtain the **powers of an adjancency matrix** the resulting matrix has an intuitive interpretation in terms of indirect connections between people (see #sec-indirect), which gives us a sense of how strongly related in a formal sense pairs of nodes in the graph are. Let's see an example.
+It turns out that matrix powers was one of the earliest applications of formal social network analysis in the social sciences, discovered about the same time by mathematicians and social psychologists Duncan Luce, Albert Perry and Leon Festinger [@luce49, @festinger49]. The basic idea is that when we obtain the **powers of an adjacency matrix** the resulting matrix has an intuitive interpretation in terms of indirect connections between people (see #sec-indirect), which gives us a sense of how strongly related in a formal sense pairs of nodes in the graph are. Let's see an example.
 
 
 ```{r}
@@ -419,18 +416,24 @@ It turns out that matrix powers was one of the earliest applications of formal s
      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-@tbl-pows-1 shows the adjacency matrix ($\mathbf{A}$) corresponding to the "hangout" network in @fig-rel-1. @tbl-pows-2 shows the entries in $\mathbf{A}^2$ computed like we did earlier in the examples shown in @tbl-pow. What is the meaning of the entries in each cell of @tbl-pows-2? Well for the *off-diagonal* entries, the numbers in each cell tell us the number of *indirect connections* (specifically the number of *walks*; see @sec-indirect) of *length two* between each pair of nodes. 
+### The Squared Adjacency Matrix
+@tbl-pows-1 shows the adjacency matrix ($\mathbf{A}$) corresponding to the "hangout" network in @fig-rel-1. @tbl-pows-2 shows the entries in $\mathbf{A}^2$ computed like we did earlier in the examples shown in @tbl-pow. What is the meaning of the entries in each cell of @tbl-pows-2? 
+
+Well for the *off-diagonal* entries, the numbers in each cell tell us the number of *indirect connections* (specifically the number of *walks*; see @sec-indirect) of *length two* between each pair of nodes. 
 
 So, for instance, we learn that node $A$ can reach node $B$ via two walks of length two, and can reach nodes $C$, $D$, $G$, and $I$ via one walk of length two. Remember from @sec-indirect that an indirect connection of a given length (in this case two) joins two nodes when it features them as the **end nodes** of the sequence of nodes and edges. Looking back at @fig-rel-1, we can see that the two walks of length two joining nodes $A$ and $B$ are $\{AC, CB\}$ and $\{AD, DB\}$, and that the walks of length two joining $A$ to nodes $\{C, D, G, I\}$ are:
 
 $$
 \{AD, DC\}, \{AC, CD\}, \{AC, CG\}, \{AK, KI\}
 $$
+The *diagonal* entries of @tbl-pows-2, on the other hand, give us the number of walks of length two that begin and end in the same node. Now what is the meaning of this? If you think of it, a walk of length two that starts in a node and goes to another node, and then comes back to the same node is just an **edge** in a symmetric graph! So the diagonals of $\mathbf{A}^2$ just count the number of edges incident to a node, which is the same as the **degree** of each node!
+
+### The Cubed Adjacency Matrix 
 @tbl-pows-3 shows the corresponding entries for $\mathbf{A}^3$. What do *these* numbers mean? Well, you may have guessed. For the off-diagonal cells they are the number of walks of *length three* linking each pair of nodes. For instance, the "1" in the cell corresponding to nodes $H$ and $F$ tells us that there is walk of length three linking these two nodes. Looking at @fig-rel-1, we can see that this is given by: $\{HG, GE, EF\}$. 
 
-Note however, that in contrast to @tbl-pows-2, there now numbers in the diagonal cells of @tbl-pows3. What do *these* number mean. Well, as you may have guessed, they are actually the number of walks of length three that begin *and* end in that same node! As you may recall from @sec-indirect, this is called a **cycle** of length three. So, the "2" in the diagonal cell entry corresponding to node $A$ tells us that there are two cycles of length three featuring node $A$ as its end nodes. Looking at @fig-rel-1, we can see that these are given by the sequences: $\{AC, CD, DA\}$ and $\{AD, DC, DA\}$. 
+What do the numbers in the *diagonal cells* of @tbl-pows-3 mean? Well, as you may have guessed, they are actually the number of walks of length three that begin *and* end in that same node! As you may recall from @sec-indirect, this is called a **cycle** of length three. So, the "2" in the diagonal cell entry corresponding to node $A$ tells us that there are two cycles of length three featuring node $A$ as its end nodes. Looking at @fig-rel-1, we can see that these are given by the sequences: $\{AC, CD, DA\}$, $\{AD, DC, DA\}$. In the same way, the number "4" in the diagonal cell for node $C$ tells us that there are four cycles of length three that begin and end in that node. These are given by the sequences: $\{CA, AD, DC\}$, $\{CD, DA, AC\}$, $\{CB, BD, DC\}$, and $\{CD DB, BC\}$. 
 
-More generally, for any adjacency matrix $\mathbf{A}$, the $n^{th}$ power of the adjacency matrix gives us a symmetric matrix ($\mathbf{A}^{n}$) whose off-diagonal entries $a^{n}_{ij}$ record the number of walks of length $n$ featuring the $i^{th}$ node as the starting node and the $j^{th}$ node as the end node, and whose diagonal entries $a^{n}_{ii}$ record the the number of cycles of length $n$ that originate and end in that node.
+Note that the edge sequence corresponding to cycles of length three is the same as that which corresponding to a **clique** of size three. So the diagonals in @tbl-pows-3, counts the *number of cliques of size three* that node belongs to. It actually counts *twice* the number of cliques of size three, because each clique is counted twice, once going in one direction (e.g., $\{CA, AD, DC\}$) and once going in the other direction $\{CD, DA, AC\}$, so in @tbl-pows-3, the diagonal cell divided by two gives us the number of cliques of size three that node belongs to. When a node belongs to no clique, like node $K$ in @fig-rel-1, then it gets a zero entry in the corresponding diagonal cell of $\mathbf{A}^3$. 
 
 ```{r}
 #| label: fig-pows
@@ -454,6 +457,9 @@ More generally, for any adjacency matrix $\mathbf{A}$, the $n^{th}$ power of the
      p
 ```
 
-@fig-pows shows the same graph as @fig-rel-1, but this time with the connections between nodes in the graph drawn as **weighted edge** with size and color intensity proportional to the entries in @tbl-pows-3 (the larger the number, the thicker and darker the edge), recording the number of walks of length three between each pair of nodes. As we can see, this reveals distinct hangout **cliques** like nodes $\{A, B, C, D\}$ and nodes $\{E, F, G, H\}$ that share multiple indirect connections with one another. 
+@fig-pows shows the same graph as @fig-rel-1, but this time with the connections between nodes in the graph drawn as **weighted edge** with size and color intensity proportional to the entries in @tbl-pows-3 (the larger the number, the thicker and darker the edge), recording the number of walks of length three between each pair of nodes. As we can see, this reveals distinct hangout **cliques** like nodes $\{A, B, C, D\}$ and nodes $\{E, F, G, H\}$ that share multiple indirect connections with one another.
+
+### To Infinity and Beyond!
+More generally, for any adjacency matrix $\mathbf{A}$, the $n^{th}$ power of the adjacency matrix gives us a symmetric matrix ($\mathbf{A}^{n}$) whose off-diagonal entries $a^{n}_{ij}$ record the number of walks of length $n$ featuring the $i^{th}$ node as the starting node and the $j^{th}$ node as the end node, and whose diagonal entries $a^{n}_{ii}$ record the the number of cycles of length $n$ that begin and end with that node.
 
 ## References {.unnumbered}
