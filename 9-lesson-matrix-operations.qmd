@@ -232,7 +232,7 @@ $$
 \mathbf{A}^T \times \mathbf{A} = defined!
 $$
 
-- When you multiply a matrix times its transpose, the *resulting matrix will be a square matrix with number of rows and columns equal to the number of rows of the original matrix*. For instance, say matrix  $\mathbf{A}_{5 \times 3}$ is of dimensions $5 \times 3$ (like the matrix shown in @tbl-trans1). Then its transpose $A^T_{3 \times 5}$ will be of dimensions $3 \times 5$ (like the matrix shown in @tbl-trans-2). That means the product of the matrix times its transpose will be:
+- When you multiply a matrix times its transpose, the *resulting matrix will be a square matrix with number of rows and columns equal to the number of rows of the original matrix*. For instance, say matrix  $\mathbf{A}_{5 \times 3}$ is of dimensions $5 \times 3$ (like the matrix shown in @tbl-trans-1). Then its transpose $A^T_{3 \times 5}$ will be of dimensions $3 \times 5$ (like the matrix shown in @tbl-trans-2). That means the product of the matrix times its transpose will be:
 
 $$
 \mathbf{A}_{5 \times 3} \times \mathbf{A}_{3 \times 5}^T = \mathbf{B}_{5 \times 5}
@@ -387,5 +387,66 @@ $$
 
 Pretty easy!
 
+## Matrix Powers and Cohesive Groups
+It turns out that matrix powers was one of the earliest applications of formal social network analysis in the social sciences, discovered about the same time by mathematicians and social psychologists Luce and Perry [@luce49] and Festinger [@festinger49]. The basic idea is that when we obtain the **powers of an adjancency matrix** the resulting matrix has an intuitive interpretation in terms of indirect connections between people (see #sec-indirect), which gives us a sense of how strongly related in a formal sense pairs of nodes in the graph are. Let's see an example.
 
+
+```{r}
+#| label: tbl-pows 
+#| tbl-cap: An adjancency matrix and its powers.
+#| tbl-subcap: 
+#|   - Original adjacency matrix.
+#|   - Adjacency matrix squared.
+#|   - Adjacency matrix cubed.
+#|   - Adjacency matrix to the fifth power. 
+#| layout-ncol: 1
+#| tbl-cap-location: margin
+
+    A1 <- as.matrix(as_adjacency_matrix(gr1))
+    A2 <- A1%^%2
+    A3 <- A1%^%3
+
+     kbl(A1, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     
+     kbl(A2, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     
+     kbl(A3, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+@tbl-pows-1 shows the adjacency matrix ($\mathbf{A}$) corresponding to the "hangout" network in @fig-rel-1. @tbl-pows-2 shows the entries in $\mathbf{A}^2$ computed like we did earlier in the examples shown in @tbl-pow. What are the meaning of the entries in each cell of @tbl-pows-2? Well for the *off-diagonal* entries, the numbers in each cell tell us the number of *indirect connections* (specifically the number of *walks*; see @sec-indirect) of *length two* between each pair of nodes. So, for instance, we learn that there are two walks of length two joing nodes $A$ and $B$ and one walk of length two joining nodes $E$ and $J$.
+
+The *diagonal* cells, on the other hand, give us the number of indirect connections of length two that *originate* (and *end*, since the graph is undirected and the matrix is symmetric) in that node, which is an indirect version of degree centrality [@katz53]. So, for instance, we learn that three walks of length two originate from node *A* and four walks of length two originate from node *C*. 
+
+@tbl-pows-3 shows the corresponding entries for $\mathbf{A}^3$. What do *these* numbers mean? Well, you may have guessed. For the of-diagonal cells they are the number of walks of length three linking each pair of nodes, and for the off-diagonal cells they are the number of walks of length three that originate and end in that node.  
+
+
+```{r}
+#| label: fig-pows
+#| fig-cap: Graph with weighted edges representing number of indirect connections of length three between nodes
+#| fig-cap-location: margin
+#| fig-width: 12
+#| fig-height: 12
+
+    m <- max(A3)
+    n <- diag(A3)^2 + 18
+   gr <- graph.adjacency(A3, mode="undirected", weighted=TRUE) %>% 
+    as_tbl_graph() 
+     p <- ggraph(gr, layout = l)
+     p <- p + geom_edge_link(aes(color = weight/m, width = weight/m)) 
+     p <- p + geom_node_point(aes(x = x, y = y), color = "tan2", size = 28)
+     p <- p + geom_node_text(aes(label = name), size = 14, color = "white")
+     p <- p + theme_graph() 
+     p <- p + scale_edge_color_steps(low = "grey95", 
+                                     high = "steelblue4")
+     p <- p + theme(legend.position = "none")
+     p
+```
+
+@fig-pows shows the same graph as @fig-rel-1, but this time with the connections between nodes in the graph drawn as **weighted edge** with size and color intensity proportional to the entries in @tbl-pows-3 (the larger the number, the thicker and darker the edge), recording the number of walks of length three between each4 pair of nodes. As we can see, this reveals distinct hangout **cliques** like nodes $\{A, B, C, D\}$ and nodes $\{E, F, G, H\}$ that share multiple indirect connections with one another. 
 
