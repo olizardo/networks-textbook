@@ -104,7 +104,7 @@ Thus, we could, as shown in @fig-bicircles, create a graph that shows board memb
 Likewise, we can transform the bipartite graph into a simple unipartite graph that captures companies that share board members. Company 2 is thus connected to Companies 1 (because of person A), 3 (because of person B), and 4 (because of person 5). This is shown in @fig-bitriangles). In fact, the reason why these are called **interlock** networks, is because it is easy to see that, ultimately, by virtue of sharing members across boards, most big corporations in the U.S. (and other countries), end up [forming part of a single giant network](https://en.wikipedia.org/wiki/Interlocking_directorate).
 
 ## From Biparite Graph to Affiliation Matrix
-Consider the **two-mode network** shown in @fig-twomodeclubs. This is an affiliation network meant to represent the memberships of six students in five college activity clubs. As discussed earlier, we use a **bipartite graph** to represent the network. The bipartite graph represents the two sets of nodes using different shapes or colors (blue and red nodes in @fig-twomodeclubs)), and draws a link between the people and the group if the person is affiliated with the group. 
+Consider the **two-mode network** shown in @fig-twomodeclubs. This is an affiliation network meant to represent the memberships of six students in five college activity clubs. As discussed earlier, we use a **bipartite graph** to represent the network. The bipartite graph represents the two sets of nodes using different shapes or colors (blue and red nodes in @fig-twomodeclubs), and draws a link between the people and the group if the person is affiliated with the group. 
 
 ```{r}
 #| label: fig-twomodeclubs
@@ -135,7 +135,7 @@ The procedure is the same as that used to build the adjacency matrix of the symm
 
 In graph theory terms, this is a matrix that we call **A**, for **affiliation matrix** of dimensions $R \times C$, where the number of rows $R = |V_1|$ is the cardinality of the first vertex set in the bipartite graph (persons in @fig-twomodeclubs), and where the number of rows $C = |V_2|$ is the cardinality of the second vertex set (clubs in @fig-twomodeclubs)). The cells of the affiliation matrix, $a_{ij} = 1$ if person *i* belongs to club *j* (there's an symmetric edge in the graph linking the person to the group), otherwise, $a_{ij} = 0$.
 
-Following these instructions would yield the affiliation matrix shown in @tbl-affmat).
+Following these instructions would yield the affiliation matrix shown in @tbl-affmat.
 
 ```{r}
 #| label: tbl-affmat
@@ -215,9 +215,9 @@ Which leads to the following degree centrality scores for the clubs:
 Just like the people, the centrality scores for the clubs tell us something about the *popularity* of each group. Some groups are popular (have lots of members), others are less so. So, it seems like in this student group, the Magic Club is definitely the most popular, containing four members. The Cheese and Fashion Clubs on the other hand, seem to be more niche pursuits, with only two members each. 
 
 ## The Affiliation Matrix Transpose
-As discussed in the lesson on matrices, it is possible to "flip" the rows and columns of any matrix, so what was previously the rows become the columns, and what was previously the columns become the rows. This is called the **matrix transpose** and if the original matrix was called **A**, then the transpose is called **A'**.^[In matrix algebra, **'** is the symbol of the matrix transpose. Another symbol for the matrix transpost is $\mathbf{^T}$.] If the original matrix **A** was of dimensions $R \times C$ then the transpose **A'** is of dimensions $C \times R$. 
+As discussed in @sec-trans, it is possible to "flip" the rows and columns of any matrix, so what was previously the rows become the columns, and what was previously the columns become the rows. This is called the **matrix transpose** and if the original matrix was called **A**, then the transpose is called **A'**.^[In matrix algebra, **'** is the symbol of the matrix transpose. Another symbol for the matrix transpose is $\mathbf{^T}$.] If the original matrix **A** was of dimensions $R \times C$ then the transpose **A'** is of dimensions $C \times R$. 
 
-The transpose of the affiliation matrix shown in @tbl-affmat) is shown in @tbl-affmattrans).
+The transpose of the affiliation matrix shown in @tbl-affmat is shown in @tbl-affmattrans.
 
 ```{r}
 #| label: tbl-affmattrans
@@ -235,9 +235,9 @@ The transpose of the affiliation matrix shown in @tbl-affmat) is shown in @tbl-a
     kbl(gr, format = "pipe", align = "c")
 ```
 
-Note that the transpose of the affiliation matrix contains exactly the *same* information as the original affiliation matrix. The group affiliations of every person are preserved as are memberships of each group. If we used equations @eq-aff1), and @eq-aff2) to compute the person and group centralities using the affiliation matrix transpose **A'**, we would get the same results, except that the first equation (summing across the rows) would now give us the group centralities, and the second equation (summing down the columns) would give use the people centralities!
+Note that the transpose of the affiliation matrix contains exactly the *same* information as the original affiliation matrix. The group affiliations of every person are preserved as are memberships of each group. If we used equations @eq-aff1, and @eq-aff2) to compute the person and group centralities using the affiliation matrix transpose **A'**, we would get the same results, except that the first equation (summing across the rows) would now give us the group centralities, and the second equation (summing down the columns) would give use the people centralities!
 
-We learn from matrix algebra that an important property of rectangular matrices is that you can *always multiply a rectangular matrix by its transpose*. Recall a key condition of matrix multiplication is that the two matrices be **conformable** so that the columns of the first matrix need to match the number of rows of the second matrix. Well, it's clear than since any matrix that is of dimensions $R \times C$, will have a transpose of dimensions $C \times A$ then the multiplication of the two matrices will be defined:
+We learn from matrix algebra that an important property of rectangular matrices is that you can *always multiply a rectangular matrix by its transpose* (see @sec-multrules). Recall a key condition of matrix multiplication is that the two matrices be **conformable** so that the columns of the first matrix need to match the number of rows of the second matrix. Well, it's clear than since any matrix that is of dimensions $R \times C$, will have a transpose of dimensions $C \times A$ then the multiplication of the two matrices will be defined:
 
 $$
     A^{}_{R \times C} \times A^{'}_{C \times R} = defined!
@@ -251,14 +251,14 @@ $${#eq-trans2}
 
 
 ## The Person and Group Overlap Matrices
-If the transpose of the affiliation matrix contains the same information as the original why do we care about it? Well the reason is that we can use the multiplication property described earlier to extract two new matrices that contain new (or at least not obvious, especially for large two-mode networks), information from the original affiliation matrix. The first is called the **person overlap matrix** (written $O^P$), this is defined for an original affiliation matrix, in which people are listed in the rows and groups, events, or project, listed in the columns using the following matrix equation:
+If the transpose of the affiliation matrix contains the same information as the original why do we care about it? Well the reason is that we can use the multiplication property described in @sec-trans to extract two new matrices that contain new (or at least not obvious, especially for large two-mode networks), information from the original affiliation matrix. The first is called the **person overlap matrix** (written $O^P$), this is defined for an original affiliation matrix, in which people are listed in the rows and groups, events, or project, listed in the columns using the following matrix equation:
 
 $$
     O^P = A^{ }_{R \times C} \times A^{'}_{C \times R} 
 $${#eq-poverlap}
 
 ### The Person Overlap Matrix
-Using the rules for matrix multiplication discussed in the lesson on matrices, the person overlap matrix obtained using the affiliation matrix shown in @tbl-affmat is shown in @tbl-poverlap.
+Using the rules for matrix multiplication discussed @sec-multrules, the person overlap matrix obtained using the affiliation matrix shown in @tbl-affmat is shown in @tbl-poverlap.
 
 ```{r}
 #| label: tbl-poverlap
@@ -289,7 +289,7 @@ $$
 $${#eq-goverlap}
 
 
-Recall from the lesson on matrices that matrix multiplication is *not* commutative (if $A$ is a rectangular matrix, then $A \times A^{'} \neq A^{'} \times A$)), so @eq-goverlap gives you a different answer than @eq-poverlap. The result is shown in @tbl-goverlap.
+Recall from @sec-matmult that matrix multiplication is *not* commutative (if $A$ is a rectangular matrix, then $A \times A^{'} \neq A^{'} \times A$)), so @eq-goverlap gives you a different answer than @eq-poverlap. The result is shown in @tbl-goverlap.
 
 ```{r}
 #| label: tbl-goverlap
@@ -314,7 +314,7 @@ Note that both the person and group overlap matrices are **symmetric**. It is ea
 
 ## Overlapping Node Neighborhoods in Two-Mode Networks
 
-Note that the notion of overlap used to construct the person and group overlap matrix is the same as the idea of overlapping node neighborhoods for regular networks, discussed in the lesson on graph theory. Thus, while nodes of the same kind cannot be connected in a two-mode network (by construction), they can share neighbors. In a two-mode network if a node belong to one of the vertex sets, let's say $V_1$, then *all* of their neighbors have to belong to the other vertex set ($V_2$) and vice versa.
+The notion of overlap used to construct the person and group overlap matrix is the same as the idea of overlapping node neighborhoods for regular networks, discussed in @sec-nodenei Thus, while nodes of the same kind cannot be connected in a two-mode network (by construction), they can share neighbors. In a two-mode network if a node belong to one of the vertex sets, let's say $V_1$, then *all* of their neighbors have to belong to the other vertex set ($V_2$) and vice versa.
 
 For instance, in @fig-twomodeclubs), Gabriela's node neighborhood is: 
 
