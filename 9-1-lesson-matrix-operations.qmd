@@ -384,7 +384,6 @@ $$
 
 Pretty easy!
 
-
 ## Matrix Multiplication of Vectors
 Recall from @sec-degset that a **vector** is a sequence of numbers of a given length. So for instance, the vector $\mathbf{a} = \{2, 4, 7, 2, 4\}$ is a vector of length five. 
 
@@ -436,7 +435,7 @@ $$
 4 + 16 + 49 + 4 + 16 = `r 4 + 16 + 49 + 4 + 16`
 $$
 
-- So the first rule of vector matrix multiplication is that you can always multiply a row vector times a column vector (even when their entries are not the same) as long as the number of columns of the row vector equal the number of rows of the column vector. 
+- The first rule of vector matrix multiplication is that you can always multiply a row vector times a column vector (even when their entries are not the same) as long as they are the same length (e.g., the number of columns of the row vector equal the number of rows of the column vector). 
 
 - The second rule of vector matrix multiplication is that when you multiply a row vector times another a column vector the result is always scalar (a single number).
 
@@ -460,17 +459,19 @@ This matrix multiplication is defined because the inner dimensions of the two ma
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
+- So, the third and final rule of vector matrix multiplication is that when you multiply a column vector times a row vector of the same length, the result is a square matrix of row and column dimensions equal to the length of the original vectors. 
+
 ## Multiplying a Vector Times A Matrix (and Vice Versa)
 Since vectors are just matrices, it means that we can always multiply a vector times a matrix (and a matrix times a vector), as long as we follow the matrix multiplication rules laid out in @sec-multrules. 
 
 ### Row Vector Times Matrix
-For instance, take the row vector $\mathbf{b} = \{4, 9, 3, 5\}$ and the binary matrix $\mathbf{A}$ shown in @tbl-pow-1. Because $\mathbf{b}$ is of dimensions $1 \times 4$ and $\mathbf{A}$ is of dimensions $4 \times 4$, it is possible to multiply the vector times the matrix as follows:
+For instance, take the row vector $\mathbf{b} = \{4, 9, 3, 5\}$ and the binary matrix $\mathbf{A}$ shown in @tbl-pow-1. Because the row vector $\mathbf{b}$ is of dimensions $1 \times 4$ and matrix $\mathbf{A}$ is of dimensions $4 \times 4$, it is possible to multiply the vector times the matrix as follows:
 
 $$
 \mathbf{b}_{1 \times 4} \times \mathbf{A}_{4 \times 4} = \mathbf{c}_{1 \times 4}
 $$ {#eq-matvec}
 
-@eq-matvec says that the product of a $1 \times 4$ row vector times a $4 \times 4$ square matrix is another **vector** of dimensions equal to the original row vector. The result for our example is shown in @tbl-vecmat1.
+@eq-matvec says that the product of a $1 \times 4$ row vector times a $4 \times 4$ square matrix is another **vector** of dimensions equal to the original row vector. The result for this example is shown in @tbl-vecmat1.
 
 ```{r}
 #| label: tbl-vecmat1
@@ -498,15 +499,13 @@ $$ {#eq-matvec}
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-Of course, it is also possible to multiply a row vector times a **rectangular** matrix (where the number of rows is not necessarily equal to the number of columns), as long as the number of rows of the matrix equals the length of the original row vector. For instance, take a row vector $\mathbf{a}_{1 \times 5}$ shown in @tbl-vecmat2-1 and a matrix $B_{5 \times 3}$. Its product would be given by:
+Of course, it is also possible to multiply a row vector times a **rectangular** matrix (where the number of rows is not necessarily equal to the number of columns), as long as the number of rows of the rectangular matrix equals the length of the original row vector. For instance, take a row vector $\mathbf{a}_{1 \times 5}$ shown in @tbl-vecmat2-1 and a matrix $B_{5 \times 3}$. Its product would be given by:
 
 $$
-\mathbf{a}_{1 \times 5} \times \mathbf{B}_{5 \times 3} = \mathbf{c}_{1 \times 5}
+\mathbf{a}_{1 \times 5} \times \mathbf{B}_{5 \times 3} = \mathbf{c}_{1 \times 3}
 $$ {#eq-matvec2}
 
-@eq-matvec2 says that the product of a row vector of dimensions $1 \times 5$ and a matrix of dimensions $5 \times 3$ is another row vector $\mathbf{c}$ of dimensions equal to the original row vector ($1 \times 5$).
-
-A numerical example is shown in @tbl-vecmat2.
+@eq-matvec2 says that the product of a row vector of dimensions $1 \times 5$ and a matrix of dimensions $5 \times 3$ is another row vector $\mathbf{c}$ of dimensions ($1 \times 3$). A numerical example corresponding to this situation is shown in @tbl-vecmat2.
 
 ```{r}
 #| label: tbl-vecmat2
@@ -542,16 +541,18 @@ $$
 $$
 4 + 20 + 77 + 30 + 48 = `r 4 + 20 + 77 + 30 + 48`
 $$
-And so on for the other two entries in @tbl-vecmat2-3. So the first rule of multiplying a row vector times a matrix is that *the result will always be another row vector of length equal to the number of columns of the matrix*. 
+
+And so on for the other two entries in @tbl-vecmat2-3. So the main rule of multiplying a row vector times a matrix with number of rows equal to the length of the row vector is that *the result will always be another row vector of length equal to the number of columns of the matrix*. 
 
 ### Matrix Times Column Vector
-In the same way, we can always multiply a matrix times a column vector, as long as the the number of rows of the matrix is equal to the length of the column vector. For instance, take the binary square matrix $A_{5 \times 5}$ shown in @tbl-vecmat3-1 and the column vector $\mathbf{b}_{5 \times 1}$ shown in @tbl-vecmat2-2. Their product $\mathbf{c}$ would be given by:
+In the same way, we can always multiply a matrix times a column vector, as long as the the number of *columns* of the matrix is equal to the length of the column vector. For instance, take the binary square matrix $A_{5 \times 5}$ shown in @tbl-vecmat3-1 and the column vector $\mathbf{b}_{5 \times 1}$ shown in @tbl-vecmat2-2. Their product $\mathbf{c}$ would be given by:
 
 $$
 \mathbf{A}_{5 \times 5} \times \mathbf{b}_{5 \times 1} = \mathbf{c}_{5 \times 1}
 $$ {#eq-matvec3}
 
-@eq-matvec3 says that the product of a matrix of dimensions $5 \times 5$ and a column vector of dimensions $5 \times 1$ and is another column vector $\mathbf{c}$ of dimensions equal to the original column vector ($5 \times 1$).
+@eq-matvec3 says that the product of a matrix of dimensions $5 \times 5$ and a column vector of dimensions $5 \times 1$ is another column vector $\mathbf{c}$ of dimensions equal to the original column vector ($5 \times 1$). A numerical example of this situation is shown in @tbl-vecmat3.
+
 
 ```{r}
 #| label: tbl-vecmat3
@@ -580,6 +581,102 @@ $$ {#eq-matvec3}
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-A numerical example of this situation is shown in @tbl-vecmat3.
+## Multiplying Matrices Times the All Ones Vector
+In matrix multiplication, there is a special row and column vector called the **all ones vector**. As you may have guessed this is a vector of *all ones*, of some length $n$. For instance and all ones row vector of length five is $\mathbf{1}_{1 \times 5} = \{1, 1, 1, 1, 1\}$ (the symbol for the all ones vector is a boldface "1"). We can also get the transpose of this all ones row vector to get the all ones column vector $\mathbf{1}^T$. 
+
+Why do we care about vectors full of ones? Well, it turns out that the all one row and column vectors have a neat property when we multiplied by matrices. We already know, from the rules of vector matrix multiplication reviewed earlier, that the product of a row vector times a square matrix is always a row vector of the same length as the original, and the product of a square matrix times a column vector is always a column vector of the same length as the original. 
+
+Let's say we a matrix $\mathbf{A}$ of dimensions $5 \times 5$, and we multiplied the all ones row vector of length five times this matrix, which would result in the row vector $\mathbf{b}$. This would be given by the formula:
+
+$$
+\mathbf{1}_{1 \times 5} \times \mathbf{A}_{5 \times 5} = b_{1 \times 5}
+$$ {#eq-allones1}
+
+A numerical example of the situation depicted in @eq-allones1 is shown in @tbl-allones1. 
+
+```{r}
+#| label: tbl-allones1
+#| tbl-cap: Row vector resulting from multiplying the all ones row vector times a square binary matrix
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - 1 X 5 all ones row vector
+#|   - 5 X 5 square binary matrix
+#|   - 1 X 5 product row vector
+
+    a <- matrix(c(1, 1, 1, 1, 1), ncol = 5)
+    A <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1), nrow = 5, byrow = TRUE)
+    c <- a %*% A
+    
+    kbl(a, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+    
+    kbl(A, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+    kbl(c, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+If you look at the resulting row vector in @tbl-allones1-3, we can see that the result of multiplying the all ones row vector times a matrix is a vector that contains the **column sums** of the matrix entries! So the "2" in position 1 of @tbl-allones1-3 comes from adding up the numbers in the first column of the matrix, the "1" in position 2 of @tbl-allones1-3 comes from adding the numbers in the second column and so forth. 
+
+```{r}
+#| label: tbl-allones2
+#| tbl-cap: Row vector resulting from multiplying the all ones row vector times a square binary matrix
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - 5 X 5 square binary matrix
+#|   - 5 X 1 all ones column vector 
+#|   - 5 X 1 product column vector
+#| layout-ncol: 3
+
+    a <- matrix(c(1, 1, 1, 1, 1), nrow = 5)
+    A <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1), nrow = 5, byrow = TRUE)
+    c <- A %*% a
+    
+    kbl(A, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+    
+    kbl(a, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+    kbl(c, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+In the same way, if we multiply the same matrix times the all ones column vector, we get the results shown in @tbl-allones2. We can see that the result of multiplying a matrix times the all ones column vector, is another column vector contains the **row sums** of the original matrix! So, the "2" in the first position of the column vector comes from adding the numbers in the first row of the matrix, the "3" comes from adding the numbers in the second row, and so forth. 
+
+
+## The Identity Matrix
+The last "interesting" matrix we will cover is called the **identity** matrix. This is a square matrix, usually written using the symbol $\mathbf{I}$ of dimensions $n \times n$. This matrix will have "1" in *every diagonal cell*, and "0" in *every off-diagonal cell*. For instance, an identity matrix of dimensions $5 \times 5$ is shown @tbl-idmat. 
+
+```{r}
+#| label: tbl-idmat
+#| tbl-cap: A 5 X 5 Identity Matrix. 
+#| tbl-cap-location: margin
+
+    A <- diag(5)
+    kbl(A, align = "c", format = "html") %>%
+    kable_styling(full_width = TRUE,
+                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+The interesting thing about this matrix is that when you multiply it times another square matrix of the same dimensions, the result is always the original matrix! So it plays the role that the number "1" plays in regular number multiplication, in matrix algebra. This means that, for any square matrix $\mathbf{A}$:
+
+$$
+\mathbf{A} \times \mathbf{I} = \mathbf{A}
+$$ {#eq-idmat1}
+
+And also, 
+
+$$
+\mathbf{I} \times \mathbf{A} = \mathbf{A}
+$$  {#eq-idmat2}
+Neat!
 
 ## References {.unnumbered}
