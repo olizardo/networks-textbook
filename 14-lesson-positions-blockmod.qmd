@@ -217,6 +217,27 @@ More importantly, as shown in @tbl-sepos, the structurally equivalent nodes have
 ## Blockmodeling
 The example we considered previously concerns the relatively small network shown in @fig-equivex. What happens when we apply the method of iterated correlations (CONCOR) to a bigger network, something like the one shown in @fig-eigen?
 
+```{r}
+#| label: fig-eigen
+#| fig-cap: "An undirected graph."
+#| fig-cap-location: margin
+#| fig-width: 12
+#| fig-height: 12
+
+    fr <- c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 3), rep(20, 3))
+    to <- c(5:9, 10:14, 15:19, 1:3, 5, 21, 22)
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = toupper(letters[union(fr, to)]))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+    gr <- as_tbl_graph(simplify(gr)) 
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.15) 
+    p <- p + geom_node_point(aes(x = x, y = y), color = "tan2", size = 22)
+    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+    p <- p + theme_graph()
+    p
+```
+
 Well, we can begin by computing the correlation distance across all ,the $V=22$ nodes in that network using @eq-cor. The result of that looks like @tbl-blocks-1. Note that even before we do any iterated correlations of correlation matrices we can see that the peripheral, single-connection nodes $E, F, G, H$, $I, J, K, L, M$ and $N, O, P, Q, R$ are perfectly structurally equivalent. This makes sense, because all the nodes in each of these three groups have identical neighborhoods, since they happen to be connected to the same central node $A$ for the first group, $B$ for the second group and $C$ for the third group. Note also that $U$ and $V$ are structurally equivalent, since their neighborhoods are the same: Their single connection is to node $S$.
 
 ```{r}
