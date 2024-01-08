@@ -6,10 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Omar Lizardo and Isaac Jilbert">
-<meta name="dcterms.date" content="2023-01-15">
 
-<title>Social Networks</title>
+<title>Social Networks - 4&nbsp; Graphs and their Subgraphs</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -31,7 +29,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./1-lesson-what-are-networks.html" rel="next">
+<link href="./5-lesson-ties-and-graphs.html" rel="next">
+<link href="./3-lesson-node-neighborhoods.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -61,6 +60,7 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -80,7 +80,7 @@ ul.task-list li input[type="checkbox"] {
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">Social Networks</h1>
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -105,7 +105,7 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">Welcome</a>
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Welcome</a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -125,7 +125,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./4-lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></a>
+  <a href="./4-lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -232,36 +232,25 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#welcome" id="toc-welcome" class="nav-link active" data-scroll-target="#welcome">Welcome</a></li>
+  <li><a href="#graphs-and-subgraphs" id="toc-graphs-and-subgraphs" class="nav-link active" data-scroll-target="#graphs-and-subgraphs"><span class="toc-section-number">4.1</span>  Graphs and Subgraphs</a></li>
+  <li><a href="#vertex-and-edge-induced-subgraphs" id="toc-vertex-and-edge-induced-subgraphs" class="nav-link" data-scroll-target="#vertex-and-edge-induced-subgraphs"><span class="toc-section-number">4.2</span>  Vertex and Edge-Induced Subgraphs</a></li>
+  <li><a href="#vertex-and-edge-deleted-subgraphs" id="toc-vertex-and-edge-deleted-subgraphs" class="nav-link" data-scroll-target="#vertex-and-edge-deleted-subgraphs"><span class="toc-section-number">4.3</span>  Vertex and Edge-Deleted Subgraphs</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/index.qmd" class="toc-action">View source</a></p></div></div></nav>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/4-lesson-graphs-subgraphs.qmd" class="toc-action">View source</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Social Networks</h1>
-<p class="subtitle lead">An Introduction</p>
+<h1 class="title"><span id="sec-subgraphs" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></span></h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
-    <div>
-    <div class="quarto-title-meta-heading">Author</div>
-    <div class="quarto-title-meta-contents">
-             <p>Omar Lizardo and Isaac Jilbert </p>
-          </div>
-  </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">January 15, 2023</p>
-    </div>
-  </div>
   
     
   </div>
@@ -269,9 +258,68 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="welcome" class="level1 unnumbered">
-<h1 class="unnumbered">Welcome</h1>
-<p>This is an introductory textbook on social networks to be used in conjunction with an undergraduate lecture class on <strong>social networks</strong> (SOCIOL 111) taught in the department of sociology at UCLA.</p>
+<section id="graphs-and-subgraphs" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="graphs-and-subgraphs"><span class="header-section-number">4.1</span> Graphs and Subgraphs</h2>
+<p>Consider the graph shown in <a href="3-lesson-node-neighborhoods.html#fig-simple2">Figure&nbsp;<span>3.1</span></a>. If all the actors that you are interested in studying are included here, we would refer to it as the <strong>whole network</strong>. However, sometimes, even when we collect data on a large number of actors we may be interested in analyzing not the whole network, but only some parts of it. How do we do that?</p>
+<div class="cell" data-fig.margin="true">
+<div class="cell-output-display">
+<div id="fig-subgraph1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="4-lesson-graphs-subgraphs_files/figure-html/fig-subgraph1-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4.1: A subgraph of an undirected graph</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Well, good thing that a graph is actually a set of two sets. If you remember your high school set theory, you can always take a set and consider only a <strong>subset</strong> of the original members.</p>
+<p>Since graphs are sets, we can do the same thing. A subset of the original nodes (or edges) of a graph, is called a <strong>subgraph</strong>. So if <span class="math inline">\(G =\{E,V\}\)</span> is the original graph, the subgraph <span class="math inline">\(G' = \{E',V'\}\)</span> is a subset of <span class="math inline">\(G\)</span>, which is written <span class="math inline">\(G \subset G'\)</span>, with the understanding that <span class="math inline">\(E' \subset E\)</span> and <span class="math inline">\(V' \subset V\)</span>.</p>
+<div class="cell" data-fig.margin="true">
+<div class="cell-output-display">
+<div id="fig-subgraph2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="4-lesson-graphs-subgraphs_files/figure-html/fig-subgraph2-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4.2: Another subgraph of an undirected graph</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For instance, let’s say we were interested in just analyzing actors <em>A</em>, <em>B</em>, <em>D</em>, and <em>F</em> in the graph shown in <a href="3-lesson-node-neighborhoods.html#fig-simple2">Figure&nbsp;<span>3.1</span></a>. They seem to be a close-knit group of people. In that case, as noted earlier, if we call the original graph <span class="math inline">\(G\)</span> with vertex and edge sets <span class="math inline">\(\{E, V\}\)</span>we can define a new subgraph <span class="math inline">\(G'\)</span>, whose node subset <span class="math inline">\(V'\)</span> only includes the actors we are interested in studying, in this case <span class="math inline">\(V' = \{A, B, D, F\}\)</span>, where <span class="math inline">\(V' \subset V\)</span>.</p>
+<p>The subgraph <span class="math inline">\(G'\)</span> is shown in <a href="#fig-subgraph1">Figure&nbsp;<span>4.1</span></a>. It looks exactly like we wanted, capturing the relations between an inter-connected subgroup of actors in the original graph. Note that the edge set of the subgraph <span class="math inline">\(E'\)</span> only includes those edges that are incident to the other nodes in the subgraph and omits those in the original graph that connect to nodes that are not in the subgraph, so <span class="math inline">\(E' \subset E\)</span>. As we will see in a later lesson, well-connected subgroups of actors of an original graph are called a <strong>cohesive subset</strong>.</p>
+</section>
+<section id="vertex-and-edge-induced-subgraphs" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="vertex-and-edge-induced-subgraphs"><span class="header-section-number">4.2</span> Vertex and Edge-Induced Subgraphs</h2>
+<p>For any graph, we can define a subgraph based on <em>any</em> old random subset of the original node set. It is completely up to us. For instance, we could define a new subgraph <span class="math inline">\(G''\)</span> of the original graph shown in <a href="3-lesson-node-neighborhoods.html#fig-simple2">Figure&nbsp;<span>3.1</span></a>, that includes the node set <span class="math inline">\(V'' = \{C, E, F\}\)</span>. That is shown in <a href="#fig-subgraph2">Figure&nbsp;<span>4.2</span></a>. That subgraph is weird and probably not very useful, but it is a subgraph of the original graph anyways!</p>
+<p>Just like we can define subgraphs based on the node set of a graph, we can define subgraphs based on subsets of the original edge set. For instance, we could pick the edges <span class="math inline">\(E' = \{AB, AC, AF\}\)</span> and define a subgraph based on them, which will necessarily include node set <span class="math inline">\(V' = \{A, B, C, F\}\)</span>.</p>
+<div class="cell" data-fig.margin="true">
+<div class="cell-output-display">
+<div id="fig-subgraph3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="4-lesson-graphs-subgraphs_files/figure-html/fig-subgraph3-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4.3: Yet another subgraph of an undirected graph</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>When a subgraph is defined by selecting a subset of nodes to keep (the common case) it is called a <strong>node-induced subgraph</strong> of the original graph. When a subgraph is defined by picking a subset of edges from the original graph to keep, it is called (you guessed it) an <strong>edge-induced subgraph</strong> of the original graph.</p>
+</section>
+<section id="vertex-and-edge-deleted-subgraphs" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="vertex-and-edge-deleted-subgraphs"><span class="header-section-number">4.3</span> Vertex and Edge-Deleted Subgraphs</h2>
+<p>A common reason for defining subgraphs in social network analysis is when we wonder what a network would look like if were to get rid of an actor or a tie. Sometimes this is useful, when we want to get a sense of how important an actor is for holding the network together. So it is possible to define a subgraph by <em>deleting</em> a node (or an edge). This is written <span class="math inline">\(G' = G - i\)</span>, where <em>i</em> is the name of the node we are deleting. So this says “give me a subgraph <em>G’</em> that is equal to the original graph <em>G</em> minus node <em>i</em>.”</p>
+<p>For instance, <a href="#fig-subgraph3">Figure&nbsp;<span>4.3</span></a>, shows the subgraph that results when we delete node <em>A</em> from the graph in <a href="3-lesson-node-neighborhoods.html#fig-simple2">Figure&nbsp;<span>3.1</span></a>: <span class="math inline">\(G' = G-A\)</span>. This is called a <strong>vertex-deleted subgraph</strong> of the original graph.</p>
+<p>Subgraphs can also be obtained by picking more than one node from the original graph for deletion. The subgraph that results from removing <em>all</em> the nodes of the original graph (so that the cardinality of the edge set is now zero) is called the <strong>null graph</strong>. The subgraph that results from removing all the nodes of the original graph <em>except</em> for one (so that the node set of the resulting subgraph includes only one node) is called the <strong>singleton graph</strong> (one is indeed a lonely number in social networks).</p>
+<div class="cell" data-fig.margin="true">
+<div class="cell-output-display">
+<div id="fig-subgraph4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="4-lesson-graphs-subgraphs_files/figure-html/fig-subgraph4-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4.4: Yet another subgraph of an undirected graph</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If we had defined the subgraph by removing a single-edge instead, then it would be called an <strong>edge-deleted subgraph</strong> of the original graph. For instance, the subgraph that results from deleting the edge <span class="math inline">\(AB\)</span> from <a href="3-lesson-node-neighborhoods.html#fig-simple2">Figure&nbsp;<span>3.1</span></a>, written <span class="math inline">\(G' = G - AB\)</span>, is shown in <a href="#fig-subgraph4">Figure&nbsp;<span>4.4</span></a>.</p>
+<p>As with nodes, subgraphs can also be obtained by removing more than on edge at at time. The subgraph that results from removing <em>all</em> the edges in a graph, such that the cardinality of the edge set turns to zero, is called the <strong>empty graph.</strong></p>
+<p>As we will see later, subgraphs (as well as vertex and edge deletion) are a useful concept for discussing levels at an “in-between” levels, above the node level but “below” the whole network level: subgroups. However, subgraphs are also useful for network concepts at the node level, because there is a special type of subgraph, called the <strong>ego graph</strong> that is defined by picking a central node and the nodes that are connected to it.</p>
 
 
 </section>
@@ -412,10 +460,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation column-body">
   <div class="nav-page nav-page-previous">
+      <a href="./3-lesson-node-neighborhoods.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./1-lesson-what-are-networks.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What are Networks?</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./5-lesson-ties-and-graphs.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
