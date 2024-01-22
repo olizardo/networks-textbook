@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Social Networks - 9&nbsp; Degree-Based Graph Metrics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./10-lesson-directed-graph-metrics.html" rel="next">
+<link href="./8-lesson-graph-metrics.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Social Networks</span>
+    </a>
+  </div>
+          <div class="quarto-toggle-container ms-auto">
+              <a href="" class="quarto-color-scheme-toggle nav-link" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+          </div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./social-ties1.jpeg" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./1-lesson-what-are-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What Are Networks?</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2-lesson-graph-theory.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Graph Theory</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3-lesson-node-neighborhoods.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./4-lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./5-lesson-ties-and-graphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6-lesson-other-graphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Other Types of Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./7-lesson-dyads-and-triads.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Dyads and Triads</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./8-lesson-graph-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./9-lesson-degree-based-graph-metrics.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-lesson-directed-graph-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Directed Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-lesson-egonet-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-lesson-indirect-connections.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Indirect Connections</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-lesson-directed-indirect-connections.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-lesson-from-graph-to-matrix.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">From Graph to Matrix</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-lesson-special-matrices.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Special Matrices</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-lesson-matrix-operations.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Matrix Operations</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-lesson-applied-matrix-operations.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Applied Matrix Operations</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-lesson-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./19-lesson-centrality.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Centrality</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20-lesson-status.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Status</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21-lesson-groups-cliques.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Clique Analysis</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22-lesson-positions-struct-equiv.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Equivalence and Similarity</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./23-lesson-positions-blockmod.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Blockmodeling</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#the-graph-degree-set" id="toc-the-graph-degree-set" class="nav-link active" data-scroll-target="#the-graph-degree-set"><span class="toc-section-number">9.1</span>  The Graph Degree Set</a></li>
+  <li><a href="#the-graph-degree-sequence" id="toc-the-graph-degree-sequence" class="nav-link" data-scroll-target="#the-graph-degree-sequence"><span class="toc-section-number">9.2</span>  The Graph Degree Sequence</a></li>
+  <li><a href="#minimum-and-maximum-degree" id="toc-minimum-and-maximum-degree" class="nav-link" data-scroll-target="#minimum-and-maximum-degree"><span class="toc-section-number">9.3</span>  Minimum and Maximum Degree</a></li>
+  <li><a href="#the-sum-of-degrees" id="toc-the-sum-of-degrees" class="nav-link" data-scroll-target="#the-sum-of-degrees"><span class="toc-section-number">9.4</span>  The Sum of Degrees</a></li>
+  <li><a href="#the-average-degree" id="toc-the-average-degree" class="nav-link" data-scroll-target="#the-average-degree"><span class="toc-section-number">9.5</span>  The Average Degree</a>
+  <ul class="collapse">
+  <li><a href="#average-degree-in-undirected-graphs" id="toc-average-degree-in-undirected-graphs" class="nav-link" data-scroll-target="#average-degree-in-undirected-graphs"><span class="toc-section-number">9.5.1</span>  Average Degree in Undirected Graphs</a></li>
+  <li><a href="#average-degree-in-directed-graphs" id="toc-average-degree-in-directed-graphs" class="nav-link" data-scroll-target="#average-degree-in-directed-graphs"><span class="toc-section-number">9.5.2</span>  Average Degree in Directed Graphs</a></li>
+  <li><a href="#the-connection-between-density-and-average-degree" id="toc-the-connection-between-density-and-average-degree" class="nav-link" data-scroll-target="#the-connection-between-density-and-average-degree"><span class="toc-section-number">9.5.3</span>  The Connection Between Density and Average Degree</a></li>
+  </ul></li>
+  <li><a href="#advanced-degree-metrics-topics" id="toc-advanced-degree-metrics-topics" class="nav-link" data-scroll-target="#advanced-degree-metrics-topics"><span class="toc-section-number">9.6</span>  Advanced Degree Metrics Topics</a>
+  <ul class="collapse">
+  <li><a href="#degree-variance" id="toc-degree-variance" class="nav-link" data-scroll-target="#degree-variance"><span class="toc-section-number">9.6.1</span>  Degree Variance</a></li>
+  <li><a href="#node-average-nearest-neighbor-degree" id="toc-node-average-nearest-neighbor-degree" class="nav-link" data-scroll-target="#node-average-nearest-neighbor-degree"><span class="toc-section-number">9.6.2</span>  Node Average Nearest Neighbor Degree</a></li>
+  <li><a href="#the-graphs-average-nearest-neighbor-degree" id="toc-the-graphs-average-nearest-neighbor-degree" class="nav-link" data-scroll-target="#the-graphs-average-nearest-neighbor-degree"><span class="toc-section-number">9.6.3</span>  The Graph’s Average Nearest Neighbor Degree</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/9-lesson-degree-based-graph-metrics.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-degmetrics" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Many graph metrics are based on the <strong>degrees</strong> of the node in graph (as defined in <a href="#sec-degree"><span class="quarto-unresolved-ref">sec-degree</span></a>). Here we cover the most important.</p>
+<section id="the-graph-degree-set" class="level2 page-columns page-full" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="the-graph-degree-set"><span class="header-section-number">9.1</span> The Graph Degree Set</h2>
+<p>Computing the degree of each node in the network gives us a vector (called <em>k</em>), containing the degree of each node. The vector is of “length” <em>n</em> where this is the number of nodes in the network. This is called the graph’s <strong>degree set</strong>, written <strong>k</strong>.</p>
+<p>What is a vector? A vector is a sequence of numbers. Thus, <span class="math inline">\((1, 2, 3, 4)\)</span> is a vector, and so is <span class="math inline">\((0, 1, 1, 0, 1, 1, 1)\)</span> and <span class="math inline">\((0.23, 0.39, 0.89)\)</span>. The <strong>length</strong> of a vector is the numbers of elements in it. Thus, the length of the vector <span class="math inline">\((1, 2, 3, 4)\)</span> is 4 and the the length of the vector <span class="math inline">\((0, 1, 1, 0, 1, 1, 1)\)</span> is 7. When vectors are considered as <strong>sets</strong> of numbers, the length of the vector is equivalent to the <strong>cardinality</strong> of the set defined by the vector.</p>
+<p>As you may have already figured out, there are as many members of this set as there are nodes in the graph, so the cardinality of the degree set is the same as that of graph’s node set <span class="math inline">\(|\mathbf{k}| = |V|\)</span>.</p>
+<p>Let’s consider the graph shown in <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a> again. The graph’s degree set <strong>k</strong> is shown in <a href="#tbl-degset">Table&nbsp;<span class="quarto-unresolved-ref">tbl-degset</span></a>.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-degset" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<thead>
+<tr class="header">
+<th style="text-align: right;">A</th>
+<th style="text-align: right;">B</th>
+<th style="text-align: right;">C</th>
+<th style="text-align: right;">D</th>
+<th style="text-align: right;">E</th>
+<th style="text-align: right;">F</th>
+<th style="text-align: right;">G</th>
+<th style="text-align: right;">H</th>
+<th style="text-align: right;">I</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;9.1: The degree set of an undirected graph.</div></div>
+</div>
+</div>
+</section>
+<section id="the-graph-degree-sequence" class="level2 page-columns page-full" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="the-graph-degree-sequence"><span class="header-section-number">9.2</span> The Graph Degree Sequence</h2>
+<p>When we list the members of the degree set (each node’s degree) in decreasing order from bigger to smaller, this is called the graph’s <strong>degree sequence</strong>, and it is written <strong>d</strong>. Every graph has its own degree sequence, but graphs with very different structure (in terms of other graph metrics) can have the same degree sequence <span class="citation" data-cites="kim_etal09">(<a href="#ref-kim_etal09" role="doc-biblioref">Kim et al. 2009</a>)</span>.</p>
+<p>It is easy to see that if we order the values of the degree set from higher to lower, we would obtain the following degree sequence:</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-degseq" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;9.2: The degree sequence of an undirected graph.</div></div>
+</div>
+</div>
+</section>
+<section id="minimum-and-maximum-degree" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="minimum-and-maximum-degree"><span class="header-section-number">9.3</span> Minimum and Maximum Degree</h2>
+<p>When studying a network, we are usually interested in the <strong>range</strong> of connectivity of people. What is the most connections somebody has in the network? What is the smallest set of neighbors someone has? These two graph metrics are called the <strong>maximum</strong> and <strong>minimum degree</strong> respectively. And are written <span class="math inline">\(k_{max}\)</span> and <span class="math inline">\(k_{min}\)</span>. They are given by taking the maximum or the minimum values of the graph degree set describing the network:</p>
+<p><span id="eq-maxdegree"><span class="math display">\[
+  k_{max} = max(\mathbf{k})
+\tag{9.1}\]</span></span></p>
+<p><span id="eq-mindegree"><span class="math display">\[
+  k_{min} = min(\mathbf{k})
+\tag{9.2}\]</span></span></p>
+<p>To go back to our running example of the graph shown in <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a>, it is easy to see from the degree set shown in <a href="#tbl-degset">Table&nbsp;<span class="quarto-unresolved-ref">tbl-degset</span></a>, that for this network, <span class="math inline">\(k_{max} = 5\)</span>, and <span class="math inline">\(k_{min} = 3\)</span>. The difference between these numbers gives us a sense of the heterogeneity or gap between the connectivity of the best connected and the least well connected nodes in the graph. This is called the <strong>degree range</strong>, and it is written <span class="math inline">\(k_r\)</span>:</p>
+<p><span id="eq-degrange"><span class="math display">\[
+k_r = k_{max} - k_{min}
+\tag{9.3}\]</span></span></p>
+<p>In this case, <span class="math inline">\(k_r = 5 - 3 = 2\)</span>, which tell us than in this graph, the difference between the best and most poorly connected nodes is really not that large. Most nodes have a fair number of links to others.</p>
+</section>
+<section id="the-sum-of-degrees" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="the-sum-of-degrees"><span class="header-section-number">9.4</span> The Sum of Degrees</h2>
+<p>Note that if we know the degree set of an undirected graph, we can figure out how many total edges there are in the graph. The reason for this is that the degree of each node can be defined in terms of the total number of edges incident on the node (as we noted earlier). So that means that if we know each node’s degree, then we can also know how many total edges there are in the graph.</p>
+<p>The first step we need to do is compute the <strong>sum of degrees</strong> of each node in the graph. This quantity is written <span class="math inline">\(\sum_i k_i\)</span>. For the degree set of the graph shown in <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a>, we can see that the sum of the degrees <span class="math inline">\(\sum_i k_i = 32\)</span> (go ahead use a calculator to add up all the numbers in <a href="#tbl-degset">Table&nbsp;<span class="quarto-unresolved-ref">tbl-degset</span></a>).</p>
+<p>If you go back to the graph shown in <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a> and count the number of lines, you can see that there are 16. So summing up the degrees of each node ended up totaling <em>twice</em> the number of edges shown in the graph: <span class="math inline">\(16 \times 2 = 32\)</span>. The reason for this is that each edge is incident (touches) two nodes, so it makes sense that when you add up the degrees of each node you end up with twice the amount of lines shown in the visual representation of the graph.</p>
+<p>So the relationship between the sum of the degrees and the number of edges in an undirected graph is one of simple doubling. In equation form, this is written:</p>
+<p><span id="eq-sumki"><span class="math display">\[
+  \sum_i k_i = 2m
+\tag{9.4}\]</span></span></p>
+<p>Where <em>m</em> is the cardinality of the graph’s edge set <span class="math inline">\(|E|\)</span>. Some people call this <strong>the first theorem of graph theory</strong> <span class="citation" data-cites="benjamin15">(<a href="#ref-benjamin15" role="doc-biblioref">Benjamin, Chartrand, and Zhang 2015, 20</a>)</span>!</p>
+<p>Another way to think about why we end up with twice the number of edges, is that in an undirected graph <span class="math inline">\(G\)</span>, if node <em>A</em> is a member of the set of neighbors of node <em>B</em>, then node <em>B</em> is necessarily also a member of the set of neighbors of node <em>A</em>. Thus, when computing the degree of each node, the edge <em>AB</em> does double duty, counting for the computation of both node <em>A</em> and node <em>B</em>’s degree scores, when we sum the degrees the edge thus shows up twice. Note that in the directed case we don’t have that problem, in which case <span class="math inline">\(\sum_i k_i = m\)</span>.</p>
+<p>Knowing the link between the sum of degrees and the number of edges, we can begin to calculate some other important graph metrics.</p>
+</section>
+<section id="the-average-degree" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="the-average-degree"><span class="header-section-number">9.5</span> The Average Degree</h2>
+<section id="average-degree-in-undirected-graphs" class="level3" data-number="9.5.1">
+<h3 data-number="9.5.1" class="anchored" data-anchor-id="average-degree-in-undirected-graphs"><span class="header-section-number">9.5.1</span> Average Degree in Undirected Graphs</h3>
+<p>Once we know what sum of the degrees is, we can compute an important graph metric called the <strong>average degree</strong>. This gives us a sense of whether there are lots of well-connected nodes in the graph (in which case the average degree is high), or whether the typical node in the graph only has a small number of neighbors (in which case the average degree is low).</p>
+<p>To get the average degree for a graph, written <span class="math inline">\(\bar{k}\)</span>, all we need to do is compute the sum of degrees (like earlier) and divided it by the total number of nodes in the graph:</p>
+<p><span id="eq-avgdeg1"><span class="math display">\[
+  \bar{k} = \frac{\sum_i k_i}{n}
+\tag{9.5}\]</span></span></p>
+<p>In an undirected graph <em>G</em> like the one shown in <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a>, the graph average degree is given by <em>twice</em> the total number of symmetric ties (the cardinality of the edge set as defined earlier) divided by the total number of nodes (the cardinality of the node node set). Because of the identity identified in <a href="#eq-sumki">Equation&nbsp;<span class="quarto-unresolved-ref">eq-sumki</span></a>, where <span class="math inline">\(\sum_i k_i = 2m\)</span>, we can also write the formula for the average degree as follows by switching the numerator:</p>
+<p><span class="math display">\[
+  \bar{k} = \frac{2m}{n}
+\]</span></p>
+<p>For <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a>, the average degree of the graph is:</p>
+<p><span id="eq-avgdeg2"><span class="math display">\[
+  \bar{k} = \frac{2m}{n} = \frac{2 \times 16}{9} = \frac{32}{9} = 3.6
+\tag{9.6}\]</span></span></p>
+</section>
+<section id="average-degree-in-directed-graphs" class="level3" data-number="9.5.2">
+<h3 data-number="9.5.2" class="anchored" data-anchor-id="average-degree-in-directed-graphs"><span class="header-section-number">9.5.2</span> Average Degree in Directed Graphs</h3>
+<p>We can use a variation of the same procedure to compute the average degree in directed graphs. Take the directed graph shown in <a href="#fig-directed">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, which has seven nodes and 11 edges. In this case, there is no need to “double” the number of lines as in the case of an undirected graph.</p>
+<p>We could compute <em>either</em> the average <strong>indegree</strong> or the average <strong>outdegree</strong> of each node and it would give us the same answer, because each link unless does single duty in determining either the outdegree or indegree of each node. Accordingly, the average degree in the directed case is:</p>
+<p><span id="eq-avgdeg3"><span class="math display">\[
+  \bar{k} = \frac{m}{|V|} = \frac{m}{n} = \frac{ 11}{7}=1.6
+\tag{9.7}\]</span></span></p>
+<p>Even easier!</p>
+<p>Although straightforward, the graph average degree provides a powerful tool to analyze the social world. For example, if we have two school clubs of the same size and we ask students who they are friends with in the club, we might get very different average degrees. Let us assume that the average degree in the first network is two, while in the second network it is five.</p>
+<p>This statistic informs us that people in the second network have more friends within the group than in the first network. If we are interested in why the first group failed and the second group kept meeting, we might understand that the underlying social relations of friendship, which might be theorized as contributing to the clubs survival, were weaker in the first group to begin with than they were in the second group. We are thus able to gain insight into the causes and/or underlying conditions that shape the social world.</p>
+</section>
+<section id="the-connection-between-density-and-average-degree" class="level3" data-number="9.5.3">
+<h3 data-number="9.5.3" class="anchored" data-anchor-id="the-connection-between-density-and-average-degree"><span class="header-section-number">9.5.3</span> The Connection Between Density and Average Degree</h3>
+<p>There is an intimate mathematical relationship between the <strong>graph density</strong> and the <strong>graph average degree</strong>. Let’s see what it is.</p>
+<p>Take another look at <a href="#eq-dens1">Equation&nbsp;<span class="quarto-unresolved-ref">eq-dens1</span></a>. It says that density is equal to:</p>
+<p><span id="eq-dens3"><span class="math display">\[
+  d(G)^u = \frac{2m}{n(n-1)}
+\tag{9.8}\]</span></span></p>
+<p>We can write the same equation as the product of two different fractions. Like this:</p>
+<p><span id="eq-dens4"><span class="math display">\[
+  d(G)^u = \frac{2m}{n} \times \frac{1}{n-1}
+\tag{9.9}\]</span></span></p>
+<p>Now, take a look at the first (left-hand) fraction of this product. Does it look familiar? It should, because it is the formula for the average degree we wrote down in <a href="#eq-avgdeg1">Equation&nbsp;<span class="quarto-unresolved-ref">eq-avgdeg1</span></a>!</p>
+<p>So that means that if we know the average degree and we know the number of nodes in a graph, we also know the density of the graph without knowing anything about the number of edges. Mathematical magic.</p>
+<p>How do we do that? Well, substituting the fraction <span class="math inline">\(\frac{2m}{n}\)</span> for its equivalent, the average degree <span class="math inline">\(\bar{k}\)</span>, in <a href="#eq-dens4">Equation&nbsp;<span class="quarto-unresolved-ref">eq-dens4</span></a> we get:</p>
+<p><span id="eq-dens5"><span class="math display">\[
+  d(G)^u = \bar{k} \times \frac{1}{n-1} =  \frac{\bar{k}}{n-1}
+\tag{9.10}\]</span></span></p>
+<p>So this formula tells us that the density of a graph is equivalent to its average degree divided by the number of nodes minus one. Pretty simple!</p>
+</section>
+</section>
+<section id="advanced-degree-metrics-topics" class="level2 page-columns page-full" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="advanced-degree-metrics-topics"><span class="header-section-number">9.6</span> Advanced Degree Metrics Topics</h2>
+<section id="degree-variance" class="level3 page-columns page-full" data-number="9.6.1">
+<h3 data-number="9.6.1" class="anchored" data-anchor-id="degree-variance"><span class="header-section-number">9.6.1</span> Degree Variance</h3>
+<p>Once we know the average degree of a graph, it is possible to compute more complex measures of the <strong>heterogeneity</strong> in connectivity across nodes (e.g., the extent to which there is a very big spread between well-connected and not so well-connected nodes in the graph) beyond the simpler measures of range such as the difference between <span class="math inline">\(k_{max}\)</span> and <span class="math inline">\(k_{min}\)</span>.</p>
+<p>One such measure was proposed by the sociologist and statistician <a href="https://en.wikipedia.org/wiki/Tom_Snijders"><strong>Tom Snijders</strong></a> in a paper written in 1981 <span class="citation" data-cites="snijders81">(<a href="#ref-snijders81" role="doc-biblioref">Snijders 1981</a>)</span>. It is called the <strong>degree variance</strong> of the graph. It is written <span class="math inline">\(\mathcal{v}(G)\)</span> and it is defined as the <em>average squared deviation</em> between the degree degree of each node and the average degree:</p>
+<p><span id="eq-degvar"><span class="math display">\[
+  \mathcal{v}(G) = \frac{\sum_i (k_i - \bar{k})^2}{n}
+\tag{9.11}\]</span></span></p>
+<p>The equation says that to compute the degree variance, first we create a vector of the square of the difference between each node’s degree and the average degree of the graph <span class="math inline">\((k_i - \bar{k})^2\)</span>, then we sum all the values in this vector (note that since we are squaring all these values will be a positive number), and divide the result by the total number of nodes <span class="math inline">\(n\)</span>.</p>
+<p>To compute the degree variance of the graph shown in <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a> using <a href="#eq-degvar">Equation&nbsp;<span class="quarto-unresolved-ref">eq-degvar</span></a>, we can thus go through the following steps.</p>
+<ul>
+<li>First we compute the vector of differences between each node’s degree <span class="math inline">\(k_i\)</span> (shown in <a href="#tbl-degset">Table&nbsp;<span class="quarto-unresolved-ref">tbl-degset</span></a>) and the average degree <span class="math inline">\(\bar{k}\)</span> (already computed in <a href="#eq-avgdeg2">Equation&nbsp;<span class="quarto-unresolved-ref">eq-avgdeg2</span></a>). This yields the following vector:</li>
+</ul>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-degdiff" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<thead>
+<tr class="header">
+<th style="text-align: right;">A</th>
+<th style="text-align: right;">B</th>
+<th style="text-align: right;">C</th>
+<th style="text-align: right;">D</th>
+<th style="text-align: right;">E</th>
+<th style="text-align: right;">F</th>
+<th style="text-align: right;">G</th>
+<th style="text-align: right;">H</th>
+<th style="text-align: right;">I</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">-0.56</td>
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">1.44</td>
+<td style="text-align: right;">-0.56</td>
+<td style="text-align: right;">0.44</td>
+<td style="text-align: right;">-0.56</td>
+<td style="text-align: right;">-0.56</td>
+<td style="text-align: right;">-0.56</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;9.3: Differences between the degree of each node and the average degree.</div></div>
+</div>
+</div>
+<ul>
+<li>Then we square each of these numbers <span class="math inline">\((k_i - \bar{k})^2\)</span>, which results in the following vector of squared deviations:</li>
+</ul>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-sqdegdiff" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<thead>
+<tr class="header">
+<th style="text-align: right;">A</th>
+<th style="text-align: right;">B</th>
+<th style="text-align: right;">C</th>
+<th style="text-align: right;">D</th>
+<th style="text-align: right;">E</th>
+<th style="text-align: right;">F</th>
+<th style="text-align: right;">G</th>
+<th style="text-align: right;">H</th>
+<th style="text-align: right;">I</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">2.09</td>
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">0.31</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;9.4: Squred differences between the degree of each node and the average degree.</div></div>
+</div>
+</div>
+<ul>
+<li>Then we compute the sum of all these numbers <span class="math inline">\(\sum_i (k_i - \bar{k})^2\)</span>, which is 4.2.</li>
+<li>Finally, we divide this sum by the number of nodes in the graph, which gives us:</li>
+</ul>
+<p><span class="math display">\[
+  \mathcal{v}(G) = \frac{4.2}{9} = 0.47
+\]</span></p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-regular" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="9-lesson-degree-based-graph-metrics_files/figure-html/fig-regular-1.png" class="img-fluid figure-img" width="960"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9.1: A 3-regular undirected graph of order 10</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The degree variance is supposed to capture the extent to which there is inequality in the connectivity of nodes in a graph. Inequality exists when a few nodes have a lot of connections and most nodes only have a few. The more inequality, the higher the degree variance. This means that in graphs where there is very little variation in the connectivity of each node (all nodes have roughly the same number of connections), the degree variance should be at a minimum.</p>
+<p>The most extreme version of the low inequality case is shown in <a href="#fig-regular">Figure&nbsp;<span class="quarto-unresolved-ref">fig-regular</span></a>. This graph has ten nodes, and every node has the same degree <span class="math inline">\(k = 3\)</span>, which means that the average degree is also the same number <span class="math inline">\(\bar{k} = 3\)</span>. This is called a <strong>regular graph</strong>.</p>
+<p>Because <span class="math inline">\(k - \bar{k} = 3 - 3 = 0\)</span> for all nodes in the regular graph, <em>The degree variance of a regular graph is always zero</em>. Regular graphs are referred to by their node degree and their order as <em>k-regular graphs of order n</em>. So, the example shown in <a href="#fig-regular">Figure&nbsp;<span class="quarto-unresolved-ref">fig-regular</span></a> is a <em>three-regular graph of order ten</em>.</p>
+</section>
+<section id="node-average-nearest-neighbor-degree" class="level3 page-columns page-full" data-number="9.6.2">
+<h3 data-number="9.6.2" class="anchored" data-anchor-id="node-average-nearest-neighbor-degree"><span class="header-section-number">9.6.2</span> Node Average Nearest Neighbor Degree</h3>
+<p>Just in the same way we can compute the degree of each node, we may be interested in in the question of whether nodes in the network tend to connect to others of high degree, or whether the connections in the network occur at random, irrespective of degree. The first situation, where people tend to connect to other people of high degree is called <strong>preferential attachment</strong> in network science <span class="citation" data-cites="barabasi_albert99">(<a href="#ref-barabasi_albert99" role="doc-biblioref">Barabási and Albert 1999</a>)</span>. It is also referred to as a <strong>popularity tournament structure</strong> in sociology <span class="citation" data-cites="waller37">(<a href="#ref-waller37" role="doc-biblioref">Waller 1937</a>)</span>. If you went to a real live high school, you may know how this works.</p>
+<p>To get a sense of whether a given node prefers to connect to others who also have a large number of connections, we can compute an index called the <strong>average nearest neighbor degree</strong>, which is conventionally written <span class="math inline">\(\bar{k}_{nn(i)}\)</span>.</p>
+<p>This is given by the following formula:</p>
+<p><span id="eq-annd1"><span class="math display">\[
+  \bar{k}_{nn(i)} = \frac{1}{k_i} \sum_{j \in \mathcal{N(i)}} k_j
+\tag{9.12}\]</span></span></p>
+<p>The formula says that to compute the <em>knn</em> of node <em>i</em> we take sum of the degrees of each of their neighbors <em>j</em> (remember that <span class="math inline">\(j \in \mathcal{N(i)}\)</span> means “as long as node <em>j</em> belongs to the set <span class="math inline">\(N(i)\)</span>”), and then divide it by the degree of node <em>i</em>.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-knn" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<thead>
+<tr class="header">
+<th style="text-align: right;">A</th>
+<th style="text-align: right;">B</th>
+<th style="text-align: right;">C</th>
+<th style="text-align: right;">D</th>
+<th style="text-align: right;">E</th>
+<th style="text-align: right;">F</th>
+<th style="text-align: right;">G</th>
+<th style="text-align: right;">H</th>
+<th style="text-align: right;">I</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">3.8</td>
+<td style="text-align: right;">4.3</td>
+<td style="text-align: right;">3.8</td>
+<td style="text-align: right;">3.6</td>
+<td style="text-align: right;">4.3</td>
+<td style="text-align: right;">3.5</td>
+<td style="text-align: right;">3.3</td>
+<td style="text-align: right;">3.3</td>
+<td style="text-align: right;">3.3</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;9.5: Average nearest neighbor degree of nodes in an undirected graph</div></div>
+</div>
+</div>
+<p>As an example, the <span class="math inline">\(\bar{k}_{nn(i)}\)</span> for each node in the undirected graph shown in <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a> are shown in <a href="#tbl-knn">Table&nbsp;<span class="quarto-unresolved-ref">tbl-knn</span></a>. This is the <em>vector</em> of average nearest neighbor degrees for the graph <span class="math inline">\(k_{nn}\)</span>. The table tells us that, nodes <em>B</em> and and <em>E</em> seem to have the strongest tendencies to connect to others who are also popular, while <em>G</em>, <em>H</em>, and <em>I</em> display the weakest such tendencies.</p>
+<p>But how the we know if a <span class="math inline">\(\bar{k}_{nn(i)} = 4.3\)</span> is a big number or a small number? Well, we can compare each node’s <span class="math inline">\(\bar{k}_{nn(i)}\)</span> to the <strong>average degree</strong> (<span class="math inline">\(\bar{k}\)</span>) as defined previously. If a node’s <span class="math inline">\(\bar{k}_{nn(i)}\)</span> is bigger than the average degree of the graph, then we can say that their neighbors are more likely to be popular than expected by chance. For instance, we know, from the calculation shown in <a href="#eq-avgdeg2">Equation&nbsp;<span class="quarto-unresolved-ref">eq-avgdeg2</span></a>, that the average degree for this graph is 3.6, so a <span class="math inline">\(\bar{k}_{nn(i)} = 4.3\)</span> tells us that a node connects to others that are (on average) more popular than the average person.</p>
+</section>
+<section id="the-graphs-average-nearest-neighbor-degree" class="level3" data-number="9.6.3">
+<h3 data-number="9.6.3" class="anchored" data-anchor-id="the-graphs-average-nearest-neighbor-degree"><span class="header-section-number">9.6.3</span> The Graph’s Average Nearest Neighbor Degree</h3>
+<p>If we take the average of the average nearest neighbor degree vector for each node shown in <a href="#tbl-knn">Table&nbsp;<span class="quarto-unresolved-ref">tbl-knn</span></a>, this would give us the graph’s <strong>average nearest neighbor degree</strong> (<span class="math inline">\(\bar{k}_{nn}\)</span>). But what could this possibly mean? Well, this would tell us the typical number of friends that the typical friend of the typical node in the graph has! Essentially, the expected number of <em>friends of friends</em> of the average person.</p>
+<p>In a mind-bending paper, the sociologist Scott <span class="citation" data-cites="feld91">Feld (<a href="#ref-feld91" role="doc-biblioref">1991</a>)</span> showed, that with very few exceptions (e.g., regular graphs), <em>the average number of friends of the typical person</em> (the graph’s average degree) is <strong>smaller</strong> than the <em>average number of friends of friends of the typical person in the same social network</em> (the graph’s average nearest neighbor degree). That is, <strong>your friends have more friends than you do</strong>. Don’t get depressed. This is just how social networks work.</p>
+<p>Check it out for yourself! If we compute the graph’s average nearest neighbor degree from the numbers in the vector shown in <a href="#tbl-knn">Table&nbsp;<span class="quarto-unresolved-ref">tbl-knn</span></a>, this would give us <span class="math inline">\(\bar{k}_{nn} = 3.7\)</span> which is larger than the same graph’s average degree we computed earlier (<span class="math inline">\(\bar{k} = 3.6\)</span>). Weird!</p>
+</section>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-barabasi_albert99" class="csl-entry" role="doc-biblioentry">
+Barabási, Albert-László, and Réka Albert. 1999. <span>“Emergence of Scaling in Random Networks.”</span> <em>Science</em> 286 (5439): 509–12.
+</div>
+<div id="ref-benjamin15" class="csl-entry" role="doc-biblioentry">
+Benjamin, Arthur, Gary Chartrand, and Ping Zhang. 2015. <em>The Fascinating World of Graph Theory</em>. Princeton University Press.
+</div>
+<div id="ref-feld91" class="csl-entry" role="doc-biblioentry">
+Feld, Scott L. 1991. <span>“Why Your Friends Have More Friends Than You Do.”</span> <em>American Journal of Sociology</em> 96 (6): 1464–77.
+</div>
+<div id="ref-kim_etal09" class="csl-entry" role="doc-biblioentry">
+Kim, Hyunju, Zoltán Toroczkai, Péter L Erdős, István Miklós, and László A Székely. 2009. <span>“Degree-Based Graph Construction.”</span> <em>Journal of Physics A: Mathematical and Theoretical</em> 42 (39): 392001.
+</div>
+<div id="ref-snijders81" class="csl-entry" role="doc-biblioentry">
+Snijders, Tom AB. 1981. <span>“The Degree Variance: An Index of Graph Heterogeneity.”</span> <em>Social Networks</em> 3 (3): 163–74.
+</div>
+<div id="ref-waller37" class="csl-entry" role="doc-biblioentry">
+Waller, Willard. 1937. <span>“The Rating and Dating Complex.”</span> <em>American Sociological Review</em> 2 (5): 727–34.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./8-lesson-graph-metrics.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./10-lesson-directed-graph-metrics.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Directed Graph Metrics</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
