@@ -1,4 +1,4 @@
-# Degree-Based Metrics {@sec-degmets}
+# Degree-Based Graph Metrics {#sec-degmetrics}
 
 ```{r setup, include=FALSE}
     library(ggraph)
@@ -7,9 +7,9 @@
     require(kableExtra)
 ```
 
-Many graph metrics are based on the **degrees** of the node in graph (as defined in the graph theory lesson). Here we cover the most important.
+Many graph metrics are based on the **degrees** of the node in graph (as defined in @sec-degree). Here we cover the most important.
 
-## The Graph Degree Set {@sec-degset}
+## The Graph Degree Set 
 Computing the degree of each node in the network gives us a vector (called *k*), containing the degree of each node. The vector is of "length" *n* where this is the number of nodes in the network. This is called the graph's **degree set**, written **k**.
 
 What is a vector? A vector is a sequence of numbers. Thus, $(1, 2, 3, 4)$ is a vector, and so is $(0, 1, 1, 0, 1, 1, 1)$ and $(0.23, 0.39, 0.89)$. The **length** of a vector is the numbers of elements in it. Thus, the length of the vector $(1, 2, 3, 4)$ is 4 and the the length of the vector $(0, 1, 1, 0, 1, 1, 1)$ is 7. When vectors are considered as **sets** of numbers, the length of the vector is equivalent to the **cardinality** of the set defined by the vector.
@@ -37,7 +37,7 @@ Let's consider the graph shown in @fig-undirected again. The graph's degree set 
     kbl(d, format = "pipe") 
 ```
 
-### The Graph Degree Sequence
+## The Graph Degree Sequence
 
 When we list the members of the degree set (each node's degree) in decreasing order from bigger to smaller, this is called the graph's **degree sequence**, and it is written **d**. Every graph has its own degree sequence, but graphs with very different structure (in terms of other graph metrics) can have the same degree sequence [@kim_etal09].
 
@@ -82,11 +82,10 @@ $${#eq-degrange}
 
 In this case, $k_r = 5 - 3 = 2$, which tell us than in this graph, the difference between the best and most poorly connected nodes is really not that large. Most nodes have a fair number of links to others.
 
-## The Average Degree
-
-Note that if we know the degree set of an undirected graph, we can figure out how many total edges there are in the graph. The reason for this is that the degree of each node can be defined in terms of the total number of edges incident on the node (as we noted earlier). So that means that if we know each node's degree, then we ca also know how many total edges there are in the graph.
 
 ## The Sum of Degrees
+
+Note that if we know the degree set of an undirected graph, we can figure out how many total edges there are in the graph. The reason for this is that the degree of each node can be defined in terms of the total number of edges incident on the node (as we noted earlier). So that means that if we know each node's degree, then we can also know how many total edges there are in the graph.
 
 The first step we need to do is compute the **sum of degrees** of each node in the graph. This quantity is written $\sum_i k_i$. For the degree set of the graph shown in @fig-undirected, we can see that the sum of the degrees $\sum_i k_i = 32$ (go ahead use a calculator to add up all the numbers in @tbl-degset).
 
@@ -104,7 +103,9 @@ Another way to think about why we end up with twice the number of edges, is that
 
 Knowing the link between the sum of degrees and the number of edges, we can begin to calculate some other important graph metrics.
 
-## Average Degree in Undirected Graphs
+## The Average Degree
+
+### Average Degree in Undirected Graphs
 
 Once we know what sum of the degrees is, we can compute an important graph metric called the **average degree**. This gives us a sense of whether there are lots of well-connected nodes in the graph (in which case the average degree is high), or whether the typical node in the graph only has a small number of neighbors (in which case the average degree is low).
 
@@ -126,7 +127,7 @@ $$
   \bar{k} = \frac{2m}{n} = \frac{2 \times 16}{9} = \frac{32}{9} = 3.6
 $$ {#eq-avgdeg2}
 
-## Average Degree in Directed Graphs
+### Average Degree in Directed Graphs
 
 We can use a variation of the same procedure to compute the average degree in directed graphs. Take the directed graph shown in @fig-directed, which has seven nodes and 11 edges. In this case, there is no need to "double" the number of lines as in the case of an undirected graph.
 
@@ -142,7 +143,7 @@ Although straightforward, the graph average degree provides a powerful tool to a
 
 This statistic informs us that people in the second network have more friends within the group than in the first network. If we are interested in why the first group failed and the second group kept meeting, we might understand that the underlying social relations of friendship, which might be theorized as contributing to the clubs survival, were weaker in the first group to begin with than they were in the second group. We are thus able to gain insight into the causes and/or underlying conditions that shape the social world.
 
-## The Connection Between Density and Average Degree
+### The Connection Between Density and Average Degree
 There is an intimate mathematical relationship between the **graph density** and the **graph average degree**. Let's see what it is.
 
 Take another look at @eq-dens1. It says that density is equal to:
@@ -169,9 +170,9 @@ $${#eq-dens5}
 
 So this formula tells us that the density of a graph is equivalent to its average degree divided by the number of nodes minus one. Pretty simple!
 
-## Advanced Topics
+## Advanced Degree Metrics Topics
 
-###Degree Variance
+### Degree Variance
 Once we know the average degree of a graph, it is possible to compute more complex measures of the **heterogeneity** in connectivity across nodes (e.g., the extent to which there is a very big spread between well-connected and not so well-connected nodes in the graph) beyond the simpler measures of range such as the difference between $k_{max}$ and $k_{min}$.
 
 One such measure was proposed by the sociologist and statistician [**Tom Snijders**](https://en.wikipedia.org/wiki/Tom_Snijders) in a paper written in 1981 [@snijders81]. It is called the **degree variance** of the graph. It is written $\mathcal{v}(G)$ and it is defined as the *average squared deviation* between the degree degree of each node and the average degree:
@@ -237,7 +238,7 @@ $$
 
 ```{r}
 #| label: fig-regular
-#| fig-cap: "A 3-regular graph of order 10"
+#| fig-cap: "A 3-regular undirected graph of order 10"
 #| fig-cap-location: margin
 #| fig-width: 10
 #| fig-height: 10
@@ -261,7 +262,7 @@ The most extreme version of the low inequality case is shown in @fig-regular. Th
 
 Because $k - \bar{k} = 3 - 3 = 0$ for all nodes in the regular graph, *The degree variance of a regular graph is always zero*. Regular graphs are referred to by their node degree and their order as *k-regular graphs of order n*. So, the example shown in @fig-regular is a *three-regular graph of order ten*.
 
-## Node Average Nearest Neighbor Degree
+### Node Average Nearest Neighbor Degree
 Just in the same way we can compute the degree of each node, we may be interested in in the question of whether nodes in the network tend to connect to others of high degree, or whether the connections in the network occur at random, irrespective of degree. The first situation, where people tend to connect to other people of high degree is called **preferential attachment** in network science [@barabasi_albert99]. It is also referred to as a **popularity tournament structure** in sociology [@waller37]. If you went to a real live high school, you may know how this works.
 
 To get a sense of whether a given node prefers to connect to others who also have a large number of connections, we can compute an index called the **average nearest neighbor degree**, which is conventionally written $\bar{k}_{nn(i)}$.
@@ -297,7 +298,7 @@ As an example, the $\bar{k}_{nn(i)}$ for each node in the undirected graph shown
 
 But how the we know if a $\bar{k}_{nn(i)} = 4.3$ is a big number or a small number? Well, we can compare each node's $\bar{k}_{nn(i)}$ to the **average degree** ($\bar{k}$) as defined previously. If a node's $\bar{k}_{nn(i)}$ is bigger than the average degree of the graph, then we can say that their neighbors are more likely to be popular than expected by chance. For instance, we know, from the calculation shown in @eq-avgdeg2, that the average degree for this graph is 3.6, so a $\bar{k}_{nn(i)} = 4.3$ tells us that a node connects to others that are (on average) more popular than the average person.
 
-## The Graph's Average Nearest Neighbor Degree
+### The Graph's Average Nearest Neighbor Degree
 
 If we take the average of the average nearest neighbor degree vector for each node shown in @tbl-knn, this would give us the graph's **average nearest neighbor degree** ($\bar{k}_{nn}$). But what could this possibly mean? Well, this would tell us the typical number of friends that the typical friend of the typical node in the graph has! Essentially, the expected number of *friends of friends* of the average person.
 
