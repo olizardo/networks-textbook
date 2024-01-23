@@ -112,15 +112,30 @@ Graphs have some basic properties that we need to learn about:
 -   If an edge "touches" a node (e.g., connects it to another node) we say that that edge is **incident** on that node. So in @fig-simple1, the edge *AB* is incident on both nodes *A* and *B*. The relation of **incidence** will be important in a later lesson when we discuss network metrics computed at the node level like **degree centrality**.
 -   Finally, in a graph, nodes that are not connected to any other nodes are called **isolates**. This means that in @fig-simple1, node *D* is an isolate because it has zero edges incident upon it.
 
-Graphs like that shown in @fig-simple1 are called **simple graphs**. There are two requirements for a graph to count as a simple graph:
+Note that in @fig-simple1, the nodes have letters which function as "names" for each. Thus, we can refer to node $A$, or node $B$ and so forth. These names are arbitrary, we can as well use numbers $\{1, 2, 3, ...\}$ or a combination of letters and numbers $\{V_1, V_2, V_3, ....\}$. 
+
+When the nodes of a graph are distinguished from one another using names, the graph is said to be **labeled**. Sometimes, the names don't matter, so we don't specify them, as in @fig-simple2. In this case, the graph is said to be **unlabeled**. Graph metrics like the ones we will compute starting on @sec-graphmetrics, are the same regardless of whether the graph is labeled or not. Most of the example graphs we will be looking at are of the labeled kind.
+
+```{r}
+#| label: fig-simple2
+#| fig-cap: "A simple unlabeled graph with four nodes and two edges."
+#| fig-cap-location: margin
+
+    gr <- create_empty(4)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:3))  
+    p <- ggraph(gr, layout = 'tree') 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p
+```
+
+Graphs like that shown in @fig-simple1 and @fig-simple2 are called **simple graphs**. There are two requirements for a graph to count as a simple graph:
 
 -   First, there can only be *one edge* joining two nodes at any time. That is, there cannot be multiple lines linking together the same pair of nodes. We will see in a later lesson that there are types of graphs that relax this restriction.
 -   The second requirement is that graph does not contain any edges that have the same node as its two end points. These kind of edges are called **loops**, and they are edges that connect a node to itself! Clearly this does not make sense for most sociological applications.
 
 With some exceptions, noted in subsequent lessons, simple graphs can represent most social networks.
-
-
-
-
 
 ## References {.unnumbered}

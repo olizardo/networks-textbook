@@ -40,7 +40,7 @@ Nodes and edges are indeed the building blocks of a graph. However, types of rel
 
 Let us assume that @fig-undirected represents a network of people who spend time together. One way of building this network would be to ask people on your dorm room floor who are the people that they spend some amount of time (e.g., more than an hour a week) hanging out with. By definition the relation "spending time together" lacks any inherent directionality. **Mutuality** (or **reciprocity**) is built in by construction. It would be nonsensical for a person (say *A*) to claim that they spend time with another person (say *B*) and for *B* to say that they do not spend time with *A*. In social network analysis these types of ties are called **symmetric ties**. 
 
-Accordingly, two people being in the same place at the same time (co-location), even if they do not one another, is an example of a symmetric tie. You also have the symmetric tie "being in the same class as" every other student that is also taking your Social Networks seminar this term. Note that, in this sense, all **co-memberships** (e.g., being in the same club or organization or being part of the same family) create symmetric ties among all actors involved (we will revisit this topic when talking about **two-mode networks** in another lesson). If I am a member of your family, you are also my family member; if we are both members of the soccer club, we are considered teammates. Social networks composed of symmetric ties are represented using **undirected graphs** like the one shown in @fig-undirected. 
+Accordingly, two people being in the same place at the same time (co-location), even if they do not one another, is an example of a symmetric tie. You also have the symmetric tie "being in the same class as" every other student that is also taking your Social Networks seminar this term. Note that, in this sense, all **co-memberships** (e.g., being in the same club or organization or being part of the same family) create symmetric ties among all actors involved (we will revisit this topic when talking about **two-mode networks** in another lesson). If I am a member of your family, you are also my family member; if we are both members of the soccer club, we are considered teammates. Social networks composed of symmetric ties are represented using **undirected graphs** like the one shown in @fig-undirected. When an undirected graph has no **loops** (edges connecting a node to itself), and there is only one edge connecting adjacent vertices to one another (the graph has no **multiedges**), it is called a **simple undirected graph**.
 
 Networks composed of symmetric ties have some interesting properties. If we know that the relationship (**R**) linking two nodes *A* and B is **symmetric**, then only a single edge exists that links them, and it does not matter whether we call this edge *AB* or *BA*. The order does not matter. In this way, we can formally define as **symmetric tie** as one that lacks directionality; if a tie is symmetric, then if we know that A is related to B (the AB edge is part of the edge set of the graph), then we know by necessity that B is related to A. 
 
@@ -82,11 +82,37 @@ Can you think of relationships in your life characterized by more or less recipr
 
 Just like symmetric ties are represented using a particular type of graph (namely, an **undirected graph**), social networks composed of asymmetric ties are best represented by a type of graph called a **directed graph**.^[Directed graphs are also called **digraphs**] @fig-directed shows the point and line diagram picture of a directed graph. What were simple lines for in the undirected graph shown in @fig-undirected have been replaced with arrows indicating directionality. A node **sends** a relationship to the node that the arrow points to. Up to two directed arrows may link nodes going both ways. 
 
-If @fig-directed were an **advice network** [@cross01], on the other hand, we could say that *H* seeks advice from *D*, but *D* does not seek advice from *H*. This may be because *D* is higher in the office hierarchy or is more experienced than *H*, in which case lack of reciprocity may be indicative of an authority relationship between the two nodes. 
+When an undirected graph has no **loops** (edges connecting a node to itself), and there is only one edge connecting adjacent vertices to one another (the graph has no **multiedges**) like @fig-directed, it is called a **simple directed graph**. If @fig-directed were an **advice network** [@cross01], on the other hand, we could say that *H* seeks advice from *D*, but *D* does not seek advice from *H*. This may be because *D* is higher in the office hierarchy or is more experienced than *H*, in which case lack of reciprocity may be indicative of an authority relationship between the two nodes. 
 
-In a directed graph, for every edge, there is a **source node** and a **destination node**. So in the case of "A helps B" the source node is *A* and the destination node is *B*. In the case of "B helps A" the source node is *B* and the destination node is *A*. This means that in a directed graph, in contrast to a undirected one, the order in which you list the nodes when you name the edges matters. Thus, the edge *AB* is a different one from the edge *BA*. For instance, the first one may exist but the second one may not exist. 
+In a directed graph, for every edge, there is a **source node** and a **destination node**. So in the case of "A helps B" the source node is *A* and the destination node is *B*. In the case of "B helps A" the source node is *B* and the destination node is *A*. This means that in a directed graph, in contrast to a undirected one, *the order in which you list the nodes when you name the edges matters*. Thus, the edge *AB* is a different one from the edge *BA*. For instance, the first one may exist but the second one may not exist.^[Edges in a direted graph are sometimes also called **arcs**.] 
 
 One must always be careful when examining a directed network to make sure one properly understands the direction of the underlying social relationships!
+
+
+```{r}
+#| label: fig-symmdirected
+#| fig-cap: "A symmetric directed graph"
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+  fr <- c("A", "B", "D", "A", "B", "C", "E", "C", "F", "A", "G", "D", "C", "D", "E", "G")
+  to <- c("B", "A", "A", "D", "C", "B", "C", "E", "A", "F", "D", "G", "D", "C", "G", "E")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  p <- ggraph(gr, layout = 'kk')
+  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+              arrow = arrow(length = unit(7, 'mm')),
+              end_cap = circle(10, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+There are also some special types of directed graphs. For instance, if in directed graph, every pair of adjacent nodes is connected via a bi-directional, reciprocal relationship, as in @fig-symmdirected, then it is called as **symmetric directed graph**.  
 
 ### Node Neighborhoods in Directed Graphs
 Just like in undirected (simple) graphs, each node in a directed graph has a **node neighborhood**. However, because now each node can be the **source** or **destination** for a asymmetric edges, this means that we have to differentiate the neighborhood of a node depending on whether the node is the **sender** or the **recipient** of a given link. 
@@ -122,7 +148,7 @@ This means that in a directed graph, there will typically be three types of (non
 - Second, there will be nodes that receive ties and also send out ties. These are called **carriers** (like nodes *A* and *B* in @fig-directed. For carrier nodes, $k_{in} > 0$ and $k_{out} > 0$.
 - Finally, there will be nodes that send ties but don't receive them. These are called **transmitters** (like nodes *E* and *G* in @fig-directed). For transmitter nodes, $k_{in} = 0$ and $k_{out} > 0$. 
 
-## Anti-Symmetric Ties and Tree Graphs {#sec-tree}
+## Anti-Symmetric Ties and Oriented Graphs {#sec-oriented}
 
 There is a particular type of directed relationship that has the property of only going in one direction. These are called **anti-symmetric ties**. Like asymmetric ties, anti-symmetric ties have a directionality (and thus source and destination nodes), but reciprocity is forbidden by definition. That means that if *A* is anti-symmetrically connected to *B*, then *B* *cannot* send the *same type of tie* back to *A* (although *B* may be connected, and typically is, to *A* via some other type of tie in a different network). 
 
@@ -130,11 +156,60 @@ A common example of anti-symmetric ties in political sociology are *patron-clien
 
 In the first (authority relations) case, your boss is your boss, while you cannot be your boss’ boss. The same goes for armies and other **command and control structures**, *giving orders to* is an anti-symmetric relation. An officer who gives orders to another officer (and thus commands them) *cannot* by definition also receive orders from them. Thus, @fig-tree could be a network in which the anti-symmetric links are directed "gives orders to" (in an army or an office) relations, where the **source node** directs commands toward the **destination node**. So *A* is the top boss and commands *B*, *C*, and *D*. Node *B*, in their turn, gives orders to *E*, who is at the lowest level of the command and control structure, not commanding anybody in turn. 
 
-In the second (cross-generational) case, your parents are your parents (but you can only be a son or daughter to your parents), and your grandparents are their parents, and so forth. "Being the parent of" thus counts as an anti-symmetric relation as we define here; it only goes way (from parents to children) but it cannot come back from children towards parents. Teacher-student, coach-athlete, buyer-seller, parent-child are all examples of anti-symmetric relationships that can be depicted as tree graphs. Later, we will see that it is possible to characterize the level of anti-symmetry we observe in a directed graph, to see how closely they approximate the pure tree structure.  
+```{r}
+#| label: fig-oriented
+#| fig-cap: "An oriented directed graph"
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+  fr <- c("A", "D", "C", "C", "A", "D", "D", "G", "C", "B", "G")
+  to <- c("B", "A", "F", "E", "F", "G", "C", "E", "A", "F", "A")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  p <- ggraph(gr, layout = 'kk')
+  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+              arrow = arrow(length = unit(7, 'mm')),
+              end_cap = circle(10, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+In the second (cross-generational) case, your parents are your parents (but you can only be a son or daughter to your parents), and your grandparents are their parents, and so forth. "Being the parent of" thus counts as an anti-symmetric relation as we define here; it only goes way (from parents to children) but it cannot come back from children towards parents. Teacher-student, coach-athlete, buyer-seller, parent-child are all examples of anti-symmetric relationships that can be depicted as tree graphs.  
+
+
+```{r}
+#| label: fig-oriented-tree
+#| fig-cap: "An oriented directed graph drawn as a tree."
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+  fr <- c("A", "D", "C", "C", "A", "D", "D", "G", "C", "B", "G")
+  to <- c("B", "A", "F", "E", "F", "G", "C", "E", "A", "F", "A")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  p <- ggraph(gr, layout = 'tree')
+  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+              arrow = arrow(length = unit(7, 'mm')),
+              end_cap = circle(10, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+What happens if we build a network composed of pure anti-symmetric ties? The resulting graph is a special type of directed graph called an **oriented graph**, like the one in @fig-oriented. An oriented graph is kind of the opposite of the kind of symmetric directed graph depicted in @fig-symmdirected. Whereas in @fig-symmdirected every connected dyad is linked by a bi-directional reciprocal link, in the oriented graph shown in @fig-oriented, every connected dyad is linked *only* by a one-way non-reciprocal link, the link that would turn the asymmetrically connected dyads in @fig-oriented into a reciprocal dyad is forbidden by the nature of the tie.
 
 ```{r}
 #| label: fig-tree
-#| fig-cap: "A tree graph"
+#| fig-cap: "A tree graph with thirteen nodes."
 #| fig-cap-location: margin
 #| fig-width: 10
 #| fig-height: 10
@@ -151,11 +226,26 @@ In the second (cross-generational) case, your parents are your parents (but you 
   p
 ```
 
-One feature of a network composed of only anti-symmetric relations is that its corresponding graph can always be drawn from top to bottom, starting (at the top) with the node that only sends but does receive any ties and ending (at the bottom) with nodes that only receive, but do not send, ties. This is called a **tree graph** and an example is shown in @fig-tree. As noted, your family tree is an example of a tree graph of anti-symmetric kin ties going from people in an older generation to those in a younger generation. For instance, *A* could be your grandmother, and *B*, *C*, and *D* could be her three daughters. If *B* was you mom, then you could be *E* (along with your siblings *F* and *G*) and your cousins *H*, *I*, *J*, *K*, *L*, *M*.
 
-As we will see in @sec-indirect, when considering connections between people that involve intermediaries, there is a special pattern called a **cycle**. This involves a node sending a directed tie to another node, which sends a directed tie to a third node. What makes it a cycle is that third node then sends a direced tie to the first node we began with. Recall from @sec-dirtriads, that the three-person subgraph *AAA(C)* shown in @fig-AAAC forms a cycle. 
+As we will see in @sec-indirect, when considering connections between people that involve intermediaries, there is a special pattern called a **cycle**. This involves a node sending a directed tie to another node, which sends a directed tie to a third node. What makes it a cycle is that third node then sends a directed tie to the first node we began with. Recall from @sec-dirtriads, that the three-person subgraph *AAA(C)* shown in @fig-AAAC forms a cycle. For instance, in @fig-oriented, the sequence of directed edges $ED, DG, GE$ forms a cycle starting and ending in node $E$. Can you spot any other cycles in @fig-oriented?
 
-Well, a key property of tree graphs composed of anti-symmetric ties is that *they can't have any cycles*. No node that sends a tie can receive a tie back! This is the reason why tree graphs are said to to be "acyclic" (they lack cycles) and also why they go by the name **directed acyclic graphs** which is sometimes abbreviated as "DAG." DAGs have applications in certain fields of statistics, causal analysis, and machine learning and have been made famous by [Judea Pearl](http://bayes.cs.ucla.edu/jp_home.html), a Professor of Computer science right here at UCLA.
+One feature of a network composed of only anti-symmetric relations is that its corresponding graph can always be drawn from top to bottom, starting (at the top) with the node that only sends but does receive any ties and ending (at the bottom) with nodes that only receive, but do not send, ties. This is called a **tree layout**. For instance, @fig-oriented tree shows the same graph as in @fig-oriented, but laid out as a tree. 
+
+However, a **tree graph** is not the same as an oriented graph drawn as a tree. Instead, a tree graph is a special kind of oriented graph, oberying a few restrictions:
+
+1. Every node is the source of only *one* directed edge and/or the destination of only *one* directed edge. 
+
+1. A node can only send a tie to a node that does not receive ties from any other node. 
+
+1. If a node sends an anti-symmetric link to a second node, and that node sends an anti-symmetric link to a third node, this last node cannot send an anti-symmetric link back to the first node. 
+
+An oriented graph obeying these three restrictions, and thus counting as a tree graph, is shown in @fig-tree. As per conditions (1) and (2), the indegrees of each node in the graph are restricted to be either zero or one. Transmitter nodes have indegree zero but oudegree equal to one or more, like $A$ in @fig-tree ($k_{in}(A) = 0, k_{out}(A) = 3$). Receiver nodes have indegree one but outdegree zero like $\{E, F, G, H, I, J, K, L, M\}$ in @fig-tree. Finally carrier nodes indegree equal to one like and outdegree of one or more like $\{B, C, D\}$ in @fig-tree.
+
+As noted, your family tree is an example of a tree graph composed of anti-symmetric kin ties going from people in an older generation to those in a younger generation. For instance, *A* could be your grandmother, and *B*, *C*, and *D* could be her three daughters. If *B* was you mom, then you could be *E* (along with your siblings *F* and *G*) and your cousins *H*, *I*, *J*, *K*, *L*, *M*. 
+
+Given condition (3), a key property of tree graphs composed of anti-symmetric ties is that *they can't have any cycles*. No node that sends a tie to another node can receive a tie back from a third node their neighbor points to! This is the reason why tree graphs are said to to be "acyclic" (they lack cycles). 
+
+In this case, tree graphs are a special case of a directed graph without cycles. These special type of directed graphs are also called **directed acyclic graphs** which is sometimes abbreviated as "DAG." DAGs have applications in certain fields of statistics, causal analysis, and machine learning and have been made famous by [Judea Pearl](http://bayes.cs.ucla.edu/jp_home.html), a Professor of Computer science right here at UCLA.
 
 
 ## References {.unnumbered}
