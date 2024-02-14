@@ -68,44 +68,70 @@ Edges represent the presence of a *connection* or a **social tie** between two n
 In graph theory, the set of edges is best thought of as a collection of *pairs* of nodes, where the two members of the pair are the nodes involved in the social tie. So if node *A* is linked to node *B* via some social tie (friendship, study group, coworkers), then *AB* is a member of the edge set of the relevant graph. In set theory notation, this is usually written as $AB \in E$ which is read as "the edge *AB* is a member of the set $E$." Edges can also be referred to by juxtaposing the two nodes that are connected by the edge. Thus, the edge *AB* can also be written as $V_A V_B$.
 
 ```{r}
-#| label: fig-simple1
-#| fig-cap: "A simple graph with four nodes and two edges."
+#| label: fig-simple
+#| fig-cap: "Four simple graphs with four nodes and two edges."
 #| fig-cap-location: margin
+#| fig-subcap:
+#|   - "A simple graph."
+#|   - "A G(4, 2) graph"
+#|   - "Another G(4,2) graph."
+#|   - "An unlabeled simple graph."
+#| layout-ncol: 2
+#| fig-width: 8
+#| fig-height: 8
 
     gr <- create_empty(4)
     gr <- gr %>% 
         bind_edges(data.frame(from = 1, to = 2:3)) %>% 
         mutate(name = toupper(letters[1:4])) 
     p <- ggraph(gr, layout = 'tree') 
+    l <- ggraph(gr, layout = 'tree') 
+    l <- as.matrix(l$data[, 1:2])
     p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
     p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
     p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-    p <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
-    p
-```
+    p1 <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p1
 
-```{r}
-#| label: fig-simple2
-#| fig-cap: "A simple unlabeled graph with four nodes and two edges."
-#| fig-cap-location: margin
-
+    gr <- create_empty(4)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 4, to = c(1, 3))) %>% 
+        mutate(name = toupper(letters[1:4])) 
+    p <- ggraph(gr, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p2 <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p2
+    
+    gr <- create_empty(4)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 3, to = c(1, 4))) %>% 
+        mutate(name = toupper(letters[1:4])) 
+    p <- ggraph(gr, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p3 <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p3
+    
     gr <- create_empty(4)
     gr <- gr %>% 
         bind_edges(data.frame(from = 1, to = 2:3))  
     p <- ggraph(gr, layout = 'tree') 
     p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
     p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-    p <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
-    p
+    p4 <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p4
 ```
 
 
 In the case of power generation stations and homes, the edges can represent power lines. Meanwhile, servers and computers are connected by internet cables and wi-fi access, while towns are connected by roads. The existence of edges signal the potential for content to flow, whether that's power, computer data, or people in cars. In the case of social networks, the content that flows between two nodes are such things as influence, advice, information, and support. But it may also be disease, bullying, or gossip. 
 
 ## What is a Graph?
-@fig-simple1 shows an example of a point and line network diagram of a graph with four **nodes** and two **edges**. Nodes *A*, *B*, *C* and *D* are circles representing actors **A**, **B**, **C** and **D**, whose real world social relationships we are interested in studying. The lines drawn between *A* and *B* and likewise between *B* and *C* represent the **edges**, indicating the presence of a social tie. Thus the edges, *AB* and *BC* appear in the network diagram. The lack of an edge between nodes *B* and *C* reflects the *absence* of a relationship between actors named **B** and **C** in the real world.
+@fig-simple(a) shows an example of a point and line network diagram of a graph with four **nodes** and two **edges**. Nodes *A*, *B*, *C* and *D* are circles representing actors **A**, **B**, **C** and **D**, whose real world social relationships we are interested in studying. The lines drawn between *A* and *B* and likewise between *B* and *C* represent the **edges**, indicating the presence of a social tie. Thus the edges, *AB* and *BC* appear in the network diagram. The lack of an edge between nodes *B* and *C* reflects the *absence* of a relationship between actors named **B** and **C** in the real world.
 
-So if we were to write out the graph shown in  @fig-simple1 in terms of the sets that define the graph, we would say:
+So if we were to write out the graph shown in  @fig-simple(a) in terms of the sets that define the graph, we would say:
 
 $$
   G = \{E, V\} 
@@ -119,9 +145,16 @@ $$
 V = \{A, B, C, D\}
 $${#eq-graph3}
 
-This says that the graph *G* shown in @fig-simple1 is a set with two members, *E* and *V*, each of which is its own set. The edge set of *G* has two members, *AB* and *AC*. The node set of *G* has four members, *A*, *B*, *C*, and *D*. The number of members in a set is typically referred to as the **cardinality** of the set, written $|N|$ where $N$ is the name of the set. 
+This says that the graph *G* shown in @fig-simple(a) is a set with two members, *E* and *V*, each of which is its own set. The edge set of *G* has two members, *AB* and *AC*. The node set of *G* has four members, *A*, *B*, *C*, and *D*. The number of members in a set is typically referred to as the **cardinality** of the set, written $|N|$ where $N$ is the name of the set.
 
-So, in this case, the cardinality of the edge set is two $|E| = 2$, and the cardinality of the vertex set is four $|V| = 4$. These two basic graph properties are so important, that they can serve as a "signature" for the graph. Thus, sometimes people will refer to a graph as $G(n, m)$ where $n$ is the cardinality of the vertex set (number of nodes) and $m$ is the cardinality of the edge set (number of links). Thus, the graph in @fig-simple1, can be referred to as a $G(4, 2)$ graph. 
+So, in the @fig-simple(a) case, the cardinality of the edge set is two $|E| = 2$, and the cardinality of the vertex set is four $|V| = 4$. These two basic graph properties are so important, that they can serve as a "signature" for the graph. Sometimes people will refer to a graph as $G(n, m)$ where $n$ is the cardinality of the vertex set (number of nodes) and $m$ is the cardinality of the edge set (number of links). Thus, the graph in @fig-simple(a), can be referred to as a $G(4, 2)$ graph. Note that @fig-simple(a) this is not the only possible $G(4, 2)$ graph. @fig-simple(b) and @fig-simple(c) show two other possible variations of a $G(4, 2)$ graph. 
+
+## Graph Labeling
+In @fig-simple(a-c), the nodes have letters which function as "names" for each. Thus, we can refer to node $A$, or node $B$ and so forth. These names are arbitrary, we can as well use numbers $\{1, 2, 3, ...\}$ or a combination of letters and numbers $\{V_1, V_2, V_3, ....\}$. 
+
+When the nodes of a graph are distinguished from one another using names, the graph is said to be **labeled**. Sometimes, the names don't matter, so we don't specify them, as in @fig-simple(d). In this case, the graph is said to be **unlabeled**. 
+
+Graph metrics like the ones we will compute starting on @sec-graphmetrics, are the same regardless of whether the graph is labeled or not. Most of the example graphs we will be looking at are of the labeled kind.
 
 ## Trivial and Non-Trivial Graphs
 The $G(1, 0)$ graph, essentially that formed by an isolated person sitting alone in a room with no connections to others (which can represent the case of the Japanese [*Hikikomori*](https://en.wikipedia.org/wiki/Hikikomori)) is sometimes called the **trivial graph**. Obviously, for purposes of social network analysis, the graphs that are be used are non-trivial. 
@@ -131,25 +164,19 @@ The smallest non-trivial graph, and thus the smallest unit of social analysis, i
 ## Basic Graph Properties
 Graphs have some basic properties that we need to learn about:
 
--   In a graph, if two nodes are joined together by an edge, they are said be **adjacent**. So in  @fig-simple1, nodes *A* and *B* are adjacent, as are nodes *A* and *C*. Pairs of nodes that are not linked by an edge, like nodes *B* and *C*, are said be **nonadjacent**.
+-   In a graph, if two nodes are joined together by an edge, they are said be **adjacent**. So in  @fig-simple(a), nodes *A* and *B* are adjacent, as are nodes *A* and *C*. Pairs of nodes that are not linked by an edge, like nodes *B* and *C*, are said be **nonadjacent**.
 -   The nodes at the two ends of each existing edge are said to be the **end vertices** of that edge. Each edge has two end vertices. As we have been doing, edges are named by typing together the names of their two end vertices. So the edge that has nodes *A* and *B* as its endpoints is called *AB*.
--   If an edge "touches" a node (e.g., connects it to another node) we say that that edge is **incident** on that node. So in @fig-simple1, the edge *AB* is incident on both nodes *A* and *B*. The relation of **incidence** will be important in a later lesson when we discuss network metrics computed at the node level like **degree centrality**.
--   Finally, in a graph, nodes that are not connected to any other nodes are called **isolates**. This means that in @fig-simple1, node *D* is an isolate because it has zero edges incident upon it.
+-   If an edge "touches" a node (e.g., connects it to another node) we say that that edge is **incident** on that node. So in @fig-simple(a), the edge *AB* is incident on both nodes *A* and *B*. The relation of **incidence** will be important in a later lesson when we discuss network metrics computed at the node level like **degree centrality**.
+-   Finally, in a graph, nodes that are not connected to any other nodes are called **isolates**. This means that in @fig-simple(a), node *D* is an isolate because it has zero edges incident upon it.
 
 
 ## Simple Graphs
 
-Graphs like that shown in @fig-simple1 and @fig-simple2 are called **simple graphs**. There are two requirements for a graph to count as a simple graph:
+Graphs like that shown in @fig-simple are called **simple graphs**. There are two requirements for a graph to count as a simple graph:
 
 -   First, there can only be *one edge* joining two nodes at any time. That is, there cannot be multiple lines linking together the same pair of nodes. We will see in a later lesson that there are types of graphs that relax this restriction.
 -   The second requirement is that graph does not contain any edges that have the same node as its two end points. These kind of edges are called **loops**, and they are edges that connect a node to itself! Clearly this does not make sense for most sociological applications.
 
 With some exceptions, noted in subsequent lessons, simple graphs can represent most social networks.
-
-
-## Graph Labeling
-Note that in @fig-simple1, the nodes have letters which function as "names" for each. Thus, we can refer to node $A$, or node $B$ and so forth. These names are arbitrary, we can as well use numbers $\{1, 2, 3, ...\}$ or a combination of letters and numbers $\{V_1, V_2, V_3, ....\}$. When the nodes of a graph are distinguished from one another using names, the graph is said to be **labeled**. Sometimes, the names don't matter, so we don't specify them, as in @fig-simple2. In this case, the graph is said to be **unlabeled**. Graph metrics like the ones we will compute starting on @sec-graphmetrics, are the same regardless of whether the graph is labeled or not. Most of the example graphs we will be looking at are of the labeled kind.
-
-
 
 ## References {.unnumbered}
