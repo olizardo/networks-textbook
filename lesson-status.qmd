@@ -1,0 +1,351 @@
+# Status
+
+```{r setup, include=FALSE}
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+    library(kableExtra)
+    library(expm)
+```
+
+Sometimes you hear the phrase "you are who you know." This is the basis of thinking of "status" (sometimes also called "prestige") from a social networks perspective. The basic idea is that you *get* status from the connections that you have with other people. The "better connected" you are the more status you have.
+
+However, note that this immediately introduces a complication. If you get status from the connections that you have, that means that the people you are connected to *also* get status from the connections *they* have (which may include you!) but that also means that the people whom they are connected to also get status from the connections *they* have and so on, forever and ever. 
+
+People have tried to grapple with this **recursive** nature of status in social network to develop various status metrics [@vigna16]. In this lesson we will begin with the simplest case and move on to headier and more complicated cases. 
+
+## Status as Indegree Centrality
+Consider a network which could be composed of asymmetric ties indicating some kind of positive regard or esteem that node *i* has for node *j*, represented by the directed graph in @fig-dirgraph, with result adjacency matrix shown in @tbl-adjmat. 
+
+The directed edges could be "thinks the other person is great,'' or "respects the other person" or "would take advice from tha person." Note that all these relations are **asymmetric** you can think that person *A* is great, but that does not mean they think the same thing about you. 
+
+
+```{r}
+#| label: fig-dirgraph
+#| fig-cap: "A directed graph."
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+set.seed(222)
+
+a <- c(rep(1:12, 3))
+b <- sample(1:12, 36, replace = TRUE)
+gr <- as_tbl_graph(data.frame(from = a, to = b)) %>% 
+  simplify(remove.multiple = TRUE) %>% 
+  as_tbl_graph() %>% 
+  activate(nodes) %>% 
+    mutate(name = toupper(letters[1:12])) 
+  p <- ggraph(gr, layout = 'auto')
+  p <- p + geom_edge_parallel(color = "steelblue4", edge_width = 1.15,
+              arrow = arrow(length = unit(5, 'mm')),
+              end_cap = circle(8, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+```{r}
+#| label: tbl-adjmat
+#| tbl-cap: "Adjacency matrix corresponding to a directed graph."
+#| tbl-cap-location: margin
+
+  A <- as.matrix(as_adjacency_matrix(gr))
+  kbl(A, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+```
+
+An easy approach is to measure the **status** of each node by counting the number of direct nominations they get from others. This would be trying to measure the status of each node by using their **indegree centrality**. The results are shown in @tbl-status-1. According to the table, nodes $F$ and $I$ are the highest status nodes in @fig-dirgraph because they each receive five and four nominations respectively They are followed by nodes $\{A, B, E, J\}$ who receive three nominations each. Node $C$ is the lowest status, as no one thinks they are important.
+
+However, the problem with using the number of incoming nominations as a measure of status is that the indegree centrality only measures the number of ties that are incoming to each node, but it does not differentiate between who sends each tie. Every nomination counts as the same. 
+
+But as we noted, the whole point of the idea of status is that you gain status when you receive ties from *high-status others*, and their status is established by their receiving ties from high status others, and so forth. So indegree centrality won't do as a measure of status in social networks, if we aim to capture the full idea behind the concept. 
+
+## Using Exogeneous Status Information
+Another possibility is that we check some measure of status that comes from *outside* the network (the fancy word for this is *exogenous*). This could be for instance, the position of each node in the organizational chart, with ten indicating a top position and zero indicating an entry-level position. We could record this information using a $1 \times 12$ **column vector** where the exogenous status of each node *i* is given by each entry $\mathbf{b}_i$. Such an exogenous status score vector is shown in @tbl-status. In the table, larger numbers indicate higher status. 
+
+```{r}
+  I <- round(diag(1, 12, 12), 1)
+  A <- as.matrix(as_adjacency_matrix(gr))
+  rownames(I) <- rownames(A)
+  colnames(I) <- colnames(A)
+  alpha <- (1 / as.numeric(eigen(A)$values[1])) - 0.04
+  aA <- round(alpha * A, 2)
+  IaA <- round(I - aA, 2)
+  iIaA <- round(solve(IaA), 1)
+  K <- round(aA %*% iIaA, 1)
+  diag(K) <- 0
+  s.katz <- colSums(K)
+```
+
+```{r}
+#| label: tbl-status
+#| tbl-cap: "Example of estimating status using exogeneous scores for nodes."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - Indegree Centrality
+#|   - Exogenous Status Scores
+#|   - Status Scores Based on Exogeneous Information
+#|   - Status Scores Based on Endogeous Information (In-degree)
+#|   - Status Scores Based on All Indirect Paths (Katz)
+#|   - Status Scores Based on All Indirect Paths and Exogeneous Status Information (Hubbell)
+
+#| layout-ncol: 1
+
+set.seed(560)
+  d <- degree(gr, mode = "in")
+  b <- matrix(sample(1:10, 12, replace = TRUE), ncol= 12)
+  s.ex <- c(t(A) %*% t(b))
+  d.vec <- matrix(d, ncol = 12)
+  s.en <- c(t(A) %*% t(d.vec))
+  s.hubbell <- t(iIaA) %*% t(b)
+  names(d) <- toupper(letters[1:12])
+  colnames(b) <- toupper(letters[1:12])
+  names(s.ex) <- toupper(letters[1:12])
+  names(s.en) <- toupper(letters[1:12])
+
+  kbl(t(d), format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+
+  kbl(b, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+
+    kbl(t(s.ex), format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+  
+    kbl(t(s.en), format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+    
+    kbl(t(round(s.katz, 0)), format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+    kbl(t(round(s.hubbell, 0)), format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+Now the status score for each person $\mathbf{s}$ can be determined by taking each of their incoming nominations and weighting them by the exogenous status score of each of the other people, so that nominations from lower status nodes (like node $K$ in @tbl-status-2) count for more than those coming from higher status nodes (like node $A$ in @tbl-status-2). To calculate the status of each node we add up the status of each of the nodes that point to it. 
+
+How do we do this? Recall from @sec-matops, that it is always possible to multiply a square matrix times a column vector of the same length as the matrix's row and column dimensions and that the result is always another column vector of the same length as the original. 
+
+Accordingly, we can get each person's weighted status score by taking network's adjacency matrix $\mathbf{A}$ and multiplying it by the (in this case, $12 \times 1$) column vector of exogenous status scores $\mathbf{b}$. However, because we want to add up the status scores of the nodes that *point* to a given node, what we want is the product of the *transpose* of the network adjacency matrix times the vector of status scores:
+
+$$
+  \mathbf{s}^{ex} = \mathbf{A}' \mathbf{b}
+$$ {#eq-exog}
+
+When we do that, we end up with the status scores shown in @tbl-status-3.
+
+As we can see, the status order is a bit different once we take into account the exogenous status of the other people who nominate each node. Yes, node $F$ is still the highest ranked node, and node $C$ is the lowest ranked. However, node $I$ is no longer the second highest status node, that honor now goes to node $E$. The reason is that while $I$ has a larger indegree than $E$, node $I$'s in-neighbors, as shown in Figure @fig-dirgraph and @tbl-adjmat, $N_{in}(I) = \{A, C, G, K\}$ are relatively low status (except for $K$). $E$'s in-neighbors, by way of contrast, $N_{in}(E) = \{B, F, I\}$ are all high to mid-status.
+
+## Using Endogeneous Network Information 
+It turns out, that in many cases, we don't have exogenous status information on each node in the network to rely on. In that case, we must rely on **endogenous** network information to determine the status of each of the other nodes. 
+
+One approach is just to use original indegree centrality scores shown in @tbl-status-1 as the status of each other the nodes. We can then say that a node is high status if it is pointed to by other nodes who are also pointed to by many other nodes. Conversely, a node is low status if it is pointed to by other nodes that are not pointed to by many other nodes. 
+
+$$
+  s^{en} = \mathbf{A}'d_{in}
+$$ {#eq-endog1}
+
+Where $\mathbf{d}_{in}$ is the $12 \times 1$ column vector of indegree centralities shown in @tbl-status-1 and $\mathbf{A}'$ is the transpose of the network's adjacency matrix shown in @tbl-adjmat. The results are shown in @tbl-status-4. As we can see, considering only endogenous network information gives us a completely different picture of the status order than using exogeneous information. Now $E$ is definitely the highest status node, and $F$ which was the highest status node based on exogenous considerations drops to fourth place, behind $B$ and $J$. 
+
+Looking at @fig-dirgraph, we can see why this happened. Take the set of $F$'s in-neighbors $\{C, D, H, J, L\}$. It is easy to see from @tbl-status-1, that most of these nodes also have low indegree centrality (except for $J$). So even though $F$ has five nodes pointing toward them, all of them are not very high-status people. By comparison $E$ only has three in-neighbors $\{B, F, I\}$, and all three are towards the top in terms of in-degree centrality. $E$ has higher status than $F$ according to $s^{en}$ because the people that choose $E$ are also chosen by many others, which is exactly what we want in a status measure. 
+
+While $s^{en}$ seems like a good measure of status, it does have one big drawback. It only counts direct connections. However, it is possible that you get status not just from the nodes that point directly toward you, but from the nodes that point to those other people even if they don't point toward you (e.g., two step connections), and perhaps from the nodes that point to those two-step alters, and the ones that point to those three-steps away, and so forth. A good status measure should be able to take into account the status of your *indirect connections* in computing your own staus score. How do we do this?
+
+## A Mathy Interlude
+Consider any number $x$, where $x < |1|$ (remember that $|a|$ means "the absolute value of $a$), and thus $-1 > x < 1$ (this reads "$x$ is between -1 and +1"). Thus, $x$ can be 0.43, or -0.62, or whatever in that interval. Recall that when we take a number in this interval and we raise it to a power, we end up with a smaller number than we begin with. The bigger the power, the smaller the result. For instance, take $x = 0.75$. For instance:
+
+$$
+  x^2 = 0.75^2 = `r round(0.75^2, 3)`
+$$
+$$
+  x^5 = 0.75^5 = `r round(0.75^5, 3)`
+$$
+$$
+  x^{10} = 0.75^{10} = `r round(0.75^10, 3)`
+$$
+Because mathematicians are strange people, they like to say things like, "since the result gets closer to zero the bigger the power, then that means that when I raise the number to an *infinite power*, then the result should approach zero." In equation terms:
+
+$$
+x^{\infty} = 0.75^{\infty} \approx 0
+$$
+Since raising a number between -1 and 1 to a big power gets you closer to zero the bigger the power, mathematicians then go on to wonder whether *adding up* the powers, gets to the point where the sum does not grow anymore. For instance, what is the end point of:
+
+$$
+  1 + x + x^2 + x^3 + x^4 + x^5 \ldots + x^{\infty}
+$$ {#eq-infsum1}
+
+The idea is that as we move to the right and add a number between -1 and 1 raised to a bigger and bigger power, we add a smaller and smaller number, such that as we approach infinity, we end up adding such an infinitesimally small number that it might as well be zero. For instance, table @tbl-powers shows the result of raising $x$ to the powers between 2 and 20 for $x = 0.75$.
+
+```{r}
+#| label: tbl-powers
+#| tbl-cap: "Incresing powers of the number 0.75."
+#| tbl-cap-location: margin
+
+p <- c(2:20)
+b <- 0.75^p
+c <- round(b, 3)
+t <- cbind(Power = p, Result = c)
+    kbl(t, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+```
+
+Now let us sum $1 + 0.75$ and add the result to the sum of all the numbers in the third column of @tbl-powers, to get an approximation to the sum shown in @eq-infsum1. The result is `r round(1 + .75 + sum(c), 2)`. 
+
+In turns out, by some bit of mathematical magic, that this number is pretty close to: 
+$$
+  (1-0.75)^{-1} = \frac{1}{1 - 0.75} = `r  (1 - .75)^-1`
+$$
+
+As we noted, as the power that we raise the number to approaches $\infty$, we will be adding a number that is closer to zero, so the result of the infinity sum when $x = 0.75$ will converge towards:
+
+$$  
+  1 + x + x^2 + x^3 + x^4 + x^5 \ldots + x^{\infty} = 
+$$
+$$
+  1 + 0.75 + 0.75^2 + 0.75^3 + 0.75^4 + 0.75^5 \ldots + 0.75^{\infty} \approx 4
+$$
+In general terms, for any number $x$ the sum of the following infinite series converges to:
+
+$$
+  1 + x + x^2 + x^3 + x^4 + x^5 +...x^\infty = 
+$$ 
+$$
+(1-x)^{-1} = \frac{1}{1 - x} 
+$$ {#eq-infsum2}
+
+Why is this bit of math important? We will see next!
+
+## Katz Status Score
+In the mid-twentieth century, the great statistician Leo Katz set out to develop a measure of status in social networks that took into account indirect connections. He first observed that the new matrix that results from taking the original **adjacency matrix** and raising it to a power (using matrix multiplication) has a clear interpretation, as we saw in @sec-appmat. For instance, if we raise the adjacency matrix to the third power ($\mathbf{A}^3$) the resulting matrix will contain, as cell entries, all the walks of $l = 3$ that have node $i$ as the starting node and node $j$ as the destination node, the same goes for any number $\mathbf{A}^k$. 
+
+Katz saw this as a way to incorporate indirect connections to construct a measure of status using only endogenous information. The idea would be to say that your total status is the sum of number of other people who choose you (or think you are great, or a great source or advice or whatever). However, among the people that choose you the ones that are chosen by many others should count for more. Those are people who are two-steps away from you. But the same should apply to the people who choose those others (people three-steps away from you). Overall, you should get more status from people who choose the people who choose the people, who choose the people...who choose you and you should get more status from the more people who are most likely to be chosen by those others, across any number of steps. 
+
+To accomplish this, we need to construct a new matrix $A^*$ that incorporates all this information about people's one step, two-step, three-step, connections to others, then sum rows of that matrix. The resulting vector ($s^{Katz}_i$) would contain the desired score for each node $i$. 
+
+One way to proceed would be:
+
+$$
+A^* = A + A^2 + A^3 + A5 + \ldots A^{\infty}
+$$ {#eq-katz1}
+
+There are a couple of problems here. First this sum keeps getting bigger and bigger and it does not have a natural end point (keeps going forever). This is because it is counting the direct connections ($A$) as much as the very indirect connections, like $A^5$, or the number of indirect links connecting you to others *five steps away*. 
+
+What we want is a way to count the first-step links the most, and then discount the longer-step links, with the discount getting larger the longer the chain. So that three-steps links count for less than two-steps links but count for more than four step links to others and so forth. 
+
+Katz's great idea is to multiply the original adjacency matrix and its powers by a number $\alpha$ that was larger than zero, but less than one. This leads to:
+
+$$
+A^* = \alpha A + \alpha A^2 + \alpha A^3 + \alpha A5 + \ldots \alpha A^{\infty}
+$$ {#eq-katz2}
+
+Now the difference between @eq-katz1 and @eq-katz2, is that as we saw before (see @eq-infsum2), while the sum in @eq-katz1 keeps getting bigger and bigger (the technical term is "diverges"), the one in @eq-katz2, will stop growing, because raising a number less than one and more than zero to a big power will result in a tiny number. The sum will *converge* rather than diverge. 
+
+Moreover, Katz knew his math, and noted that there is a version of {@eq-infsum2} that applies to matrices. This is:
+
+$$
+A^* = \alpha A(I + \alpha A + \alpha A^2 + \alpha A^3 + \alpha A5 + \ldots \alpha A^{\infty})
+$$ 
+
+$$
+A^* = \alpha A(I-A)^{-1}
+$$ {#eq-katz3}
+
+Where $I$ refers to the "identity matrix." This is simply a matrix with the same dimensions as $A$, but containing ones along the diagonal and zeros everywhere. It functions just like the number "$1$" does in regular (scalar) multiplication. Thus, for an adjacency matrix $A$ and its respective identity matrix $I$ of the same dimensions:
+
+$$
+A \times I = A
+$$
+$$
+I \times A = A
+$$
+$$
+A \times A^{-1} = I
+$$
+$$
+A^{-1} \times A = I
+$$
+
+What @katz53 proposed is that we can turn the infinite sum part of @eq-katz3 ($I + \alpha A + \alpha A^2 + \alpha A^3 + \alpha A5 + \ldots \alpha A^{\infty})$ into just $(I-A)^{-1}$ following the principle outlined earlier in @eq-infsum2. Just like the endless sum of squares of a number $x$ between $-1$ and and $1$ just turns into just $\frac{1}{1-x}$, the endless sums of a matrix *containing* numbers between $-1$ and $1$ as its entries $\alpha A$ turns into $(I-\alpha A)^{-1}$, with $I$ playing the role of $1$ and raising $I-\alpha A$ to the power of $-1$ playing the role of taking the reciprocal.^[Recall from high school algebra that $x^{-1} = \frac{1}{x}$ and that for any number $x$ the **reciprocal** of $x$ is $\frac{1}{x}$.]
+
+Katz showed that the new matrix, $A^* = \alpha A(I-\alpha A)^{-1}$ contains all the information we need, as it condenses the sums of all the status that a persons gets from *all their connections* both direct and indirect, regardless of how indirect, and it weighs each person's contribution to each other's persons status by the status of those people (which is calculated in the same way). Math magic to the rescue!
+
+Let's see how it works, step by step:
+
+-  First we create the $12 \times 12$ identity matrix $I_{12 \times 12}$, show in @tbl-katz-1. As noted, this matrix has twelve ones across the diagonals and zeroes everywhere else. Then we choose a value for alpha. There are obscure mathematical reasons for why this value cannot be too big (depending on $A$), but for this example $\alpha = `r round(alpha, 2)`$ will work. 
+
+- Second, we multiply $\alpha$ times the original adjacency matrix (shown in @fig-dirgraph) to get $\alpha A$. This new matrix is shown in @tbl-katz-2. In the new $\alpha A$ matrix, for every cell in which there is one in $A$, the value `r round(alpha, 2)` now appears in $\alpha A$. 
+
+- Third, we subtract $I$ from $\alpha A$ , to get $I-\alpha A$. This new matrix is shown in @tbl-katz-3. Note that what this does is to add ones to the diagonals of $\alpha A$ and change all the other non-zero entries from positive to negative. 
+
+- Fourth, we find the matrix that equals the reciprocal of $I-\alpha A$ (also called the **matrix inverse** of $I-\alpha A$) to get $(I-\alpha A)^{-1}$.  The matrix inverse is somewhat involved to calculate for larger matrices like $I-\alpha A$, so, for now, chalk the numbers in @tbl-katz-4 up to math magic. Essentially you are trying to find a new matrix $W$ such that when you multiply it by $(I-\alpha A)$ you get $I$ as the result. 
+
+- Fifth we multiply $\alpha A$ (shown in @tbl-katz-2) times the new matrix $(I-\alpha A)^{-1}$ (shown in @tbl-katz-4) to get the answer to $\alpha A(I-\alpha A)^{-1}$. This new matrix, called the **Katz status similarity matrix** is shown in @tbl-katz-5.^[Note that we set the diagonals of the matrix to zero, since we don't care about the contributions the person makes to their own status based on **cycles** (walks that begin and end in the same node).] In this matrix, the larger the number in the cell, the more node $i$ is connected to node $j$ via indirect connections. 
+
+- Finally, we compute the *column sums* of the Katz status similarity matrix. In equation form:
+
+$$
+s^{katz}_i = \sum_jA^*_{ij}
+$$ {#eq-katz4}
+
+With $A*$ computed using @eq-katz3. The resulting scores are shown in @tbl-status-5 for each node of @fig-dirgraph.
+
+As we can see, according to the Katz's status score, node $E$ is still the highest status node in the network. They are followed by nodes $B$ and $J$, closely agreeing with the endogenous status scores obtained using the in-degree (@tbl-status-4). This makes sense, since the Katz scores can be seen as a *generalization* of the endogenous degree measure, with the latter taken into account only the first step links, and Katz's taking into account all the indirect links regardless of lengths (but counting the really long ones very little, and counting the first step ones the most). In this way, the Katz approach is the most comprehensive way to compute the status of nodes using only endogenous network information.
+
+```{r}
+#| label: tbl-katz
+#| tbl-cap: "Example of estimating status in social networks using exogeneous and endogeneous information for nodes."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - Twelve by twelve identity matrix
+#|   - Adjacency matrix multiplied by alpha
+#|   - Adjacency matrix multiplied by alpha subtracted from the identity matrix
+#|   - Inverse of adjacency matrix multiplied by alpha subtracted from the identity matrix
+#|   - Katz similarity matrix (original adjacency matrix multiplied by alpha times the inverse of the adjacency matrix multiplied by alpha subtracted from the identity matrix)
+#| layout-ncol: 1
+
+  kbl(I, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+  kbl(aA, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(IaA, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(iIaA, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(K, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+
+## Hubbell's Tweak on Katz's Score
+So far, we have discussed two main ways to measure the status of node in a social network, both based on the similar principle that people gain status from being (directly or indirectly) connected to high-status others (and get less status from being directly or indirectly connected to low status others). There are two ways to get a sense of the status of others. On the **exogeneous** approach, we use some kind of prior ranking or knowledge (see @tbl-status-2) on the endogenous approach, we use only information on network connectivity (in-degree or the Katz approach). What if there was a way to *combine* both approaches and get the best of both worlds? 
+
+This is exactly what was proposed by @hubbell65. It revolves around a relatively small tweak on Katz's approach. The trick is to take the part of @eq-katz3 that computes the endogenous status based on all indirect links to others ($(I-\alpha A)^{-1}$) and multiply not by $\alpha A$, but by the external vector of status $b^T$. 
+
+In equation form:
+
+$$
+s^{hubbell} = A'^*\mathbf{b}
+$$ {#eq-hubbell}
+
+Where $\mathbf{b}$ is the column vector containing the exogenous status information shown in @tbl-status-2, and $A'^*$. Is the transpose of the matrix $A^*$ which is given by:
+
+$$
+A^* = (I - \alpha A)^{-1}
+$$
+The resulting Hubbell status scores are shown in @tbl-status-6 for each node in @fig-dirgraph. As we can see, incorporating both endogenous and exogenous status information changes the picture, creating more separation between high and low status nodes. 
+
+Now, node $E$ is the indisputable highest status node in the network, followed, at a distant second and third place, by nodes $B$ and $F$. Combining both endogenous and exogenous sources of information does reveal a deeper status inequalities in social networks. 
+
+
+
+## References {.unnumbered}
+
+

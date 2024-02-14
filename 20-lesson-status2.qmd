@@ -1,0 +1,169 @@
+# Status
+
+```{r setup, include=FALSE}
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+    library(kableExtra)
+    library(expm)
+```
+
+Sometimes you hear the phrase "you are who you know." This is the basis of thinking of "status" (sometimes also called "prestige") from a social networks perspective. The basic idea is that you *get* status from the connections that you have with other people. The "better connected" you are the more status you have.
+
+However, note that this immediately introduces a complication. If you get status from the connections that you have, that means that the people you are connected to *also* get status from the connections *they* have (which may include you!) but that also means that the people whom they are connected to also get status from the connections *they* have and so on, forever and ever. 
+
+People have tried to grapple with this **recursive** nature of status in social network to develop various status metrics [@vigna16]. In this lesson we will begin with the simplest case and move on to headier and more complicated cases. 
+
+## Status as Indegree Centrality
+Consider a network which could be composed of asymmetric ties indicating some kind of positive regard or esteem that node *i* has for node *j*, represented by the directed graph in @fig-dirgraph, with result adjacency matrix shown in @tbl-adjmat. 
+
+
+```{r}
+#| label: fig-dirgraph
+#| fig-cap: "A directed graph."
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+set.seed(222)
+
+a <- c(rep(1:12, 3))
+b <- sample(1:12, 36, replace = TRUE)
+gr <- as_tbl_graph(data.frame(from = a, to = b)) %>% 
+  simplify(remove.multiple = TRUE) %>% 
+  as_tbl_graph() %>% 
+  activate(nodes) %>% 
+    mutate(name = toupper(letters[1:12])) 
+  p <- ggraph(gr, layout = 'auto')
+  p <- p + geom_edge_parallel(color = "steelblue4", edge_width = 1.15,
+              arrow = arrow(length = unit(5, 'mm')),
+              end_cap = circle(8, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+An easy approach is to measure the **status** of each node by counting the number of direct nominations they get from others. This would be trying to measure the status of each node by using their **indegree centrality**. The results are shown in @tbl-indeg.
+
+According to @tbl-indeg, nodes $F$ and $I$ are the highest status nodes in @fig-dirgraph because they each receive five and four nominations respectively They are followed by nodes $\{A, B, E, J\}$ who receive three nominations each.
+
+However, the problem with using the number of incoming nominations as a measure of status is that the indegree centrality only measures the number of ties that are incoming to each node, but it doesn't differentiate between who sends each tie. Every nomination counts as the same. 
+
+But as we noted, the whole point of the idea of status is that you gain status when you receive ties from *high-status others*, and their status is established by their receiving ties from high status others, and so forth. So indegree centrality won't do as a measure of status in social networks.  
+
+
+```{r}
+#| label: tbl-adjmat
+#| tbl-cap: "Adjacency matrix corresponding to a directed graph."
+#| tbl-cap-location: margin
+
+  A <- as.matrix(as_adjacency_matrix(gr))
+  kbl(A, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+```
+
+## Using Exogeneous Status Information
+Another possibility is that we check some measure of status that comes from *outside* the network (the fancy word for this is exogenous). This could be for instance, the position of each node in the organizational chart, with ten indicating a top position and zero indicating an entry-level position. We could record this information using a $1 \times 12$ **column vector** where the exogenous status of each node *i* is given by each entry $\mathbf{b}_i$. Such an exogenous status score vector is shown in @tbl-exog. In the table, larger numbers indicate higher status. 
+
+
+```{r}
+#| label: tbl-status
+#| tbl-cap: "Adjacency matrix corresponding to a directed graph."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - Indegree Centrality
+#|   - Exogenous Status Scores
+#|   - Network Status Scores Based on Exogeneous Information
+#| layout-ncol: 3
+
+set.seed(1260)
+  d <- degree(gr, mode = "in")
+  b <- sample(1:12, 12)
+  s <- c(b %*% A)
+  s1 <- c(d %*% A)
+  names(d) <- toupper(letters[1:12])
+  names(b) <- toupper(letters[1:12])
+  names(s) <- toupper(letters[1:12])
+
+  kbl(d, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1, bold = TRUE)
+  
+  kbl(b, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1, bold = TRUE)
+  
+    kbl(s, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1, bold = TRUE)
+```
+
+Now the status score for each person $\mathbf{s}$ can be determined by taking each of their incoming nominations and weighting them by the exogenous status score of each of the other people, so that nominations from higher status nodes (like node $C$ in @tbl-exog) count for more than those coming from lower status nodes (like node $J$ in @tbl-exog). To calculate the status of each node we add up the status of each of the nodes that point to it. 
+
+How do we do this? Recall from @sec-matops, that it is always possible to multiply a square matrix times a column vector of the same length as the matrix's row and column dimensions and that the result is always another column vector of the same length as the original. Accordingly, we get each person's weighted status score by taking network's adjacency matrix and multiplying is by the column vector of exogenous status scores  
+
+$$
+\mathbf{s} = \mathbf{A} \mathbf{b} 
+$$ {#eq-exog}
+
+When we do that, we end up with the status scores shown in @tbl-status-3.
+
+As we can see, the status order is different once we take into account the exogenous status of the other people who nominate each node. Nodes $F$ and $I$ are no longer the highest ranked nodes. Instead, that honor goes now goes to node $E$. Node $I$ in particular falls a long way down the status ladder. The reason for that is that their neighbors $\{A, C, G, K\}$ are also very low status as shown in @tbl-status-2. Meanwhile node $E$'s neighbors $\{B, F, I\}$ are all of relatively high status. 
+
+## Using Endogeneous Network Information 
+It turns out, that in many cases, we don't have exogenous status information on each node in the network to rely on. In that case, we must rely on **endogenous** network information to determine the status of each of the other nodes. 
+
+```{r}
+#| label: tbl-status
+#| tbl-cap: "Adjacency matrix corresponding to a directed graph."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - Indegree Centrality
+#|   - Exogenous Status Scores
+#|   - Network Status Scores Based on Exogeneous Information
+#| layout-ncol: 3
+
+set.seed(1260)
+  A2 <- ifelse(A%^%2 > 0, 1, 0)
+  A3 <- ifelse(A%^%3 > 0, 1, 0)
+
+  diag(A2) <- 0
+  diag(A3) <- 0
+  diag(A4) <- 0
+
+  
+  
+  
+  names(d) <- toupper(letters[1:12])
+  names(b) <- toupper(letters[1:12])
+  names(s) <- toupper(letters[1:12])
+
+  kbl(d, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1, bold = TRUE)
+  
+  kbl(b, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1, bold = TRUE)
+  
+    kbl(s, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
+    column_spec(1, bold = TRUE)
+```
+
+
+One approach is just to use original indegree centrality scores shown in @tbl-status-1 as the status of each other the nodes. We can then say that a node is high status if it is pointed to by other nodes who are also pointed to by many other nodes. 
+
+$$
+  s_i = \mathbf{Ad} + 1
+$$ {#eq-endog1}
+
+Where $\mathbf{d}$ is the column vector of indegree centralities shown in @tbl-status-1 and $\mathbf{A}$ is the network's adjacency matrix shown in @tbl-adjmat. 
+
+
+## References {.unnumbered}
+
+

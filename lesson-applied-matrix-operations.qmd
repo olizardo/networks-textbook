@@ -1,0 +1,154 @@
+# Applied Matrix Operations {#sec-appmat}
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+    require(expm)
+```
+
+## Matrix Powers and Cohesive Groups
+It turns out that the matrix powers operation discussed in @sec-pows was one of the earliest applications of formal social network analysis in the social sciences, discovered about the same time by mathematicians and social psychologists Duncan [@luce49], Albert Perry and Leon [@festinger49]. The basic idea is that when we obtain the **powers of an adjacency matrix** the resulting matrix has an intuitive interpretation in terms of indirect connections between people (see @sec-indirect), which gives us a sense of how strongly related in a formal sense pairs of nodes in the graph are. 
+
+Let's see an example.
+
+
+```{r}
+#| label: tbl-pows 
+#| tbl-cap: An adjancency matrix and its powers.
+#| tbl-subcap: 
+#|   - Original adjacency matrix.
+#|   - Adjacency matrix squared.
+#|   - Adjacency matrix cubed.
+#|   - Adjacency matrix to the fifth power. 
+#| layout-ncol: 1
+#| tbl-cap-location: margin
+
+    set.seed(859)
+
+    gr1 <- play_islands(3, 4, m = 1, p_within = 0.8) %>% 
+     activate(nodes) %>% 
+     mutate(name = toupper(letters[1:12]))
+     l <- ggraph(gr1, layout = 'tree')
+     l <- as.matrix(l$data[, 1:2])
+
+    A1 <- as.matrix(as_adjacency_matrix(gr1))
+    A2 <- A1%^%2
+    A3 <- A1%^%3
+
+     kbl(A1, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     
+     kbl(A2, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     
+     kbl(A3, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+## The Squared Adjacency Matrix
+@tbl-pows-1 shows the adjacency matrix ($\mathbf{A}$) corresponding to the "hangout" network in @fig-rel-1. @tbl-pows-2 shows the entries in $\mathbf{A}^2$ computed like we did earlier in the examples shown in @tbl-pow. What is the meaning of the entries in each cell of @tbl-pows-2? 
+
+Well for the *off-diagonal* entries, the numbers in each cell tell us the number of *indirect connections* (specifically the number of *walks*; see @sec-indirect) of *length two* between each pair of nodes. 
+
+So, for instance, we learn that node $A$ can reach node $B$ via two walks of length two, and can reach nodes $C$, $D$, $G$, and $I$ via one walk of length two. Remember from @sec-indirect that an indirect connection of a given length (in this case two) joins two nodes when it features them as the **end nodes** of the sequence of nodes and edges. Looking back at @fig-rel-1, we can see that the two walks of length two joining nodes $A$ and $B$ are $\{AC, CB\}$ and $\{AD, DB\}$, and that the walks of length two joining $A$ to nodes $\{C, D, G, I\}$ are:
+
+$$
+\{AD, DC\}, \{AC, CD\}, \{AC, CG\}, \{AK, KI\}
+$$
+The *diagonal* entries of @tbl-pows-2, on the other hand, give us the number of walks of length two that begin and end in the same node. Now what is the meaning of this? If you think of it, a walk of length two that starts in a node and goes to another node, and then comes back to the same node is just an **edge** in a symmetric graph! So the diagonals of $\mathbf{A}^2$ just count the number of edges incident to a node, which is the same as the **degree** of each node!
+
+## The Cubed Adjacency Matrix 
+@tbl-pows-3 shows the corresponding entries for $\mathbf{A}^3$. What do *these* numbers mean? Well, you may have guessed. For the off-diagonal cells they are the number of walks of *length three* linking each pair of nodes. For instance, the "1" in the cell corresponding to nodes $H$ and $F$ tells us that there is walk of length three linking these two nodes. Looking at @fig-rel-1, we can see that this is given by: $\{HG, GE, EF\}$. 
+
+What do the numbers in the *diagonal cells* of @tbl-pows-3 mean? Well, as you may have guessed, they are actually the number of walks of length three that begin *and* end in that same node! As you may recall from @sec-indirect, this is called a **cycle** of length three. So, the "2" in the diagonal cell entry corresponding to node $A$ tells us that there are two cycles of length three featuring node $A$ as its end nodes. Looking at @fig-rel-1, we can see that these are given by the sequences: $\{AC, CD, DA\}$, $\{AD, DC, DA\}$. In the same way, the number "4" in the diagonal cell for node $C$ tells us that there are four cycles of length three that begin and end in that node. These are given by the sequences: $\{CA, AD, DC\}$, $\{CD, DA, AC\}$, $\{CB, BD, DC\}$, and $\{CD DB, BC\}$. 
+
+Note that the edge sequence corresponding to cycles of length three is the same as that which corresponding to a **clique** of size three. So the diagonals in @tbl-pows-3, counts the *number of cliques of size three* that node belongs to. It actually counts *twice* the number of cliques of size three, because each clique is counted twice, once going in one direction (e.g., $\{CA, AD, DC\}$) and once going in the other direction $\{CD, DA, AC\}$, so in @tbl-pows-3, the diagonal cell divided by two gives us the number of cliques of size three that node belongs to. When a node belongs to no clique, like node $K$ in @fig-rel-1, then it gets a zero entry in the corresponding diagonal cell of $\mathbf{A}^3$. 
+
+```{r}
+#| label: fig-pows
+#| fig-cap: Graph with weighted edges representing number of indirect connections of length three between nodes
+#| fig-cap-location: margin
+#| fig-width: 12
+#| fig-height: 12
+
+    m <- max(A3)
+    n <- diag(A3)^2 + 18
+   gr <- graph.adjacency(A3, mode="undirected", weighted=TRUE) %>% 
+    as_tbl_graph() 
+  
+     
+     p <- ggraph(gr, layout = l)
+     p <- p + geom_edge_link(aes(color = weight/m, width = weight/m)) 
+     p <- p + geom_node_point(aes(x = x, y = y), color = "tan2", size = 28)
+     p <- p + geom_node_text(aes(label = name), size = 14, color = "white")
+     p <- p + theme_graph() 
+     p <- p + scale_edge_color_steps(low = "grey95", 
+                                     high = "steelblue4")
+     p <- p + theme(legend.position = "none")
+     p
+```
+
+@fig-pows shows the same graph as @fig-rel-1, but this time with the connections between nodes in the graph drawn as **weighted edge** with size and color intensity proportional to the entries in @tbl-pows-3 (the larger the number, the thicker and darker the edge), recording the number of walks of length three between each pair of nodes. As we can see, this reveals distinct hangout **cliques** like nodes $\{A, B, C, D\}$ and nodes $\{E, F, G, H\}$ that share multiple indirect connections with one another.
+
+### To Infinity and Beyond!
+More generally, for any adjacency matrix $\mathbf{A}$, the $n^{th}$ power of the adjacency matrix gives us a symmetric matrix ($\mathbf{A}^{n}$) whose off-diagonal entries $a^{n}_{ij}$ record the number of walks of length $n$ featuring the $i^{th}$ node as the starting node and the $j^{th}$ node as the end node, and whose diagonal entries $a^{n}_{ii}$ record the the number of cycles of length $n$ that begin and end with that node.
+
+## Matrix Multiplication and Common Neighbors
+As we noted in @sec-trans, it is always possible to multiply any matrix times its transpose. Well, the adjacency matrix of a network ($\mathbf{A}$) like @tbl-pows-1 is a matrix. That means it call always be multiplied times its transpose ($\mathbf{A}^T$), resulting in some other matrix $\mathbf{B}$, of the same dimensions as the original adjacency matrix:
+
+$$
+\mathbf{A} \times \mathbf{A}^T = \mathbf{B}
+$$
+The entries corresponding to $\mathbf{B}$ computed according to the matrix multiplication rules laid out in @sec-matmultex, are shown in @tbl-comm.
+
+
+```{r}
+#| label: tbl-comm 
+#| tbl-cap: Adjacency matrix multiplied by its transpose.
+#| tbl-cap-location: margin
+
+    A <- as.matrix(as_adjacency_matrix(gr1))
+    A <- A %*% t(A)
+    kbl(A, format = "html", align = "c")  %>% 
+    column_spec(1, bold = TRUE) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+What are the entries in @tbl-comm? Well, first note one thing, the diagonal entries of @tbl-comm are the same as the diagonal entries of @tbl-pows-2. That means that it is counting the **degree** of each node.
+
+What are the off-diagonal entries of $\mathbf{B}$ though? Let's see where they come from using the rules of matrix multiplication (see @sec-matmultex). Let's take the entry corresponding to nodes $A$ and $C$ (the cell corresponding to the first row and third column) in @tbl-comm. We see there is a "1" there. We know it must have come from matching the numbers in the first row of @tbl-pows-1 with the numbers in the third column of the same table. These are:
+
+```{r}
+#| label: tbl-commex 
+#| tbl-cap: Entries from an adjacency matrix
+#| tbl-subcap: 
+#|   - First row entries (node A)
+#|   - Third column entries (node C)
+#|   - Product of first row entries and third column entries
+#| tbl-cap-location: margin
+
+    A <- as.matrix(as_adjacency_matrix(gr1))
+    a <- t(A[1, ])
+    b <- t(A[, 3])
+    c <- a * b
+
+     kbl(a, format = "html", align = "c")  %>% 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     
+    kbl(b, format = "html", align = "c")  %>% 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+    
+    kbl(c, format = "html", align = "c")  %>% 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+To get the entry in cell $b_{13}$ of matrix $\mathbf{B}$ all we need to do is multiply each of the zeros and ones in @tbl-commex-1 and @tbl-commex-2 and add up the result. When we do that we get the numbers in @tbl-commex-3. We see that the only lonely "1" in @tbl-commex-3 corresponds to node $D$, note that this happens to be the only *common neighbor* shared by nodes $A$ and $C$. 
+
+So we cracked the mystery of the off-diagonal entries of @tbl-comm! When we multiply an adjacency matrix times its transpose, we end up with a matrix whose *off-diagonal cells count the number of common neighbors shared by the row node and the column node, and whose diagonal entries count the total number of neighbors of that node*.
+
+## References {.unnumbered}

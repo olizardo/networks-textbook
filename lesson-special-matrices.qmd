@@ -1,0 +1,176 @@
+
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+# Special Matrices {#sec-specmats}
+
+There are various other types of matrices we can use to understand and measure things in graphs beyond the **adjacency matrix**. We consider the most important ones in this lesson.
+
+## The Reachability Matrix
+Consider the directed graph shown in @fig-directed. Earlier, we derived an asymmetric adjancency matrix from a graph similar to this one. But directed graphs do not only encode information about adjacency relations between nodes. As we saw in the graph theory lessson, in directed graphs (and as we will later, in **disconnected** undirected graphs), there is another pairwise relationship between nodes we may be interested in; namely, **reachability** [@krackhardt94]:
+
+In a graph, node *B* is said to be **reachable** by node *A* if there is **path** (of any length) that has *A* as the origin node and *B* as the destination node. In that case, we say that *A* can **reach** *B*.
+
+Sometimes, it is useful to encode reachability relations between nodes to in order to compute some important graph metrics. This is done using the **reachability matrix**, written $D^r$. The reachability matrix is just like the adjacency matrix, except that instead of putting a one the corresponding matrix cell if the node in the row sends a tie to the node in the respective column, we put a one in the corresponding matrix cell if the node in the rode *can reach* the node in the column via a path. @tbl-reachmat shows the reachability matrix corresponding to the directed graph shown in @fig-directed.
+
+Note that if a node sends a regular old directed edge (a path of length one!) that counts for reachability too. This means that if the cell corresponding to the relationship between two nodes has a one in the adjacency matrix, then it should also have a one in the reachability  matrix. 
+
+
+```{r}
+#| label: tbl-reachmat
+#| tbl-cap: "Reachability matrix corresponding to a directed graph."
+#| tbl-cap-location: margin
+
+    fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G", "F")
+    to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D", "G")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = TRUE)
+    r <-distances(gr, mode = "out")
+    r <- ifelse(r == Inf, 0, 1)
+    diag(r) <- "--"
+    kbl(r, format = "pipe")
+```
+
+So show does this work? Let us take a look at how the first row (corresponding to whether node *A* can reach the other nodes in the graph) was filled out. First we ask, can node *A* reach node *B*? The answer is yes, because they are is a direct link between them! Node *A* sends a tie to node *B*, so the corresponding cell $d^r_{12} = 1$.
+
+Then we ask, can node *A* reach node *C*? The answer is no. Note that there is no directed path we can trace that would start from node *A* and end in node *C*. So we put a zero in the corresponding cell (row 1, column 3) of the reachability matrix ($d^r_{13} = 0$).
+
+Further, we can ask, can node *A* reach node *D*? Note that here the answer is yes! While node *A* is not directly connected to node *D*, they are **indirectly connected**, so node *A* can **reach** node *D* in two ways: First, via a path of length two that goes: $A \rightarrow B, B \rightarrow D$, and via path of length three that goes: $A \rightarrow F, F \rightarrow G, G \rightarrow D$.^[Because nodes can be indirectly connected by more than one path, it is possible to come up with a **weighted** version of the reachability matrix, that encodes the *number of paths of any length* via which the row node can reach the column node.] So $d^r_{13} = 1$.
+
+We can continue like this and finish the row for node *A* and the the rows for all the other nodes. If we do we end up with numbers shown in $tbl-reachmat. There are some interesting things about this matrix. Reading across the rows for each node, we can figure out the number of other nodes that that particular node can reach.
+
+Note than an interesting feature of the graph shown in @fig-directed is that while some nodes (like node *A*) cannot reach all the nodes in the graph, other nodes (like node *E*) can! It seems like *E* has access to everyone in the network, whether directly or indirectly. Maybe they are pretty important [@krackhardt94]. Node *C* is almost like node *E*. They can reach almost everyone in the network, *except* for *E*. Maybe they are the second in command.
+
+In the same way, note that *reading across the columns*, tell us whether a particular node is reachable by the other nodes. So we see that some nodes, like *A*, *B*, *D*, *F*, and *G* are reachable by everyone. Other nodes like *E* are reachable by no one. Finally, a node like *C* is not reachable by almost anyone else, except node *E*. It seems like reachability can encode some interesting properties, and can be used to develop some graph metrics related to power and hierarchy.
+
+```{r}
+#| label: tbl-treemat
+#| tbl-cap: "Reachability matrix corresponding to a tree graph."
+#| tbl-cap-location: margin
+
+    gr <- create_tree(n = 13, children = 3) 
+    gr <- mutate(gr, name = toupper(letters[1:13])) 
+    r <-distances(gr, mode = "out")
+    r <- ifelse(r == Inf, 0, 1)
+    diag(r) <- "--"
+    kbl(r, format =  "pipe")
+```
+For instance, the reachability matrix corresponding to a perfectly hierarchical tree graph containing only **antisymmetric** relations, such as the one shown in @fig-tree, has an interesting property. This is shown in @tbl-treemat. If you look at the reachability matrix's **lower-triangle**, it is full of zeroes! The only ones present in the matrix are contained in the matrix's **upper-triangle**. This means that when looking at a reachability matrix of any directed graph, we can get a sense of much they approximate a pure antisymetric hierachy by counting the number of ones that appear in the reachability matrix's lower-trinagle. 
+
+## The Geodesic Distance Matrix 
+Consider the directed graph shown in @fig-undirected again. In @tbl-symmadjmat we derived an symmetric adjacency matrix from the same graph. However, as noted in the graph theory lesson and our previous discussion of indirect connections, adjacency is only one way (the direct way) in which nodes can be connected in graph. A particularly important way in which two nodes can be connected is via **shortest paths**. The length of shortest path between two nodes is called the **geodesic distance** between them. So it is possible to create a matrix **D** in which each cell **d**$_{ij}$ contains the length of the shortest path between the row node *i* and the column node *j*. This is called the **distance matrix** for the corresponding graph. The **D** matrix corresponding to the graph shown in @fig-undirected, is shown in @tbl-distancemat1.
+
+```{r}
+#| label: tbl-distancemat1
+#| tbl-cap: "Distance matrix for an undirected graph."
+#| tbl-cap-location: margin
+
+    fr <- c("A", "A", "A", "B", "B", "C", "C", "C", "C", "D", "D", "D", "E", "E", "E", "F", "F", "F", "F", "G", "G", "G", "H", "H", "H", "I", "I", "I")
+    to <- c("B", "D", "C", "A", "D", "C", "A", "D", "B", "A", "C", "B", "A", "D", "C", "D", "G", "H", "I", "F" , "H", "I", "G", "F", "I", "F", "G", "H")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    gr <- as_tbl_graph(simplify(gr)) 
+    d <- distances(gr)
+    knitr::kable(d, format = "pipe")
+```
+
+The distance matrix reveals a number of things about the network. First, note that nodes that are adjacent in @fig-undirected have a geodesic distance of 1.0 by definition. In addition, nodes are at minimum distance from themselves, so we put a value of 0 in the diagonal cells; **d**$_{ij} = 0$ for all $i=j$. Second, note that the maximum geodesic distance between any two nodes in the graph is 3.0. As we saw in the lesson on indirect connections, this is an important graph metric, called the **graph diameter**. Finally, note that just like an undirected graph yields a symmetric adjacency matrix, it also yields a symmetric distance matrix. If the geodesic distance between nodes *A* and *G* in an the undirected graph is 3.0, then the geodesic distance between *G* and *A* is also 3.0: **d**$_{ij}$ = **d**$_{ji}$ for all $i$ and $j$.
+
+We can also generate geodesic distance matrices for directed graphs, such as the one shown in @fig-directed. The corresponding distance matrix for this graph is shown in @tbl-distancemat2.
+
+```{r}
+#| label: tbl-distancemat2
+#| tbl-cap: "Distance matrix for a directed graph."
+#| tbl-cap-location: margin
+
+  fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+  to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  gr <- as_tbl_graph(simplify(gr), directed = TRUE) 
+  d <- distances(gr, mode = "out")
+  kbl(d, format = "pipe")
+```
+
+This distance matrix is very different from the one corresponding to the undirected graph. First note that some shortest paths are not defined, because some pairs of nodes are **disconnected** in the directed graph; that is there is **directed path** linking them. So the corresponding cells are noted with *Inf* in the matrix.^[If the shortest path between a pair of nodes does not exist, then technically their geodesic distance is infinity! ($\infty$)] For instance, node *A* cannot reach nodes *C*, *E* or *G*. Note also that now the matrix is *asymmetric*, so the numbers above the diagonal do not have to match the numbers below the diagonal. Thus, while node *A* cannot reach node *G* via a shortest path, node *G* can reach node *A* via shortest path of length 2.
+
+## The Shortest Paths Matrix 
+Recall that in our discussion of shortest paths in the indirect connectivity lesson, we noted that nodes can be connected by more than one shortest path at the same time. So sometimes it is useful to create a matrix that records this number for each pair of nodes. This is called the **shortest paths matrix** (**S**). Each cell in the matrix **s**$_{ij}$ gives us the *number of shortest paths* connecting the row node *i* with the column node *j*. The shortest path matrix corresponding to the graph in @fig-undirected, is shown in @tbl-shortpaths.
+
+```{r}
+#| label: tbl-shortpaths
+#| tbl-cap: "Shortest paths matrix for an undirected graph."
+#| tbl-cap-location: margin
+
+    fr <- c("A", "A", "A", "B", "B", "C", "C", "C", "C", "D", "D", "D", "E", "E", "E", "F", "F", "F", "F", "G", "G", "G", "H", "H", "H", "I", "I", "I")
+    to <- c("B", "D", "C", "A", "D", "C", "A", "D", "B", "A", "C", "B", "A", "D", "C", "D", "G", "H", "I", "F" , "H", "I", "G", "F", "I", "F", "G", "H")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    gr <- as_tbl_graph(simplify(gr))
+    s <- shortest.paths(gr)
+    kbl(s, format = "pipe")
+```
+
+The **S** matrix contains useful information. For instance, it tell us that some pairs of nodes in the graph, have *multiple ways* of reaching other nodes to which they are not directly connected using shortest paths. For instance, actor *A* can get to actor *G* via three distinct shortest paths. So this gives us a sense of the capacity of that actor to reach the other one in an efficient way; if one of those shortest paths were to be compromised, *A* would still be able to send something to *G* via the other non-compromised paths.
+
+## The Neighborhood Overlap Matrix
+As we noted in the original graph theory lesson, it is possible for the **neighborhood** of two nodes in a graph to *overlap*. Recall that for each node, we define its neighborhood as the set of other nodes that they are adjacent to. That means the neighborhood between two nodes can have members in common.
+
+This can be used as a measure of the **overlap** of the neighborhood between two nodes. For instance, imagine you have a friend and that friend knows *all* your friends and you know *all* their friends. In which case we would say that the overlap between your node neighborhoods is pretty high; in fact the two neighborhoods overlap *completely*.
+
+Now imagine you just met a new person online who lives in a far away country, and as far as you know, they know *none* of your friends and you know *none* of their friends. In which case, we would say that the overlap if the two neighborhoods is nil or as close to zero as it can get.
+
+$$
+  o_{ij} = \frac{|\mathcal{N}(i) \cap \mathcal{N}(j)|}{|\mathcal{N}(i) \cup \mathcal{N}(j)|}
+$${#eq-overlap}
+
+Given a graph, we can construct the **neighborhood overlap matrix** for the graph **O**, containing such overlap scores between the neighborhood sets of each pair of nodes in the graph. The overlap score ranges from 0 (not overlap), to 1.0 (complete overlap), with values in-between for partial overlap (which is the more common case). Each cell in the matrix is filled in using equation @eq-overlap.
+
+This equation says that the overlap between node *i* and node *j*, written $o_{ij}$, is equivalent to the cardinality (\|\|) of the set defined by the *intersection* ($\cap$) of *i*'s neighborhood ($\mathcal{N}(i)$) and *j*'s neighborhood ($\mathcal{N}(j)$), or the number of common neighbors, divided by the cardinality of the set defined by the *union* ($\cup$) of *i*'s neighborhood ($\mathcal{N}(i)$) and *j*'s neighborhood ($\mathcal{N}(j)$), or the total number of neighbors.
+
+Thus, the overlap is the *number of common neighbors, divided by the number of total neighbors*. For instance, the neighborhood overlap for the undirected graph shown in @fig-undirected is shown in @tbl-overlap.
+
+```{r}
+#| label: tbl-overlap
+#| tbl-cap: "Neighborhood Overlap Matrix for an undirected graph."
+#| tbl-cap-location: margin
+
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+        bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+        bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+        bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+        bind_edges(data.frame(from = 8, to = c(9))) %>%
+        mutate(name = toupper(letters[1:9]))
+    o <- similarity(gr, method = "jaccard")
+    o <- round(o, 2)
+    rownames(o) <- toupper(letters[1:9])
+    colnames(o) <- toupper(letters[1:9])
+    kbl(o, format = "pipe")
+```
+
+Looking at the first row of the matrix, we can see that nodes *A* and *C* have a pretty high neighborhood overlap score $o_{AC} = 0.60$. But the node neighborhood *A* has no overlap with that of nodes *G*, *H* and *I*, as is evident by looking at @fig-undirected.
+
+We can examine the overlap pattern of each node in @fig-undirected by going down each row of the matrix. Note that the common neighbors matrix is symmetric: If *A* has an overlap of *o* with *B*, then *B* necessarily has the same overlap score with *A*. So all the information in the neighborhood overlap matrix is contained in either the lower or upper triangle.
+
+We can think of neighborhood overlap as a measure of structural **similarity** of two nodes in a graph based on their pattern of social connections. In fact, the formula shown in equation \@ref(eq:overlap) is called **Jaccard's Coefficient** (named after the French Botanist **Paul Jaccard**, who introduced it) and it is generally used (along with many variations) as a measure of similarity between two sets [@jaccard01]. 
+
+So looking at @tbl-overlap, we can see node *F* is most similar to nodes *G*, *H* and *I* in the graph shown in @fig-undirected, and least similar to node *D*. 
+
+*Can you think of which of your friends you are most similar to in terms of neighborhood overlap?*
+
+As we noted in the lesson on graph theory, common neighbors are defined for all the dyads in the network, whether they are **connected** or **null**. So that means that two nodes can have overlapping neighborhoods even if they do not have tie between them! Sometimes it happens that you meet someone new and *then* you realize that you had friends in common. This is such a common occurrence that it has a name: **the small world** phenomenon [@milgram67].
+
+## References {.unnumbered}

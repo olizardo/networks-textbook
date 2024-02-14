@@ -1,0 +1,418 @@
+---
+title: "Equivalence and Similarity"
+---
+
+```{r setup, include=FALSE}
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+    library(kableExtra)
+    library(lsa)
+```
+
+## The Position Approach
+The basic idea behind the position approach to dividing up the nodes in a graph is to come up with a measure of how *similar* two nodes are in terms of their patterns of connectivity with others. This measure then can be used to partition the nodes into what are called **equivalence** or **similarity** classes. Nodes in the same equivalence class are said to occupy the same **position** in the social structure described by the network. 
+
+There are two main ways to partition nodes into equivalence classes. The first is based on the idea that two nodes occupy the same position is they have similar patterns of connectivity to the same other nodes in the graph. This is called **structural equivalence**. 
+
+The second is based on the idea that two nodes are equivalent if they are connected to people who are themselves equivalent, even if these are not literally the same people. This is called **regular equivalence**. 
+
+This lesson will deal mainly with various ways of partitioning the nodes in a network based on **structural equivalence** (@sec-equiv) and its more relaxed cousin, **structural similarity**.
+
+## Structural Equivalence {#sec-equiv}
+*Two nodes are structurally equivalent if they are connected to the same others*. Thus, their patterns of connectivity (e.g., their row in the adjacency matrix) is exactly the same. 
+
+```{r}
+#| label: fig-equivex 
+#| fig-cap: "An undirected graph with nodes colored by membership in the same structural equivalence class."
+#| fig-cap-location: margin 
+#| fig-width: 12
+#| fig-height: 12
+
+    gr <- create_empty(6, directed = FALSE)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 3, to = 1:2)) %>% 
+        bind_edges(data.frame(from = 4, to = 1:2)) %>% 
+        bind_edges(data.frame(from = 5, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 6, to = 5)) %>% 
+        mutate(name = toupper(letters[1:6]))
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.1)
+    p <- p + geom_node_point(aes(x = x, y = y, color = c("a", "a", "b", "b", "c", "d")), size = 24) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() + theme(legend.position = "none")
+    p
+```
+
+For instance in @fig-equivex, nodes *C* and *D* are structurally equivalent because they are connected to the same neighbors $\{A, B, E\}$. In the same way, nodes *A* and *B* are structurally equivalent because they are connected to the same neighbors $\{C, D\}$. Finally, nodes *E* and *F* occupy *unique positions* in the network because their neighborhoods are not equivalent to that of any other nodes. Node *E* is the only node that has a neighborhood composed of nodes $\{C, D, F\}$, and node *F* is the only node that has a neighborhood composed of node $\{E\}$ only. Perhaps *F* is the main boss, and *E* is the second in command. 
+
+```{r adjmat1}
+#| label: tbl-adjmat1 
+#| tbl-cap: "Adjancency Matrix of an Undirected Graph"
+#| tbl-cap-location: margin
+
+    gr <- simplify(gr)
+    a <- matrix(as_adjacency_matrix(gr), nrow = length(V(gr)))
+    rownames(a) <- V(gr)$name
+    colnames(a) <- V(gr)$name
+    a <- a[order(row.names(a)), order(row.names(a))]
+    kbl(a, format = "html", padding = 2, align = "c") %>% 
+        row_spec(1:2, background = "salmon", bold = TRUE) %>% 
+        row_spec(3:4, background = "lightgreen", bold = TRUE) %>% 
+        row_spec(5, background = "cyan", bold = TRUE) %>% 
+        row_spec(6, background = "violet", bold = TRUE)
+```
+
+We can also see by looking at @tbl-adjmat1) that, indeed, the rows corresponding to the structurally equivalent nodes  $\{A, B\}$ and  $\{C, D\}$ in the corresponding **adjacency matrix** are indistinguishable from one another. The nodes that have unique positions in the network $\{E, F\}$, also have a unique pattern of 0s and 1s across the rows of the adjacency matrix. 
+
+### Structural Similarity
+In most real-world applications, the standard definition of structural equivalence is much too strong. In answer to the question of whether two nodes occupy the same position in the network it only allows for a "yes/no" answer. Yes, if their neighborhoods are *exactly* the same, and "no" if there aren't. 
+
+What we need is a measure of position that allows for "more or less" rather than "yes" and "no." This is what is called **structural similarity** [@leicth_etal06]. Two nodes are structurally similar if they have *similar patterns* of connectivity with the same others. There are various versions of structural similarity between nodes. Here we will consider some popular ones.
+
+## Measuring Structural Similarity Using the Euclidian Distance
+Given an adjacency matrix for a graph, how can we find out which nodes are structurally similar without staring at a picture for a long time? A classic way of measuring structural similarity, developed by the sociologist Ronald Burt @burt76 is to use the **Euclidean Distance** between the row vectors corresponding to each node in an adjacency matrix. 
+
+Take for instance @tbl-adjmat1. The row vector for node *A* is $a_{(A)j} = (0, 0, 1, 1, 0, 0)$, and so is the row vector for node *B* $a_{(B)j}$, because we already know they are structurally equivalent! Remember, the row vector is just the entries in each row corresponding to each node in @tbl-adjmat1. So the row vector for node *C* ($a_{(C)j}= (1, 1, 0, 0, 1, 0)$ and so forth. Here the subscript $j$ refers to each column entry of the adjacency matrix $(A, B, C...F)$.
+
+The **Euclidean Distance** between the row row-vectors of two nodes $k$ and $l$ is given by:
+
+$$
+d^{Euclid}_{k,l} = \sqrt{\sum_j (a_{(k)j}-a_{(l)j})^2}
+$$ {#eq-euclid}
+
+What equation @eq-euclid says is that we take each corresponding entry of the row vectors, subtract them from one another, square them, sum them, and take the square root of the resulting sum. As noted, structurally equivalent nodes will receive a score of zero, while structurally similar nodes will receive scores that are *close* to zero. The *larger* the Euclidean distance between two nodes, the *less* structurally similar they are. 
+
+So let's say we wanted to find out the structural similarity between between nodes *A* and *C* in @tbl-adjmat1 using the Euclidean distance. We would proceed as follows:
+
+- First, get the row vector for node *A* that's $a_{(A)j} = (0, 0, 1, 1, 0, 0)$, as we saw earlier.
+- Second, get the row vector for node *C* that's $a_{(C)j}= (1, 1, 0, 0, 1, 0)$, as we saw earlier.
+- Third, line them up, so that you can compute the differences and then square them:
+
+```{r}
+#| label: tbl-eudist-ex1 
+#| tbl-cap: "Euclidean distance calculation."
+#| tbl-cap-location: margin
+
+    a <- c(0, 0, 1, 1, 0, 0)
+    c <- c(1, 1, 0, 0, 1, 0)
+    d <- a-c
+    e <- d^2
+    c.diff <- c("(0 - 1)", "(0 - 1)", "(1 - 0)", "(1 - 0)", "(0 - 1)", "(0 - 0)")
+    t <- matrix(c(a, c, c.diff, d, e), nrow = 5, byrow = TRUE)
+    rownames(t) <- c("A", "C", "A - C", "A - C", "(A - C)^2")
+    kbl(t, format = "pipe", align = "c")
+```
+
+The Euclidean distance between *A* and *C* is thus the square root of the sum of the numbers in the last row of @tbl-eudist-ex1: $\sqrt{1+1+1+1+1+0} = \sqrt{5}= 2.2$.
+
+As we noted, for structurally equivalent node pairs (which have identical row vectors), the Euclidean distance should reach its minimum value of zero. We can check that by computing the Euclidean distance of nodes *A* and *B* in @tbl-adjmat1:
+
+```{r}
+#| label: tbl-eudist-ex2
+#| tbl-cap: "Euclidean distance calculation."
+#| tbl-cap-location: margin
+
+    a <- c(0, 0, 1, 1, 0, 0)
+    d <- a-a
+    e <- d^2
+    t <- matrix(c(a, a, d, e), nrow = 4, byrow = TRUE)
+    rownames(t) <- c("A", "B", "A-C", "(A-C)^2")
+    kbl(t, format = "pipe", align = "c")
+```
+
+Indeed since the sum of the last row of the numbers in @tbl-eudist-ex2 is zero, then so will the square root!
+
+### The Structural Similarity Matrix
+@tbl-dist1 shows the **structural similarity matrix** ($\mathbf{S}$) produced by computing euclidean distance between of each pair of nodes in the adjacency matrix shown in @tbl-adjmat1 (corresponding to the graph shown in @fig-equivex) according to @eq-euclid. 
+
+
+```{r}
+#| label: tbl-dist1
+#| tbl-cap: Structural Equivalence matrix for an undirected graph.
+#| tbl-cap-location: margin
+
+    eudist <- function(x) {
+      r <- nrow(x)
+      edist <- matrix(0, r, r)
+      for (i in 1: r) {
+          for (j in 1: r) {
+            e <- x[i, ] - x[j, ]
+            e <- e^2
+            e <- round(sqrt(sum(e)), 1)
+            edist[i, j] <- e
+          }
+        }
+    return(edist)
+    }
+    gr <- simplify(gr)
+    a <- matrix(as_adjacency_matrix(gr), nrow = length(V(gr)))
+    rownames(a) <- V(gr)$name
+    colnames(a) <- V(gr)$name
+    d <- eudist(a)
+    rownames(d) <- rownames(a)
+    colnames(d) <- colnames(a)
+    diag(d) <- "--"
+    kbl(d, format = "pipe", align = "c")
+
+```
+
+In the $\mathbf{S}$ matrix, each cell $\mathbf{s}_{ij}$ gives us the Euclidean distance between nodes *i* and *j*. Note that the $\mathbf{S}$ matrix is **symmetric**, meaning that the same information is contained in the lower and upper triangles ($\mathbf{s}_{ij}= \mathbf{s}_{ji}$). This makes sense, because the distance between point *a* and point *b* should be the same as the distance between point *b* and point *a*. In the same way, if you are similar to your friend, then your friend should be equally similar to you!
+
+Checking the values in @tbl-dist1, we can see that structurally equivalent pairs of nodes---are connected to exactly the same others, like nodes *A* and *B* or nodes *C* and *D*---have similarity $\mathbf{d}_{ji}= 0$ in the matrix based on the Euclidian distnce. As nodes become less similar---are connected to different others like nodes *E* and *C*---their Euclidean distance becomes larger.
+
+So, we can say that *structurally similar nodes occupy the same position in the network*. So *A* and *B* occupy the same position, and so do *C* and *D*. 
+
+### Euclidian Distance in Directed Graphs
+So far we have considered the case of structural similarity for undirected graphs composed of **symmetric ties**. 
+
+But what happens when the network we are studying is composed of **asymmetric ties**? 
+
+Well, in the directed graph case, we have to distinguish between *two ways* nodes in a graph can be structurally similar to one another based on the directionality of the ties we are considering.
+
+- In the first case, two nodes are structurally similar if they *send ties to the same others*.
+- In the second case, two nodes are structurally similar if they *receive ties from the same others*.
+
+These don't necessarily have to go together. One node (*A*) can send ties to the same others as another node (*B*) (and thus *A* and *B* can be structurally similar when it comes to their **out-neighbors**), but receive ties from a different set of others (and thus *A* and *B* can fail to be structurally similar in terms of their **in-neighbors**)
+
+This means that in the directed graph case, two nodes are structurally equivalent if and only if *they send ties to the same others and receive ties from the same others*. 
+
+This added complication means that we have to modify the way we measure structural similarity in the directed graph case when using the euclidian distance. Particularly, to consider the distance between pairs of nodes, we now have to consider both their row-vectors (capturing the pattern of *sending ties*) *and* their column vectors (capturing the patterns of their *receiving ties*) in calculating the distance. 
+
+This means @eq-euclid now turns into:
+
+$$
+  d^{Euclidean}_{k,l} = \sqrt{\sum_j (a_{(k)j}-a_{(l)j})^2 + \sum_i (a_{(k)i}-a_{(l)i})^2}
+$$ {#eq-deuclid}
+
+The first part of @eq-deuclid inside the square root operator is just like @eq-euclid: $\sum_j (a_{(k)j}-a_{(l)j})^2$. In this case, this tracks the Euclidean distance between the respective *row* vectors of nodes *k* and *l* (which is we sum across the columns *j*), which captures the extent to which they *send* links to the same others. When this part of the equation equals zero, it means *k* and *l* are structurally equivalent when it comes to sending ties.
+
+The second part that is added is $\sum_j (a_{(k)i}-a_{(l)i})^2$, which measures the Euclidean distance between the *column vectors* of nodes *k* and *l* in the **asymmetric adjacency matrix** (which is why we sum across the rows *i*); this captures the extent to which *k* and *l* *receive* ties from the same others. When this part of the equation equals zero, it means *k* and *l* are structurally equivalent when it comes to receiving ties.
+
+```{r}
+#| label: fig-direquiv
+#| fig-cap: "A directed graph"
+#| fig-cap-location: margin
+#| fig-height: 10
+#| fig-width: 10
+
+    fr <- c("A", "A", "A", "A", "B", "B", "B", "C", "D", "D", "E", "E", "F", "G", "G", "D", "D", "B")
+    to <- c("C", "D", "B", "F", "A", "D", "C", "A", "A", "B", "C", "F", "A", "F", "C", "E", "G", "F")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  p <- ggraph(gr, layout = 'tree')
+  p <- p + geom_edge_parallel(color = "gray", edge_width = 1.25,
+              arrow = arrow(length = unit(5, 'mm')),
+              end_cap = circle(10, 'mm'), 
+              sep = unit(6, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y,
+                           color = c("a", "b", "c", "d", "e", "c", "e")), size = 24)
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p <- p + theme_graph() + theme(legend.position = "none")
+  p
+  
+```
+Let's look at an example. Consider the graph shown in @fig-direquiv. In the graph, nodes rendered in the same color are structurally equivalent according to @eq-deuclid. The corresponding **asymmetric adjacency matrix** for the graph in @fig-direquiv is shown in @tbl-directed.
+
+```{r}
+#| label: tbl-directed
+#| tbl-cap: "Asymmetric adjacency matrix for a directed graph."
+#| tbl-cap-location: margin
+
+    A <- as.matrix(as_adjacency_matrix(gr))
+    diag(A) <- "--"
+    kbl(A, format = "pipe", align = "c") 
+```
+
+Let's say we wanted to figure out whether nodes *E* and *G* are structurally equivalent (they are). First, we would compare their respective row-vectors in the adjacency matrix:
+
+```{r}
+#| label: tbl-rowvecs
+#| tbl-cap: Row vectors for nodes E and G.
+
+    A <- as.matrix(as_adjacency_matrix(gr))
+    diag(A) <- "--"
+    A <- A[c(5, 7), ]
+    kbl(A, format = "pipe", align = "c") 
+```
+
+Then we would compare their respective column vectors:
+
+```{r}
+#| label: tbl-colvecs
+#| tbl-cap: Column vectors for nodes E and G.
+
+    A <- as.matrix(as_adjacency_matrix(gr))
+    diag(A) <- "--"
+    A <- A[, c(5, 7)]
+    kbl(A, format = "pipe", align = "c") 
+```
+
+And indeed, they are both the same! When we compute the **structural similarity matrix** based on the Euclidean distance for the directed graph shown in @fig-direquiv using @eq-deuclid, we end up with:
+
+```{r}
+#| label: tbl-dist2
+#| tbl-cap: Structural Equivalence matrix for an undirected graph.
+#| tbl-cap-location: margin
+
+    eudist <- function(x) {
+      r <- nrow(x)
+      edist <- matrix(0, r, r)
+      for (i in 1: r) {
+          for (j in 1: r) {
+            e1 <- x[i, ] - x[j, ]
+            e1 <- e1^2
+            e1 <- round(sqrt(sum(e1)), 1)
+            e2 <- x[, i] - x[, j]
+            e2 <- e2^2
+            e2 <- round(sqrt(sum(e2)), 1)
+            edist[i, j] <- e1 + e2
+          }
+        }
+    return(edist)
+    }
+
+    fr <- c("A", "A", "A", "A", "B", "B", "B", "C", "D", "D", "E", "E", "F", "G", "G", "D", "D", "B")
+    to <- c("C", "D", "B", "F", "A", "D", "C", "A", "A", "B", "C", "F", "A", "F", "C", "E", "G", "F")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    a <- matrix(as_adjacency_matrix(gr), nrow = length(V(gr)))
+    rownames(a) <- V(gr)$name
+    colnames(a) <- V(gr)$name
+    d <- eudist(a)
+    rownames(d) <- rownames(a)
+    colnames(d) <- colnames(a)
+    diag(d) <- "--"
+    kbl(d, format = "pipe", align = "c")
+```
+
+Which tells us that nodes *E* and *G* in @fig-direquiv are structurally equivalent $d_{E,G} = 0$, but so are nodes *C* and *F*. These two pair of nodes send ties to the same out-neighbors and receive ties from the same in-neighbors.^[Can you figure out who those are in the figure?] So, we can say that nodes *E* and *G* occupy one position in the network and nodes *C* and *F* occupy another position. Perhaps if this were an office, and the relation was one of advice, this would reveal two set of actors who have a similar **role** in the office network. 
+
+## Measuring Structural Similarity Using the Neighborhood Overlap
+As we noted in the original graph theory lesson, it is possible for the **neighborhood** of two nodes in a graph to *overlap*. Recall that for each node, we define its neighborhood as the set of other nodes that they are adjacent to. That means the neighborhood between two nodes can have members in common. *The more members they have in common the more structurally similar two nodes are*. 
+
+```{r}
+#| label: fig-stsim
+#| fig-cap: "An undirected graph."
+#| fig-cap-location: margin
+#| fig-width: 10
+#| fig-height: 10
+
+    set.seed(378)
+    w <- 0
+    while (w == 0) {
+      d <- sample(2:6, 12, replace = TRUE)
+      w <- as.numeric(is.graphical.degree.sequence(d))
+      }
+    gr <- play_degree(d, method = "simple")
+    V(gr)$name <- toupper(letters[1:length(V(gr))])
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+    
+For instance, imagine you have a friend and that friend knows *all* your friends and you know *all* their friends. In which case we would say that the overlap between your node neighborhoods is pretty high; in fact the two neighborhoods overlap *completely*, which makes you structurally equivalent! But even if your friend knows 90% of the people in your network (and you know 90% of the people in their network) that would make you very structurally similar to one another. 
+
+Now imagine you just met a new person online who lives in a far away country, and as far as you know, they know *none* of your friends and you know *none* of their friends. In which case, we would say that the overlap if the two neighborhoods is nil or as close to zero as it can get. You occupy completely different positions in the network. 
+
+### Jaccard Similarity
+We can use this reasoning to construct a measure of structural similarity between two nodes called [**Jaccard's Similarity Coefficient**](https://en.wikipedia.org/wiki/Jaccard_index) ($J_{ij}$). It goes like this [@jaccard01]. Let's say $n_{ij}$ is the number of friends that nodes *i* and *j* have in common, and the total number of *i*'s friends if $k_i$ (*i*'s degree) and the total number of *j*'s friends if $k_j$ (*j*'s degree). Then the structural similarity of *i* and *j* is given by: 
+
+$$
+  J_{ij} = \frac{n_{ij}}{k_i + k_j - n_{ij}}
+$$   {#eq-jaccard}
+
+It says that the structural similarity of two nodes is equivalent to the number of friends that the two persons know in common, divided by the sum of their degrees minus the number of people they know in common. Jaccard's coefficient ranges from zer (when $n_{ij}=0$ and the two nodes have no neighbors in common) to 1.0 (when $n_{ij} = k_i$ and $n_{ij} = k_j$ and the two nodes are structurally equivalent). 
+
+### Dice Similarity
+A second measure of structural similarity between nodes based on the neighborhood overlap is the [**Dice Similarity Index**](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). It goes like this [@dice45]:
+
+$$
+  D_{ij} = \frac{2n_{ij}}{k_i + k_j}
+$$   {#eq-dice}
+
+Which says that the structural similarity between two nodes is equivalent to the twice the number of people the know in common, divided by the sum of their degrees. 
+
+### Cosine Similarity
+A third and final measure of structural similarity between two nodes based on the neighborhood overlap is the [**cosine similarity**](https://en.wikipedia.org/wiki/Cosine_similarity) between their respective neighborhoods ($C_{ij}$). This is given by: 
+
+$$
+  C_{ij} = \frac{n_{ij}}{\sqrt{k_ik_j}}
+$$   {#eq-cosine}
+
+Which says that the structural similarity between two nodes is equivalent to the number of people they know in common divided by the square root of the product of their degrees (which is also referred to as the **geometric mean** of their degrees). 
+
+A lot of the times, these three measures of structural similarity will tend to agree. @tbl-tabj), @tbl-tabd), and @tbl-tabc) show the similarities between each pair of nodes in the graph depicted in @fig-stsim.
+
+```{r}
+#| label: tbl-tabj
+#| tbl-cap: Structural similarity matrix based on Jaccard's index.
+#| tbl-cap-location: margin
+
+    J <- round(similarity(gr, method = "jaccard"), 2)
+    rownames(J) <- V(gr)$name
+    colnames(J) <- V(gr)$name
+    diag(J) <- "--"
+    J[lower.tri(J)] <- "--"
+    kbl(J, format = "simple", align = "c",
+        caption = "Structural similarities for pairs of nodes in an undirected graph (Jaccard).")
+```
+
+```{r}
+#| label: tbl-tabd
+#| tbl-cap: Structural similarity matrix based on Dice's index.
+#| tbl-cap-location: margin
+
+    D <- round(similarity(gr, method = "dice"), 2)
+    rownames(D) <- V(gr)$name
+    colnames(D) <- V(gr)$name
+    diag(D) <- "--"
+    D[lower.tri(D)] <- "--"
+    kbl(D, format = "simple", align = "c", 
+        caption = "Structural similarities for pairs of nodes in an undirected graph (Dice).")
+```
+  
+```{r tabc}
+#| label: tbl-tabc
+#| tbl-cap: Structural similarity matrix based on the cosine distance.
+#| tbl-cap-location: margin
+
+    a <- as.matrix(as_adjacency_matrix(gr))
+    C <- round(cosine(a), 2)
+    rownames(C) <- V(gr)$name
+    colnames(C) <- V(gr)$name
+    diag(C) <- "--"
+    C[lower.tri(C)] <- "--"
+    kbl(C, format = "simple", align = "c",
+        caption = "Structural similarities for pairs of nodes in an undirected graph (cosine).")
+```
+
+### Neighborhood Overlap in Directed Graphs
+Similarity works in similar (pun intended) ways when studying asymmetric ties in directed graph. The main difference, as usual, is that in a directed graph pairs of nodes can structurally similar in two different ways. Fist, pairs of nodes can be similar with respect to their out-neighborhoods, in which case we say that nodes are structural similar if they point to the same set of neighbors. This is called the **out-similarity**. Second, pairs of nodes can be similar with respect to their in-neighborhoods, in which case we say that nodes are structural similar if they *receive* ties or nominations from the same set of neighbors. This is called the **in-similarity**.
+
+Special cases of the out and in-similarities between nodes show up in particular types of networks. For instance, consider an information network composed of scientific papers. Here a directed tie emerges when paper *A* *cites* or refers to paper *B*. This is called a **citation network**. 
+
+In a citation network out-similar papers are papers that *cite* the same other papers. Out-similar papers are said to exhibit **bibliographic coupling** (essentially the overlap or set intersection between their reference lists). A weighted network of similarities between papers, where the weight of the edge is the number of other papers that that they both cite in common is called a **bibliographic coupling network**. A bibliographic coupling network is essentially a network of out-similarities between papers in a scientific information network. 
+
+In a citation network, in-similar papers are papers that *get cited* by the same set of others. In this case, we say that the two papers are **co-cited** a third paper. A weighted network of similarities between papers, where the weight of the edge is the number of other papers that cite both of them is called **co-citation network**. A co-citation network is essentially a network of in-similarities between papers in a scientific information network.   
+
+The two measures of out and in-similarities can be defined in the same way as before. If $n^{out}_{ij}$ is the number of common out-neighbors of nodes *i* and *j* and $n^{in}_{ij}$ is the number of their common out-neighbors, $k_{out}$ is the total number of out-neighbors of a particular node, and $k_{in}$ is the total number of in-neighbors, then the structural out and in-similarities between pairs of nodes *i* and *j* are given by (using the cosine distance measure) by:
+
+$$
+  C_{ij}^{out} = \frac{n_{ij}^{out}}{\sqrt{k_i^{out}k_j^{out}}}
+$$   {#eq-cosout}
+
+
+
+$$
+  C_{ij}^{in} = \frac{n_{ij}^{in}}{\sqrt{k_i^{in}k_j^{in}}}
+$$   {#eq-cosin}
+
+## References {.unnumbered}
