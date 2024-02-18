@@ -1,0 +1,329 @@
+# Dyads {#sec-dyads}
+
+```{r setup, include=FALSE}
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+    library(kableExtra)
+    library(patchwork)
+```
+In a graph, *every pair of nodes*, whether joined by an edge or not, is referred to as a **dyad.** Essentially, a dyad is *any subgraph of order two* of a larger graph. Generally researchers only refer to dyads when describing features of the network, although it it important to remember that ties that do not exist, but could exist, may be socially meaningful. 
+
+Additionally, when may consider the relationship among sets of three actors, we describe this as a **triad.** Triads have very important sociological properties that we will explore in @sec-triads. Dyads, triads and larger **motifs** constitute the (lego-like) building blocks of social network.s For now however, the terms provide a language that we can use to describe parts of the graph.
+
+## Types of Undirected Dyads
+Using @fig-undirected as the reference graph $(G)$, we can define a subgraph $(G')$ containing only nodes *A* and *B*. This is shown in @fig-udyads(a). In the same way, we could define a subgraph containing only nodes *D* and *E*. This is shown in @fig-udyads(b). Each figure portrays the two types of dyads that can exist in a undirected graph. Either a dyad with two nodes share an edge, or they don't.
+
+The dyad shown in @fig-udyads(a), with two nodes linked by an edge, is called a **connected dyad**, while the dyad shown in @fig-udyads(b) is called a **null dyad**. Since there can only be two types of dyads an undirected graph, every pair of actors is either part of a **connected** or a **null** dyad. Both types of dyads are defined by subgraphs of the same order (two), but they are different in size. The null dyad is size zero, and the connected dyad is size one.
+
+
+```{r}
+#| label: fig-udyads
+#| fig-cap: "The two dyads in an undirected graph."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - "A connected dyad."
+#|   - "A null dyad."
+#| layout-ncol: 2
+#| fig-width: 4
+#| fig-height: 4
+
+
+    gr <- create_empty(2) %>% 
+        bind_edges(data.frame(from = 1, to = 2)) %>% 
+        mutate(name = toupper(letters[1:2]))    
+    p <- ggraph(gr, layout = 'linear')
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p1 <- p + theme_graph() + xlim(0.9,2.1)
+    p1
+    
+     gr <- create_empty(2) %>% 
+         mutate(name = toupper(letters[4:5]))
+    p <- ggraph(gr, layout = 'linear')
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p2 <- p + theme_graph() + xlim(0.9,2.1) 
+    p2
+```
+
+
+```{r}
+#| label: tbl-adjmat
+#| tbl-cap: Adjacency matrix for an undireced graph.
+#| tbl-cap-location: margin
+
+  gr <- create_empty(9, directed = FALSE)
+  gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+    A <- as.matrix(as_adjacency_matrix(gr))
+    diag(A) <- 0
+    s <- sum(rowSums(A))
+    diag(A) <- "--"
+    kbl(A, format = "pipe") %>%
+         column_spec(1, bold = TRUE) 
+
+```
+
+There are certain fixed relations between some of the basic graph metrics we covered in @sec-graphmetrics and the number of mutual and null dyads in an undirected graph. Let us use $N_M$ to refer to the number of mutual dyads in an undirected graph. @tbl-adjmat shows the adjacency matrix for the graph shown in @fig-undirected. The number of mutual dyads in @fig-undirected, then will be given by:
+
+$$
+N_M = \frac{\sum_i \sum_j a_{ij}}{2}
+$${#eq-nmutuals}
+
+@eq-nmutuals says that the number of mutual dyads is equals to the sum of *all* the cells in the adjacency matrix divided by two. In this case, this will be `r s` $\div$ 2 $=$ `r s/2`. So there are `r s/2` mutual dyads in @fig-undirected. 
+
+```{r}
+#| label: tbl-compmat
+#| tbl-cap: Adjacency matrix for an undireced graph.
+#| tbl-cap-location: margin
+
+  gr <- create_empty(9, directed = FALSE)
+  gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+    A <- 1 - as.matrix(as_adjacency_matrix(gr))
+    diag(A) <- 0
+    n <- sum(rowSums(A))
+    diag(A) <- "--"
+    kbl(A, format = "html") %>%
+         column_spec(1, bold = TRUE) 
+
+```
+
+How do we find the number of null dyads? Well, remember our handy dandy matrix operation called the **graph complement**, which in matrix algebra is defined as $A' = 1- A$ where $A$ is the adjacency matrix of the graph. Recall that $1- A$ means that we subtract *each* cell $a_{ij}$ of the original matrix from one $1- a_{ij}$ and create a new matrix $A'$ from the original; this is shown in @tbl-compmat for the graph in @fig-undirected. 
+
+Once we have $A'$ we can figure out the number of null dyads in the graph. Just like before, the number of null dyads is then given by:
+
+$$
+N_N = \frac{\sum_i \sum_j a'_{ij}}{2}
+$${#eq-nnulls}
+
+Which says that the number of null dyads in the graph is just the sum of the entries of the graph complement matrix $A'$ divided by two. 
+
+This makes sense, because every entry in the complement matrix $A'$ is reversed relative to the original adjacency matrix $A$, so that $a'_{ij} = 0$ only if $a_{ij} = 1$ and $a'_{ij} = 1$ only if $a_{ij} = 0$. This means summing up the cells of $A'$ will record every instance of a *lack* of connection between the row and column nodes in $A$ which is exactly what we want. 
+
+In this case, $\sum_i \sum_j a'_{ij}$ = `r n`, so the number of null dyads is `r n` $\div$ 2 = `r n/2`. So there are `r n/2` null dyads in @fig-undirected. 
+
+Note that if we sum $N_M$ and $N_N$ for the undirected graph we get: $N_M + N_N =$ `r s/2` $+$ `r n/2` = `r s/2 + n/2`. Which is equal to $(9 \times (9-1)) \div 2$ = $(9 \times 8) \div 2$ = `r (9*8)/2` or the **maximum size** for the undirected graph of order nine. So the total number of dyads mutual and null in an undirected graph is equal to the graph's maximum size. 
+
+## Types of Directed Dyads
+
+```{r}
+#| label: fig-adyads
+#| fig-cap: "The two types of connected dyads in an undirected graph."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - "An asymmetric dyad."
+#|   - "A mutual dyad."
+#| layout-ncol: 2
+#| fig-width: 4
+#| fig-height: 4
+
+    gr <- create_empty(2) %>% 
+        bind_edges(data.frame(from = 1, to = 2)) %>% 
+        mutate(name = toupper(letters[c(3,2)])) 
+    p <- ggraph(gr, layout = 'linear') 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.5,
+                            arrow = arrow(length = unit(5, 'mm')),
+                            end_cap = circle(8, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p1 <- p + theme_graph() + xlim(0.75, 2.3)
+    p1
+
+    gr <- create_empty(2, directed = TRUE) %>% 
+        bind_edges(data.frame(from = c(1,2), to = c(2,1))) %>% 
+        mutate(name = toupper(letters[1:2]))
+    p <- ggraph(gr, layout = 'linear') 
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.5,
+                        arrow = arrow(length = unit(5, 'mm')),
+                        end_cap = circle(8, 'mm'), 
+                        sep = unit(6, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p2 <- p + theme_graph() + xlim(0.75, 2.3)
+    p2
+```
+
+While in an undirected graph there can only be two types of dyads, in a directed graph like the one shown in @fig-directed, there can *three* different kinds of dyads. The reason for this is that in a directed graph, connected dyads can be of two kinds. 
+
+On the one hand, we can have a dyad like that of actors *C* and *B* in @fig-directed, who are described as an **asymmetrically connected dyad** (or **asymmetric dyad** for short), as shown in the subgraph @fig-adyads(a). This is because while *C* sends a tie to *B*, *B* does not send a tie back to *C*. In this sense, asymmetric dyads are by definition *non-reciprocal*.
+
+In contrast, actors *A* and *B* in @fig-directed can be described as a **mutually connected dyad** (or **mutual dyad** for short), their subgraph is shown in @fig-adyads(b). Actors *A* and *B* are part of a mutual dyad because *A* sends a tie to *B*, and *B* sends a tie back to *A*. In this sense, mutual dyads are by definition *reciprocal*. 
+
+Thus, in a directed graph representing a network of asymmetric ties, every pair of actors in the network can be classified as belonging to one of three types of dyads: **Mutual** (connected bi-directionally), **Asymmetric** (connected uni-directionally), and **Null** (not connected in any way). An easy way to remember this is that the first letters of each term in this classification spells "MAN." 
+
+It is important to keep distinct the notion of **asymmetry** when used to refer to *types of edges* in a graph, from when it is used to refer to types of *dyads*. For instance, a **mutual dyad** is composed of a *pair* of **asymmetric edges**! When used to refer to edges, the notion of asymmetry implies only **directionality** of the single edge, while when used to refer to dyads the notion of asymmetry implies **non-reciprocity** of the whole dyad. 
+
+A lot of the time we collect social network information that has a directed basis. For instance, we ask people whether the "know" someone, or whether they consider somebody a "friend." These type of network data are called **nominations**, and they are very common in social network analysis. 
+
+For instance may ask an individual $E$ (let's call her Jennifer) whether they nominate another individual $C$ (in their school, classroom, dorm, office) as a "friend" (let's call her Mariah), and they say "yes I know Mariah," or "Mariah is my friend." As with the "I don't know her" meme,^[https://knowyourmeme.com/memes/i-dont-know-her] sometimes it happens Jennifer says they know Mariah, or "nominates" Mariah as a friend, but Mariah says they don't know Jennifer, or fail to nominate Jennifer as a friend back! 
+
+This creates a situation in which most social network data sets, end up being composed of directed dyads with asymmetric friendship or acquaintance relations, even if the researcher thought they would end up with symmetric ties [@carley_krackhardt96].
+
+## The Dyad Census
+Just like the undirected case, we can use matrices and simple operations on matrices to figure out the number of mutual ($N_M$), asymmetric ($N_A$) and null ($N_N$) dyads in a directed graph. This is called the directed graph's **dyad census**. We will need *four* matrices to make this happen: (1) The original adjacency matrix, (2) the **transpose** of the adjacency matrix $A^T$, (3) the complement of the adjacency matrix $A'$ and (4) the complement of the transpose $A'^{T}$. 
+
+Let's take @fig-directed as the graph of interest. In which case, the corresponding adjacency matrix. The four required matrices are shown in @tbl-dyadmats:
+
+1. @tbl-dyadmats(a) records the original adjacency relations ($A$) in the directed graph from @fig-directed. 
+1. @tbl-dyadmats(b) is the transpose of the adjacency matrix ($A^T$) as defined in @sec-transpose. 
+1. @tbl-dyadmats(c) records the non-adjacencies of the original adjacency matrix, that is for every pair nodes that are non-adjacent in @fig-directed, @tbl-dyadmats(c) has a 1 in the corresponding cell and for every pair of nodes that is adjacent in @fig-directed, @tbl-dyadmats(c) has a zero. More accurately, @tbl-dyadmats(c) shows the adjacency matrix corresponding to the **complement** of the directed graph in @fig-directed ($A'$) as defined in @sec-complement. This is obtained by subtracting one from each of the cells of the original adjacency matrix: $A' = 1 - A$.
+1. @tbl-dyadmats(d) is just the transpose of @tbl-dyadmats(c), which can also be obtained by subtracting one from the entries in @tbl-dyadmats(b): $A'^T = 1 - A^T$.
+
+
+```{r}
+#| label: tbl-dyadmats
+#| tbl-cap: "The Four matrices needed for the dyad census."
+#| tbl-cap-location: margin
+#| tbl-subcap:
+#|   - "Original A matrix."
+#|   - "Transpose of the A matrix."
+#|   - "Complement of the A matrix."
+#|   - "Complement of transpose."
+#| layout-ncol: 2
+
+    fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+    to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    A <- as.matrix(as_adjacency_matrix(gr))
+    A1 <- A
+    diag(A1) <- "--"
+    kbl(A1, format = "pipe", align = "c") %>% 
+         kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+    A2 <- t(A)
+    diag(A2) <- "--"
+    kbl(A2, format = "pipe", align = "c") %>% 
+         kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+    A3 <- 1 - A
+    diag(A3) <- "--"
+    kbl(A3, format = "pipe", align = "c") %>% 
+         kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+    A4 <- 1 - t(A)
+     diag(A4) <- "--"
+     kbl(A3, format = "pipe", align = "c") %>%
+          kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+### Number of Mutual Dyads
+
+Once we have these matrices it is easy to compute the numbers we want. Let's begin with $N_M$ or the number of mutual dyads. To do that, we first compute a new matrix $M$ which is equal to the dot product (as defined in @sec-dotproduct) of the adjacency matrix (@tbl-dyadmats(a)) times its transpose (@tbl-dyadmats(a)).
+
+$$
+M = A \circ A^T
+$$
+
+Which means that:
+
+$$
+m_{ij} = a_{ij} \times a^T_{ij} = a_{ij} \times a_{ji}
+$${#eq-nmutuals1}
+
+That is the entries in the **nulls matrix** $M$ are just the original cells in the $A$ matrix multiplied by the corresponding cell in the transpose $A^T$. But we know from the way the transpose works, that $a^T_{ij} = a_{ji}$ for each *i* and *j* hence the final equation in @eq-nmutuals1. 
+
+Finally, the *number of mutual dyads* is given by:
+
+$$
+M = \frac{\sum_i \sum_j m_{ij}}{2}
+$${#eq-nmutuals2}
+
+Which says that the number of mutual dyads $N_M$ is just the sum of all the cell entries $m_{ij}$ of the nulls matrix $M$ that results from computing the dot product of the original adjacency matrix times it's transpose divided by two. For the case shown in tbl-cenmats(a), we can see that the sum of the cell entries is $\sum_i \sum_j m_{ij} = 4$ and therefore, the number of mutual is $4 \div 2 = 2$. There are two mutual dyads @fig-directed. 
+
+
+```{r}
+#| label: tbl-cenmats
+#| tbl-cap: "The three resulting dyad census matrices."
+#| tbl-cap-location: margin
+#| tbl-subcap:
+#|   - "Mutuals matrix (M)."
+#|   - "Asymmetrics matrix (S)."
+#|   - "Nulls matrix (N)."
+#| layout-ncol: 2
+
+    M <- A * t(A)
+     diag(M) <- "--"
+     kbl(M, format = "pipe", align = "c") %>%
+          kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+    S <- A * (1 - t(A))
+     diag(S) <- "--"
+     kbl(S, format = "pipe", align = "c") %>%
+          kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+    N <- (1 - A) * (1 - t(A))
+     diag(N) <- "--"
+     kbl(N, format = "pipe", align = "c") %>%
+          kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+### Number of Asymmetric Dyads
+
+```{r}
+     S <- A * (1 - t(A))
+     diag(S) <- 0
+     N <- (1 - A) * (1 - t(A))
+     diag(N) <- 0
+```
+
+
+In the same way, the **asymmetrics matrix** ($S$) is given by the following matrix formula:
+
+$$
+S = A \circ A'^T
+$$
+
+Which means that:
+
+$$
+s_{ij} = a_{ij} \times (1 - a^T_{ij}) = a_{ij} \times (1 - a_{ji})
+$${#eq-asymm1}
+
+Which says that each entry of $S$ is equal to the entries of the original adjacency matrix times one subtracted from the entries of the transpose. So essentially we multiply the corresponding cells in @tbl-dyadmats(a) and @tbl-dyadmats(d). The result is shown in @tbl-cenmats(b).
+
+To find the *number of asymmetric dyads* ($N_A$), we simply sum each cell of the $S$ matrix:
+
+$$
+N_A = \sum_i \sum_j s_{ij}
+$$
+The result is shown in @tbl-cenmats(b). We can see from the table that the sum of the cells is $\sum_i \sum_j s_{ij} =$ `r sum(rowSums(S))`. So there are five asymmetric dyads in @fig-directed. 
+
+### Number of Null Dyads
+How about the number of null dyads? As you can guess this can also be computed by first calculating the entries of a new  **nulls matrix** ($N$) that is the result of dot-multiplying two other matrices selected from the menu in @tbl-dyadmats. In this case these are:
+
+$$
+N = A' \circ A'^T
+$$
+
+Which means that:
+
+$$
+n_{ij} = (1-a_{ij}) \times (1 - a^T_{ij}) = (1-a_{ij}) \times (1-a_{ji})
+$$
+Which says that the nulls matrix is just the dot product of the complement matrix $A'$ shown in @tbl-dyadmats(c) and the complement of the transpose of the adjacency matrix shown in @tbl-dyadmats(d). The resulting matrix $N$ is shown in @tbl-cenmats(c).
+
+The *number of null dyads* in the graph ($N_N$), is then given by:
+
+$$
+N_N = \frac{\sum_i \sum_j n_{ij}}{2}
+$$
+
+Which says that the number of null dyads in the graph is just the sum of each cell of the nulls matrix divided by two. From @tbl-cenmats(c) we can see that $\sum_i \sum_j n_{ij}=$ `r sum(rowSums(N))`, which means that $N_N =$ `r sum(rowSums(N))` $\div$ 2, which equals `r (sum(rowSums(N)))/2`. So there are thirteen null dyads in @fig-directed. 
+
+
+## References {.unnumbered}

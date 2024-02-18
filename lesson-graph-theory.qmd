@@ -170,6 +170,54 @@ Graphs have some basic properties that we need to learn about:
 -   Finally, in a graph, nodes that are not connected to any other nodes are called **isolates**. This means that in @fig-simple(a), node *D* is an isolate because it has zero edges incident upon it.
 
 
+```{r}
+#| label: fig-complement
+#| fig-cap: "A graph and its complement."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - "A G(6, 5) graph."
+#|   - "The complement of a G(6, 5) graph."
+#| layout-ncol: 2
+#| fig-width: 12
+#| fig-height: 12
+
+    gr <- create_empty(6, directed = FALSE) %>%
+          bind_edges(data.frame(from = 1, to = c(2, 4, 6))) %>%
+          bind_edges(data.frame(from = 6, to = c(3, 5))) %>%
+          mutate(name = toupper(letters[1:6])) 
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p1 <- p + theme_graph()
+    p1
+
+    gr.c <- complementer(gr)
+    l <- as.matrix(p$data[, 1:2])
+    p <- ggraph(gr.c, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p2 <- p + theme_graph()
+    p2
+```
+
+## The Graph Complement {#sec-complement}
+
+Sometimes when examining a graph, we may be interested in the graph's evil twin. This is called the **graph complement**. 
+
+More technically, for any graph $G$, its complement $G'$ is a graph that meets the following two conditions:
+
+1. Every pair of nodes adjacent in $G$ are non-adjacent in $G'$.
+1. Every pair nodes that are non-adjacent in $G$ and are adjacent in $G'$. 
+
+That is, the disconnected nodes in graph $G$ are connected in its complement $G'$, and the connected nodes in $G$ are disconnected in $G'$. 
+
+For instance, @fig-complement shows a $G(6, 5)$ graph in (a), namely a graph with six nodes and five edges, and the complement of that graph in (b). As we can see, every pair of nodes that is connected in (a) is disconnected in (b) and vice versa. 
+
+What's the graph complement useful for? As we will see later on, we sometimes will be interested in counting the *non-relations* that exist in a network in addition to the relations. The complement (and its matrix representation) is useful for that.
+
+
 ## Simple Graphs
 
 Graphs like that shown in @fig-simple are called **simple graphs**. There are two requirements for a graph to count as a simple graph:

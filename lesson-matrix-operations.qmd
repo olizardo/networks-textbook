@@ -88,8 +88,8 @@ Our running example will be the pair of graphs shown in @fig-rel. Supppose this 
 
 @fig-rel-1, composed of nodes joined by blue edges, represents hanging out relations; @fig-rel-2 represents co-working relations. The corresponding **adjacency matrices** for the @fig-rel networks are shown in @tbl-rel. @tbl-rel-1 (let's call it $\mathbf{H}$) records hanging out relations and @tbl-rel-2 (let's call it $\mathbf{C}$) records co-working relations.  
 
-## Matrix Addition 
-Perhaps the simplest operation we can do with matrices is add them up. To add two matrices, we simply add up the corresponding entries in each cell. In matrix notation:
+## Matrix Addition and Subtraction
+Perhaps the simplest operation we can do with two matrices is add them up. To add two matrices, we simply add up the corresponding entries in each cell. In matrix notation:
 
 $$
 \mathbf{H} + \mathbf{C} = h_{ij} + c_{ij}
@@ -116,15 +116,22 @@ Why would we want to do this? Well, if we were studying the network shown in @fi
 
 @tbl-mult shows that the $BC$ dyad has a multiplex relation (there is a "2" in the corresponding cell entry) and so does the $AC$, $FH$, $GH$, $EF$, and $JL$ dyads. 
 
-
-## The Matrix Dot Product
-Another way of figuring out which pairs of people in a network have multiplex ties is to compute the **matrix dot product** (symbol: $\cdot$). Just like matrix addition, we find the matrix dot product by *multiplying* the corresponding entries in each of the matrices. In matrix format:
+Note that matrix subtraction works the same way:
 
 $$
-\mathbf{H} \mathbf{\cdot} \mathbf{C} = h_{ij} \times c_{ij}
+\mathbf{H} - \mathbf{C} = h_{ij} - c_{ij}
 $$ {#eq-matadd}
 
-If we take the dot product of two adjacency matrices like $\mathbf{H}$ and $\mathbf{C}$, then the resulting matrix will have a one in a given cell *only if* $h_{ij} = 1$ and $c_{ij} = 1$. Otherwise, it will have a zero. This means that the dot product of two adjacency matrices will retain *only* the multiplex ties and erase all the other ones. The result of the dot products of the adjancency matrices shown in @tbl-rel is shown in @tbl-dot.  
+To subtract two matrices, we simply subtract the corresponding entries in each cell. Why would we ever want to do this? Perhaps we could be interested in those dyads in the network that are connected by a single, special purpose **uniplex** ties while disregarding both the disconnected and multiplex connected dyads. In which case, subtracting the two matrices, and then taking the **absolute** value of each of the cell entries (e.g., turning negative entries into positive ones), written $|h_{ij} - c_{ij}|$ will result in a binary matrix that will only contain ones for people who are *either* hangout buddies or workmates but not both. 
+
+## The Matrix Dot Product {#sec-dotproduct}
+Another way of figuring out which pairs of people in a network have multiplex ties is to compute the **matrix dot product** (symbol: $\cdot$), sometimes this is also called the **Hadamard product** named after French mathematician [Jacques Hadarmard](https://en.wikipedia.org/wiki/Jacques_Hadamard), (symbol: $\circ$). Just like matrix addition, we find the matrix dot product by *multiplying* the corresponding entries in each of the matrices. In matrix format:
+
+$$
+\mathbf{H} \circ \mathbf{C} = h_{ij} \times c_{ij}
+$$ {#eq-matadd}
+
+If we take the dot product of two adjacency matrices like $\mathbf{H}$ and $\mathbf{C}$, then the resulting matrix will have a one in a given cell *only if* $h_{ij} = 1$ and $c_{ij} = 1$. Otherwise, it will have a zero. This means that the dot product of two adjacency matrices will retain *only* the **multiplex ties** and erase all the other ones. The result of the dot products of the adjacency matrices shown in @tbl-rel is shown in @tbl-dot.  
 
 ```{r}
 #| label: tbl-dot
@@ -143,7 +150,7 @@ If we take the dot product of two adjacency matrices like $\mathbf{H}$ and $\mat
 
 As we can see, the only dyads that have non-zero entries in @tbl-dot are the multiplex dyads in @tbl-mult. The resulting network, composed of the combined "hanging + co-working" relation is shown in @fig-rel-3. Note that this network is much more sparse than either of the other two, since there's an edge between nodes only when they are adjacent in *both* the @fig-rel-1 and @fig-rel-2 networks. 
 
-## The Matrix Transpose {#sec-trans}
+## The Matrix Transpose {#sec-transpose}
 One thing we can do with a matrix is "turn it 90 degrees" so that the rows of the new matrix are equal to the columns of the resulting matrix and the columns of the first matrix equal the rows of the resulting matrix. This is called the **matrix transpose** (symbol: $^T$). 
 
 For instance, if we have a matrix $\mathbf{A}_{4 \times 5}$ of dimensions $4 \times 5$ (four rows and five columns), then the transpose $A^T_{5 \times 4}$ will have five rows and four columns, with the respective entries in each matrix given by the formula:

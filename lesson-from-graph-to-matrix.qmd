@@ -154,7 +154,8 @@ Why are the ties are not reciprocated? You might remember from our lessons on ty
     gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
     A <- as.matrix(as_adjacency_matrix(gr))
     diag(A) <- "--"
-    kbl(A, format = "pipe")
+    kbl(A, format = "pipe", align = "c") %>% 
+         kbl_styling()
 ```
 
 ### The Valued Adjacency Matrix
@@ -205,7 +206,7 @@ For example, your best friend might be a tie strength of 1.0, while people you a
     gr <- tbl_graph(edges=edge.dat, nodes=node.dat)
     a <- t(as.matrix(as_adjacency_matrix(gr,attr = "w",sparse = T)))
     diag(a) <- "--"
-    kbl(a, format = "pipe")
+    kbl(a, format = "pipe", align = "c")
 ```
 
 In the @fig-weighted case, the theoretical maximum is represented by a weight of 1.0. This is shown in Table @tbl-weighted. Note that we follow the same procedure as that used for constructing the asymmetric adjacency matrix, only that this time, we check on the weight of the edge that actor *i* sends to actor *j*. When there is no edge between actors, we put a zero in the corresponding cell of the valued adjacency matrix as before. For instance, to fill the row corresponding to actor *D*, we see that they do not send a tie to actor *A*, so we put a zero in the cell corresponding to row 4 and column 1). We also observe that they indeed send a tie to actor *B* and the corresponding weight of this tie is 0.33, so we input that number into cell corresponding to row 4 and column 2 in the table. We continue until all the entries for actor *D* (row 4 of the valued adjacency matrix) are filled and keep on going row by row until we have covered all the actors in the network.
