@@ -93,32 +93,6 @@ In a directed graph, for every edge, there is a **source node** and a **destinat
 For instance, if @fig-directed were an **advice network** [@cross01], on the other hand, we could say that *H* seeks advice from *D*, but *D* does not seek advice from *H*. This may be because *D* is higher in the office hierarchy or is more experienced than *H*, in which case lack of reciprocity may be indicative of an authority relationship between the two nodes.  
 One must always be careful when examining a directed network to make sure one properly understands the direction of the underlying social relationships!
 
-
-```{r}
-#| label: fig-symmdirected
-#| fig-cap: "A symmetric directed graph"
-#| fig-cap-location: margin
-#| fig-height: 8
-#| fig-width: 8
-
-  fr <- c("A", "B", "D", "A", "B", "C", "E", "C", "F", "A", "G", "D", "C", "D", "E", "G")
-  to <- c("B", "A", "A", "D", "C", "B", "C", "E", "A", "F", "D", "G", "D", "C", "G", "E")
-  edge.dat <- data.frame(fr, to)
-  node.dat <- data.frame(name = union(fr, to))
-  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
-  p <- ggraph(gr, layout = 'kk')
-  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
-              arrow = arrow(length = unit(7, 'mm')),
-              end_cap = circle(10, 'mm'), 
-              sep = unit(8, 'mm'))
-  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
-  p <- p + theme_graph() 
-  p
-```
-
-There are also some special types of directed graphs. For instance, if in directed graph, every pair of adjacent nodes is connected via a bi-directional, reciprocal relationship, as in @fig-symmdirected, then it is called as **symmetric directed graph**.  
-
 ### Node Neighborhoods in Directed Graphs
 Just like in undirected (simple) graphs, each node in a directed graph has a **node neighborhood**. However, because now each node can be the **source** or **destination** for a asymmetric edges, this means that we have to differentiate the neighborhood of a node depending on whether the node is the **sender** or the **recipient** of a given link. 
 
@@ -147,13 +121,53 @@ Can you calculate what the indegree and outdegree of node *D* in @fig-directed i
 
 The graph theoretic ideas of indegree and outdegree have clear sociological interpretations. In a social network, for instance, a node having a large outdegree could indicate a *sociable person* (a person that likes to connect with others), while having a large indegree can indicate a *popular person* (e.g., a person lots of other people want to be friends with). In a later lesson we will see how to use a directed graph's **asymmetric adjacency matrix** to readily compute the outdegree and indegree in real social networks.
 
-### Functional Graphs
-There is a special kind of digraph that is built by imposing the restriction that each node can only have a single out-neighbor, meaning that the outdegree of each node is equal to one. This is called a **functional graph** and has applications in the anthropological analysis of kinship exchange systems in less differentiated societies. For instance, @fig-fund
+## Types of Nodes in Directed Graphs {#sec-typedir}
+
+In a directed graph, there will typically be three types of (non-isolate) nodes [@Harary65]: 
+
+- First, there will be nodes that receive ties but don't send them. These are called **receivers** (like node *C* in @fig-directed). For receiver nodes $k_{in} > 0$ and $k_{out} = 0$.
+- Second, there will be nodes that receive ties and also send out ties. These are called **carriers** (like nodes *A* and *B* in @fig-directed. For carrier nodes, $k_{in} > 0$ and $k_{out} > 0$.
+- Finally, there will be nodes that send ties but don't receive them. These are called **transmitters** (like nodes *E* and *G* in @fig-directed). For transmitter nodes, $k_{in} = 0$ and $k_{out} > 0$. 
+
+
+## Special Kinds of Directed Graphs
+
+### Symmetric Directed Graphs
+There are also some special types of directed graphs created when we impose some restrictions on either reciprocity or edge directionality. For instance, if in a directed graph, every pair of adjacent nodes is connected via a bi-directional, reciprocal relationship then it is called as **symmetric directed graph**. 
 
 
 ```{r}
-#| label: fig-fundirected
+#| label: fig-symm
 #| fig-cap: "A symmetric directed graph"
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+  fr <- c("A", "B", "D", "A", "B", "C", "E", "C", "F", "A", "G", "D", "C", "D", "E", "G")
+  to <- c("B", "A", "A", "D", "C", "B", "C", "E", "A", "F", "D", "G", "D", "C", "G", "E")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  p <- ggraph(gr, layout = 'kk')
+  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+              arrow = arrow(length = unit(7, 'mm')),
+              end_cap = circle(10, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+@fig-symm shows a symmetric directed graph with eight nodes and thirty two bi-directional edges.
+
+### Functional Graphs
+There is also a special kind of digraph built by imposing the restriction that each node can only have a *single out-neighbor*. This means the outdegree of each node is equal to one for each node in the graph. This is called a **functional graph** and has applications in the anthropological analysis of kinship exchange systems in less differentiated societies [@hageharary96]. 
+
+
+```{r}
+#| label: fig-func
+#| fig-cap: "A functional directed graph"
 #| fig-cap-location: margin
 #| fig-height: 8
 #| fig-width: 8
@@ -174,15 +188,9 @@ There is a special kind of digraph that is built by imposing the restriction tha
   p
 ```
 
-### Types of Nodes in Directed Graphs {#sec-typedir}
+For instance, @fig-func shows a functional graph with eight nodes. If a graph $G$ is a functional graph, then the number of nodes $V$ is always equal to the number of directed edges $E$. Thus, the cardinality of the edge set is constrained to be the same as the cardinality of the node set, via the constrain that each node's degree is equal to one. Thus, in @fig-func, $V = E = 8$.
 
-In a directed graph, there will typically be three types of (non-isolate) nodes [@Harary65]: 
-
-- First, there will be nodes that receive ties but don't send them. These are called **receivers** (like node *C* in @fig-directed). For receiver nodes $k_{in} > 0$ and $k_{out} = 0$.
-- Second, there will be nodes that receive ties and also send out ties. These are called **carriers** (like nodes *A* and *B* in @fig-directed. For carrier nodes, $k_{in} > 0$ and $k_{out} > 0$.
-- Finally, there will be nodes that send ties but don't receive them. These are called **transmitters** (like nodes *E* and *G* in @fig-directed). For transmitter nodes, $k_{in} = 0$ and $k_{out} > 0$. 
-
-## Anti-Symmetric Ties and Oriented Graphs {#sec-oriented}
+### Anti-Symmetric Ties and Oriented Graphs {#sec-oriented}
 
 There is a particular type of directed relationship that has the property of only going in one direction. These are called **anti-symmetric ties**. Like asymmetric ties, anti-symmetric ties have a directionality (and thus source and destination nodes), but reciprocity is forbidden by definition. That means that if *A* is anti-symmetrically connected to *B*, then *B* *cannot* send the *same type of tie* back to *A* (although *B* may be connected, and typically is, to *A* via some other type of tie in a different network). 
 
@@ -241,7 +249,7 @@ Yet another set of relations that can only be represented using anti-symmetric l
   p
 ```
 
-What happens if we build a network composed of pure anti-symmetric ties? The resulting graph is a special type of directed graph called an **oriented graph**, like the one in @fig-oriented. An oriented graph is kind of the opposite of the kind of symmetric directed graph depicted in @fig-symmdirected. Whereas in @fig-symmdirected every connected dyad is linked by a bi-directional reciprocal link, in the oriented graph shown in @fig-oriented, every connected dyad is linked *only* by a one-way non-reciprocal link, the link that would turn the asymmetrically connected dyads in @fig-oriented into a reciprocal dyad is forbidden by the nature of the tie.
+What happens if we build a network composed of pure anti-symmetric ties? The resulting graph is a special type of directed graph called an **oriented graph**, like the one in @fig-oriented. An oriented graph is kind of the opposite of the kind of symmetric directed graph depicted in @fig-symm. Whereas in @fig-symm every connected dyad is linked by a bi-directional reciprocal link, in the oriented graph shown in @fig-oriented, every connected dyad is linked *only* by a one-way non-reciprocal link, the link that would turn the asymmetrically connected dyads in @fig-oriented into a reciprocal dyad is forbidden by the nature of the tie.
 
 ```{r}
 #| label: fig-tree
@@ -262,7 +270,7 @@ What happens if we build a network composed of pure anti-symmetric ties? The res
   p
 ```
 
-As we will see in @sec-indirect, when considering connections between people that involve intermediaries, there is a special pattern called a **cycle**. This involves a node sending a directed tie to another node, which sends a directed tie to a third node. What makes it a cycle is that third node then sends a directed tie to the first node we began with. Recall from @sec-dirtriads, that the three-person subgraph *AAA(C)* shown in @fig-AAAC forms a cycle. For instance, in @fig-oriented, the sequence of directed edges $ED, DG, GE$ forms a cycle starting and ending in node $E$. Can you spot any other cycles in @fig-oriented?
+As we will see in @sec-indirect, when considering connections between people that involve intermediaries, there is a special pattern called a **cycle**. This involves a node sending a directed tie to another node, which sends a directed tie to a third node. What makes it a cycle is that third node then sends a directed tie to the first node we began with. Recall from @sec-triads, that the three-person subgraph *AAA(C)* shown in @fig-AAAC forms a cycle. For instance, in @fig-oriented, the sequence of directed edges $ED, DG, GE$ forms a cycle starting and ending in node $E$. Can you spot any other cycles in @fig-oriented?
 
 One feature of a network composed of only anti-symmetric relations is that its corresponding graph can always be drawn from top to bottom, starting (at the top) with the node that only sends but does receive any ties and ending (at the bottom) with nodes that only receive, but do not send, ties. This is called a **tree layout**. For instance, @fig-oriented-tree shows the same graph as in @fig-oriented, but laid out as a tree. 
 
