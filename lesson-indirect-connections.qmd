@@ -45,7 +45,7 @@ So what is a path?
 
 In a graph, a path between two nodes *A* and *B* is a *sequence* of nodes and edges, such that the sequence begins with node *A* and ends with node *B* and *only goes through each of the inner nodes in the path once*. 
 
-Note that every path is actually a **subgraph** of the original graph as defined in @sec-graph-subgraphs! Except that the subgraph that defines a path will always contain a sequence of vertices and edges connected in a line.
+Note that every path is actually a **subgraph** of the original graph as defined in @sec-subgraphs! Except that the subgraph that defines a path will always contain a sequence of vertices and edges connected in a line.
 
 ## Properties of Paths
 In graph theory, paths between pairs of nodes have some unique properties:
@@ -54,6 +54,8 @@ In graph theory, paths between pairs of nodes have some unique properties:
 -   Second, while it might not seem immediately obvious, because paths do not repeat nodes, they also *do not repeat edges*. As we will see later, this property helps differentiate paths from other less restricted types of edge sequences we may define in a graph featuring two nodes at the ends of it.\
 -   Third, paths are characterized by their *length*. The length of a path ($\mathcal{l}_{ij}$, where $i$ is the origin node and $j$ is the destination node) is given by the number of edges included in it. So the length of the path $(AD, DE, EB)$ is $\mathcal{l}_{AB} = 3$ because there are three edges in the path.^[So now you can tell your friends what "six degrees of separation" means in graph theory terms. If you can trace a path of $\mathcal{l} = 6$ with you as the origin node, and at the other end there stands Kevin Bacon, then you are six degrees of separation from him]
 -   Finally, there may be *multiple paths* connecting the same pair of nodes. For instance, In @fig-paths1 node *A* can also reach node *B* via the path $(AC, CE, EB)$ which is distinct from the one shown in red the Figure, but which also counts as a proper graph theoretic path (intervening nodes only appear twice in the listing, and the end nodes only appear once).
+
+## Node Connectivity and Reachability
 
 This leads us to the graph theory definition of **connectivity** for pairs of nodes:
 
@@ -65,235 +67,23 @@ Note that once we understand the graph theory notion of **connectivity**, it bec
 
 In a simple graph with no isolates, like that shown in @fig-paths1, it is easy to see that all node pairs are connected via a path of some length.
 
-## Connected and Disconnected Graphs
-Look at @fig-paths1 again. Are there any **disconnected** pairs of nodes in the graph? The answer is no. If you pick any pair of nodes, they are either directly connected, or indirectly connected to one another via a path of some length. So how can we get two nodes to be disconnected in a simple undirected graph? The answer is that there has to be some kind of "gap" splitting the graph into two or more pieces, so that some set of nodes can no longer reach some of the other ones. 
-
-```{r}
-#| label: fig-connected1
-#| fig-cap: "A connected graph versus a disconnected graph."
-#| fig-cap-location: margin
-#| fig-subcap:
-#|   - "A connected graph."
-#|   - "A disconnected graph." 
-#| layout-ncol: 2
-#| fig-width: 9
-#| fig-height: 10
-
-    gr <- create_empty(9, directed = FALSE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2:5)) %>% 
-        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
-        bind_edges(data.frame(from = 3, to = 4:5)) %>% 
-        bind_edges(data.frame(from = 4, to = 5:6)) %>% 
-        bind_edges(data.frame(from = 6, to = c(7:9))) %>%
-        bind_edges(data.frame(from = 7, to = c(8:9))) %>%
-        bind_edges(data.frame(from = 8, to = c(9))) %>%
-        mutate(name = toupper(letters[1:9]))
-    l <- ggraph(gr, layout = 'kk')
-    l <- as.matrix(l$data[, 1:2])
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", width = 1) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-    p <- p + theme_graph() 
-    p
-
-    gr <- create_empty(9, directed = FALSE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2:5)) %>% 
-        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
-        bind_edges(data.frame(from = 3, to = 4:5)) %>% 
-        bind_edges(data.frame(from = 4, to = 5:6)) %>% 
-        bind_edges(data.frame(from = 6, to = c(7:9))) %>%
-        bind_edges(data.frame(from = 7, to = c(8:9))) %>%
-        bind_edges(data.frame(from = 8, to = c(9))) %>%
-        mutate(name = toupper(letters[1:9]))
-    gr <- subgraph.edges(gr, c(1:9, 11:16), delete.vertices = FALSE)
-    p <- ggraph(gr, layout = l) 
-    p <- p + geom_edge_link(color = "steelblue", width = 1) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-    p <- p + theme_graph() 
-    p
-```
-
-For instance, if you compare the undirected graphs @fig-connected1-1 and @fig-connected1-2 you can appreciate the difference between a **connected graph** and a **disconnected graph**. The difference between @fig-connected1-1 and @fig-connected1-2 is that the @fig-connected1-2 graph is a subgraph of the @fig-connected1-1 graph, in which the $DF$ edge has been removed (an **edge-deleted subgraph** according to what we discussed in @sec-subgraphs): $G(b) = G(a) - DF$. Removing this edge has resulted in $G(b)$ being disconnected. There is no way we can trace a path connecting any of the vertices in the $\{F, G, H, I\}$ subset with any of the vertices in the $\{A, B, C, D, E\}$ subset. This is different from @fig-connected1-1 where we can trace a finite path between any two vertices, even if it is very long. Thus, we can come up with a formal definition of **graph connectivity**:
-
-- A graph is **connected** if there exists a (finite) path between each pair of nodes.
-
-- A graph is **disconnected** if there does not exist a path connecting every pair of nodes
-
-## Components and the Giant Component
-When a graph goes from connected (like @fig-connected1-1) to disconnected (like @fig-connected1-2) it is split into a number of subgraphs that are themselves connected. For instance, in @fig-connected1-2 the set nodes $\{A, B, C, D, E\}$ form a **connected subgraph** of the larger disconnected graph. A connected subgraph that is part of a larger disconnected graph is called a **component**.  In @fig-connected1-2 there are two components, one formed by the connected subgraph with node set $\{A, B, C, D, E\}$, and the other formed by the connected subgraph with node set $\{F, G, H, I\}$. 
-
-```{r}
-#| label: fig-connected2
-#| fig-cap: "A series of connected and disconnected graphs displaying components and the giant component."
-#| fig-subcap:
-#|   - "A connected graph."
-#|   - "A disconnected graph with three components."
-#|   - "A disconnected graph with a giant component."
-#| fig-height: 4
-#| fig-width: 3
-#| fig-cap-location: margin
-#| layout-ncol: 3
-
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 4, to = 11)) %>% 
-      bind_edges(data.frame(from = 8, to = 11)) %>% 
-      bind_edges(data.frame(from = 1, to = 7))
-    ewc <- c(rep("n", 24), rep("r", 2), "p")
-    cols <- c("n" = "steelblue", "r" = "red", "p" = "purple")
-    wdts <- c("n" = .7, "r" = 1.5, "p" = 1.5)
-    l <- ggraph(gr, layout = "kk")
-    l <- as.matrix(l$data[, 1:2])
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(aes(color = ewc, edge_width = ewc))
-    p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
-    p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
-    p <- p + theme_graph() + theme(legend.position = "none")
-    p 
-
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14))
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", width = .7) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
-    p <- p + theme_graph()
-    p
-    
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 1, to = 7))
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", width = .7) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
-    p <- p + theme_graph()
-    p
-
-```
-
-It is possible to split a graph into multiple components not just two. For instance, take a look at @fig-connected2-1. If we were to generate a subgraph from @fig-connected2-1 by deleting the red and purple edges, we would end up with the @fig-connected2-2; this graph is disconnected, and it features *three* separate components (connected subgraphs). If were to delete just the red edges from @fig-connected2-1 and keep the purple edge, we would end up with the graph shown in @fig-connected2-3. Like the @fig-connected2-2, @fig-connected2-3 is also disconnected, but it is split into *two* not three components. 
-
-Note that one of the connected components in @fig-connected2-3 is way larger than the other one. The bigger connected component of graph @fig-connected2-3 is of order ten, but the smaller component is only of order four. When a disconnected graph is split into multiple components, the component containing the largest number of nodes (the connected subgraph of the highest order) is called **the giant component**.
-
-## Bridges {#sec-bridges}
-We went from the connected graph shown in @fig-connected2-1 to the disconnected graphs in @fig-connected2-2 and @fig-connected2-3 by removing or deleting particular edges (like the red and purple ones in @fig-connected2-1). These edges are clearly more important than the other blue ones, because they are responsible for keeping the whole graph together as a connected structure. Edges whose removal results in a graph going from being connected to disconnected are so important that they have a special name: **bridges**.
-
-Thus, in a graph the bridges are (smallest in terms of cardinality) set of edges whose deletion results in the graph becoming disconnected. For instance, in @fig-connected1-1 the $DF$ edge is a bridge. In @fig-connected2-1, on the other hand, any two of the threesome formed by the two red edges and the purple edge count as bridges. Deleting any two of these three edges disconnects the graph.
-
-Note that in contrast to @fig-connected1-1, @fig-connected2-1 doesn't have any *one* edge that is *the* bridge (the cardinality of the set of bridges is one). Instead, it takes deleting at least two edges from the red and purple set to disconnect it. For instance, if we were to remove just the purple edge, @fig-connected2-1 would still be connected, and it would look like @fig-connected3-1, which is a connected graph. The same goes for removing just one of the red edges. If were to do that, we would end up with the graph shown in @fig-connected3-2, which is also a connected graph.
-
-
-```{r}
-#| label: fig-connected3
-#| fig-cap: "Two connected graphs."
-#| fig-subcap:
-#|   - "A connected graph."
-#|   - "Another connected graph."
-#| fig-height: 4
-#| fig-width: 3
-#| fig-cap-location: margin
-#| layout-ncol: 2
-
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 4, to = 11)) %>% 
-      bind_edges(data.frame(from = 8, to = 11)) %>% 
-      bind_edges(data.frame(from = 1, to = 7))     
-    l <- ggraph(gr, layout = "kk")
-    l <- as.matrix(l$data[, 1:2])
-
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 4, to = 11)) %>% 
-      bind_edges(data.frame(from = 8, to = 11))     
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", width = .7) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2")    
-    p <- p + theme_graph()
-    p <- p + theme(legend.position = "none")
-    p
-    
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 4, to = 11)) %>% 
-      bind_edges(data.frame(from = 1, to = 7))     
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", width = .7) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2")    
-    p <- p + theme_graph()
-    p <- p + theme(legend.position = "none")
-    p
-```
-
-<!--## Graph Diameter-->  
 ## Shortest Paths 
-Consider the multiple ways node *B* can reach node *C* via a path in @fig-paths1. One possibility is the path defined by the edge sequence $(BE, ED, DA, AC)$. Another possibility is the path defined by the sequence $(BE, ED, DC)$. Yet another possibility is the path given by the edge sequence $(BE, EC)$. What's the difference between these paths? Well, for the first one, $\mathcal{l}_{BC}^{(1)} = 4$, for the second one $\mathcal{l}_{BC}^{(2)} = 3$ and for the last one $\mathcal{l}_{BC}^{(3)} = 2$. The three paths are of different length, even though all three are proper graph-theoretic paths (they do not repeat inner nodes) and even though all three feature the same actors as the end nodes.^[Note that the length of the smallest *possible* shortest path between two non-adjacent vertices is always two.]
+Consider the multiple ways node *B* can reach node *C* via a path in @fig-paths1. One possibility is the path defined by the edge sequence $(BE, ED, DA, AC)$. Another possibility is the path defined by the sequence $(BE, ED, DC)$. Yet another possibility is the path given by the edge sequence $(BE, EC)$. What's the difference between these paths? Well, for the first one, $\mathcal{l}_{BC}^{(1)} = 4$, for the second one $\mathcal{l}_{BC}^{(2)} = 3$ and for the last one $\mathcal{l}_{BC}^{(3)} = 2$. The three paths are of different length, even though all three are proper graph-theoretic paths (they do not repeat inner nodes) and even though all three feature the same actors as the end nodes. Note that the length of the smallest *possible* shortest path between two non-adjacent vertices is always two!
 
-Let's say *B* was a spy who needed to send an urgent message to *C* even though they don't know *C* directly. If *B* wanted the message to get to *C* in the fastest way, they would use the **shortest path** between them, which in this case is $(BE, EC)$. For any two nodes in the network, the shortest path is the *smallest* existing path (in terms of path length) that has those nodes as the end nodes.^[This means that for every pair of connected actors in the network, we can define a shortest path between them.^[Shortest paths between pairs of nodes are also called **geodesics**.]
+Let's say *B* was a spy who needed to send an urgent message to *C* even though they don't know *C* directly. If *B* wanted the message to get to *C* in the fastest way, they would use the **shortest path** between them, which in this case is $(BE, EC)$. For any two nodes in the network, the shortest path is the *smallest* existing path (in terms of path length) that has those nodes as the end nodes. This means that for every pair of connected actors in the network, we can define a shortest path between them. The shortest paths between pairs of nodes are also called **geodesics**. 
 
-Sometimes, as with actors *A* and *B* in @fig-paths1), there will be **multiple shortest paths** between two pairs of nodes, because we end up with two or more paths that are "tied" in length (and thus all count as "shortest" paths). So for nodes *A* and *B* in @fig-paths1, the two shortest paths connecting them are of length 3: $(AC, CE, EB)$ and $(AD, DE, EB)$.
+Sometimes, as with actors *A* and *B* in @fig-paths1, there will be **multiple shortest paths** between two pairs of nodes, because we end up with two or more paths that are "tied" in length (and thus all count as "shortest" paths). So for nodes *A* and *B* in @fig-paths1, the two shortest paths connecting them are of length three: $(AC, CE, EB)$ and $(AD, DE, EB)$. 
 
-Observe that, in @fig-paths1 if *B* really wanted to reach *C* via the shortest path, they will always have to go through node *E*. When this is the case, we say that *E* *stands in the shortest path* between *B* and *C*. So *B* is highly dependent on *E* to reach *C*. This makes *E*'s position in the network particular important for *B*, because they play the role of *go-between* or **broker** between *B* and the other actors in the network.
+Observe that, in @fig-paths1, if *B* really wanted to reach *C* via the shortest path, they will always have to go through node *E*. When this is the case, we say that *E* *stands in the shortest path* between *B* and *C* because it is an inner node in that path. So *B* is highly dependent on *E* to reach *C*. This makes *E*'s position in the network particular important for *B*, because they play the role of *go-between* or **broker** between *B* and the other actors in the network [@marsden83].
 
 Because of this connection to communication efficiency and inter-mediation, shortest paths figure prominently in various measures of node position, called **centrality measures** we will deal with in @sec-centrality. One such measure, called **betweenness centrality** is based on counting the *number of shortest paths* between every other pair of nodes that a given node stands on. 
+
+The length of the shortest path between two pair of non-adjacent vertices in the network can be thought of as the "degrees of separation" between them. This is also called the **geodesic distance** between two nodes. For instance, the shortest path between nodes *A* and *B* is of length three, so *A* is three degrees of separation away from *B*. As we saw in this example, there does not have to be only one shortest path between two nodes. Actors in the network can be connected via multiple distinct shortest paths as are *A* and *B* in @fig-paths1.
+
+## Cycles {#sec-cycles}
+Consider the edge sequence $(AD, DE, EC, CA)$ highlighted in red in @fig-cycle. What's so special about it? Well, it looks like a path, because the inner nodes are only listed twice and so all the edges are unique. However, both the origin and destination nodes are the same!
+
+Something like this sometimes happens with gossip. You start a rumor about someone by telling somebody else, and then a third person tells you the rumor that you started as if it was news to you! In this case, the rumor has traveled in the network via what is called a **cycle**.
 
 ```{r}
 #| label: fig-cycle
@@ -319,135 +109,50 @@ Because of this connection to communication efficiency and inter-mediation, shor
     p
 ```
 
-The length of the shortest path between two pair of non-adjacent vertices in the network can be thought of as the "degrees of separation" between them. This is also called the **geodesic distance** between two nodes. For instance, the shortest path between nodes *A* and *B* is of length three, so *A* is three degrees of separation away from *B*. As we saw in this example, there does not have to be only one shortest path between two nodes. Actors in the network can be connected via multiple distinct shortest paths as are *A* and *B* in @fig-paths1).
-
-## Cycles {#sec-cycles}
-Consider the edge sequence $(AD, DE, EC, CA)$ highlighted in red in @fig-cycle). What's so special about it? Well, it looks like a path, because the inner nodes are only listed twice and so all the edges are unique. However, both the origin and destination nodes are the same!
-
-Something like this sometimes happens with gossip. You start a rumor about someone by telling somebody else, and then a third person tells you the rumor that you started as if it was news to you! In this case, the rumor has traveled in the network via what is called a **cycle**.
-
 A cycle is path,*of length three or larger*, *featuring the same node in both the origin and destination slots*.
 
-Some directed graphs, are distinctive because they don't have any cycles. It doesn't matter how hard you try, or how long you stare at them, there is no way you will find a directed path of minimum length three that begins and ends with the same node. Directed graphs completely lacking in cycles are called **directed acyclic graphs** (DAGs). Note that **tree graphs** made up of **anti-symmetric** links, such as the one shown in @fig-tree are DAGs.
+Some directed graphs, are distinctive because they don't have any cycles. It doesn't matter how hard you try, or how long you stare at them, there is no way you will find a directed path of minimum length three that begins and ends with the same node. Directed graphs completely lacking in cycles are called **directed acyclic graphs** (DAGs). Note that **tree graphs** are by definition graphs that do not contan cycles. Therefore every tree graph is also a DAG. 
 
-## Trails and Walks
+## Graph Properties Based on Paths and Cycles
+
+Given what we have learned so far, we can characterize key properties of the whole graph depending on the range (minimum and maximum lengths) of the shortest paths and cycles between pairs of nodes in it:
+
+- The length of the *longest* geodesic (shortest path) between two nodes in a graph is called the **graph diameter**. 
+- The length of the *shortest* geodesic (shortest path) between two nodes in a graph is called the **graph radius**. 
+- For graphs that are not acyclic (e.g., they contain at least one cycle), the length of the *longest* cycle is called the **graph circumference** [@buckleyharary90, p. 10]. 
+- In the same way, the length of the *shortest* cycle in a graph with cycles is called the **graph girth** [@buckleyharary90, p. 10]. For a graph with a single cycle, the circumference is always equal to the girth. 
+- A path that includes every node in a graph is called a **Hamiltonian path** (also called **spanning paths**). Obviously not all graphs will contain such a path, graphs that do contain a Hamiltonian path are called **traceable graphs**. 
+- A cycle that visits each node in the graph exactly once is called **Hamiltonian cycle** (also called **spanning cycles**). Obviously not all graphs will contain such a cycle, graphs that do contain such a Hamiltonian cycle are called (you guessed it) **Hamiltonian graphs**.^[Hamiltonian paths, cycles, and graphs are named after the Irish Mathematician and Scientist [William Rowan Hamilton](https://en.wikipedia.org/wiki/William_Rowan_Hamilton).]
+
+## Walks and Trails
 Not every sequence of nodes and edges that begins with one node and ends in another counts as a proper graph-theoretic path between two nodes.
 
 For instance, looking at @fig-paths1, we could imagine a sequence of edges that started with one node and ended in another one without repeating edges, but repeating nodes. For instance, the sequence $(CA, AD, DC, CE, ED)$ has node *C* as the origin node and node *D* as the destination node, and all the edges in the sequence are unique. However, the origin node *C* and the destination node *D* also appear in the intervening chain, which means that they are listed three times. This fails the path test for this edge sequence. Sequences like this, featuring all unique edges but repeated nodes, are called **trails**.
 
 In the same way, we could imagine some kind of message traveling across the edge sequence $(AD, DC, CE, ED, DC, EC, EB)$. This sequence has *A* as the origin node and has *B* as the destination node. However, the sequence goes through nodes *C*, *D*, and *E* twice; moreover, the edge DC appears twice, as does the edge EC. This means nodes C, D, and E appear four times in the listing which also fails the "is this a path?" test for this sequence.
 
-Arbitrary sequences of nodes and edges that begin with one node and end in another node but that feature both repeated nodes and edges along the way are called **walks**.
+Arbitrary sequences of nodes and edges that begin with one node and end in another node but that feature both repeated nodes and edges along the way are called **walks**. If a walk begins and ends in the same node (like a cycle) then it is called a **closed walk**, otherwise, if a walk has different source and destination nodes, it is called an **open walk** [@buckleyharary90, p. 10]. The same distinction applies to trails. 
 
 Walks, trails, and paths, form a hierarchy of increasingly less restricted "travels" from one node to another via edges in a graph. Walks are the least restricted (they can include both repeated nodes and edges) and paths are the most restricted (they cannot include repeated nodes, which by implication also means they can't include repeated links). Trails are in between. They are forbidden from repeating edges but can use multiple nodes more than once.
 
 This means all paths are trails, and are trails are walks, but not all walks are trails, and not all trails are paths!
 
-## Keeping Walks and Trails Apart
+### Keeping Walks and Trails Apart
 
-One way to keep these distinctions straight is by thinking about different types of things that **flow** through a network and how they may use paths, trails, or walks [@borgatti05]. Take for instance a *virus*. A virus doesn't decide where to go. It just gets transmitted from person to person every time pairs of people (or multiple pairs if it's a mass gathering) come into contact with one another. The same person can become exposed to the virus multiple times via different links (so the chain repeats nodes). In the same way, the same link (your best friend) can expose you to the virus multiple times (so the chain repeats edges). This means that viruses form transmission chains in social networks that look like **walks**: they repeat both nodes and edges. In this way, viruses are very much like money. If you buy something with a dollar, and the person you gave the dollar to buys something with it, the dollar can come back to you after flowing through the network for a while, so money also travels through networks via walks because it can repeat both nodes and edges. 
+One way to keep these distinctions straight is by thinking about different types of things that **flow** through a network and how they may use paths, trails, or walks [@borgatti05]. Take for instance a *virus* like our (in)famous friend, Covid 19. A virus doesn't decide where to go. It just gets transmitted from person to person every time pairs of people (or multiple pairs if it's a mass gathering) come into contact with one another. The same person can become exposed to the virus multiple times via different links (so the chain repeats nodes).  In the same way, the same link (your best friend) can expose you to the virus multiple times (so the chain repeats edges). 
 
-How about trails? We already mentioned the idea of "six degrees of separation." In the 1960s, the social psychologist Stanley @milgram67 designed an experiment where he sent almost two hundred packages containing a letter to a bunch of random people in Nebraska. The letter had the name of a stockbroker who lived in Boston and instructions that read: "If you know this person and where they live, send them this package; if you don't know this person, forward it to someone you know who you think might know this person." This is called the [**small world experiment**](https://en.wikipedia.org/wiki/Small-world_experiment). These letters thus began to flow through indirect connections in social networks. Any one "chain" of letters however would flow from one link in the network to another. Theoretically it could come back to a person who had already sent the letter (if one of the people forward in the chain didn't know that person had sent the letter before), but no one would forward the letter back to the same person they had forwarded the letter before. This means that the packages in the small world experiment traveled via **trails**. They could repeat nodes (e.g., people) but not edges. Gossip spreads through the network via trails too. You can hear the same piece of gossip from different friends (meaning that you are a repeated node in the trail), but you won't hear the same piece of gossip from the *same* friend (meaning that edges are not repeated), unless they had memory loss!
+These considerations lead us to conclude that viruses form transmission chains in social networks that look like **walks**: they repeat both nodes and edges. 
+
+In this way, viruses are very much like (good old fashioned paper and coin) *money* even though you may not have thought of that connection before. If you buy something with a dollar, and the person you gave the dollar to buys something with it, the dollar can come back to you after flowing through the network for a while, so money also travels through networks via walks because it can repeat both nodes and edges. 
+
+### Milgram's Small World Experiment
+
+How about trails? We already mentioned the idea of "six degrees of separation." In the 1960s, the social psychologist Stanley @milgram67 designed an experiment where he sent almost two hundred packages containing a letter to a bunch of random people in Nebraska. The letter had the name of a stockbroker who lived in Boston and instructions that read: "If you know this person and where they live, send them this package; if you don't know this person, forward it to someone you know who you think might know this person." This is called the [**small world experiment**](https://en.wikipedia.org/wiki/Small-world_experiment). 
+
+The letters in Milgram's experiment thus began to flow through indirect connections in social networks. Any one "chain" of letters however would go from one link in the network to another. Theoretically it could come back to a person who had already sent the letter (if one of the people forward in the chain didn't know that person had sent the letter before), but no one would forward the letter back to the same person they had forwarded the letter before. This means that the packages in the small world experiment traveled via **trails**. They could repeat nodes (e.g., people) but not edges. 
+
+Gossip spreads through the network via trails too. You can hear the same piece of gossip from different friends (meaning that you are a repeated node in the trail), but you won't hear the same piece of gossip from the *same* friend (meaning that edges are not repeated), unless they had memory loss!
 
 So the differences between the ways viruses and gossip travel via social networks should help you keep walks and trails apart. 
-
-## Local Bridges
-In a classic paper on "The Strength of Weak Ties," Mark @granovetter73 developed the concept of a *local bridge*. Recall from section @sec-bridges, that a bridge is an edge (or set of edges) that if removed would completely disconnect the graph. There is another way of thinking of bridges in the context of shortest paths and this is with respect to what happens to the connectivity between particular pairs of nodes in the graph when a specific edge is removed. From this perspective, a bridge is an edge (or set of edges) that if removed would increase the length of the shortest paths between two sets of nodes from a particular number to *infinity* since, in  a disconnected graph, the length of the path between nodes that cannot reach one another is indeed infinity! ($\infty$).
-
-But of course, between a small number and infinity there's a lot of in-between. That's what the concept of a **local bridge** is intended to capture. A local bridge is an edge that if removed from the graph, would increase the length of the shortest path between *a particular pair* of nodes to a number that is less than infinity. This number is called the *degree* of the local bridge in question. Because a local bridge is always defined with respect to a particular pair of nodes, it is a triplet, involving two nodes and one edge.
-
-```{r}
-#| label: fig-connected4
-#| fig-cap: "Two connected graphs."
-#| fig-subcap:
-#|   - "A connected graph."
-#|   - "Another connected graph."
-#| fig-height: 6
-#| fig-width: 6
-#| fig-cap-location: margin
-#| layout-ncol: 2
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 4, to = 11)) %>% 
-      bind_edges(data.frame(from = 8, to = 11)) %>% 
-      bind_edges(data.frame(from = 1, to = 7))     
-    l <- ggraph(gr, layout = "kk")
-    l <- as.matrix(l$data[, 1:2])
-
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 4, to = 11)) %>% 
-      bind_edges(data.frame(from = 1, to = 7))  %>% 
-      bind_edges(data.frame(from = 8, to = 11)) %>%    
-      activate(nodes) %>% 
-         mutate(name = toupper(letters[1:14]))
-    
-     ewc <- c(rep("n", 24), rep("r", 2), "p")
-     ewc[c(3, 14)] <- "r"
-     cols <- c("n" = "steelblue", "r" = "red", "p" = "purple")
-     wdts <- c("n" = .7, "r" = 1.5, "p" = 2)
-    
-     p <- ggraph(gr, layout = l)
-     p <- p + geom_edge_link(aes(color = ewc, edge_width = ewc))
-     p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "tan2")   
-     p <- p + geom_node_text(aes(label = name), size = 8, color = "white")   
-     p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
-     p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")
-     p <- p + theme_graph()
-     p <- p + theme(legend.position = "none")
-     p
-    
-    gr <- create_empty(14, directed = FALSE)
-    gr <- gr %>%
-      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-      bind_edges(data.frame(from = 13, to = 14)) %>% 
-      bind_edges(data.frame(from = 4, to = 11)) %>% 
-      bind_edges(data.frame(from = 1, to = 7)) %>%
-      activate(nodes) %>% 
-         mutate(name = toupper(letters[1:14]))
-     
-     ewc <- c(rep("n", 24), rep("r", 2))
-     ewc[c(3, 14)] <- "r"
-     cols <- c("n" = "steelblue", "r" = "red")
-     wdts <- c("n" = .7, "r" = 1.5)
-    
-     p <- ggraph(gr, layout = l)
-     p <- p + geom_edge_link(aes(color = ewc, edge_width = ewc))
-     p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "tan2")   
-     p <- p + geom_node_text(aes(label = name), size = 8, color = "white")   
-     p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
-     p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")
-     p <- p + theme_graph()
-     p <- p + theme(legend.position = "none")
-     p
-```
-
-
-For instance, in @fig-connected4-1, with respect to nodes $A$ and $H$, the edge $HK$ (pictured in purple) is a *local bridge of degree 4*. The reason for that is that, as shown in @fig-connected4-2, when the edge $HK$ is removed from the graph, the shortest path_ between nodes $H$ and $K$ increases from $l_{HK} =1$ ($H$ and $K$ are adjacent in @fig-connected4-1) to $l_{HK} = 4$, as given by the edge sequence $\{GH, AG, AD, DK\}$ (pictured in red). Note that from the perspective of nodes $D$ and $H$, the purple $HK$ edge is a local bridge of degree three, because $l_{DH} = 2$ in @fig-connected4-1 and $l_{DH} = 3$ when the edge $HK$ is removed from the graph in @fig-connected4-2.
 
 ## References {.unnumbered}

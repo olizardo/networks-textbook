@@ -1,0 +1,325 @@
+# Graph Connectivity {#sec-graphconnectivity}
+
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+```
+
+## Connected and Disconnected Graphs
+Look at @fig-paths1 again. Are there any **disconnected** pairs of nodes in the graph? The answer is no. If you pick any pair of nodes, they are either directly connected, or indirectly connected to one another via a path of some length. So how can we get two nodes to be disconnected in a simple undirected graph? The answer is that there has to be some kind of "gap" splitting the graph into two or more pieces, so that some set of nodes can no longer reach some of the other ones. 
+
+```{r}
+#| label: fig-connected1
+#| fig-cap: "A connected graph versus a disconnected graph."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - "A connected graph."
+#|   - "A disconnected graph." 
+#| layout-ncol: 2
+#| fig-width: 9
+#| fig-height: 10
+
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+        bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+        bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+        bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+        bind_edges(data.frame(from = 8, to = c(9))) %>%
+        mutate(name = toupper(letters[1:9]))
+    l <- ggraph(gr, layout = 'kk')
+    l <- as.matrix(l$data[, 1:2])
+    p <- ggraph(gr, layout = l)
+    p <- p + geom_edge_link(color = "steelblue", width = 1) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() 
+    p
+
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+        bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+        bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+        bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+        bind_edges(data.frame(from = 8, to = c(9))) %>%
+        mutate(name = toupper(letters[1:9]))
+    gr <- subgraph.edges(gr, c(1:9, 11:16), delete.vertices = FALSE)
+    p <- ggraph(gr, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+
+For instance, if you compare the undirected graphs @fig-connected1-1 and @fig-connected1-2 you can appreciate the difference between a **connected graph** and a **disconnected graph**. The difference between @fig-connected1-1 and @fig-connected1-2 is that the @fig-connected1-2 graph is a subgraph of the @fig-connected1-1 graph, in which the $DF$ edge has been removed (an **edge-deleted subgraph** according to what we discussed in @sec-subgraphs): $G(b) = G(a) - DF$. Removing this edge has resulted in $G(b)$ being disconnected. There is no way we can trace a path connecting any of the vertices in the $\{F, G, H, I\}$ subset with any of the vertices in the $\{A, B, C, D, E\}$ subset. This is different from @fig-connected1-1 where we can trace a finite path between any two vertices, even if it is very long. Thus, we can come up with a formal definition of **graph connectivity**:
+
+- A graph is **connected** if there exists a (finite) path between each pair of nodes.
+
+- A graph is **disconnected** if there does not exist a path connecting every pair of nodes
+
+## Components and the Giant Component
+When a graph goes from connected (like @fig-connected1-1) to disconnected (like @fig-connected1-2) it is split into a number of subgraphs that are themselves connected. For instance, in @fig-connected1-2 the set nodes $\{A, B, C, D, E\}$ form a **connected subgraph** of the larger disconnected graph. A connected subgraph that is part of a larger disconnected graph is called a **component**.  In @fig-connected1-2 there are two components, one formed by the connected subgraph with node set $\{A, B, C, D, E\}$, and the other formed by the connected subgraph with node set $\{F, G, H, I\}$. 
+
+```{r}
+#| label: fig-connected2
+#| fig-cap: "A series of connected and disconnected graphs displaying components and the giant component."
+#| fig-subcap:
+#|   - "A connected graph."
+#|   - "A disconnected graph with three components."
+#|   - "A disconnected graph with a giant component."
+#| fig-height: 4
+#| fig-width: 3
+#| fig-cap-location: margin
+#| layout-ncol: 3
+
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14)) %>% 
+      bind_edges(data.frame(from = 4, to = 11)) %>% 
+      bind_edges(data.frame(from = 8, to = 11)) %>% 
+      bind_edges(data.frame(from = 1, to = 7))
+    ewc <- c(rep("n", 24), rep("r", 2), "p")
+    cols <- c("n" = "steelblue", "r" = "red", "p" = "purple")
+    wdts <- c("n" = .7, "r" = 1.5, "p" = 1.5)
+    l <- ggraph(gr, layout = "kk")
+    l <- as.matrix(l$data[, 1:2])
+    p <- ggraph(gr, layout = l)
+    p <- p + geom_edge_link(aes(color = ewc, edge_width = ewc))
+    p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
+    p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")    
+    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
+    p <- p + theme_graph() + theme(legend.position = "none")
+    p 
+
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14))
+    p <- ggraph(gr, layout = l)
+    p <- p + geom_edge_link(color = "steelblue", width = .7) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
+    p <- p + theme_graph()
+    p
+    
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14)) %>% 
+      bind_edges(data.frame(from = 1, to = 7))
+    p <- ggraph(gr, layout = l)
+    p <- p + geom_edge_link(color = "steelblue", width = .7) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2") 
+    p <- p + theme_graph()
+    p
+
+```
+
+It is possible to split a graph into multiple components not just two. For instance, take a look at @fig-connected2-1. If we were to generate a subgraph from @fig-connected2-1 by deleting the red and purple edges, we would end up with the @fig-connected2-2; this graph is disconnected, and it features *three* separate components (connected subgraphs). If were to delete just the red edges from @fig-connected2-1 and keep the purple edge, we would end up with the graph shown in @fig-connected2-3. Like the @fig-connected2-2, @fig-connected2-3 is also disconnected, but it is split into *two* not three components. 
+
+Note that one of the connected components in @fig-connected2-3 is way larger than the other one. The bigger connected component of graph @fig-connected2-3 is of order ten, but the smaller component is only of order four. When a disconnected graph is split into multiple components, the component containing the largest number of nodes (the connected subgraph of the highest order) is called **the giant component**.
+
+## Bridges {#sec-bridges}
+We went from the connected graph shown in @fig-connected2-1 to the disconnected graphs in @fig-connected2-2 and @fig-connected2-3 by removing or deleting particular edges (like the red and purple ones in @fig-connected2-1). These edges are clearly more important than the other blue ones, because they are responsible for keeping the whole graph together as a connected structure. Edges whose removal results in a graph going from being connected to disconnected are so important that they have a special name: **bridges**.
+
+Thus, in a graph the bridges are (smallest in terms of cardinality) set of edges whose deletion results in the graph becoming disconnected. For instance, in @fig-connected1-1 the $DF$ edge is a bridge. In @fig-connected2-1, on the other hand, any two of the threesome formed by the two red edges and the purple edge count as bridges. Deleting any two of these three edges disconnects the graph.
+
+Note that in contrast to @fig-connected1-1, @fig-connected2-1 doesn't have any *one* edge that is *the* bridge (the cardinality of the set of bridges is one). Instead, it takes deleting at least two edges from the red and purple set to disconnect it. For instance, if we were to remove just the purple edge, @fig-connected2-1 would still be connected, and it would look like @fig-connected3-1, which is a connected graph. The same goes for removing just one of the red edges. If were to do that, we would end up with the graph shown in @fig-connected3-2, which is also a connected graph.
+
+
+```{r}
+#| label: fig-connected3
+#| fig-cap: "Two connected graphs."
+#| fig-subcap:
+#|   - "A connected graph."
+#|   - "Another connected graph."
+#| fig-height: 4
+#| fig-width: 3
+#| fig-cap-location: margin
+#| layout-ncol: 2
+
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14)) %>% 
+      bind_edges(data.frame(from = 4, to = 11)) %>% 
+      bind_edges(data.frame(from = 8, to = 11)) %>% 
+      bind_edges(data.frame(from = 1, to = 7))     
+    l <- ggraph(gr, layout = "kk")
+    l <- as.matrix(l$data[, 1:2])
+
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14)) %>% 
+      bind_edges(data.frame(from = 4, to = 11)) %>% 
+      bind_edges(data.frame(from = 8, to = 11))     
+    p <- ggraph(gr, layout = l)
+    p <- p + geom_edge_link(color = "steelblue", width = .7) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2")    
+    p <- p + theme_graph()
+    p <- p + theme(legend.position = "none")
+    p
+    
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14)) %>% 
+      bind_edges(data.frame(from = 4, to = 11)) %>% 
+      bind_edges(data.frame(from = 1, to = 7))     
+    p <- ggraph(gr, layout = l)
+    p <- p + geom_edge_link(color = "steelblue", width = .7) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 6, color = "tan2")    
+    p <- p + theme_graph()
+    p <- p + theme(legend.position = "none")
+    p
+```
+
+### Local Bridges
+
+In a classic paper on "The Strength of Weak Ties," Mark @granovetter73 developed the concept of a *local bridge*. Recall from section @sec-bridges, that a bridge is an edge (or set of edges) that if removed would completely disconnect the graph. There is another way of thinking of bridges in the context of shortest paths and this is with respect to what happens to the connectivity between particular pairs of nodes in the graph when a specific edge is removed. From this perspective, a bridge is an edge (or set of edges) that if removed would increase the length of the shortest paths between two sets of nodes from a particular number to *infinity* since, in  a disconnected graph, the length of the path between nodes that cannot reach one another is indeed infinity! ($\infty$).
+
+But of course, between a small number and infinity there's a lot of in-between. That's what the concept of a **local bridge** is intended to capture. A local bridge is an edge that if removed from the graph, would increase the length of the shortest path between *a particular pair* of nodes to a number that is less than infinity. This number is called the *degree* of the local bridge in question. Because a local bridge is always defined with respect to a particular pair of nodes, it is a triplet, involving two nodes and one edge.
+
+```{r}
+#| label: fig-connected4
+#| fig-cap: "Two connected graphs."
+#| fig-subcap:
+#|   - "A connected graph."
+#|   - "Another connected graph."
+#| fig-height: 6
+#| fig-width: 6
+#| fig-cap-location: margin
+#| layout-ncol: 2
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14)) %>% 
+      bind_edges(data.frame(from = 4, to = 11)) %>% 
+      bind_edges(data.frame(from = 8, to = 11)) %>% 
+      bind_edges(data.frame(from = 1, to = 7))     
+    l <- ggraph(gr, layout = "kk")
+    l <- as.matrix(l$data[, 1:2])
+
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14)) %>% 
+      bind_edges(data.frame(from = 4, to = 11)) %>% 
+      bind_edges(data.frame(from = 1, to = 7))  %>% 
+      bind_edges(data.frame(from = 8, to = 11)) %>%    
+      activate(nodes) %>% 
+         mutate(name = toupper(letters[1:14]))
+    
+     ewc <- c(rep("n", 24), rep("r", 2), "p")
+     ewc[c(3, 14)] <- "r"
+     cols <- c("n" = "steelblue", "r" = "red", "p" = "purple")
+     wdts <- c("n" = .7, "r" = 1.5, "p" = 2)
+    
+     p <- ggraph(gr, layout = l)
+     p <- p + geom_edge_link(aes(color = ewc, edge_width = ewc))
+     p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "tan2")   
+     p <- p + geom_node_text(aes(label = name), size = 8, color = "white")   
+     p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
+     p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")
+     p <- p + theme_graph()
+     p <- p + theme(legend.position = "none")
+     p
+    
+    gr <- create_empty(14, directed = FALSE)
+    gr <- gr %>%
+      bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
+      bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
+      bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
+      bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
+      bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
+      bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
+      bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
+      bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
+      bind_edges(data.frame(from = 13, to = 14)) %>% 
+      bind_edges(data.frame(from = 4, to = 11)) %>% 
+      bind_edges(data.frame(from = 1, to = 7)) %>%
+      activate(nodes) %>% 
+         mutate(name = toupper(letters[1:14]))
+     
+     ewc <- c(rep("n", 24), rep("r", 2))
+     ewc[c(3, 14)] <- "r"
+     cols <- c("n" = "steelblue", "r" = "red")
+     wdts <- c("n" = .7, "r" = 1.5)
+    
+     p <- ggraph(gr, layout = l)
+     p <- p + geom_edge_link(aes(color = ewc, edge_width = ewc))
+     p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "tan2")   
+     p <- p + geom_node_text(aes(label = name), size = 8, color = "white")   
+     p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
+     p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")
+     p <- p + theme_graph()
+     p <- p + theme(legend.position = "none")
+     p
+```
+
+For instance, in @fig-connected4-1, with respect to nodes $A$ and $H$, the edge $HK$ (pictured in purple) is a *local bridge of degree 4*. The reason for that is that, as shown in @fig-connected4-2, when the edge $HK$ is removed from the graph, the shortest path_ between nodes $H$ and $K$ increases from $l_{HK} =1$ ($H$ and $K$ are adjacent in @fig-connected4-1) to $l_{HK} = 4$, as given by the edge sequence $\{GH, AG, AD, DK\}$ (pictured in red). Note that from the perspective of nodes $D$ and $H$, the purple $HK$ edge is a local bridge of degree three, because $l_{DH} = 2$ in @fig-connected4-1 and $l_{DH} = 3$ when the edge $HK$ is removed from the graph in @fig-connected4-2.
