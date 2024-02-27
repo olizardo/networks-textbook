@@ -1,0 +1,97 @@
+# Cohesive Subsets {#sec-cohesive}
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+In @sec-cliques we explored once approach to analyzing the group structure of a network. There we focused on finding *densely connected subgraphs* in the structure, with the **clique** providing the ideal type of a **maximally complete** subgraph, that is a subgroup where every actor is connected to one another. 
+
+However, we saw that perhaps the ideal of full connectivity is too strong to define a group, which is why we turned to Luce's notion of an **n-clique** which counts groups not based on a direct criterion of connectivity (like **adjacency**; see @sec-graphtheory) but using an indirect criterion (like **reachability**; see @sec-indirect).
+
+Yet, both of these ideas of groups are based on an **intrinsic** criterion of what counts as group, and that is the level of connectivity that actors in a group how *with each other*. However, there is also a **positional** criterion for what makes a group a group, and that is the idea that *group members should have more connections with the people inside the group than with people outside the group* [@seidmanfoster78]. 
+
+In network analysis, groups that meet both the intrinsic *and* the positional criterion for counting as a group are called **cohesive subsets** [@borgattietal90].
+
+In this lesson we explore some ways of defining cohesive subsets using graph theory and network-analytic ideas. 
+
+## Pairwise Edge and Node Connectivity
+
+First, we need to define some graph-theoretic concepts. Most of these are generalizations to the case of *pairs of nodes* in a graph of concepts we already defined in section @sec-graphconnectivity for the graph as a whole. 
+
+Recall that the **edge connectivity** of a graph $G = \{E, V\}$ is defined as the cardinality of one of the graph's **minimum edge cutsets**, where a graph's **edge cutset** is any subset of edges taken from the larger set $E$ that disconnects the graph, an a minimum cutset is an edge cutset of the smallest cardinality possible. So, a graph with edge-connectivity equal to two, contains at least one subset of edges of cardinality two that if removed would disconnect the graph.
+
+Just like we can define an edge-connectivity number for the whole graph, we define an edge connectivity for *each pair of nodes* in the graph. The beauty is that the **pairwise edge connectivity** between two nodes is the define the same way as for the whole graph. 
+
+Thus, if *A* and *B* are two nodes that belong to the larger set $V$ of a connected graph $G$, then their edge connectivity---written $\lambda(A,B)$---is given by the minimum number of edges that we would have be removed from $G$ to disconnect *A* and *B*. 
+
+```{r}
+#| label: fig-edgecon
+#| fig-cap: "A connected graph."
+#| fig-height: 10
+#| fig-width: 10
+#| fig-cap-location: margin
+
+set.seed(463)
+gr <- play_gnm(8, 12, directed = FALSE) %>% 
+         mutate(name = toupper(letters[1:8])) 
+    p <- ggraph(gr, layout = 'kk')
+    p <- p + geom_edge_link(color = "steelblue", width = .7) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph()
+    p <- p + theme(legend.position = "none")
+    p
+
+```
+
+Consider the graph shown in @fig-edgecon. Let's say we wanted to figure out the edge connectivity of some of the nodes in the graph. The case of *D* and *H* is pretty obvious; their edge connectivity is clearly $\lambda(D, H) = 1$ since all it takes is to remove the $DH$ edge to disconnect *D* and *H*.
+
+In fact, since *D* is clearly an **end-node** in the graph (a node with degree equals one), the node connectivity between *D* and *every* other node in the graph is equal to one: In mathese, $\lambda(D, V-D) = 1$.
+
+What about the edge connectivity between nodes *F* and *G*? Here, we can't just disconnect these two nodes by removing their direct connection, edge $FG$. The reason is that *F* can still reach *G* via path $\{FE, EG\}$. So we also need to remove the $FE$ edge to disconnect *F* and *E*, meaning that $\lambda(F, E) = 2$. 
+
+### The Edge Connectivity Matrix
+
+We can of course keep going and figure out the pairwise edge connectivities for each pair of nodes in the graph. We can store this information in a handy dandy matrix, which we will call the graph's **edge connectivity matrix**. 
+
+The edge connectivity matrix for the graph shown in @fig-edgecon is shown in @tbl-edgecon. 
+
+```{r}
+#| label: tbl-edgecon
+#| tbl-cap: "Edge connectivity matrix of a connected graph."
+#| tbl-cap-location: margin
+
+n <- length(V(gr))
+m <- matrix(0, n, n)
+for (i in 1:n) {
+     for (j in 1:n) {
+          if (i != j) {
+               m[i,j] <- edge_connectivity(gr, source = i, target = j)
+          }
+     }
+}
+rownames(m) <- toupper(letters[1:n])
+colnames(m) <- toupper(letters[1:n])
+diag(m) <- "--"
+kbl(m, format = "html") %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+
+```
+
+Note that the edge connectivity matrix is **symmetric** which makes sense since for any node *A* and *B* $\lambda(A, B) = \lambda(B, A)$. The diagonals are empty since edge-connectivity is a pairwise relation between different nodes in the graph. 
+
+The edge connectivity between two nodes can be interpreted as the **strength of the indirect ties** between any two nodes in the graph. The higher, the stronger the indirect links between two nodes. 
+
+It is clear, from looking at @tbl-edgecon, that the strongest connected nodes in @fig-edgecon are nodes *E* and *G* with $\lambda(E,G) = 4$, which means that we would have to sever four distinct relationships in the network to disconnect them.
+
+### Edge-Independent Paths
+
+A theorem in graph theory says that if the edge connectivity between two nodes is a certain number *n*, then than means that there are *n* **edge independent paths** connecting the two nodes in the graph. Two paths are edge-independent if they don't share any edges between them. 
+
+This means for instance, that nodes *E* and *G* in @fig-edgecon are connected by four distinct paths that don't share any edges between them. These are: $\{EG\}$ (their direct link) and $\{EF, FG\}$, $\{EH, HB, BG\}$, and $\{EA, AG\}$. You can see that all the edges in these four paths are different. 
+
+## References {.unnumbered}
