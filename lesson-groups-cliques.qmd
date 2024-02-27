@@ -240,7 +240,9 @@ The off-diagonal cells of the clique overlap matrix tell us the number of common
 From this information we can construct what @everettborgatti98 call the **Clique Graph**. This is a weighted graph with cliques as the nodes and the edges weighted by the number of people shared by each clique. The clique graph corresponding to the clique affiliation matrix in @tbl-cliquemat is shown in @fig-cliquegraph.
 
 ## N-Cliques
-Consider the network represented by the graph shown in @fig-nclique. In this figure, it is clear that the set of nodes $\{E, F, G, H\}$ are members of a clique of size four. But what about the set of nodes $\{A, B, C, D\}$? I mean, they do look "groupy" but they *technically* do not meet the requirements of a sociometric clique. The reason is that the subgraph formed by nodes $\{A, B, C, D\}$ is not complete (it is missing the edge $AC$) and thus has a density below one. However, we still have a strong intuition that there are pretty close to being a group.
+Consider the network represented by the graph shown in @fig-nclique. In this figure, it is clear that the set of nodes $\{E, F, G, H\}$ are members of a clique of size four. But what about the set of nodes $\{A, B, C, D, H\}$? I mean, they do look "groupy" but they *technically* do not meet the requirements of a sociometric clique. 
+
+The reason is that the subgraph formed by nodes $\{A, B, C, D, H\}$ is not complete (it is missing the edges $\{AC, BH, DH\}$ and thus has a density below one. However, we still have a strong intuition that those five actors are pretty close to being a group.
 
 ```{r}
 #| label: fig-nclique
@@ -262,9 +264,13 @@ Consider the network represented by the graph shown in @fig-nclique. In this fig
 ```
 
 
-The mathematician [Duncan Luce](https://en.wikipedia.org/wiki/R._Duncan_Luce) @luce50 had the same intuition and that's why he developed the notion of an **n-clique**. The basic idea is simple. Instead of defining a group based on a complete subgraph, we can define a group based on a subgraph with a (minimum) desired level of **indirect connectivity** (see @sec-indirect), which we denote as *n*. For instance, we can say that any subset of nodes where every node in the subset is connected to every other node in the subset by a path of length two or smaller (which means a direct connection as an edge is a "path" of length one) form a **2-clique** ($n = 2$). 
+The mathematician [Duncan Luce](https://en.wikipedia.org/wiki/R._Duncan_Luce) @luce50 had the same intuition and that's why he developed the notion of an **n-clique**. The basic idea is simple. 
 
-Note that the subgraph formed by the nodes $\{A, B, C, D\}$ meets this criterion: While node *A* is not connected to node *C*, it can reach node *C* by two paths of length two (either $\{AD, DC\}$ or $\{AB, BC\}$). Note that adding any other node to the subgraph (e.g., *J*, or *H*) breaks this property and no longer makes it a 2-clique. This means that the subgraph $\{A, B, C, D\}$ is **maximal** for the property of being a 2-clique 
+Instead of defining a group based on a **complete** subgraph, we can define a group based on a subgraph with a (minimum) desired level of **indirect connectivity** (see @sec-indirect), which we denote as *n*. For instance, we can say that any subset of nodes where every node in the subset is connected to every other node in the subset by a path of length two or smaller (which means a direct connection as an edge is a "path" of length one) form a **2-clique** ($n = 2$). 
+
+Note that the subgraph formed by the nodes $\{A, B, C, D, H\}$ meets this criterion: While node *A* is not connected to node *C*, it can reach node *C* by two paths of length two (either $\{AD, DC\}$ or $\{AB, BC\}$). In the same way, *H* can reach either *B* or *D* via two paths of length two.^[Can you see which paths are these?]
+
+Note that adding any other node to the subgraph (e.g., *J*, or *E*) breaks this property and no longer makes it a 2-clique. This means that the subgraph $\{A, B, C, D, H\}$ is **maximal** for the property of being a 2-clique in @fig-nclique.
 
 Can you see other subset of nodes in the graph that also form a 2-clique?^[Hint: take a look at the "kite" subgraph formed by nodes $\{I, J, K, L\}$]
 
