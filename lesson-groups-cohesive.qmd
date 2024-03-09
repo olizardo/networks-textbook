@@ -5,6 +5,7 @@
     require(tidygraph)
     require(igraph)
     require(kableExtra)
+    require(factoextra)
 ```
 
 In @sec-cliques we explored once approach to analyzing the group structure of a network. There we focused on finding *densely connected subgraphs* in the structure, with the **clique** providing the ideal type of a **maximally complete** subgraph, that is a subgroup where every actor is connected to one another. 
@@ -17,11 +18,12 @@ In network analysis, groups that meet both the intrinsic *and* the positional cr
 
 In this lesson we explore some ways of defining cohesive subsets using graph theory and network-analytic ideas. 
 
-## Pairwise Edge and Node Connectivity
-
 First, we need to define some graph-theoretic concepts. Most of these are generalizations to the case of *pairs of nodes* in a graph of concepts we already defined in section @sec-graphconnectivity for the graph as a whole. 
 
-Recall that the **edge connectivity** of a graph $G = \{E, V\}$ is defined as the cardinality of one of the graph's **minimum edge cutsets**, where a graph's **edge cutset** is any subset of edges taken from the larger set $E$ that disconnects the graph, an a minimum cutset is an edge cutset of the smallest cardinality possible. So, a graph with edge-connectivity equal to two, contains at least one subset of edges of cardinality two that if removed would disconnect the graph.
+## Pairwise Edge Connectivity {#sec-pairedgecon}
+
+Recall that the **edge connectivity** of a graph $G = \{E, V\}$ is defined as the cardinality of one of the graph's **minimum edge cutsets**, where a graph's **edge cutset** is any subset of edges taken from the larger set $E$ that disconnects the graph, an a minimum cutset is an edge cutset of the smallest cardinality possible. 
+So, a graph with edge-connectivity equal to two, contains at least one subset of edges of cardinality two that if removed would disconnect the graph.
 
 Just like we can define an edge-connectivity number for the whole graph, we define an edge connectivity for *each pair of nodes* in the graph. The beauty is that the **pairwise edge connectivity** between two nodes is the define the same way as for the whole graph. 
 
@@ -35,7 +37,7 @@ Thus, if *A* and *B* are two nodes that belong to the larger set $V$ of a connec
 #| fig-cap-location: margin
 
 set.seed(463)
-gr <- play_gnm(8, 12, directed = FALSE) %>% 
+    gr <- play_gnm(8, 12, directed = FALSE) %>% 
          mutate(name = toupper(letters[1:8])) 
     p <- ggraph(gr, layout = 'kk')
     p <- p + geom_edge_link(color = "steelblue", width = .7) 
@@ -49,7 +51,9 @@ gr <- play_gnm(8, 12, directed = FALSE) %>%
 
 Consider the graph shown in @fig-edgecon. Let's say we wanted to figure out the edge connectivity of some of the nodes in the graph. The case of *D* and *H* is pretty obvious; their edge connectivity is clearly $\lambda(D, H) = 1$ since all it takes is to remove the $DH$ edge to disconnect *D* and *H*.
 
-In fact, since *D* is clearly an **end-node** in the graph (a node with degree equals one), the node connectivity between *D* and *every* other node in the graph is equal to one: In mathese, $\lambda(D, V-D) = 1$.
+In fact, since *D* is clearly an **end-node** in the graph (a node with degree equals one), the node connectivity between *D* and *every* other node in the graph is equal to one: In mathese, $\lambda(D, V-D) = 1$. 
+
+This also means that the edge connectivity of the whole graph shown in @fig-edgecon, as discussed in @sec-graphconnectivity, which is always the *minimum edge connectivity for any pair of nodes* is also going to be one: $\lambda(D, V-D) = 1$.
 
 What about the edge connectivity between nodes *F* and *G*? Here, we can't just disconnect these two nodes by removing their direct connection, edge $FG$. The reason is that *F* can still reach *G* via path $\{FE, EG\}$. So we also need to remove the $FE$ edge to disconnect *F* and *E*, meaning that $\lambda(F, E) = 2$. 
 
@@ -90,8 +94,234 @@ It is clear, from looking at @tbl-edgecon, that the strongest connected nodes in
 
 ### Edge-Independent Paths
 
-A theorem in graph theory says that if the edge connectivity between two nodes is a certain number *n*, then than means that there are *n* **edge independent paths** connecting the two nodes in the graph. Two paths are edge-independent if they don't share any edges between them. 
+A mathematical theorem in graph theory says that if the edge connectivity between two nodes is a certain number *n*, then than means that there are a maximum of *n* **edge independent paths** connecting the two nodes in the graph  [@whiteharary01, p. 333]. Two paths are edge-independent if they don't share any edges between them. 
 
-This means for instance, that nodes *E* and *G* in @fig-edgecon are connected by four distinct paths that don't share any edges between them. These are: $\{EG\}$ (their direct link) and $\{EF, FG\}$, $\{EH, HB, BG\}$, and $\{EA, AG\}$. You can see that all the edges in these four paths are different. 
+This means for instance, that nodes *E* and *G* in @fig-edgecon are connected by four distinct paths that don't share any edges between them. These are: $\{EG\}$ (their direct link) and $\{EF, FG\}$, $\{EH, HB, BG\}$, and $\{EA, AG\}$. You can see that all the edges in these four paths are different. The same applies for every pair of nodes in the graph. 
+
+## Pairwise Node Connectivity {#sec-pairnodecon}
+
+Pairwise node connectivity works the same way as edge connectivity with some wrinkles. The pairwise connectivity between two **non-adjacent** nodes *A* and *B* in a graph $G$---written $\kappa(A, B)$---is the minimum number of nodes that would have to be removed from the graph to eliminate all paths connecting *A* and *B* (thus disconnecting them).
+
+Note that in contrast to edge connectivity, node-connectivity is only defined for non-adjacent nodes. The reason is that for pairs of nodes that are directly connected by an edge, there's no amount of other nodes we could remove from the graph to disconnect them! We could remove all the other nodes and we would just have a single **connected dyad** left at the end [hararywhite01].
+
+
+
+```{r}
+#| label: fig-nodecon
+#| fig-cap: "A connected graph."
+#| fig-height: 10
+#| fig-width: 10
+#| fig-cap-location: margin
+
+set.seed(463)
+gr <- play_gnp(8, .45, directed = FALSE) %>% 
+         mutate(name = toupper(letters[1:8])) 
+    p <- ggraph(gr, layout = 'kk')
+    p <- p + geom_edge_link(color = "steelblue", width = .7) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph()
+    p <- p + theme(legend.position = "none")
+    p
+
+```
+
+Consider the graph shown in @fig-nodecon. Let's say we wanted to figure the node-connectivity of nodes *E* and *G*. Well that's easy because we know that removing node *A* will disconnect them. 
+
+In fact, the node connectivity of node *E* and the rest of the nodes in the graph except for *A*, written $\kappa(E, V-(A, E)) = 1$ is one, since removing *A* separates E from every other node in the graph other than *A*. Recall than since *E* and *A* are adjacent, their node connectivity is not defined. 
+
+How about the node connectivity of *B* and *H*? This one is a bit harder, because we can't just remove one node to disconnect them. Getting rid of *A* will not do, because *B* can still reach *H* via path $\{BF, FH\}$. But getting rid of *F* will not do either because *B* can still reach *H* via path $\{BC, CH\}$. So we would have to remove all three nodes $\{A, F, C\}$ to disconnect *B* and *H* meaning their pairwise node connectivity is $\kappa(B, H) = 3$. 
+
+## The Node Connectivity Matrix
+
+As with pairwise edge connectivity, we can keep on going and calculate a node connectivity for each pair of non-adjacent nodes in the graph. We can collect these results in a matrix, where each cells records the node connectivity of the row node with respect to the column node. The result would look like @tbl-nodecon. 
+
+```{r}
+#| label: tbl-nodecon
+#| tbl-cap: "Edge connectivity matrix of a connected graph."
+#| tbl-cap-location: margin
+n <- length(V(gr))
+a <- as.matrix(as_adjacency_matrix(gr))
+m <- matrix(0, n, n)
+for (i in 1:n) {
+     for (j in 1:n) {
+          if (i != j & a[i, j] != 1) {
+               m[i,j] <- vertex_connectivity(gr, source = i, target = j)
+          }
+     }
+}
+rownames(m) <- toupper(letters[1:n])
+colnames(m) <- toupper(letters[1:n])
+m[m == 0] <- "--"
+diag(m) <- "--"
+kbl(m, format = "html") %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+As @tbl-nodecon shows, the node-connectivity of *E* with every other node in the graph except for *A* is one, which is what we suspected. Note that since one is the *minimum node connectivity observed among any pair of nodes in the graph*, this is also the node connectivity of the whole graph: $\kappa(G) = 1$, as discussed in @sec-graphconnectivity. 
+
+In contrast, the strongest connected nodes in terms of node-connectivity are the pair (*A*, *F*) which have node connectivity $\kappa(A, F) = 5$ the maximum in the graph. This means that we would have to remove *five* nodes to disconnect them, namely, the set formed by $\{B, C, D, H, G\}$. 
+
+This also means following a theorem proved by the mathematician [Karl Menger](https://en.wikipedia.org/wiki/Karl_Menger) in 1927, and very appositely named **Menger's Theorem**, that there are also *five node-independent paths* linking nodes *A* and *H* in @fig-nodecon. Two paths are node-independent if they don't share any **inner nodes**. 
+
+More generally, Menger's Theorem says that for any pair of node-adjacent nodes in a connected graph, if we know their node connectivity is some number *n* then we also know that there are *n* node-independent paths connecting them. 
+
+In the case of *A* and *F* in @fig-nodecon, the five node-independent paths linking them are as follows:
+
+1. $\{AB, BF\}$
+1. $\{AC, CF\}$
+1. $\{AD, DF\}$
+1. $\{AH, HF\}$
+1. $\{AG, GF\}$
+
+You can verify that each of these paths have distinct inner nodes not shared by any of the other four paths!
+
+## Using Edge Connectivity to Find Cohesive Subsets
+
+You may be wondering why we have bothered to define all of these graph theoretic concepts, neat as they are. The reason is that we can use the ideas developed in @sec-pairedgecon and @sec-pairnodecon to develop techniques to find **cohesive subsets** in networks. That is, discover set of actors who have stronger connections among themselves than they do with the rest of the actors in the system, the topic we began this lesson with. In this section, we show how use the ideas developed in this lesson, along with those in @sec-graphconnectivity to do that for the case of edge connectivity. 
+
+
+```{r}
+#| label: fig-edgecon2
+#| fig-cap: Using edge connectivity to identify cohesive subsets.
+#| fig-cap-location: margin 
+#| fig-width: 10
+#| fig-height: 10
+#| fig-subcap:
+#|   - "."
+#|   - "."
+#|   - "."
+#|   - "."
+#| layout-ncol: 2
+set.seed(456)
+    gr <- play_islands(4, 4, .75, 1) %>% 
+        mutate(name = toupper(letters[1:16])) 
+    gr <- gr + edge(which(letters[1:16] == "e"),
+                 which(letters[1:16] == "h"))
+    gr <- gr + edge(which(letters[1:16] == "i"),
+                 which(letters[1:16] == "n"))
+    l <- as.matrix(ggraph(gr, layout = 'kk')$data[,1:2])
+        plot.net <- function(x) {
+        p <- ggraph(x, layout = l)
+        p <- p + geom_edge_link(color = "steelblue", width = .7) 
+        p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+        p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+        p <- p + theme_graph()
+        p <- p + theme(legend.position = "none")
+        return(p)
+        }
+    plot.net(gr)
+    gr2 <- gr - edge("A|F")  
+    gr2 <- gr2 - edge("A|L")    
+    gr2 <- gr2 - edge("C|P")    
+    plot.net(gr2)
+    gr3 <- gr2 - edge("H|J")
+    gr3 <- gr3 - edge("H|M")
+    plot.net(gr3)
+    gr4 <- gr3 - edge("J|N")
+    gr4 <- gr4 - edge("I|N")
+    plot.net(gr4)
+    
+    n <- length(V(gr))
+    m <- matrix(0, n, n)
+    for (i in 1:n) {
+         for (j in 1:n) {
+              if (i != j) {
+                   m[i,j] <- edge_connectivity(gr, source = i, target = j)
+              }
+         }
+    }
+    rownames(m) <- toupper(letters[1:n])
+    colnames(m) <- toupper(letters[1:n])
+    diag(m) <- max(m)
+    P <- matrix(0, max(m) + 1, n)
+    for (k in 0:max(m)) {
+        for(i in 1:n){
+            for (j in 1:n) {
+                if (i != j) {
+                    P[k+1, i] = as.numeric(m[i,j] >= k)
+                    P[k+1, j] = as.numeric(m[i,j] >= k)
+                }
+            }
+        }
+    }
+    colnames(P) <- LETTERS[1:n]
+```
+
+Consider @fig-edgecon2-1. Let's say we wanted to identify the most cohesive subgroups in the graph, based on the idea of edge connectivity. How would we proceed?
+
+The first we would do is ask: What is the edge-connectivity of the *whole* graph in @fig-edgecon2-1? We know the answer to this question from @sec-graphconnectivity: The edge connectivity of the graph is the minimum number of edges that it would take to disconnect it. 
+
+In the case of the graph shown in @fig-edgecon2-1, the answer is $\lambda(G) = 3$. We can disconnect the graph by removing the minimum edge cutset $\{AF, AL, CP\}$, whose cardinality (number of members) is indeed, three. 
+
+So the second thing we do is go ahead and delete the edges in the minimum edge cutset from the graph. This results in @fig-edgecon2-2, which is a graph with two **connected components**. 
+
+What do we do now? Third, we compute the edge-connectivity of each of the connected components of the new disconnected graph, and disconnect the component with the smallest edge connectivity.
+
+What is this business about the *edge connectivity of each component*? Well, just like connected graphs have an overall graph edge connectivity (see @sec-edgecon), the separate components of a disconnected graph also have an edge connectivity. More generally, in a disconnected graph with components $\{C_1, C_2, \ldots C_k\}$, a *k*-edge-connected component is a component with edge-connectivity *k*.
+
+For instance, in the graph shown in @fig-edgecon2-2, the largest **giant component** is clearly a 2-edge-connected component; $k=2$ because all it takes is removing two edges (the $HJ$ and $HM$ edges) to disconnect it.  
+
+The smaller component however, is a **clique** of size four featuring nodes $\{A, B, C, D\}$, which means that it would removing *three* edges to disconnect any one of the actors from the others, so it is a **three-connected component**. 
+
+In general, if a subgraph of a larger graph is maximally connected (it is a clique) then the edge connectivity of that subgraph is always $n-1$, where *n* is the number of nodes in the clique.
+
+So it is clear that our next step is to disconnect the giant component by removing the relevant two edges. This is shown in @fig-edgecon2-3.
+
+Now we have a graph with three components, two of them are cliques of size four with edge-connectivity $4-1 = 3$. So we compute the k-edge connectivity of the larger component left, which is $\lambda(C_3) = 2$, as all it would take to disconnect the component is to remove the edges $JN$ and $IN$. So we go ahead and delete this minimum edge cutset, leading to the graph in @fig-edgecon2-4. 
+
+We can stop now because disconnecting any of the four components left would result in producing an **isolate** node. So that means that we have identified the **cohesive subgroups** in the graph!
+
+Note that at each step, the cohesive subgroups are nested inside one another. So they can be arranged into something called a **dendrogram** that shows this nesting, as in @fig-edgedend.
+
+```{r}
+#| label: fig-edgedend
+#| fig-cap: Dendrogram showing nested structure of Lambda sets in a graph.
+#| fig-cap-location: margin 
+    a <- list()  
+    # initialize empty object
+    # define merging pattern: 
+    #    negative numbers are leaves, 
+    #    positive are merged clusters (defined by row number in $merge)
+    a$merge <- matrix(c(-1, -2,
+                        -3, 1,
+                        -4, 2,
+                        -5, -6,
+                        -7, 4,
+                        -8, 5,
+                        -9, -10,
+                        -11, 7,
+                        -12, 8,
+                        -13, -14,
+                        -15, 10,
+                        -16, 11,
+                         9, 12,
+                         6, 13,
+                         3, 14), nc=2, byrow=TRUE ) 
+    a$height <- c(rep(1, 12), 3, 4, 5)# define merge heights
+    a$order <- 1:16          # order of leaves(trivial if hand-entered)
+    a$labels <- LETTERS[1:16]    # labels of leaves
+    class(a) <- "hclust"        # make it an hclust object
+    #plot(a)                     # look at the result   
+    d <- as.dendrogram(a)
+    p <- fviz_dend(d, k = 4, k_colors = "uchicago", 
+                   show_labels = TRUE, cex = 1.5, lwd = 1) 
+    p <- p + theme(axis.text.y = element_blank(),
+                   axis.title.y = element_blank(), 
+                   axis.ticks.y = element_blank(),
+                   title = element_blank())
+       
+    p
+```
+
+@borgattietal90 refer to the nested cohesive subgroups identified using this approach as **lambda sets**, after the Greek letter lambda ($\lambda$) which is used to indicate the edge connectivity of a graph, a component, or a pair of vertices as we have seen in this lesson and @sec-graphconnectivity. 
+
+Technically, each of the components in the graphs shown in @fig-edgecon2-1, @fig-edgecon2-2, and @fig-edgecon2-3 are lambda sets under the definition provided by @borgattietal90.
+
+Lambda sets are, of course, subgraphs of the original graph, but they have interesting properties. First, at any stage of the graph partition process, each node belongs to only one lambda set. Smaller lambda sets like $\{M, N, O, P\}$ are nested within others such as $\{I, J, K, L, M, N, O, P\}$.
+
+Second, the pairwise edge connectivity between nodes in the same lambda set is always larger than the pairwise edge connectivity between any other node in the lambda set (including themselves) and a node not in the lambda set. That means that nodes inside a lambda set have stronger indirect connections with one another than they do with outsiders, which is precisely what we would want in a cohesive subset of actors.
+
 
 ## References {.unnumbered}

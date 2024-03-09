@@ -305,11 +305,14 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#pairwise-edge-and-node-connectivity" id="toc-pairwise-edge-and-node-connectivity" class="nav-link active" data-scroll-target="#pairwise-edge-and-node-connectivity"><span class="toc-section-number">25.1</span>  Pairwise Edge and Node Connectivity</a>
+  <li><a href="#sec-pairedgecon" id="toc-sec-pairedgecon" class="nav-link active" data-scroll-target="#sec-pairedgecon"><span class="toc-section-number">25.1</span>  Pairwise Edge Connectivity</a>
   <ul class="collapse">
   <li><a href="#the-edge-connectivity-matrix" id="toc-the-edge-connectivity-matrix" class="nav-link" data-scroll-target="#the-edge-connectivity-matrix"><span class="toc-section-number">25.1.1</span>  The Edge Connectivity Matrix</a></li>
   <li><a href="#edge-independent-paths" id="toc-edge-independent-paths" class="nav-link" data-scroll-target="#edge-independent-paths"><span class="toc-section-number">25.1.2</span>  Edge-Independent Paths</a></li>
   </ul></li>
+  <li><a href="#sec-pairnodecon" id="toc-sec-pairnodecon" class="nav-link" data-scroll-target="#sec-pairnodecon"><span class="toc-section-number">25.2</span>  Pairwise Node Connectivity</a></li>
+  <li><a href="#the-node-connectivity-matrix" id="toc-the-node-connectivity-matrix" class="nav-link" data-scroll-target="#the-node-connectivity-matrix"><span class="toc-section-number">25.3</span>  The Node Connectivity Matrix</a></li>
+  <li><a href="#using-edge-connectivity-to-find-cohesive-subsets" id="toc-using-edge-connectivity-to-find-cohesive-subsets" class="nav-link" data-scroll-target="#using-edge-connectivity-to-find-cohesive-subsets"><span class="toc-section-number">25.4</span>  Using Edge Connectivity to Find Cohesive Subsets</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-groups-cohesive.qmd" class="toc-action">View source</a></p></div></div></nav>
@@ -339,9 +342,9 @@ div.csl-indent {
 <p>Yet, both of these ideas of groups are based on an <strong>intrinsic</strong> criterion of what counts as group, and that is the level of connectivity that actors in a group how <em>with each other</em>. However, there is also a <strong>positional</strong> criterion for what makes a group a group, and that is the idea that <em>group members should have more connections with the people inside the group than with people outside the group</em> <span class="citation" data-cites="seidmanfoster78">(<a href="#ref-seidmanfoster78" role="doc-biblioref">Seidman and Foster 1978</a>)</span>.</p>
 <p>In network analysis, groups that meet both the intrinsic <em>and</em> the positional criterion for counting as a group are called <strong>cohesive subsets</strong> <span class="citation" data-cites="borgattietal90">(<a href="#ref-borgattietal90" role="doc-biblioref">Borgatti, Everett, and Shirey 1990</a>)</span>.</p>
 <p>In this lesson we explore some ways of defining cohesive subsets using graph theory and network-analytic ideas.</p>
-<section id="pairwise-edge-and-node-connectivity" class="level2 page-columns page-full" data-number="25.1">
-<h2 data-number="25.1" class="anchored" data-anchor-id="pairwise-edge-and-node-connectivity"><span class="header-section-number">25.1</span> Pairwise Edge and Node Connectivity</h2>
 <p>First, we need to define some graph-theoretic concepts. Most of these are generalizations to the case of <em>pairs of nodes</em> in a graph of concepts we already defined in section <a href="lesson-graph-connectivity.html"><span>Chapter&nbsp;8</span></a> for the graph as a whole.</p>
+<section id="sec-pairedgecon" class="level2 page-columns page-full" data-number="25.1">
+<h2 data-number="25.1" class="anchored" data-anchor-id="sec-pairedgecon"><span class="header-section-number">25.1</span> Pairwise Edge Connectivity</h2>
 <p>Recall that the <strong>edge connectivity</strong> of a graph <span class="math inline">\(G = \{E, V\}\)</span> is defined as the cardinality of one of the graph’s <strong>minimum edge cutsets</strong>, where a graph’s <strong>edge cutset</strong> is any subset of edges taken from the larger set <span class="math inline">\(E\)</span> that disconnects the graph, an a minimum cutset is an edge cutset of the smallest cardinality possible. So, a graph with edge-connectivity equal to two, contains at least one subset of edges of cardinality two that if removed would disconnect the graph.</p>
 <p>Just like we can define an edge-connectivity number for the whole graph, we define an edge connectivity for <em>each pair of nodes</em> in the graph. The beauty is that the <strong>pairwise edge connectivity</strong> between two nodes is the define the same way as for the whole graph.</p>
 <p>Thus, if <em>A</em> and <em>B</em> are two nodes that belong to the larger set <span class="math inline">\(V\)</span> of a connected graph <span class="math inline">\(G\)</span>, then their edge connectivity—written <span class="math inline">\(\lambda(A,B)\)</span>—is given by the minimum number of edges that we would have be removed from <span class="math inline">\(G\)</span> to disconnect <em>A</em> and <em>B</em>.</p>
@@ -357,6 +360,7 @@ div.csl-indent {
 </div>
 <p>Consider the graph shown in <a href="#fig-edgecon">Figure&nbsp;<span>25.1</span></a>. Let’s say we wanted to figure out the edge connectivity of some of the nodes in the graph. The case of <em>D</em> and <em>H</em> is pretty obvious; their edge connectivity is clearly <span class="math inline">\(\lambda(D, H) = 1\)</span> since all it takes is to remove the <span class="math inline">\(DH\)</span> edge to disconnect <em>D</em> and <em>H</em>.</p>
 <p>In fact, since <em>D</em> is clearly an <strong>end-node</strong> in the graph (a node with degree equals one), the node connectivity between <em>D</em> and <em>every</em> other node in the graph is equal to one: In mathese, <span class="math inline">\(\lambda(D, V-D) = 1\)</span>.</p>
+<p>This also means that the edge connectivity of the whole graph shown in <a href="#fig-edgecon">Figure&nbsp;<span>25.1</span></a>, as discussed in <a href="lesson-graph-connectivity.html"><span>Chapter&nbsp;8</span></a>, which is always the <em>minimum edge connectivity for any pair of nodes</em> is also going to be one: <span class="math inline">\(\lambda(D, V-D) = 1\)</span>.</p>
 <p>What about the edge connectivity between nodes <em>F</em> and <em>G</em>? Here, we can’t just disconnect these two nodes by removing their direct connection, edge <span class="math inline">\(FG\)</span>. The reason is that <em>F</em> can still reach <em>G</em> via path <span class="math inline">\(\{FE, EG\}\)</span>. So we also need to remove the <span class="math inline">\(FE\)</span> edge to disconnect <em>F</em> and <em>E</em>, meaning that <span class="math inline">\(\lambda(F, E) = 2\)</span>.</p>
 <section id="the-edge-connectivity-matrix" class="level3 page-columns page-full" data-number="25.1.1">
 <h3 data-number="25.1.1" class="anchored" data-anchor-id="the-edge-connectivity-matrix"><span class="header-section-number">25.1.1</span> The Edge Connectivity Matrix</h3>
@@ -481,9 +485,229 @@ div.csl-indent {
 </section>
 <section id="edge-independent-paths" class="level3" data-number="25.1.2">
 <h3 data-number="25.1.2" class="anchored" data-anchor-id="edge-independent-paths"><span class="header-section-number">25.1.2</span> Edge-Independent Paths</h3>
-<p>A theorem in graph theory says that if the edge connectivity between two nodes is a certain number <em>n</em>, then than means that there are <em>n</em> <strong>edge independent paths</strong> connecting the two nodes in the graph. Two paths are edge-independent if they don’t share any edges between them.</p>
-<p>This means for instance, that nodes <em>E</em> and <em>G</em> in <a href="#fig-edgecon">Figure&nbsp;<span>25.1</span></a> are connected by four distinct paths that don’t share any edges between them. These are: <span class="math inline">\(\{EG\}\)</span> (their direct link) and <span class="math inline">\(\{EF, FG\}\)</span>, <span class="math inline">\(\{EH, HB, BG\}\)</span>, and <span class="math inline">\(\{EA, AG\}\)</span>. You can see that all the edges in these four paths are different.</p>
+<p>A mathematical theorem in graph theory says that if the edge connectivity between two nodes is a certain number <em>n</em>, then than means that there are a maximum of <em>n</em> <strong>edge independent paths</strong> connecting the two nodes in the graph <span class="citation" data-cites="whiteharary01">(<a href="#ref-whiteharary01" role="doc-biblioref">White and Harary 2001, 333</a>)</span>. Two paths are edge-independent if they don’t share any edges between them.</p>
+<p>This means for instance, that nodes <em>E</em> and <em>G</em> in <a href="#fig-edgecon">Figure&nbsp;<span>25.1</span></a> are connected by four distinct paths that don’t share any edges between them. These are: <span class="math inline">\(\{EG\}\)</span> (their direct link) and <span class="math inline">\(\{EF, FG\}\)</span>, <span class="math inline">\(\{EH, HB, BG\}\)</span>, and <span class="math inline">\(\{EA, AG\}\)</span>. You can see that all the edges in these four paths are different. The same applies for every pair of nodes in the graph.</p>
 </section>
+</section>
+<section id="sec-pairnodecon" class="level2" data-number="25.2">
+<h2 data-number="25.2" class="anchored" data-anchor-id="sec-pairnodecon"><span class="header-section-number">25.2</span> Pairwise Node Connectivity</h2>
+<p>Pairwise node connectivity works the same way as edge connectivity with some wrinkles. The pairwise connectivity between two <strong>non-adjacent</strong> nodes <em>A</em> and <em>B</em> in a graph <span class="math inline">\(G\)</span>—written <span class="math inline">\(\kappa(A, B)\)</span>—is the minimum number of nodes that would have to be removed from the graph to eliminate all paths connecting <em>A</em> and <em>B</em> (thus disconnecting them).</p>
+<p>Note that in contrast to edge connectivity, node-connectivity is only defined for non-adjacent nodes. The reason is that for pairs of nodes that are directly connected by an edge, there’s no amount of other nodes we could remove from the graph to disconnect them! We could remove all the other nodes and we would just have a single <strong>connected dyad</strong> left at the end [hararywhite01].</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-nodecon" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-groups-cohesive_files/figure-html/fig-nodecon-1.png" class="img-fluid figure-img" width="960"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;25.2: A connected graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Consider the graph shown in <a href="#fig-nodecon">Figure&nbsp;<span>25.2</span></a>. Let’s say we wanted to figure the node-connectivity of nodes <em>E</em> and <em>G</em>. Well that’s easy because we know that removing node <em>A</em> will disconnect them.</p>
+<p>In fact, the node connectivity of node <em>E</em> and the rest of the nodes in the graph except for <em>A</em>, written <span class="math inline">\(\kappa(E, V-(A, E)) = 1\)</span> is one, since removing <em>A</em> separates E from every other node in the graph other than <em>A</em>. Recall than since <em>E</em> and <em>A</em> are adjacent, their node connectivity is not defined.</p>
+<p>How about the node connectivity of <em>B</em> and <em>H</em>? This one is a bit harder, because we can’t just remove one node to disconnect them. Getting rid of <em>A</em> will not do, because <em>B</em> can still reach <em>H</em> via path <span class="math inline">\(\{BF, FH\}\)</span>. But getting rid of <em>F</em> will not do either because <em>B</em> can still reach <em>H</em> via path <span class="math inline">\(\{BC, CH\}\)</span>. So we would have to remove all three nodes <span class="math inline">\(\{A, F, C\}\)</span> to disconnect <em>B</em> and <em>H</em> meaning their pairwise node connectivity is <span class="math inline">\(\kappa(B, H) = 3\)</span>.</p>
+</section>
+<section id="the-node-connectivity-matrix" class="level2 page-columns page-full" data-number="25.3">
+<h2 data-number="25.3" class="anchored" data-anchor-id="the-node-connectivity-matrix"><span class="header-section-number">25.3</span> The Node Connectivity Matrix</h2>
+<p>As with pairwise edge connectivity, we can keep on going and calculate a node connectivity for each pair of non-adjacent nodes in the graph. We can collect these results in a matrix, where each cells records the node connectivity of the row node with respect to the column node. The result would look like <a href="#tbl-nodecon">Table&nbsp;<span>25.2</span></a>.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-nodecon" class="anchored page-columns page-full">
+
+<table class="table table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:left;"> A </th>
+   <th style="text-align:left;"> B </th>
+   <th style="text-align:left;"> C </th>
+   <th style="text-align:left;"> D </th>
+   <th style="text-align:left;"> E </th>
+   <th style="text-align:left;"> F </th>
+   <th style="text-align:left;"> G </th>
+   <th style="text-align:left;"> H </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> A </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> B </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> C </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> -- </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> D </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> E </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> F </td>
+   <td style="text-align:left;"> 5 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> G </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> H </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 1 </td>
+   <td style="text-align:left;"> -- </td>
+   <td style="text-align:left;"> 3 </td>
+   <td style="text-align:left;"> -- </td>
+  </tr>
+</tbody>
+</table>
+
+<div class="quarto-table-caption margin-caption">Table&nbsp;25.2:  Edge connectivity matrix of a connected graph. </div></div>
+</div>
+</div>
+<p>As <a href="#tbl-nodecon">Table&nbsp;<span>25.2</span></a> shows, the node-connectivity of <em>E</em> with every other node in the graph except for <em>A</em> is one, which is what we suspected. Note that since one is the <em>minimum node connectivity observed among any pair of nodes in the graph</em>, this is also the node connectivity of the whole graph: <span class="math inline">\(\kappa(G) = 1\)</span>, as discussed in <a href="lesson-graph-connectivity.html"><span>Chapter&nbsp;8</span></a>.</p>
+<p>In contrast, the strongest connected nodes in terms of node-connectivity are the pair (<em>A</em>, <em>F</em>) which have node connectivity <span class="math inline">\(\kappa(A, F) = 5\)</span> the maximum in the graph. This means that we would have to remove <em>five</em> nodes to disconnect them, namely, the set formed by <span class="math inline">\(\{B, C, D, H, G\}\)</span>.</p>
+<p>This also means following a theorem proved by the mathematician <a href="https://en.wikipedia.org/wiki/Karl_Menger">Karl Menger</a> in 1927, and very appositely named <strong>Menger’s Theorem</strong>, that there are also <em>five node-independent paths</em> linking nodes <em>A</em> and <em>H</em> in <a href="#fig-nodecon">Figure&nbsp;<span>25.2</span></a>. Two paths are node-independent if they don’t share any <strong>inner nodes</strong>.</p>
+<p>More generally, Menger’s Theorem says that for any pair of node-adjacent nodes in a connected graph, if we know their node connectivity is some number <em>n</em> then we also know that there are <em>n</em> node-independent paths connecting them.</p>
+<p>In the case of <em>A</em> and <em>F</em> in <a href="#fig-nodecon">Figure&nbsp;<span>25.2</span></a>, the five node-independent paths linking them are as follows:</p>
+<ol type="1">
+<li><span class="math inline">\(\{AB, BF\}\)</span></li>
+<li><span class="math inline">\(\{AC, CF\}\)</span></li>
+<li><span class="math inline">\(\{AD, DF\}\)</span></li>
+<li><span class="math inline">\(\{AH, HF\}\)</span></li>
+<li><span class="math inline">\(\{AG, GF\}\)</span></li>
+</ol>
+<p>You can verify that each of these paths have distinct inner nodes not shared by any of the other four paths!</p>
+</section>
+<section id="using-edge-connectivity-to-find-cohesive-subsets" class="level2" data-number="25.4">
+<h2 data-number="25.4" class="anchored" data-anchor-id="using-edge-connectivity-to-find-cohesive-subsets"><span class="header-section-number">25.4</span> Using Edge Connectivity to Find Cohesive Subsets</h2>
+<p>You may be wondering why we have bothered to define all of these graph theoretic concepts, neat as they are. The reason is that we can use the ideas developed in <a href="#sec-pairedgecon"><span>Section&nbsp;25.1</span></a> and <a href="#sec-pairnodecon"><span>Section&nbsp;25.2</span></a> to develop techniques to find <strong>cohesive subsets</strong> in networks. That is, discover set of actors who have stronger connections among themselves than they do with the rest of the actors in the system, the topic we began this lesson with. In this section, we show how use the ideas developed in this lesson, along with those in <a href="lesson-graph-connectivity.html"><span>Chapter&nbsp;8</span></a> to do that for the case of edge connectivity.</p>
+<div id="fig-edgecon2" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-edgecon2-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-groups-cohesive_files/figure-html/fig-edgecon2-1.png" class="img-fluid figure-img" data-ref-parent="fig-edgecon2" width="960"></p>
+<p></p><figcaption class="figure-caption">(a) .</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-edgecon2-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-groups-cohesive_files/figure-html/fig-edgecon2-2.png" class="img-fluid figure-img" data-ref-parent="fig-edgecon2" width="960"></p>
+<p></p><figcaption class="figure-caption">(b) .</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-edgecon2-3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-groups-cohesive_files/figure-html/fig-edgecon2-3.png" class="img-fluid figure-img" data-ref-parent="fig-edgecon2" width="960"></p>
+<p></p><figcaption class="figure-caption">(c) .</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-edgecon2-4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-groups-cohesive_files/figure-html/fig-edgecon2-4.png" class="img-fluid figure-img" data-ref-parent="fig-edgecon2" width="960"></p>
+<p></p><figcaption class="figure-caption">(d) .</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;25.3: Using edge connectivity to identify cohesive subsets.</figcaption><p></p>
+</figure>
+</div>
+<p>Consider <a href="#fig-edgecon2-1">Figure&nbsp;<span>25.3 (a)</span></a>. Let’s say we wanted to identify the most cohesive subgroups in the graph, based on the idea of edge connectivity. How would we proceed?</p>
+<p>The first we would do is ask: What is the edge-connectivity of the <em>whole</em> graph in <a href="#fig-edgecon2-1">Figure&nbsp;<span>25.3 (a)</span></a>? We know the answer to this question from <a href="lesson-graph-connectivity.html"><span>Chapter&nbsp;8</span></a>: The edge connectivity of the graph is the minimum number of edges that it would take to disconnect it.</p>
+<p>In the case of the graph shown in <a href="#fig-edgecon2-1">Figure&nbsp;<span>25.3 (a)</span></a>, the answer is <span class="math inline">\(\lambda(G) = 3\)</span>. We can disconnect the graph by removing the minimum edge cutset <span class="math inline">\(\{AF, AL, CP\}\)</span>, whose cardinality (number of members) is indeed, three.</p>
+<p>So the second thing we do is go ahead and delete the edges in the minimum edge cutset from the graph. This results in <a href="#fig-edgecon2-2">Figure&nbsp;<span>25.3 (b)</span></a>, which is a graph with two <strong>connected components</strong>.</p>
+<p>What do we do now? Third, we compute the edge-connectivity of each of the connected components of the new disconnected graph, and disconnect the component with the smallest edge connectivity.</p>
+<p>What is this business about the <em>edge connectivity of each component</em>? Well, just like connected graphs have an overall graph edge connectivity (see <a href="lesson-graph-connectivity.html#sec-edgecon"><span>Section&nbsp;8.3</span></a>), the separate components of a disconnected graph also have an edge connectivity. More generally, in a disconnected graph with components <span class="math inline">\(\{C_1, C_2, \ldots C_k\}\)</span>, a <em>k</em>-edge-connected component is a component with edge-connectivity <em>k</em>.</p>
+<p>For instance, in the graph shown in <a href="#fig-edgecon2-2">Figure&nbsp;<span>25.3 (b)</span></a>, the largest <strong>giant component</strong> is clearly a 2-edge-connected component; <span class="math inline">\(k=2\)</span> because all it takes is removing two edges (the <span class="math inline">\(HJ\)</span> and <span class="math inline">\(HM\)</span> edges) to disconnect it.</p>
+<p>The smaller component however, is a <strong>clique</strong> of size four featuring nodes <span class="math inline">\(\{A, B, C, D\}\)</span>, which means that it would removing <em>three</em> edges to disconnect any one of the actors from the others, so it is a <strong>three-connected component</strong>.</p>
+<p>In general, if a subgraph of a larger graph is maximally connected (it is a clique) then the edge connectivity of that subgraph is always <span class="math inline">\(n-1\)</span>, where <em>n</em> is the number of nodes in the clique.</p>
+<p>So it is clear that our next step is to disconnect the giant component by removing the relevant two edges. This is shown in <a href="#fig-edgecon2-3">Figure&nbsp;<span>25.3 (c)</span></a>.</p>
+<p>Now we have a graph with three components, two of them are cliques of size four with edge-connectivity <span class="math inline">\(4-1 = 3\)</span>. So we compute the k-edge connectivity of the larger component left, which is <span class="math inline">\(\lambda(C_3) = 2\)</span>, as all it would take to disconnect the component is to remove the edges <span class="math inline">\(JN\)</span> and <span class="math inline">\(IN\)</span>. So we go ahead and delete this minimum edge cutset, leading to the graph in <a href="#fig-edgecon2-4">Figure&nbsp;<span>25.3 (d)</span></a>.</p>
+<p>We can stop now because disconnecting any of the four components left would result in producing an <strong>isolate</strong> node. So that means that we have identified the <strong>cohesive subgroups</strong> in the graph!</p>
+<p>Note that at each step, the cohesive subgroups are nested inside one another. So they can be arranged into something called a <strong>dendrogram</strong> that shows this nesting, as in <a href="#fig-edgedend">Figure&nbsp;<span>25.4</span></a>.</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-edgedend" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-groups-cohesive_files/figure-html/fig-edgedend-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;25.4: Dendrogram showing nested structure of Lambda sets in a graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="citation" data-cites="borgattietal90">Borgatti, Everett, and Shirey (<a href="#ref-borgattietal90" role="doc-biblioref">1990</a>)</span> refer to the nested cohesive subgroups identified using this approach as <strong>lambda sets</strong>, after the Greek letter lambda (<span class="math inline">\(\lambda\)</span>) which is used to indicate the edge connectivity of a graph, a component, or a pair of vertices as we have seen in this lesson and <a href="lesson-graph-connectivity.html"><span>Chapter&nbsp;8</span></a>.</p>
+<p>Technically, each of the components in the graphs shown in <a href="#fig-edgecon2-1">Figure&nbsp;<span>25.3 (a)</span></a>, <a href="#fig-edgecon2-2">Figure&nbsp;<span>25.3 (b)</span></a>, and <a href="#fig-edgecon2-3">Figure&nbsp;<span>25.3 (c)</span></a> are lambda sets under the definition provided by <span class="citation" data-cites="borgattietal90">Borgatti, Everett, and Shirey (<a href="#ref-borgattietal90" role="doc-biblioref">1990</a>)</span>.</p>
+<p>Lambda sets are, of course, subgraphs of the original graph, but they have interesting properties. First, at any stage of the graph partition process, each node belongs to only one lambda set. Smaller lambda sets like <span class="math inline">\(\{M, N, O, P\}\)</span> are nested within others such as <span class="math inline">\(\{I, J, K, L, M, N, O, P\}\)</span>.</p>
+<p>Second, the pairwise edge connectivity between nodes in the same lambda set is always larger than the pairwise edge connectivity between any other node in the lambda set (including themselves) and a node not in the lambda set. That means that nodes inside a lambda set have stronger indirect connections with one another than they do with outsiders, which is precisely what we would want in a cohesive subset of actors.</p>
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
@@ -495,6 +719,9 @@ Borgatti, Stephen P, Martin G Everett, and Paul R Shirey. 1990. <span>“LS Sets
 </div>
 <div id="ref-seidmanfoster78" class="csl-entry" role="doc-biblioentry">
 Seidman, Stephen B, and Brian L Foster. 1978. <span>“A Graph-Theoretic Generalization of the Clique Concept.”</span> <em>Journal of Mathematical Sociology</em> 6 (1): 139–54.
+</div>
+<div id="ref-whiteharary01" class="csl-entry" role="doc-biblioentry">
+White, Douglas R, and Frank Harary. 2001. <span>“The Cohesiveness of Blocks in Social Networks: Node Connectivity and Conditional Density.”</span> <em>Sociological Methodology</em> 31 (1): 305–59.
 </div>
 </div>
 </section>

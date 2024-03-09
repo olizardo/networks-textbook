@@ -1,16 +1,12 @@
----
-title: "Blockmodeling"
-editor_options: 
-  chunk_output_type: console
----
+# Blockmodeling
 
 ```{r setup, include=FALSE}
     library(ggraph)
     library(tidygraph)
     library(igraph)
     library(kableExtra)
-	library(corrplot)
-    
+    library(corrplot)
+
     #function:
     corr.dist <- function(x) {
          r <- nrow(x)
@@ -69,8 +65,8 @@ $$ {#eq-cor}
 
 Let's go through each components that we have already encountered in the lesson structural equivalence and structural similarity:
 
--   $a_{(k)j}$ is the row vector for node *k* in the adjacency matrix.
--   $a_{(l)j}$ is the row vector for node *l* in the adjacency matrix.
+-   $a_{(k)j}$ is the row (or column) vector for node *k* in the adjacency matrix.
+-   $a_{(l)j}$ is the row (or column) vector for node *l* in the adjacency matrix.
 
 Now let's introduce ourselves to some new friends. For instance, what the heck is $\overline{a}_{(k)j}$? The little "bar" on top the $a$ indicates that we are taking the **mean** or the **average** of the elements of the row vector.
 
@@ -151,11 +147,12 @@ When we do that for each pair of nodes in @tbl-adjmat1, we end up with the **str
     colnames(a) <- V(gr)$name
     a <- a[order(row.names(a)), order(row.names(a))]
     a <- corr.dist(a)
-    diag(a) <- "--"
-    kable(a, format = "pipe", padding = 2, align = "c") 
+    c <- a
+    diag(c) <- "--"
+    kable(c, format = "pipe", padding = 2, align = "c") 
 ```
 
-In the @tbl-cor, the structurally equivalent pairs of nodes, *A* and *B* and *C* and *D* have $d^{corr} = 1.0$. Nodes that are completely non-equivalent like *C* and *E* and *D* and *E* have $d^{corr} = -1.0$. Nodes that are structurally similar, but not equivalent, like nodes *C* and *F* ($d^{corr} = 0.45$) get a positive number that is less than $1.0$.
+In @tbl-cor, the structurally equivalent pairs of nodes, *A* and *B* and *C* and *D* have $d^{corr} = 1.0$. Nodes that are completely non-equivalent like *C* and *E* and *D* and *E* have $d^{corr} = -1.0$. Nodes that are structurally similar, but not equivalent, like nodes *C* and *F* ($d^{corr} = 0.45$) get a positive number that is less than $1.0$.
 
 ## Iterated Correlational Distances: CONCOR
 What happens if we were to try to use @eq-cor to find the *correlation distance of a correlation distance* matrix? If we were to do this and use @tbl-cor as our input matrix, we end up with @tbl-concor (a).
@@ -166,28 +163,12 @@ Now, as Leo (when stuck in a dream, about a dream, about a dream...) always says
 
 ```{r}
 #| label: tbl-concor
-#| tbl-cap: "Iterated correlational distances."
+#| tbl-cap: "Iterated correlation distances."
 #| tbl-subcap:
 #|   - "Second Iteration"
 #|   - "Third Iteration"
 #|   - "Fourth Iteration"
-#| layout-ncol: 1
- 
-    gr <- create_empty(6, directed = FALSE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 3:4)) %>% 
-        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
-        bind_edges(data.frame(from = 3, to = 1:2)) %>% 
-        bind_edges(data.frame(from = 4, to = 1:2)) %>% 
-        bind_edges(data.frame(from = 5, to = 3:4)) %>% 
-        bind_edges(data.frame(from = 6, to = 5)) %>% 
-        mutate(name = toupper(letters[1:6]))
-    gr <- simplify(gr)
-    a <- matrix(as_adjacency_matrix(gr), nrow = length(V(gr)))
-    rownames(a) <- V(gr)$name
-    colnames(a) <- V(gr)$name
-    a <- a[order(row.names(a)), order(row.names(a))]
-    a <- corr.dist(a)
+#| layout-ncol: 2
     b <- corr.dist(a)
     c <- corr.dist(b)
     d <- corr.dist(c)
@@ -249,13 +230,6 @@ Well, we can begin by computing the correlation distance across all ,the $V=22$ 
 #|   - "Correlation Distance Matrix in (a) with Rows and Columns Reshuffled to Show Hidden Pattern." 
 #| tbl-cap-location: bottom
 #| layout-ncol: 1
-
-    fr <- c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 3), rep(20, 3))
-    to <- c(5:9, 10:14, 15:19, 1:3, 5, 21, 22)
-    edge.dat <- data.frame(fr, to)
-    node.dat <- data.frame(name = toupper(letters[union(fr, to)]))
-    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
-    gr <- as_tbl_graph(simplify(gr))
     a <- matrix(as_adjacency_matrix(gr), nrow = length(V(gr)))
     rownames(a) <- V(gr)$name
     colnames(a) <- V(gr)$name
@@ -285,9 +259,7 @@ Well, we can begin by computing the correlation distance across all ,the $V=22$ 
       column_spec(12, extra_css = "border-right: 2px solid;")
 ```
 
-What happens when we take the correlation distance of the correlation distance matrix shown in @tbl-blocks-1, and the correlation distance of the resulting matrix, and keep going until we only have zeros and ones? The results is @tbl-blocks-2. This matrix seems to reveal a much deeper pattern of commonalities in structural positions across the nodes in @fig-eigen. In fact, if we were a conspiracy theorist like Charlie from *Always Sunny in Philadelphia*, we might even surmise that there is a *secret pattern* that can be revealed if we reshuffled the rows and the columns of the matrix (without changing any of the numbers of course!).[^14-lesson-positions-blockmod-2]
-
-[^14-lesson-positions-blockmod-2]: <https://knowyourmeme.com/memes/pepe-silvia>
+What happens when we take the correlation distance of the correlation distance matrix shown in @tbl-blocks-1, and the correlation distance of the resulting matrix, and keep going until we only have zeros and ones? The results is @tbl-blocks-2. This matrix seems to reveal a much deeper pattern of commonalities in structural positions across the nodes in @fig-eigen. In fact, if we were a conspiracy theorist like Charlie from *Always Sunny in Philadelphia*, we might even surmise that there is a *secret pattern* that can be revealed if we reshuffled the rows and the columns of the matrix (without changing any of the numbers of course!).^[[https://knowyourmeme.com/memes/pepe-silvia](https://knowyourmeme.com/memes/pepe-silvia)]
 
 If we do that, we end up with @tbl-blocks-3. So it turns out that there is indeed a secret pattern! The reshuffling shows that the nodes in the network can be divided into two **blocks** such *within* blocks all nodes are structurally similar (and some structurally equivalent) and *across* blocks, all nodes are structurally dissimilar. Thus $V, U, S, H, G, F, E, T, C, A, B$ are members of one structurally similar block (let's called them "Block 1"), and nodes $R, Q, P, O, N, M, L, K, J, D, I$ are members of another structurally similar block (let's called them "Block 2"). Nodes in "Block 1" are structurally dissimilar from nodes in "Block 2," but structurally similar to one another and vice versa. To illustrate, @fig-blocks1 is the same as @fig-eigen, but this time nodes are colored by their memberships in two separate blocks.
 
@@ -298,13 +270,7 @@ If we do that, we end up with @tbl-blocks-3. So it turns out that there is indee
 #| fig-width: 12
 #| fig-height: 12
 
-    fr <- c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 3), rep(20, 3))
-    to <- c(5:9, 10:14, 15:19, 1:3, 5, 21, 22)
-    edge.dat <- data.frame(fr, to)
-    node.dat <- data.frame(name = toupper(letters[union(fr, to)]))
     node.color <- c(rep("firebrick",3), "darkblue", "firebrick", rep("firebrick", 4), rep("darkblue", 10), "firebrick", rep("firebrick", 2))
-    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
-    gr <- as_tbl_graph(simplify(gr)) 
     p <- ggraph(gr, layout = 'kk') 
     p <- p + geom_edge_link(color = "steelblue", width = 1.15) 
     p <- p + geom_node_point(aes(x = x, y = y), color = node.color, size = 22)
@@ -417,13 +383,7 @@ Now let's do a couple of final splits of the subgraph composed of nodes $A, B, C
 #| fig-width: 12
 #| fig-height: 12
 
-    fr <- c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 3), rep(20, 3))
-    to <- c(5:9, 10:14, 15:19, 1:3, 5, 21, 22)
-    edge.dat <- data.frame(fr, to)
-    node.dat <- data.frame(name = toupper(letters[union(fr, to)]))
     node.color <- c("firebrick", rep("darkblue", 2), "purple", rep("tan1", 5), rep("darkgreen", 5), rep("#CC79A7", 5), "firebrick", rep("#56B4E9", 2))
-    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
-    gr <- as_tbl_graph(simplify(gr)) 
     p <- ggraph(gr, layout = 'kk') 
     p <- p + geom_edge_link(color = "steelblue", width = 1.15) 
     p <- p + geom_node_point(aes(x = x, y = y), color = node.color, size = 22)
