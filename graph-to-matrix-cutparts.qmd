@@ -1,0 +1,99 @@
+### The Valued Adjacency Matrix
+Recall that weighted networks, in which the edges connecting actors have some kind of value range beyond zero one (e.g., representing the intensity of the relationship or the amount of interaction) are best represented using **weighted graphs**. Can we translate weighted graphs into matrix form? Yes! We can use square **valued matrices** to represent represent weighted graphs. A valued matrix is simply a type of square adjacency matrix where cell values could be any number. From the information on tie weights in the graph shown as Figure , we use the weight as an indication of the **strength of the tie** between the two actors. Thus, a tie is not simply absent or present, but falls along some scale ranging from absence to "maximum intensity," which is a function of how the researcher thinks about the tie.
+
+```{r}
+#| label: fig-weighted
+#| fig-cap: "A weighted graph."
+#| fig-cap-location: margin
+#| fig-height: 10
+#| fig-width: 10
+
+    set.seed(23)
+    fr <- c("A", "A", "B",  "B", "C", "C", "D", "E", "E", "E", "F", "F", "B", "A", "B")
+    to <- c("E", "C", "D", "C", "B", "F", "E", "D", "F", "A", "E", "C", "F", "F", "E")
+    w <- round(runif(15), 2)
+    edge.dat <- data.frame(fr, to, w)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges=edge.dat, nodes=node.dat)
+    p <- ggraph(gr, layout = 'nicely')
+    p <- p + geom_edge_link(aes(label = w), color = "white", 
+                       angle_calc = 'along', label_size = 5,
+                       label_dodge = unit(6.5, 'mm'))
+    p <- p + geom_edge_parallel(
+                        color = "steelblue", edge_width = 1.25,
+                        arrow = arrow(length = unit(6, 'mm')),
+                        end_cap = circle(10, 'mm'), 
+                        sep = unit(8, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 26, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph()
+    p
+```
+
+For example, your best friend might be a tie strength of 1.0, while people you are no very close to are closer to zero. However, in the middle there are all types of people who fall along the spectrum between your best friend and someone you have never seen before. It might make sense if you are trying to study social influence that people's best friend might have more influence on their choices than their 5th closest friend. What the weights for your 5th closest friend in this weighting system is a matter of research design which can be debated, but once the weights are determined, it is simple to incorporate them into a matrix.
+
+```{r}
+#| label: tbl-weighted
+#| tbl-cap: "Adjacency matrix for a weighted graph"
+#| tbl-cap-location: margin
+
+    set.seed(23)
+    fr <- c("A", "A", "B",  "B", "C", "C", "D", "E", "E", "E", "F", "F", "B", "A", "B")
+    to <- c("E", "C", "D", "C", "B", "F", "E", "D", "F", "A", "E", "C", "F", "F", "E")
+    w <- round(runif(15), 2)
+    edge.dat <- data.frame(fr, to, w)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges=edge.dat, nodes=node.dat)
+    a <- t(as.matrix(as_adjacency_matrix(gr,attr = "w",sparse = T)))
+    diag(a) <- "--"
+    kbl(a, format = "pipe", align = "c")
+```
+
+In the @fig-weighted case, the theoretical maximum is represented by a weight of 1.0. This is shown in Table @tbl-weighted. Note that we follow the same procedure as that used for constructing the asymmetric adjacency matrix, only that this time, we check on the weight of the edge that actor *i* sends to actor *j*. When there is no edge between actors, we put a zero in the corresponding cell of the valued adjacency matrix as before. For instance, to fill the row corresponding to actor *D*, we see that they do not send a tie to actor *A*, so we put a zero in the cell corresponding to row 4 and column 1). We also observe that they indeed send a tie to actor *B* and the corresponding weight of this tie is 0.33, so we input that number into cell corresponding to row 4 and column 2 in the table. We continue until all the entries for actor *D* (row 4 of the valued adjacency matrix) are filled and keep on going row by row until we have covered all the actors in the network.
+
+### The Signed Adjacency Matrix
+**Signed graphs** like those discussed in the graph theory lesson, can also be represented using **signed matrices**. Signed matrices are just like valued matrices, with the stipulation that values are restricted to the couplet of -1 (to indicate a negative tie) and +1 to indicate a positive tie. For instance, the valued adjacency matrix for the signed graph shown in @fig-signed is shown in @tbl-signed.
+
+```{r}
+#| label: tbl-signed
+#| tbl-cap: "Adjacency matrix for a signed graph."
+#| tbl-cap-location: margin
+
+    fr <- c(rep("A", 5), rep("B", 5), rep("C", 5), rep("D", 5), rep("E", 5))
+    to <- c(rep(c("A", "B", "C", "D", "E"), 5))
+    set.seed(32)
+    s <- sample(c(-1, 1), 25, replace = TRUE)
+    edge.dat <- data.frame(fr, to, s)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    a <- t(as.matrix(as_adjacency_matrix(gr,attr = "s",sparse = T)))
+    diag(a) <- "--"
+    kbl(a, format = "pipe")
+```
+
+As before each cell in the matrix encodes the sign of the relationship that goes from the row node to the column node. So we see that node *A* sends a positive ties to nodes *D* and *E* and sends negative ties to nodes *B* and *C*. This node has an equal number of negative and positive links. This contrasts to the row representing node *E*, which shows that they send *negative* links to all the other nodes in the graph.  Perhaps they are a difficult person or some kind of downer. Reading across the rows tell us something about what each actors "gives off" in the network of valenced relations. This could be positivity or negativity. Reading across the columns, on the other hand, tell us what each actors **receives** from others in the network. For instance, node *B* receives negative links from every other node in the graph, making them the only universally disliked actor in the system. Meanwhile, while *E* gives off all negative links, they receive mostly positive links except for the one coming from node *B*.  
+
+@tbl-terms summarizes the linkage between the different types of graphs and the different types of matrices used to represent them. 
+
+|Type of Tie|Graph|Adjacency Matrix|
+|:---|:---:|:---:|
+|Symmetric|Undirected|Symmetric|
+|Asymmetric|Directed|Asymmetric|
+|Weighted|Weighted|Valued|
+|Valenced|Signed|Signed|
+
+ : Specific Terms Referring to Graphs and Matrices based on the type of tie and associated network we are studying. Keep them straight! {#tbl-terms}
+
+
+### Applying Your Knowledge: Calculating Average Nearest Neighbor Degree from the Adjacency Matrix
+We can calculate the node metric known as **average nearest neighbor degree** ($k^{nn}_i$), covered in the graph metrics lesson, from the graph's **adjacency matrix** in a straightforward way. 
+
+Let $k_i$ be the sum of the *i*$^{th}$ row in the graph adjacency matrix ($\sum_j a_{ij}$), which gives us node *i*'s degree, which we refer to as $k_i$. So for the other nodes in the network *j*, *l*, *m*, and so forth, the same formula gives us their degrees, which we write as $k_j$, $k_l$, $k_m$, and so on. We just go to the corresponding row in the matrix and sum across the columns. Taking the **row sums** of the entire adjacency matrix, then this gives us the **degree set** of the entire graph. 
+
+Once we have all the degrees for each node in the graph, the calculation of each node's average nearest neighbor degree simplifies to #@eq-annd2:
+
+$$  
+  \bar{k}_{nn(i)} = \frac{1}{k_i} \sum_i a_{ij} k_j
+$$ {#eq-annd2}
+
+Where $a_{ij}$ are cells in the adjacency matrix, so $a_{ij} = 1$ if nodes *i* and *j* are neighbors and equals zero otherwise. It is easy to see that this formula will first compute the sum of degrees of the neighbors of node *i* only (because the degrees of the nodes that are not *i*'s neighbors will be set to zero when each $k_{j}$ is multiplied by $a_{ij}$) and then it will divide this total by *i*'s degree ($k_i$).

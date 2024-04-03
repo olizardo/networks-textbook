@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Social Networks - 11&nbsp; Graph Connectivity</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-matrix-intro.html" rel="next">
+<link href="./lesson-graphs-directed-paths.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Social Networks</span>
+    </a>
+  </div>
+          <div class="quarto-toggle-container ms-auto">
+              <a href="" class="quarto-color-scheme-toggle nav-link" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+          </div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./social-ties1.jpeg" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Introduction to Networks</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-what-are-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What Are Networks?</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Graph Theory: The Basics</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-theory.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Introduction to Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-ties.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-neighborhoods.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-degree.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Nodes and their Degrees</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-degree-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-paths.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Indirect Connections</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-directed-paths.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-connectivity.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Matrices: The Basics</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-intro.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-adjacency.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">The Adjacency Matrix</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-row-column-sums.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Matrix Operations: Row and Column Sums</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-operations.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Basic Matrix Operations</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-multiplication.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Matrix Multiplication</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#connected-and-disconnected-graphs" id="toc-connected-and-disconnected-graphs" class="nav-link active" data-scroll-target="#connected-and-disconnected-graphs"><span class="toc-section-number">11.1</span>  Connected and Disconnected Graphs</a></li>
+  <li><a href="#components-and-the-giant-component" id="toc-components-and-the-giant-component" class="nav-link" data-scroll-target="#components-and-the-giant-component"><span class="toc-section-number">11.2</span>  Components and the Giant Component</a></li>
+  <li><a href="#sec-edgecon" id="toc-sec-edgecon" class="nav-link" data-scroll-target="#sec-edgecon"><span class="toc-section-number">11.3</span>  Edge Connectivity</a>
+  <ul class="collapse">
+  <li><a href="#sec-bridges" id="toc-sec-bridges" class="nav-link" data-scroll-target="#sec-bridges"><span class="toc-section-number">11.3.1</span>  Bridges</a></li>
+  </ul></li>
+  <li><a href="#sec-nodecon" id="toc-sec-nodecon" class="nav-link" data-scroll-target="#sec-nodecon"><span class="toc-section-number">11.4</span>  Node Connectivity</a>
+  <ul class="collapse">
+  <li><a href="#articulation-cutnodes" id="toc-articulation-cutnodes" class="nav-link" data-scroll-target="#articulation-cutnodes"><span class="toc-section-number">11.4.1</span>  Articulation (Cut)Nodes</a></li>
+  <li><a href="#graph-connectivity-and-minimum-degree" id="toc-graph-connectivity-and-minimum-degree" class="nav-link" data-scroll-target="#graph-connectivity-and-minimum-degree"><span class="toc-section-number">11.4.2</span>  Graph Connectivity and Minimum Degree</a></li>
+  </ul></li>
+  <li><a href="#advanced-local-bridges" id="toc-advanced-local-bridges" class="nav-link" data-scroll-target="#advanced-local-bridges"><span class="toc-section-number">11.5</span>  Advanced: Local Bridges</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-graphs-connectivity.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-graphconnectivity" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="connected-and-disconnected-graphs" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="connected-and-disconnected-graphs"><span class="header-section-number">11.1</span> Connected and Disconnected Graphs</h2>
+<p>Look at <a href="lesson-graphs-paths.html#fig-paths1">Figure&nbsp;<span>9.1</span></a> again. Are there any <strong>disconnected</strong> pairs of nodes in the graph? The answer is no. If you pick any pair of nodes, they are either directly connected, or indirectly connected to one another via a path of some length. So how can we get two nodes to be disconnected in a simple undirected graph? The answer is that there has to be some kind of “gap” splitting the graph into two or more pieces, so that some set of nodes can no longer reach some of the other ones.</p>
+<div id="fig-connected1" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-connected1-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected1-1.png" class="img-fluid figure-img" data-ref-parent="fig-connected1" width="864"></p>
+<p></p><figcaption class="figure-caption">(a) A connected graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-connected1-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected1-2.png" class="img-fluid figure-img" data-ref-parent="fig-connected1" width="864"></p>
+<p></p><figcaption class="figure-caption">(b) A disconnected graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;11.1: A connected graph versus a disconnected graph.</figcaption><p></p>
+</figure>
+</div>
+<p>For instance, if you compare the undirected graphs <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a> and <a href="#fig-connected1-2">Figure&nbsp;<span>11.1 (b)</span></a> you can appreciate the difference between a <strong>connected graph</strong> and a <strong>disconnected graph</strong>. The difference between <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a> and <a href="#fig-connected1-2">Figure&nbsp;<span>11.1 (b)</span></a> is that the <a href="#fig-connected1-2">Figure&nbsp;<span>11.1 (b)</span></a> graph is a subgraph of the <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a> graph, in which the <span class="math inline">\(DF\)</span> edge has been removed (an <strong>edge-deleted subgraph</strong> according to what we discussed in <a href="lesson-graphs-subgraphs.html"><span>Chapter&nbsp;4</span></a>): <span class="math inline">\(G(b) = G(a) - DF\)</span>.</p>
+<p>Removing the <span class="math inline">\(DF\)</span> edge has resulted in <span class="math inline">\(G(b)\)</span> being disconnected. There is no way we can trace a path connecting any of the vertices in the <span class="math inline">\(\{F, G, H, I\}\)</span> subset with any of the vertices in the <span class="math inline">\(\{A, B, C, D, E\}\)</span> subset. This is different from <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a> where we can trace a finite path between any two vertices, even if it is very long. Thus, we can come up with a formal definition of <strong>graph connectivity</strong>:</p>
+<ul>
+<li><p>A graph is <strong>connected</strong> if there exists a (finite) path between each pair of nodes.</p></li>
+<li><p>A graph is <strong>disconnected</strong> if there does not exist a path connecting every pair of nodes</p></li>
+</ul>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-connected-c" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected-c-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;11.2: A connected graph with three edges highlighted.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="components-and-the-giant-component" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="components-and-the-giant-component"><span class="header-section-number">11.2</span> Components and the Giant Component</h2>
+<p>When a graph goes from connected (like <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a>) to disconnected (like <a href="#fig-connected1-2">Figure&nbsp;<span>11.1 (b)</span></a>) it is split into a number of subgraphs that are themselves connected.</p>
+<p>For instance, in <a href="#fig-connected1-2">Figure&nbsp;<span>11.1 (b)</span></a> the set nodes <span class="math inline">\(\{A, B, C, D, E\}\)</span> form a <strong>connected subgraph</strong> of the larger disconnected graph. A connected subgraph that is part of a larger disconnected graph is called a <strong>component</strong>.</p>
+<p>In <a href="#fig-connected1-2">Figure&nbsp;<span>11.1 (b)</span></a> there are two components, one formed by the connected subgraph with node set <span class="math inline">\(\{A, B, C, D, E\}\)</span>, and the other formed by the connected subgraph with node set <span class="math inline">\(\{F, G, H, I\}\)</span>.</p>
+<div id="fig-connected2" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 33.3%;justify-content: center;">
+<div id="fig-connected2-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected2-1.png" class="img-fluid figure-img" data-ref-parent="fig-connected2" width="576"></p>
+<p></p><figcaption class="figure-caption">(a) A disconnected graph with three components.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 33.3%;justify-content: center;">
+<div id="fig-connected2-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected2-2.png" class="img-fluid figure-img" data-ref-parent="fig-connected2" width="576"></p>
+<p></p><figcaption class="figure-caption">(b) A disconnected graph with a giant component.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 33.3%;justify-content: center;">
+<div id="fig-connected2-3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected2-3.png" class="img-fluid figure-img" data-ref-parent="fig-connected2" width="576"></p>
+<p></p><figcaption class="figure-caption">(c) Another disconnected graph with a giant component.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 33.3%;justify-content: center;">
+<div id="fig-connected2-4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected2-4.png" class="img-fluid figure-img" data-ref-parent="fig-connected2" width="576"></p>
+<p></p><figcaption class="figure-caption">(d) Yet another disconnected graph with a giant component.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 33.3%;justify-content: center;">
+<div id="fig-connected2-5" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected2-5.png" class="img-fluid figure-img" data-ref-parent="fig-connected2" width="576"></p>
+<p></p><figcaption class="figure-caption">(e) A connected graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 33.3%;justify-content: center;">
+<div id="fig-connected2-6" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected2-6.png" class="img-fluid figure-img" data-ref-parent="fig-connected2" width="576"></p>
+<p></p><figcaption class="figure-caption">(f) Yet another connected graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;11.3: A series of connected and disconnected graphs displaying components and the giant component.</figcaption><p></p>
+</figure>
+</div>
+<p>It is possible to split a graph into multiple components not just two. For instance, take a look at the <strong>unlabeled graph</strong> in <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a>. If we were to generate a subgraph from <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a> by deleting the two red edges and the one purple edge, we would end up with the graph shown in <a href="#fig-connected2-1">Figure&nbsp;<span>11.3 (a)</span></a>. This graph is disconnected, and it features <em>three</em> separate components (connected subgraphs).</p>
+<p>If were to delete just the red edges from <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a> and keep the purple edge, we would end up with the graph shown in <a href="#fig-connected2-2">Figure&nbsp;<span>11.3 (b)</span></a>. Like the <a href="#fig-connected2-1">Figure&nbsp;<span>11.3 (a)</span></a>, <a href="#fig-connected2-2">Figure&nbsp;<span>11.3 (b)</span></a> is also disconnected, but it is split into <em>two</em> not three components.</p>
+<p>Note that one of the connected components in the graphs shown in <a href="#fig-connected2-2">Figure&nbsp;<span>11.3 (b)</span></a>, <a href="#fig-connected2-3">Figure&nbsp;<span>11.3 (c)</span></a>, and <a href="#fig-connected2-4">Figure&nbsp;<span>11.3 (d)</span></a> is way larger than the other one. For instance, the bigger connected component of graph <a href="#fig-connected2-2">Figure&nbsp;<span>11.3 (b)</span></a> is of order ten, but the smaller component is only of order four.</p>
+<p>When a disconnected graph is split into multiple components, the component containing the largest number of nodes (the connected subgraph of the highest order) is called the graph’s <strong>giant component</strong>.</p>
+</section>
+<section id="sec-edgecon" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="sec-edgecon"><span class="header-section-number">11.3</span> Edge Connectivity</h2>
+<p>We went from the connected graph shown in <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a> to the disconnected graphs in <a href="#fig-connected2">Figure&nbsp;<span>11.3</span></a> by removing particular <em>edges</em>, like the red and purple ones in <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a>.</p>
+<p>These edges are clearly more important than the other colored blue in the graph, because they are responsible for keeping the whole graph together as a connected structure. Obviously this property of edges has a name in graph theory.</p>
+<p>In a graph, an <strong>edge cutset</strong> is <em>any</em> set of edges whose removal results in a graph going from being connected to disconnected.</p>
+<p>For instance, in <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a> the set of two red edges is a cutset of the graph <span class="math inline">\(G\)</span> since deleting these edges would disconnect the graph as shown in <a href="#fig-connected2-2">Figure&nbsp;<span>11.3 (b)</span></a>. In the same way we can see that a subset that combines any one of the red edges with the purple edge is also a cutset of the graph in <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a>, because removing any combination of these two links results in a disconnected graph, as shown in <a href="#fig-connected2-3">Figure&nbsp;<span>11.3 (c)</span></a> and <a href="#fig-connected2-4">Figure&nbsp;<span>11.3 (d)</span></a>.</p>
+<p>Generally, picking a bigger edge cutset will result in more disconnected components. For instance, selecting both the red edges and the purple edge—a cutset of cardinality three—as the cutset results in a graph with three disconnected components, as in <a href="#fig-connected2-1">Figure&nbsp;<span>11.3 (a)</span></a>.</p>
+<p>A <strong>minimum edge cutset</strong> of a graph is any edge cutset that also happens to be of the smallest size (in terms of cardinality) among all the possible cutsets. The cardinality of the minimum edge cutset in the graph is called the graph’s <strong>edge connectivity</strong>, and it is written <span class="math inline">\(\lambda(G)\)</span>.</p>
+<p>The graph in <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a> has edge-connectivity <span class="math inline">\(\lambda(G) = 2\)</span> because we need to remove at least two edges to disconnected it. As we saw earlier these could be either the set the two red edges of any combination featuring one of the red ones with the purple one.</p>
+<p>When a graph has edge-connectivity larger than one, like <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a>, it means that we could remove <em>any one edge</em> and the graph would still be connected. For instance, looking at <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a>, if we were to remove just the purple edge, the graph would still be connected, and it would look like <a href="#fig-connected2-5">Figure&nbsp;<span>11.3 (e)</span></a>, which is a connected graph.</p>
+<p>The same would happen if we removed just one of the red edges from <a href="#fig-connected-c">Figure&nbsp;<span>11.2</span></a>. If were to do that, we would end up with the graph shown in <a href="#fig-connected2-6">Figure&nbsp;<span>11.3 (f)</span></a>, which is still a connected graph.</p>
+<section id="sec-bridges" class="level3" data-number="11.3.1">
+<h3 data-number="11.3.1" class="anchored" data-anchor-id="sec-bridges"><span class="header-section-number">11.3.1</span> Bridges</h3>
+<p>As you might imagine, the smallest edge connectivity a connected graph can have is <span class="math inline">\(\lambda(G) = 1\)</span>. A graph with edge-connectivity equal to one has a special edge called a <strong>bridge</strong>. This is the <em>single</em> edge whose removal disconnects a graph with edge-connectivity equal to one.</p>
+<p>For instance, in <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a> the <span class="math inline">\(DF\)</span> edge is a bridge. When a graph is like the one shown in <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a> and has a bridge (like <span class="math inline">\(DF\)</span>), this edge has two interesting properties <span class="citation" data-cites="buckleyharary90">(<a href="#ref-buckleyharary90" role="doc-biblioref">Buckley and Harary 1990, 17</a>)</span>.</p>
+<ol type="1">
+<li>First, if an edge is a bridge in graph <span class="math inline">\(G\)</span>, then that edge does not lie on any cycle of <span class="math inline">\(G\)</span> (as defined in <a href="lesson-graphs-paths.html"><span>Chapter&nbsp;9</span></a>). That means that <span class="math inline">\(DF\)</span> in <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a> does not lie on any cycle of <span class="math inline">\(G\)</span>.</li>
+<li>Second, if an edge is a bridge, then there is at least one pair of nodes <em>i</em> and <em>j</em> such that the bridge is an edge on <em>every</em> path linking <em>i</em> and <em>j</em>. In <a href="#fig-connected1-1">Figure&nbsp;<span>11.1 (a)</span></a>, clearly condition (2) is the case for every node in the subset <span class="math inline">\(\{F, G, H, I\}\)</span> relative to nodes in the subset <span class="math inline">\(\{A, B, C, D, E\}\)</span>. Every path linking nodes in the first subset to nodes in the second subset has to include the bridge <span class="math inline">\(DF\)</span>.</li>
+</ol>
+</section>
+</section>
+<section id="sec-nodecon" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="sec-nodecon"><span class="header-section-number">11.4</span> Node Connectivity</h2>
+<p>As you recall from <a href="lesson-graphs-subgraphs.html"><span>Chapter&nbsp;4</span></a>, we can create subgraphs by removing either edges or nodes. In the same way, we can take a graph from being connected by removing either edges or nodes. In <a href="#sec-edgecon"><span>Section&nbsp;11.3</span></a> we considered the case of removing edges to disconnect a graph. Here, we consider the case of removing nodes.</p>
+<p>In a graph, a <strong>node cutset</strong> is <em>any</em> set of nodes whose removal results in a graph going from being connected to disconnected.</p>
+<div id="fig-connected3" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-connected3-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected3-1.png" class="img-fluid figure-img" data-ref-parent="fig-connected3" width="960"></p>
+<p></p><figcaption class="figure-caption">(a) A connected graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-connected3-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected3-2.png" class="img-fluid figure-img" data-ref-parent="fig-connected3" width="960"></p>
+<p></p><figcaption class="figure-caption">(b) A disconnected graph after removing two nodes (A, D).</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-connected3-3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected3-3.png" class="img-fluid figure-img" data-ref-parent="fig-connected3" width="960"></p>
+<p></p><figcaption class="figure-caption">(c) Anoter disconnected graph after removing two nodes (G, H).</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-connected3-4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected3-4.png" class="img-fluid figure-img" data-ref-parent="fig-connected3" width="960"></p>
+<p></p><figcaption class="figure-caption">(d) A disconnected graph after removing one node (K).</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;11.4: Two connected graphs.</figcaption><p></p>
+</figure>
+</div>
+<p><a href="#fig-connected3-1">Figure&nbsp;<span>11.4 (a)</span></a> shows a graph that is the same as <a href="#fig-connected2">Figure&nbsp;<span>11.3</span></a>, except that the nodes are <strong>labeled</strong>. In that graph, the set of nodes <span class="math inline">\(\{A, D\}\)</span> is a cutset of the graph <span class="math inline">\(G\)</span> since deleting these nodes disconnects the graph, as shown by the resulting node-deleted subgraph shown in <a href="#fig-connected3-2">Figure&nbsp;<span>11.4 (b)</span></a>. This graph is now disconnected, featuring a nine-node giant component and a smaller three-node component containing nodes <span class="math inline">\(\{B, C, E\}\)</span></p>
+<p>In the same way we can see that the set of nodes <span class="math inline">\(\{G, H\}\)</span> is also a cutset of the graph, because removing these nodes would separate <span class="math inline">\(\{F, I, J\}\)</span> from the rest of their friends, creating a graph with two separate components, as shown in <a href="#fig-connected3-3">Figure&nbsp;<span>11.4 (c)</span></a>.</p>
+<p>Interestingly, the set formed by the single node <span class="math inline">\(K\)</span> is <em>also</em> a cutset of the graph. As shown in <a href="#fig-connected3-4">Figure&nbsp;<span>11.4 (d)</span></a>, removing this one node disconnects the graph, separating <span class="math inline">\(\{L, M, N\}\)</span> from the rest.</p>
+<p>A <strong>minimum node cutset</strong> of a graph is any node cutset that also happens to be of the smallest size (in terms of cardinality). The cardinality of the minimum node cutset in the graph is called the graph’s <strong>node connectivity</strong>, and it is written <span class="math inline">\(\kappa(G)\)</span>.</p>
+<p>The graph in <a href="#fig-connected3-1">Figure&nbsp;<span>11.4 (a)</span></a> has node-connectivity (<span class="math inline">\(\kappa(G) = 1\)</span>) because, as we have seen, all we need to do is remove <span class="math inline">\(K\)</span> to disconnect it.</p>
+<section id="articulation-cutnodes" class="level3" data-number="11.4.1">
+<h3 data-number="11.4.1" class="anchored" data-anchor-id="articulation-cutnodes"><span class="header-section-number">11.4.1</span> Articulation (Cut)Nodes</h3>
+<p>If a graph has a single node whose removal disconnects the graph then that node is called the <strong>articulation node</strong> of the graph (also called a <strong>cutnode</strong>). The articulation node is the node equivalent of what a bridge is for edges. A single actor upon whom the entire connectivity of the network depends.</p>
+<p>If a graph <span class="math inline">\(G\)</span> has an articulation node, then by definition <span class="math inline">\(\kappa(G) = 1\)</span>. Any graph <span class="math inline">\(G\)</span> with <span class="math inline">\(\kappa(G) &gt; 1\)</span>, therefore, lacks an articulation node. It follows from this that if a graph has node-connectivity larger than one (<span class="math inline">\(\kappa(G) &gt; 1\)</span>), we could remove <em>any one node</em> and the graph would still be connected.</p>
+<p>Articulation nodes have another interesting property related to indirect connectivity. If a graph has an articulation node <em>u</em>, there is at least one other node in the graph <em>v</em> such that <em>u</em> stands in the middle of <em>every path</em> (as an <strong>inner node</strong>) connecting <em>v</em> to the rest of the other nodes in the graph.</p>
+<p>Finally, if a node in a graph has degree <span class="math inline">\(k = 1\)</span> (that is the node is an <strong>end-node</strong>) then it cannot be an articulation node. We can always remove an end-node from a connected graph and the graph will stay connected.</p>
+<p>The larger the graph connectivity (<span class="math inline">\(\kappa(G)\)</span>) of a graph, then the larger is the <strong>structural cohesion</strong> of the underlying social network represented by the graph <span class="citation" data-cites="whiteharary01">(<a href="#ref-whiteharary01" role="doc-biblioref">White and Harary 2001</a>)</span>.</p>
+</section>
+<section id="graph-connectivity-and-minimum-degree" class="level3" data-number="11.4.2">
+<h3 data-number="11.4.2" class="anchored" data-anchor-id="graph-connectivity-and-minimum-degree"><span class="header-section-number">11.4.2</span> Graph Connectivity and Minimum Degree</h3>
+<p>An interesting mathematical relationship obtains between three graph properties: <strong>Minimum Degree</strong> (covered in <a href="lesson-graphs-degree-metrics.html"><span>Chapter&nbsp;8</span></a>) and the edge and node connectivities.</p>
+<p>It goes as follows: In every graph <em>the node connectivity is always smaller or equal to the edge connectivity which is always smaller or equal to the minimum degree</em> <span class="citation" data-cites="harary69">(<a href="#ref-harary69" role="doc-biblioref">Harary 1969, 43</a>)</span>.</p>
+<p>In mathese, for any graph <span class="math inline">\(G\)</span>:</p>
+<p><span id="eq-connect"><span class="math display">\[
+\kappa(G) \leq \lambda(G) \leq min(k)
+\tag{11.1}\]</span></span></p>
+<p>Neat! These can be interpreted as three different criteria that tells us whether how well-connected a whole graph, a subgraph, or a component of a larger is. Having a high minimum degree is the weakest, followed by having a high edge-connectivity, with having a high node connectivity being the strongest criterion.</p>
+</section>
+</section>
+<section id="advanced-local-bridges" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="advanced-local-bridges"><span class="header-section-number">11.5</span> Advanced: Local Bridges</h2>
+<p>In a classic paper on “The Strength of Weak Ties,” Mark <span class="citation" data-cites="granovetter73">Granovetter (<a href="#ref-granovetter73" role="doc-biblioref">1973</a>)</span> developed the concept of a <em>local bridge</em>. Recall from section <a href="#sec-bridges"><span>Section&nbsp;11.3.1</span></a>, that a bridge is an edge that if removed would completely disconnect the graph.</p>
+<p>Another way of thinking about this is that a bridge is an edge that if removed would increase the length of the shortest paths between two sets of nodes from a particular number to <em>infinity</em> since, in a disconnected graph, the length of the path between nodes that cannot reach one another is indeed infinity! (<span class="math inline">\(\infty\)</span>).</p>
+<p>There is another way of thinking of bridges in the context of shortest paths and this is with respect to what happens to the indirect connectivity between particular pairs of nodes in the graph when a specific edge is removed. Clearly, every time we remove an edge, this has to affect the indirect connectivity between pair of nodes, by for instance, increasing their geodesic distance (the length of the shortest path linking them).</p>
+<p>So even if a graph remains connected after removing an edge (because its edge-connectivity is larger than one), removing an edge can affect how close two nodes in the network are. That is what the concept of a <strong>local bridge</strong> is intended to capture.</p>
+<p>Formally, a local bridge is an edge that if removed from the graph, would increase the length of the shortest path between <em>a particular pair</em> of nodes to a number that is higher than their current one but less than infinity. This number is called the <em>degree</em> of the local bridge in question. Because a local bridge is always defined with respect to a particular pair of nodes, it is a triplet, involving two nodes <em>i</em> and <em>j</em> and one edge <em>uv</em>.</p>
+<div id="fig-connected4" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-connected4-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected4-1.png" class="img-fluid figure-img" data-ref-parent="fig-connected4" width="768"></p>
+<p></p><figcaption class="figure-caption">(a) A connected graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-connected4-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-connectivity_files/figure-html/fig-connected4-2.png" class="img-fluid figure-img" data-ref-parent="fig-connected4" width="768"></p>
+<p></p><figcaption class="figure-caption">(b) Another connected graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;11.5: Two connected graphs.</figcaption><p></p>
+</figure>
+</div>
+<p>For instance, in <a href="#fig-connected4-1">Figure&nbsp;<span>11.5 (a)</span></a>, with respect to nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(H\)</span>, the edge <span class="math inline">\(HK\)</span> (pictured in purple) is a <em>local bridge of degree 4</em>. The reason for that is that, as shown in <a href="#fig-connected4-2">Figure&nbsp;<span>11.5 (b)</span></a>, when the edge <span class="math inline">\(HK\)</span> is removed from the graph, the shortest path_ between nodes <span class="math inline">\(H\)</span> and <span class="math inline">\(K\)</span> increases from <span class="math inline">\(l_{HK} =1\)</span> (<span class="math inline">\(H\)</span> and <span class="math inline">\(K\)</span> are adjacent in <a href="#fig-connected4-1">Figure&nbsp;<span>11.5 (a)</span></a>) to <span class="math inline">\(l_{HK} = 4\)</span>, as given by the edge sequence <span class="math inline">\(\{GH, AG, AD, DK\}\)</span> (pictured in red).</p>
+<p>Note that from the perspective of nodes <span class="math inline">\(D\)</span> and <span class="math inline">\(H\)</span>, the purple <span class="math inline">\(HK\)</span> edge is a local bridge of degree three, because <span class="math inline">\(l_{DH} = 2\)</span> in <a href="#fig-connected4-1">Figure&nbsp;<span>11.5 (a)</span></a> and <span class="math inline">\(l_{DH} = 3\)</span> when the edge <span class="math inline">\(HK\)</span> is removed from the graph in <a href="#fig-connected4-2">Figure&nbsp;<span>11.5 (b)</span></a>.</p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-buckleyharary90" class="csl-entry" role="doc-biblioentry">
+Buckley, Fred, and Frank Harary. 1990. <em>Distance in Graphs</em>. Addison-Wesley.
+</div>
+<div id="ref-granovetter73" class="csl-entry" role="doc-biblioentry">
+Granovetter, Mark S. 1973. <span>“The Strength of Weak Ties.”</span> <em>American Journal of Sociology</em> 78 (6): 1360–80.
+</div>
+<div id="ref-harary69" class="csl-entry" role="doc-biblioentry">
+Harary, Frank. 1969. <em>Graph Theory</em>. Addison-Wesley.
+</div>
+<div id="ref-whiteharary01" class="csl-entry" role="doc-biblioentry">
+White, Douglas R, and Frank Harary. 2001. <span>“The Cohesiveness of Blocks in Social Networks: Node Connectivity and Conditional Density.”</span> <em>Sociological Methodology</em> 31 (1): 305–59.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-graphs-directed-paths.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-matrix-intro.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,0 +1,67 @@
+# Equivalence and Similarity
+
+```{r setup, include=FALSE}
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+    library(kableExtra)
+```
+
+## The Position Approach
+The basic idea behind the position approach to dividing up the nodes in a graph is to come up with a measure of how *similar* two nodes are in terms of their patterns of connectivity with others. This measure then can be used to partition the nodes into what are called **equivalence** or **similarity** classes. Nodes in the same equivalence class are said to occupy the same **position** in the social structure described by the network. 
+
+There are two main ways to partition nodes into equivalence classes. The first is based on the idea that two nodes occupy the same position is they have similar patterns of connectivity to the same other nodes in the graph. This is called **structural equivalence** [@lorrainwhite71]. 
+
+The second is based on the idea that two nodes are equivalent if they are connected to people who are themselves equivalent, even if these are not literally the same people. This is called **regular equivalence** [@whitereitz83]. 
+
+This and the following lessons will deal mainly with various ways of partitioning the nodes in a network based on **structural equivalence** and its more relaxed cousin, **structural similarity**.
+
+## Structural Equivalence {#sec-equiv}
+*Two nodes are structurally equivalent if they are connected to the same others*. Thus, their patterns of connectivity (e.g., their row in the adjacency matrix) is *exactly the same*. 
+
+```{r}
+#| label: fig-equivex 
+#| fig-cap: "An undirected graph with nodes colored by membership in the same structural equivalence class."
+#| fig-cap-location: margin 
+#| fig-width: 12
+#| fig-height: 12
+
+    gr <- create_empty(6, directed = FALSE)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 3, to = 1:2)) %>% 
+        bind_edges(data.frame(from = 4, to = 1:2)) %>% 
+        bind_edges(data.frame(from = 5, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 6, to = 5)) %>% 
+        mutate(name = toupper(letters[1:6]))
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.1)
+    p <- p + geom_node_point(aes(x = x, y = y, color = c("a", "a", "b", "b", "c", "d")), size = 24) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() + theme(legend.position = "none")
+    p
+```
+
+For instance in @fig-equivex, nodes *C* and *D* are structurally equivalent because they are connected to the same neighbors $\{A, B, E\}$. In the same way, nodes *A* and *B* are structurally equivalent because they are connected to the same neighbors $\{C, D\}$. Finally, nodes *E* and *F* occupy *unique positions* in the network because their neighborhoods are not equivalent to that of any other nodes. Node *E* is the only node that has a neighborhood composed of nodes $\{C, D, F\}$, and node *F* is the only node that has a neighborhood composed of node $\{E\}$ only. Perhaps *F* is the main boss, and *E* is the second in command. 
+
+```{r adjmat1}
+#| label: tbl-adjmat1 
+#| tbl-cap: "Adjancency Matrix of an Undirected Graph"
+#| tbl-cap-location: margin
+
+    gr <- simplify(gr)
+    a <- matrix(as_adjacency_matrix(gr), nrow = length(V(gr)))
+    rownames(a) <- V(gr)$name
+    colnames(a) <- V(gr)$name
+    a <- a[order(row.names(a)), order(row.names(a))]
+    kbl(a, format = "html", padding = 2, align = "c") %>% 
+        row_spec(1:2, background = "salmon", bold = TRUE) %>% 
+        row_spec(3:4, background = "lightgreen", bold = TRUE) %>% 
+        row_spec(5, background = "cyan", bold = TRUE) %>% 
+        row_spec(6, background = "violet", bold = TRUE)
+```
+
+We can also see by looking at @tbl-adjmat1) that, indeed, the rows corresponding to the structurally equivalent nodes  $\{A, B\}$ and  $\{C, D\}$ in the corresponding **adjacency matrix** are indistinguishable from one another. The nodes that have unique positions in the network $\{E, F\}$, also have a unique pattern of 0s and 1s across the rows of the adjacency matrix. 
+
+## References {.unnumbered}

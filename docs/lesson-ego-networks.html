@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Social Networks - 15&nbsp; Ego Network Metrics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-positions-blockmod.html" rel="next">
+<link href="./lesson-affiliation-networks.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Social Networks</span>
+    </a>
+  </div>
+          <div class="quarto-toggle-container ms-auto">
+              <a href="" class="quarto-color-scheme-toggle nav-link" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+          </div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./social-ties1.jpeg" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Introduction to Networks</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-what-are-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What Are Networks?</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Graph Theory: The Basics</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graph-theory.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Introduction to Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-ties-and-graphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graph-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-node-neighborhoods.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-node-degree.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Nodes and their Degrees</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-degree-based-graph-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Graphs and Matrices</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-intro-to-matrices.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-adjacency-matrix.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">The Adjacency Matrix</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Network Analysis: Equivalence, Similarity, and Positions</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-indirect-connections.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Indirect Connections</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-directed-indirect-connections.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graph-connectivity.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Special Kinds of Networks</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-ego-networks.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Network Analysis: Nodes</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-positions-blockmod.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Blockmodeling</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-centrality.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Centrality</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Network Analysis: Group Structure</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-groups-cliques.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Clique Analysis</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-groups-cohesive.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Cohesive Subsets</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-egographs" id="toc-sec-egographs" class="nav-link active" data-scroll-target="#sec-egographs"><span class="toc-section-number">15.1</span>  Ego Graphs</a></li>
+  <li><a href="#ego-networks" id="toc-ego-networks" class="nav-link" data-scroll-target="#ego-networks"><span class="toc-section-number">15.2</span>  Ego Networks</a></li>
+  <li><a href="#what-ego-networks-tell-us" id="toc-what-ego-networks-tell-us" class="nav-link" data-scroll-target="#what-ego-networks-tell-us"><span class="toc-section-number">15.3</span>  What Ego Networks Tell Us</a>
+  <ul class="collapse">
+  <li><a href="#ego-graph-notation" id="toc-ego-graph-notation" class="nav-link" data-scroll-target="#ego-graph-notation"><span class="toc-section-number">15.3.1</span>  Ego Graph Notation</a></li>
+  </ul></li>
+  <li><a href="#ego-network-size" id="toc-ego-network-size" class="nav-link" data-scroll-target="#ego-network-size"><span class="toc-section-number">15.4</span>  Ego Network Size</a></li>
+  <li><a href="#ego-network-homophily" id="toc-ego-network-homophily" class="nav-link" data-scroll-target="#ego-network-homophily"><span class="toc-section-number">15.5</span>  Ego Network Homophily</a>
+  <ul class="collapse">
+  <li><a href="#fun-facts" id="toc-fun-facts" class="nav-link" data-scroll-target="#fun-facts"><span class="toc-section-number">15.5.1</span>  Fun Facts:</a></li>
+  </ul></li>
+  <li><a href="#ei-homophily-index" id="toc-ei-homophily-index" class="nav-link" data-scroll-target="#ei-homophily-index"><span class="toc-section-number">15.6</span>  EI Homophily Index</a></li>
+  <li><a href="#ego-network-diversity" id="toc-ego-network-diversity" class="nav-link" data-scroll-target="#ego-network-diversity"><span class="toc-section-number">15.7</span>  Ego Network Diversity</a></li>
+  <li><a href="#clustering-coefficient" id="toc-clustering-coefficient" class="nav-link" data-scroll-target="#clustering-coefficient"><span class="toc-section-number">15.8</span>  Clustering Coefficient</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-ego-networks.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-egonets" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="sec-egographs" class="level2" data-number="15.1">
+<h2 data-number="15.1" class="anchored" data-anchor-id="sec-egographs"><span class="header-section-number">15.1</span> Ego Graphs</h2>
+<p>Consider Figure <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a> again. If we solved the <strong>boundary specification problem</strong>, then this could be considered an example of a <strong>whole network</strong>. All the relevant actors and social ties are included. However, sometimes, we do not have that information. Instead, what we have is network data collected from the point of a single person. For instance, let us say, that instead of collecting information on all the actors depicted in Figure <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a>), we <em>only</em> interviewed actor <em>D</em> and ask them to name the people they spend time with and tell us about the relations between those people.</p>
+<p>In that case, we would have end up with a graph that looks like <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>. This is called a <strong>simple ego graph</strong>. Ego graphs are also referred to as <strong>centered graphs</strong> <span class="citation" data-cites="freeman82">(<a href="#ref-freeman82" role="doc-biblioref">Freeman 1982</a>)</span>, because they are graphs that are centered around a focal node, namely, ego. The reason we call it “simple” is because the ego graph, just like the overall graph of which it is a subgraph, contains only undirected, binary (present or absent) edges, and no loops (self-edges), which are the conditions that define <strong>simple graphs</strong> (see <a href="#sec-graphtheory"><span class="quarto-unresolved-ref">sec-graphtheory</span></a>).</p>
+<p>Note that in the ego graph shown as Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>, all nodes are a subset of the original graph, and all edges are also a subset of the original graph shown in Figure <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a>). So if <span class="math inline">\(G_D\)</span> if node <em>D</em>’s ego graph, and <span class="math inline">\(G\)</span> is the original undirected graph, then <span class="math inline">\(G_D = (E_D, V_D)\)</span>, <span class="math inline">\(E_D \subset E\)</span> and <span class="math inline">\(V_D \subset V\)</span>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-egograph" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-ego-networks_files/figure-html/fig-egograph-1.png" class="img-fluid figure-img" width="1152"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;15.1: Ego graph for point D.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="ego-networks" class="level2" data-number="15.2">
+<h2 data-number="15.2" class="anchored" data-anchor-id="ego-networks"><span class="header-section-number">15.2</span> Ego Networks</h2>
+<p>Ego graphs are useful for representing <strong>egocentric networks</strong>—often shortened to just <strong>ego networks</strong> or even <strong>ego nets</strong>—also called <strong>personal networks</strong>. These are a particular type of network meant to represent a set of social relations from the perspective of a focal person.</p>
+<p>In the point and line graph representation of an ego-network, the person of interest, or <strong>ego</strong>, which is the Latin word for “self”, is usually represented at the center of the graph surrounded by their contacts; these are referred by the Latin word for “others,” namely, <strong>alters</strong>. Ego networks will usually contain links indicating the relationship between alters, as seen from the perspective of ego.</p>
+<p>As a matter of historical fact, it is likely that the first person to use the ego network as an analytical tool was the anthropologist <a href="https://en.wikipedia.org/wiki/J._Clyde_Mitchell">J. Clyde Mitchell</a>. Who called it a <strong>reticulum</strong>. According to Michell a reticulum consisted of “the direct links radiating from a particular Ego to other individuals in a situation, and the links which connect those individuals who are directly tied to Ego, and one another” <span class="citation" data-cites="mitchell69">(<a href="#ref-mitchell69" role="doc-biblioref">Mitchell 1969</a>)</span>, which is precisely what is meant by an ego network.</p>
+<p>In the typical ego network diagram, <em>D</em> is the ego node (shown in tan in Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>) and is depicted as the center of the ego graph. The alter nodes are <em>A</em>, <em>B</em>, <em>C</em>, <em>E</em> and <em>F</em> (shown in red in Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>) are shown as “satellites” orbiting the ego node.</p>
+<p>Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a> also shows that in an ego network there are <em>two</em> kinds edges we may be interested in and that we need to keep separate. First there are <strong>ego-to-alter</strong> edges (shown in blue in Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>)), indicating the alters ego is connected to. In an ego network, ego-to-alter links are <strong>obligatory</strong>, meaning that they all should be present. Thus, if, like in Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a> there are five alters depicted, there should also be five ego-to-alter links. As you can see, that is indeed the case: <span class="math inline">\(\{DA, DB, DC, DE, DF\}\)</span>.</p>
+<p>Second, there are <strong>alter-to-alter</strong> links (shown in purple in <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>) indicating relationships between alters that do not involve ego, but that <em>only</em> include other nodes that are connected to ego via ego-to-alter links. These are optional, in the sense that they could or could not exist. While, in an ego network, ego is <em>necessarily</em> connected to their alters, alters may or may not be connected to one another. Thus, in Figure Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>, there are five alter-to-alter links, namely, <span class="math inline">\(\{AC, AB, AE, BC, CE\}\)</span>, but these are not all the possible ones that could exist. For instance, alters <em>E</em> and <em>F</em> are a null (disconnected) dyad in the ego graph, and so are alters <em>E</em> and <em>F</em>. Later in the lesson, we will show you how to compute the maximum number of expected connections in an ego network so as to compare them to the ones we actually observe (hint: it has something to do with the formula for graph density).</p>
+<p>For example, if you were to ask someone to name their friends (or any other type of alter), they will tell you who their friends are. They could even tell you whether two or their friends knew one another or not. However, they typically will not be able to you about the <em>entirety</em> of each of their alter’s networks (e.g., every person known by their alters and the connections between these others). Thus, while in Figure <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a>) we have a graph of the <strong>whole network</strong>, in the ego-network case, such as Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>, we are only getting a small part of the overall social network, centered on a single person.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+</section>
+<section id="what-ego-networks-tell-us" class="level2" data-number="15.3">
+<h2 data-number="15.3" class="anchored" data-anchor-id="what-ego-networks-tell-us"><span class="header-section-number">15.3</span> What Ego Networks Tell Us</h2>
+<p>While it might seem like we are unable to do much with ego-networks, that is definitely not the case! While having data on only one person’s ego would not tell scholars much, when we have tens, hundreds, or thousands of ego-networks we are able to analyze systematic differences in the ways different types of people structure their social worlds <span class="citation" data-cites="marsden87">(<a href="#ref-marsden87" role="doc-biblioref">Marsden 1987</a>)</span>, or, as is more likely from a sociological perspective, have it structured for them by social forces beyond their direct control.</p>
+<p>For example, if all the students in the class fill out ego-networks of their friends and family, could we find that certain types of people have more friends? Do people with more family members also have more friends, or do they have fewer friends? Are the friends of some people more likely to be friends with one another? Do some people have all women or all people their same race or ethnicity in their ego-networks?</p>
+<p>These are empirical questions which, when scholars creatively compare egocentric networks, we are able to potentially answer. Research does not have to only use one type of relationship when collecting network data, and this would be one such case when combining egocentric networks of both friendship and family ties into a single personal network of emotional support or some other socially meaningful exchange.</p>
+<p>Once we have collected ego network data, using the standard battery of <strong>name generators</strong> and <strong>name interpreters</strong>, we may be interested in computing certain <strong>metrics</strong> that allow us to characterize each personal (ego) network in terms of certain <strong>ego network properties</strong> of interest. There are four pieces of information we need to compute all the relevant ego network properties. These are:</p>
+<ul>
+<li>The number of <strong>ego-to-alter</strong> ties</li>
+<li>The number of <strong>alters</strong></li>
+<li>The number of <strong>alter-to-alter</strong> ties</li>
+<li><strong>Sociodemographic characteristics of ego</strong> (e.g., age, gender identity, racial identity, etc.)</li>
+<li><strong>Sociodemographic characteristics of alter</strong> (e.g., age, gender identity, racial identity, etc.).</li>
+</ul>
+<p>Given this information, there are four main types of ego network properties that we could be interested in. These are:</p>
+<ul>
+<li><strong>Size</strong>: Total number of ego-alter ties</li>
+<li><strong>Diversity</strong>: Variation in alter attributes</li>
+<li><strong>Homogeneity</strong>: Ties to alter same/different from ego</li>
+<li><strong>Composition</strong>: Proportion of certain types of alter ties</li>
+<li><strong>Clustering</strong>: Density of alter-to-alter network</li>
+</ul>
+<p>Table tbl-ego-net-props shows each ego-network property with a brief definition, showing the type of information we need to compute each.</p>
+<div id="tbl-ego-net-props" class="anchored">
+<table class="table">
+<caption>Table&nbsp;15.1: Ego Network Properties</caption>
+<colgroup>
+<col style="width: 22%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 19%">
+<col style="width: 19%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;">Ego-alter ties</th>
+<th style="text-align: center;">Alter-Alter Ties</th>
+<th style="text-align: center;">Ego Attributes</th>
+<th style="text-align: center;">Alter Attributes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Size</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Homogeneity</td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;">X</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Diversity</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">X</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Composition</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">X</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Clustering</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">X</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="ego-graph-notation" class="level3" data-number="15.3.1">
+<h3 data-number="15.3.1" class="anchored" data-anchor-id="ego-graph-notation"><span class="header-section-number">15.3.1</span> Ego Graph Notation</h3>
+<p>In what follows we will abide by the following notational conventions:</p>
+<ul>
+<li>We will refer to the <strong>ego node</strong> as <span class="math inline">\(Ego\)</span>.</li>
+<li>We will refer to the set of <strong>ego-to-alter</strong> edges as <span class="math inline">\(E_{ea}\)</span>.</li>
+<li>We will refer to the set of <strong>alter-to-alter</strong> edges as <span class="math inline">\(E_{aa}\)</span>.</li>
+<li>We will refer to the set of <strong>alter nodes</strong> as <span class="math inline">\(N(Ego)\)</span> which can be read as “ego’s neighborhood.”</li>
+</ul>
+</section>
+</section>
+<section id="ego-network-size" class="level2" data-number="15.4">
+<h2 data-number="15.4" class="anchored" data-anchor-id="ego-network-size"><span class="header-section-number">15.4</span> Ego Network Size</h2>
+<p>The <strong>size</strong> (<span class="math inline">\(S(ego)\)</span>) of the ego network is the simplest metrics we can compute. It is given by a count of the <strong>ego-to-alter</strong> ties (<span class="math inline">\(E_{ij}\)</span>). Note that in this case, ego-network-size is equivalent to the number of <strong>neighbors</strong> (<span class="math inline">\(N(Ego)\)</span>) ego has in the ego graph, which is also the <strong>degree</strong> of the ego node (<span class="math inline">\(k^{Ego}\)</span>) in the larger graph. Thus, for ego networks, size and degree are the same metric, and is given either by the cardinality of ego’s neighborhood:</p>
+<p><span id="eq-egosize1"><span class="math display">\[
+  S(Ego) = |N(ego)|
+\tag{15.1}\]</span></span></p>
+<p>Or the cardinality of the ego-to-alter edge set:</p>
+<p><span id="eq-egosize2"><span class="math display">\[
+  S(Ego) = |E_{ea}|
+\tag{15.2}\]</span></span></p>
+<p>Thus, in the example shown in Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>:</p>
+<p><span class="math display">\[
+  S(Ego) = |N(Ego)| = |\{A, B, C, E, F\}| = 5
+\]</span></p>
+<p>Or equivalently:</p>
+<p><span class="math display">\[
+  S(Ego) = |E_{ea}| = |\{DA, DB, DC, DE, DF\}| = 5
+\]</span></p>
+</section>
+<section id="ego-network-homophily" class="level2" data-number="15.5">
+<h2 data-number="15.5" class="anchored" data-anchor-id="ego-network-homophily"><span class="header-section-number">15.5</span> Ego Network Homophily</h2>
+<p>Another property of ego networks we may be interested in measuring is <strong>homogeneity</strong>. That is, we may wan to ask: Do people connect to others that similar to themselves or do they connect to to others that are different from them? People can be similar or different from others in an infinity of ways. Sociologists are primarily interested in similarity or difference along lines of social position or social categories. For instance, in human societies <em>gender</em> is an important marker of social position, as is racial identification, class identification, age, occupation, or educational attainment.</p>
+<p><strong>Homophily</strong> is the idea that people with similar personal or social traits will tend to have relationships with each other compared to having relationships with those unlike themselves. Etymologically, the word is a simple combination of <em>homo</em>, meaning same, and <em>philia</em>, meaning love or liking. Thus, homophily is literally a like or love of the same. Many languages have some phrase capturing this propensity, and in English it is often idiomatically expressed as “birds of a feather flock together” <span class="citation" data-cites="mcpherson01">(<a href="#ref-mcpherson01" role="doc-biblioref">McPherson, Smith-Lovin, and Cook 2001</a>)</span></p>
+<p>The theory of homophily says that all else equal, people will tend to associate with others that are similar to themselves. As we have seen before, there are various reasons for why this might be, both psychological (people prefer similarity) to sociological (social contexts induce people to link to similar others).</p>
+<section id="fun-facts" class="level3" data-number="15.5.1">
+<h3 data-number="15.5.1" class="anchored" data-anchor-id="fun-facts"><span class="header-section-number">15.5.1</span> Fun Facts:</h3>
+<p>Many languages have idioms for homophily as a social phenomenom. Just a few include</p>
+<ul>
+<li><p><strong>Japanese</strong>- Racoon dogs from the same den (<em>Onazi ana no mujina</em>)</p></li>
+<li><p><strong>French</strong>- Those who ressemble each other assemble together (<em>Qui se ressemble s’assemble</em>)</p></li>
+<li><p><strong>Italian</strong>- God makes them then couples them (<em>Dio li fa e poi li accoppia</em>)</p></li>
+</ul>
+<p>Have an idiom from another language for homophily? Let us know so we can include it!</p>
+</section>
+</section>
+<section id="ei-homophily-index" class="level2" data-number="15.6">
+<h2 data-number="15.6" class="anchored" data-anchor-id="ei-homophily-index"><span class="header-section-number">15.6</span> EI Homophily Index</h2>
+<p>The EI homophily index is one of the most useful ways to think about homophily in an ego-network. The EI homophily index is a relative measure of homophily because it does not consider the underlying population as would be required in an expected rate. Although it might be nice to calculate an expected rate, researchers can often do interesting things even without this data.</p>
+<p>The EI homophily index is a measure of <em>in- and out-group preference.</em> One simply subtracts the number of out-group ties from the number of in-group ties, divided by the total number of ties. This measure thus uses information on ego-to-alter ties, and both ego and alter characteristics.</p>
+<p><span id="eq-EI"><span class="math display">\[
+  EI=\frac{External-Internal}{External+Internal}
+\tag{15.3}\]</span></span></p>
+<p>Thus, an EI score of -1 means complete homophily- the individual only has relationships with actors of the same “type” as they themselves are. An EI score of 1 means complete heterophily- all the alters are of a different “type” than they themselves are. Finally, an EI score of 0 means that an equal number of alters are of both the same “type” as the ego, and different types.</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-eiexamp" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-ego-networks_files/figure-html/fig-eiexamp-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;15.2: An ego graph with node color indicating gender identification.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To calculate the EI score for the above ego, we must first ask along what dimension of homophily we are interested in. This must be done to reflect our research question. Let us presume however that we are interested in the relationship between gender identification and friendship networks. We might ask if the friendship networks of high-schoolers are changing over time. If we had older data on friendships, say from 40 years ago, we could compare it with friendship networks from high school students today.</p>
+<p>An example of an ego network in which the nodes are classified by gender identification is shown in Figure <a href="#fig-eiexamp">Figure&nbsp;<span class="quarto-unresolved-ref">fig-eiexamp</span></a>. In the figure, nodes that identify as men are shown in green, those that identify as women are orange, and those that identify as nonbinary are blue. Notice that the ego in this case identifies as a man. also notice that ego has four alters who also identify as men, two that identify as women, and one non-binary alter Thus, ego has four ego-to-alter ties that connect him to alters who are in the same category as himself on the social attribute of interest. These are <strong>internal ties</strong> because they connect ego to people who are similar to himself (shown in teal). Ego also has three ego-to-alter ties who are not the same as ego in the attribute of interest, regardless of them belonging to different classifications among themselves. These are <strong>external</strong> ties, because they connect ego to people who are different from himself (shown in red).</p>
+<p>Given this information, the EI index for the ego in Figure <a href="#fig-eiexamp">Figure&nbsp;<span class="quarto-unresolved-ref">fig-eiexamp</span></a> can be computed as:</p>
+<p><span class="math display">\[
+  EI=\frac{External-Internal}{External+Internal}=\frac{3-4}{3+4}=\frac{-1}{7}=-0.14
+\]</span></p>
+<p>This gives us an EI score just under zero, which indicates a slight preference for associating with similar others in terms of gender identity. The EI score ranges from -1.0 to +1.0. EI scores below zero (and approaching -1) indicate a tendency towards homophily (associating with similar others). EI scores above zero (and approching 1.0) indicate a tendecy towards associating with <em>dissimilar</em> others.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> Finally, an EI score around zero suggests that the ego-network is balanced in terms of an equal number of similar and dissimilar alters.</p>
+</section>
+<section id="ego-network-diversity" class="level2" data-number="15.7">
+<h2 data-number="15.7" class="anchored" data-anchor-id="ego-network-diversity"><span class="header-section-number">15.7</span> Ego Network Diversity</h2>
+<p>We may be interested in how <strong>diverse</strong> ego’s contacts are. Do they all belong to the same social group or is ego connected to a wide range of contacts? Note that the only piece of information we need here have to do with characteristics of ego’s contacts. We do not need to know anything about ego to know how diverse their networks are. So the connection between diversity and ego’s characteristics is <em>empirical</em> rather than definitional.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>The most popular measure of diversity for ego networks is <strong>Blau’s heterogeneity index</strong> (H). Quite simply, H is the sum of the square of the percentage (p) of the ego’s network belonging to particular groups, subtracted from one:</p>
+<p><span id="eq-blaudiv"><span class="math display">\[
+  H = 1-\sum_{k}p_k^{2}
+\tag{15.4}\]</span></span></p>
+<p>Unlike in the EI homophily index, ego’s own group membership does not matter. A woman with only men friends would have an H-index of 0, just as a woman with only female friends would also have an H index of 0. An H-index of zero simply means that there is no diversity in the types of friends the ego has. Conversely, an H index score that approaches towards 1 implies greater heterogeneity, or diversity, in an ego’s network relations. For instance, someone with equal number of men and women friends, or a woman who one-third women friends, one-third men friends, and one-third of friends who are nonbinary would have an H-index of 1.0 with respect to gender diversity.</p>
+<p>Remember that we can to compute ego network diversity, we need to pick which characteristic we are measuring gender diversity on. For instance, and ego network can be non-diverse with respect to race (each of ego’s alters is of the same race), but be very diverse with respect to education (ego has contacts from a wide range of educational backgrounds). So there is no such thing as a “diverse” ego network in general (or a non-diverse one). You always have to specify what <em>social characteristic</em> you are talking about. So there is ego-network diversity with respect to gender identification, which is different from that with respect to racial identity of alters, and so on.</p>
+<p>For instance, we may want to know how diverse and ego network is with respect to the gender identification of alters like we considered in the previous example. Thus, to the H diversity index of the ego network shown in Figure <a href="#fig-eiexamp">Figure&nbsp;<span class="quarto-unresolved-ref">fig-eiexamp</span></a>, first it is a matter of identifying the different groups the alters in ego’s network belong to, where the groups are defined their gender identification. As we saw, this spans three groups, men, women, and nonbinary. So to figure out ego’s diversity with respect to gender using <a href="#eq-blaudiv">Equation&nbsp;<span class="quarto-unresolved-ref">eq-blaudiv</span></a>, we would have to compute:</p>
+<p><span class="math display">\[
+  H = 1- (p^2_{men} + p^2_{women} + p^2_{nonbinary})
+\]</span></p>
+<p>As shown above, the ego’s network has ties to three different groups that we are interested in as this is how many gender identities are in the ego’s network. The next step is to find what percentage of each group makes up the ego’s network. Once this is done, a little bit of math solves for the H index score. So we know that ego has four alters who identify as men. This means that <span class="math inline">\(p_{male} = \frac{4}{7}\)</span>. Four out of the seven contacts in ego’s network are men. Writing this quantity for all three gender identification groups in ego’s network yields:</p>
+<p><span class="math display">\[
+  \begin{split}
+    H &amp;= 1- \left(\left[\frac{4}{7}\right]^2_{men} + \left[\frac{2}{7}\right]^2_{women} + \left[\frac{1}{7}\right]^2_{nonbinary}\right) \\
+    H &amp;= 1- (0.57^2+ 0.28^2 + 0.14^2)  \\
+    H &amp;= 1- (0.33+ 0.08 + 0.02) \\
+    H &amp;= 1 - 0.43 \\
+    H &amp;= 0.57
+  \end{split}
+\]</span></p>
+<p>The resulting H index is 0.57. We might ask: What does this mean? Well, we can compare this score to some extreme hypothetical cases. For instance, if Ego’s contacts where all of the same gender identification then there would be <em>no</em> diversity in the ego-network. In this case, the H-index would take its minimum value of zero, meaning that all of a person’s friends come from the same group. The fact that the H-index is substantially above zero tells us that there’s quite a lot of gender diversity in this ego network.</p>
+<p>The H-index gets larger (approaching one) the more diverse a person’s ego network gets. The H index reaches its maximum when people from different groups are <em>equally</em> represented in Ego’s network. For instance, a maximally diverse ego-network with respect to gender identification would contain equal number of men, women, and nonbinary identifying people. So, if Ego has six friends, they would have maximum gender diversity of they have two women friends, two men friends and two nonbinary identifying friends.</p>
+<p>Technically, the maximum H is given by <span class="citation" data-cites="solanas_etal12">(<a href="#ref-solanas_etal12" role="doc-biblioref">Solanas et al. 2012</a>)</span>:</p>
+<p><span id="eq-hmax"><span class="math display">\[
+  H_{max} = 1 - \frac{1}{k}
+\tag{15.5}\]</span></span></p>
+<p>Where <span class="math inline">\(k\)</span> is the number of categories of the sociodemographic dimension being considered. In the gender identification example <span class="math inline">\(k=3\)</span>, but if we were studying ego-network diversity along different demographics (e.g., race or education), <span class="math inline">\(k\)</span> would be a larger number.</p>
+<p>So to return to our example is <span class="math inline">\(H= 0.57\)</span> a large number? Well, let’s compare it to the maximum value it could take. With <span class="math inline">\(k=3\)</span> gender categories, the maximum H is given by:</p>
+<p><span class="math display">\[
+  H_{max} = 1 - \frac{1}{3} =  1 - 0.33 = 0.67
+\]</span></p>
+<p>We can divide the observed <span class="math inline">\(H\)</span> by this hypothetical maximum to see how close Ego is to the ideal of a maximally diverse network with respect to gender. This gives us <span class="math inline">\(\frac{H}{H_{max}} = \frac{0.57}{0.67} = 0.85\)</span>. So this means that Ego’s network is pretty diverse (at 85% percent maximum diversity), but has a bit more room to grow to reach maximum diversity!</p>
+</section>
+<section id="clustering-coefficient" class="level2" data-number="15.8">
+<h2 data-number="15.8" class="anchored" data-anchor-id="clustering-coefficient"><span class="header-section-number">15.8</span> Clustering Coefficient</h2>
+<p>By definition, everyone knows the ego, but to what extent does someone’s friends know each other? For ego-networks, the tendency of ego’s friends to be friends with one another is called <strong>clustering</strong> and this ego network property is measured via the <strong>clustering coefficient</strong> (<span class="math inline">\(CC\)</span>). Consider Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>, again. In that ego graph, we can see that some of ego’s alters do know each other but some of them do not.</p>
+<p>The <span class="math inline">\(CC\)</span> is calculated by computing the <strong>density</strong> of the subgraph among alters that remains when ego and the edges that are incident on ego (e.g., the ego-to-alter edges) are removed. This can range from zero (none of ego’s alters are connected to one another) to one (all of ego’s alters are friends with each other) or some fraction in between (for instance, a CC of 0.5 means that 50% of the total possible number of relationships between ego’s alters are present).</p>
+<p>Since we are already know how to compute the density of undirected graphs (see the lesson on graph metrics), then we know that the clustering coefficient for an ego network can be obtained using this formula:</p>
+<p><span id="eq-cc"><span class="math display">\[
+  CC_i = \frac{2m}{n(n-1)}
+\tag{15.6}\]</span></span></p>
+<p>Where <span class="math inline">\(n\)</span> is the size of the ego network size (number of alters) and <span class="math inline">\(m\)</span> is the number of <strong>alter-to-alter</strong> edges among alters surrounding ego. Thus, as noted, the clustering coefficient calculation ignores ego and the ego-to-alter edges.</p>
+<p>We can compute the clustering coefficient for the ego network depicted in Figure <a href="#fig-egograph">Figure&nbsp;<span class="quarto-unresolved-ref">fig-egograph</span></a>, because we know that <span class="math inline">\(n\)</span> = 5 and <span class="math inline">\(m\)</span> = 4. We then plug in these values into <a href="#eq-cc">Equation&nbsp;<span class="quarto-unresolved-ref">eq-cc</span></a>, which gives us:</p>
+<p><span class="math display">\[
+  CC_i = \frac{2m}{n(n-1)}=\frac{2 \times 4}{5 \times (5-1)}=\frac{8}{5 \times 4} = \frac{8}{20}=\frac{2}{5}=0.40
+\]</span></p>
+<p>Because the resulting clustering coefficient of <span class="math inline">\(0.40\)</span>, we can conclude that <span class="math inline">\(40\%\)</span> of all possible ties among ego’s alters exist. Another way of putting it is that, if we were to pick two of ego’s alters at random the <em>probability</em> that the two would be part of a connected dyad is <span class="math inline">\(p = 0.40\)</span>. With multiple egos, we might thus be able to compare their personal networks to build theories about how the social world operates.</p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-freeman82" class="csl-entry" role="doc-biblioentry">
+Freeman, Linton C. 1982. <span>“Centered Graphs and the Structure of Ego Networks.”</span> <em>Mathematical Social Sciences</em> 3 (3): 291–304.
+</div>
+<div id="ref-marsden87" class="csl-entry" role="doc-biblioentry">
+Marsden, Peter V. 1987. <span>“Core Discussion Networks of Americans.”</span> <em>American Sociological Review</em> 52 (1): 122–31.
+</div>
+<div id="ref-mcpherson01" class="csl-entry" role="doc-biblioentry">
+McPherson, Miller, Lynn Smith-Lovin, and James M Cook. 2001. <span>“Birds of a Feather: Homophily in Social Networks.”</span> <em>Annual Review of Sociology</em> 27 (1): 415–44.
+</div>
+<div id="ref-mitchell69" class="csl-entry" role="doc-biblioentry">
+Mitchell, James Clyde. 1969. <span>“The Concept and Use of Social Networks.”</span> In <em>Social Networks in Urban Situations</em>. Manchester University Press.
+</div>
+<div id="ref-solanas_etal12" class="csl-entry" role="doc-biblioentry">
+Solanas, Antonio, Rejina M Selvam, José Navarro, and David Leiva. 2012. <span>“Some Common Indices of Group Diversity: Upper Boundaries.”</span> <em>Psychological Reports</em> 111 (3): 777–96.
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>The mathematical symbol for subset is <span class="math inline">\(\subset\)</span>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Reminder: Smaller clumps of a larger social network are also known as <strong>subgraphs</strong><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>This also has a Latin name: <strong>heterophily</strong>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>For instance, we can ask: Do women have more diverse ego networks than men? Do Hispanics have more diverse ego networks than white people?<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-affiliation-networks.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-positions-blockmod.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Blockmodeling</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

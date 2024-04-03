@@ -1,0 +1,99 @@
+# Special Kinds of Directed Graphs
+
+```{r setup, include=FALSE}
+  knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+  require(ggraph)
+  require(tidygraph)
+  require(igraph)
+```
+
+## Symmetric Directed Graphs
+There are also some special types of directed graphs created when we impose some restrictions on either reciprocity or edge directionality. For instance, if in a directed graph, every pair of adjacent nodes is connected via a bi-directional, reciprocal relationship then it is called as **symmetric directed graph**. 
+
+
+```{r}
+#| label: fig-symm
+#| fig-cap: "A symmetric directed graph"
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+  fr <- c("A", "B", "D", "A", "B", "C", "E", "C", "F", "A", "G", "D", "C", "D", "E", "G")
+  to <- c("B", "A", "A", "D", "C", "B", "C", "E", "A", "F", "D", "G", "D", "C", "G", "E")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  p <- ggraph(gr, layout = 'kk')
+  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+              arrow = arrow(length = unit(7, 'mm')),
+              end_cap = circle(10, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+@fig-symm shows a symmetric directed graph with eight nodes and thirty two bi-directional edges.
+
+## Functional Graphs
+There is also a special kind of digraph built by imposing the restriction that each node can only have a *single out-neighbor*. This means the outdegree of each node is equal to one for each node in the graph. This is called a **functional graph** and has applications in the anthropological analysis of kinship exchange systems in less differentiated societies [@hageharary96]. 
+
+
+```{r}
+#| label: fig-func
+#| fig-cap: "A functional directed graph"
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+  fr <- c("A", "B", "C", "D", "E", "F", "G", "H")
+  to <- c("C", "G", "G", "H", "A", "A", "B", "C")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  p <- ggraph(gr, layout = 'kk')
+  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+              arrow = arrow(length = unit(7, 'mm')),
+              end_cap = circle(10, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+For instance, @fig-func shows a functional graph with eight nodes. If a graph $G$ is a functional graph, then the number of nodes $V$ is always equal to the number of directed edges $E$. Thus, the cardinality of the edge set is constrained to be the same as the cardinality of the node set, via the constrain that each node's degree is equal to one. Thus, in @fig-func, $V = E = 8$.
+
+## Oriented Graphs {#sec-oriented}
+
+What happens if we build a network composed of directed links that go only in one direction? That is, if *a* sends a link back to *b* we never observe *b* sending a link back to *a*. Such a directed graph lacks reciprocity in each connected dyad.  
+
+
+```{r}
+#| label: fig-oriented
+#| fig-cap: "An oriented directed graph"
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+  fr <- c("A", "D", "C", "C", "A", "D", "D", "G", "C", "B", "G")
+  to <- c("B", "A", "F", "E", "F", "G", "C", "E", "A", "F", "A")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  p <- ggraph(gr, layout = 'kk')
+  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+              arrow = arrow(length = unit(7, 'mm')),
+              end_cap = circle(10, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+The resulting graph is a special type of directed graph called an **oriented graph**, like the one in @fig-oriented. An oriented graph is kind of the opposite of the kind of symmetric directed graph depicted in @fig-symm. Whereas in @fig-symm every connected dyad is linked by a bi-directional reciprocal link, in the oriented graph shown in @fig-oriented, every connected dyad is linked *only* by a one-way non-reciprocal link, the link that would turn the asymmetrically connected dyads in @fig-oriented into a reciprocal dyad is forbidden by the nature of the tie.
+
+
+

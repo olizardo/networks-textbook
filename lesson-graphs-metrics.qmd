@@ -1,0 +1,119 @@
+# Basic Graph Metrics {#sec-graphmetrics}
+
+```{r setup, include=FALSE}
+    library(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+## Computing Metrics on Graphs
+
+As graphs are really just representations of real world-networks, they can be as varied as different networks are from one another. Some social networks are small (composed of just a few people), while others are large. In some social networks there is not much connectivity, while other networks feature thousands if not millions of ties between people. 
+
+We can quantify a lot of these properties of real world networks by representing them as graphs and then computing **graph metrics**. This is fancy word for counting various numbers most of which are a function of the number of nodes and edges in a graph. In this lesson, we will review the most important graph metrics in social networks.
+
+### Graph Order
+The **order** of a graph (typically written as $n$), is the *number of nodes* in the graph. Technically speaking, keeping in mind that the graph is really a set of a set of nodes and edges, the order is the cardinality of node set $n = |V|$. **Cardinality** is simply a technical term from set theory indicating *how many elements* there are in a set. Thus, the graph in @fig-undirected has an order of 9, while @fig-directed has an order of 7.
+
+### Graph Size
+
+Likewise, the **size** of a graph (typically written as $m$), is the *number of edges* in the graph, which is (like with nodes) the **cardinality** of the edge set $m = |E|$. Thus, the **size** of the graph in @fig-undirected is 16, while the size of the graph in @fig-directed it is 11.
+
+This means that if you say the **size** of the graph in @fig-undirected is 16, we will all understand that you are referring to the number of edges, as you would use the term **order** if you were talking about the number of nodes.
+
+## The Graph Maximum Size
+
+In some cases we may be interested to know how many edges there *could* be in a graph if everyone had a relationship with everyone else in the network. This is the *maximum possible number of edges* that could exist in a network of order $n$.
+
+Recall that, as we discussed previously, the number of edges in a graph is called the **graph size**. Additionally, a graph in which all the edges that could exist are actually present is called the **complete graph**. The **maximum size** of a graph of order $n$ is the number of edges that would exist in that graph is the graph was complete. A graph in which *no* edges exist (every node is an isolate), is called an **empty graph**.
+
+While this may seem like a complicated thing, it is actually given by a simple (and important) formula. For an **undirected graph** this is:
+
+$$
+  Max(E)^{u}=\frac{n(n-1)}{2}
+$${#eq-graphmax1}
+
+For a **directed graph**, the same computation is even simpler. The maximum number of possible edges in this case is:
+
+$$
+  Max(E)^d=n(n-1)
+$${#eq-graphmax2}
+
+## Graph Maximum Size Explainer
+
+Where do these formulas for maximum graph size come from? Let's consider the directed case first. A graph would be complete if every node was connected to every other node. It is easy to see that for each node, this would be every other node in the graph except themselves. So in a complete graph of order $n$, the degree of each node *has* to be $n-1$. So if we call the degree of the first node in the graph $(n-1)_1$, then the **degree set** ($\mathbf{k}^c$) of a complete graph would be:
+
+$$
+  \mathbf{k}^{c} = [(n-1)_1, (n-1)_2, (n-1)_3 \dots (n-1)_n]  
+$${#eq-graphmax3}
+
+It is easy to see the that the **sum of degrees** ($\sum k_i^c$) of the complete graph, will give us the maximum size for any graph of that order. So we can write that sum as:
+
+$$
+  \sum k_i^{c} = \sum_i^{n} n-1 
+$${#eq-graphmax4}
+
+Essentially we add up $n-1$ to $n-1$ to $n-1$, etc. $n$ times, once for each node in the graph. From basic arithmetic, we know that adding the same number $n$ number of times is the same as multiplying that number by $n$. So therefore, the maximum size of a complete graph of order $n$ is $n \times n-1 = n(n-1)$, the formula written as @eq-graphmax2!
+
+In the undirected case (@eq-graphmax1, the procedure is the same, except that now each edge shows up twice in the degree sum, but one of those is redundant. Therefore we divide the whole sum of degrees by 2 to eliminate double-counting, resulting in $\frac{n(n-1)}{2}$ as the formula for the maximum size of an undirected graph or order $n$.
+
+### Applying your knowledge
+
+You can now look a genius. If somebody were to ask you:
+
+**Q**: In classroom with 10 kindergartners, how many total pairs of friends would exist if every kid was friends with every other kid?
+
+Using your graph theory metrics knowledge, you can now pull out your phone calculator and compute:
+
+$$
+  \frac{10(10-1)}{2} = 
+  \frac{10(9)}{2} = 
+  \frac{90}{2} = 45
+$$
+
+Impressing your audience immensely!
+
+## Graph Density
+In a classic study, the British social anthropologist Elizabeth Bott, made a classic distinction between two types of network structure. According to Bott, some networks are **tight-knit** and others are **loose-knit** [@bott57]. Tight-knit networks feature a lot of connections and actors can reach others via multiple pathways. Loose-knit networks are more sparsely connected and actors are only reachable to one another via a very restricted set of pathways.
+
+It was soon realized that a very simple graph metric, called the **network density** could be a useful index of Bott's ideas of tight versus loose-knit networks. Tight-knit networks are **dense** featuring a lot of inter-connections between actors, while loose-knit networks are less dense [@barnes69]. How can we think of this in terms of graph theory concepts?
+
+### Density in Undirected Graphs
+The density $d(G)$ of a graph is a measure of *how many ties between actors exist compared to how many ties between actors are possible*, given the **graph size** (number of nodes) and the **graph order** (number of links). As such, the density of an undirected graph is quite simply calculated as, the ratio between the observed number of edges $m$ (the cardinality of the edge set), and the graph maximum size as defined using @eq-graphmax1.
+
+$$
+  d(G)^u=\frac{m}{\frac{n(n-1)}{2}}=m \times \frac{2}{n(n-1)}=\frac{2m}{n(n-1)}
+$$ {#eq-dens1}
+
+Where $m$ is the number of edges (graph size) and $n$ is the number of nodes (graph order) in the network.
+
+For the graph shown in @fig-undirected, of size $m = 16$ and order $n=9$, we can use @eq-dens1 to compute the graph density as follows:
+
+$$
+  d(G)^u = \frac{2m}{n(n-1)} = 
+  \frac{2 \times 16}{9 \times (9-1)}=
+  \frac{32}{9 \times 8} = 
+  \frac{32}{72} = 
+  0.44
+$$
+
+The estimated density of the network, $d = 0.44$ tell us that 44% of the total possible number of edges are actually observed. Another way to think about density, is as giving the *probability* that, if we were to choose two random nodes in the network, this random dyad will have probability $p = 0.44$ of being **connected** (as opposed to **null**).
+
+### Density in Directed Graphs
+To compute the density of a directed graph, there is no need to multiply the numerator by two, as each edge does single duty. As such, the equation for computing the density of a directed graph is:
+
+$$
+  d(G)^d=\frac{m}{n(n-1)}
+$${#eq-densdir}
+
+Which is even simpler than in the directed case!
+
+### Why is density important?
+
+The density of a network property is important to consider for two reasons. First, (which is the definition of density!) is that it can help us understand how connected the network is compared to how connected it might be. Second, when comparing two networks with the same number of nodes and the same type of relationships, it can tell us how the networks are different.
+
+For example, let us imagine that there are two organizations, each with 10 people in them. The one organization has high density and the other has low density in terms of the interactions among the members. What might be some of the underlying social differences between the two organizations? While we would need more information, we could posit that the one issue might be that information does not transmit very efficiently across the low density organization because it has to go from member to member, rather than diffusing from one member rapidly to all the others. Another issue might be the "hit by a bus" problem, where if one or two members are taken out of the network, you can suffer breakdown because they are no longer there to coordinate the different parts that don't talk to each other. Denser networks are less vulnerable to disruption due to remove of key nodes.
+
+
+## References {.unnumbered}

@@ -1,0 +1,230 @@
+# Introduction to Graphs {#sec-graphtheory}
+
+```{r setup, include=FALSE}
+      library(ggraph)
+      library(tidygraph)
+      library(igraph)
+```
+
+## From Ties to Graphs
+This is likely not your first sociology course. But even if it is, relationships are relatively intuitive for people. They are all around us: you and your parents, you and your siblings, your siblings and your parents, you and your classmates, your classmates to each other. Affiliation, communication, friendship, hatred: these are the *content* of social relationships. Two people either have a relationship of some kind, or they do not. Essentially, a relationship is a connection between at least two social actors. We will see that sometimes, when relations clump together into networks, two sets of relations can have different content, but still share the same **form** (e.g., arrangement, or pattern).
+
+The technical social networks term for "relations clumping together into networks" is **concatenation** [@martin09]. For instance, every time you introduce two previously unrelated acquaintances to one another, you concatenate two previous disconnected ties into a connected triple.
+
+## Social Ties
+
+For example, you are likely enrolled in a social network's class if you are reading this, and have people you know such as your friends and people you've taken prior classes with, but also people you've never seen before. It might be obvious that you have a relationship with those people that you know, but do you have a relationship with those you do not know?
+
+!["The first picture of a social network, then called a 'sociogram' was drawn by Jacob Moreno in 1934. It consisted of the relationships between 19 boys (triangles) and 18 girls (circles) in a 5th grade classroom"](images/moreno-sociogram.png){#fig-sociogram}
+
+The answer is maybe. It depends on how you define the term social relationship. If you were asked who your friends are, you would tell me that some of your classmates are your friends, and the rest of your classmates are not your friends. If you were asked which of these people in your classroom are your classmates however, everyone would be your classmate, except for your professor or teaching assistants. You share a particular type of relationship with these other people, your classmates, even if you've never met them. The word "classmate" even implies a relationship type, one with a different social meaning than "friend." When analyzing a social network, it is important to first understand what type of social relationship you are analyzing, as it relates directly to what type of conclusions or generalizations you can make about the social world.
+
+## Network Boundaries
+
+Once you have a type of social relationship you would like to examine, the next step is to *bound* the context. If you want to map out all the social relationships in the world, well that's impossible. Imagine how difficult it would be to map out all the people at your school who are friends with one another. That might be feasible if you have only 1,000 undergraduates, but at a school of 30,000, it would be a nightmare. That is in part why it is so important to bound the social context. The other is to exclude relationships that are not meaningful for your study. **Bounding**, or to draw boundaries, is to have a rule about what will or will not be included in the study [@laumann89].
+
+!["The Zachary karate club network study was one of the first data collection probjects in the history of SNA. The data are famous for showing how networks could be used to find groups based on the relations between actors."](images/karate.jpg){#fig-karate}
+
+
+For example, if you are interested in who is friends with who in your social networks class, you have bound your study to look at only people who are in your social networks class. One of the most famous social network studies was performed by the anthropologist Wayne W. Zachary (see @fig-karate at a college karate club in the 1970s [@zachary77]. Thus, the 34 members of the karate club and the outside teacher were the actors included in the study because they were the people who were involved in the day to day operations of the karate club at the time data were collected.
+
+With a type of social relationship in some bounded context, you can begin to map the social world as a graph. In its most basic form, a graph is essentially a picture of the relationships between different types of social actors. This picture becomes incredibly powerful when we begin to use mathematical concepts to understand how actors relate to each other (mostly what this book is concerned with) or upon what social principles the network may have been formed.
+
+While this class will mostly use the terms node and edge when referring to graphs, these are not the only terms in use among those who use network analysis techniques. Additional names for nodes include, **vertex** or **point**. Relationships between two nodes are, in addition to being called edges, are referred to as **ties** or **links**. Table @tbl-terms shows the different network lingo people use across disciplines.
+
+|Academic Origin | Social Actor | Relationship |
+ :-------------- | :----------: | :-------: |
+|Graph Theory | Point | Line|
+|Network Science | Vertex | Edge |
+|Sociology | Actor | Tie |
+|Computer Science| Node | Link|
+
+: Network terminology across disciplines. {#tbl-terms}
+
+## The Building Blocks of Graphs: Edges and Nodes
+
+There is a mathematical definition of a **graph** which is slightly more technical. A graph is a **set**, usually represented by the capital letter *G*.
+
+From high school math, you may remember that the mathematical definition of a set is simply a collection of entities, some of which may be ordered and some of which may themselves be other sets (a set can have sets as its members). In the case of graphs, the entities inside the collection are a set of **vertices** (also called **nodes**) and a separate set of **edges** (also called **links**).
+
+A graph is thus a set containing two sets as its members: a set of nodes (usually represented by the capital letter *V*) and a set of edges (usually represented by the capital letter *E*).
+
+In set theory notation:
+
+$$    
+  G = \{V, E\}
+$${#eq-graph}
+
+Which says that the members of the set defined by the graph, which we call *G*, are two other sets, called *E* and *V* (who themselves have a series of members inside). The usual notation, like in @eq-graph, is to *enclose* the members of a set in *brackets* $\{\}$.
+
+### Nodes
+The set of nodes usually represents actors in the real world social network. **Point and line diagrams** (such as the ones shown in @fig-karate) are used to represent graphs, these in their turn represent the real social network.
+
+In these diagrams nodes (representing actors) are usually drawn as a circle, but they could be any shape or symbol. In social network analysis, actors are often either an individual or an organization, but, as we have seen, in wider applications of the network imagery in the physical and biological sciences (usually going under the banner of **network science**), nodes can represent anything that links up to other similar entities in a larger system. These include power generation stations and homes, servers and computers, animals in an ecosystem, towns, really anything of substance that we can define some kind of relation on, or from which some type of content can be said to be exchanged.
+
+### Edges
+Edges represent the presence of a *connection* or a **social tie** between two nodes. As we will see this can be a permanent relationship (e.g., "brother of") or a more fleeting interaction (e.g., a text message, being in the same place at the same time). We will define what social ties are, how many types exist, and what their properties are, in lecture. For now, we can say that in social network analysis, connections are relationships, or links between nodes, and edges in a graph are meant to represent these connections.
+
+In graph theory, the set of edges is best thought of as a collection of *pairs* of nodes, where the two members of the pair are the nodes involved in the social tie. So if node *A* is linked to node *B* via some social tie (friendship, study group, coworkers), then *AB* is a member of the edge set of the relevant graph. In set theory notation, this is usually written as $AB \in E$ which is read as "the edge *AB* is a member of the set $E$." Edges can also be referred to by juxtaposing the two nodes that are connected by the edge. Thus, the edge *AB* can also be written as $V_A V_B$.
+
+In the case of power generation stations and homes, the edges can represent power lines. Meanwhile, servers and computers are connected by internet cables and wi-fi access, while towns are connected by roads. The existence of edges signal the potential for content to flow, whether that's power, computer data, or people in cars. In the case of social networks, the content that flows between two nodes are such things as influence, advice, information, and support. But it may also be disease, bullying, or gossip. 
+
+## What is a Graph?
+@fig-simple(a) shows an example of a point and line network diagram of a graph with four **nodes** and two **edges**. Nodes *A*, *B*, *C* and *D* are circles representing actors **A**, **B**, **C** and **D**, whose real world social relationships we are interested in studying. The lines drawn between *A* and *B* and likewise between *B* and *C* represent the **edges**, indicating the presence of a social tie. Thus the edges, *AB* and *BC* appear in the network diagram. The lack of an edge between nodes *B* and *C* reflects the *absence* of a relationship between actors named **B** and **C** in the real world.
+
+So if we were to write out the graph shown in  @fig-simple(a) in terms of the sets that define the graph, we would say:
+
+$$
+  G = \{E, V\} 
+$${#eq-graph1}
+
+$$  
+E = \{AB, AC\} 
+$${#eq-graph2}
+
+$$
+V = \{A, B, C, D\}
+$${#eq-graph3}
+
+This says that the graph *G* shown in @fig-simple(a) is a set with two members, *E* and *V*, each of which is its own set. The edge set of *G* has two members, *AB* and *AC*. The node set of *G* has four members, *A*, *B*, *C*, and *D*. The number of members in a set is typically referred to as the **cardinality** of the set, written $|N|$ where $N$ is the name of the set.
+
+So, in the @fig-simple(a) case, the cardinality of the edge set is two $|E| = 2$, and the cardinality of the vertex set is four $|V| = 4$. These two basic graph properties are so important, that they can serve as a "signature" for the graph. Sometimes people will refer to a graph as $G(n, m)$ where $n$ is the cardinality of the vertex set (number of nodes) and $m$ is the cardinality of the edge set (number of links). Thus, the graph in @fig-simple(a), can be referred to as a $G(4, 2)$ graph. Note that @fig-simple(a) this is not the only possible $G(4, 2)$ graph. @fig-simple(b) and @fig-simple(c) show two other possible variations of a $G(4, 2)$ graph. 
+
+```{r}
+#| label: fig-simple
+#| fig-cap: "Four simple graphs with four nodes and two edges."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - "A simple graph."
+#|   - "A G(4, 2) graph"
+#|   - "Another G(4,2) graph."
+#|   - "An unlabeled G(4, 2) graph."
+#| layout-ncol: 2
+#| fig-width: 8
+#| fig-height: 8
+
+    gr <- create_empty(4)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:3)) %>% 
+        mutate(name = toupper(letters[1:4])) 
+    p <- ggraph(gr, layout = 'tree') 
+    l <- ggraph(gr, layout = 'tree') 
+    l <- as.matrix(l$data[, 1:2])
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p1 <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p1
+
+    gr <- create_empty(4)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = c(1, 4), to = c(2, 3))) %>% 
+        mutate(name = toupper(letters[1:4])) 
+    p <- ggraph(gr, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p2 <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p2
+    
+    gr <- create_empty(4)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = c(1, 2), to = c(4, 3))) %>% 
+        mutate(name = toupper(letters[1:4])) 
+    p <- ggraph(gr, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p3 <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p3
+    
+    gr <- create_empty(4)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:3))  
+    p <- ggraph(gr, layout = 'tree') 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p4 <- p + theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+    p4
+```
+
+
+## Graph Labeling
+In @fig-simple(a-c), the nodes have letters which function as "names" for each. Thus, we can refer to node $A$, or node $B$ and so forth. These names are arbitrary, we can as well use numbers $\{1, 2, 3, ...\}$ or a combination of letters and numbers $\{V_1, V_2, V_3, ....\}$. 
+
+When the nodes of a graph are distinguished from one another using names, the graph is said to be **labeled**. Sometimes, the names don't matter, so we don't specify them, as in @fig-simple(d). In this case, the graph is said to be **unlabeled**. 
+
+Graph metrics like the ones we will compute starting on @sec-graphmetrics, are the same regardless of whether the graph is labeled or not. Most of the example graphs we will be looking at are of the labeled kind.
+
+## Trivial and Non-Trivial Graphs
+The $G(1, 0)$ graph, essentially that formed by an isolated person sitting alone in a room with no connections to others (which can represent the case of the Japanese [*Hikikomori*](https://en.wikipedia.org/wiki/Hikikomori)) is sometimes called the **trivial graph**. Obviously, for purposes of social network analysis, the graphs that are be used are non-trivial. 
+
+The smallest non-trivial graph, and thus the smallest unit of social analysis, is the $G(2, 1)$ graph, the social unit formed by two people connected by a single link, sometimes referred to as a **connected dyad** (the $G(2, 0$ graph is a **disconnected dyad**, like two people stuck in a deserted island who decided to no longer speak to one another). Connected dyads are the "hydrogen atom" of society, the building block from which all other larger networks are built.  
+
+## Basic Graph Properties
+Graphs have some basic properties that we need to learn about:
+
+-   In a graph, if two nodes are joined together by an edge, they are said be **adjacent**. So in  @fig-simple(a), nodes *A* and *B* are adjacent, as are nodes *A* and *C*. Pairs of nodes that are not linked by an edge, like nodes *B* and *C*, are said be **nonadjacent**.
+-   The nodes at the two ends of each existing edge are said to be the **end vertices** of that edge. Each edge has two end vertices. As we have been doing, edges are named by typing together the names of their two end vertices. So the edge that has nodes *A* and *B* as its endpoints is called *AB*.
+-   If an edge "touches" a node (e.g., connects it to another node) we say that that edge is **incident** on that node. So in @fig-simple(a), the edge *AB* is incident on both nodes *A* and *B*. The relation of **incidence** will be important in a later lesson when we discuss network metrics computed at the node level like **degree centrality**.
+-   Finally, in a graph, nodes that are not connected to any other nodes are called **isolates**. This means that in @fig-simple(a), node *D* is an isolate because it has zero edges incident upon it.
+
+
+```{r}
+#| label: fig-complement
+#| fig-cap: "A graph and its complement."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - "A G(6, 5) graph."
+#|   - "The complement of a G(6, 5) graph."
+#| layout-ncol: 2
+#| fig-width: 12
+#| fig-height: 12
+
+    gr <- create_empty(6, directed = FALSE) %>%
+          bind_edges(data.frame(from = 1, to = c(2, 4, 6))) %>%
+          bind_edges(data.frame(from = 6, to = c(3, 5))) %>%
+          mutate(name = toupper(letters[1:6])) 
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p1 <- p + theme_graph()
+    p1
+
+    gr.c <- complementer(gr)
+    l <- as.matrix(p$data[, 1:2])
+    p <- ggraph(gr.c, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p2 <- p + theme_graph()
+    p2
+```
+
+## The Graph Complement {#sec-complement}
+
+Sometimes when examining a graph, we may be interested in the graph's evil twin. This is called the **graph complement**. 
+
+More technically, for any graph $G$, its complement $G'$ is a graph that meets the following two conditions:
+
+1. Every pair of nodes adjacent in $G$ are non-adjacent in $G'$.
+1. Every pair nodes that are non-adjacent in $G$ and are adjacent in $G'$. 
+
+That is, the disconnected nodes in graph $G$ are connected in its complement $G'$, and the connected nodes in $G$ are disconnected in $G'$. 
+
+For instance, @fig-complement shows a $G(6, 5)$ graph in (a), namely a graph with six nodes and five edges, and the complement of that graph in (b). As we can see, every pair of nodes that is connected in (a) is disconnected in (b) and vice versa. 
+
+What's the graph complement useful for? As we will see later on, we sometimes will be interested in counting the *non-relations* that exist in a network in addition to the relations. The complement (and its matrix representation) is useful for that.
+
+
+## Simple Graphs
+
+Graphs like that shown in @fig-simple are called **simple graphs**. There are two requirements for a graph to count as a simple graph:
+
+-   First, there can only be *one edge* joining two nodes at any time. That is, there cannot be multiple lines linking together the same pair of nodes. We will see in a later lesson that there are types of graphs that relax this restriction.
+-   The second requirement is that graph does not contain any edges that have the same node as its two end points. These kind of edges are called **loops**, and they are edges that connect a node to itself! Clearly this does not make sense for most sociological applications.
+
+With some exceptions, noted in subsequent lessons, simple graphs can represent most social networks.
+
+## References {.unnumbered}

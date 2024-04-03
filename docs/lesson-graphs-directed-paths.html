@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Social Networks - 10&nbsp; Directed Indirect Connections</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-graphs-connectivity.html" rel="next">
+<link href="./lesson-graphs-paths.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Social Networks</span>
+    </a>
+  </div>
+          <div class="quarto-toggle-container ms-auto">
+              <a href="" class="quarto-color-scheme-toggle nav-link" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+          </div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./social-ties1.jpeg" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Introduction to Networks</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-what-are-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What Are Networks?</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Graph Theory: The Basics</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-theory.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Introduction to Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-ties.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-neighborhoods.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-degree.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Nodes and their Degrees</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-degree-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-paths.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Indirect Connections</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-directed-paths.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-connectivity.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Matrices: The Basics</span>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-intro.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-adjacency.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">The Adjacency Matrix</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-row-column-sums.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Matrix Operations: Row and Column Sums</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-operations.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Basic Matrix Operations</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-multiplication.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Matrix Multiplication</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#mutual-reachability" id="toc-mutual-reachability" class="nav-link active" data-scroll-target="#mutual-reachability"><span class="toc-section-number">10.1</span>  Mutual Reachability</a></li>
+  <li><a href="#directed-cycles" id="toc-directed-cycles" class="nav-link" data-scroll-target="#directed-cycles"><span class="toc-section-number">10.2</span>  Directed Cycles</a></li>
+  <li><a href="#types-of-indirect-connections-in-directed-graphs" id="toc-types-of-indirect-connections-in-directed-graphs" class="nav-link" data-scroll-target="#types-of-indirect-connections-in-directed-graphs"><span class="toc-section-number">10.3</span>  Types of Indirect Connections in Directed Graphs</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-graphs-directed-paths.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-dirpaths" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>What if the relationship we are studying is not symmetric like a similarity or a co-location but it is asymmetric like an interaction or an exchange (e.g., communication or advice) and we need to represent the resulting network using a directed graph? How do indirect connections work in the directed case? Well, it’s just like in the undirected case we saw in <a href="lesson-graphs-paths.html"><span>Chapter&nbsp;9</span></a> but with a couple of differences.</p>
+<ul>
+<li><p>First, we have to <em>respect the direction of the path</em> (follow the arrows).</p></li>
+<li><p>Second, just like asymmetric ties in directed graphs, directed paths can be non-reciprocal.</p></li>
+</ul>
+<p>That is, there can be a directed path between two nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> where <span class="math inline">\(A\)</span> is the origin node and <span class="math inline">\(B\)</span> is the destination node, but that does <em>not</em> mean that there is a directed path going <span class="math inline">\(B\)</span> to <span class="math inline">\(A\)</span>, with <span class="math inline">\(B\)</span> as the origin and <span class="math inline">\(A\)</span> as the destination node.</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-dirpath1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-directed-paths_files/figure-html/fig-dirpath1-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10.1: A directed graph showing a directed path of length 3 between nodes A and B.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-dirpath1">Figure&nbsp;<span>10.1</span></a> shows an example of this situation. The highlighted red path goes from origin node <span class="math inline">\(A\)</span> to destination node <span class="math inline">\(B\)</span>. However, note that if we were to start with node <span class="math inline">\(B\)</span> and try to get a message or a package to node <span class="math inline">\(A\)</span>, there is no way we could do it by a path of any length in this graph, as long as we are forced to follow the direction of the arrows.</p>
+<p>That means that while node <span class="math inline">\(A\)</span> can <strong>reach</strong> node <span class="math inline">\(A\)</span> by a <em>directed shortest path</em> of <span class="math inline">\(l_{AB} = 3\)</span>, node <span class="math inline">\(B\)</span> cannot <strong>reach</strong> node <span class="math inline">\(A\)</span> (<span class="math inline">\(l_{BA} = \infty\)</span>). The <strong>reachability</strong> relation in directed graphs is therefore asymmetric.</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-dirpath2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-directed-paths_files/figure-html/fig-dirpath2-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10.2: A directed graph showing a directed path of length 4 between nodes A and B.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This also brings up another difference between undirected and directed graphs when it comes to reachability. In the undirected case, as we will see in a future lesson, the only way that a node cannot be reachable other nodes in the graph is for the graph to be <strong>disconnected</strong>. In the directed case, on the other hand, a graph can be fully connected while at the same time some nodes being incapable of reaching others.</p>
+<p>Note like before, there can be multiple directed paths of a given length connecting two nodes. In the case of <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>, there is at least one other path of length 3 with origin node <span class="math inline">\(A\)</span> and destination node <span class="math inline">\(B\)</span>. Can you see it?</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-dirpath3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-directed-paths_files/figure-html/fig-dirpath3-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10.3: A directed graph showing two nodes B and C, mutually reachable via a path of length 3.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Also like we saw in <span class="quarto-unresolved-ref">?sec-directed</span>, there can be directed paths of different lengths connecting pairs of nodes. For instance <a href="#fig-dirpath2">Figure&nbsp;<span>10.2</span></a> shows a highlighted red path of length <span class="math inline">\(l_{AB} = 4\)</span> with origin node <span class="math inline">\(A\)</span> and destination node <span class="math inline">\(B\)</span> and edges <span class="math inline">\((AD, DC, CE, EB)\)</span>. In the case of <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>, there is at least one other path of length 4 with origin node <span class="math inline">\(A\)</span> and destination node <span class="math inline">\(B\)</span>. Can you see it?</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-dirpath4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-directed-paths_files/figure-html/fig-dirpath4-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10.4: A directed graph showing two nodes B and C, mutually reachable via a paths of different lengths.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="mutual-reachability" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="mutual-reachability"><span class="header-section-number">10.1</span> Mutual Reachability</h2>
+<p>In directed graphs, some pairs of nodes can be <strong>mutually reachable</strong>. That is, there can be a directed path going from one node to the other, and vice versa. <a href="#fig-dirpath3">Figure&nbsp;<span>10.3</span></a> shows an example of this case involving nodes <span class="math inline">\(B\)</span> and <span class="math inline">\(C\)</span>. Starting with origin node <span class="math inline">\(B\)</span> we can get to <span class="math inline">\(C\)</span> via the highlighted purple path of length <span class="math inline">\(l_{BC} = 3\)</span> formed by the edges <span class="math inline">\((BE, ED, DC)\)</span>. In the same way, starting with node <span class="math inline">\(C\)</span>, we can get to node <span class="math inline">\(B\)</span> via the separate, highlighted red path of length <span class="math inline">\(l_{CB} = 3\)</span> formed by the edges <span class="math inline">\((CD, DE, EB)\)</span>.</p>
+<p>For mutual reachability between two nodes to happen in a directed graph, the two paths do not have to be the same length in fact, in the case of nodes <span class="math inline">\(B\)</span> and <span class="math inline">\(C\)</span> node <span class="math inline">\(C\)</span> can reach <span class="math inline">\(B\)</span> via path shorter than length 3. This is shown in <a href="#fig-dirpath4">Figure&nbsp;<span>10.4</span></a>), where we can see that <span class="math inline">\(C\)</span> can reach <span class="math inline">\(B\)</span> via the shortest path possible short of being directly connected <span class="math inline">\((l_{CB} = 2)\)</span>, formed by the edges <span class="math inline">\((CE, EB)\)</span> (highlighted in red). On the other hand, <span class="math inline">\(B\)</span> cannot reach <span class="math inline">\(C\)</span> via a path shorter than 3.</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-dircycle" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-directed-paths_files/figure-html/fig-dircycle-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10.5: A directed graph showing a directed cycle starting and ending with node C.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="directed-cycles" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="directed-cycles"><span class="header-section-number">10.2</span> Directed Cycles</h2>
+<p>Just like in the undirected case, a directed path that begins and ends with the same node is called a <strong>directed cycle</strong>. We refer to different cycles by the number of directed edges they include. For instance a 3-directed cycle is a directed cycle with three directed edges, a 4-directed cycle is a directed cycle with four edges and so forth. For instance, in <a href="#fig-dircycle">Figure&nbsp;<span>10.5</span></a>, the directed 3-cycle features node <span class="math inline">\(C\)</span> as both the origin and destination node involving the directed edges <span class="math inline">\((CE, ED, DC)\)</span> is highlighted in red.</p>
+<p>A directed graph that does not contain any cycles is a special kind of directed graph (composed of anti-symmetric ties) called a <strong>directed acyclic graph</strong>.</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-dirpath5" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-directed-paths_files/figure-html/fig-dirpath5-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10.6: A directed graph showing two weakly connected nodes A and B.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="types-of-indirect-connections-in-directed-graphs" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="types-of-indirect-connections-in-directed-graphs"><span class="header-section-number">10.3</span> Types of Indirect Connections in Directed Graphs</h2>
+<p>In a directed graph, when pairs of nodes are mutually reachable they are also said to be <strong>strongly connected</strong>. Otherwise if nodes in a directed graph are connected via at least one directed path that only goes in one direction (like nodes <em>A</em> and <em>B</em> in <a href="#fig-dirpath3">Figure&nbsp;<span>10.3</span></a>)), they are said to be <strong>unilaterally connected</strong>. Two nodes are said to be <strong>recursively connected</strong> when they are strongly connected <em>and</em> and at least one of the pairs of directed paths going in both directions use the same nodes (like paths <span class="math inline">\((BE, ED, DC)\)</span> and <span class="math inline">\((CD, DE, EB)\)</span> connecting nodes <em>B</em> and <em>C</em> in <a href="#fig-dirpath3">Figure&nbsp;<span>10.3</span></a>)).</p>
+<p>Finally, in a directed graph, two nodes are <strong>weakly connected</strong> if we can trace a path from one to the other, but only by ignoring the direction of the arrows! For instance, <a href="#fig-dirpath5">Figure&nbsp;<span>10.6</span></a> shows a directed graph in which nodes <em>A</em> and <em>B</em> have a weak connection via the <span class="math inline">\((BE, CE, AC)\)</span> path (highlighted in red), although this is not the only weak connection they share.</p>
+<p>Can you trace other weakly connected paths between nodes <em>A</em> and <em>B</em> in <a href="#fig-dirpath5">Figure&nbsp;<span>10.6</span></a>)?</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-graphs-paths.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Indirect Connections</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-graphs-connectivity.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

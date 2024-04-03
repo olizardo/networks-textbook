@@ -1,0 +1,155 @@
+# Matrix Operations: Row and Column Sums
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+## Row Sums
+
+Once we have constructed a matrix, we can do various numerical operations on the matrix to compute all kinds of exciting things. Perhaps the most basic operation that we can do on a matrix is compute its **row sums** and its **column sums**. 
+
+```{r}
+#| label: tbl-exmat
+#| tbl-cap: "A Matrix."
+#| tbl-cap-location: margin
+     set.seed(123)
+     m <- matrix(sample(1:9, 25, replace = TRUE), 
+                 ncol = 5, byrow = TRUE)
+     kbl(m, format = "html", align = "c") %>% 
+          kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+Consider the matrix shown in @tbl-exmat. This matrix is of dimensions $5 \times 5$ meaning it has five rows and five columns. Let's call the matrix $\mathbf{B}$. 
+
+The **row sums** of $\mathbf{B}$ is written:
+
+$$
+\sum_i b_{ij}
+$$ {#eq-rowsums}
+
+This is called **sigma notation**. In this formula *i* refers to the rows of the matrix and *j* refers to the columns. So the formula says, "to get the row sums, pick a row *i*, and sum the cells across the columns *j*." So for instance, if $i = 2$, then @eq-rowsums turns into:
+
+$$
+\sum_2 b_{2j} = 4 + 6 + 9 + 5 + 3 = 27
+$$ {#eq-rowex}
+
+Note that the numbers in the sum are just the number in row two of @tbl-exmat. The same goes for all the other rows. Note that if we do the row sums of all the rows in the matrix, the result is a **row sum vector**, containing the total sum for the numbers in each row. 
+
+The row sum vector for @tbl-exmat is:
+
+```{r}
+     rs <- rowSums(m)
+     kbl(t(rs), format = "html", align = "c") %>% 
+          kable_styling(bootstrap_options = 
+                             c("hover", "condensed", "responsive"))
+```
+
+The first number corresponds to the row sums of the first row, the second to the rows sums of the second row, and so forth. 
+
+## Column Sums
+
+The **column sums** of a matrix work pretty much the same way. In sigma notation the column sum for matrix $\mathbf{B}$ is written as:
+
+$$
+\sum_j b_{ij}
+$$ {#eq-colsums}
+
+Note that the main difference between @eq-colsums and @eq-rowsums is the subscript under the $\sum$ symbol, which is *j* instead of *i*. @eq-colsums says: "to get the column sums, pick a column, and then sum each number down the rows." 
+
+So for instance, if $j = 3$, then @eq-colsums turns into:
+
+$$
+\sum_3 b_{i3} = 2 + 9 + 9 + 3 + 7 = 30
+$$ {#eq-colex}
+
+The column sum vector for @tbl-exmat is:
+
+```{r}
+     cs <- colSums(m)
+     kbl(t(cs), format = "html", align = "c") %>% 
+          kable_styling(bootstrap_options = 
+                             c("hover", "condensed", "responsive"))
+```
+
+The first number corresponds to the column sums of the first column, the second to the column sums of the second column, and so forth. 
+
+## Row and Column Sums of the Symmetric Adjacency Matrix
+
+What happens if we calculate the row and column sum vectors of a symmetric adjacency matrix corresponding to an undirected graph? 
+
+Let us go back to the example corresponding to @fig-undirected, whose adjacency matrix is show in @tbl-symmadjmat. The row sum vector of the adjacency matrix is shown in @tbl-symmsums-1, and the column sum vector is shown in @tbl-symmsums-2.
+
+
+```{r}
+#| label: tbl-symmsums 
+#| tbl-cap: "Row and column sum vector of the symmetric adjacency matrix for an undirected graph."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - "Row sums of the symmetric adjacency matrix."
+#|   - "Column sums of the symmetric adjacency matrix."
+#| layout-nrow: 1
+
+  gr <- create_empty(9, directed = FALSE)
+  gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+    a <- as.matrix(as_adjacency_matrix(gr))
+     rs <- rowSums(a)
+     kbl(t(rs), format = "html", align = "c") %>% 
+          kable_styling(bootstrap_options = 
+                             c("hover", "condensed", "responsive"))
+     
+     cs <- colSums(a)
+     kbl(t(cs), format = "html", align = "c") %>% 
+          kable_styling(bootstrap_options = 
+                             c("hover", "condensed", "responsive"))
+```
+
+Note two things. For the symmetric adjacency matrix, the row and column sums vectors are identical. So we get the same answer whether we sum the numbers for each row across columns, or for each column down the rows. 
+
+But what are these numbers? If you stare at them long enough, you will see that they are familiar, for they are nothing but the undirected graph's **degree set**. So, for an undirected graph, the row *or* column sums of the symmetric adjacency matrix gives us the **degrees** of each node!
+
+## Row and Column Sums of the Asymmetric Adjacency Matrix
+
+Now what happens if we compute the row and column sums for an asymmetric adjacency matrix? We already saw one such matrix in @tbl-asymmadjmat corresponding to @fig-directed. The row and column sums of that adjcency matrix is shown in @tbl-asymmsums-1 and @tbl-asymmsums-2. 
+
+```{r}
+#| label: tbl-asymmsums 
+#| tbl-cap: "Row and column sum vector of the asymmetric adjacency matrix for a directed graph."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - "Row sums of the asymmetric adjacency matrix."
+#|   - "Column sums of the asymmetric adjacency matrix."
+#| layout-nrow: 1
+
+    fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+    to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    a <- as.matrix(as_adjacency_matrix(gr))
+     rs <- rowSums(a)
+     kbl(t(rs), format = "html", align = "c") %>% 
+          kable_styling(bootstrap_options = 
+                             c("hover", "condensed", "responsive"))
+     
+     cs <- colSums(a)
+     kbl(t(cs), format = "html", align = "c") %>% 
+          kable_styling(bootstrap_options = 
+                             c("hover", "condensed", "responsive"))
+```
+
+Note that in contrast to the symmetric case, the row and column sum vectors of the asymmetric adjacency matrix corresponding to a  directed graph are *different*. What's the difference?
+
+Well if you stare at them long enough, it might dawn on you that the row sum vector corresponds to the directed graph's **outdegree set**, and the column sum vector corresponds to the directed graph's **indegree set**. 
+
+So in the directed case, each of the sum operations that we can perform on the asymmetric adjacency matrix captures a separate graph property, in this case the difference between each node's **indegree** (given by the **row sums**) and each node's **outdegree** (given by the **column sums**). Neat!

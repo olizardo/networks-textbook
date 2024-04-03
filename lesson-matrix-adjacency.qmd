@@ -1,0 +1,80 @@
+# The Adjacency Matrix {#sec-adjmat}
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+As we saw in the @sec-introtomat, a matrix is a two-dimensional array of numbers. A matrix is two-dimensional because it arranges numbers according to the intersection of a **row dimension** and a **column dimension**. 
+
+Matrices, therefore are perfect for storing network information, because we can put the nodes in the row and column dimension and then record characteristics of each **dyad** in the network (like whether they are adjacent in the corresponding graph) in the corresponding **cell** of the matrix. 
+
+Recall that each *ij* cell of a matrix corresponds to the intersection of a particular row object *i* and a particular column object *j*, so they are perfect for recording dyadic information, like adjacency. A matrix that stores adjacency relations between pairs of nodes in a graph is called an **adjacency matrix**.
+
+As we will see later, we can of course record all kinds relationships between dyads in matrix form beyond adjacency. These include the length of the shortest paths linking two nodes, the number of shortest paths, the number of common neighbors, whether two nodes are reachable from one another, and so forth. 
+
+Regardless, the adjacency matrix is the most important, most commonly used way of representing graphs in network analysis. As we saw in @sec-graphtheory, two actors have a relationship, they share an edge (are **adjacent**) in the graph, whereas if they do not share a relationship, they do not share an edge in the graph (are **non-adjacent**). 
+
+The adjacency matrix asks if two cases share a direct connection or not, and thus as it names implies it records the adjacency relations between every pair of nodes in the network.
+
+## Symmetric Adjadcency Matrices for Undirected Graphs
+
+The first step in building the adjacency matrix that represents the graph is to list all the nodes $\{A, B, C, D, E, F, G, H, I\}$ as both a row and a column entry for each node. Next, one goes sequentially across the rows and columns, asking the question "does actor i have the relationship I am examining with actor j?" If the question asked is about the absence or presence of a relationship, 0's and 1's are used. If A has a relationship with B, the value 1 is marked. Otherwise, 0.
+
+```{r}
+#| label: tbl-symmadjmat
+#| tbl-cap: "Symmetric adjacency matrix corresponding to an undirected graph."
+#| tbl-cap-location: margin
+
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+        bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+        bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+        bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+        bind_edges(data.frame(from = 8, to = c(9))) %>%
+        mutate(name = toupper(letters[1:9]))
+    A <- as.matrix(as_adjacency_matrix(gr))
+    diag(A) <- "--"
+    kbl(A, format = "pipe", align = "c") 
+```
+
+As we can see in @tbl-symmadjmat, *A* indeed has a relationship with *B*, so the corresponding cell for the row corresponding to *A* and the column corresponding to *B* is marked 1. In fact, *A* has a relationship with *B*, *C*, *D*, and E and has 1's in each of the cells corresponding to these actors, but not with *F*, *G*, *H*, or *I* and so 0's are in these cells.
+
+But what do we do about the cells where we are theoretically supposed to ask if A has a relationship with A? As we have seen, for most sociological applications, it makes sense to just put a dash there, thus **blocking the diagonals**. It's not sociologically meaningful for A to have a relationship with itself. 
+
+For example, asking "Is A friends with A?" does not make much sense, but there are rare cases when it does, such as when A is a group of people and not an individual, and the relationship we are looking at might occur both within and between groups. As we saw in @sec-graphtheory, these are called **reflexive-ties** or **loops**. But if the network is represented as a **simple graph** it should contain no loops.
+
+After completing the first row, we ask does actor B have a relationship with actor A? Well yes, it does. In fact, we can know without even looking because if you recall, this network is defined ahead of time as reciprocal, meaning if A is friends with B, B is friends with A. We can remember this because the graph we are using is undirected. This means that the resulting matrix is going to be symmetric. **Symmetric matrices** are those that, when flipped along the diagonal (as shown in Figure @tbl-symmadjmat), the two sides of the matrix will be mirror images of each other.
+
+## Asymmetric Adjacency Matrices for Directed Graphs
+Conversely, a directed graph describing a network of asymmetric or anti-symmetric ties will create an **asymmetric matrix**. Saying a matrix is asymmetric means that the values contained in the **upper and lower triangles** of the matrix do not mirror each other. In other words, In an asymmetric matrix the cell values are not necessarily the same (the relationship is not necessarily equivalent) between every pair of cases.
+
+@fig-directed shows an example directed graph. The corresponding **asymmetric adjacency matrix** is shown in @tbl-asymmadjmat. Note that while some relationships (such as between node A and B) are reciprocated, not all connections in the network are reciprocated. Node G sends ties to D and F, but does not receive any ties back. 
+
+In the resulting matrix, A to B and B to A each have a 1 listed for the value, while G to D and G to F also have a value of 1. However, the cells corresponding to F to G and D to G each have a value of 0 because the ties are unreciprocated. These unreciprocated ties make the resulting matrix asymmetric. The two halves across the diagonal are no longer mirror images, but contain different entries.
+
+```{r}
+#| label: tbl-asymmadjmat
+#| tbl-cap: "Asymmetric adjacency matrix corresponding to an directed graph."
+#| tbl-cap-location: margin
+
+    fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+    to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    A <- as.matrix(as_adjacency_matrix(gr))
+    diag(A) <- "--"
+    kbl(A, format = "pipe", align = "c") %>% 
+      kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+Why are the ties are not reciprocated? You might remember from our lessons on types of ties and types of graphs, but it is because of the type of data that the graph and matrix are representing. For example, the matrix in @tbl-asymmadjmat and graph shown in @fig-directed could represent a intramural basketball club where they ask everyone in the club who they like to have as a teammate. 
+Not everyone could agree that they like to have one another as teammates, and the matrix and graph in @fig-directed would represent that. 
+
+In this case, a node like G and E look really lonely since they have nobody who wants to play with them. However, if the tie were to be about advice, such that actually G gives advice to D and F, but does not take their advice back, G (and E) now look like respected figures in the network.

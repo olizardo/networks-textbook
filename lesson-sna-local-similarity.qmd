@@ -1,0 +1,241 @@
+# Local Node Similarities {#sec-locsim}
+
+```{r setup, include=FALSE}
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+    library(kableExtra)
+    library(lsa)
+```
+
+As we noted in @sec-nodenei, it is possible for the **neighborhood** of two nodes in a graph to *overlap*. Recall that for each node, we define its neighborhood as the set of other nodes that they are adjacent to. That means the neighborhood between two nodes can have members in common, which is given by the **intersection** between these two sets. *The more members they have in common the more structurally similar two nodes are*. 
+
+Similarities based on the neighborhood overlap between two nodes are called **local node similarities** because they only use information on the immediate **ego network** of the two nodes, based on only on direct (one-step) connections. As we will in @glob-sim, we can also define similarities based on indirect connections between nodes. 
+
+## Structural Equivalence and Local Similarity
+
+If two nodes *A* and *B* are structurally equivalent then their neighborhood overlap $O(A, B)$ is equivalent to their total set of neighbors, meaning that the cardinality of their neighborhood sets is the same as the cardinality of the intersection of those sets. In mathese, for structurally equivalent nodes:
+
+$$
+N(A) = N(B)
+$$
+$$
+O(A,B) = |N(A) \cap N(B)| = |N(A)| = |N(B)|
+$$ {#eq-over}
+
+@eq-over says that when two nodes are structurally equivalent, their overlap is the same as the cardinality as the intersection between their neighborhoods, which happens to be the same as the cardinality of their original neighborhoods!
+
+ 
+For instance, imagine you have a friend and that friend knows *all* your friends and you know *all* their friends. In which case we would say that the overlap between your node neighborhoods is pretty high; in fact the two neighborhoods overlap *completely*, which makes you structurally equivalent! 
+
+But even if your friend knows 90% of the people in your network (and you know 90% of the people in their network) that would make you very *structurally similar* to one another. 
+
+Now imagine you just met a new person online who lives in a far away country, and as far as you know, they know *none* of your friends and you know *none* of their friends. In which case, we would say that the overlap if the two neighborhoods is nil or as close to zero as it can get. You occupy completely different positions in the network. 
+
+
+```{r}
+#| label: fig-stsim
+#| fig-cap: "An undirected graph."
+#| fig-cap-location: margin
+#| fig-width: 10
+#| fig-height: 10
+
+    set.seed(378)
+    gr <- play_gnp(12, .45, directed = FALSE) %>% 
+      mutate(name = LETTERS[1:12])
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+
+## The Neighborhood Overlap Matrix
+
+To measure structural similarity between nodes based on their neighborhood overlap, we need to construct a new matrix, called the **neighborhood overlap matrix** that stores the neighborhood overlap information for each pair of nodes.
+
+Consider the graph shown in @fig-stsim. Its corresponding neighborhood overlap matrix is show in @tbl-neiover. In the matrix, each cell gives us the overlap between the row node and the column node. Because $O(i, j) = O(j, i)$ for all nodes *i* and *j* in a graph, the neighborhood overlap matrix is **symmetric** (has the same information in the upper and lower triangles).
+
+@tbl-neiover shows that some nodes like *A* and *I* have a very strong overlaps in their neighborhoods: $O(A, I) = 4$, for other nodes, like $G$ and $F$, the overlap is much lower $O(G, F) = 1$. For nodes that don't have any neighbors in common, like *B* and *H* the overlap is the lowest it can be, namely, zero $O(B, H) = 0$. 
+
+```{r}
+#| label: tbl-neiover
+#| tbl-cap: "Neighborhood overlap matrix of an undirected graph."
+#| tbl-cap-location: margin
+
+n <- length(V(gr))
+o <- matrix(0, n, n)
+for (i in 1:n) {
+     for (j in 1:n) {
+          if (i != j) {
+               ni <- neighbors(gr, i)
+               nj <- neighbors (gr, j)
+               o[i, j] <- length(intersection(ni, nj))
+          }
+     }
+}
+rownames(o) <- LETTERS[1:12]
+colnames(o) <- LETTERS[1:12]
+kbl(o, format = "html", align = "c") %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+
+### Jaccard Similarity
+Once we have recorded the neighborhood overlap information we can construct a measure of structural similarity between two nodes called [**Jaccard's Similarity Coefficient**](https://en.wikipedia.org/wiki/Jaccard_index) ($J_{ij}$) [@jaccard01]. Actually we will need one more bit of information before computing this measure (and the other ones that follow), which is the graph's degree set. This is shown in @tbl-degsetover.
+
+```{r}
+#| label: tbl-degsetover
+#| tbl-cap: "Degree set of an undirected graph."
+#| tbl-cap-location: margin
+
+d <- t(degree(gr))
+kbl(d, format = "html", align = "c") %>% 
+     kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+The Jaccard similarity between two nodes *i* and *j* goes like this. Let's say $n_{ij}$ is the number of friends that nodes *i* and *j* have in common, and the total number of *i*'s friends if $k_i$ (*i*'s degree) and the total number of *j*'s friends if $k_j$ (*j*'s degree). Then the structural similarity of *i* and *j* is given by: 
+
+$$
+  J_{ij} = \frac{n_{ij}}{k_i + k_j - n_{ij}}
+$$   {#eq-jaccard}
+
+@eq-jaccard says that the structural similarity of two nodes is equivalent to the number of friends that the two persons know in common, divided by the sum of their degrees minus the number of people they know in common. Jaccard's coefficient ranges from zer (when $n_{ij}=0$ and the two nodes have no neighbors in common) to 1.0 (when $n_{ij} = k_i$ and $n_{ij} = k_j$ and the two nodes are structurally equivalent). 
+
+For instance, @tbl-neiover tells us that nodes *D* and *H* have three neighbors in common: $n_{DH} = 3$, and @tbl-degsetover tells us that the degree of *D* is $k_D = 5$ and that the degree of *H* is also $k_H = 5$. This means that the Jaccard similarity $J_{DH}$ is:
+
+$$
+J_{DH} = \frac{3}{5 + 5 - 3} = \frac{3}{10-3}=\frac{3}{7} = 0.43
+$$
+
+
+```{r}
+#| label: tbl-jaccard
+#| tbl-cap: Structural similarity matrix based on Jaccard's index.
+#| tbl-cap-location: margin
+
+    J <- round(similarity(gr, method = "jaccard"), 2)
+    rownames(J) <- V(gr)$name
+    colnames(J) <- V(gr)$name
+    diag(J) <- "--"
+    J[lower.tri(J)] <- "--"
+    kbl(J, format = "html", align = "c") %>% 
+         column_spec(1, bold = TRUE) %>% 
+         kable_styling(bootstrap_options = 
+                            c("hover", "condensed", "responsive"))
+```
+
+The structural similarities for all nodes in @fig-stsim based on Jaccard's index are shown in @tbl-jaccard.
+
+### Dice Similarity
+A second measure of structural similarity between nodes based on the neighborhood overlap is the [**Dice Similarity Index**](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). It goes like this [@dice45]:
+
+$$
+  D_{ij} = \frac{2n_{ij}}{k_i + k_j}
+$$   {#eq-dice}
+
+Which says that the structural similarity between two nodes is equivalent to the twice the number of people the know in common, divided by the sum of their degrees. 
+
+```{r}
+#| label: tbl-dice
+#| tbl-cap: Structural similarity matrix based on Dice's index.
+#| tbl-cap-location: margin
+
+    D <- round(similarity(gr, method = "dice"), 2)
+    rownames(D) <- V(gr)$name
+    colnames(D) <- V(gr)$name
+    diag(D) <- "--"
+    D[lower.tri(D)] <- "--"
+    kbl(D, format = "html", align = "c") %>% 
+         column_spec(1, bold = TRUE) %>% 
+         kable_styling(bootstrap_options = 
+                            c("hover", "condensed", "responsive"))
+```
+
+For nodes *D* and *H* in @fig-stsim, this would be equal to:
+
+$$
+D_{DH} = \frac{2 \times 3}{5 + 5} = \frac{6}{10} = 0.60
+$$
+
+The structural similarities for all nodes in @fig-stsim based on Dice's index are shown in @tbl-dice.
+
+
+### Cosine Similarity
+A third and final measure of structural similarity between two nodes based on the neighborhood overlap is the [**cosine similarity**](https://en.wikipedia.org/wiki/Cosine_similarity) between their respective neighborhoods ($C_{ij}$). This is given by: 
+
+$$
+  C_{ij} = \frac{n_{ij}}{\sqrt{k_ik_j}}
+$$   {#eq-cosine}
+
+Which says that the structural similarity between two nodes is equivalent to the number of people they know in common divided by the square root of the product of their degrees (which is also referred to as the **geometric mean** of their degrees). 
+
+  
+```{r tabc}
+#| label: tbl-cosine
+#| tbl-cap: Structural similarity matrix based on the cosine distance.
+#| tbl-cap-location: margin
+
+    a <- as.matrix(as_adjacency_matrix(gr))
+    n <- length(V(gr))
+    d <-degree(gr)
+    C <- matrix(0, n, n)
+    cosij <- function(a, b, c) {
+         cos <- a / sqrt(b*c)
+    }
+    for (i in 1:n) {
+         for (j in 1:n) {
+              C[i,j] <- o[i,j] / sqrt(d[i] * d[j])
+         }
+         
+    }
+    rownames(C) <- V(gr)$name
+    colnames(C) <- V(gr)$name
+    C <- round(C, 2)
+    diag(C) <- "--"
+    C[lower.tri(C)] <- "--"
+    kbl(C, format = "html", align = "c") %>% 
+         column_spec(1, bold = TRUE) %>% 
+         kable_styling(bootstrap_options = 
+                            c("hover", "condensed", "responsive"))
+```
+
+For nodes *D* and *H* in @fig-stsim, this would be equal to:
+
+$$
+D_{DH} = \frac{3}{\sqrt{5 \times 5}} = \frac{3}{\sqrt{25}} = \frac{3}{5} = 0.60
+$$
+
+
+The structural similarities for all nodes in @fig-stsim based on the cosine distance are shown in @tbl-cosine.
+
+A lot of the times, these three measures of structural similarity will tend to agree closely.
+
+### Neighborhood Overlap in Directed Graphs
+Similarity works in similar (pun intended) ways when studying asymmetric ties in directed graph. The main difference, as usual, is that in a directed graph pairs of nodes can structurally similar in two different ways. 
+
+Fist, pairs of nodes can be similar with respect to their out-neighborhoods, in which case we say that nodes are structural similar if they point to the same set of neighbors. This is called the **out-similarity**. 
+
+Second, pairs of nodes can be similar with respect to their in-neighborhoods, in which case we say that nodes are structural similar if they *receive* ties or nominations from the same set of neighbors. This is called the **in-similarity**.
+
+Special cases of the out and in-similarities between nodes show up in particular types of networks. For instance, consider an information network composed of scientific papers. Here a directed tie emerges when paper *A* *cites* or refers to paper *B*. This is called a **citation network**. 
+
+In a citation network out-similar papers are papers that *cite* the same other papers. Out-similar papers are said to exhibit **bibliographic coupling** (essentially the overlap or set intersection between their reference lists). A weighted network of similarities between papers, where the weight of the edge is the number of other papers that that they both cite in common is called a **bibliographic coupling network**. A bibliographic coupling network is essentially a network of out-similarities between papers in a scientific information network. 
+
+In a citation network, in-similar papers are papers that *get cited* by the same set of others. In this case, we say that the two papers are **co-cited** a third paper. A weighted network of similarities between papers, where the weight of the edge is the number of other papers that cite both of them is called **co-citation network**. A co-citation network is essentially a network of in-similarities between papers in a scientific information network.   
+
+The two measures of out and in-similarities can be defined in the same way as before. If $n^{out}_{ij}$ is the number of common out-neighbors of nodes *i* and *j* and $n^{in}_{ij}$ is the number of their common out-neighbors, $k_{out}$ is the total number of out-neighbors of a particular node, and $k_{in}$ is the total number of in-neighbors, then the structural out and in-similarities between pairs of nodes *i* and *j* are given by (using the cosine distance measure) by:
+
+$$
+  C_{ij}^{out} = \frac{n_{ij}^{out}}{\sqrt{k_i^{out}k_j^{out}}}
+$$   {#eq-cosout}
+
+
+
+$$
+  C_{ij}^{in} = \frac{n_{ij}^{in}}{\sqrt{k_i^{in}k_j^{in}}}
+$$   {#eq-cosin}
+
+## References {.unnumbered}
