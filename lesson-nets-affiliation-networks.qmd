@@ -277,7 +277,7 @@ Using the rules for matrix multiplication discussed @sec-multrules, the person o
     kbl(c, format = "pipe", align = "c")
 ```
 
-The person overlap matrix transforms the initial rectangular affiliation matrix, which has people in the rows and groups in the columns, to a **square matrix**, which like the usual relationship matrices we have been dealing with, feature people in both the rows and the columns. Each entry in the person overlap matrix $o^P_{ij}$ now gives us the number of groups in which person *i* and *j* mutually belong to [@breiger74]. So we learn that Gabriela and Brandon have three memberships in common (I bet they seen another a lot!) but that Rahul and Parker have no memberships in common (so they are less likely to encounter one another).
+The person overlap matrix transforms the initial rectangular affiliation matrix, which has people in the rows and groups in the columns, to a **square matrix**, which like the usual relationship matrices we have been dealing with, feature people in both the rows and the columns. Each entry in the person overlap matrix $o^P_{ij}$ now gives us the number of groups in which person *i* and *j* mutually belong to [@breiger74]. So we learn that Gabriela and Brandon have three memberships in common (I bet they see one another a lot!) but that Rahul and Parker have no memberships in common (so they are less likely to encounter one another).
 
 Note also that, in the person overlap matrix, (in contrast to the usual adjacency matrix), there are valid entries along the diagonal cells ($o^P_{ii}$). These cells now record the *total number of memberships* that the node corresponding to that row (or column) has. Which we ascertained by computing the node centralities in the original affiliation matrix using @eq-aff1). You can see that the vector of degree centralities shown in @tbl-affdegcent1) is the same as the vector formed by the diagonal entries in @tbl-comem).
 
@@ -343,8 +343,8 @@ Note that both the comembership and group overlap matrices, being square matrix 
 #| label: fig-onemode1 
 #| fig-cap: "One mode (persons) projection of the original bipartite graph."
 #| fig-cap-location: margin 
-#| fig-height: 9
-#| fig-width: 9
+#| fig-height: 12
+#| fig-width: 12
 
     clubs <- c("Super Smash Brs.", "Cheese", "Nerdfighters", "Magic", "Fashion")
     fr <- c(rep("Gabriela", 4), rep("Parker", 2), rep("Brandon", 3), rep("Marie", 2), rep("Rahul", 2), rep("Minjoo", 1))
@@ -357,11 +357,11 @@ Note that both the comembership and group overlap matrices, being square matrix 
     c <- gr %*% t(gr)
     gr <- graph_from_adjacency_matrix(c, weighted = TRUE)
     gr <- as_tbl_graph(gr)
-    p <- ggraph(gr, layout = 'auto') 
+    p <- ggraph(gr, layout = 'circle') 
     p <- p + geom_edge_link(aes(width = weight), color = "steelblue") 
     p <- p + geom_node_label(aes(label = name), size = 8, color = "red")
     p <- p + theme_graph() + theme(legend.position = "none")
-    p <- p + ylim(-0.75,1) + xlim(-1.75, 1.75)
+    p <- p + xlim(-1, 1.2)
     p
 ```
 
@@ -371,8 +371,8 @@ So using formulas @eq-poverlap) and @eq-goverlap), it is possible to go from a t
 #| label: fig-onemode2
 #| fig-cap: "One mode (groups) projection of the original bipartite graph."
 #| fig-cap-location: margin 
-#| fig-height: 9
-#| fig-width: 9
+#| fig-height: 12
+#| fig-width: 12
 
     clubs <- c("Super Smash Brs.", "Cheese", "Nerdfighters", "Magic", "Fashion")
     fr <- c(rep("Gabriela", 4), rep("Parker", 2), rep("Brandon", 3), rep("Marie", 2), rep("Rahul", 2), rep("Minjoo", 1))
@@ -385,11 +385,11 @@ So using formulas @eq-poverlap) and @eq-goverlap), it is possible to go from a t
     c <- t(gr) %*% gr
     gr <- graph_from_adjacency_matrix(c, weighted = TRUE)
     gr <- as_tbl_graph(gr)
-    p <- ggraph(gr, layout = 'auto') 
+    p <- ggraph(gr, layout = 'circle') 
     p <- p + geom_edge_link(aes(width = weight), color = "steelblue") 
     p <- p + geom_node_label(aes(label = name), size = 8, color = "blue")
     p <- p + theme_graph() + theme(legend.position = "none")
-    p <- p + ylim(-0.75,1) + xlim(-1.75, 1.75)
+    p <- p + xlim(-1.2, 1.2)
     p
 ```
 
