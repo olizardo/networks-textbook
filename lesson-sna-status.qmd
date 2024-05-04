@@ -73,20 +73,18 @@ This brings up another problem with the indegree cenntrality, which is that it i
 So indegree centrality won't do as a measure of status in social networks, if we aim to capture the full idea behind the concept. 
 
 ## Using Exogeneous Status Information
-Let us deal with the problem of treating every incoming tie the same first. One possibility is that we check some measure of status that comes from *outside* the network (the fancy word for this is *exogenous*). This could be for instance, the position of each node in the organizational chart, with ten indicating a top position and zero indicating an entry-level position. We could record this information using a $1 \times 12$ **column vector** where the exogenous status of each node *i* is given by each entry $\mathbf{b}_i$. Such an exogenous status score vector is shown in @tbl-status. In the table, larger numbers indicate higher exogeneous status. 
+Let us deal with the problem of treating every incoming tie the same first. One possibility is that we check some measure of status that comes from *outside* the network (the fancy word for this is *exogenous*). This could be for instance, the position of each node in the organizational chart, with ten indicating a top position and zero indicating an entry-level position. We could record this information using a $1 \times 12$ **row vector** where the exogenous status of each node *i* is given by each entry $\mathbf{b}_i$. Such an exogenous status score vector is shown in @tbl-status. In the table, larger numbers indicate higher exogenous status. 
 
 ```{r}
   I <- round(diag(1, 12, 12), 1)
   A <- as.matrix(as_adjacency_matrix(gr))
+  e <- rep(1, nrow(A))
   rownames(I) <- rownames(A)
   colnames(I) <- colnames(A)
   alpha <- (1 / as.numeric(eigen(A)$values[1])) - 0.04
-  aA <- alpha * A
-  IaA <- I - aA
-  iIaA <- solve(IaA)
-  K <- aA %*% iIaA
-  #diag(K) <- 0
-  s.katz <- colSums(K)
+  K <- solve(I - alpha * A)
+  diag(K) <- 0
+  s.katz <- e %*% K
 ```
 
 ```{r}
@@ -106,14 +104,13 @@ Let us deal with the problem of treating every incoming tie the same first. One 
 set.seed(560)
   d <- degree(gr, mode = "in")
   b <- matrix(sample(1:10, 12, replace = TRUE), ncol= 12)
-  s.ex <- c(t(A) %*% t(b))
-  d.vec <- matrix(d, ncol = 12)
-  s.en <- c(t(A) %*% t(d.vec))
-  s.hubbell <- t(iIaA) %*% t(b)
-  names(d) <- toupper(letters[1:12])
-  colnames(b) <- toupper(letters[1:12])
-  names(s.ex) <- toupper(letters[1:12])
-  names(s.en) <- toupper(letters[1:12])
+  n <- LETTERS[1:12]
+  s.ex <- b %*% A
+  s.en <- d %*% A
+  s.hub <- b %*% solve(I - alpha * A)
+  colnames(b) <- n
+  names(s.ex) <- n
+  names(s.en) <- n
 
   kbl(t(d), format = "html", align = "c") %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
@@ -121,33 +118,33 @@ set.seed(560)
   kbl(b, format = "html", align = "c") %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 
-    kbl(t(s.ex), format = "html", align = "c") %>% 
+    kbl(s.ex, format = "html", align = "c") %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
   
-    kbl(t(s.en), format = "html", align = "c") %>% 
+    kbl(s.en, format = "html", align = "c") %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
     
-    kbl(t(round(s.katz, 1)), format = "html", align = "c") %>% 
+    kbl(round(s.katz, 1), format = "html", align = "c") %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
-    kbl(t(round(s.hubbell, 1)), format = "html", align = "c") %>% 
+    kbl(round(s.hub, 1), format = "html", align = "c") %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-Now the status score for each person $\mathbf{s}$ can be determined by taking each of their incoming nominations and weighting them by the exogenous status score of each of the other people, so that nominations from higher status nodes (like node $K$ in @tbl-status-2) count for more than those coming from lower status nodes (like node $A$ in @tbl-status-2). To calculate the status of each node we add up the status of each of the nodes that point to it. 
+Now the status score for each person $\mathbf{s}$ can be determined by taking each of their *incoming*---recorded in the columns of the adjacency matrix in @tbl-adjmat---nominations and weighting them by the exogenous status score of each of the other people, so that nominations from higher status nodes (like node $K$ in @tbl-status-2) count for more than those coming from lower status nodes (like node $A$ in @tbl-status-2). To calculate the status of each node we add up the status of each of the nodes that point to it. 
 
-How do we do this? Recall from @sec-matops, that it is always possible to multiply a square matrix times a column vector of the same length as the matrix's row and column dimensions and that the result is always another column vector of the same length as the original. 
+How do we do this? Recall from @sec-matops, that it is always possible to multiply a row vector times a square matrix as long as the row vector is of the same length as the matrix's row and column dimensions. The result is always another row vector of the same length as the original. 
 
-Accordingly, we can get each person's weighted status score by taking network's adjacency matrix $\mathbf{A}$ and multiplying it by the (in this case, $12 \times 1$) column vector of exogenous status scores $\mathbf{b}$. However, because we want to add up the status scores of the nodes that *point* to a given node, what we want is the product of the *transpose* of the adjacency matrix corresponding to the directed graph (@tbl-dirgraph) times the vector of status scores. 
-
-Because the dimensions of the transpose of a square adjacency matrix is the same as the original adjacency matrix (in this case $12 \times 12$) and the $\mathbf{b}$ column vector's dimensions are $12 \times 1$ the multiplication is allowed (the terms are conformable) and the result will be a $12 \times 1$ column vector of status scores that we will call $\mathbf{s}^{ex}$:
+Accordingly, we can get each person's weighted status score by taking the exogeneous status scores vector $\mathbf{b}$ and multiplying by the network's adjacency matrix $\mathbf{A}$. In this case, $\mathbf{b}$ is $1 \times 12$ and $\mathbf{A}$ $\mathbf{b}$ is $12 \times 12$. Because the number of rows of the matrix are the same as the lengtth (number of columns) of the vector, the multiplication is allowed (the terms are conformable) and the result will be a $1 \times 12$ row vector of status scores that we will call $\mathbf{s}^{ex}$:
 
 $$
-  \mathbf{s}^{ex} = \mathbf{A}^T \mathbf{b}
+  \mathbf{s}^{ex} = \mathbf{b}\mathbf{A}
 $$ {#eq-exog}
 
 When we do that, we end up with the status scores shown in @tbl-status-3.
 
 As we can see, the status order is a bit different once we take into account the exogenous status of the other people who nominate each node. Yes, node $F$ is still the highest ranked node, and node $C$ is the lowest ranked. However, node $I$ is no longer the second highest status node, that honor now goes to node $E$. The reason is that while $I$ has a larger indegree than $E$, node $I$'s in-neighbors, as shown in Figure @fig-dirgraph and @tbl-adjmat, $N_{in}(I) = \{A, C, G, K\}$ are relatively low status (except for $K$). $E$'s in-neighbors, by way of contrast, $N_{in}(E) = \{B, F, I\}$ are all high to mid-status.
+
+Note that for each node, we can reconstruct their status score simply by adding up the status scores of their in-neighbors in @tbl-adjmat. So for instance, node $A$ gets at status score of 17. Where does this number come from? Well if we go to @tbl-adjmat, we can see that $A$'s in-neighbors are $\{H, J, K\}$ (looking down the column corresponding to $A$), and we can see that the corresponding status scores of each of these nodes in @tbl-status-2 are 4, 4, and 9 (respectively), which means that $4 + 4 + 9 = 17$, the status score for node $A$! 
 
 ## Using Endogeneous Network Information 
 It turns out, that in many cases, we don't have exogenous status information on each node in the network to rely on. In that case, we must rely on **endogenous** network information to determine the status of each of the other nodes. 
@@ -155,10 +152,10 @@ It turns out, that in many cases, we don't have exogenous status information on 
 One approach is just to use original indegree centrality scores shown in @tbl-status-1 as the status of each other the nodes. We can then say that a node is high status if it is pointed to by other nodes who are also pointed to by many other nodes. Conversely, a node is low status if it is pointed to by other nodes that are not pointed to by many other nodes. 
 
 $$
-  s^{en} = \mathbf{A}^TC^{IN}
+  s^{en} = C^{IN}\mathbf{A}
 $$ {#eq-endog1}
 
-Where $C^{IN}$ is the $12 \times 1$ column vector of indegree centralities shown in @tbl-status-1 and $\mathbf{A}^T$ is the transpose of the network's adjacency matrix shown in @tbl-adjmat. The results are shown in @tbl-status-4. As we can see, considering only endogenous network information gives us a completely different picture of the status order than using exogenous information. Now $E$ is definitely the highest status node, and $F$ which was the highest status node based on exogenous considerations drops to fourth place, behind $B$ and $J$. 
+Where $C^{IN}$ is the $1 \times 12$ row vector of indegree centralities shown in @tbl-status-1 and $\mathbf{A}$ is the the network's adjacency matrix shown in @tbl-adjmat. The results are shown in @tbl-status-4. As we can see, considering only endogenous network information gives us a completely different picture of the status order than using exogenous information. Now $E$ is definitely the highest status node, and $F$ which was the highest status node based on exogenous considerations drops to fourth place, behind $B$ and $J$. 
 
 Looking at @fig-dirgraph, we can see why this happened. Take the set of $F$'s in-neighbors $\{C, D, H, J, L\}$. It is easy to see from @tbl-status-1, that most of these nodes also have low indegree centrality (except for $J$). So even though $F$ has five nodes pointing toward them ($C^{IN}_F = 5$), all of them are not very high-status people. By comparison $E$ only has three in-neighbors $\{B, F, I\}$, and all three are towards the top in terms of in-degree centrality. $E$ has higher status than $F$ according to $s^{en}$ because the people that choose $E$ are also chosen by many others, which is exactly what we want in a status measure. 
 
@@ -223,64 +220,55 @@ $$
   1 + x + x^2 + x^3 + x^4 + x^5 +...x^\infty = 
 $$ 
 $$
-(1-x)^{-1} = \frac{1}{1 - x} 
+\frac{1}{1 - x} = (1-x)^{-1}  
 $$ {#eq-infsum2}
 
 Why is this bit of math important? We will see next!
 
-## Katz Status Score
-In the mid-twentieth century, the great statistician Leo Katz set out to develop a measure of status in social networks that took into account indirect connections. He first observed that the new matrix that results from taking the original **adjacency matrix** and raising it to a power (using matrix multiplication) has a clear interpretation. For instance, if we raise the adjacency matrix to the third power ($\mathbf{A}^3$) the resulting matrix will contain, as cell entries, all the paths of length $l = 3$ that have node $i$ as the starting node and node $j$ as the destination node, the same goes for any number $\mathbf{A}^k$. 
+## Katz Status Index
+In the mid-twentieth century, the great statistician [Leo Katz](https://en.wikipedia.org/wiki/Leo_Katz_(statistician)) set out to develop a measure of status in social networks that took into account indirect connections. He first observed that the new matrix that results from taking the original **adjacency matrix** and raising it to a power (using matrix multiplication) has a clear interpretation. For instance, as we saw in @sec-pows, if we raise the adjacency matrix $A$ shown in @tbl-adjmat to the third power ($\mathbf{A}^3$) the resulting matrix will contain, as cell entries $a^3_{ij}$, all the **directed paths** of length $l = 3$ that have row node $i$ as the starting column node and node $j$ as the destination node, the same goes for any number $\mathbf{A}^k$. This means that the **column sums** of this matrix---or the row sums of the transpose $A^T$---will contain the number of paths of length three that are directed from all other nodes to a given node.  
 
 Katz saw this as a way to incorporate indirect connections to construct a measure of status using only endogenous information. The idea would be to say that your total status is the sum of number of other people who choose you (or think you are great, or a great source or advice or whatever). However, among the people that choose you the ones that are chosen by many others should count for more. Those are people who are two-steps away from you. But the same should apply to the people who choose those others (people three-steps away from you). Overall, you should get more status from people who choose the people who choose the people, who choose the people...who choose you and you should get more status from the more people who are most likely to be chosen by those others, across any number of steps. 
 
-To accomplish this, we need to construct a new matrix $A^*$ that incorporates all this information about people's one step, two-step, three-step, connections to others, then sum rows of that matrix. The resulting vector ($s^{Katz}_i$) would contain the desired score for each node $i$. 
+To accomplish this, we need to construct a new matrix that incorporates all this information about people's one step, two-step, three-step, connections to others, then sum columns of that matrix (or the rows of the transpose). The resulting vector ($s^{Katz}_i$) would contain the desired score for each node $i$. 
 
-One way to proceed would be:
+One way to proceed would be to create the matrix by calculating the following infinite sum:
 
 $$
-A^* = A + A^2 + A^3 + A5 + \ldots A^{\infty}
-$$ {#eq-katz1}
+I + A + A^2 + A^3 + A^4 + \ldots A^{\infty} = 
+$$ 
 
-There are a couple of problems here. First this sum keeps getting bigger and bigger and it does not have a natural end point (keeps going forever). This is because it is counting the direct connections ($A$) as much as the very indirect connections, like $A^5$, or the number of indirect links connecting you to others *five steps away*. 
+$$
+\mathbf{1} \sum_{k = 0}^{k = \infty} A^k
+$${#eq-katz1}
+
+With the understanding that $A^0 = I$ (raising a matrix to the zero power returns the identity matrix), and $\mathbf{1}$ is a row vector full of ones $\mathbf{1} = \{1, 1, 1, ... 1\}$ of the same length as the number of rows in $A$, which when multiplied by $\sum A^k$ would return the column sums of that matrix (see @sec-allones) which would be our vector of Katz centrality scores for each node.
+
+There are a couple of problems with @eq-katz1. First this sum keeps getting bigger and bigger and it does not have a natural end point (keeps going forever). This is because it is counting the direct connections ($A$) as much as the very indirect connections, like $A^5$, or the number of indirect links connecting you to others *five steps away*. 
 
 What we want is a way to count the first-step links the most, and then discount the longer-step links, with the discount getting larger the longer the chain. So that three-steps links count for less than two-steps links but count for more than four step links to others and so forth. 
 
 Katz's great idea is to multiply the original adjacency matrix and its powers by a number $\alpha$ that was larger than zero, but less than one. This leads to:
 
 $$
-A^* = \alpha A + \alpha^2 A^2 + \alpha^3 A^3 + \alpha^4 A^4 + \ldots \alpha A^{\infty}
-$$ {#eq-katz2}
-
-Now the difference between @eq-katz1 and @eq-katz2, is that as we saw before (see @eq-infsum2), while the sum in @eq-katz1 keeps getting bigger and bigger (the technical term is "diverges"), the one in @eq-katz2, will stop growing, because raising a number less than one and more than zero (like $\alpha$) to a bigger and bigger power will result in a tinier and tinier number, until we get close to zero. The sum will *converge* rather than diverge. 
-
-Moreover, Katz knew his math, and noted that there is a version of {@eq-infsum2} that applies to matrices. This is:
-
-$$
-A^* = \alpha A(I + \alpha A + \alpha A^2 + \alpha A^3 + \alpha A5 + \ldots \alpha A^{\infty})
+I + \alpha A + \alpha^2 A^2 + \alpha^3 A^3 + \alpha^4 A^4 + \ldots \alpha^\infty A^{\infty} = 
 $$ 
 
 $$
-A^* = \alpha A(I-\alpha A)^{-1}
+\mathbf{1} \sum_{k = 0}^{k = \infty} \alpha^k A^k
+$${#eq-katz2}
+
+With the understanding that $\alpha^0 A^0 = 1 \times I = I$, the first term in the sequence is once again the identity matrix. Now the difference between @eq-katz1 and @eq-katz2, is that as we saw before (see @eq-infsum2), while the sum in @eq-katz1 keeps getting bigger and bigger (the technical term is "diverges"), the one in @eq-katz2, will stop growing, because raising a number less than one and more than zero (like $\alpha$) to a bigger and bigger power will result in a tinier and tinier number, until we get close to zero. The sum will *converge* rather than diverge. 
+
+Moreover, Katz knew his math, and noted that there is a version of {@eq-infsum2} that applies to matrices, and which can be calculated without adding up an infinity of numbers. This is:
+
+$$
+\mathbf{1} \sum_{k = 0}^{k = \infty} \alpha^k A^k = \mathbf{1} (I - \alpha A)^{-1}
 $$ {#eq-katz3}
 
-Where $I$ refers to the "identity matrix." This is simply a matrix with the same dimensions as $A$, but containing ones along the diagonal and zeros everywhere. It functions just like the number "$1$" does in regular (scalar) multiplication. Thus, for an adjacency matrix $A$ and its respective identity matrix $I$ of the same dimensions:
+Where $I$ refers to the identity matrix (see @sec-identitymat). What @katz53 proposed is that we can turn the infinite sum part of @eq-katz3 ($I + \alpha A + \alpha A^2 + \alpha A^3 + \alpha A^4 + \ldots \alpha A^{\infty})$ into just $(I- \alpha A)^{-1}$ following the principle outlined earlier in @eq-infsum2. Just like the endless sum of squares of a number $x$ between $-1$ and and $1$ just turns into just $(1-x)^{-1}$, the endless sums of a matrix *containing* numbers between $-1$ and $1$ as its entries $\alpha A$ turns into $(I-\alpha A)^{-1}$, with $I$ playing the role of $1$ and raising $I-\alpha A$ to the power of $-1$ playing the role of taking the reciprocal.^[Recall from high school algebra that $x^{-1} = \frac{1}{x}$ and that for any number $x$ the **reciprocal** of $x$ is $\frac{1}{x}$.]
 
-$$
-A \times I = A
-$$
-$$
-I \times A = A
-$$
-$$
-A \times A^{-1} = I
-$$
-$$
-A^{-1} \times A = I
-$$
-
-What @katz53 proposed is that we can turn the infinite sum part of @eq-katz3 ($I + \alpha A + \alpha A^2 + \alpha A^3 + \alpha A5 + \ldots \alpha A^{\infty})$ into just $(I- \alpha A)^{-1}$ following the principle outlined earlier in @eq-infsum2. Just like the endless sum of squares of a number $x$ between $-1$ and and $1$ just turns into just $(1-x)^-1$, the endless sums of a matrix *containing* numbers between $-1$ and $1$ as its entries $\alpha A$ turns into $(I-\alpha A)^{-1}$, with $I$ playing the role of $1$ and raising $I-\alpha A$ to the power of $-1$ playing the role of taking the reciprocal.^[Recall from high school algebra that $x^{-1} = \frac{1}{x}$ and that for any number $x$ the **reciprocal** of $x$ is $\frac{1}{x}$.]
-
-Katz showed that the new matrix, $A^* = \alpha A(I-\alpha A)^{-1}$ contains all the information we need, as it condenses the sums of all the status that a persons gets from *all their connections* both direct and indirect, regardless of how indirect, and it weighs each person's contribution to each other's persons status by the status of those people (which is calculated in the same way). Math magic to the rescue!
+Katz showed that the new matrix, $A^* = (I-\alpha A)^{-1}$ contains all the information we need, as it condenses the sums of all the status that a persons gets from *all their connections* both direct and indirect, regardless of how indirect, and it weighs each person's contribution to each other person's status by the status of those people (which is calculated in the same way). The column sums of this matrix $\mathbf{1}(I-\alpha A)^{-1}$will give us the Katz status scores we need as the contain information on all the indirect paths that start with other nodes and end in the focal node. Math magic to the rescue!
 
 Let's see how it works, step by step:
 
@@ -290,17 +278,15 @@ Let's see how it works, step by step:
 
 - Third, we subtract $I$ from $\alpha A$ , to get $I-\alpha A$. This new matrix is shown in @tbl-katz-3. Note that what this does is to add ones to the diagonals of $\alpha A$ and change all the other non-zero entries from positive to negative. 
 
-- Fourth, we find the matrix that equals the reciprocal of $I-\alpha A$ (also called the **matrix inverse** of $I-\alpha A$) to get $(I-\alpha A)^{-1}$.  The matrix inverse is somewhat involved to calculate for larger matrices like $I-\alpha A$, so, for now, chalk the numbers in @tbl-katz-4 up to math magic. Essentially you are trying to find a new matrix $W$ such that when you multiply it by $(I-\alpha A)$ you get $I$ as the result; that is a matrix $W$ is the inverse of another matrix $(I-\alpha A)$ if and only if $W(I-\alpha A) = I$. This is just like the the reciprocal of any number $x$, namely, $\frac{1}{x}$ always equals to one when multiplied by that number: $\frac{1}{x} \times x = \frac{x}{x} = 1$.
+- Fourth, we find the matrix that equals the reciprocal of $I-\alpha A$ (also called the **matrix inverse** of $I-\alpha A$) to get $(I-\alpha A)^{-1}$.  The matrix inverse is somewhat involved to calculate for larger matrices like $I-\alpha A$, so, for now, chalk the numbers in @tbl-katz-4 up to math magic. Essentially you are trying to find a new matrix $W$ such that when you multiply it by $(I-\alpha A)$ you get $I$ as the result; that is a matrix $W$ is the inverse of another matrix $(I-\alpha A)$ if and only if $W(I-\alpha A) = I$. This is just like the the reciprocal of any number $x$, namely, $\frac{1}{x}$ always equals to one when multiplied by that number: $\frac{1}{x} \times x = \frac{x}{x} = 1$. This new matrix, called the **Katz proximity matrix** is shown in @tbl-katz-4.^[Note that we set the diagonals of the matrix to zero, since we don't care about the contributions the person makes to their own status based on **cycles** (walks that begin and end in the same node).] In this matrix, the larger the number in the cell, the more node $i$ is connected to node $j$ via indirect connections. 
 
-- Fifth we multiply $\alpha A$ (shown in @tbl-katz-2) times the new matrix $W = (I-\alpha A)^{-1}$ (shown in @tbl-katz-4) to get the answer to $\alpha A(I-\alpha A)^{-1}$. This new matrix, called the **Katz proximity matrix** is shown in @tbl-katz-5.^[Note that we set the diagonals of the matrix to zero, since we don't care about the contributions the person makes to their own status based on **cycles** (walks that begin and end in the same node).] In this matrix, the larger the number in the cell, the more node $i$ is connected to node $j$ via indirect connections. 
-
-- Finally, we compute the *column sums* of the Katz proximity matrix. In equation form:
+- Finally, we compute the *column sums* of the Katz proximity matrix to get the Katz status scores for each node. In equation form:
 
 $$
-s^{katz}_i = \sum_jA^*_{ij}
+s^{katz}_i = \mathbf{1} (I - \alpha A)^{-1}
 $$ {#eq-katz4}
 
-With $A*$ computed using @eq-katz3. The resulting scores are shown in @tbl-status-5 for each node of @fig-dirgraph.
+The resulting scores are shown in @tbl-status-5 for each node of @fig-dirgraph.
 
 As we can see, according to the Katz's status score, node $E$ is still the highest status node in the network. They are followed by nodes $B$ and $J$, closely agreeing with the endogenous status scores obtained using the in-degree (@tbl-status-4). This makes sense, since the Katz scores can be seen as a *generalization* of the endogenous degree measure, with the latter taken into account only the first step links, and Katz's taking into account all the indirect links regardless of lengths (but counting the really long ones very little, and counting the first step ones the most). In this way, the Katz approach is the most comprehensive way to compute the status of nodes using only endogenous network information.
 
@@ -312,46 +298,40 @@ As we can see, according to the Katz's status score, node $E$ is still the highe
 #|   - Twelve by twelve identity matrix
 #|   - Adjacency matrix multiplied by alpha
 #|   - Adjacency matrix multiplied by alpha subtracted from the identity matrix
-#|   - Inverse of adjacency matrix multiplied by alpha subtracted from the identity matrix
-#|   - Katz proximity matrix (original adjacency matrix multiplied by alpha times the inverse of the adjacency matrix multiplied by alpha subtracted from the identity matrix)
+#|   - Katz proximity matrix (inverse of adjacency matrix multiplied by alpha subtracted from the identity matrix)
 #| layout-ncol: 1
 
   kbl(I, format = "html", align = "c") %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
-  kbl(round(aA, 1), format = "html", align = "c") %>% 
+  kbl(round(alpha * A, 2), format = "html", align = "c") %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-  kbl(round(IaA, 1), format = "html", align = "c") %>% 
+  kbl(round(I - alpha * A, 2), format = "html", align = "c") %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-  kbl(round(iIaA, 1), format = "html", align = "c") %>% 
-        column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-  kbl(round(K, 1), format = "html", align = "c") %>% 
+  kbl(round(solve(I - alpha * A), 1), format = "html", align = "c") %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 
 ## Hubbell's Tweak on Katz's Score
-So far, we have discussed two main ways to measure the status of node in a social network, both based on the similar principle that people gain status from being (directly or indirectly) connected to high-status others (and get less status from being directly or indirectly connected to low status others). There are two ways to get a sense of the status of others. On the **exogeneous** approach, we use some kind of prior ranking or knowledge (see @tbl-status-2) on the endogenous approach, we use only information on network connectivity (in-degree or the Katz approach). What if there was a way to *combine* both approaches and get the best of both worlds? 
+So far, we have discussed two main ways to measure the status of node in a social network, both based on the similar principle that people gain status from being (directly or indirectly) connected to high-status others (and get less status from being directly or indirectly connected to low status others). There are two ways to get a sense of the status of others. On the **exogeneous** approach, we use some kind of prior ranking or knowledge (see @tbl-status-2) on the endogenous approach, we use only information on network connectivity (in-degree or the Katz approach). 
 
-This is exactly what was proposed by @hubbell65. It revolves around a relatively small tweak on Katz's approach. The trick is to take the part of @eq-katz3 that computes the endogenous status based on all indirect links to others, namely, $(I-\alpha A)^{-1}$, and multiply not by $\alpha A$, but by the external column vector of status scores $\mathbf{b}$. 
+What if there was a way to *combine* both approaches and get the best of both worlds? That is, we count *all* the paths coming into a node from other nodes---of any length--- and we *weigh* each path so that paths that *start* with high status nodes (according to our exogenous scores) count for more than paths that have low status nodes as their starting point. 
+
+This is exactly what was proposed by @hubbell65. It revolves around a relatively small tweak on Katz's approach. The trick is to take the Katz proximity matrix computed according to to @eq-katz4 and pre-multiply it not by a row vector full of ones, like with @eq-katz4, but by the external row vector of status scores $\mathbf{b}$ itself. 
 
 In equation form:
 
 $$
-s^{hubbell} = (I-\alpha A^T)^{-1}\mathbf{b}
+s^{hubbell} = \mathbf{b}(I-\alpha A)^{-1}
 $$ {#eq-hubbell}
 
-Where $\mathbf{b}$ is the column vector containing the exogenous status information shown in @tbl-status-2, and $A^T$ is the transpose of the adjacency matrix $A$. 
-
-The resulting Hubbell status scores are shown in @tbl-status-6 for each node in @fig-dirgraph. As we can see, incorporating both endogenous and exogenous status information changes the picture, creating more separation between high and low status nodes. 
+The resulting Hubbell status scores are shown in @tbl-status-6 for each node in @fig-dirgraph. As we can see, incorporating both endogenous and exogenous status information changes the picture, provided by the Katz scores creating more separation between high and low status nodes. 
 
 Now, node $E$ is the indisputable highest status node in the network, followed, at a distant second and third place, by nodes $B$ and $F$. Combining both endogenous and exogenous sources of information does reveal a deeper status inequalities in social networks. 
-
-
 
 ## References {.unnumbered}
 

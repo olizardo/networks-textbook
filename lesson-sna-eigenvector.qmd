@@ -1,0 +1,235 @@
+# Getting Centrality from Others {#sec-eigen}
+
+```{r setup, include=FALSE}
+     library(ggraph)
+     library(tidygraph)
+     library(igraph)
+     library(kableExtra)
+
+```
+
+In @sec-centrality we discussed the idea of centrality mainly from a "positional" perspective. That is, a node's centrality depends on *where* they are located in the connectivity structure of the graph [@borgatti05]. Either by being "close" to many others, either directly---as with **degree centrality**---or indirectly---as with **closeness centrality**---or being in the "middle" of the connections of many others---as with **betweennness centrality**.
+
+But there is another way of thinking about centrality, and that relates more to the idea that to be central is to be connected to central people, not just to many other people (or being in-between many people). Under this alternative definition, the ultimate way of being central resolves into *being connected to many people who are also central*. 
+
+From this perspective, you *get* the centrality of the people you are connected to, so that your centrality $C_i$ should be a function of the centrality of the people that are adjacent to you in the graph. 
+
+Expressed as a formula:
+
+$$
+C_i = \sum_j a_{ij}C_j 
+$${#eq-eig1}
+
+Now, this looks like it does what we want. The centrality of node $i$, expressed as $C_i$, is a sum of the centrality $C_j$ of the people they are connected to, since the right-hand side of the sum wil be a number that does not equal zero only when $a_{ij} = 1$, that is when node $i$ is connected to node $j$ in the network.
+
+The one issue with @eq-eig1 is that we have a chicken and the egg problem. Which centrality comes first? That of node $i$ or node $j$? We don't know since the centrality term appears on both sides of the equation. So while @eq-eig1 is conceptually appealing, it's like a snake eating it's own tail. 
+
+Nevertheless, not all is lost. We can make progress in coming up with a centrality measure in which your centrality is a function of the centrality of others, or more accurately, in which the people you are connected to "give" their centrality to you (and that total amounts makes up your centrality score), by just assigning everybody some "amount" of centrality "points" at the beginning and then using @eq-eig1 to "loop" through the network to calculate everyone else's centrality. 
+
+Let's see how this would work. 
+
+
+```{r}
+#| label: fig-eig
+#| fig-cap: "A simple graph"
+#| fig-cap-location: margin
+#| fig-width: 12
+#| fig-height: 12
+
+     set.seed(235)
+     gr <- play_gnp(10, .4, directed = F, loops = F) %>% 
+        mutate(name = LETTERS[1:10]) 
+     p <- ggraph(gr, layout = 'kk') 
+     p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+     p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+     p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+     p <- p + theme_graph() 
+     p
+```
+
+@fig-eig shows a graph with associated adjacency matrix shown in @tbl-adjmat. Our task is to come up with a centrality metric for all the nodes in this graph, that more or less follows the spirit of @eq-eig1. The idea is to compute a "fist pass" set of centrality scores for each node in the graph, by first "initializing" everyone's centrality some arbitrary positive number and computing the centralities of each node as the sum of the centralities of the nodes that they are connected to. 
+
+
+```{r}
+#| label: tbl-adjmat
+#| tbl-cap: "Adjacency matrix of a simple graph."
+#| tbl-cap-location: margin
+    A <- as.matrix(as_adjacency_matrix(gr))
+    kbl(A, format = "html", align = "c") %>% 
+         column_spec(1, bold = TRUE) %>% 
+         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+```{r}
+     eig.iter <- function(x, e = 0.000001) {
+          n <- nrow(x)
+          w <- 1
+          c <- rep(1, n)
+          k <- 0
+          m <- c
+          while (w > e) {
+               o.c <- c
+               for (i in 1:n) {
+                    c[i] <- sum(o.c * x[, i])
+                    }
+          c <- c/max(c)
+          w <- abs(sum(abs(c) - abs(o.c)))
+          m <- cbind(m, c)
+          k <- k + 1
+          }
+      return(list(c =c, o.c = o.c, w = w, k = k, m = m))
+}
+eig.res <- eig.iter(A)
+```
+
+For instance, let's say that we give everyone one centrality point to "give out" everyone they are connected to in the first step. In that case, the centrality of node $E$ in @fig-eig. We know from looking at @tbl-adjmat that $E$'s neighbor set is equal to $\{A, D, F, G, H, J\}$. If at the beginning, $E$ gets one "centrality point" from each of their neighbors, then their starting centrality would be equal to:
+
+$$
+C(1)_E = C(0)_A + C(0)_D + C(0)_F + C(0)_G + C(0)_H + C(0)_J =
+$$
+
+$$
+C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
+$$
+
+Where $C(0)$ indicates everyone's centralities at "step zero" (the centralities everyone begins with), and $C(1)$ indicates everyone's centralities at the first step. 
+
+As we can see because everyone just has one centrality point to give out, $E$ initial centrality $C(1)_E$ is just their **degree** and the same for everybody else! 
+
+We can record these initial centralities in a table for each node, shown as @tbl-eig-1. Note that because we don't care about the specific number (which once again is just everyone's degree), but only about the *rank order* of nodes, we divide the initial centralities by the maximum observed (the graph's **maximum degree**) so that nodes with the maximum degree gets a score of 1.0---in this case $D$ and $E$---and everyone gets a smaller number depending on how many centrality points they got from their neighbors at step 1. 
+
+```{r}
+#| label: tbl-eig
+#| tbl-cap: "."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - Centrality at step 1
+#|   - Centrality at step 2
+#|   - Centrality at step 3
+#|   - Centrality at step 4
+#|   - Centrality at step 5
+#|   - Centrality at step 6
+#|   - Centrality at step 7
+#|   - Centrality at step 8
+#|   - Centrality at step 9
+#|   - Centrality at step 10
+#| layout-ncol: 3
+
+  d <- degree(gr)/max(degree(gr)) 
+  kbl(round(d, 2), format = "html", align = "c", col.names = NULL) %>% 
+          column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+  kbl(round(eig.res$m[,3], 2), format = "html", align = "c", col.names = NULL) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(round(eig.res$m[,4], 2), format = "html", align = "c", col.names = NULL) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     e <- eig.res$m[,5]
+     names(e) <- LETTERS[1:10]
+  kbl(round(e, 2), format = "html", align = "c", col.names = NULL) %>% 
+          column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(round(eig.res$m[,6], 2), format = "html", align = "c", col.names = NULL) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(round(eig.res$m[,7], 2), format = "html", align = "c", col.names = NULL) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     e <- eig.res$m[,8]
+     names(e) <- LETTERS[1:10]
+  kbl(round(e, 2), format = "html", align = "c", col.names = NULL) %>% 
+          column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(round(eig.res$m[,9], 2), format = "html", align = "c", col.names = NULL) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(round(eig.res$m[,10], 2), format = "html", align = "c", col.names = NULL) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+Now, of course, we can keep going, and apply @eq-eig1 again, but this time the centrality "points" each node gets are the $C(1)$ scores recorded in @tbl-eig-1. So in this step, node $E$'s centrality is simply:
+
+$$
+C(2)_E = C(1)_A + C(1)_D + C(1)_F + C(1)_G + C(1)_H + C(1)_J =
+$$
+
+$$
+C(1)_E = 0.5 + 1 + 0.7 + 0.3 + 0.5 + 0.7 = 3.7
+$$
+
+Once again, because we only care about the ranking and not the exact number, we divide each score by the maximum observed at *this* step. The result are shown in @tbl-eig-2. As we can see, node $D$ is still at the top, but node $E$ has slipped to second place. The reason for that is that $E$ gets less centrality "bang" (the points given by others) for their "buck" (their number of connections). While both $D$ and $E$ are connected to the same *number* of others, $E$ is connected to *less central* others than $D$. The same happened to $A$ and $B$ who were tied at step one, but are now separated at step two, with $A$ being more central than $B$. 
+
+Of course, we can keep going and calculate centralities at step three $C(3)$, four $C(4)$ and so on. The results are shown in @tbl-eig-3 through @tbl-eig-9.
+
+Note one interesting that happens as we iterate through these steps. The rank order of the centrality scores stop changing! While there are some minute differences between @tbl-eig-8 and @tbl-eig-9, the order in which nodes are arranged in terms of who has the top centrality, and the second biggest, and the third biggest, all the way down to the last, is pretty much the same. 
+
+That means that as we proceed further and further until the ranks begin to "freeze." So we can decide to stop after sum of the (absolute value) of the differences between the centrality score at some step $k$, expressed as $C(k)$ and those at the previous step $C(k-1)$ are smaller than some criterion (e.g., $e = 0.0001$). In which case we have arrived at the centrality scores we wanted! These are shown in @tbl-eig-final.
+
+```{r}
+#| label: tbl-eig-final
+#| tbl-cap: "Centrality scores At the final step versus the eigvenctor centralities."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - Centrality at final step 
+#|   - Eigenvector Centralities
+#| layout-ncol: 2
+  e1 <- eig.res$m[,ncol(eig.res$m)]
+  names(e1) <- LETTERS[1:10]
+  kbl(round(sort(e1, decreasing = TRUE), 3), format = "html", align = "c", col.names = NULL) %>% 
+          column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+  e2 <- abs(eigen(A)$vectors[, 1])
+  e2 <- e2/max(e2)
+  names(e2) <- LETTERS[1:10]
+  kbl(round(sort(e2, decreasing = TRUE), 3), format = "html", align = "c", col.names = NULL) %>% 
+          column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+Now it turns out that there is a way to come up with a set of centrality scores that will arrange the nodes in the graph from top to bottom just like we did in @tbl-eig-final but without going through all the work of iterating through various steps using @eq-eig1. Imagine that there is magical unknown number---let's call it $\lambda$---and a magical vector---let's call it $\mathbf{b}$--- containing the scores that we want. The numbers in the vector will arrange the nodes in the graph exactly like in @tbl-eig-final, only if the following equation is satisfied:
+
+$$
+A \mathbf{b} = \lambda \mathbf{b}
+$$ {#eq-eig2}
+
+@eq-eig2 says that the magical vector containing the centrality scores exists, only if there is a set of numbers we can fill out the vector with, so that when multiply the network adjacency matrix times this vector (which as we know from @sec-matmult results in another vector of the same length as $\mathbf{b}$) we get the same answer as multiplying the vector times the magical number $\lambda$. 
+
+It turns out that there is a way to use mathematical magic to solve @eq-eig2 using methods from **linear algebra**. In this field, the vector $\mathbf{b}$ that satisfies equation @eq-eig2 is called an **eigenvector** of the matrix $A$. In the same way the magical number $lambda$ is called an **eigenvalue** of the same matrix. The method from linear algebra that allows us to find $\mathbf{b}$ and $\lambda$ is called the **eigen-decomposition** of the adjacency matrix $A$ (I know, all terrible names). We 
+
+When eigen-decompose a matrix, the aim is to find to other matrices, $\Lambda$ and $U$ such that the following matrix multiplication equation is satisfied:
+
+$$
+A = U \Lambda U^T
+$${#eq-eig3}
+
+When $A$ is a square adjacency matrix, the matrix $U$ will be of same dimensions as $A$ (same number of rows and columns), and so will be the matrix $\Lambda$. The matrix $U^T$ is just the **transpose** of $U$. The main difference between $U$ and $\Lambda$ is that $U$ is going to be full of numbers (contain non-zero entries on each cell). Each column of $U$ can be considered separately as a vector, and each of them counts as an **eigenvector** of $A$. 
+
+The matrix $\Lambda$, on the other hand, is going to have zeros in each cell *except* the diagonals, which will contain a series of numbers $\lambda_1, \lambda_2, \lambda_3 \ldots \lambda_k$, where $k$ is equal to the number of rows or columns of the original matrix. 
+
+```{r}
+#| label: tbl-eigen
+#| tbl-cap: "Centrality scores At the final step versus the eigvenctor centralities."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - Eigenvectors of an adjacency matrix
+#|   - Eigenvalues of an adjacency matrix
+#| layout-ncol: 1
+  eigen.res <- eigen(A)
+  U <- as.matrix(eigen.res$vectors)
+  V <- diag(eigen.res$values)
+  rownames(U) <- LETTERS[1:10]
+  colnames(U) <- LETTERS[1:10]
+  rownames(V) <- LETTERS[1:10]
+  colnames(V) <- LETTERS[1:10]
+  kbl(round(U, 2), format = "html", align = "c") %>% 
+          column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+  kbl(round(V, 2), format = "html", align = "c") %>%
+          column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+Finally, the *first* column of $U$ contains the centrality scores we seek (those that go into the vector $\mathbf{b}$ and therefore satisfy @eq-eig2) and the number in the first row and first column of the matrix $\Lambda$ is the eigenvalue that satifies @eq-eig2 ($\lambda$). Because of this, the centrality scores $\mathbf{b}$ obtained via this method are called the **eigenvector centralities** of the nodes in the network represented by adjacency matrix $A$ [@bonacich72]. 
+
+The matrix containing the eigenvectors corresponding to the adjacency matrix in @tbl-adjmat are shown in @tbl-eigen-1. The corresponding eigenvalues are shown as the diagonal entries of the matrix shown in @tbl-eigen-2. We can verify that arranging the nodes in the graph shown in @fig-eig according to the (absolute) value of the scores from the first column of @tbl-eigen-1. Once again, because we only care about the rank and not the specific number, we divide the scores in the first column of @tbl-eigen-1 by the maximum observed (absolute) value. As shown in @tbl-eig-final-2, this results in scores and a rank ordering identical to that which we found via our iterative procedure. 
+
+These eigenvector centrality scores, therefore, give us a sense of which nodes in the network are well-connected, in the sense of receiving centrality from being linked to central others. 
+
+## References {.unnumbered}
+
