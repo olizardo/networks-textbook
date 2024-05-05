@@ -22,7 +22,7 @@ $${#eq-eig1}
 
 Now, this looks like it does what we want. The centrality of node $i$, expressed as $C_i$, is a sum of the centrality $C_j$ of the people they are connected to, since the right-hand side of the sum wil be a number that does not equal zero only when $a_{ij} = 1$, that is when node $i$ is connected to node $j$ in the network.
 
-The one issue with @eq-eig1 is that we have a chicken and the egg problem. Which centrality comes first? That of node $i$ or node $j$? We don't know since the centrality term appears on both sides of the equation. So while @eq-eig1 is conceptually appealing, it's like a snake eating it's own tail. 
+The one issue with @eq-eig1 is that we have a chicken or the egg problem. Which centrality comes first? That of node $i$ or node $j$? We don't know since the centrality term appears on both sides of the equation. So while @eq-eig1 is conceptually appealing, it's like a snake eating it's own tail. 
 
 Nevertheless, not all is lost. We can make progress in coming up with a centrality measure in which your centrality is a function of the centrality of others, or more accurately, in which the people you are connected to "give" their centrality to you (and that total amounts makes up your centrality score), by just assigning everybody some "amount" of centrality "points" at the beginning and then using @eq-eig1 to "loop" through the network to calculate everyone else's centrality. 
 
@@ -82,7 +82,7 @@ Let's see how this would work.
 eig.res <- eig.iter(A)
 ```
 
-For instance, let's say that we give everyone one centrality point to "give out" everyone they are connected to in the first step. In that case, the centrality of node $E$ in @fig-eig. We know from looking at @tbl-adjmat that $E$'s neighbor set is equal to $\{A, D, F, G, H, J\}$. If at the beginning, $E$ gets one "centrality point" from each of their neighbors, then their starting centrality would be equal to:
+For instance, let's say that we give everyone one centrality point to "give out" everyone they are connected to in the first step. Let us calculate the centrality of node $E$ in @fig-eig using this approach. We know from looking at @tbl-adjmat that $E$'s neighbor set is equal to $\{A, D, F, G, H, J\}$. If at the beginning, $E$ gets one "centrality point" from each of their neighbors, then their starting centrality would be equal to:
 
 $$
 C(1)_E = C(0)_A + C(0)_D + C(0)_F + C(0)_G + C(0)_H + C(0)_J =
@@ -96,7 +96,7 @@ Where $C(0)$ indicates everyone's centralities at "step zero" (the centralities 
 
 As we can see because everyone just has one centrality point to give out, $E$ initial centrality $C(1)_E$ is just their **degree** and the same for everybody else! 
 
-We can record these initial centralities in a table for each node, shown as @tbl-eig-1. Note that because we don't care about the specific number (which once again is just everyone's degree), but only about the *rank order* of nodes, we divide the initial centralities by the maximum observed (the graph's **maximum degree**) so that nodes with the maximum degree gets a score of 1.0---in this case $D$ and $E$---and everyone gets a smaller number depending on how many centrality points they got from their neighbors at step 1. 
+We can record these initial centralities in a table for each node, shown as @tbl-eig-1. Note that because we don't care about the specific number (which once again is just everyone's degree), but only about the *rank order* of nodes, we divide the initial centralities by the maximum observed (the graph's **maximum degree**) so that nodes with the maximum observed centrality at this step gets a score of 1.0---in this case $D$ and $E$---and everyone gets a smaller number depending on how many centrality points they got from their neighbors at step 1. 
 
 ```{r}
 #| label: tbl-eig
@@ -190,17 +190,17 @@ $$ {#eq-eig2}
 
 @eq-eig2 says that the magical vector containing the centrality scores exists, only if there is a set of numbers we can fill out the vector with, so that when multiply the network adjacency matrix times this vector (which as we know from @sec-matmult results in another vector of the same length as $\mathbf{b}$) we get the same answer as multiplying the vector times the magical number $\lambda$. 
 
-It turns out that there is a way to use mathematical magic to solve @eq-eig2 using methods from **linear algebra**. In this field, the vector $\mathbf{b}$ that satisfies equation @eq-eig2 is called an **eigenvector** of the matrix $A$. In the same way the magical number $lambda$ is called an **eigenvalue** of the same matrix. The method from linear algebra that allows us to find $\mathbf{b}$ and $\lambda$ is called the **eigen-decomposition** of the adjacency matrix $A$ (I know, all terrible names). We 
+It turns out that there is a way to use mathematical magic to solve @eq-eig2 using methods from **linear algebra**. In this field, the vector $\mathbf{b}$ that satisfies equation @eq-eig2 is called an **eigenvector** of the matrix $A$. In the same way the magical number $\lambda$ is called an **eigenvalue** of the same matrix. 
 
-When eigen-decompose a matrix, the aim is to find to other matrices, $\Lambda$ and $U$ such that the following matrix multiplication equation is satisfied:
+The method from linear algebra that allows us to find $\mathbf{b}$ and $\lambda$ is called the **eigen-decomposition** of the adjacency matrix $A$ (I know, all terrible names). When eigen-decompose a square matrix like the adjacency matrix $A$, the aim is to find two other matrices, $\Lambda$ and $U$, of the same dimensions as the original, such that the following matrix multiplication equation is satisfied:
 
 $$
 A = U \Lambda U^T
 $${#eq-eig3}
 
-When $A$ is a square adjacency matrix, the matrix $U$ will be of same dimensions as $A$ (same number of rows and columns), and so will be the matrix $\Lambda$. The matrix $U^T$ is just the **transpose** of $U$. The main difference between $U$ and $\Lambda$ is that $U$ is going to be full of numbers (contain non-zero entries on each cell). Each column of $U$ can be considered separately as a vector, and each of them counts as an **eigenvector** of $A$. 
+Where the matrix $U^T$ is just the **transpose** of $U$. The main difference between $U$ and $\Lambda$ is that $U$ is going to be full of numbers (contain non-zero entries in each cell). The matrix $\Lambda$, on the other hand, is going to have zeros in each cell *except* the diagonals, which will contain a series of numbers $\lambda_1, \lambda_2, \lambda_3 \ldots \lambda_k$, where $k$ is equal to the number of rows or columns of the original matrix. 
 
-The matrix $\Lambda$, on the other hand, is going to have zeros in each cell *except* the diagonals, which will contain a series of numbers $\lambda_1, \lambda_2, \lambda_3 \ldots \lambda_k$, where $k$ is equal to the number of rows or columns of the original matrix. 
+At the same time, each column of $U$ can be considered separately as a vector, and each of them counts as an **eigenvector** of $A$. Each eigenvector of $U$ can be paired with one of the numbers of the diagonal of $\Lambda$. So the first column of $U$ is called the first eigevector of $A$ and it is paired with the entry in the $\lambda_{1 \times 1}$ cell of the matrix $\Lambda$ which is call the first eigenvalue of $A$. The same goes for the second column of $U$---called the second eigenvector of $A$---which is paired with the number in cell $\lambda_{2 \times 2}$ of $\Lambda$ (the second eigenvalue of $A$), and so forth, all the way up to $k^{th}$ eigenvector (the $k^{th}$ column of $U$) and the entry in the $k \times k$ cell of $\Lambda$ (the $k^{th}$ eigenvalue), where $k$ is equal to the number of rows (or columns) of $A$.
 
 ```{r}
 #| label: tbl-eigen
@@ -225,7 +225,7 @@ The matrix $\Lambda$, on the other hand, is going to have zeros in each cell *ex
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-Finally, the *first* column of $U$ contains the centrality scores we seek (those that go into the vector $\mathbf{b}$ and therefore satisfy @eq-eig2) and the number in the first row and first column of the matrix $\Lambda$ is the eigenvalue that satifies @eq-eig2 ($\lambda$). Because of this, the centrality scores $\mathbf{b}$ obtained via this method are called the **eigenvector centralities** of the nodes in the network represented by adjacency matrix $A$ [@bonacich72]. 
+To cut to the chase, the *first* column of $U$, corresponding to the firt eigenvector of $A$, contains the centrality scores we seek (those that go into the vector $\mathbf{b}$ and therefore satisfy @eq-eig2) and the number in the first row and first column of the matrix $\Lambda$ is the eigenvalue that satisfies @eq-eig2 ($\lambda$). Because of this, the centrality scores $\mathbf{b}$ obtained via this method are called the **eigenvector centralities** of the nodes in the network represented by adjacency matrix $A$ [@bonacich72]. 
 
 The matrix containing the eigenvectors corresponding to the adjacency matrix $A$ in @tbl-adjmat is shown in @tbl-eigen-1. The corresponding eigenvalues of $A$ are shown as the diagonal entries of the matrix shown in @tbl-eigen-2. We can verify that arranging the nodes in the graph shown in @fig-eig according to the (absolute) value of the scores from the first column of @tbl-eigen-1 results in the same scores we obtained by iteratively giving each node the centralities of each of the other nodes they were connected to. 
 
