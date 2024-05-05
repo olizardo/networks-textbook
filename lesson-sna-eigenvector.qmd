@@ -227,7 +227,32 @@ The matrix $\Lambda$, on the other hand, is going to have zeros in each cell *ex
 
 Finally, the *first* column of $U$ contains the centrality scores we seek (those that go into the vector $\mathbf{b}$ and therefore satisfy @eq-eig2) and the number in the first row and first column of the matrix $\Lambda$ is the eigenvalue that satifies @eq-eig2 ($\lambda$). Because of this, the centrality scores $\mathbf{b}$ obtained via this method are called the **eigenvector centralities** of the nodes in the network represented by adjacency matrix $A$ [@bonacich72]. 
 
-The matrix containing the eigenvectors corresponding to the adjacency matrix in @tbl-adjmat are shown in @tbl-eigen-1. The corresponding eigenvalues are shown as the diagonal entries of the matrix shown in @tbl-eigen-2. We can verify that arranging the nodes in the graph shown in @fig-eig according to the (absolute) value of the scores from the first column of @tbl-eigen-1. Once again, because we only care about the rank and not the specific number, we divide the scores in the first column of @tbl-eigen-1 by the maximum observed (absolute) value. As shown in @tbl-eig-final-2, this results in scores and a rank ordering identical to that which we found via our iterative procedure. 
+The matrix containing the eigenvectors corresponding to the adjacency matrix $A$ in @tbl-adjmat is shown in @tbl-eigen-1. The corresponding eigenvalues of $A$ are shown as the diagonal entries of the matrix shown in @tbl-eigen-2. We can verify that arranging the nodes in the graph shown in @fig-eig according to the (absolute) value of the scores from the first column of @tbl-eigen-1 results in the same scores we obtained by iteratively giving each node the centralities of each of the other nodes they were connected to. 
+
+```{r}
+#| label: tbl-eigvec
+#| tbl-cap: "Centrality scores At the final step versus the eigvenctor centralities."
+#| tbl-cap-location: margin
+#| tbl-subcap: 
+#|   - First eigevector of adjacency matrix
+#|   - Absolute values of first eigevector of adjacency matrix
+#|   - Absolute values of first eigevector of adjacency matrix divided by the maximum
+#| layout-ncol: 1
+
+a <- round(t(U[,1]), 3)
+b <- abs(a)
+c <- round(b/max(b), 3)
+  kbl(a, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+
+  kbl(b, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+ 
+  kbl(c, format = "html", align = "c") %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+```
+
+First we take the first column of @tbl-eigen-1 and arrange it as a vector $\mathbf{e}$, as in @tbl-eigvec-1. Since the numbers in the eigenvector are negative, we get rid of the negative by taking the absolute value of the scores in the vector $|\mathbf{e}|$, as in tbl-eigvec-2. Finally, because we only care about the rank and not the specific number, we divide by the maximum value $max(|\mathbf{e}|) = 0.473$, which turns them into the scores shown inn @tbl-eigvec-3. As shown in @tbl-eig-final-2, these scores are identical to that which we found via our iterative procedure!
 
 These eigenvector centrality scores, therefore, give us a sense of which nodes in the network are well-connected, in the sense of receiving centrality from being linked to central others. 
 

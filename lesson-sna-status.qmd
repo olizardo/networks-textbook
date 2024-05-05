@@ -61,14 +61,14 @@ gr <- as_tbl_graph(data.frame(from = a, to = b)) %>%
 An easy approach is to measure the **status** of each node is by counting the number of direct nominations they get from others. This would be trying to measure the status of each node by using their **indegree centrality**. Recall, from @sec-centrality, that this is given by computing the **column sums** of the adjacency matrix (summing down each column across rows). In matrix form:
 
 $$
-C^{IN}_j = \sum_i a_{ij}
+C^{IN}_i = \sum_j a_{ij}
 $$ {#eq-indeg}
 
-The results are shown in @tbl-status-1. According to the table, nodes $F$ and $I$ are the highest status nodes in @fig-dirgraph because they each receive five and four nominations respectively They are followed by nodes $\{A, B, E, J\}$ who receive three nominations each. Node $C$ is the lowest status, as no one thinks they are important.
+The results of the indegree calculation for all the nodes in the graph shown in @fig-dirgraph---with corresponding adjacency matrix shown in @tbl-adjmat---are shown in @tbl-status-1. According to the table, nodes $F$ and $I$ are the highest status nodes in @fig-dirgraph because they each receive five and four nominations respectively They are followed by nodes $\{A, B, E, J\}$ who receive three nominations each. Node $C$ is the lowest status, as no one thinks they are important.
 
 However, the problem with using the number of incoming nominations as a measure of status is that the indegree centrality only measures the number of ties that are incoming to each node, but it does not differentiate between who sends each tie. Every nomination counts as the same. But as we noted, the whole point of the idea of status is that you gain status when you receive ties from *high-status others*, and their status is established by their receiving ties from high status others, and so forth. 
 
-This brings up another problem with the indegree cenntrality, which is that it is a purely *local* measure, counting only paths of length one (direct connections). But it is possible that you get status not only from the people you are connected to, but the people *they* are connected to (paths of length two) and the people those people are connected to (paths of length three) and so forth. A good measure of status would incorporate information from **indirect ties** (see @sec-indirect).
+This brings up another problem with the indegree centrality, which is that it is a purely *local* measure, counting only paths of length one (direct connections). But it is possible that you get status not only from the people you are connected to, but the people *they* are connected to (paths of length two) and the people those people are connected to (paths of length three) and so forth. A good measure of status would incorporate information from **indirect ties** (see @sec-indirect).
 
 So indegree centrality won't do as a measure of status in social networks, if we aim to capture the full idea behind the concept. 
 
@@ -134,7 +134,7 @@ Now the status score for each person $\mathbf{s}$ can be determined by taking ea
 
 How do we do this? Recall from @sec-matops, that it is always possible to multiply a row vector times a square matrix as long as the row vector is of the same length as the matrix's row and column dimensions. The result is always another row vector of the same length as the original. 
 
-Accordingly, we can get each person's weighted status score by taking the exogeneous status scores vector $\mathbf{b}$ and multiplying by the network's adjacency matrix $\mathbf{A}$. In this case, $\mathbf{b}$ is $1 \times 12$ and $\mathbf{A}$ $\mathbf{b}$ is $12 \times 12$. Because the number of rows of the matrix are the same as the lengtth (number of columns) of the vector, the multiplication is allowed (the terms are conformable) and the result will be a $1 \times 12$ row vector of status scores that we will call $\mathbf{s}^{ex}$:
+Accordingly, we can get each person's weighted status score by taking the exogenous status scores vector $\mathbf{b}$ and multiplying by the network's adjacency matrix $\mathbf{A}$. In this case, $\mathbf{b}$ is $1 \times 12$ and $\mathbf{A}$ $\mathbf{b}$ is $12 \times 12$. Because the number of rows of the matrix are the same as the lengtth (number of columns) of the vector, the multiplication is allowed (the terms are conformable) and the result will be a $1 \times 12$ row vector of status scores that we will call $\mathbf{s}^{ex}$:
 
 $$
   \mathbf{s}^{ex} = \mathbf{b}\mathbf{A}
