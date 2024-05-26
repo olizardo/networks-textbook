@@ -5,7 +5,6 @@
      library(tidygraph)
      library(igraph)
      library(kableExtra)
-
 ```
 
 In @sec-centrality we discussed the idea of centrality mainly from a "positional" perspective. That is, a node's centrality depends on *where* they are located in the connectivity structure of the graph [@borgatti05]. Either by being "close" to many others, either directly---as with **degree centrality**---or indirectly---as with **closeness centrality**---or being in the "middle" of the connections of many others---as with **betweennness centrality**.
@@ -61,23 +60,21 @@ Let's see how this would work.
 ```
 
 ```{r}
-     eig.iter <- function(x, e = 0.000001) {
-          n <- nrow(x)
-          w <- 1
+     eig.iter <- function(A, e = 0.000001) {
+          n <- nrow(A)
           c <- rep(1, n)
-          k <- 0
           m <- c
+          w <- 1
+          k <- 0
           while (w > e) {
-               o.c <- c
-               for (i in 1:n) {
-                    c[i] <- sum(o.c * x[, i])
-                    }
-          c <- c/max(c)
-          w <- abs(sum(abs(c) - abs(o.c)))
-          m <- cbind(m, c)
-          k <- k + 1
-          }
-      return(list(c =c, o.c = o.c, w = w, k = k, m = m))
+            o.c <- c
+            c <- A %*% c
+            c <- c/norm(c, type = "E")
+            m <- cbind(m, c)
+            w <- abs(sum(abs(c) - abs(o.c)))
+            k <- k + 1
+            }
+      return(list(k = k, m = m))
 }
 eig.res <- eig.iter(A)
 ```
@@ -252,7 +249,7 @@ c <- round(b/max(b), 3)
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
 
-First we take the first column of @tbl-eigen-1 and arrange it as a vector $\mathbf{e}$, as in @tbl-eigvec-1. Since the numbers in the eigenvector are negative, we get rid of the negative by taking the absolute value of the scores in the vector $|\mathbf{e}|$, as in tbl-eigvec-2. Finally, because we only care about the rank and not the specific number, we divide by the maximum value $max(|\mathbf{e}|) = 0.473$, which turns them into the scores shown inn @tbl-eigvec-3. As shown in @tbl-eig-final-2, these scores are identical to that which we found via our iterative procedure!
+First we take the first column of @tbl-eigen-1 and arrange it as a vector $\mathbf{e}$, as in @tbl-eigvec-1. Since the numbers in the eigenvector are negative, we get rid of the negative by taking the absolute value of the scores in the vector $|\mathbf{e}|$, as in @tbl-eigvec-2. Finally, because we only care about the rank and not the specific number, we divide by the maximum value $max(|\mathbf{e}|) = 0.473$, which turns them into the scores shown inn @tbl-eigvec-3. As shown in @tbl-eig-final-2, these scores are identical to that which we found via our iterative procedure!
 
 These eigenvector centrality scores, therefore, give us a sense of which nodes in the network are well-connected, in the sense of receiving centrality from being linked to central others. 
 

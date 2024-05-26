@@ -1,0 +1,112 @@
+# Centralities based on Shortest Paths {#sec-pathcent}
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+## Betweenness Centrality 
+Recall that in our discussion of shortest paths between pair of nodes in the lesson on indirect connections, we noted the importance of the inner nodes that *intervene* or *mediate* between a node that wants to reach another one. Nodes that stand in these **brokerage** or **gatekeeper** slots in the network, occupy an important position [@marsden83], and this is different from having a lot of contacts (like degree centrality), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality). Instead, this is about being *in-between* the indirect communications of other nodes in graph. We can compute a centrality metric for each node called **betweenness centrality** that captures this idea [anthonisse71, @freeman77, @freeman80]. 
+
+```{r}
+#| label: fig-bet
+#| fig-cap: "An undirected graph showing the node with the maximum betweenness centrality (in red)"
+#| fig-cap-location: margin
+#| fig-width: 12
+#| fig-height: 8
+
+  set.seed(76)
+  fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+  to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+  gr <- as_tbl_graph(simplify(gr))    
+  gr <- gr %>%   
+        activate(nodes) %>%
+        mutate(btc = centrality_betweenness()) %>% 
+        mutate(col = as.character(btc == max(btc)))
+  p <- ggraph(gr, layout = 'kk') 
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y, colour = col), size = 18)
+  cols <- c("TRUE" = "red", "FALSE" = "tan1")
+  p <- p + scale_discrete_manual(values = cols, aesthetics = "colour")
+  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + theme_graph()  
+  p <- p + theme(legend.position = "none")
+  p
+```
+
+For instance, let's say you were actor *K* in the network shown in @fig-clos, and you wanted to know who is the person that you depend on the most to communicate with actor *J*. Here dependence means that you are forced to "go through them" if *I* wanted to reach *N* via a shortest path. One way *K* could figure this out is by listing every shortest path having them as the **origin node** and having *N* as the **destination node**. After you have this list, you can see which of other other nodes shows up as an **inner node**---an intermediary or gatekeeper---in those paths the most times. 
+
+This shortest path list would look like this: 
+
+1. $\{KH, HF, FJ\}$
+
+1. $\{KD, DF, FJ\}$
+
+1. $\{KH, HN, NJ\}$
+
+1. $\{KA, AC, CJ\}$
+
+1. $\{KA, AE, EJ\}$
+
+1. $\{KH, HE, EJ\}$
+
+There are six shortest paths of length three indirectly connecting actors *K* and *J* in @fig-clos), with nodes $\{A, C, D, E, F, H, N\}$ showing up as an inner node in at least one of those paths. To see which other actor in the network is the most frequent intermediary between *J* and *K*, we can create a list with the number of times each of these nodes shows up as an intermediary in this shortest path list. This would look like this:
+
+```{r}
+#| label: tbl-pairdep 
+#| tbl-cap: Intermediaries between nodes J and K
+#| tbl-cap-location: margin
+
+    n <- c("A", "C", "D", "E", "F", "H", "N") 
+    t <- c(2, 1, 1, 2, 2, 3, 1)
+    p <- round(t/6, 2)
+    d <-data.frame(n, t, p)
+    names(d) <- c("Node", "Freq.", "Prop.")
+    kbl(d, format = "pipe", align = "c") 
+```
+
+So it looks like, looking at the second column of @tbl-pairdep, that *H* is the other actor that *J* depends on the most to reach *K*. A better way to quantify this, is to actually look at the *proportion* of paths linking *J* and *K* that a particular other node (like *H*) shows up in. Let's call this $p_{K(H)J}$ which can be read as "the proportion of paths between *K* and *J* featuring *H* as an inner node." This is shown in the third column of @tbl-pairdep We can write this in equation form like this:
+
+$$
+  p_{K(H)J} = \frac{g_{K(H)J}}{g_{KJ}} = \frac{3}{6} = 0.5
+$$   {#eq-pairdep}
+
+In @eq-pairdep, $g_{K(H)J}$ is the number of shortest paths linking *K* and *J* featuring *H* as an inner node, and $g_{KJ}$ is the total number of paths linking *K* and *J*. @freeman80 calls this measure the **pair-dependency** of actor *K* on actor *H* to reach a given node *J*. In this case, $g_{K(H)J} = 3$ and $g_{KJ} = 6$, which means that actor *K* depends on actor *H* for fifty percent of their shortest path access to *J*. Making *H* the actor in the network *J* depends on the most to be able to reach *J*. 
+
+Generalizing this approach, we can do the same for each triplet of actors *i*, *j*, and *k* in the network. This is the basis for calculating betweenness centrality. That is, we can count the number of times *k* stands on the shortest path between two other actors *i* and *j*. We can all this number $g_{i(k)j}$. We can then divide it by the total number of shortest paths linking actors *i* and *j* in the network, which we refer by $g_{ij}$. Remember that two actors can be indirectly linked by *multiple shortest paths of the same length*, and that we can figure out how many short paths links pairs of actors in the network using the **shortest paths matrix**.
+
+This ratio, written $\frac{g_{i(k)j}}{g_{ij}}$ then gives us the *proportion* of shortest paths in the network that have *i* and *j* as the end nodes and that feature *k* as an intermediary inner node. This can range from zero (no shortest paths between *i* and *j* feature node *k* as an intermediary) to one (all the shortest paths between *i* and *j* feature node *k* as an intermediary).
+
+We can then use the following equation to compute the average of this proportion for each node *k* across each pair of actors in the network *i* and *j*:
+
+$$
+  C_k^{BET} = \sum_i \sum_j \frac{g_{i(k)j}}{g_{ij}}
+$$ {#eq-betcen}
+
+Computing this quantity for the graph shown in @fig-bet, yields the  betweenness centrality scores shown in @tbl-bet.
+
+```{r}
+#| label: tbl-bet 
+#| tbl-cap: "Betweenness centrality scores."
+#| tbl-cap-location: margin
+
+    set.seed(76)
+    fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+    to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
+    edge.dat <- edge.dat[order(fr, to),]
+    node.dat <- data.frame(name = union(edge.dat$fr, edge.dat$to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+    gr <- as_tbl_graph(simplify(gr))
+    b <- t(round(betweenness(gr), 1))
+    kbl(b, format = "pipe", align = "c") 
+```
+
+The numbers in the Table can be readily interpreted as percentages. Thus, the fact that node *J* has a a betweenness centrality score of 10.8 tells us that they stand in about 11% of the shortest paths between pairs of nodes in the graph. Interestingly, as shown in @fig-bet, the node that ends up with the highest betweenness score is *L* ($C_L^{BET} = 16.4$), mostly due to the fact that node *I*, who has the lowest possible betweenness score of zero, depends on this node for access to every other actor in the network. 
+
+Note also that two *different* nodes end up being ranked first on closeness and betweenness centrality in the same network (compare the red nodes in @fig-clos and @fig-bet). This tells us that closeness and betweenness are analytically distinct measures of node position. One (closeness) gets at reachability, and the other (betweenness) gets at intermediation potential. 
+## References {.unnumbered}

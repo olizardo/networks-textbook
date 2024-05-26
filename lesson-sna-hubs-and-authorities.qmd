@@ -1,0 +1,213 @@
+# Hubs and Authorities {#sec-hubs}
+
+```{r setup, include=FALSE}
+     library(ggraph)
+     library(tidygraph)
+     library(igraph)
+     library(kableExtra)
+```
+
+In @sec-eigen we saw a way to think of centrality as being "reflected" in the connections you have with others. Rather than being a property of the person, centrality is a property of the relations that a given person has with central others. We studied that idea in the case of an undirected graph, which gave us a conception of this type of reflective centrality as **eigenvector centrality**.
+
+In this chapter we extend this idea to the case of asymmetric relations represented as a **directed graph**. The added complexity is that we have to think of two ways people's centrality is reflected from their connections to others. On the one hand, a person can be central because many people seek their advice or services, or think of them as smart, capable, likable, and so on. That is, people are central when they *receive* many directed ties from other people. We will call these people **authorities** [@kleinberg99]. 
+
+At the same time, there are people who while not being authorities themselves, serve as a *conduit* to authorities. These people get their centrality by pointing to authorities, and you get centrality by pointing to them (because that puts you just a few steps away from authorities). Thus a person who direct ties to many other people who are themselves authorities has a certain knowledge of the social structure that is valuable (they know the people who others need to know). We will call these people **hubs** [@kleinberg99].
+
+At first pass, the distinction between hubs and authorities thus boils down to this:
+
+- Authorities are people who are pointed to by many other people.
+
+- Hubs are people who point to authorities. 
+
+Nevertheless, as we discussed in @sec-status, not all people are created the same. A really good authority should be a person who gets lots of incoming nominations, not just from everyone, but from people who are also considered good hubs by other people. And what is a good hub? Well a good hub is a person who points to really good authorities. Thus, your status as an authority or a hub is both *reflective* and *recursive*. The reason for this is that the "goodness" of authorities and hubs is defined in terms of one another, just like the snake eating its own tail we found in @sec-eigen. 
+
+Thus, if $\mathbf{u}$ is a $n \times 1$ column vector containing the authority scores of a set of nodes in a graph---a set of numbers ranking nodes from top to bottom in terms of their authoritativeness--and $\mathbf{v}$ is a column vector of the same length containing the hub scores---a set of numbers ranking nodes from top to bottom depending of how good they are in pointing to authorities---then the two vectors $\mathbf{u}$ and $\mathbf{v}$ should be linked by the following mathematical relationship:
+
+$$
+\mathbf{u} = A^T \mathbf{v}
+$$ {#eq-klein1}
+
+$$
+\mathbf{v} = A \mathbf{u}
+$$ {#eq-klein2}
+
+Where $A$ is the adjacency matrix. That is, the authority scores should be a function of the hub scores of the *incoming* ties to a node---recorded in the transpose of the original adjacency matrix $A^T$---and the hub scores should be a function of authority scores of the outgoing ties to a node---recorded in the origina adjacency matrix $A$. 
+
+Note that in @eq-klein1 and @eq-klein2 we face the same chicken and the egg problem we encountered in @sec-eigen. Because the authorities scores are defined in terms of the hub scores, we can't figure those out until we find the hub scores, but because the hub scores are defined in terms of the authority scores we can't figure those out until we find the authority scores!
+
+The solution to our dilemma is similar to the one we used in @sec-eigen. We can give each node in the network the same number of "starting" hub points to give out to every node they point to for free---let's say every node with an outgoing edge gives one hub point to their out-neighbor---and then calculate the authority scores of all nodes $\mathbf{u}$ using @eq-klein1. Then we can use those $\mathbf{u}$ scores to calculate the hub scores $\mathbf{v}$ using @eq-klein2. A node's authority score is the sum of the hub scores of the nodes that point to it, and a node's hub score is the sum of the authority scores of the nodes they point to. We rinse, repeat and stop once the rank order of nodes on both the authority and hub ranking stops changing. 
+
+How would this work in a social network? Let us see. @fig-dirgraph shows a directed graph representing a set of asymmetric ties between people (this is the same graph from @sec-status) and @tbl-adjmat is the corresponding adjacency matrix. 
+
+```{r}
+#| label: fig-dirgraph
+#| fig-cap: "A directed graph."
+#| fig-cap-location: margin
+#| fig-height: 8
+#| fig-width: 8
+
+set.seed(222)
+
+a <- c(rep(1:12, 3))
+b <- sample(1:12, 36, replace = TRUE)
+gr <- as_tbl_graph(data.frame(from = a, to = b)) %>% 
+  simplify(remove.multiple = TRUE) %>% 
+  as_tbl_graph() %>% 
+  activate(nodes) %>% 
+    mutate(name = LETTERS[1:12])
+  p <- ggraph(gr, layout = 'auto')
+  p <- p + geom_edge_parallel(color = "steelblue4", edge_width = 1.15,
+              arrow = arrow(length = unit(5, 'mm')),
+              end_cap = circle(8, 'mm'), 
+              sep = unit(8, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+```{r}
+#| label: tbl-adjmat
+#| tbl-cap: "Adjacency matrix corresponding to a directed graph."
+#| tbl-cap-location: margin
+
+  A <- as.matrix(as_adjacency_matrix(gr))
+  kbl(A, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+```
+
+
+Now, let's assign everyone "one" hub point to begin with. That means that the the $\mathbf{v_1}$ column vector that goes into @eq-klein1 will just be a $12 \times 1$ column vector full of ones. This is shown in @tbl-klein-1
+
+Thus, when we plug the numbers in @tbl-klein-1 into @eq-klein1, we get a column vector with the entries shown in @tbl-klein-2. Note that these are the **in-degrees** of each node in the graph. This makes sense, because multiplying an adjacency matrix times the **all ones vector** results in a vector that is just the row sums of the original matrix (as we learned in @sec-matmult). 
+
+Multiplying the transpose of the adjacency matrix times the all ones vector gives us the row sums of the transpose, which is the same as the column sums of the original adjacency matrix (which is how we calculate in-degree centrality; see @sec-centrality).
+
+Now all we need to do is plug the authority score vector $\mathbf{u_1}$ shown in @tbl-klein-2 into @eq-klein2 to calculate the new hub score vector $\mathbf{v_2}$ But before we do that we normalize the authority score vector $\mathbf{u_1}$ by dividing by the maximum observed score ($max(\mathbf{u_1}) = 5$, to get the new authority score vector $\mathbf{u_1}$ shown in @tbl-klein-3. We plug in *these* entries into @eq-klein2 and divide by the maximum, to get the hub score vector $\mathbf{v_2}$ shown in @tbl-klein-4. 
+
+```{r}
+#| label: tbl-klein
+#| tbl-cap: "First four steps in finding hub and authority scores."
+#| layout-ncol: 4
+#| tbl-subcap: 
+#|   - ""
+#|   - ""
+#|   - ""
+#|   - ""
+
+  a <- rep(1, 12)
+  names(a) <- LETTERS[1:12]
+  kbl(a, format = "html", align = "c", col.names = NULL) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))  
+  a <- t(A) %*% rep(1, 12)
+  kbl(a, format = "html", align = "c", col.names = NULL) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+  kbl(round(a/max(a), 2), format = "html", align = "c", col.names = NULL) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+  kbl(round(hit.res$m.h[,2], 2), format = "html", align = "c", col.names = NULL) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+Of course, the point is to keep this iteration going until we have minimal differences between the $\mathbf{u_k}$ and $\mathbf{u_k}$ vectors at step $k$ and those we found at step $k - 1$. After `r hit.res$k` iterations, we find the final hub and authority scores shown in @tbl-hits-1 and @tbl-hits-2, which each node arranged from top to bottom according to their respective scores. 
+
+```{r}
+#| label: tbl-hits
+#| tbl-cap: "Final hub and authority scores."
+#| layout-ncol: 2
+#| tbl-subcap: 
+#|   - "Final authority scores"
+#|   - "Final hub scores"
+  a <- round(hit.res$m.a[, hit.res$k], 2)
+  b <- round(hit.res$m.h[, hit.res$k], 2)
+  kbl(sort(a, decreasing = T), format = "html", align = "c", col.names = NULL) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))  
+  a <- A %*% rep(1, 12)
+  kbl(sort(b, decreasing = T), format = "html", align = "c", col.names = NULL) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+```
+
+As we can see from @tbl-hits-1, node $F$ is the undisputed authority in the network. If @fig-dirgraph was an advice network, that's the person you'd want to go to, because the people who other people go to, also go to them. 
+
+Nevertheless, if you didn't know that $F$ was the main authority, you'd want to ask the people who seek advice from that authority even if not that many people seek advice from them. These are the "hubs" in the network, and they happen to be nodes $J$, $H$, and $C$. 
+
+Node $C$ is an interesting case; no one points to $C$ ($C$'s in-degree is zero which makes them last in the authority rank as shown in @tbl-hits-1), but because $C$ points to $F$, it makes them one of the best hubs (so still a good person to know, because he knows who the important people are).
+
+Now as you recall from @sec-eigen, every time we have this kind of chicken and the egg, snake eating its own tail problem, it seems to also be possible to compute the rankings without iterating back and forth, and instead solving a matrix equation using linear algebra methods [@bonacich72]. This time is no exception. 
+
+Consider the matrix $B$ that results when we multiply the transpose of the adjacency matrix times the original adjacency matrix:
+
+$$
+B = A^TA
+$$ {#eq-com1}
+
+This matrix is shown in @tbl-ata. As we have seen, this matrix records the number of *common in-neighbors* that the row node *i* has with the column node *j* (with the diagonals recording the in-degrees of each node). 
+
+```{r}
+#| label: tbl-ata
+#| tbl-cap: "Common in-neighbors matrix."
+  B <- t(A) %*% A
+  kbl(B, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))  
+```
+
+Now also consider the matrix $C$ that results when we multiply the original adjacency matrix times its transpose:
+
+$$
+C = AA^T
+$$ {#eq-com2}
+
+This matrix is shown in @tbl-aat. As we have also seen, this matrix records the number of *common out-neighbors* that the row node *i* has with the column node *j* (with the diagonals recording the out-degrees of each node). 
+
+```{r}
+#| label: tbl-aat
+#| tbl-cap: "Common out-neighbors matrix."
+  C <- A %*% t(A)
+  kbl(C, format = "html", align = "c") %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))  
+```
+
+It turns out that our final authority score vectors $\mathbf{u}$ hub score vectors $\mathbf{v}$ are equivalent to the ones that solve the following equations:
+
+$$
+B\mathbf{u} = \lambda^B \mathbf{u}
+$$ {#eq-eig1}
+
+$$
+C\mathbf{v} = \lambda^C \mathbf{v}
+$$ {#eq-eig2}
+
+Which means that $\mathbf{u}$ in @eq-eig1 is an eigenvector of the common in-neighbors matrix $B$ and $\mathbf{v}$ in @eq-eig2 is an eigenvector of the common out-neighbors matrix $C$ (with $\lambda^B$ and $\lambda^C$ being the corresponding eigenvalues). In fact, $\mathbf{u}$ and $\mathbf{v}$ are the leading (first) eigenvectors of the common in and out-neighbors matrices (respectively). The absolute values of these two eigenvectors are shown in @tbl-hits-eig. 
+
+```{r}
+#| label: tbl-hits-eig
+#| tbl-cap: "Final hub and authority scores according to the eigenvalues of the in and out-neighbor matrices."
+#| layout-ncol: 2
+#| tbl-subcap: 
+#|   - "First Eigenvector of the common in-neighbor matrix"
+#|   - "First Eigenvector of the common out-neighbor matrix"
+
+  a <- round(abs(eigen(B)$vectors[,1]), 3)
+  names(a) <- LETTERS[1:12]
+  b <- round(abs(eigen(C)$vectors[,1]), 3)
+  names(b) <- LETTERS[1:12]
+  kbl(sort(a, decreasing = T), format = "html", align = "c", col.names = NULL) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))  
+  kbl(sort(b, decreasing = T), format = "html", align = "c", col.names = NULL) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+```
+
+As we can see the order of nodes in terms of authority and hub scores is the same as that obtained by the iterative procedure!
+
+
+## References {.unnumbered}

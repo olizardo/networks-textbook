@@ -1,0 +1,113 @@
+# Centralities based on Degree {#sec-degcent}
+
+```{r setup, include=FALSE}
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+## Degree Centrality 
+
+The most basic way of defining centrality is simply as a measure of how many alters an ego is connected to. This simply takes a node's degree as introduced in @sec-degree, and begins to consider this measure as a reflection of importance of the node in the network. The logic is that those with more direct connections to others, compared to those with fewer, hold a more prominent place in the network. 
+
+Once we have constructed the **adjacency matrix** for the network (**A**), then degree centrality is easy to calculate. As @eq-degcen for a given node *i* the degree centrality is given by summing the entries of its corresponding row.
+
+$$
+  C_i^{DEG} = \sum_{j= 1}^{n}a_{ij}
+$$ {#eq-degcen}
+
+@eq-degcen thus *ranks each node in the graph based on the number of other nodes that it is adjacent to*. Just like real life, some nodes will be popular (they will be adjacent to lots of other nodes), while others will be unpopular. 
+
+Although it might seem a simple task to just add up the number of connections of each node, that is essentially what the below mathematical equation is doing! Mathematical notation plays an important role in expressing network measures in succinct formats. 
+
+For instance, if we were to use @eq-degcen to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in @fig-undirected then we would end up with the following degree centralities for each node:
+
+```{r}
+#| label: tbl-degcen 
+#| tbl-cap: "Degree centralities of nodes in an undirected graph."
+#| tbl-cap-location: margin
+
+  gr <- create_empty(9, directed = FALSE)
+  gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+  
+    d <- degree(gr)
+    d <- t(d)
+    kbl(d, format = "pipe", align = "c") 
+```
+
+## Indegree and Outdegree Centrality 
+If we are talking about a **directed graph**, then there are two types of degree centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of *sociability* or *expansiveness* that is how many other nodes in the graph a given node **sends** links to. This is called the **outdegree centrality** of that node, written as $C_i^{OUT}$. As with the undirected case, this is computed by summing across the rows of the **asymmetric adjacency matrix** corresponding to the directed graph in question, using @eq-degcen:
+
+$$
+  C_i^{OUT} = \sum_ja_{ij}
+$$  {#eq-outdegcen}
+
+However, in a directed graph, we may also be interested in how *popular* or *sought after* by others a given node is. That is, how many other actors send ties *to* that node. In which case we need to sum across the **columns** of the asymmetric adjacency matrix, and modify the formula as follows:
+
+$$
+  C_j^{IN} = \sum_ia_{ij}
+$$   {#eq-indegcen}
+
+Note that in this version of the equation, we are summing over *j* (the columns) not over *i* (the rows) as given by subscript under the $\sum$ symbol.
+
+For instance, if we were to use equations @eq-outdegcen and @eq-outdegcen to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in @fig-directed), then we would up with the following centralities for each node:
+
+```{r}
+#| label: tbl-outindegcen
+#| tbl-cap: "Out and Indegree centralities of nodes in a directed graph."
+#| tbl-cap-location: margin
+
+    fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+    to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = TRUE)
+    gr <- simplify(gr)
+    d.out <- degree(gr, mode = "out")
+    d.in <- degree(gr, mode = "in")
+    d <- rbind(d.out, d.in)
+    rownames(d) <- c("Outdegre", "Indegree")
+    kbl(d, format = "pipe", align = "c") 
+```
+
+Just like the degree centrality for undirected graphs, the outdegree and indegree centralities rank each node in a directed graph. The first, outdegree centrality, ranks each node based on the number of other nodes that they are connected to. This is a kind of popularity based on *sociability*, or the tendency to seek out the company of others. The second, indegree centrality, ranks each node in the graph based on the number of other nodes that connect to that node. This is a kind of popularity based on on *being sought after* a kind of status. 
+
+### Normalized Degree Centrality {#sec-normdeg}
+When we compute the degree centrality of a node, are counting the number of other nodes that they are connected to. Obviously, the more nodes there are to connect to, the more opportunities there will be to reach a larger number. But what happens if we wanted to compare the degree centrality of nodes in two very different networks? 
+
+For instance, if your high-school has one thousand people and you have twenty friends, that's very different from having twenty friends in a high-school of only one hundred people. It seems like the second person, with twenty friends (covering 20% of the population) in a high-school of one-hundred people is definitely more popular than the second person with twenty friends (covering 2% of the population), in a high school with one thousand people.
+
+That's why Freeman @freeman79 proposed *normalizing* the degree centrality of each node by the *maximum* possible it can take in a given network. As you may have guessed, the maximum degree in a network is $N-1$ the order of the graph minus one. Essentialy, everyone but you! 
+
+We can compute the normalized degree centrality using the following equation:
+
+$$
+  C_{i(norm)}^{DEG} = \frac{C_{i}^{DEG}}{N-1}
+$$   {#eq-indegcen}
+
+Where we just divide the regular degree centrality computed using @eq-degcen by the order of the graph minus one. This will be equal to $1.0$ if a person knows *everyone* and $0$ is a person knows *no one*. For all the other nodes it will be a number between zero and one. 
+
+Moreover, this measure is sensitive to the order of the graph. Thus, for a person with twenty friends in a high-school of a thousand people, the normalized degree centrality is equal to:
+
+$$
+  C_{i(norm)}^{DEG} = \frac{20}{1000-1}= 0.02
+$$   {#eq-indegcen}
+
+But for the person with the same twenty friends in a high-school of one-hundred people, it is equal to:
+
+$$
+  C_{i(norm)}^{DEG} = \frac{20}{100-1}= 0.20
+$$   {#eq-indegcen}
+
+Indicating that a person with the same number of friends in the smaller place is indeed more central!
+
+## References {.unnumbered}

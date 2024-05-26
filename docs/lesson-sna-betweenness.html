@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Social Networks - 5&nbsp; Basic Graph Metrics</title>
+<title>Social Networks - 22&nbsp; Centralities based on Shortest Paths</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -48,8 +48,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./lesson-graphs-neighborhoods.html" rel="next">
-<link href="./lesson-graphs-ties.html" rel="prev">
+<link href="./lesson-sna-eigenvector.html" rel="next">
+<link href="./lesson-sna-closeness.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -86,7 +86,7 @@ div.csl-indent {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating nav-fixed">
+<body class="nav-sidebar floating nav-fixed slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -104,7 +104,7 @@ div.csl-indent {
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></h1>
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -160,7 +160,7 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
+  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -244,17 +244,27 @@ div.csl-indent {
   <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-closeness.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-betweenness.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <span class="sidebar-item-text sidebar-link text-start">Prestige</span>
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></a>
+  <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Status</span></a>
+  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Status</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -262,7 +272,7 @@ div.csl-indent {
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-nets-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
+  <a href="./lesson-nets-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
   </div>
 </li>
     </ul>
@@ -274,32 +284,16 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#computing-metrics-on-graphs" id="toc-computing-metrics-on-graphs" class="nav-link active" data-scroll-target="#computing-metrics-on-graphs"><span class="toc-section-number">5.1</span>  Computing Metrics on Graphs</a>
-  <ul class="collapse">
-  <li><a href="#graph-order" id="toc-graph-order" class="nav-link" data-scroll-target="#graph-order"><span class="toc-section-number">5.1.1</span>  Graph Order</a></li>
-  <li><a href="#graph-size" id="toc-graph-size" class="nav-link" data-scroll-target="#graph-size"><span class="toc-section-number">5.1.2</span>  Graph Size</a></li>
-  </ul></li>
-  <li><a href="#the-graph-maximum-size" id="toc-the-graph-maximum-size" class="nav-link" data-scroll-target="#the-graph-maximum-size"><span class="toc-section-number">5.2</span>  The Graph Maximum Size</a></li>
-  <li><a href="#graph-maximum-size-explainer" id="toc-graph-maximum-size-explainer" class="nav-link" data-scroll-target="#graph-maximum-size-explainer"><span class="toc-section-number">5.3</span>  Graph Maximum Size Explainer</a>
-  <ul class="collapse">
-  <li><a href="#applying-your-knowledge" id="toc-applying-your-knowledge" class="nav-link" data-scroll-target="#applying-your-knowledge"><span class="toc-section-number">5.3.1</span>  Applying your knowledge</a></li>
-  </ul></li>
-  <li><a href="#graph-density" id="toc-graph-density" class="nav-link" data-scroll-target="#graph-density"><span class="toc-section-number">5.4</span>  Graph Density</a>
-  <ul class="collapse">
-  <li><a href="#density-in-undirected-graphs" id="toc-density-in-undirected-graphs" class="nav-link" data-scroll-target="#density-in-undirected-graphs"><span class="toc-section-number">5.4.1</span>  Density in Undirected Graphs</a></li>
-  <li><a href="#density-in-directed-graphs" id="toc-density-in-directed-graphs" class="nav-link" data-scroll-target="#density-in-directed-graphs"><span class="toc-section-number">5.4.2</span>  Density in Directed Graphs</a></li>
-  <li><a href="#why-is-density-important" id="toc-why-is-density-important" class="nav-link" data-scroll-target="#why-is-density-important"><span class="toc-section-number">5.4.3</span>  Why is density important?</a></li>
-  </ul></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#betweenness-centrality" id="toc-betweenness-centrality" class="nav-link active" data-scroll-target="#betweenness-centrality"><span class="toc-section-number">22.1</span>  Betweenness Centrality</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-graphs-metrics.qmd" class="toc-action">View source</a></p></div></div></nav>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-sna-betweenness.qmd" class="toc-action">View source</a></p></div></div></nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content">
+<main class="content page-columns page-full column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-graphmetrics" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></span></h1>
+<h1 class="title"><span id="sec-pathcent" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></span></h1>
 </div>
 
 
@@ -314,103 +308,169 @@ div.csl-indent {
 
 </header>
 
-<section id="computing-metrics-on-graphs" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="computing-metrics-on-graphs"><span class="header-section-number">5.1</span> Computing Metrics on Graphs</h2>
-<p>As graphs are really just representations of real world-networks, they can be as varied as different networks are from one another. Some social networks are small (composed of just a few people), while others are large. In some social networks there is not much connectivity, while other networks feature thousands if not millions of ties between people.</p>
-<p>We can quantify a lot of these properties of real world networks by representing them as graphs and then computing <strong>graph metrics</strong>. This is fancy word for counting various numbers most of which are a function of the number of nodes and edges in a graph. In this lesson, we will review the most important graph metrics in social networks.</p>
-<section id="graph-order" class="level3" data-number="5.1.1">
-<h3 data-number="5.1.1" class="anchored" data-anchor-id="graph-order"><span class="header-section-number">5.1.1</span> Graph Order</h3>
-<p>The <strong>order</strong> of a graph (typically written as <span class="math inline">\(n\)</span>), is the <em>number of nodes</em> in the graph. Technically speaking, keeping in mind that the graph is really a set of a set of nodes and edges, the order is the cardinality of node set <span class="math inline">\(n = |V|\)</span>. <strong>Cardinality</strong> is simply a technical term from set theory indicating <em>how many elements</em> there are in a set. Thus, the graph in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a> has an order of 9, while <a href="lesson-graphs-ties.html#fig-directed">Figure&nbsp;<span>4.2</span></a> has an order of 7.</p>
-</section>
-<section id="graph-size" class="level3" data-number="5.1.2">
-<h3 data-number="5.1.2" class="anchored" data-anchor-id="graph-size"><span class="header-section-number">5.1.2</span> Graph Size</h3>
-<p>Likewise, the <strong>size</strong> of a graph (typically written as <span class="math inline">\(m\)</span>), is the <em>number of edges</em> in the graph, which is (like with nodes) the <strong>cardinality</strong> of the edge set <span class="math inline">\(m = |E|\)</span>. Thus, the <strong>size</strong> of the graph in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a> is 16, while the size of the graph in <a href="lesson-graphs-ties.html#fig-directed">Figure&nbsp;<span>4.2</span></a> it is 11.</p>
-<p>This means that if you say the <strong>size</strong> of the graph in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a> is 16, we will all understand that you are referring to the number of edges, as you would use the term <strong>order</strong> if you were talking about the number of nodes.</p>
-</section>
-</section>
-<section id="the-graph-maximum-size" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="the-graph-maximum-size"><span class="header-section-number">5.2</span> The Graph Maximum Size</h2>
-<p>In some cases we may be interested to know how many edges there <em>could</em> be in a graph if everyone had a relationship with everyone else in the network. This is the <em>maximum possible number of edges</em> that could exist in a network of order <span class="math inline">\(n\)</span>.</p>
-<p>Recall that, as we discussed previously, the number of edges in a graph is called the <strong>graph size</strong>. Additionally, a graph in which all the edges that could exist are actually present is called the <strong>complete graph</strong>. The <strong>maximum size</strong> of a graph of order <span class="math inline">\(n\)</span> is the number of edges that would exist in that graph is the graph was complete. A graph in which <em>no</em> edges exist (every node is an isolate), is called an <strong>empty graph</strong>.</p>
-<p>While this may seem like a complicated thing, it is actually given by a simple (and important) formula. For an <strong>undirected graph</strong> this is:</p>
-<p><span id="eq-graphmax1"><span class="math display">\[
-  Max(E)^{u}=\frac{n(n-1)}{2}
-\tag{5.1}\]</span></span></p>
-<p>For a <strong>directed graph</strong>, the same computation is even simpler. The maximum number of possible edges in this case is:</p>
-<p><span id="eq-graphmax2"><span class="math display">\[
-  Max(E)^d=n(n-1)
-\tag{5.2}\]</span></span></p>
-</section>
-<section id="graph-maximum-size-explainer" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="graph-maximum-size-explainer"><span class="header-section-number">5.3</span> Graph Maximum Size Explainer</h2>
-<p>Where do these formulas for maximum graph size come from? Let’s consider the directed case first. A graph would be complete if every node was connected to every other node. It is easy to see that for each node, this would be every other node in the graph except themselves. So in a complete graph of order <span class="math inline">\(n\)</span>, the degree of each node <em>has</em> to be <span class="math inline">\(n-1\)</span>. So if we call the degree of the first node in the graph <span class="math inline">\((n-1)_1\)</span>, then the <strong>degree set</strong> (<span class="math inline">\(\mathbf{k}^c\)</span>) of a complete graph would be:</p>
-<p><span id="eq-graphmax3"><span class="math display">\[
-  \mathbf{k}^{c} = [(n-1)_1, (n-1)_2, (n-1)_3 \dots (n-1)_n]  
-\tag{5.3}\]</span></span></p>
-<p>It is easy to see the that the <strong>sum of degrees</strong> (<span class="math inline">\(\sum k_i^c\)</span>) of the complete graph, will give us the maximum size for any graph of that order. So we can write that sum as:</p>
-<p><span id="eq-graphmax4"><span class="math display">\[
-  \sum k_i^{c} = \sum_i^{n} n-1
-\tag{5.4}\]</span></span></p>
-<p>Essentially we add up <span class="math inline">\(n-1\)</span> to <span class="math inline">\(n-1\)</span> to <span class="math inline">\(n-1\)</span>, etc. <span class="math inline">\(n\)</span> times, once for each node in the graph. From basic arithmetic, we know that adding the same number <span class="math inline">\(n\)</span> number of times is the same as multiplying that number by <span class="math inline">\(n\)</span>. So therefore, the maximum size of a complete graph of order <span class="math inline">\(n\)</span> is <span class="math inline">\(n \times n-1 = n(n-1)\)</span>, the formula written as <a href="#eq-graphmax2">Equation&nbsp;<span>5.2</span></a>!</p>
-<p>In the undirected case (<a href="#eq-graphmax1">Equation&nbsp;<span>5.1</span></a>, the procedure is the same, except that now each edge shows up twice in the degree sum, but one of those is redundant. Therefore we divide the whole sum of degrees by 2 to eliminate double-counting, resulting in <span class="math inline">\(\frac{n(n-1)}{2}\)</span> as the formula for the maximum size of an undirected graph or order <span class="math inline">\(n\)</span>.</p>
-<section id="applying-your-knowledge" class="level3" data-number="5.3.1">
-<h3 data-number="5.3.1" class="anchored" data-anchor-id="applying-your-knowledge"><span class="header-section-number">5.3.1</span> Applying your knowledge</h3>
-<p>You can now look a genius. If somebody were to ask you:</p>
-<p><strong>Q</strong>: In classroom with 10 kindergartners, how many total pairs of friends would exist if every kid was friends with every other kid?</p>
-<p>Using your graph theory metrics knowledge, you can now pull out your phone calculator and compute:</p>
-<p><span class="math display">\[
-  \frac{10(10-1)}{2} =
-  \frac{10(9)}{2} =
-  \frac{90}{2} = 45
-\]</span></p>
-<p>Impressing your audience immensely!</p>
-</section>
-</section>
-<section id="graph-density" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="graph-density"><span class="header-section-number">5.4</span> Graph Density</h2>
-<p>In a classic study, the British social anthropologist Elizabeth Bott, made a classic distinction between two types of network structure. According to Bott, some networks are <strong>tight-knit</strong> and others are <strong>loose-knit</strong> <span class="citation" data-cites="bott57">(<a href="#ref-bott57" role="doc-biblioref">Bott 1957</a>)</span>. Tight-knit networks feature a lot of connections and actors can reach others via multiple pathways. Loose-knit networks are more sparsely connected and actors are only reachable to one another via a very restricted set of pathways.</p>
-<p>It was soon realized that a very simple graph metric, called the <strong>network density</strong> could be a useful index of Bott’s ideas of tight versus loose-knit networks. Tight-knit networks are <strong>dense</strong> featuring a lot of inter-connections between actors, while loose-knit networks are less dense <span class="citation" data-cites="barnes69">(<a href="#ref-barnes69" role="doc-biblioref">Barnes 1969</a>)</span>. How can we think of this in terms of graph theory concepts?</p>
-<section id="density-in-undirected-graphs" class="level3" data-number="5.4.1">
-<h3 data-number="5.4.1" class="anchored" data-anchor-id="density-in-undirected-graphs"><span class="header-section-number">5.4.1</span> Density in Undirected Graphs</h3>
-<p>The density <span class="math inline">\(d(G)\)</span> of a graph is a measure of <em>how many ties between actors exist compared to how many ties between actors are possible</em>, given the <strong>graph size</strong> (number of nodes) and the <strong>graph order</strong> (number of links). As such, the density of an undirected graph is quite simply calculated as, the ratio between the observed number of edges <span class="math inline">\(m\)</span> (the cardinality of the edge set), and the graph maximum size as defined using <a href="#eq-graphmax1">Equation&nbsp;<span>5.1</span></a>.</p>
-<p><span id="eq-dens1"><span class="math display">\[
-  d(G)^u=\frac{m}{\frac{n(n-1)}{2}}=m \times \frac{2}{n(n-1)}=\frac{2m}{n(n-1)}
-\tag{5.5}\]</span></span></p>
-<p>Where <span class="math inline">\(m\)</span> is the number of edges (graph size) and <span class="math inline">\(n\)</span> is the number of nodes (graph order) in the network.</p>
-<p>For the graph shown in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a>, of size <span class="math inline">\(m = 16\)</span> and order <span class="math inline">\(n=9\)</span>, we can use <a href="#eq-dens1">Equation&nbsp;<span>5.5</span></a> to compute the graph density as follows:</p>
-<p><span class="math display">\[
-  d(G)^u = \frac{2m}{n(n-1)} =
-  \frac{2 \times 16}{9 \times (9-1)}=
-  \frac{32}{9 \times 8} =
-  \frac{32}{72} =
-  0.44
-\]</span></p>
-<p>The estimated density of the network, <span class="math inline">\(d = 0.44\)</span> tell us that 44% of the total possible number of edges are actually observed. Another way to think about density, is as giving the <em>probability</em> that, if we were to choose two random nodes in the network, this random dyad will have probability <span class="math inline">\(p = 0.44\)</span> of being <strong>connected</strong> (as opposed to <strong>null</strong>).</p>
-</section>
-<section id="density-in-directed-graphs" class="level3" data-number="5.4.2">
-<h3 data-number="5.4.2" class="anchored" data-anchor-id="density-in-directed-graphs"><span class="header-section-number">5.4.2</span> Density in Directed Graphs</h3>
-<p>To compute the density of a directed graph, there is no need to multiply the numerator by two, as each edge does single duty. As such, the equation for computing the density of a directed graph is:</p>
-<p><span id="eq-densdir"><span class="math display">\[
-  d(G)^d=\frac{m}{n(n-1)}
-\tag{5.6}\]</span></span></p>
-<p>Which is even simpler than in the directed case!</p>
-</section>
-<section id="why-is-density-important" class="level3" data-number="5.4.3">
-<h3 data-number="5.4.3" class="anchored" data-anchor-id="why-is-density-important"><span class="header-section-number">5.4.3</span> Why is density important?</h3>
-<p>The density of a network property is important to consider for two reasons. First, (which is the definition of density!) is that it can help us understand how connected the network is compared to how connected it might be. Second, when comparing two networks with the same number of nodes and the same type of relationships, it can tell us how the networks are different.</p>
-<p>For example, let us imagine that there are two organizations, each with 10 people in them. The one organization has high density and the other has low density in terms of the interactions among the members. What might be some of the underlying social differences between the two organizations? While we would need more information, we could posit that the one issue might be that information does not transmit very efficiently across the low density organization because it has to go from member to member, rather than diffusing from one member rapidly to all the others. Another issue might be the “hit by a bus” problem, where if one or two members are taken out of the network, you can suffer breakdown because they are no longer there to coordinate the different parts that don’t talk to each other. Denser networks are less vulnerable to disruption due to remove of key nodes.</p>
-</section>
-</section>
-<section id="references" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<section id="betweenness-centrality" class="level2 page-columns page-full" data-number="22.1">
+<h2 data-number="22.1" class="anchored" data-anchor-id="betweenness-centrality"><span class="header-section-number">22.1</span> Betweenness Centrality</h2>
+<p>Recall that in our discussion of shortest paths between pair of nodes in the lesson on indirect connections, we noted the importance of the inner nodes that <em>intervene</em> or <em>mediate</em> between a node that wants to reach another one. Nodes that stand in these <strong>brokerage</strong> or <strong>gatekeeper</strong> slots in the network, occupy an important position <span class="citation" data-cites="marsden83">(<a href="#ref-marsden83" role="doc-biblioref">Marsden 1983</a>)</span>, and this is different from having a lot of contacts (like degree centrality), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality). Instead, this is about being <em>in-between</em> the indirect communications of other nodes in graph. We can compute a centrality metric for each node called <strong>betweenness centrality</strong> that captures this idea <span class="citation" data-cites="freeman77">Freeman (<a href="#ref-freeman80" role="doc-biblioref">1980</a>)</span>.</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-bet" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-sna-betweenness_files/figure-html/fig-bet-1.png" class="img-fluid figure-img" width="1152"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;22.1: An undirected graph showing the node with the maximum betweenness centrality (in red)</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For instance, let’s say you were actor <em>K</em> in the network shown in <a href="lesson-sna-closeness.html#fig-clos">Figure&nbsp;<span>21.1</span></a>, and you wanted to know who is the person that you depend on the most to communicate with actor <em>J</em>. Here dependence means that you are forced to “go through them” if <em>I</em> wanted to reach <em>N</em> via a shortest path. One way <em>K</em> could figure this out is by listing every shortest path having them as the <strong>origin node</strong> and having <em>N</em> as the <strong>destination node</strong>. After you have this list, you can see which of other other nodes shows up as an <strong>inner node</strong>—an intermediary or gatekeeper—in those paths the most times.</p>
+<p>This shortest path list would look like this:</p>
+<ol type="1">
+<li><p><span class="math inline">\(\{KH, HF, FJ\}\)</span></p></li>
+<li><p><span class="math inline">\(\{KD, DF, FJ\}\)</span></p></li>
+<li><p><span class="math inline">\(\{KH, HN, NJ\}\)</span></p></li>
+<li><p><span class="math inline">\(\{KA, AC, CJ\}\)</span></p></li>
+<li><p><span class="math inline">\(\{KA, AE, EJ\}\)</span></p></li>
+<li><p><span class="math inline">\(\{KH, HE, EJ\}\)</span></p></li>
+</ol>
+<p>There are six shortest paths of length three indirectly connecting actors <em>K</em> and <em>J</em> in <a href="lesson-sna-closeness.html#fig-clos">Figure&nbsp;<span>21.1</span></a>), with nodes <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> showing up as an inner node in at least one of those paths. To see which other actor in the network is the most frequent intermediary between <em>J</em> and <em>K</em>, we can create a list with the number of times each of these nodes shows up as an intermediary in this shortest path list. This would look like this:</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-pairdep" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<thead>
+<tr class="header">
+<th style="text-align: center;">Node</th>
+<th style="text-align: center;">Freq.</th>
+<th style="text-align: center;">Prop.</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.17</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.17</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">E</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">F</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">H</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">N</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.17</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;22.1: Intermediaries between nodes J and K</div></div>
+</div>
+</div>
+<p>So it looks like, looking at the second column of <a href="#tbl-pairdep">Table&nbsp;<span>22.1</span></a>, that <em>H</em> is the other actor that <em>J</em> depends on the most to reach <em>K</em>. A better way to quantify this, is to actually look at the <em>proportion</em> of paths linking <em>J</em> and <em>K</em> that a particular other node (like <em>H</em>) shows up in. Let’s call this <span class="math inline">\(p_{K(H)J}\)</span> which can be read as “the proportion of paths between <em>K</em> and <em>J</em> featuring <em>H</em> as an inner node.” This is shown in the third column of <a href="#tbl-pairdep">Table&nbsp;<span>22.1</span></a> We can write this in equation form like this:</p>
+<p><span id="eq-pairdep"><span class="math display">\[
+  p_{K(H)J} = \frac{g_{K(H)J}}{g_{KJ}} = \frac{3}{6} = 0.5
+\tag{22.1}\]</span></span></p>
+<p>In <a href="#eq-pairdep">Equation&nbsp;<span>22.1</span></a>, <span class="math inline">\(g_{K(H)J}\)</span> is the number of shortest paths linking <em>K</em> and <em>J</em> featuring <em>H</em> as an inner node, and <span class="math inline">\(g_{KJ}\)</span> is the total number of paths linking <em>K</em> and <em>J</em>. <span class="citation" data-cites="freeman80">Freeman (<a href="#ref-freeman80" role="doc-biblioref">1980</a>)</span> calls this measure the <strong>pair-dependency</strong> of actor <em>K</em> on actor <em>H</em> to reach a given node <em>J</em>. In this case, <span class="math inline">\(g_{K(H)J} = 3\)</span> and <span class="math inline">\(g_{KJ} = 6\)</span>, which means that actor <em>K</em> depends on actor <em>H</em> for fifty percent of their shortest path access to <em>J</em>. Making <em>H</em> the actor in the network <em>J</em> depends on the most to be able to reach <em>J</em>.</p>
+<p>Generalizing this approach, we can do the same for each triplet of actors <em>i</em>, <em>j</em>, and <em>k</em> in the network. This is the basis for calculating betweenness centrality. That is, we can count the number of times <em>k</em> stands on the shortest path between two other actors <em>i</em> and <em>j</em>. We can all this number <span class="math inline">\(g_{i(k)j}\)</span>. We can then divide it by the total number of shortest paths linking actors <em>i</em> and <em>j</em> in the network, which we refer by <span class="math inline">\(g_{ij}\)</span>. Remember that two actors can be indirectly linked by <em>multiple shortest paths of the same length</em>, and that we can figure out how many short paths links pairs of actors in the network using the <strong>shortest paths matrix</strong>.</p>
+<p>This ratio, written <span class="math inline">\(\frac{g_{i(k)j}}{g_{ij}}\)</span> then gives us the <em>proportion</em> of shortest paths in the network that have <em>i</em> and <em>j</em> as the end nodes and that feature <em>k</em> as an intermediary inner node. This can range from zero (no shortest paths between <em>i</em> and <em>j</em> feature node <em>k</em> as an intermediary) to one (all the shortest paths between <em>i</em> and <em>j</em> feature node <em>k</em> as an intermediary).</p>
+<p>We can then use the following equation to compute the average of this proportion for each node <em>k</em> across each pair of actors in the network <em>i</em> and <em>j</em>:</p>
+<p><span id="eq-betcen"><span class="math display">\[
+  C_k^{BET} = \sum_i \sum_j \frac{g_{i(k)j}}{g_{ij}}
+\tag{22.2}\]</span></span></p>
+<p>Computing this quantity for the graph shown in <a href="#fig-bet">Figure&nbsp;<span>22.1</span></a>, yields the betweenness centrality scores shown in <a href="#tbl-bet">Table&nbsp;<span>22.2</span></a>.</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-bet" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<colgroup>
+<col style="width: 4%">
+<col style="width: 7%">
+<col style="width: 4%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 4%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+<th style="text-align: center;">F</th>
+<th style="text-align: center;">G</th>
+<th style="text-align: center;">H</th>
+<th style="text-align: center;">J</th>
+<th style="text-align: center;">K</th>
+<th style="text-align: center;">L</th>
+<th style="text-align: center;">M</th>
+<th style="text-align: center;">N</th>
+<th style="text-align: center;">I</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">1.5</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">6.8</td>
+<td style="text-align: center;">11.4</td>
+<td style="text-align: center;">9.3</td>
+<td style="text-align: center;">6.3</td>
+<td style="text-align: center;">4.8</td>
+<td style="text-align: center;">10.8</td>
+<td style="text-align: center;">3.7</td>
+<td style="text-align: center;">16.4</td>
+<td style="text-align: center;">2.8</td>
+<td style="text-align: center;">5.3</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;22.2: Betweenness centrality scores.</div></div>
+</div>
+</div>
+<p>The numbers in the Table can be readily interpreted as percentages. Thus, the fact that node <em>J</em> has a a betweenness centrality score of 10.8 tells us that they stand in about 11% of the shortest paths between pairs of nodes in the graph. Interestingly, as shown in <a href="#fig-bet">Figure&nbsp;<span>22.1</span></a>, the node that ends up with the highest betweenness score is <em>L</em> (<span class="math inline">\(C_L^{BET} = 16.4\)</span>), mostly due to the fact that node <em>I</em>, who has the lowest possible betweenness score of zero, depends on this node for access to every other actor in the network.</p>
+<p>Note also that two <em>different</em> nodes end up being ranked first on closeness and betweenness centrality in the same network (compare the red nodes in <a href="lesson-sna-closeness.html#fig-clos">Figure&nbsp;<span>21.1</span></a> and <a href="#fig-bet">Figure&nbsp;<span>22.1</span></a>). This tells us that closeness and betweenness are analytically distinct measures of node position. One (closeness) gets at reachability, and the other (betweenness) gets at intermediation potential. ## References {.unnumbered}</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
-<div id="ref-barnes69" class="csl-entry" role="doc-biblioentry">
-Barnes, John A. 1969. <span>“Graph Theory and Social Networks: A Technical Comment on Connectedness and Connectivity.”</span> <em>Sociology</em> 3 (2): 215–32.
+<div id="ref-freeman77" class="csl-entry" role="doc-biblioentry">
+Freeman, Linton C. 1977. <span>“A Set of Measures of Centrality Based on Betweenness.”</span> <em>Sociometry</em> 40 (1): 35–41.
 </div>
-<div id="ref-bott57" class="csl-entry" role="doc-biblioentry">
-Bott, Elizabeth. 1957. <em>Family and Social Network: Roles, Norms, and External Relationships in Ordinary Urban Families</em>. Tavistock Publications.
+<div id="ref-freeman80" class="csl-entry" role="doc-biblioentry">
+———. 1980. <span>“The Gatekeeper, Pair-Dependency and Structural Centrality.”</span> <em>Quality and Quantity</em> 14 (4): 585–92.
+</div>
+<div id="ref-marsden83" class="csl-entry" role="doc-biblioentry">
+Marsden, Peter V. 1983. <span>“Restricted Access in Networks and Models of Power.”</span> <em>American Journal of Sociology</em> 88 (4): 686–717.
 </div>
 </div>
 </section>
@@ -666,13 +726,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation column-body">
   <div class="nav-page nav-page-previous">
-      <a href="./lesson-graphs-ties.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></span>
+      <a href="./lesson-sna-closeness.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./lesson-graphs-neighborhoods.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./lesson-sna-eigenvector.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

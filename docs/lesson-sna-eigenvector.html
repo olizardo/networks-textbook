@@ -48,8 +48,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./lesson-sna-status.html" rel="next">
-<link href="./lesson-sna-centrality.html" rel="prev">
+<link href="./lesson-sna-hubs-and-authorities.html" rel="next">
+<link href="./lesson-sna-degree-centrality.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -224,9 +224,6 @@ div.csl-indent {
   <a href="./lesson-matrix-multiplication.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Matrix Multiplication</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <span class="sidebar-item-text sidebar-link text-start">Notions of Node Position</span>
-  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-theory-equivalence.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Equivalence and Similarity</span></a>
@@ -242,11 +239,17 @@ div.csl-indent {
   <a href="./lesson-sna-blockmodeling.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Blockmodeling</span></a>
   </div>
 </li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Centrality</span>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-centrality.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centrality</span></a>
+  <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></a>
   </div>
 </li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">Prestige</span>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></a>
@@ -254,7 +257,12 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Status</span></a>
+  <a href="./lesson-sna-hubs-and-authorities.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Hubs and Authorities</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Status</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -262,7 +270,7 @@ div.csl-indent {
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-nets-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
+  <a href="./lesson-nets-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
   </div>
 </li>
     </ul>
@@ -298,7 +306,7 @@ div.csl-indent {
 
 </header>
 
-<p>In <a href="lesson-sna-centrality.html"><span>Chapter&nbsp;20</span></a> we discussed the idea of centrality mainly from a “positional” perspective. That is, a node’s centrality depends on <em>where</em> they are located in the connectivity structure of the graph <span class="citation" data-cites="borgatti05">(<a href="#ref-borgatti05" role="doc-biblioref">Borgatti 2005</a>)</span>. Either by being “close” to many others, either directly—as with <strong>degree centrality</strong>—or indirectly—as with <strong>closeness centrality</strong>—or being in the “middle” of the connections of many others—as with <strong>betweennness centrality</strong>.</p>
+<p>In <a href="#sec-centrality"><span class="quarto-unresolved-ref">sec-centrality</span></a> we discussed the idea of centrality mainly from a “positional” perspective. That is, a node’s centrality depends on <em>where</em> they are located in the connectivity structure of the graph <span class="citation" data-cites="borgatti05">(<a href="#ref-borgatti05" role="doc-biblioref">Borgatti 2005</a>)</span>. Either by being “close” to many others, either directly—as with <strong>degree centrality</strong>—or indirectly—as with <strong>closeness centrality</strong>—or being in the “middle” of the connections of many others—as with <strong>betweennness centrality</strong>.</p>
 <p>But there is another way of thinking about centrality, and that relates more to the idea that to be central is to be connected to central people, not just to many other people (or being in-between many people). Under this alternative definition, the ultimate way of being central resolves into <em>being connected to many people who are also central</em>.</p>
 <p>From this perspective, you <em>get</em> the centrality of the people you are connected to, so that your centrality <span class="math inline">\(C_i\)</span> should be a function of the centrality of the people that are adjacent to you in the graph.</p>
 <p>Expressed as a formula:</p>
@@ -306,8 +314,8 @@ div.csl-indent {
 C_i = \sum_j a_{ij}C_j
 \tag{21.1}\]</span></span></p>
 <p>Now, this looks like it does what we want. The centrality of node <span class="math inline">\(i\)</span>, expressed as <span class="math inline">\(C_i\)</span>, is a sum of the centrality <span class="math inline">\(C_j\)</span> of the people they are connected to, since the right-hand side of the sum wil be a number that does not equal zero only when <span class="math inline">\(a_{ij} = 1\)</span>, that is when node <span class="math inline">\(i\)</span> is connected to node <span class="math inline">\(j\)</span> in the network.</p>
-<p>The one issue with <a href="#eq-eig1">Equation&nbsp;<span>21.1</span></a> is that we have a chicken or the egg problem. Which centrality comes first? That of node <span class="math inline">\(i\)</span> or node <span class="math inline">\(j\)</span>? We don’t know since the centrality term appears on both sides of the equation. So while <a href="#eq-eig1">Equation&nbsp;<span>21.1</span></a> is conceptually appealing, it’s like a snake eating it’s own tail.</p>
-<p>Nevertheless, not all is lost. We can make progress in coming up with a centrality measure in which your centrality is a function of the centrality of others, or more accurately, in which the people you are connected to “give” their centrality to you (and that total amounts makes up your centrality score), by just assigning everybody some “amount” of centrality “points” at the beginning and then using <a href="#eq-eig1">Equation&nbsp;<span>21.1</span></a> to “loop” through the network to calculate everyone else’s centrality.</p>
+<p>The one issue with <a href="#eq-eig1">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig1</span></a> is that we have a chicken or the egg problem. Which centrality comes first? That of node <span class="math inline">\(i\)</span> or node <span class="math inline">\(j\)</span>? We don’t know since the centrality term appears on both sides of the equation. So while <a href="#eq-eig1">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig1</span></a> is conceptually appealing, it’s like a snake eating it’s own tail.</p>
+<p>Nevertheless, not all is lost. We can make progress in coming up with a centrality measure in which your centrality is a function of the centrality of others, or more accurately, in which the people you are connected to “give” their centrality to you (and that total amounts makes up your centrality score), by just assigning everybody some “amount” of centrality “points” at the beginning and then using <a href="#eq-eig1">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig1</span></a> to “loop” through the network to calculate everyone else’s centrality.</p>
 <p>Let’s see how this would work.</p>
 <div class="cell" data-fig-cap-location="margin">
 <div class="cell-output-display">
@@ -319,7 +327,7 @@ C_i = \sum_j a_{ij}C_j
 </div>
 </div>
 </div>
-<p><a href="#fig-eig">Figure&nbsp;<span>21.1</span></a> shows a graph with associated adjacency matrix shown in <a href="lesson-sna-status.html#tbl-adjmat">Table&nbsp;<span>22.1</span></a>. Our task is to come up with a centrality metric for all the nodes in this graph, that more or less follows the spirit of <a href="#eq-eig1">Equation&nbsp;<span>21.1</span></a>. The idea is to compute a “fist pass” set of centrality scores for each node in the graph, by first “initializing” everyone’s centrality some arbitrary positive number and computing the centralities of each node as the sum of the centralities of the nodes that they are connected to.</p>
+<p><a href="#fig-eig">Figure&nbsp;<span class="quarto-unresolved-ref">fig-eig</span></a> shows a graph with associated adjacency matrix shown in <a href="#tbl-adjmat">Table&nbsp;<span class="quarto-unresolved-ref">tbl-adjmat</span></a>. Our task is to come up with a centrality metric for all the nodes in this graph, that more or less follows the spirit of <a href="#eq-eig1">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig1</span></a>. The idea is to compute a “fist pass” set of centrality scores for each node in the graph, by first “initializing” everyone’s centrality some arbitrary positive number and computing the centralities of each node as the sum of the centralities of the nodes that they are connected to.</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div id="tbl-adjmat" class="anchored page-columns page-full">
@@ -480,7 +488,7 @@ C_i = \sum_j a_{ij}C_j
 <div class="cell">
 
 </div>
-<p>For instance, let’s say that we give everyone one centrality point to “give out” everyone they are connected to in the first step. Let us calculate the centrality of node <span class="math inline">\(E\)</span> in <a href="#fig-eig">Figure&nbsp;<span>21.1</span></a> using this approach. We know from looking at <a href="lesson-sna-status.html#tbl-adjmat">Table&nbsp;<span>22.1</span></a> that <span class="math inline">\(E\)</span>’s neighbor set is equal to <span class="math inline">\(\{A, D, F, G, H, J\}\)</span>. If at the beginning, <span class="math inline">\(E\)</span> gets one “centrality point” from each of their neighbors, then their starting centrality would be equal to:</p>
+<p>For instance, let’s say that we give everyone one centrality point to “give out” everyone they are connected to in the first step. Let us calculate the centrality of node <span class="math inline">\(E\)</span> in <a href="#fig-eig">Figure&nbsp;<span class="quarto-unresolved-ref">fig-eig</span></a> using this approach. We know from looking at <a href="#tbl-adjmat">Table&nbsp;<span class="quarto-unresolved-ref">tbl-adjmat</span></a> that <span class="math inline">\(E\)</span>’s neighbor set is equal to <span class="math inline">\(\{A, D, F, G, H, J\}\)</span>. If at the beginning, <span class="math inline">\(E\)</span> gets one “centrality point” from each of their neighbors, then their starting centrality would be equal to:</p>
 <p><span class="math display">\[
 C(1)_E = C(0)_A + C(0)_D + C(0)_F + C(0)_G + C(0)_H + C(0)_J =
 \]</span></p>
@@ -489,7 +497,7 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 \]</span></p>
 <p>Where <span class="math inline">\(C(0)\)</span> indicates everyone’s centralities at “step zero” (the centralities everyone begins with), and <span class="math inline">\(C(1)\)</span> indicates everyone’s centralities at the first step.</p>
 <p>As we can see because everyone just has one centrality point to give out, <span class="math inline">\(E\)</span> initial centrality <span class="math inline">\(C(1)_E\)</span> is just their <strong>degree</strong> and the same for everybody else!</p>
-<p>We can record these initial centralities in a table for each node, shown as <a href="#tbl-eig-1">Table&nbsp;<span>21.2 (a)</span></a>. Note that because we don’t care about the specific number (which once again is just everyone’s degree), but only about the <em>rank order</em> of nodes, we divide the initial centralities by the maximum observed (the graph’s <strong>maximum degree</strong>) so that nodes with the maximum observed centrality at this step gets a score of 1.0—in this case <span class="math inline">\(D\)</span> and <span class="math inline">\(E\)</span>—and everyone gets a smaller number depending on how many centrality points they got from their neighbors at step 1.</p>
+<p>We can record these initial centralities in a table for each node, shown as <a href="#tbl-eig-1">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-1</span></a>. Note that because we don’t care about the specific number (which once again is just everyone’s degree), but only about the <em>rank order</em> of nodes, we divide the initial centralities by the maximum observed (the graph’s <strong>maximum degree</strong>) so that nodes with the maximum observed centrality at this step gets a score of 1.0—in this case <span class="math inline">\(D\)</span> and <span class="math inline">\(E\)</span>—and everyone gets a smaller number depending on how many centrality points they got from their neighbors at step 1.</p>
 <div id="tbl-eig" class="cell tbl-parent quarto-layout-panel anchored page-columns page-full">
 <div class="panel-caption table-caption margin-caption">
 <p>Table&nbsp;21.2: .</p>
@@ -548,34 +556,44 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 <table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;"><caption>(b) Centrality at step 2 </caption>
 <tbody>
   <tr>
-   <td style="text-align:center;"> 0.65 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 0.48 </td>
-  </tr>
-  <tr>
+   <td style="text-align:left;"> A </td>
    <td style="text-align:center;"> 0.30 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:left;"> B </td>
+   <td style="text-align:center;"> 0.22 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.96 </td>
+   <td style="text-align:left;"> C </td>
+   <td style="text-align:center;"> 0.14 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.74 </td>
+   <td style="text-align:left;"> D </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.43 </td>
+   <td style="text-align:left;"> E </td>
+   <td style="text-align:center;"> 0.45 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.57 </td>
+   <td style="text-align:left;"> F </td>
+   <td style="text-align:center;"> 0.35 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.57 </td>
+   <td style="text-align:left;"> G </td>
+   <td style="text-align:center;"> 0.20 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.74 </td>
+   <td style="text-align:left;"> H </td>
+   <td style="text-align:center;"> 0.26 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> I </td>
+   <td style="text-align:center;"> 0.26 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> J </td>
+   <td style="text-align:center;"> 0.35 </td>
   </tr>
 </tbody>
 </table>
@@ -586,34 +604,44 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 <table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;"><caption>(c) Centrality at step 3 </caption>
 <tbody>
   <tr>
-   <td style="text-align:center;"> 0.59 </td>
+   <td style="text-align:left;"> A </td>
+   <td style="text-align:center;"> 0.28 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.47 </td>
+   <td style="text-align:left;"> B </td>
+   <td style="text-align:center;"> 0.23 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.29 </td>
+   <td style="text-align:left;"> C </td>
+   <td style="text-align:center;"> 0.14 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:left;"> D </td>
+   <td style="text-align:center;"> 0.48 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:left;"> E </td>
+   <td style="text-align:center;"> 0.48 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.72 </td>
+   <td style="text-align:left;"> F </td>
+   <td style="text-align:center;"> 0.34 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.41 </td>
+   <td style="text-align:left;"> G </td>
+   <td style="text-align:center;"> 0.20 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.55 </td>
+   <td style="text-align:left;"> H </td>
+   <td style="text-align:center;"> 0.26 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:left;"> I </td>
+   <td style="text-align:center;"> 0.27 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.68 </td>
+   <td style="text-align:left;"> J </td>
+   <td style="text-align:center;"> 0.33 </td>
   </tr>
 </tbody>
 </table>
@@ -627,43 +655,43 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 <tbody>
   <tr>
    <td style="text-align:left;font-weight: bold;"> A </td>
-   <td style="text-align:center;"> 0.62 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;font-weight: bold;"> B </td>
-   <td style="text-align:center;"> 0.47 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;font-weight: bold;"> C </td>
    <td style="text-align:center;"> 0.29 </td>
   </tr>
   <tr>
+   <td style="text-align:left;font-weight: bold;"> B </td>
+   <td style="text-align:center;"> 0.22 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> C </td>
+   <td style="text-align:center;"> 0.14 </td>
+  </tr>
+  <tr>
    <td style="text-align:left;font-weight: bold;"> D </td>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> E </td>
-   <td style="text-align:center;"> 0.98 </td>
+   <td style="text-align:center;"> 0.46 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> F </td>
-   <td style="text-align:center;"> 0.74 </td>
+   <td style="text-align:center;"> 0.35 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> G </td>
-   <td style="text-align:center;"> 0.43 </td>
+   <td style="text-align:center;"> 0.20 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> H </td>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:center;"> 0.26 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> I </td>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:center;"> 0.27 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> J </td>
-   <td style="text-align:center;"> 0.71 </td>
+   <td style="text-align:center;"> 0.33 </td>
   </tr>
 </tbody>
 </table>
@@ -674,34 +702,44 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 <table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;"><caption>(e) Centrality at step 5 </caption>
 <tbody>
   <tr>
-   <td style="text-align:center;"> 0.60 </td>
+   <td style="text-align:left;"> A </td>
+   <td style="text-align:center;"> 0.28 </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> B </td>
+   <td style="text-align:center;"> 0.22 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> C </td>
+   <td style="text-align:center;"> 0.14 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> D </td>
    <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.29 </td>
+   <td style="text-align:left;"> E </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:left;"> F </td>
+   <td style="text-align:center;"> 0.35 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.99 </td>
+   <td style="text-align:left;"> G </td>
+   <td style="text-align:center;"> 0.20 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.73 </td>
+   <td style="text-align:left;"> H </td>
+   <td style="text-align:center;"> 0.26 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.42 </td>
+   <td style="text-align:left;"> I </td>
+   <td style="text-align:center;"> 0.27 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.55 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 0.56 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 0.69 </td>
+   <td style="text-align:left;"> J </td>
+   <td style="text-align:center;"> 0.33 </td>
   </tr>
 </tbody>
 </table>
@@ -712,34 +750,44 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 <table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;"><caption>(f) Centrality at step 6 </caption>
 <tbody>
   <tr>
-   <td style="text-align:center;"> 0.61 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 0.47 </td>
-  </tr>
-  <tr>
+   <td style="text-align:left;"> A </td>
    <td style="text-align:center;"> 0.29 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:left;"> B </td>
+   <td style="text-align:center;"> 0.22 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.99 </td>
+   <td style="text-align:left;"> C </td>
+   <td style="text-align:center;"> 0.14 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.74 </td>
+   <td style="text-align:left;"> D </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.43 </td>
+   <td style="text-align:left;"> E </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:left;"> F </td>
+   <td style="text-align:center;"> 0.35 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:left;"> G </td>
+   <td style="text-align:center;"> 0.20 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.70 </td>
+   <td style="text-align:left;"> H </td>
+   <td style="text-align:center;"> 0.26 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> I </td>
+   <td style="text-align:center;"> 0.27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> J </td>
+   <td style="text-align:center;"> 0.33 </td>
   </tr>
 </tbody>
 </table>
@@ -753,43 +801,43 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 <tbody>
   <tr>
    <td style="text-align:left;font-weight: bold;"> A </td>
-   <td style="text-align:center;"> 0.60 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;font-weight: bold;"> B </td>
-   <td style="text-align:center;"> 0.47 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;font-weight: bold;"> C </td>
    <td style="text-align:center;"> 0.29 </td>
   </tr>
   <tr>
+   <td style="text-align:left;font-weight: bold;"> B </td>
+   <td style="text-align:center;"> 0.22 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> C </td>
+   <td style="text-align:center;"> 0.14 </td>
+  </tr>
+  <tr>
    <td style="text-align:left;font-weight: bold;"> D </td>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> E </td>
-   <td style="text-align:center;"> 0.99 </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> F </td>
-   <td style="text-align:center;"> 0.73 </td>
+   <td style="text-align:center;"> 0.35 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> G </td>
-   <td style="text-align:center;"> 0.42 </td>
+   <td style="text-align:center;"> 0.20 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> H </td>
-   <td style="text-align:center;"> 0.55 </td>
+   <td style="text-align:center;"> 0.26 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> I </td>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:center;"> 0.27 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> J </td>
-   <td style="text-align:center;"> 0.70 </td>
+   <td style="text-align:center;"> 0.33 </td>
   </tr>
 </tbody>
 </table>
@@ -800,34 +848,44 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 <table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;"><caption>(h) Centrality at step 8 </caption>
 <tbody>
   <tr>
-   <td style="text-align:center;"> 0.61 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 0.47 </td>
-  </tr>
-  <tr>
+   <td style="text-align:left;"> A </td>
    <td style="text-align:center;"> 0.29 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:left;"> B </td>
+   <td style="text-align:center;"> 0.22 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.99 </td>
+   <td style="text-align:left;"> C </td>
+   <td style="text-align:center;"> 0.14 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.73 </td>
+   <td style="text-align:left;"> D </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.43 </td>
+   <td style="text-align:left;"> E </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:left;"> F </td>
+   <td style="text-align:center;"> 0.35 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:left;"> G </td>
+   <td style="text-align:center;"> 0.20 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.70 </td>
+   <td style="text-align:left;"> H </td>
+   <td style="text-align:center;"> 0.26 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> I </td>
+   <td style="text-align:center;"> 0.27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> J </td>
+   <td style="text-align:center;"> 0.33 </td>
   </tr>
 </tbody>
 </table>
@@ -838,34 +896,44 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 <table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;"><caption>(i) Centrality at step 9 </caption>
 <tbody>
   <tr>
-   <td style="text-align:center;"> 0.61 </td>
-  </tr>
-  <tr>
-   <td style="text-align:center;"> 0.47 </td>
-  </tr>
-  <tr>
+   <td style="text-align:left;"> A </td>
    <td style="text-align:center;"> 0.29 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:left;"> B </td>
+   <td style="text-align:center;"> 0.22 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.99 </td>
+   <td style="text-align:left;"> C </td>
+   <td style="text-align:center;"> 0.14 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.73 </td>
+   <td style="text-align:left;"> D </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.42 </td>
+   <td style="text-align:left;"> E </td>
+   <td style="text-align:center;"> 0.47 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.55 </td>
+   <td style="text-align:left;"> F </td>
+   <td style="text-align:center;"> 0.35 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:left;"> G </td>
+   <td style="text-align:center;"> 0.20 </td>
   </tr>
   <tr>
-   <td style="text-align:center;"> 0.70 </td>
+   <td style="text-align:left;"> H </td>
+   <td style="text-align:center;"> 0.26 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> I </td>
+   <td style="text-align:center;"> 0.27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> J </td>
+   <td style="text-align:center;"> 0.33 </td>
   </tr>
 </tbody>
 </table>
@@ -873,17 +941,17 @@ C(1)_E = 1 + 1 + 1 + 1 + 1 + 1 = 6
 </div>
 </div>
 </div>
-<p>Now, of course, we can keep going, and apply <a href="#eq-eig1">Equation&nbsp;<span>21.1</span></a> again, but this time the centrality “points” each node gets are the <span class="math inline">\(C(1)\)</span> scores recorded in <a href="#tbl-eig-1">Table&nbsp;<span>21.2 (a)</span></a>. So in this step, node <span class="math inline">\(E\)</span>’s centrality is simply:</p>
+<p>Now, of course, we can keep going, and apply <a href="#eq-eig1">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig1</span></a> again, but this time the centrality “points” each node gets are the <span class="math inline">\(C(1)\)</span> scores recorded in <a href="#tbl-eig-1">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-1</span></a>. So in this step, node <span class="math inline">\(E\)</span>’s centrality is simply:</p>
 <p><span class="math display">\[
 C(2)_E = C(1)_A + C(1)_D + C(1)_F + C(1)_G + C(1)_H + C(1)_J =
 \]</span></p>
 <p><span class="math display">\[
 C(1)_E = 0.5 + 1 + 0.7 + 0.3 + 0.5 + 0.7 = 3.7
 \]</span></p>
-<p>Once again, because we only care about the ranking and not the exact number, we divide each score by the maximum observed at <em>this</em> step. The result are shown in <a href="#tbl-eig-2">Table&nbsp;<span>21.2 (b)</span></a>. As we can see, node <span class="math inline">\(D\)</span> is still at the top, but node <span class="math inline">\(E\)</span> has slipped to second place. The reason for that is that <span class="math inline">\(E\)</span> gets less centrality “bang” (the points given by others) for their “buck” (their number of connections). While both <span class="math inline">\(D\)</span> and <span class="math inline">\(E\)</span> are connected to the same <em>number</em> of others, <span class="math inline">\(E\)</span> is connected to <em>less central</em> others than <span class="math inline">\(D\)</span>. The same happened to <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> who were tied at step one, but are now separated at step two, with <span class="math inline">\(A\)</span> being more central than <span class="math inline">\(B\)</span>.</p>
-<p>Of course, we can keep going and calculate centralities at step three <span class="math inline">\(C(3)\)</span>, four <span class="math inline">\(C(4)\)</span> and so on. The results are shown in <a href="#tbl-eig-3">Table&nbsp;<span>21.2 (c)</span></a> through <a href="#tbl-eig-9">Table&nbsp;<span>21.2 (i)</span></a>.</p>
-<p>Note one interesting that happens as we iterate through these steps. The rank order of the centrality scores stop changing! While there are some minute differences between <a href="#tbl-eig-8">Table&nbsp;<span>21.2 (h)</span></a> and <a href="#tbl-eig-9">Table&nbsp;<span>21.2 (i)</span></a>, the order in which nodes are arranged in terms of who has the top centrality, and the second biggest, and the third biggest, all the way down to the last, is pretty much the same.</p>
-<p>That means that as we proceed further and further until the ranks begin to “freeze.” So we can decide to stop after sum of the (absolute value) of the differences between the centrality score at some step <span class="math inline">\(k\)</span>, expressed as <span class="math inline">\(C(k)\)</span> and those at the previous step <span class="math inline">\(C(k-1)\)</span> are smaller than some criterion (e.g., <span class="math inline">\(e = 0.0001\)</span>). In which case we have arrived at the centrality scores we wanted! These are shown in <a href="#tbl-eig-final">Table&nbsp;<span>21.3</span></a>.</p>
+<p>Once again, because we only care about the ranking and not the exact number, we divide each score by the maximum observed at <em>this</em> step. The result are shown in <a href="#tbl-eig-2">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-2</span></a>. As we can see, node <span class="math inline">\(D\)</span> is still at the top, but node <span class="math inline">\(E\)</span> has slipped to second place. The reason for that is that <span class="math inline">\(E\)</span> gets less centrality “bang” (the points given by others) for their “buck” (their number of connections). While both <span class="math inline">\(D\)</span> and <span class="math inline">\(E\)</span> are connected to the same <em>number</em> of others, <span class="math inline">\(E\)</span> is connected to <em>less central</em> others than <span class="math inline">\(D\)</span>. The same happened to <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> who were tied at step one, but are now separated at step two, with <span class="math inline">\(A\)</span> being more central than <span class="math inline">\(B\)</span>.</p>
+<p>Of course, we can keep going and calculate centralities at step three <span class="math inline">\(C(3)\)</span>, four <span class="math inline">\(C(4)\)</span> and so on. The results are shown in <a href="#tbl-eig-3">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-3</span></a> through <a href="#tbl-eig-9">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-9</span></a>.</p>
+<p>Note one interesting that happens as we iterate through these steps. The rank order of the centrality scores stop changing! While there are some minute differences between <a href="#tbl-eig-8">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-8</span></a> and <a href="#tbl-eig-9">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-9</span></a>, the order in which nodes are arranged in terms of who has the top centrality, and the second biggest, and the third biggest, all the way down to the last, is pretty much the same.</p>
+<p>That means that as we proceed further and further until the ranks begin to “freeze.” So we can decide to stop after sum of the (absolute value) of the differences between the centrality score at some step <span class="math inline">\(k\)</span>, expressed as <span class="math inline">\(C(k)\)</span> and those at the previous step <span class="math inline">\(C(k-1)\)</span> are smaller than some criterion (e.g., <span class="math inline">\(e = 0.0001\)</span>). In which case we have arrived at the centrality scores we wanted! These are shown in <a href="#tbl-eig-final">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-final</span></a>.</p>
 <div id="tbl-eig-final" class="cell tbl-parent quarto-layout-panel anchored page-columns page-full">
 <div class="panel-caption table-caption margin-caption">
 <p>Table&nbsp;21.3: Centrality scores At the final step versus the eigvenctor centralities.</p>
@@ -895,43 +963,43 @@ C(1)_E = 0.5 + 1 + 0.7 + 0.3 + 0.5 + 0.7 = 3.7
 <tbody>
   <tr>
    <td style="text-align:left;font-weight: bold;"> D </td>
-   <td style="text-align:center;"> 1.000 </td>
+   <td style="text-align:center;"> 0.473 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> E </td>
-   <td style="text-align:center;"> 0.990 </td>
+   <td style="text-align:center;"> 0.468 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> F </td>
-   <td style="text-align:center;"> 0.734 </td>
+   <td style="text-align:center;"> 0.347 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> J </td>
-   <td style="text-align:center;"> 0.698 </td>
+   <td style="text-align:center;"> 0.330 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> A </td>
-   <td style="text-align:center;"> 0.605 </td>
+   <td style="text-align:center;"> 0.286 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> I </td>
-   <td style="text-align:center;"> 0.564 </td>
+   <td style="text-align:center;"> 0.267 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> H </td>
-   <td style="text-align:center;"> 0.555 </td>
+   <td style="text-align:center;"> 0.262 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> B </td>
-   <td style="text-align:center;"> 0.466 </td>
+   <td style="text-align:center;"> 0.220 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> G </td>
-   <td style="text-align:center;"> 0.425 </td>
+   <td style="text-align:center;"> 0.201 </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> C </td>
-   <td style="text-align:center;"> 0.287 </td>
+   <td style="text-align:center;"> 0.136 </td>
   </tr>
 </tbody>
 </table>
@@ -987,12 +1055,12 @@ C(1)_E = 0.5 + 1 + 0.7 + 0.3 + 0.5 + 0.7 = 3.7
 </div>
 </div>
 </div>
-<p>Now it turns out that there is a way to come up with a set of centrality scores that will arrange the nodes in the graph from top to bottom just like we did in <a href="#tbl-eig-final">Table&nbsp;<span>21.3</span></a> but without going through all the work of iterating through various steps using <a href="#eq-eig1">Equation&nbsp;<span>21.1</span></a>. Imagine that there is magical unknown number—let’s call it <span class="math inline">\(\lambda\)</span>—and a magical vector—let’s call it <span class="math inline">\(\mathbf{b}\)</span>— containing the scores that we want. The numbers in the vector will arrange the nodes in the graph exactly like in <a href="#tbl-eig-final">Table&nbsp;<span>21.3</span></a>, only if the following equation is satisfied:</p>
+<p>Now it turns out that there is a way to come up with a set of centrality scores that will arrange the nodes in the graph from top to bottom just like we did in <a href="#tbl-eig-final">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-final</span></a> but without going through all the work of iterating through various steps using <a href="#eq-eig1">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig1</span></a>. Imagine that there is magical unknown number—let’s call it <span class="math inline">\(\lambda\)</span>—and a magical vector—let’s call it <span class="math inline">\(\mathbf{b}\)</span>— containing the scores that we want. The numbers in the vector will arrange the nodes in the graph exactly like in <a href="#tbl-eig-final">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-final</span></a>, only if the following equation is satisfied:</p>
 <p><span id="eq-eig2"><span class="math display">\[
 A \mathbf{b} = \lambda \mathbf{b}
 \tag{21.2}\]</span></span></p>
-<p><a href="#eq-eig2">Equation&nbsp;<span>21.2</span></a> says that the magical vector containing the centrality scores exists, only if there is a set of numbers we can fill out the vector with, so that when multiply the network adjacency matrix times this vector (which as we know from <a href="lesson-matrix-multiplication.html"><span>Chapter&nbsp;16</span></a> results in another vector of the same length as <span class="math inline">\(\mathbf{b}\)</span>) we get the same answer as multiplying the vector times the magical number <span class="math inline">\(\lambda\)</span>.</p>
-<p>It turns out that there is a way to use mathematical magic to solve <a href="#eq-eig2">Equation&nbsp;<span>21.2</span></a> using methods from <strong>linear algebra</strong>. In this field, the vector <span class="math inline">\(\mathbf{b}\)</span> that satisfies equation <a href="#eq-eig2">Equation&nbsp;<span>21.2</span></a> is called an <strong>eigenvector</strong> of the matrix <span class="math inline">\(A\)</span>. In the same way the magical number <span class="math inline">\(\lambda\)</span> is called an <strong>eigenvalue</strong> of the same matrix.</p>
+<p><a href="#eq-eig2">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig2</span></a> says that the magical vector containing the centrality scores exists, only if there is a set of numbers we can fill out the vector with, so that when multiply the network adjacency matrix times this vector (which as we know from <a href="#sec-matmult"><span class="quarto-unresolved-ref">sec-matmult</span></a> results in another vector of the same length as <span class="math inline">\(\mathbf{b}\)</span>) we get the same answer as multiplying the vector times the magical number <span class="math inline">\(\lambda\)</span>.</p>
+<p>It turns out that there is a way to use mathematical magic to solve <a href="#eq-eig2">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig2</span></a> using methods from <strong>linear algebra</strong>. In this field, the vector <span class="math inline">\(\mathbf{b}\)</span> that satisfies equation <a href="#eq-eig2">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig2</span></a> is called an <strong>eigenvector</strong> of the matrix <span class="math inline">\(A\)</span>. In the same way the magical number <span class="math inline">\(\lambda\)</span> is called an <strong>eigenvalue</strong> of the same matrix.</p>
 <p>The method from linear algebra that allows us to find <span class="math inline">\(\mathbf{b}\)</span> and <span class="math inline">\(\lambda\)</span> is called the <strong>eigen-decomposition</strong> of the adjacency matrix <span class="math inline">\(A\)</span> (I know, all terrible names). When eigen-decompose a square matrix like the adjacency matrix <span class="math inline">\(A\)</span>, the aim is to find two other matrices, <span class="math inline">\(\Lambda\)</span> and <span class="math inline">\(U\)</span>, of the same dimensions as the original, such that the following matrix multiplication equation is satisfied:</p>
 <p><span id="eq-eig3"><span class="math display">\[
 A = U \Lambda U^T
@@ -1314,8 +1382,8 @@ A = U \Lambda U^T
 </div>
 </div>
 </div>
-<p>To cut to the chase, the <em>first</em> column of <span class="math inline">\(U\)</span>, corresponding to the firt eigenvector of <span class="math inline">\(A\)</span>, contains the centrality scores we seek (those that go into the vector <span class="math inline">\(\mathbf{b}\)</span> and therefore satisfy <a href="#eq-eig2">Equation&nbsp;<span>21.2</span></a>) and the number in the first row and first column of the matrix <span class="math inline">\(\Lambda\)</span> is the eigenvalue that satisfies <a href="#eq-eig2">Equation&nbsp;<span>21.2</span></a> (<span class="math inline">\(\lambda\)</span>). Because of this, the centrality scores <span class="math inline">\(\mathbf{b}\)</span> obtained via this method are called the <strong>eigenvector centralities</strong> of the nodes in the network represented by adjacency matrix <span class="math inline">\(A\)</span> <span class="citation" data-cites="bonacich72">(<a href="#ref-bonacich72" role="doc-biblioref">Bonacich 1972</a>)</span>.</p>
-<p>The matrix containing the eigenvectors corresponding to the adjacency matrix <span class="math inline">\(A\)</span> in <a href="lesson-sna-status.html#tbl-adjmat">Table&nbsp;<span>22.1</span></a> is shown in <a href="#tbl-eigen-1">Table&nbsp;<span>21.4 (a)</span></a>. The corresponding eigenvalues of <span class="math inline">\(A\)</span> are shown as the diagonal entries of the matrix shown in <a href="#tbl-eigen-2">Table&nbsp;<span>21.4 (b)</span></a>. We can verify that arranging the nodes in the graph shown in <a href="#fig-eig">Figure&nbsp;<span>21.1</span></a> according to the (absolute) value of the scores from the first column of <a href="#tbl-eigen-1">Table&nbsp;<span>21.4 (a)</span></a> results in the same scores we obtained by iteratively giving each node the centralities of each of the other nodes they were connected to.</p>
+<p>To cut to the chase, the <em>first</em> column of <span class="math inline">\(U\)</span>, corresponding to the firt eigenvector of <span class="math inline">\(A\)</span>, contains the centrality scores we seek (those that go into the vector <span class="math inline">\(\mathbf{b}\)</span> and therefore satisfy <a href="#eq-eig2">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig2</span></a>) and the number in the first row and first column of the matrix <span class="math inline">\(\Lambda\)</span> is the eigenvalue that satisfies <a href="#eq-eig2">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig2</span></a> (<span class="math inline">\(\lambda\)</span>). Because of this, the centrality scores <span class="math inline">\(\mathbf{b}\)</span> obtained via this method are called the <strong>eigenvector centralities</strong> of the nodes in the network represented by adjacency matrix <span class="math inline">\(A\)</span> <span class="citation" data-cites="bonacich72">(<a href="#ref-bonacich72" role="doc-biblioref">Bonacich 1972</a>)</span>.</p>
+<p>The matrix containing the eigenvectors corresponding to the adjacency matrix <span class="math inline">\(A\)</span> in <a href="#tbl-adjmat">Table&nbsp;<span class="quarto-unresolved-ref">tbl-adjmat</span></a> is shown in <a href="#tbl-eigen-1">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eigen-1</span></a>. The corresponding eigenvalues of <span class="math inline">\(A\)</span> are shown as the diagonal entries of the matrix shown in <a href="#tbl-eigen-2">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eigen-2</span></a>. We can verify that arranging the nodes in the graph shown in <a href="#fig-eig">Figure&nbsp;<span class="quarto-unresolved-ref">fig-eig</span></a> according to the (absolute) value of the scores from the first column of <a href="#tbl-eigen-1">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eigen-1</span></a> results in the same scores we obtained by iteratively giving each node the centralities of each of the other nodes they were connected to.</p>
 <div id="tbl-eigvec" class="cell tbl-parent quarto-layout-panel anchored page-columns page-full">
 <div class="panel-caption table-caption margin-caption">
 <p>Table&nbsp;21.5: Centrality scores At the final step versus the eigvenctor centralities.</p>
@@ -1429,7 +1497,7 @@ A = U \Lambda U^T
 </div>
 </div>
 </div>
-<p>First we take the first column of <a href="#tbl-eigen-1">Table&nbsp;<span>21.4 (a)</span></a> and arrange it as a vector <span class="math inline">\(\mathbf{e}\)</span>, as in <a href="#tbl-eigvec-1">Table&nbsp;<span>21.5 (a)</span></a>. Since the numbers in the eigenvector are negative, we get rid of the negative by taking the absolute value of the scores in the vector <span class="math inline">\(|\mathbf{e}|\)</span>, as in tbl-eigvec-2. Finally, because we only care about the rank and not the specific number, we divide by the maximum value <span class="math inline">\(max(|\mathbf{e}|) = 0.473\)</span>, which turns them into the scores shown inn <a href="#tbl-eigvec-3">Table&nbsp;<span>21.5 (c)</span></a>. As shown in <a href="#tbl-eig-final-2">Table&nbsp;<span>21.3 (b)</span></a>, these scores are identical to that which we found via our iterative procedure!</p>
+<p>First we take the first column of <a href="#tbl-eigen-1">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eigen-1</span></a> and arrange it as a vector <span class="math inline">\(\mathbf{e}\)</span>, as in <a href="#tbl-eigvec-1">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eigvec-1</span></a>. Since the numbers in the eigenvector are negative, we get rid of the negative by taking the absolute value of the scores in the vector <span class="math inline">\(|\mathbf{e}|\)</span>, as in <a href="#tbl-eigvec-2">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eigvec-2</span></a>. Finally, because we only care about the rank and not the specific number, we divide by the maximum value <span class="math inline">\(max(|\mathbf{e}|) = 0.473\)</span>, which turns them into the scores shown inn <a href="#tbl-eigvec-3">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eigvec-3</span></a>. As shown in <a href="#tbl-eig-final-2">Table&nbsp;<span class="quarto-unresolved-ref">tbl-eig-final-2</span></a>, these scores are identical to that which we found via our iterative procedure!</p>
 <p>These eigenvector centrality scores, therefore, give us a sense of which nodes in the network are well-connected, in the sense of receiving centrality from being linked to central others.</p>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
@@ -1696,13 +1764,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation column-body">
   <div class="nav-page nav-page-previous">
-      <a href="./lesson-sna-centrality.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centrality</span></span>
+      <a href="./lesson-sna-degree-centrality.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./lesson-sna-status.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Status</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./lesson-sna-hubs-and-authorities.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Hubs and Authorities</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

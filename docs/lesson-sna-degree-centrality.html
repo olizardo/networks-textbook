@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Social Networks - 5&nbsp; Basic Graph Metrics</title>
+<title>Social Networks - 20&nbsp; Centralities based on Degree</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -48,8 +48,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./lesson-graphs-neighborhoods.html" rel="next">
-<link href="./lesson-graphs-ties.html" rel="prev">
+<link href="./lesson-sna-eigenvector.html" rel="next">
+<link href="./lesson-sna-blockmodeling.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -86,7 +86,7 @@ div.csl-indent {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating nav-fixed">
+<body class="nav-sidebar floating nav-fixed slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -104,7 +104,7 @@ div.csl-indent {
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></h1>
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -160,7 +160,7 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
+  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -241,7 +241,7 @@ div.csl-indent {
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></a>
+  <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -274,32 +274,21 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#computing-metrics-on-graphs" id="toc-computing-metrics-on-graphs" class="nav-link active" data-scroll-target="#computing-metrics-on-graphs"><span class="toc-section-number">5.1</span>  Computing Metrics on Graphs</a>
+  <li><a href="#degree-centrality" id="toc-degree-centrality" class="nav-link active" data-scroll-target="#degree-centrality"><span class="toc-section-number">20.1</span>  Degree Centrality</a></li>
+  <li><a href="#indegree-and-outdegree-centrality" id="toc-indegree-and-outdegree-centrality" class="nav-link" data-scroll-target="#indegree-and-outdegree-centrality"><span class="toc-section-number">20.2</span>  Indegree and Outdegree Centrality</a>
   <ul class="collapse">
-  <li><a href="#graph-order" id="toc-graph-order" class="nav-link" data-scroll-target="#graph-order"><span class="toc-section-number">5.1.1</span>  Graph Order</a></li>
-  <li><a href="#graph-size" id="toc-graph-size" class="nav-link" data-scroll-target="#graph-size"><span class="toc-section-number">5.1.2</span>  Graph Size</a></li>
-  </ul></li>
-  <li><a href="#the-graph-maximum-size" id="toc-the-graph-maximum-size" class="nav-link" data-scroll-target="#the-graph-maximum-size"><span class="toc-section-number">5.2</span>  The Graph Maximum Size</a></li>
-  <li><a href="#graph-maximum-size-explainer" id="toc-graph-maximum-size-explainer" class="nav-link" data-scroll-target="#graph-maximum-size-explainer"><span class="toc-section-number">5.3</span>  Graph Maximum Size Explainer</a>
-  <ul class="collapse">
-  <li><a href="#applying-your-knowledge" id="toc-applying-your-knowledge" class="nav-link" data-scroll-target="#applying-your-knowledge"><span class="toc-section-number">5.3.1</span>  Applying your knowledge</a></li>
-  </ul></li>
-  <li><a href="#graph-density" id="toc-graph-density" class="nav-link" data-scroll-target="#graph-density"><span class="toc-section-number">5.4</span>  Graph Density</a>
-  <ul class="collapse">
-  <li><a href="#density-in-undirected-graphs" id="toc-density-in-undirected-graphs" class="nav-link" data-scroll-target="#density-in-undirected-graphs"><span class="toc-section-number">5.4.1</span>  Density in Undirected Graphs</a></li>
-  <li><a href="#density-in-directed-graphs" id="toc-density-in-directed-graphs" class="nav-link" data-scroll-target="#density-in-directed-graphs"><span class="toc-section-number">5.4.2</span>  Density in Directed Graphs</a></li>
-  <li><a href="#why-is-density-important" id="toc-why-is-density-important" class="nav-link" data-scroll-target="#why-is-density-important"><span class="toc-section-number">5.4.3</span>  Why is density important?</a></li>
+  <li><a href="#sec-normdeg" id="toc-sec-normdeg" class="nav-link" data-scroll-target="#sec-normdeg"><span class="toc-section-number">20.2.1</span>  Normalized Degree Centrality</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-graphs-metrics.qmd" class="toc-action">View source</a></p></div></div></nav>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-sna-degree-centrality.qmd" class="toc-action">View source</a></p></div></div></nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content">
+<main class="content page-columns page-full column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-graphmetrics" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></span></h1>
+<h1 class="title"><span id="sec-degcent" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></span></h1>
 </div>
 
 
@@ -314,91 +303,127 @@ div.csl-indent {
 
 </header>
 
-<section id="computing-metrics-on-graphs" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="computing-metrics-on-graphs"><span class="header-section-number">5.1</span> Computing Metrics on Graphs</h2>
-<p>As graphs are really just representations of real world-networks, they can be as varied as different networks are from one another. Some social networks are small (composed of just a few people), while others are large. In some social networks there is not much connectivity, while other networks feature thousands if not millions of ties between people.</p>
-<p>We can quantify a lot of these properties of real world networks by representing them as graphs and then computing <strong>graph metrics</strong>. This is fancy word for counting various numbers most of which are a function of the number of nodes and edges in a graph. In this lesson, we will review the most important graph metrics in social networks.</p>
-<section id="graph-order" class="level3" data-number="5.1.1">
-<h3 data-number="5.1.1" class="anchored" data-anchor-id="graph-order"><span class="header-section-number">5.1.1</span> Graph Order</h3>
-<p>The <strong>order</strong> of a graph (typically written as <span class="math inline">\(n\)</span>), is the <em>number of nodes</em> in the graph. Technically speaking, keeping in mind that the graph is really a set of a set of nodes and edges, the order is the cardinality of node set <span class="math inline">\(n = |V|\)</span>. <strong>Cardinality</strong> is simply a technical term from set theory indicating <em>how many elements</em> there are in a set. Thus, the graph in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a> has an order of 9, while <a href="lesson-graphs-ties.html#fig-directed">Figure&nbsp;<span>4.2</span></a> has an order of 7.</p>
+<section id="degree-centrality" class="level2 page-columns page-full" data-number="20.1">
+<h2 data-number="20.1" class="anchored" data-anchor-id="degree-centrality"><span class="header-section-number">20.1</span> Degree Centrality</h2>
+<p>The most basic way of defining centrality is simply as a measure of how many alters an ego is connected to. This simply takes a node’s degree as introduced in <a href="lesson-graphs-degree.html"><span>Chapter&nbsp;7</span></a>, and begins to consider this measure as a reflection of importance of the node in the network. The logic is that those with more direct connections to others, compared to those with fewer, hold a more prominent place in the network.</p>
+<p>Once we have constructed the <strong>adjacency matrix</strong> for the network (<strong>A</strong>), then degree centrality is easy to calculate. As <a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a> for a given node <em>i</em> the degree centrality is given by summing the entries of its corresponding row.</p>
+<p><span id="eq-degcen"><span class="math display">\[
+  C_i^{DEG} = \sum_{j= 1}^{n}a_{ij}
+\tag{20.1}\]</span></span></p>
+<p><a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a> thus <em>ranks each node in the graph based on the number of other nodes that it is adjacent to</em>. Just like real life, some nodes will be popular (they will be adjacent to lots of other nodes), while others will be unpopular.</p>
+<p>Although it might seem a simple task to just add up the number of connections of each node, that is essentially what the below mathematical equation is doing! Mathematical notation plays an important role in expressing network measures in succinct formats.</p>
+<p>For instance, if we were to use <a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a> to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a> then we would end up with the following degree centralities for each node:</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-degcen" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<thead>
+<tr class="header">
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+<th style="text-align: center;">F</th>
+<th style="text-align: center;">G</th>
+<th style="text-align: center;">H</th>
+<th style="text-align: center;">I</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">3</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;20.1: Degree centralities of nodes in an undirected graph.</div></div>
+</div>
+</div>
 </section>
-<section id="graph-size" class="level3" data-number="5.1.2">
-<h3 data-number="5.1.2" class="anchored" data-anchor-id="graph-size"><span class="header-section-number">5.1.2</span> Graph Size</h3>
-<p>Likewise, the <strong>size</strong> of a graph (typically written as <span class="math inline">\(m\)</span>), is the <em>number of edges</em> in the graph, which is (like with nodes) the <strong>cardinality</strong> of the edge set <span class="math inline">\(m = |E|\)</span>. Thus, the <strong>size</strong> of the graph in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a> is 16, while the size of the graph in <a href="lesson-graphs-ties.html#fig-directed">Figure&nbsp;<span>4.2</span></a> it is 11.</p>
-<p>This means that if you say the <strong>size</strong> of the graph in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a> is 16, we will all understand that you are referring to the number of edges, as you would use the term <strong>order</strong> if you were talking about the number of nodes.</p>
-</section>
-</section>
-<section id="the-graph-maximum-size" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="the-graph-maximum-size"><span class="header-section-number">5.2</span> The Graph Maximum Size</h2>
-<p>In some cases we may be interested to know how many edges there <em>could</em> be in a graph if everyone had a relationship with everyone else in the network. This is the <em>maximum possible number of edges</em> that could exist in a network of order <span class="math inline">\(n\)</span>.</p>
-<p>Recall that, as we discussed previously, the number of edges in a graph is called the <strong>graph size</strong>. Additionally, a graph in which all the edges that could exist are actually present is called the <strong>complete graph</strong>. The <strong>maximum size</strong> of a graph of order <span class="math inline">\(n\)</span> is the number of edges that would exist in that graph is the graph was complete. A graph in which <em>no</em> edges exist (every node is an isolate), is called an <strong>empty graph</strong>.</p>
-<p>While this may seem like a complicated thing, it is actually given by a simple (and important) formula. For an <strong>undirected graph</strong> this is:</p>
-<p><span id="eq-graphmax1"><span class="math display">\[
-  Max(E)^{u}=\frac{n(n-1)}{2}
-\tag{5.1}\]</span></span></p>
-<p>For a <strong>directed graph</strong>, the same computation is even simpler. The maximum number of possible edges in this case is:</p>
-<p><span id="eq-graphmax2"><span class="math display">\[
-  Max(E)^d=n(n-1)
-\tag{5.2}\]</span></span></p>
-</section>
-<section id="graph-maximum-size-explainer" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="graph-maximum-size-explainer"><span class="header-section-number">5.3</span> Graph Maximum Size Explainer</h2>
-<p>Where do these formulas for maximum graph size come from? Let’s consider the directed case first. A graph would be complete if every node was connected to every other node. It is easy to see that for each node, this would be every other node in the graph except themselves. So in a complete graph of order <span class="math inline">\(n\)</span>, the degree of each node <em>has</em> to be <span class="math inline">\(n-1\)</span>. So if we call the degree of the first node in the graph <span class="math inline">\((n-1)_1\)</span>, then the <strong>degree set</strong> (<span class="math inline">\(\mathbf{k}^c\)</span>) of a complete graph would be:</p>
-<p><span id="eq-graphmax3"><span class="math display">\[
-  \mathbf{k}^{c} = [(n-1)_1, (n-1)_2, (n-1)_3 \dots (n-1)_n]  
-\tag{5.3}\]</span></span></p>
-<p>It is easy to see the that the <strong>sum of degrees</strong> (<span class="math inline">\(\sum k_i^c\)</span>) of the complete graph, will give us the maximum size for any graph of that order. So we can write that sum as:</p>
-<p><span id="eq-graphmax4"><span class="math display">\[
-  \sum k_i^{c} = \sum_i^{n} n-1
-\tag{5.4}\]</span></span></p>
-<p>Essentially we add up <span class="math inline">\(n-1\)</span> to <span class="math inline">\(n-1\)</span> to <span class="math inline">\(n-1\)</span>, etc. <span class="math inline">\(n\)</span> times, once for each node in the graph. From basic arithmetic, we know that adding the same number <span class="math inline">\(n\)</span> number of times is the same as multiplying that number by <span class="math inline">\(n\)</span>. So therefore, the maximum size of a complete graph of order <span class="math inline">\(n\)</span> is <span class="math inline">\(n \times n-1 = n(n-1)\)</span>, the formula written as <a href="#eq-graphmax2">Equation&nbsp;<span>5.2</span></a>!</p>
-<p>In the undirected case (<a href="#eq-graphmax1">Equation&nbsp;<span>5.1</span></a>, the procedure is the same, except that now each edge shows up twice in the degree sum, but one of those is redundant. Therefore we divide the whole sum of degrees by 2 to eliminate double-counting, resulting in <span class="math inline">\(\frac{n(n-1)}{2}\)</span> as the formula for the maximum size of an undirected graph or order <span class="math inline">\(n\)</span>.</p>
-<section id="applying-your-knowledge" class="level3" data-number="5.3.1">
-<h3 data-number="5.3.1" class="anchored" data-anchor-id="applying-your-knowledge"><span class="header-section-number">5.3.1</span> Applying your knowledge</h3>
-<p>You can now look a genius. If somebody were to ask you:</p>
-<p><strong>Q</strong>: In classroom with 10 kindergartners, how many total pairs of friends would exist if every kid was friends with every other kid?</p>
-<p>Using your graph theory metrics knowledge, you can now pull out your phone calculator and compute:</p>
-<p><span class="math display">\[
-  \frac{10(10-1)}{2} =
-  \frac{10(9)}{2} =
-  \frac{90}{2} = 45
-\]</span></p>
-<p>Impressing your audience immensely!</p>
-</section>
-</section>
-<section id="graph-density" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="graph-density"><span class="header-section-number">5.4</span> Graph Density</h2>
-<p>In a classic study, the British social anthropologist Elizabeth Bott, made a classic distinction between two types of network structure. According to Bott, some networks are <strong>tight-knit</strong> and others are <strong>loose-knit</strong> <span class="citation" data-cites="bott57">(<a href="#ref-bott57" role="doc-biblioref">Bott 1957</a>)</span>. Tight-knit networks feature a lot of connections and actors can reach others via multiple pathways. Loose-knit networks are more sparsely connected and actors are only reachable to one another via a very restricted set of pathways.</p>
-<p>It was soon realized that a very simple graph metric, called the <strong>network density</strong> could be a useful index of Bott’s ideas of tight versus loose-knit networks. Tight-knit networks are <strong>dense</strong> featuring a lot of inter-connections between actors, while loose-knit networks are less dense <span class="citation" data-cites="barnes69">(<a href="#ref-barnes69" role="doc-biblioref">Barnes 1969</a>)</span>. How can we think of this in terms of graph theory concepts?</p>
-<section id="density-in-undirected-graphs" class="level3" data-number="5.4.1">
-<h3 data-number="5.4.1" class="anchored" data-anchor-id="density-in-undirected-graphs"><span class="header-section-number">5.4.1</span> Density in Undirected Graphs</h3>
-<p>The density <span class="math inline">\(d(G)\)</span> of a graph is a measure of <em>how many ties between actors exist compared to how many ties between actors are possible</em>, given the <strong>graph size</strong> (number of nodes) and the <strong>graph order</strong> (number of links). As such, the density of an undirected graph is quite simply calculated as, the ratio between the observed number of edges <span class="math inline">\(m\)</span> (the cardinality of the edge set), and the graph maximum size as defined using <a href="#eq-graphmax1">Equation&nbsp;<span>5.1</span></a>.</p>
-<p><span id="eq-dens1"><span class="math display">\[
-  d(G)^u=\frac{m}{\frac{n(n-1)}{2}}=m \times \frac{2}{n(n-1)}=\frac{2m}{n(n-1)}
-\tag{5.5}\]</span></span></p>
-<p>Where <span class="math inline">\(m\)</span> is the number of edges (graph size) and <span class="math inline">\(n\)</span> is the number of nodes (graph order) in the network.</p>
-<p>For the graph shown in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a>, of size <span class="math inline">\(m = 16\)</span> and order <span class="math inline">\(n=9\)</span>, we can use <a href="#eq-dens1">Equation&nbsp;<span>5.5</span></a> to compute the graph density as follows:</p>
-<p><span class="math display">\[
-  d(G)^u = \frac{2m}{n(n-1)} =
-  \frac{2 \times 16}{9 \times (9-1)}=
-  \frac{32}{9 \times 8} =
-  \frac{32}{72} =
-  0.44
-\]</span></p>
-<p>The estimated density of the network, <span class="math inline">\(d = 0.44\)</span> tell us that 44% of the total possible number of edges are actually observed. Another way to think about density, is as giving the <em>probability</em> that, if we were to choose two random nodes in the network, this random dyad will have probability <span class="math inline">\(p = 0.44\)</span> of being <strong>connected</strong> (as opposed to <strong>null</strong>).</p>
-</section>
-<section id="density-in-directed-graphs" class="level3" data-number="5.4.2">
-<h3 data-number="5.4.2" class="anchored" data-anchor-id="density-in-directed-graphs"><span class="header-section-number">5.4.2</span> Density in Directed Graphs</h3>
-<p>To compute the density of a directed graph, there is no need to multiply the numerator by two, as each edge does single duty. As such, the equation for computing the density of a directed graph is:</p>
-<p><span id="eq-densdir"><span class="math display">\[
-  d(G)^d=\frac{m}{n(n-1)}
-\tag{5.6}\]</span></span></p>
-<p>Which is even simpler than in the directed case!</p>
-</section>
-<section id="why-is-density-important" class="level3" data-number="5.4.3">
-<h3 data-number="5.4.3" class="anchored" data-anchor-id="why-is-density-important"><span class="header-section-number">5.4.3</span> Why is density important?</h3>
-<p>The density of a network property is important to consider for two reasons. First, (which is the definition of density!) is that it can help us understand how connected the network is compared to how connected it might be. Second, when comparing two networks with the same number of nodes and the same type of relationships, it can tell us how the networks are different.</p>
-<p>For example, let us imagine that there are two organizations, each with 10 people in them. The one organization has high density and the other has low density in terms of the interactions among the members. What might be some of the underlying social differences between the two organizations? While we would need more information, we could posit that the one issue might be that information does not transmit very efficiently across the low density organization because it has to go from member to member, rather than diffusing from one member rapidly to all the others. Another issue might be the “hit by a bus” problem, where if one or two members are taken out of the network, you can suffer breakdown because they are no longer there to coordinate the different parts that don’t talk to each other. Denser networks are less vulnerable to disruption due to remove of key nodes.</p>
+<section id="indegree-and-outdegree-centrality" class="level2 page-columns page-full" data-number="20.2">
+<h2 data-number="20.2" class="anchored" data-anchor-id="indegree-and-outdegree-centrality"><span class="header-section-number">20.2</span> Indegree and Outdegree Centrality</h2>
+<p>If we are talking about a <strong>directed graph</strong>, then there are two types of degree centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of <em>sociability</em> or <em>expansiveness</em> that is how many other nodes in the graph a given node <strong>sends</strong> links to. This is called the <strong>outdegree centrality</strong> of that node, written as <span class="math inline">\(C_i^{OUT}\)</span>. As with the undirected case, this is computed by summing across the rows of the <strong>asymmetric adjacency matrix</strong> corresponding to the directed graph in question, using <a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a>:</p>
+<p><span id="eq-outdegcen"><span class="math display">\[
+  C_i^{OUT} = \sum_ja_{ij}
+\tag{20.2}\]</span></span></p>
+<p>However, in a directed graph, we may also be interested in how <em>popular</em> or <em>sought after</em> by others a given node is. That is, how many other actors send ties <em>to</em> that node. In which case we need to sum across the <strong>columns</strong> of the asymmetric adjacency matrix, and modify the formula as follows:</p>
+<p><span id="eq-indegcen"><span class="math display">\[
+  C_j^{IN} = \sum_ia_{ij}
+\tag{20.3}\]</span></span></p>
+<p>Note that in this version of the equation, we are summing over <em>j</em> (the columns) not over <em>i</em> (the rows) as given by subscript under the <span class="math inline">\(\sum\)</span> symbol.</p>
+<p>For instance, if we were to use equations <a href="#eq-outdegcen">Equation&nbsp;<span>20.2</span></a> and <a href="#eq-outdegcen">Equation&nbsp;<span>20.2</span></a> to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in <a href="lesson-graphs-ties.html#fig-directed">Figure&nbsp;<span>4.2</span></a>), then we would up with the following centralities for each node:</p>
+<div class="cell page-columns page-full">
+<div class="cell-output-display page-columns page-full">
+<div id="tbl-outindegcen" class="anchored page-columns page-full">
+<table class="table table-sm table-striped">
+
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+<th style="text-align: center;">F</th>
+<th style="text-align: center;">G</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Outdegre</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Indegree</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;20.2: Out and Indegree centralities of nodes in a directed graph.</div></div>
+</div>
+</div>
+<p>Just like the degree centrality for undirected graphs, the outdegree and indegree centralities rank each node in a directed graph. The first, outdegree centrality, ranks each node based on the number of other nodes that they are connected to. This is a kind of popularity based on <em>sociability</em>, or the tendency to seek out the company of others. The second, indegree centrality, ranks each node in the graph based on the number of other nodes that connect to that node. This is a kind of popularity based on on <em>being sought after</em> a kind of status.</p>
+<section id="sec-normdeg" class="level3" data-number="20.2.1">
+<h3 data-number="20.2.1" class="anchored" data-anchor-id="sec-normdeg"><span class="header-section-number">20.2.1</span> Normalized Degree Centrality</h3>
+<p>When we compute the degree centrality of a node, are counting the number of other nodes that they are connected to. Obviously, the more nodes there are to connect to, the more opportunities there will be to reach a larger number. But what happens if we wanted to compare the degree centrality of nodes in two very different networks?</p>
+<p>For instance, if your high-school has one thousand people and you have twenty friends, that’s very different from having twenty friends in a high-school of only one hundred people. It seems like the second person, with twenty friends (covering 20% of the population) in a high-school of one-hundred people is definitely more popular than the second person with twenty friends (covering 2% of the population), in a high school with one thousand people.</p>
+<p>That’s why Freeman <span class="citation" data-cites="freeman79">Freeman (<a href="#ref-freeman79" role="doc-biblioref">1979</a>)</span> proposed <em>normalizing</em> the degree centrality of each node by the <em>maximum</em> possible it can take in a given network. As you may have guessed, the maximum degree in a network is <span class="math inline">\(N-1\)</span> the order of the graph minus one. Essentialy, everyone but you!</p>
+<p>We can compute the normalized degree centrality using the following equation:</p>
+<p><span id="eq-indegcen"><span class="math display">\[
+  C_{i(norm)}^{DEG} = \frac{C_{i}^{DEG}}{N-1}
+\tag{20.4}\]</span></span></p>
+<p>Where we just divide the regular degree centrality computed using <a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a> by the order of the graph minus one. This will be equal to <span class="math inline">\(1.0\)</span> if a person knows <em>everyone</em> and <span class="math inline">\(0\)</span> is a person knows <em>no one</em>. For all the other nodes it will be a number between zero and one.</p>
+<p>Moreover, this measure is sensitive to the order of the graph. Thus, for a person with twenty friends in a high-school of a thousand people, the normalized degree centrality is equal to:</p>
+<p><span id="eq-indegcen"><span class="math display">\[
+  C_{i(norm)}^{DEG} = \frac{20}{1000-1}= 0.02
+\tag{20.5}\]</span></span></p>
+<p>But for the person with the same twenty friends in a high-school of one-hundred people, it is equal to:</p>
+<p><span id="eq-indegcen"><span class="math display">\[
+  C_{i(norm)}^{DEG} = \frac{20}{100-1}= 0.20
+\tag{20.6}\]</span></span></p>
+<p>Indicating that a person with the same number of friends in the smaller place is indeed more central!</p>
 </section>
 </section>
 <section id="references" class="level2 unnumbered">
@@ -406,11 +431,8 @@ div.csl-indent {
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
-<div id="ref-barnes69" class="csl-entry" role="doc-biblioentry">
-Barnes, John A. 1969. <span>“Graph Theory and Social Networks: A Technical Comment on Connectedness and Connectivity.”</span> <em>Sociology</em> 3 (2): 215–32.
-</div>
-<div id="ref-bott57" class="csl-entry" role="doc-biblioentry">
-Bott, Elizabeth. 1957. <em>Family and Social Network: Roles, Norms, and External Relationships in Ordinary Urban Families</em>. Tavistock Publications.
+<div id="ref-freeman79" class="csl-entry" role="doc-biblioentry">
+Freeman, Linton C. 1979. <span>“Centrality in Social Networks Conceptual Clarification.”</span> <em>Social Networks</em> 1 (3): 215–39.
 </div>
 </div>
 </section>
@@ -666,13 +688,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation column-body">
   <div class="nav-page nav-page-previous">
-      <a href="./lesson-graphs-ties.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></span>
+      <a href="./lesson-sna-blockmodeling.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Blockmodeling</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./lesson-graphs-neighborhoods.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./lesson-sna-eigenvector.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
