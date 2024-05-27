@@ -1,4 +1,4 @@
-# Centralities based on the Geodesic Distance {#sec-distcent}
+# Centralities based on the Geodesic Distance {#sec-closcent}
 
 ```{r setup, include=FALSE}
     require(ggraph)
@@ -14,8 +14,8 @@ Sometimes it not important how many people you *directly* connected to. Instead,
 #| label: fig-clos
 #| fig-cap: "An undirected graph showing the node with the maximum closeness centrality (in red)."
 #| fig-cap-location: margin
-#| fig-width: 12
-#| fig-height: 8
+#| fig-width: 10
+#| fig-height: 7
 
   set.seed(76)
   fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
@@ -28,7 +28,7 @@ Sometimes it not important how many people you *directly* connected to. Instead,
         activate(nodes) %>%
         mutate(cc = centrality_closeness()) %>% 
         mutate(col = as.character(cc == max(cc)))
-  p <- ggraph(gr, layout = 'kk') 
+  p <- ggraph(gr, layout = 'auto') 
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
   p <- p + geom_node_point(aes(x = x, y = y, colour = col), size = 18)
   cols <- c("TRUE" = "red", "FALSE" = "tan1")
@@ -50,7 +50,10 @@ The information on the pairwise geodesic distances between every pair of nodes i
 #| tbl-cap-location: margin
 
     d <- distances(gr)
-    kbl(d, format = "pipe", align = "c") 
+    kbl(d, format = "html", align = "c", padding = 2) %>% 
+        column_spec(1, bold = TRUE) %>% 
+        kable_styling(bootstrap_options = 
+                        c("striped", "hover", "condensed", "responsive"))
 ```
 
 As shown in @tbl-dis, a node like *I*, who seems to be at the outskirts of the network, also shows up as having the largest geodesic distances from other nodes in the graph. Other nodes, like *E*, *G*, and *L* seem to be "closer" to others, in terms of having to traverse smaller geodesic distances to reach them. 
@@ -80,7 +83,6 @@ Let's see how this work for the graph in @fig-clos. First, we get the row sums o
     d <- cbind(d1, d2, d3)
     kbl(d, format = "html", align = "c", padding = 2,
         col.names = c("Sum of Distances (d)", "Inverse (1/d)", "Normalized (N-1/d)")) %>% 
-        #row_spec(1, bold = TRUE) %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
@@ -135,7 +137,8 @@ Note that in @tbl-dis2, pairs of nodes that cannot **reach** one another in the 
 #| tbl-cap-location: margin
 
     d <- t(rowSums(d))
-    kbl(d, format = "pipe", align = "c") 
+    kbl(d, format = "html", align = "c", padding = 2) %>% 
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
 So that's a bummer since all the "numbers" in @tbl-inf, are just infinity. Not to get too philosophical, but the problem is that when you add any number to "infinity," the answer is, well, *infinity*.^[For more details, see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] This means that closeness centrality is only defined for **connected graphs**. When it comes to disconnected graphs, we are out of luck. 
 
@@ -162,7 +165,8 @@ So let's check by taking every entry in @tbl-dis2 and dividing one by the number
     d <- distances(gr)
     d <- round(1/d, 1)
     diag(d) <- 0
-    kbl(d, format = "pipe", align = "c") 
+    kbl(d, format = "html", align = "c", padding = 2)  %>% 
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 Beautiful! Now, instead of weird "Inf"s we have zeroes, which is great because we can add stuff to zero and get a real number back. We can then apply @eq-harmcen to the numbers in @tbl-dis3 (e.g., computing the sum of each row and then multiplying that by $\frac{1}{N-1}$) to get the **harmonic closeness centrality** for each node in @fig-connected1-2. These are shown in @tbl-clos2.
@@ -173,7 +177,8 @@ Beautiful! Now, instead of weird "Inf"s we have zeroes, which is great because w
 #| tbl-cap-location: margin
 
     d <- round(t(rowSums(d)) * (1/(nrow(d)-1)), 2)
-    kbl(d, format = "pipe", align = "c")
+    kbl(d, format = "html", align = "c", padding = 2) %>% 
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 Great! Now we have a measure of closeness centrality we can apply to all kinds of graphs, whether they are **connected** or **disconnected**. 
