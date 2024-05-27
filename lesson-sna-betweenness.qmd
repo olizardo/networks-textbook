@@ -26,8 +26,8 @@ After you have this list, you can see which of other other nodes shows up as an 
 #| label: fig-bet
 #| fig-cap: "An undirected graph showing the node with the maximum betweenness centrality (in red)"
 #| fig-cap-location: margin
-#| fig-width: 10
-#| fig-height: 7
+#| fig-width: 12
+#| fig-height: 12
 
   set.seed(76)
   fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
@@ -40,12 +40,12 @@ After you have this list, you can see which of other other nodes shows up as an 
         activate(nodes) %>%
         mutate(btc = centrality_betweenness()) %>% 
         mutate(col = as.character(btc == max(btc)))
-  p <- ggraph(gr, layout = 'auto') 
+  p <- ggraph(gr, layout = 'fr') 
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-  p <- p + geom_node_point(aes(x = x, y = y, colour = col), size = 18)
+  p <- p + geom_node_point(aes(x = x, y = y, colour = col), size = 22)
   cols <- c("TRUE" = "red", "FALSE" = "tan1")
   p <- p + scale_discrete_manual(values = cols, aesthetics = "colour")
-  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
   p <- p + theme_graph()  
   p <- p + theme(legend.position = "none")
   p
