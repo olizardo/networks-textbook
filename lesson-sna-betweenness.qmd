@@ -5,10 +5,20 @@
     require(tidygraph)
     require(igraph)
     require(kableExtra)
+    require(sna)
+    require(conflicted)
+    conflicts_prefer(base::attr)
+    conflicts_prefer(igraph::betweenness)
 ```
 
-## Betweenness Centrality 
-Recall that in our discussion of shortest paths between pair of nodes in @sec-indirect, we noted the importance of the **inner nodes** that *intervene* or *mediate* between any one node in the graph that wants to reach another one. Nodes that stand in these **brokerage** or **gatekeeper** slots in the network [@gould_fernandez89], occupy an important position [@marsden83], and this is different from having a lot of contacts (like degree centrality), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality). Instead, this is about being *in-between* the indirect communications of other nodes in graph. We can compute a centrality metric for each node called **betweenness centrality** that captures this idea [anthonisse71, @freeman77, @freeman80]. 
+Recall that in our discussion of shortest paths between pair of nodes in @sec-indirect, we noted the importance of the **inner nodes** that *intervene* or *mediate* between any one node in the graph that wants to reach another one. Nodes that stand in these **brokerage** or **gatekeeper** slots in the network [@gould_fernandez89], occupy an important position [@marsden83], and this is different from having a lot of contacts (like degree centrality), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality). Instead, this is about being *in-between* the indirect communications of other nodes in graph. In this chapter we discuss a couple of centrality metrics designed to capture the extent to which nodes serves as intermediaries between other nodes in a social network.
+
+## Stress Centrality
+
+For instance, let's say you were actor *K* in the network shown in @fig-bet, and you wanted to know who is the person that you depend on the most to communicate with actor *J*. Here dependence means that you are forced to "go through them." One way *K* could figure this out is by listing every shortest path having them as the **origin node** and having *J* as the **destination node**. 
+
+After you have this list, you can see which of other other nodes shows up as an **inner node**---an intermediary or gatekeeper---in those paths the most times. Remember that two actors can be indirectly linked by *multiple shortest paths of the same length*, and that we can figure out how many short paths links pairs of actors in the network using the **shortest paths matrix**.
+
 
 ```{r}
 #| label: fig-bet
@@ -39,7 +49,6 @@ Recall that in our discussion of shortest paths between pair of nodes in @sec-in
   p
 ```
 
-For instance, let's say you were actor *K* in the network shown in @fig-clos, and you wanted to know who is the person that you depend on the most to communicate with actor *J*. Here dependence means that you are forced to "go through them" if *I* wanted to reach *N* via a shortest path. One way *K* could figure this out is by listing every shortest path having them as the **origin node** and having *N* as the **destination node**. After you have this list, you can see which of other other nodes shows up as an **inner node**---an intermediary or gatekeeper---in those paths the most times. 
 
 This shortest path list would look like this: 
 
@@ -55,7 +64,11 @@ This shortest path list would look like this:
 
 1. $\{KH, HE, EJ\}$
 
-There are six shortest paths of length three indirectly connecting actors *K* and *J* in @fig-clos), with nodes $\{A, C, D, E, F, H, N\}$ showing up as an inner node in at least one of those paths. To see which other actor in the network is the most frequent intermediary between *J* and *K*, we can create a list with the number of times each of these nodes shows up as an intermediary in this shortest path list. This would look like this:
+There are six shortest paths (in this case of length $l = 3$) indirectly connecting actors *K* and *J* in @fig-bet, with nodes $\{A, C, D, E, F, H, N\}$ showing up as an inner node in at least one of those paths. To see which other actor in the network is the most *frequent intermediary* between *K* and *J*, we can create a list with the number of times each of these nodes shows up as an inner node in the shortest path list shown earlier. 
+
+We will call each of these numbers $n_{K(x)J}$, where the little $x$ in parentheses indicates the inner node we are talking about standing between $K$ and $J$. For instance, $n_{K(A)J}$ refers to the number of times node $A$ stands on a shortest path linking $K$ and $J$, and so forth for each of the nodes in the inner node set $\{A, C, D, E, F, H, N\}$.
+
+The table containing this information would look like that shown in @tbl-pairdep. 
 
 ```{r}
 #| label: tbl-pairdep 
@@ -70,44 +83,75 @@ There are six shortest paths of length three indirectly connecting actors *K* an
     kbl(d, format = "pipe", align = "c") 
 ```
 
-So it looks like, looking at the second column of @tbl-pairdep, that *H* is the other actor that *J* depends on the most to reach *K*. A better way to quantify this, is to actually look at the *proportion* of paths linking *J* and *K* that a particular other node (like *H*) shows up in. Let's call this $p_{K(H)J}$ which can be read as "the proportion of paths between *K* and *J* featuring *H* as an inner node." This is shown in the third column of @tbl-pairdep We can write this in equation form like this:
+So it looks like, looking at the second column of @tbl-pairdep, that *H* is the other actor that *J* depends on the most to reach *K*, since they show up three times in the paths linking *K* and *J*---meaning that $n_{K(H)J} = 3$---beating out all the other nodes.
+
+We can use this information---aggregated across all pairs of nodes in the graph for every other node---to construct a centrality metric. That is, for each node in the graph $k$ we can ask how often they show up as an intermediary between every other pair of nodes in the graph $i$ and $j$ and then we sum up this quantity across all pairs. This centrality index was first proposed by Alfonso @shimbel53 and it is called the **stress centrality**. 
+
+In equation form you write the stress centrality index like this:
 
 $$
-  p_{K(H)J} = \frac{g_{K(H)J}}{g_{KJ}} = \frac{3}{6} = 0.5
+C^{STRESS}_k = \sum_{i \neq k} \sum_{j \neq k} n_{i(k)j}
+$$ {#eq-stress}
+
+Which says that the stress centrality of node $k$ is the sum of the number of times they stand in a shortest path between each pair of nodes in the graph, excluding the pairs that include $k$ (recall that $i \neq k$ means "$i$ does not equal $k$" in English). 
+
+```{r}
+#| label: tbl-stress
+#| tbl-cap: "Stress centrality scores."
+#| tbl-cap-location: margin
+
+    s <- stresscent(as.matrix(as_adjacency_matrix(gr)))
+    names(s) <- rownames(as_adjacency_matrix(gr))
+    kbl(t(s[LETTERS[1:14]]), format = "html", align = "c", padding = 2) %>% 
+        kable_styling(bootstrap_options = 
+                        c("hover", "condensed", "responsive"))
+```
+
+@tbl-stress shows the results of computing the stress centralities for all the nodes in @fig-bet. It is clear that according to this metric, nodes $E$ and $J$ win out, standing in the middle of a whopping $n_{i(E)j} = n_{i(J)j} = 48$ shortest paths between other nodes in @fig-bet. Node $I$ receives a stress centrality score of $n_{i(I)j} = 0$ because they are not an inner node between any other pair of nodes. 
+
+## Betweenness Centrality
+
+While Shimbel's Stress Centrality idea goes a long way to capturing the idea of who the most intermediary nodes are, it can be improved upon. This is what was noted by Anthonisse and later Linton Freeman in a landmark series of papers, where they developed a centrality metric aimed to measure node intermediation called **betweenness centrality** [anthonisse71, @freeman77, @freeman80]
+
+The basic observation behind betweenness centrality is pretty simple. It rests on the idea that rather than *counting* the raw number of shortest paths a particular node sits on as an inner node, it is better to look at the *percentage* (or proportion) of such paths. 
+
+Let us return to our earlier example featuring nodes $K$ and $J$ as the end nodes. To measure the proportion of shortest paths featuring nodes in the inner node set $\{A, C, D, E, F, H, N\}$ standing between $K$ and $J$, we simplyt take $n_{K(x)J}$ and divide it by the total number of shortests paths between $K$ and $J$, whih we already noted was six. Let us call this new quantity $p_{K(x)J}$ which can be read as "the proportion of paths between *K* and *J* featuring node $x$ as an inner node." This is shown in the third column of @tbl-pairdep.
+
+Let's say we wanted to calculate $p_{K(x)J}$ for node $H$, written $p_{K(H)J}$. We can write this in equation form like this:
+
+$$
+  p_{K(H)J} = \frac{n_{K(H)J}}{n_{KJ}} = \frac{3}{6} = 0.5
 $$   {#eq-pairdep}
 
-In @eq-pairdep, $g_{K(H)J}$ is the number of shortest paths linking *K* and *J* featuring *H* as an inner node, and $g_{KJ}$ is the total number of paths linking *K* and *J*. @freeman80 calls this measure the **pair-dependency** of actor *K* on actor *H* to reach a given node *J*. In this case, $g_{K(H)J} = 3$ and $g_{KJ} = 6$, which means that actor *K* depends on actor *H* for fifty percent of their shortest path access to *J*. Making *H* the actor in the network *J* depends on the most to be able to reach *J*. 
+Just as before, in @eq-pairdep, $n_{K(H)J}$ is the number of shortest paths linking *K* and *J* featuring *H* as an inner node, and $n_{KJ}$ is the *total* number of shortest paths linking *K* and *J*. 
 
-Generalizing this approach, we can do the same for each triplet of actors *i*, *j*, and *k* in the network. This is the basis for calculating betweenness centrality. That is, we can count the number of times *k* stands on the shortest path between two other actors *i* and *j*. We can all this number $g_{i(k)j}$. We can then divide it by the total number of shortest paths linking actors *i* and *j* in the network, which we refer by $g_{ij}$. Remember that two actors can be indirectly linked by *multiple shortest paths of the same length*, and that we can figure out how many short paths links pairs of actors in the network using the **shortest paths matrix**.
+@freeman80 calls the measure in @eq-pairdep the **pair-dependency** of actor *K* on actor *H* to reach a given node *J*. In this case, $n_{K(H)J} = 3$ and $n_{KJ} = 6$, which means that actor *K* depends on actor *H* for fifty percent of their shortest path access to *J*. Making *H* the actor in the network *J* depends on the most to be able to reach *J*. The third column of @tbl-pairdep shows the $p_{K(x)J}$ scores for all the nodes in the inner node set $\{A, C, D, E, F, H, N\}$ standing between $K$ and $J$.
 
-This ratio, written $\frac{g_{i(k)j}}{g_{ij}}$ then gives us the *proportion* of shortest paths in the network that have *i* and *j* as the end nodes and that feature *k* as an intermediary inner node. This can range from zero (no shortest paths between *i* and *j* feature node *k* as an intermediary) to one (all the shortest paths between *i* and *j* feature node *k* as an intermediary).
+Generalizing this approach, we can do the same for each triplet of actors *i*, *j*, and *k* in @fig-bet This is the basis for calculating **betweenness centrality**. That is, we can count the number of times *k* stands on the shortest path between two other actors *i* and *j*, we can then divide it by the total number of shortest paths linking actors *i* and *j* in the network. 
+
+This ratio, written $\frac{n_{i(k)j}}{n_{ij}}$ then gives us the *proportion* of shortest paths in the network that have *i* and *j* as the end nodes and that feature *k* as an intermediary inner node, written $p_{i(k)j}$. This can range from zero (no shortest paths between *i* and *j* feature node *k* as an intermediary) to one (all the shortest paths between *i* and *j* feature node *k* as an intermediary).
 
 We can then use the following equation to compute the average of this proportion for each node *k* across each pair of actors in the network *i* and *j*:
 
 $$
-  C_k^{BET} = \sum_i \sum_j \frac{g_{i(k)j}}{g_{ij}}
+  C_k^{BET} = \sum_{i \neq k} \sum_{j \neq k} p_{i(k)j}
 $$ {#eq-betcen}
 
-Computing this quantity for the graph shown in @fig-bet, yields the  betweenness centrality scores shown in @tbl-bet.
+Computing this quantity for the graph shown in @fig-bet, yields the betweenness centrality scores shown in @tbl-bet.
 
 ```{r}
 #| label: tbl-bet 
 #| tbl-cap: "Betweenness centrality scores."
 #| tbl-cap-location: margin
 
-    set.seed(76)
-    fr <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
-    to <- c(sample(toupper(letters[1:14]), 35, replace = TRUE))
-    edge.dat <- edge.dat[order(fr, to),]
-    node.dat <- data.frame(name = union(edge.dat$fr, edge.dat$to))
-    gr <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
-    gr <- as_tbl_graph(simplify(gr))
     b <- t(round(betweenness(gr), 1))
     kbl(b, format = "pipe", align = "c") 
 ```
 
-The numbers in the Table can be readily interpreted as percentages. Thus, the fact that node *J* has a a betweenness centrality score of 10.8 tells us that they stand in about 11% of the shortest paths between pairs of nodes in the graph. Interestingly, as shown in @fig-bet, the node that ends up with the highest betweenness score is *L* ($C_L^{BET} = 16.4$), mostly due to the fact that node *I*, who has the lowest possible betweenness score of zero, depends on this node for access to every other actor in the network. 
+The numbers in the Table can be readily interpreted as percentages (or probabilities). Thus, the fact that node *J* has a a betweenness centrality score of 10.8 tells us that they stand in about 11% of the shortest paths between pairs of nodes in the graph. Alternatively, it says that if pick a shortest path betweenn any two pair of random nodes $i$ and $j$ there's an 11% chance that $J$ will be one of the inner nodes in that path. 
 
-Note also that two *different* nodes end up being ranked first on closeness and betweenness centrality in the same network (compare the red nodes in @fig-clos and @fig-bet). This tells us that closeness and betweenness are analytically distinct measures of node position. One (closeness) gets at reachability, and the other (betweenness) gets at intermediation potential. 
+Interestingly, as shown in @fig-bet, the node that ends up with the highest betweenness score is *L* ($C_L^{BET} = 16.4$), which is different from the result we got using the stress centralities scores in @tbl-stress. This is mostly due to the fact that node *I*, who has the lowest possible betweenness score of zero, depends on this node for access to every other actor in the network. 
+
+Note also that two *different* nodes end up being ranked first on closeness---as we saw on @sec-closeness---and betweenness centrality in the same network (compare the red nodes in @fig-clos and @fig-bet). This tells us that closeness and betweenness are analytically distinct measures of node position. One (closeness) gets at reachability, and the other (betweenness) gets at intermediation potential. 
 
 ## References {.unnumbered}
