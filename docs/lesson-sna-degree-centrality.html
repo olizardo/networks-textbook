@@ -48,7 +48,7 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./lesson-sna-eigenvector.html" rel="next">
+<link href="./lesson-sna-closeness.html" rel="next">
 <link href="./lesson-sna-blockmodeling.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -244,17 +244,32 @@ div.csl-indent {
   <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-closeness.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-betweenness.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-bigthree.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">The “Big Three” Centrality Metrics</span></a>
+  </div>
+</li>
         <li class="sidebar-item sidebar-item-section">
       <span class="sidebar-item-text sidebar-link text-start">Prestige</span>
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></a>
+  <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Status</span></a>
+  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Status</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -262,7 +277,7 @@ div.csl-indent {
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-nets-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
+  <a href="./lesson-nets-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
   </div>
 </li>
     </ul>
@@ -305,14 +320,14 @@ div.csl-indent {
 
 <section id="degree-centrality" class="level2 page-columns page-full" data-number="20.1">
 <h2 data-number="20.1" class="anchored" data-anchor-id="degree-centrality"><span class="header-section-number">20.1</span> Degree Centrality</h2>
-<p>The most basic way of defining centrality is simply as a measure of how many alters an ego is connected to. This simply takes a node’s degree as introduced in <a href="lesson-graphs-degree.html"><span>Chapter&nbsp;7</span></a>, and begins to consider this measure as a reflection of importance of the node in the network. The logic is that those with more direct connections to others, compared to those with fewer, hold a more prominent place in the network.</p>
-<p>Once we have constructed the <strong>adjacency matrix</strong> for the network (<strong>A</strong>), then degree centrality is easy to calculate. As <a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a> for a given node <em>i</em> the degree centrality is given by summing the entries of its corresponding row.</p>
+<p>The most basic way of defining centrality is simply as a measure of how many alters an ego is connected to. This simply takes a node’s degree as introduced in <a href="#sec-degree"><span class="quarto-unresolved-ref">sec-degree</span></a>, and begins to consider this measure as a reflection of importance of the node in the network. The logic is that those with more direct connections to others, compared to those with fewer, hold a more prominent place in the network.</p>
+<p>Once we have constructed the <strong>adjacency matrix</strong> for the network (<strong>A</strong>), then degree centrality is easy to calculate. As <a href="#eq-degcen">Equation&nbsp;<span class="quarto-unresolved-ref">eq-degcen</span></a> for a given node <em>i</em> the degree centrality is given by summing the entries of its corresponding row.</p>
 <p><span id="eq-degcen"><span class="math display">\[
   C_i^{DEG} = \sum_{j= 1}^{n}a_{ij}
 \tag{20.1}\]</span></span></p>
-<p><a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a> thus <em>ranks each node in the graph based on the number of other nodes that it is adjacent to</em>. Just like real life, some nodes will be popular (they will be adjacent to lots of other nodes), while others will be unpopular.</p>
+<p><a href="#eq-degcen">Equation&nbsp;<span class="quarto-unresolved-ref">eq-degcen</span></a> thus <em>ranks each node in the graph based on the number of other nodes that it is adjacent to</em>. Just like real life, some nodes will be popular (they will be adjacent to lots of other nodes), while others will be unpopular.</p>
 <p>Although it might seem a simple task to just add up the number of connections of each node, that is essentially what the below mathematical equation is doing! Mathematical notation plays an important role in expressing network measures in succinct formats.</p>
-<p>For instance, if we were to use <a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a> to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in <a href="lesson-graphs-ties.html#fig-undirected">Figure&nbsp;<span>4.1</span></a> then we would end up with the following degree centralities for each node:</p>
+<p>For instance, if we were to use <a href="#eq-degcen">Equation&nbsp;<span class="quarto-unresolved-ref">eq-degcen</span></a> to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in <a href="#fig-undirected">Figure&nbsp;<span class="quarto-unresolved-ref">fig-undirected</span></a> then we would end up with the following degree centralities for each node:</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div id="tbl-degcen" class="anchored page-columns page-full">
@@ -351,7 +366,7 @@ div.csl-indent {
 </section>
 <section id="indegree-and-outdegree-centrality" class="level2 page-columns page-full" data-number="20.2">
 <h2 data-number="20.2" class="anchored" data-anchor-id="indegree-and-outdegree-centrality"><span class="header-section-number">20.2</span> Indegree and Outdegree Centrality</h2>
-<p>If we are talking about a <strong>directed graph</strong>, then there are two types of degree centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of <em>sociability</em> or <em>expansiveness</em> that is how many other nodes in the graph a given node <strong>sends</strong> links to. This is called the <strong>outdegree centrality</strong> of that node, written as <span class="math inline">\(C_i^{OUT}\)</span>. As with the undirected case, this is computed by summing across the rows of the <strong>asymmetric adjacency matrix</strong> corresponding to the directed graph in question, using <a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a>:</p>
+<p>If we are talking about a <strong>directed graph</strong>, then there are two types of degree centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of <em>sociability</em> or <em>expansiveness</em> that is how many other nodes in the graph a given node <strong>sends</strong> links to. This is called the <strong>outdegree centrality</strong> of that node, written as <span class="math inline">\(C_i^{OUT}\)</span>. As with the undirected case, this is computed by summing across the rows of the <strong>asymmetric adjacency matrix</strong> corresponding to the directed graph in question, using <a href="#eq-degcen">Equation&nbsp;<span class="quarto-unresolved-ref">eq-degcen</span></a>:</p>
 <p><span id="eq-outdegcen"><span class="math display">\[
   C_i^{OUT} = \sum_ja_{ij}
 \tag{20.2}\]</span></span></p>
@@ -360,7 +375,7 @@ div.csl-indent {
   C_j^{IN} = \sum_ia_{ij}
 \tag{20.3}\]</span></span></p>
 <p>Note that in this version of the equation, we are summing over <em>j</em> (the columns) not over <em>i</em> (the rows) as given by subscript under the <span class="math inline">\(\sum\)</span> symbol.</p>
-<p>For instance, if we were to use equations <a href="#eq-outdegcen">Equation&nbsp;<span>20.2</span></a> and <a href="#eq-outdegcen">Equation&nbsp;<span>20.2</span></a> to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in <a href="lesson-graphs-ties.html#fig-directed">Figure&nbsp;<span>4.2</span></a>), then we would up with the following centralities for each node:</p>
+<p>For instance, if we were to use equations <a href="#eq-outdegcen">Equation&nbsp;<span class="quarto-unresolved-ref">eq-outdegcen</span></a> and <a href="#eq-outdegcen">Equation&nbsp;<span class="quarto-unresolved-ref">eq-outdegcen</span></a> to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in <a href="#fig-directed">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>), then we would up with the following centralities for each node:</p>
 <div class="cell page-columns page-full">
 <div class="cell-output-display page-columns page-full">
 <div id="tbl-outindegcen" class="anchored page-columns page-full">
@@ -414,7 +429,7 @@ div.csl-indent {
 <p><span id="eq-indegcen"><span class="math display">\[
   C_{i(norm)}^{DEG} = \frac{C_{i}^{DEG}}{N-1}
 \tag{20.4}\]</span></span></p>
-<p>Where we just divide the regular degree centrality computed using <a href="#eq-degcen">Equation&nbsp;<span>20.1</span></a> by the order of the graph minus one. This will be equal to <span class="math inline">\(1.0\)</span> if a person knows <em>everyone</em> and <span class="math inline">\(0\)</span> is a person knows <em>no one</em>. For all the other nodes it will be a number between zero and one.</p>
+<p>Where we just divide the regular degree centrality computed using <a href="#eq-degcen">Equation&nbsp;<span class="quarto-unresolved-ref">eq-degcen</span></a> by the order of the graph minus one. This will be equal to <span class="math inline">\(1.0\)</span> if a person knows <em>everyone</em> and <span class="math inline">\(0\)</span> is a person knows <em>no one</em>. For all the other nodes it will be a number between zero and one.</p>
 <p>Moreover, this measure is sensitive to the order of the graph. Thus, for a person with twenty friends in a high-school of a thousand people, the normalized degree centrality is equal to:</p>
 <p><span id="eq-indegcen"><span class="math display">\[
   C_{i(norm)}^{DEG} = \frac{20}{1000-1}= 0.02
@@ -693,8 +708,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./lesson-sna-eigenvector.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./lesson-sna-closeness.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
