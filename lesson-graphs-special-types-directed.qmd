@@ -95,5 +95,22 @@ What happens if we build a network composed of directed links that go only in on
 
 The resulting graph is a special type of directed graph called an **oriented graph**, like the one in @fig-oriented. An oriented graph is kind of the opposite of the kind of symmetric directed graph depicted in @fig-symm. Whereas in @fig-symm every connected dyad is linked by a bi-directional reciprocal link, in the oriented graph shown in @fig-oriented, every connected dyad is linked *only* by a one-way non-reciprocal link, the link that would turn the asymmetrically connected dyads in @fig-oriented into a reciprocal dyad is forbidden by the nature of the tie.
 
+```{r}
+#| label: fig-tree
+#| fig-cap: "A tree graph with thirteen nodes."
+#| fig-cap-location: margin
+#| fig-width: 10
+#| fig-height: 10
 
+  gr <- create_tree(n = 13, children = 3) 
+  gr <- mutate(gr, name = toupper(letters[1:13])) 
+  p <- ggraph(gr, layout = 'tree')
+  p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25,
+              arrow = arrow(length = unit(6, 'mm')),
+              end_cap = circle(10, 'mm'))
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p <- p + theme_graph() 
+  p
+```
 
