@@ -107,33 +107,11 @@ A common example of anti-symmetric ties in political sociology are *patron-clien
 
 In the first (authority relations) case, your boss is your boss, while you cannot be your boss’ boss. The same goes for armies and other **command and control structures**, *giving orders to* is an anti-symmetric relation. An officer who gives orders to another officer (and thus commands them) *cannot* by definition also receive orders from them. Thus, @fig-tree could be a network in which the anti-symmetric links are directed "gives orders to" (in an army or an office) relations, where the **source node** directs commands toward the **destination node**. So *A* is the top boss and commands *B*, *C*, and *D*. Node *B*, in their turn, gives orders to *E*, who is at the lowest level of the command and control structure, not commanding anybody in turn. 
 
-
 In the second (cross-generational) case, your parents are your parents (but you can only be a son or daughter to your parents), and your grandparents are their parents, and so forth. "Being the parent of" thus counts as an anti-symmetric relation as we define here; it only goes way (from parents to children) but it cannot come back from children towards parents. Teacher-student, coach-athlete, buyer-seller, parent-child are all examples of anti-symmetric relationships that can be depicted as tree graphs.
 
 Yet another set of relations that can only be represented using anti-symmetric links are **dominance relations**. These include negative interactions like "bullying"---or "pecking" if we are talking about chickens @chase82. Obviously if somebody bullies somebody else then they cannot be bullied back at the same time (although it could happen that a person dominated by a bully can become dominated by the person they used to bully, as when George McFly stood up to Biff in *Back to the Future*, thus reversing the direction of the one-way anti-symmetric link going from $A$ to $B$ so that it goes from $B$ to $A$).^[When dominance relations become concatenated into a whole network based on anti-symmetric dominance links they form a **dominance hierarchy**.] 
 
-```{r}
-#| label: fig-oriented-tree
-#| fig-cap: "An oriented directed graph drawn as a tree."
-#| fig-cap-location: margin
-#| fig-height: 8
-#| fig-width: 8
 
-  fr <- c("A", "D", "C", "C", "A", "D", "D", "G", "C", "B", "G")
-  to <- c("B", "A", "F", "E", "F", "G", "C", "E", "A", "F", "A")
-  edge.dat <- data.frame(fr, to)
-  node.dat <- data.frame(name = union(fr, to))
-  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
-  p <- ggraph(gr, layout = 'tree')
-  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
-              arrow = arrow(length = unit(7, 'mm')),
-              end_cap = circle(10, 'mm'), 
-              sep = unit(8, 'mm'))
-  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
-  p <- p + theme_graph() 
-  p
-```
 
 ```{r}
 #| label: fig-tree
@@ -154,13 +132,12 @@ Yet another set of relations that can only be represented using anti-symmetric l
   p
 ```
 
-As we will see in @sec-indirect, when considering connections between people that involve intermediaries, there is a special pattern called a **cycle**. This involves a node sending a directed tie to another node, which sends a directed tie to a third node. What makes it a cycle is that third node then sends a directed tie to the first node we began with. Recall from @sec-triads, that the three-person subgraph *AAA(C)* shown in @fig-AAAC forms a cycle. For instance, in @fig-oriented, the sequence of directed edges $ED, DG, GE$ forms a cycle starting and ending in node $E$. Can you spot any other cycles in @fig-oriented?
+One feature of a network composed of only anti-symmetric relations is that its corresponding graph can always be drawn from top to bottom, starting (at the top) with the node that only sends but does receive any ties and ending (at the bottom) with nodes that only receive, but do not send, ties. This is called a **tree graph**, like the one shown in @fig-tree. 
 
-One feature of a network composed of only anti-symmetric relations is that its corresponding graph can always be drawn from top to bottom, starting (at the top) with the node that only sends but does receive any ties and ending (at the bottom) with nodes that only receive, but do not send, ties. This is called a **tree layout**. For instance, @fig-oriented-tree shows the same graph as in @fig-oriented, but laid out as a tree. 
+For instance, if @fig-tree was a network composed of dominance interactions between people like "bullying" or "beating in a fight," then the tree layout of the oriented graph would reveal the relevant **dominance hierarchy** between people. So we would conclude that node $A$ being a transmitter node as defined in @sec-typedir, that is, a node that is not the receiver of any dominance interactions but only a sender of them, is the "strongest." No one dominates $A$.
 
-For instance, if @fig-oriented-tree was a network composed of dominance interactions between people like "bullying" or "beating in a fight," then the tree layout of the oriented graph would reveal the relevant **dominance hierarchy** between people. So we would conclude that node $D$ being a transmitter node as defined in @sec-typedir, that is, a node that is not the receiver of any dominance interactions but only a sender of them, is the "strongest." No one dominates $D$.
+Note that if you are dominated by somebody else in a dominance hierarchy, while you may not be able to dominate the person who dominates you back (given the anti-symmetric constraint), you can always dominate *somebody else*. This dynamic creates *chains* of negative interactions, which is exactly how bullying networks work when observed by sociologists.
 
-Note that if you are dominated by somebody else in a dominance hierarchy, while you may not be able to dominate the person who dominates you back (given the anti-symmetric constraint), you can always dominate *somebody else*. This dynamic creates *chains* of negative interactions, which is exactly how bullying networks work when observed by sociologists. 
+Thus, in @fig-tree, while $C$ gets dominated by $A$, they in turn bully $H$, $I$, and $H$. This creates dominance chains---technically known as a **directed paths** as we will see in @sec-dirpaths---going from $A$ to $C$ to $H$, $I$, and $J$. Also note that in a dominance hierarchy, transmitter nodes like $\{B, C, D\}$ in @fig-tree are both bullies and bullied, while receiver nodes like $\{E, F, G, H, I, J, K, L, M\}$ are in the worst possible position only receiving negative interactions.
 
-Thus, in @fig-oriented-tree, while $C$ gets dominated by $D$, they in turn bully $F$ and $E$. This creates dominance chains---technically known as a **directed paths** as we will see in @sec-dirpaths---going from $A$ to $C$ to $F$ and $E$. Also note that in a dominance hierarchy, transmitter nodes like $\{A, B, C, G\}$ in @fig-oriented-tree are both bullies and bullied, while receiver nodes are in the worst possible position only receiving negative interactions.
 ## References {.unnumbered}
