@@ -8,13 +8,13 @@
     library(lsa)
 ```
 
-As we noted in @sec-nodenei, it is possible for the **neighborhood** of two nodes in a graph to *overlap*. Recall that for each node, we define its neighborhood as the set of other nodes that they are adjacent to. That means the neighborhood between two nodes can have members in common, which is given by the **intersection** between these two sets. *The more members they have in common the more structurally similar two nodes are*. 
+As we noted in @sec-nodenei, it is possible for the **neighborhood** of two nodes in a graph to *overlap*. Recall that for each node, we define its neighborhood as the set of other nodes that it is adjacent to. That means the neighborhood between two nodes can have members in common, which is the **intersection** of these two sets. *The more members they have in common, the more structurally similar two nodes are*. 
 
-Similarities based on the neighborhood overlap between two nodes are called **local node similarities** because they only use information on the immediate **ego network** of the two nodes, based on only on direct (one-step) connections.^[We can also define similarities based on indirect connections between nodes, but that's a subject for a future lesson.]
+Similarities based on the neighborhood overlap between two nodes are called **local node similarities** because they only use information on the immediate **ego network** of the two nodes, based only on direct (one-step) connections.^[We can also define similarities based on indirect connections between nodes, but that's a subject for a future lesson.]
 
 ## Structural Equivalence and Local Similarity
 
-If two nodes *A* and *B* are structurally equivalent then their neighborhood overlap $O(A, B)$ is equivalent to their total set of neighbors, meaning that the cardinality of their neighborhood sets is the same as the cardinality of the intersection of those sets. In mathese, for structurally equivalent nodes:
+If two nodes *A* and *B* are structurally equivalent, then their neighborhood overlap $O(A, B)$ is equivalent to their total set of neighbors, meaning that the cardinality of their neighborhood sets is the same as the cardinality of the intersection of those sets. In mathese, for structurally equivalent nodes:
 
 $$
 N(A) = N(B)
@@ -23,14 +23,13 @@ $$
 O(A,B) = |N(A) \cap N(B)| = |N(A)| = |N(B)|
 $$ {#eq-over}
 
-@eq-over says that when two nodes are structurally equivalent, their overlap is the same as the cardinality as the intersection between their neighborhoods, which happens to be the same as the cardinality of their original neighborhoods!
+@eq-over says that when two nodes are structurally equivalent, their overlap is the same as the cardinality of the intersection between their neighborhoods, which happens to be the same as the cardinality of their original neighborhoods!
 
- 
-For instance, imagine you have a friend and that friend knows *all* your friends and you know *all* their friends. In which case we would say that the overlap between your node neighborhoods is pretty high; in fact the two neighborhoods overlap *completely*, which makes you structurally equivalent! 
+For instance, imagine you have a friend, and that friend knows *all* your friends, and you know *all* their friends. In which case, we would say that the overlap between your node neighborhoods is pretty high; in fact, the two neighborhoods overlap *completely*, which makes you structurally equivalent! 
 
-But even if your friend knows 90% of the people in your network (and you know 90% of the people in their network) that would make you very *structurally similar* to one another. 
+But even if your friend knows 90% of the people in your network (and you know 90% of the people in their network), that would make you very **structurally similar** to one another. 
 
-Now imagine you just met a new person online who lives in a far away country, and as far as you know, they know *none* of your friends and you know *none* of their friends. In which case, we would say that the overlap if the two neighborhoods is nil or as close to zero as it can get. You occupy completely different positions in the network. 
+Now imagine you just met a new person online who lives in a faraway country, and as far as you know, they know *none* of your friends, and you know *none* of their friends. In which case, we would say that the overlap of the two neighborhoods is nil or as close to zero as it can get. You occupy completely different positions in the network. 
 
 
 ```{r}
@@ -52,12 +51,11 @@ Now imagine you just met a new person online who lives in a far away country, an
 ```
 
 ## The Neighborhood Overlap Matrix
+To measure structural similarity between nodes based on their neighborhood overlap, we construct a new matrix, called the **neighborhood overlap matrix**, which stores neighborhood overlap information for each pair of nodes.
 
-To measure structural similarity between nodes based on their neighborhood overlap, we need to construct a new matrix, called the **neighborhood overlap matrix** that stores the neighborhood overlap information for each pair of nodes.
+Consider the graph shown in @fig-stsim. Its corresponding neighborhood overlap matrix is shown in @tbl-neiover. In the matrix, each cell gives us the overlap between the row node and the column node. Because $O(i, j) = O(j, i)$ for all nodes *i* and *j* in a graph, the neighborhood overlap matrix is **symmetric** (has the same information in the upper and lower triangles).
 
-Consider the graph shown in @fig-stsim. Its corresponding neighborhood overlap matrix is show in @tbl-neiover. In the matrix, each cell gives us the overlap between the row node and the column node. Because $O(i, j) = O(j, i)$ for all nodes *i* and *j* in a graph, the neighborhood overlap matrix is **symmetric** (has the same information in the upper and lower triangles).
-
-@tbl-neiover shows that some nodes like *A* and *I* have a very strong overlaps in their neighborhoods: $O(A, I) = 4$, for other nodes, like $G$ and $F$, the overlap is much lower $O(G, F) = 1$. For nodes that don't have any neighbors in common, like *B* and *H* the overlap is the lowest it can be, namely, zero $O(B, H) = 0$. 
+@tbl-neiover shows that some nodes like *A* and *I* have a very strong overlaps in their neighborhoods: $O(A, I) = 4$, for other nodes, like $G$ and $F$, the overlap is much lower $O(G, F) = 1$. For nodes that don't have any neighbors in common, like *B* and *H*, the overlap is at its minimum, namely, zero: $O(B, H) = 0$. 
 
 ```{r}
 #| label: tbl-neiover
@@ -84,7 +82,7 @@ kbl(o, format = "html", align = "c") %>%
 
 
 ### Jaccard Similarity
-Once we have recorded the neighborhood overlap information we can construct a measure of structural similarity between two nodes called [**Jaccard's Similarity Coefficient**](https://en.wikipedia.org/wiki/Jaccard_index) ($J_{ij}$) [@jaccard01]. Actually we will need one more bit of information before computing this measure (and the other ones that follow), which is the graph's degree set. This is shown in @tbl-degsetover.
+Once we have recorded the neighborhood overlap information, we can construct a measure of structural similarity between two nodes called [**Jaccard's Similarity Coefficient**](https://en.wikipedia.org/wiki/Jaccard_index) ($J_{ij}$) [@jaccard01]. Actually, we will need one more piece of information before computing this measure (and the other measures that follow): the graph's degree set. This is shown in @tbl-degsetover.
 
 ```{r}
 #| label: tbl-degsetover
@@ -96,13 +94,13 @@ kbl(d, format = "html", align = "c") %>%
      kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
 ```
 
-The Jaccard similarity between two nodes *i* and *j* goes like this. Let's say $n_{ij}$ is the number of friends that nodes *i* and *j* have in common, and the total number of *i*'s friends if $k_i$ (*i*'s degree) and the total number of *j*'s friends if $k_j$ (*j*'s degree). Then the structural similarity of *i* and *j* is given by: 
+The Jaccard similarity between two nodes *i* and *j* is defined as follows. Let's say $n_{ij}$ is the number of friends that nodes *i* and *j* have in common, and the total number of *i*'s friends is $k_i$ (*i*'s degree) and the total number of *j*'s friends if $k_j$ (*j*'s degree). Then the structural similarity of *i* and *j* is given by: 
 
 $$
   J_{ij} = \frac{n_{ij}}{k_i + k_j - n_{ij}}
 $$   {#eq-jaccard}
 
-@eq-jaccard says that the structural similarity of two nodes is equivalent to the number of friends that the two persons know in common, divided by the sum of their degrees minus the number of people they know in common. Jaccard's coefficient ranges from zer (when $n_{ij}=0$ and the two nodes have no neighbors in common) to 1.0 (when $n_{ij} = k_i$ and $n_{ij} = k_j$ and the two nodes are structurally equivalent). 
+@eq-jaccard says that the structural similarity between two nodes is equivalent to the number of friends they have in common, divided by the sum of their degrees minus the number of people they have in common. Jaccard's coefficient ranges from zero (when $n_{ij}=0$ and the two nodes have no neighbors in common) to 1.0 (when $n_{ij} = k_i$ and $n_{ij} = k_j$ and the two nodes are structurally equivalent). 
 
 For instance, @tbl-neiover tells us that nodes *D* and *H* have three neighbors in common: $n_{DH} = 3$, and @tbl-degsetover tells us that the degree of *D* is $k_D = 5$ and that the degree of *H* is also $k_H = 5$. This means that the Jaccard similarity $J_{DH}$ is:
 
@@ -127,16 +125,16 @@ $$
                             c("hover", "condensed", "responsive"))
 ```
 
-The structural similarities for all nodes in @fig-stsim based on Jaccard's index are shown in @tbl-jaccard.
+The structural similarities among all nodes in @fig-stsim, based on Jaccard's index, are shown in @tbl-jaccard.
 
 ### Dice Similarity
-A second measure of structural similarity between nodes based on the neighborhood overlap is the [**Dice Similarity Index**](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). It goes like this [@dice45]:
+A second measure of structural similarity between nodes, based on neighborhood overlap, is the [**Dice Similarity Index**](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). It goes like this [@dice45]:
 
 $$
   D_{ij} = \frac{2n_{ij}}{k_i + k_j}
 $$   {#eq-dice}
 
-Which says that the structural similarity between two nodes is equivalent to the twice the number of people the know in common, divided by the sum of their degrees. 
+This says that the structural similarity between two nodes equals twice the number of people they know in common, divided by the sum of their degrees. 
 
 ```{r}
 #| label: tbl-dice
@@ -160,11 +158,11 @@ $$
 D_{DH} = \frac{2 \times 3}{5 + 5} = \frac{6}{10} = 0.60
 $$
 
-The structural similarities for all nodes in @fig-stsim based on Dice's index are shown in @tbl-dice.
+The structural similarities among all nodes in @fig-stsim, based on Dice's index, are shown in @tbl-dice.
 
 
 ### Cosine Similarity
-A third and final measure of structural similarity between two nodes based on the neighborhood overlap is the [**cosine similarity**](https://en.wikipedia.org/wiki/Cosine_similarity) between their respective neighborhoods ($C_{ij}$). This is given by: 
+A third and final measure of structural similarity between two nodes, based on neighborhood overlap, is the [**cosine similarity**](https://en.wikipedia.org/wiki/Cosine_similarity) between their neighborhoods ($C_{ij}$). This is given by: 
 
 $$
   C_{ij} = \frac{n_{ij}}{\sqrt{k_ik_j}}
