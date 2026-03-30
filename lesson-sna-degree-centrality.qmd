@@ -9,17 +9,17 @@
 
 ## Degree Centrality 
 
-The most basic way of defining centrality is simply as a measure of how many alters an ego is connected to. This simply takes a node's degree as introduced in @sec-degree, and begins to consider this measure as a reflection of importance of the node in the network. The logic is that those with more direct connections to others, compared to those with fewer, hold a more prominent place in the network. 
+The most basic way of defining centrality is simply as a measure of how many alters an ego is connected to. This simply takes a node's degree, as introduced in @sec-degree, and treats it as a reflection of the node's *importance* in the network. The logic is that those with more direct connections to others, compared to those with fewer, hold a more prominent place in the network. 
 
-Once we have constructed the **adjacency matrix** for the network (**A**), then degree centrality is easy to calculate. As @eq-degcen for a given node *i* the degree centrality is given by summing the entries of its corresponding row.
+Once we have constructed the **adjacency matrix** for the network (**A**), then degree centrality is easy to calculate. As @eq-degcen for a given node *i*, the degree centrality is given by summing the entries of its corresponding row.
 
 $$
   C_i^{DEG} = \sum_{j= 1}^{n}a_{ij}
 $$ {#eq-degcen}
 
-@eq-degcen thus *ranks each node in the graph based on the number of other nodes that it is adjacent to*. Just like real life, some nodes will be popular (they will be adjacent to lots of other nodes), while others will be unpopular. 
+@eq-degcen thus *ranks each node in the graph by the number of other nodes it is adjacent to*. Just like real life, some nodes will be popular (they will be adjacent to lots of other nodes), while others will be unpopular. 
 
-Although it might seem a simple task to just add up the number of connections of each node, that is essentially what the below mathematical equation is doing! Mathematical notation plays an important role in expressing network measures in succinct formats. 
+Although it might seem a simple task to just add up the number of connections of each node, that is essentially what the mathematical equation below is doing! Mathematical notation plays an important role in expressing network measures succinctly. 
 
 For instance, if we were to use @eq-degcen to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in @fig-undirected then we would end up with the following degree centralities for each node:
 
@@ -45,13 +45,13 @@ For instance, if we were to use @eq-degcen to calculate the degree centrality of
 ```
 
 ## Indegree and Outdegree Centrality 
-If we are talking about a **directed graph**, then there are two types of degree centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of *sociability* or *expansiveness* that is how many other nodes in the graph a given node **sends** links to. This is called the **outdegree centrality** of that node, written as $C_i^{OUT}$. As with the undirected case, this is computed by summing across the rows of the **asymmetric adjacency matrix** corresponding to the directed graph in question, using @eq-degcen:
+If we are talking about a **directed graph**, then there are two types of degree centralities that can be calculated. On the one hand, we may be interested in how central a node is in terms of *sociability* or *expansiveness*, that is, how many other nodes in the graph a given node **sends** links to. This is called the **outdegree centrality** of that node, written as $C_i^{OUT}$. As with the undirected case, this is computed by summing across the rows of the **asymmetric adjacency matrix** corresponding to the directed graph in question, using @eq-degcen:
 
 $$
   C_i^{OUT} = \sum_ja_{ij}
 $$  {#eq-outdegcen}
 
-However, in a directed graph, we may also be interested in how *popular* or *sought after* by others a given node is. That is, how many other actors send ties *to* that node. In which case we need to sum across the **columns** of the asymmetric adjacency matrix, and modify the formula as follows:
+However, in a directed graph, we may also be interested in how *popular* or *sought-after* a given node is by others. That is, how many other actors send ties *to* that node. In which case, we need to sum across the **columns** of the asymmetric adjacency matrix, and modify the formula as follows:
 
 $$
   C_j^{IN} = \sum_ia_{ij}
@@ -59,7 +59,7 @@ $$   {#eq-indegcen}
 
 Note that in this version of the equation, we are summing over *j* (the columns) not over *i* (the rows) as given by subscript under the $\sum$ symbol.
 
-For instance, if we were to use equations @eq-outdegcen and @eq-outdegcen to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in @fig-directed), then we would up with the following centralities for each node:
+For instance, if we were to use equations @eq-outdegcen and @eq-outdegcen to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in @fig-directed, then we would end up with the following centralities for each node:
 
 ```{r}
 #| label: tbl-outindegcen
@@ -79,14 +79,14 @@ For instance, if we were to use equations @eq-outdegcen and @eq-outdegcen to cal
     kbl(d, format = "pipe", align = "c") 
 ```
 
-Just like the degree centrality for undirected graphs, the outdegree and indegree centralities rank each node in a directed graph. The first, outdegree centrality, ranks each node based on the number of other nodes that they are connected to. This is a kind of popularity based on *sociability*, or the tendency to seek out the company of others. The second, indegree centrality, ranks each node in the graph based on the number of other nodes that connect to that node. This is a kind of popularity based on on *being sought after* a kind of status. 
+Just like the degree centrality for undirected graphs, the outdegree and indegree centralities rank each node in a directed graph. The first, outdegree centrality, ranks each node based on the number of other nodes that they are connected to. This is a kind of popularity based on *sociability*, or the tendency to seek out the company of others. The second, indegree centrality, ranks each node in the graph by the number of other nodes that connect to it. This is a kind of popularity based on on *being sought after* a kind of status. 
 
 ### Normalized Degree Centrality {#sec-normdeg}
-When we compute the degree centrality of a node, are counting the number of other nodes that they are connected to. Obviously, the more nodes there are to connect to, the more opportunities there will be to reach a larger number. But what happens if we wanted to compare the degree centrality of nodes in two very different networks? 
+When we compute the degree centrality of a node, we are counting the number of other nodes to which it is connected. Obviously, the more nodes there are to connect to, the more opportunities there will be to reach a larger number. But what happens if we want to compare the degree centrality of nodes in two very different networks? 
 
-For instance, if your high-school has one thousand people and you have twenty friends, that's very different from having twenty friends in a high-school of only one hundred people. It seems like the second person, with twenty friends (covering 20% of the population) in a high-school of one-hundred people is definitely more popular than the second person with twenty friends (covering 2% of the population), in a high school with one thousand people.
+For instance, if your high school has 1,000 students and you have 20 friends, that's very different from having 20 friends in a high school of only 100 students. It seems like the second person, with twenty friends (covering 20% of the population) in a high school of one hundred people, is definitely more popular than the second person with twenty friends (covering 2% of the population), in a high school with one thousand people.
 
-That's why Freeman @freeman79 proposed *normalizing* the degree centrality of each node by the *maximum* possible it can take in a given network. As you may have guessed, the maximum degree in a network is $N-1$ the order of the graph minus one. Essentialy, everyone but you! 
+That's why Freeman @freeman79 proposed *normalizing* the degree centrality of each node by the *maximum* possible it can take in a given network. As you may have guessed, the maximum degree in a network is $N-1$, the order of the graph minus one. Essentially, everyone but you! 
 
 We can compute the normalized degree centrality using the following equation:
 
@@ -94,15 +94,15 @@ $$
   C_{i(norm)}^{DEG} = \frac{C_{i}^{DEG}}{N-1}
 $$   {#eq-indegcen}
 
-Where we just divide the regular degree centrality computed using @eq-degcen by the order of the graph minus one. This will be equal to $1.0$ if a person knows *everyone* and $0$ is a person knows *no one*. For all the other nodes it will be a number between zero and one. 
+Where we just divide the regular degree centrality computed using @eq-degcen by the order of the graph minus one. This will be equal to $1.0$ if a person knows *everyone* and $0$ is a person knows *no one*. For all other nodes, it will be a number between 0 and 1. 
 
-Moreover, this measure is sensitive to the order of the graph. Thus, for a person with twenty friends in a high-school of a thousand people, the normalized degree centrality is equal to:
+Moreover, this measure is sensitive to the order of the graph. Thus, for a person with twenty friends in a high school of a thousand people, the normalized degree centrality is equal to:
 
 $$
   C_{i(norm)}^{DEG} = \frac{20}{1000-1}= 0.02
 $$   {#eq-indegcen}
 
-But for the person with the same twenty friends in a high-school of one-hundred people, it is equal to:
+But for the person with the same twenty friends in a high school of one-hundred people, it is equal to:
 
 $$
   C_{i(norm)}^{DEG} = \frac{20}{100-1}= 0.20
