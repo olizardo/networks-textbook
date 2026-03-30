@@ -8,16 +8,16 @@
     require(expm)
 ```
 
-Since matrices are just array of *numbers* one powerful thing that we can do is arithmetic and algebraic operations on them. These including summing, multiplying, taking powers of matrices and so forth. In this lesson, we discuss some basic matrix operations and their relevance for the analysis of social networks. 
+Since matrices are just an array of *numbers*, one powerful thing that we can do is perform arithmetic and algebraic operations on them. These include summing, multiplying, taking powers of matrices, and so forth. In this lesson, we discuss some basic matrix operations and their relevance for the analysis of social networks. 
 
 Our running example will be the pair of graphs shown in @fig-rel. Suppose this is a network of twelve people who work at a (very) small company. We have recorded two types of relationships for each pair of persons: Whether *they hang out together* after work, and whether they get assigned to *work together in team projects* (we will call these "hang out" and "co-working" relations for short).
 
-@fig-rel-1, composed of nodes joined by blue edges, represents hanging out relations; @fig-rel-2 represents co-working relations. The corresponding **adjacency matrices** for the @fig-rel networks are shown in @tbl-rel. @tbl-rel-1 (let's call it $\mathbf{H}$) records hanging out relations and @tbl-rel-2 (let's call it $\mathbf{C}$) records co-working relations.
+@fig-rel-1, composed of nodes joined by blue edges, represents hanging out relations; @fig-rel-2 represents co-working relations. The corresponding **adjacency matrices** for the @fig-rel networks are shown in @tbl-rel; @tbl-rel-1 (let's call it $\mathbf{H}$) records hanging out relations and @tbl-rel-2 (let's call it $\mathbf{C}$) records co-working relations.
 
 
 ```{r}
 #| label: fig-rel
-#| fig-cap: "Undirected graphs representing different social relationships"
+#| fig-cap: "Undirected graphs representing different social relationships."
 #| fig-cap-location: margin
 #| fig-subcap:
 #|   - "A graph representing hanging out relations (blue)."
@@ -96,7 +96,7 @@ set.seed(859)
 ```
 
 ## Matrix Addition and Subtraction
-Perhaps the simplest operation we can do with two matrices is add them up. To add two matrices, we simply add up the corresponding entries in each cell. In matrix notation:
+Perhaps the simplest operation we can perform on two matrices is to *add* them. To add two matrices, we simply add up the corresponding entries in each cell. In matrix notation:
 
 $$
 \mathbf{H} + \mathbf{C} = h_{ij} + c_{ij}
@@ -104,7 +104,7 @@ $$ {#eq-matadd}
 
 Where $h_{ij}$ is the corresponding entry for nodes *i* and *j* in the hanging out adjacency matrix $\mathbf{H}$, and $c_{ij}$ is the same entry in the co-working adjacency matrix $\mathbf{C}$. 
 
-Why would we want to do this? Well, if we were studying the network shown in @fig-rel, we might be interested in which dyads have **uniplex** (or single-stranded) relations, and which ones have **multiplex** (or multi-stranded) relations. That is, while some actors in the network *either* hang out together or work together, some of the do *both*. Adding up the adjacency matrices shown in @tbl-rel, will tell us who these are. The result is shown in @tbl-mult.
+Why would we want to do this? Well, if we were studying the network shown in @fig-rel, we might be interested in which dyads have **uniplex** (single-stranded) relations and which have **multiplex** (multi-stranded) relations. That is, while some actors in the network *either* hang out together or work together, some of them do *both*. Adding up the adjacency matrices shown in @tbl-rel will tell us who these are. The result is shown in @tbl-mult.
 
 ```{r}
 #| label: tbl-mult 
@@ -121,7 +121,7 @@ Why would we want to do this? Well, if we were studying the network shown in @fi
      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-@tbl-mult shows that the $BC$ dyad has a multiplex relation (there is a "2" in the corresponding cell entry) and so does the $AC$, $FH$, $GH$, $EF$, and $JL$ dyads. A graph shown the nodes linked only by multiplex relations (hanging out and co-working) is shown in @fig-rel-3. 
+@tbl-mult shows that the $BC$ dyad has a multiplex relation (there is a "2" in the corresponding cell entry) and so do the $AC$, $FH$, $GH$, $EF$, and $JL$ dyads. A graph showing the nodes linked only by multiplex relations (hanging out and co-working) is shown in @fig-rel-3. 
 
 Note that matrix subtraction works the same way:
 
@@ -129,7 +129,7 @@ $$
 \mathbf{H} - \mathbf{C} = h_{ij} - c_{ij}
 $$ {#eq-matadd}
 
-To subtract two matrices, we simply subtract the corresponding entries in each cell. Why would we ever want to do this? Perhaps we could be interested in those dyads in the network that are connected by a single, special purpose **uniplex** ties while disregarding both the disconnected and multiplex connected dyads. 
+To subtract two matrices, we simply subtract the corresponding entries in each cell. Why would we ever want to do this? Perhaps we could focus on dyads in the network connected by a single, special-purpose **uniplex** tie, while disregarding both disconnected and multiplex-connected dyads. 
 
 ```{r}
 #| label: tbl-uni
@@ -147,10 +147,10 @@ To subtract two matrices, we simply subtract the corresponding entries in each c
 ```
 
 
-In which case, subtracting the two matrices, and then taking the **absolute** value of each of the cell entries (e.g., turning negative entries into positive ones), written $|h_{ij} - c_{ij}|$ will result in a binary matrix that will only contain ones for people who are *either* hangout buddies or workmates but not both. Such a marix is shown in @tbl-uni and corresponding to the graph shown in @fig-rel-4.
+In which case, subtracting the two matrices, and then taking the **absolute** value of each of the cell entries (e.g., turning negative entries into positive ones), written $|h_{ij} - c_{ij}|$ will result in a binary matrix that will only contain ones for people who are *either* hangout buddies or workmates but not both. Such a matrix is shown in @tbl-uni and corresponds to the graph shown in @fig-rel-4.
 
 ## The Matrix Dot Product {#sec-dotproduct}
-Another way of figuring out which pairs of people in a network have multiplex ties is to compute the **matrix dot product** (symbol: $\cdot$), sometimes this is also called the **Hadamard product** named after French mathematician [Jacques Hadarmard](https://en.wikipedia.org/wiki/Jacques_Hadamard), (symbol: $\circ$). Just like matrix addition, we find the matrix dot product by *multiplying* the corresponding entries in each of the matrices. In matrix format:
+Another way of figuring out which pairs of people in a network have multiplex ties is to compute the **matrix dot product** (symbol: $\cdot$), sometimes this is also called the **Hadamard product** named after French mathematician [Jacques Hadamard](https://en.wikipedia.org/wiki/Jacques_Hadamard), (symbol: $\circ$). Just like matrix addition, we find the matrix dot product by *multiplying* the corresponding entries in each of the matrices. In matrix format:
 
 $$
 \mathbf{H} \circ \mathbf{C} = h_{ij} \times c_{ij}
@@ -173,19 +173,19 @@ If we take the dot product of two adjacency matrices like $\mathbf{H}$ and $\mat
      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-As we can see, the only dyads that have non-zero entries in @tbl-dot are the multiplex dyads in @tbl-mult. The resulting network, composed of the combined "hanging + co-working" relation is shown in @fig-rel-3. Note that this network is much more sparse than either of the other two, since there's an edge between nodes only when they are adjacent in *both* the @fig-rel-1 and @fig-rel-2 networks. 
+As we can see, the only dyads that have non-zero entries in @tbl-dot are the multiplex dyads in @tbl-mult. The resulting network, comprising the combined "hanging + co-working" relationship, is shown in @fig-rel-3. Note that this network is much more sparse than either of the other two, since there's an edge between nodes only when they are adjacent in *both* the @fig-rel-1 and @fig-rel-2 networks. 
 
 ## The Matrix Transpose {#sec-transpose}
-One thing we can do with a matrix is "turn it 90 degrees" so that the rows of the new matrix are equal to the columns of the resulting matrix and the columns of the first matrix equal the rows of the resulting matrix. This is called the **matrix transpose** (symbol: $^T$). 
+One thing we can do with a matrix is "turn it 90 degrees" so that the rows of the new matrix correspond to the columns of the original matrix, and the columns of the new matrix correspond to the rows of the original matrix. This is called the **matrix transpose** (symbol: $^T$). 
 
 For instance, if we have a matrix $\mathbf{A}_{4 \times 5}$ of dimensions $4 \times 5$ (four rows and five columns), then the transpose $A^T_{5 \times 4}$ will have five rows and four columns, with the respective entries in each matrix given by the formula:
 
 $$
 a_{ij} = a^T_{ji}
 $$
-That is the number that in the first matrix appears in the $i^{th}$ row and $j^{th}$ column now appears in the transposed version of the matrix in the $j^{th}$ row and $i^{th}$ column. 
+That is the number that appears in the first matrix in the $i^{th}$ row and $j^{th}$ column, and now appears in the transposed version of the matrix in the $j^{th}$ row and $i^{th}$ column. 
 
-An example of a matrix and its tranpose is shown in @tbl-trans.
+An example of a matrix and its transpose is shown in @tbl-trans.
 
 ```{r}
 #| label: tbl-trans 
@@ -206,8 +206,6 @@ kbl(A, align = "c", format = "html") %>%
     column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
     row_spec(1, extra_css = "border-top: 0.75px solid;") 
 
-
-
 kbl(B, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
@@ -217,6 +215,6 @@ kbl(B, align = "c", format = "html") %>%
     row_spec(1, extra_css = "border-top: 0.75px solid;")
 ```
 
-So let's check out how the transpose works. The original matrix in @tbl-trans-1 has five rows and three columns. The transposed matrix has three rows and five columns. We can find the same numbers in the original and transposed matrices by switching the rows and columns. Thus, in the original matrix, the number in third row and second column is a six ($a_{32} = 6$). In the transposed version of the matrix, that same six is in second row and third column ($a^T_{23} = 6$). If you check, you'll see that's the case for each number! Thus, the transposed version of a matrix has the same information as the original, it is just that the rows and columns are switched. While this might seem like a totally useless thing to do (or learn) at the moment, we will see in @sec-affiliation that the matrix transpose comes in very handy in the analysis of social networks, and particular in the analysis of **two mode networks** and **cliques**. 
+So let's check out how the transpose works. The original matrix in @tbl-trans-1 has five rows and three columns. The transposed matrix has three rows and five columns. We can find the same numbers in the original and transposed matrices by switching the rows and columns. Thus, in the original matrix, the number in the third row and second column is six ($a_{32} = 6$). In the transposed version of the matrix, the same 6 appears in the second row and third column ($a^T_{23} = 6$). If you check, you'll see that's the case for each number! Thus, the transposed version of a matrix has the same information as the original; it is just that the rows and columns are switched. While this might seem like a totally useless thing to do (or learn) at the moment, we will see in @sec-affiliation that the matrix transpose comes in very handy for analyzing social networks, particularly **two-mode networks** and **cliques**. 
 
 ## References {.unnumbered}
