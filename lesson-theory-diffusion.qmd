@@ -51,18 +51,18 @@ diffusion_data <- data.frame(
 
 # 2. Plot the S-Curve using ggplot2
 ggplot(diffusion_data, aes(x = Time, y = Cumulative_Adoption)) +
-  geom_line(color = "steelblue", size = 1.5) +
+  geom_line(color = "steelblue", size = 2) +
   
   # Add a vertical dashed line at the inflection point
-  geom_vline(xintercept = t0, linetype = "dashed", color = "gray50", size = 0.8) +
+  geom_vline(xintercept = t0, linetype = "dashed", color = "gray50", size = 1.5) +
   
   # Add annotations to explain the phases of the curve
-  annotate("text", x = 2.5, y = 25, label = "Slow Initial\nAdoption", 
-           color = "black", fontface = "italic", size = 4) +
-  annotate("text", x = t0 - 1, y = 70, label = "Rapid Growth\n(Takeoff)", 
-           color = "black", fontface = "italic", size = 4, hjust = 1) +
-  annotate("text", x = 8, y = 90, label = "Market Saturation\n(Leveling Off)", 
-           color = "black", fontface = "italic", size = 4) +
+  annotate("text", x = 2, y = 15, label = "Slow Initial\nAdoption", 
+           color = "black", fontface = "italic", size = 8) +
+  annotate("text", x = 4.75, y = 55, label = "Rapid Growth\n(Takeoff)", 
+           color = "black", fontface = "italic", size = 8, hjust = 1) +
+  annotate("text", x = 9, y = 90, label = "Saturation\n(Leveling Off)", 
+           color = "black", fontface = "italic", size = 8) +
   
   # Labels and theming
   labs(title = "The S-Curve Model of Diffusion",
@@ -71,11 +71,12 @@ ggplot(diffusion_data, aes(x = Time, y = Cumulative_Adoption)) +
        y = "Cumulative Adoption (%)") +
   theme_minimal() +
   theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12, margin = margin(b = 15)),
-    axis.title = element_text(face = "bold", size = 12),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 24),
+    plot.subtitle = element_text(hjust = 0.5, size = 16, margin = margin(b = 15)),
+    axis.title = element_text(face = "bold", size = 22),
     # Remove the arbitrary numeric labels on the x-axis for a more conceptual look
     axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 18, face = "bold"),
     axis.ticks.x = element_blank(),
     panel.grid.minor = element_blank()
   )
@@ -124,6 +125,96 @@ Everett Rogers' classification categorizes individuals into five groups based on
 
 Roger's classification relates to the idea of the  **tipping point** (sometimes referred to as "the chasm" in commercial contexts), which happens around the time after the early adopters have adopted but before the full engagement of the early majority. Innovations that fail to reach this tipping point often do not achieve widespread diffusion and die out.
 
+```{r}
+#| label: fig-rogers
+#| fig-cap: "Rogers's Classification of Adopters Based on Time to Adoption."
+#| fig-cap-location: bottom
+#| fig-height: 10
+#| fig-width: 10
+library(dplyr)
+# 1. Generate the normal distribution data
+# Create a sequence of x values from -3.5 to 3.5 (representing standard deviations)
+x <- seq(-3.5, 3.5, length.out = 1000)
+y <- dnorm(x) # Calculate the exact height of the normal curve for each x
+df <- data.frame(x = x, y = y)
+
+# 2. Segment the data into Rogers's categories
+df <- df %>%
+  mutate(category = case_when(
+    x < -2 ~ "Innovators (2.5%)",
+    x >= -2 & x < -1 ~ "Early Adopters (13.5%)",
+    x >= -1 & x < 0 ~ "Early Majority (34%)",
+    x >= 0 & x < 1 ~ "Late Majority (34%)",
+    x >= 1 ~ "Laggards (16%)"
+  )) %>%
+  # Convert to a factor to lock in the left-to-right order for the legend
+  mutate(category = factor(category, levels = c(
+    "Innovators (2.5%)",
+    "Early Adopters (13.5%)",
+    "Early Majority (34%)",
+    "Late Majority (34%)",
+    "Laggards (16%)"
+  )))
+
+# 3. Create the ggplot
+ggplot(df, aes(x = x, y = y, fill = category)) +
+  # Draw the filled segments
+  geom_area(alpha = 0.9, color = "black", linewidth = 0.5) +
+  
+  # Add vertical dashed lines at the standard deviation thresholds
+  geom_vline(xintercept = c(-2, -1, 0, 1), linetype = "dashed", color = "gray20", linewidth = 0.6) +
+  
+  # Apply a custom, distinct color palette
+  scale_fill_manual(values = c(
+    "Innovators (2.5%)"      = "#F4A261", # Sandy Orange
+    "Early Adopters (13.5%)" = "#E9C46A", # Yellow/Gold
+    "Early Majority (34%)"   = "#2A9D8F", # Teal
+    "Late Majority (34%)"    = "#264653", # Dark Blue/Green
+    "Laggards (16%)"         = "#E76F51"  # Burnt Orange/Red
+  )) +
+  
+  # Format the X-axis to show Standard Deviation mathematical notation
+  scale_x_continuous(
+    breaks = c(-2, -1, 0, 1),
+    labels = c(expression(mu - 2*sigma), 
+               expression(mu - 1*sigma), 
+               expression(mu), 
+               expression(mu + 1*sigma))
+  ) +
+  
+  # Add labels and titles
+  labs(
+    x = "Time of Adoption",
+    y = NULL,
+  ) +
+  
+  # Clean up the theme (removing arbitrary Y-axis numbers to keep it conceptual)
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    
+    # Typography
+    axis.title.x = element_text(face = "bold", margin = margin(t = 10), size = 18),
+    axis.text.x = element_text(size = 16),
+    
+    # Move legend to the bottom
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 18)
+  ) + 
+  
+  # Add in-plot text annotations for the larger chunks
+    annotate("text", x = -2.4, y = 0.02, label = "Innovators", color = "black", fontface = "bold", size = 5) +
+    annotate("text", x = -1.35, y = 0.08, label = "Early\nAdopters", color = "black", fontface = "bold", size = 5) +
+    annotate("text", x = -0.5, y = 0.15, label = "Early\nMajority", color = "white", fontface = "bold", size = 5) +
+    annotate("text", x = 0.5,  y = 0.15, label = "Late\nMajority", color = "white", fontface = "bold", size = 5) +
+    annotate("text", x = 1.4, y = 0.08, label = "Laggards", color = "white", fontface = "bold", size = 5) + guides(fill = guide_legend(nrow = 2))
+```
+
 ### Valente's Classification of Adopters (Network Threshold Model)
 
 Thomas Valente's Network Threshold Model revisits and refines Roger's classification by incorporating the idea of individual thresholds for adoption within a network context. This model acknowledges that individuals adopt an innovation when the proportion of their direct contacts who have already adopted reaches a certain personal threshold. 
@@ -143,6 +234,127 @@ Now consider Person 2 with a higher threshold ($q$) of $0.75$. This means Person
 - Time 1 & 2: Even if one or two friends adopt (e.g., 25% or 50% of friends), this proportion is below Person 2's 0.75 threshold, so they do not adopt.
 - Time 3: If three friends adopt, and this constitutes 75% of their friends, then 75% (0.75) is equal to their 0.75 threshold. Thus, Person 2 adopts. 
 
+```{r}
+#| label: fig-valente
+#| fig-cap: "."
+#| fig-cap-location: bottom
+#| fig-height: 12
+#| fig-width: 12
+
+library(igraph)
+library(ggraph)
+
+# Install required packages if you don't have them:
+# install.packages(c("igraph", "ggraph", "patchwork"))
+
+# ---------------------------------------------------------
+# 1. Define the Network and Thresholds
+# ---------------------------------------------------------
+# Create a small, interconnected graph
+edges <- data.frame(
+  from = c(1, 1, 2, 2, 3, 4, 4, 5, 6, 7),
+  to   = c(2, 3, 3, 4, 5, 5, 6, 7, 8, 8)
+)
+g <- graph_from_data_frame(edges, directed = FALSE)
+
+# Assign a personal threshold to each node. 
+# This is the PROPORTION of neighbors that must adopt before this node adopts.
+# Node 1 is our seed (threshold 0).
+V(g)$threshold <- c(0.00,  # Node 1 (Seed)
+                    0.30,  # Node 2
+                    0.60,  # Node 3 (Resistant, needs 60% of friends)
+                    0.40,  # Node 4
+                    0.30,  # Node 5
+                    0.50,  # Node 6
+                    0.40,  # Node 7
+                    0.50)  # Node 8
+
+# Create a label for the plot that shows Node ID and its Threshold
+V(g)$label <- paste0("ID: ", V(g)$name, "\nTh: ", V(g)$threshold)
+
+# ---------------------------------------------------------
+# 2. Simulate Valente's Adoption Process
+# ---------------------------------------------------------
+# Initialize Time 0 (Only the seed node has adopted)
+V(g)$state_t0 <- ifelse(V(g)$name == "1", "Adopted", "Unadopted")
+
+# Function to calculate the next time step based on Valente's rules
+simulate_step <- function(g, current_state_attr, next_state_attr) {
+  states <- vertex_attr(g, current_state_attr)
+  new_states <- states
+  
+  for (v in V(g)) {
+    if (states[v] == "Unadopted") {
+      neighbors <- neighbors(g, v)
+      if (length(neighbors) > 0) {
+        # Calculate the proportion of neighbors who have adopted
+        adopted_count <- sum(states[neighbors] == "Adopted")
+        prop_adopted <- adopted_count / length(neighbors)
+        
+        # If the proportion meets or exceeds the threshold, the node adopts
+        if (prop_adopted >= V(g)$threshold[v]) {
+          new_states[v] <- "Adopted"
+        }
+      }
+    }
+  }
+  # Save the new states to the graph
+  g <- set_vertex_attr(g, next_state_attr, value = new_states)
+  return(g)
+}
+
+# Run the simulation for 5 time steps
+g <- simulate_step(g, "state_t0", "state_t1")
+g <- simulate_step(g, "state_t1", "state_t2")
+g <- simulate_step(g, "state_t2", "state_t3")
+g <- simulate_step(g, "state_t3", "state_t4")
+g <- simulate_step(g, "state_t4", "state_t5")
+
+# ---------------------------------------------------------
+# 3. Plotting the Simulation
+# ---------------------------------------------------------
+# Generate a FIXED layout so the nodes don't move around between plots
+set.seed(123) 
+fixed_layout <- create_layout(g, layout = "fr")
+
+# Helper function to generate identical plots for different time steps
+plot_time_step <- function(graph_data, state_column, title) {
+  # Map the specific time step state to a standard column for plotting
+  graph_data$current_state <- graph_data[[state_column]]
+  
+  ggraph(graph_data) +
+    geom_edge_link(color = "gray70", width = 1) +
+    geom_node_point(aes(color = current_state), size = 18) +
+    geom_node_text(aes(label = label), size = 3.5, color = "black", fontface = "bold") +
+    scale_color_manual(values = c("Adopted" = "tomato", "Unadopted" = "cadetblue2"),
+                       drop = FALSE) + # Keep colors consistent even if all are adopted
+    labs(title = title) +
+    theme_void() +
+    theme(legend.position = "none",
+          plot.title = element_text(hjust = 0.5, face = "bold", size = 14, margin = margin(b=10)))
+}
+
+# Generate the 6 plots
+plot_time_step(fixed_layout, "state_t0", "Time 0: Initial Seed")
+plot_time_step(fixed_layout, "state_t1", "Time 1")
+plot_time_step(fixed_layout, "state_t2", "Time 2")
+plot_time_step(fixed_layout, "state_t3", "Time 3")
+plot_time_step(fixed_layout, "state_t4", "Time 4")
+plot_time_step(fixed_layout, "state_t5", "Time 5: Full Adoption")
+
+# # Combine them into a 2x3 grid using patchwork
+# combined_plot <- (p0 | p1 | p2) / (p3 | p4 | p5) +
+#   plot_annotation(
+#     title = "Valente's Network Threshold Model of Diffusion",
+#     subtitle = "Nodes adopt when the proportion of their adopted neighbors meets or exceeds their threshold (Th).",
+#     theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+#                   plot.subtitle = element_text(size = 12, hjust = 0.5))
+#   )
+
+# # Display the final plot
+# combined_plot
+```
+
 Valente's model categorizes adopters based on two dimensions of their threshold: their Whole Network Threshold (their general receptiveness to adoption across the entire system) and their Personal Network Threshold (how many of their direct contacts need to adopt before they do). This creates a two bytwo2 matrix, yielding four types of adopters:
 
 1. **True Innovators** (Influentials): These individuals have a Low Personal Network Threshold and a Low Whole Network Threshold. They are among the first to adopt because they require little external validation from their direct contacts or the broader system. These are the individuals often identified as "opinion leaders" who influence the attitudes, beliefs, motivations, and behaviors of others. They are typically visible, occupy powerful positions (e.g., celebrities, politicians), and are well-connected in terms of degree, eigenvector, and betweenness centrality.
@@ -156,6 +368,105 @@ Valente's model also provides insights into the **Local/Cosmopolitan** split in 
 
 **Simplex** and **complex contagion** represent two distinct mechanisms by which objects, ideas, information, fashions, tastes, or practices spread through a social network [@centola_macy07]. The primary difference lies in the threshold for adoption and the nature of social reinforcement required for an individual to adopt an innovation.
 
+```{r}
+#| label: fig-simplex
+#| fig-cap: "Illustrating the difference between simplex and complex contagion."
+#| fig-cap-location: bottom
+#| fig-height: 8
+#| fig-width: 8
+#| fig-subcap:
+#|   - 
+#|   -  
+#| layout-ncol: 1
+# ---------------------------------------------------------
+# 1. Prepare Data for Simple Contagion (Threshold = 1)
+# ---------------------------------------------------------
+nodes_simple <- data.frame(
+  name = c("Ego", "A1", "A2", "A3"),
+  state = c("Newly Adopted", "Active Adopter", "Inactive", "Inactive")
+)
+
+edges_simple <- data.frame(
+  from = c("A1", "A2", "A3"),
+  to = c("Ego", "Ego", "Ego"),
+  type = c("Transmitting", "Dormant", "Dormant")
+)
+
+g_simple <- graph_from_data_frame(edges_simple, directed = TRUE, vertices = nodes_simple)
+
+# ---------------------------------------------------------
+# 2. Prepare Data for Complex Contagion (Threshold = 2)
+# ---------------------------------------------------------
+nodes_complex <- data.frame(
+  name = c("Ego", "A1", "A2", "A3"),
+  state = c("Newly Adopted", "Active Adopter", "Active Adopter", "Inactive")
+)
+
+edges_complex <- data.frame(
+  from = c("A1", "A2", "A3"),
+  to = c("Ego", "Ego", "Ego"),
+  type = c("Transmitting", "Transmitting", "Dormant")
+)
+
+g_complex <- graph_from_data_frame(edges_complex, directed = TRUE, vertices = nodes_complex)
+
+# ---------------------------------------------------------
+# 3. Define a Fixed Layout & Plotting Function
+# ---------------------------------------------------------
+# Ego at center, Alters arranged in a triangle around Ego
+layout_mat <- matrix(c(
+   0.000,  0.0,  # Ego (Center)
+   0.000,  1.0,  # A1 (Top)
+   0.866, -0.5,  # A2 (Bottom Right)
+  -0.866, -0.5   # A3 (Bottom Left)
+), ncol = 2, byrow = TRUE)
+
+# Custom function to keep plot styling consistent
+plot_contagion <- function(g, title, subtitle) {
+  ggraph(g, layout = layout_mat) +
+    # Draw edges with different styles based on whether they are transmitting
+    geom_edge_link(aes(color = type, linetype = type),
+                   arrow = arrow(length = unit(5, 'mm'), type = "closed"),
+                   end_cap = circle(12, 'mm'),
+                   width = 1.5) +
+    # Draw nodes
+    geom_node_point(aes(color = state), size = 24) +
+    geom_node_text(aes(label = name), color = "white", fontface = "bold", size = 5) +
+    
+    # Custom color palettes
+    scale_color_manual(values = c("Active Adopter" = "firebrick", 
+                                  "Newly Adopted" = "darkorange", 
+                                  "Inactive" = "gray80")) +
+    scale_edge_color_manual(values = c("Transmitting" = "firebrick", 
+                                       "Dormant" = "gray80")) +
+    scale_edge_linetype_manual(values = c("Transmitting" = "solid", 
+                                          "Dormant" = "dashed")) +
+    
+    # Titles and formatting
+    labs(title = title, subtitle = subtitle) +
+    theme_graph() + xlim(-1, 1) + ylim(-1, 1.1) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
+          plot.subtitle = element_text(hjust = 0.5, size = 14, margin = margin(b = 15)),
+          legend.position = "none") # Hide legends for cleaner individual plots
+}
+
+# ---------------------------------------------------------
+# 4. Generate and Combine Plots
+# ---------------------------------------------------------
+plot_contagion(
+  g_simple, 
+  "Simplex Contagion", 
+  "1 exposure is enough to transmit\n(e.g., Information, Disease)"
+)
+
+plot_contagion(
+  g_complex, 
+  "Complex Contagion", 
+  "Multiple exposures required to transmit\n(e.g., Behavior, Innovation)"
+)
+
+```
+
 ### Simplex Contagion
 
 Simplex contagion refers to the diffusion of innovations or behaviors that require only a single exposure or a low threshold for adoption. These are typically items or information that carry low risk or cost, and a single instance of exposure is sufficient for an individual to adopt or transmit it.
@@ -168,8 +479,8 @@ Characteristics of simplex contagion:
 
 Examples:
 
-- Information: Simple facts, news, or gossip can spread as simplex contagion. For example, learning "Who's hiring?" or "What's the best messaging app?" typically only requires one reliable source.
-- Disease: Biological contagions like a disease can spread from a single point of contact.
+- *Information*: Simple facts, news, or gossip can spread as simplex contagion. For example, learning "Who's hiring?" or "What's the best messaging app?" typically only requires one reliable source.
+- *Disease*: Biological contagions like a disease can spread from a single point of contact.
 
 Role of Ties: 
 
@@ -180,18 +491,16 @@ Complex contagion, in contrast, involves the diffusion of innovations or behavio
 
 Characteristics:
 
-- High Thresholds: Individuals have a higher internal barrier to adoption due to perceived risks or costs.
-- Multiple Sources Required: Adoption often necessitates seeing multiple friends or contacts adopt, or receiving reinforcement from several sources. This provides validation, reduces perceived risk, and signals legitimacy.
-- Nature of Information: Often involves complex, interdependent information that requires greater trust and intimacy for effective transmission and adoption.
+- *High Thresholds*: Individuals have a higher internal barrier to adoption due to perceived risks or costs.
+- *Multiple Sources Required*: Adoption often necessitates seeing multiple friends or contacts adopt, or receiving reinforcement from several sources. This provides validation, reduces perceived risk, and signals legitimacy.
+- *Nature of Information*: Often involves complex, interdependent information that requires greater trust and intimacy for effective transmission and adoption.
 
 Examples:
 
-- High-risk Social Movement Participation: Joining a protest or a high-stakes social movement often requires multiple trusted contacts to participate, as there are personal risks involved.
-- Religious Conversion: A profound personal change like religious conversion is rarely influenced by a single casual encounter; it usually requires consistent reinforcement from multiple individuals within one's social circle.
-- Migration: The decision to migrate is a significant one with many uncertainties, often requiring validation and support from multiple social ties.
-- Adopting Complex Knowledge: Learning how to do complex tasks, like network analysis in a programming language (e.g., R), is better transmitted through **higher bandwidth ties** which provide the necessary trust and depth of interaction for complex, interdependent information transfer.
-
-Role of Ties: 
+- *High-risk Social Movement Participation*: Joining a protest or a high-stakes social movement often requires multiple trusted contacts to participate, as there are personal risks involved.
+- *Religious Conversion*: A profound personal change like religious conversion is rarely influenced by a single casual encounter; it usually requires consistent reinforcement from multiple individuals within one's social circle.
+- *Migration*: The decision to migrate is a significant one with many uncertainties, often requiring validation and support from multiple social ties.
+- *Adopting Complex Knowledge*: Learning how to do complex tasks, like network analysis in a programming language (e.g., R), is better transmitted through **higher bandwidth ties** which provide the necessary trust and depth of interaction for complex, interdependent information transfer.
 
 Complex contagion typically spreads more effectively through strong ties and within cliques (densely connected subgroups). While weak ties are good for novel information, they are less effective for complex contagion because they often connect infrequently and may not provide the sustained or multiple exposures necessary for adoption when the stakes are high. Strong ties provide the redundancy, trust, and frequent interaction needed to overcome the higher thresholds associated with complex behaviors.
 
@@ -210,3 +519,5 @@ Diffusion Speed | Can spread faster via weak ties | Can spread faster via clique
 Table @tbl-contagion summarizes the key features of the simplex versus complex contagion processes. 
 
 The concepts of simplex and complex contagion are closely related to threshold models of diffusion. Granovetter's Global Threshold Model assumes individuals know the proportion of adopters in the whole population, which might be less realistic for complex contagions. Valente's Network Threshold Model, on the other hand, is more appropriate for complex contagion as it posits that individuals adopt when a certain proportion of their direct contacts have adopted, reflecting the need for local validation and multiple exposures inherent in complex contagion.
+
+# References {.ununumbered}
