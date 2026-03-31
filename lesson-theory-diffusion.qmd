@@ -24,6 +24,64 @@ The S-curve is characterized by three main phases:
 2. **Rapid Spread**: Following the initial slow phase, there is a period of rapid adoption where the innovation quickly gains traction and spreads throughout the population. The number of new adopters per unit of time peaks during this "take off" period, indicating accelerated diffusion.
 3. **Final Slow Saturation**: As the innovation approaches widespread adoption, the rate of new adoptions decelerates, eventually reaching a saturation point where most of the potential adopters have integrated the innovation.
 
+```{r}
+#| label: fig-scurve
+#| fig-cap: "The S-Curve Diffusion Model."
+#| fig-cap-location: bottom
+#| fig-height: 10
+#| fig-width: 10
+library(ggplot2)
+
+# 1. Generate the data using a logistic function
+# Formula: f(t) = L / (1 + exp(-k * (t - t0)))
+time_points <- seq(0, 10, length.out = 200)
+
+L <- 100     # Market capacity or maximum adoption (100%)
+k <- 1.2     # Steepness / growth rate of diffusion
+t0 <- 5      # The inflection point (time of maximum growth rate)
+
+# Calculate the cumulative adoption (the S-curve)
+adoption <- L / (1 + exp(-k * (time_points - t0)))
+
+# Create a data frame
+diffusion_data <- data.frame(
+  Time = time_points,
+  Cumulative_Adoption = adoption
+)
+
+# 2. Plot the S-Curve using ggplot2
+ggplot(diffusion_data, aes(x = Time, y = Cumulative_Adoption)) +
+  geom_line(color = "steelblue", size = 1.5) +
+  
+  # Add a vertical dashed line at the inflection point
+  geom_vline(xintercept = t0, linetype = "dashed", color = "gray50", size = 0.8) +
+  
+  # Add annotations to explain the phases of the curve
+  annotate("text", x = 2.5, y = 25, label = "Slow Initial\nAdoption", 
+           color = "black", fontface = "italic", size = 4) +
+  annotate("text", x = t0 - 1, y = 70, label = "Rapid Growth\n(Takeoff)", 
+           color = "black", fontface = "italic", size = 4, hjust = 1) +
+  annotate("text", x = 8, y = 90, label = "Market Saturation\n(Leveling Off)", 
+           color = "black", fontface = "italic", size = 4) +
+  
+  # Labels and theming
+  labs(title = "The S-Curve Model of Diffusion",
+       subtitle = "Cumulative adoption of an innovation over time",
+       x = "Time",
+       y = "Cumulative Adoption (%)") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 12, margin = margin(b = 15)),
+    axis.title = element_text(face = "bold", size = 12),
+    # Remove the arbitrary numeric labels on the x-axis for a more conceptual look
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
 ### The Tipping Point
 
 The "tipping point" for an innovation, the critical juncture where it shifts from slow growth to rapid adoption, typically occurs after the early adopters and before the early majority fully engage. Innovations that fail to reach this tipping point often die out.
