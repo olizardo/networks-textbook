@@ -236,10 +236,18 @@ Now consider Person 2 with a higher threshold ($q$) of $0.75$. This means Person
 
 ```{r}
 #| label: fig-valente
-#| fig-cap: "."
+#| fig-cap: "Depiction of a Difussion Process According to Valente's Network Threshold Model."
 #| fig-cap-location: bottom
-#| fig-height: 12
-#| fig-width: 12
+#| fig-height: 6
+#| fig-width: 6
+#| fig-subcap:
+#|   - ""
+#|   - ""
+#|   - ""
+#|   - ""
+#|   - ""
+#|   - ""
+#| layout-ncol: 2
 
 library(igraph)
 library(ggraph)
@@ -270,7 +278,7 @@ V(g)$threshold <- c(0.00,  # Node 1 (Seed)
                     0.50)  # Node 8
 
 # Create a label for the plot that shows Node ID and its Threshold
-V(g)$label <- paste0("ID: ", V(g)$name, "\nTh: ", V(g)$threshold)
+V(g)$label <- paste0("Th: ", V(g)$threshold)
 
 # ---------------------------------------------------------
 # 2. Simulate Valente's Adoption Process
@@ -326,10 +334,10 @@ plot_time_step <- function(graph_data, state_column, title) {
     geom_edge_link(color = "gray70", width = 1) +
     geom_node_point(aes(color = current_state), size = 18) +
     geom_node_text(aes(label = label), size = 3.5, color = "black", fontface = "bold") +
-    scale_color_manual(values = c("Adopted" = "tomato", "Unadopted" = "cadetblue2"),
+    scale_color_manual(values = c("Adopted" = "tomato", "Unadopted" = "lightblue"),
                        drop = FALSE) + # Keep colors consistent even if all are adopted
     labs(title = title) +
-    theme_void() +
+    theme_graph() + ylim(-4, 2) + xlim(-2, 2) +
     theme(legend.position = "none",
           plot.title = element_text(hjust = 0.5, face = "bold", size = 14, margin = margin(b=10)))
 }
@@ -520,4 +528,4 @@ Table @tbl-contagion summarizes the key features of the simplex versus complex c
 
 The concepts of simplex and complex contagion are closely related to threshold models of diffusion. Granovetter's Global Threshold Model assumes individuals know the proportion of adopters in the whole population, which might be less realistic for complex contagions. Valente's Network Threshold Model, on the other hand, is more appropriate for complex contagion as it posits that individuals adopt when a certain proportion of their direct contacts have adopted, reflecting the need for local validation and multiple exposures inherent in complex contagion.
 
-# References {.ununumbered}
+# References{.ununumbered}
