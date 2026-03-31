@@ -25,31 +25,96 @@ Here are some concrete examples of balanced triadic configurations:
 
 1. **"A friend of a friend is a friend"**:
 
-- Description: In this configuration, Person (P) likes Object (O) (positive tie, +1), Object (O) likes a Third Party (Q) (positive tie, +1), and Person (P) also likes the Third Party (Q) (positive tie, +1). All sentiments are positive.
+- Description: In this configuration, Person (P) likes Object (O) (positive tie, +1), Object (O) likes a Third Party (Q) (positive tie, +1), and Person (P) also likes the Third Party (Q) (positive tie, +1). All sentiments are positive. This configuration of triadic sentiments is depicted in @fig-balanced-1.
 - Example: Imagine that you (P) have a friend (O) whom you like, and they like another classmate (Q) who you also like. Everything seems fine here!
 - Mathematical Representation: (+1) * (+1) * (+1) = +1.
 - Sign Pattern: P-O (+) , O-Q (+) , P-Q (+). This triad has zero negative links; thus, it is balanced.
 
 2. **"An enemy of an enemy is a friend"**:
 
-- Description: Person (P) dislikes Object (O) (negative tie, -1), Object (O) dislikes a Third Party (Q) (negative tie, -1), but Person (P) likes the Third Party (Q) (positive tie, +1).
+- Description: Person (P) dislikes Object (O) (negative tie, -1), Object (O) dislikes a Third Party (Q) (negative tie, -1), but Person (P) likes the Third Party (Q) (positive tie, +1). This configuration of triadic sentiments is depicted in @fig-balanced-2.
 - Example: Imagine that you (P) have an enemy (O) who likes another classmate (Q) whom you *also* dislike. This seems like a perfectly fine arrangement!
 - Mathematical Representation: (-1) * (-1) * (+1) = +1.
 - Sign Pattern: P-O (-) , O-Q (-) , P-Q (+). This triad has two negative links; thus, it is balanced.
 
 3. **"An enemy of a friend is an enemy"**:
 
-- Description: If a person P dislikes O (negative tie, -1), and O likes Q (positive tie, +1), then P should dislike Q (negative tie, -1).
+- Description: If a person P dislikes O (negative tie, -1), and O likes Q (positive tie, +1), then P should dislike Q (negative tie, -1). This configuration of triadic sentiments is depicted in @fig-balanced-3.
 - Example: Imagine that you (P) have a huge fight with somebody else (O). You later find out that they have a best friend (Q). It makes sense that you will start them as well!
 - Mathematical Representation: (-1) * (+1) * (-1) = +1.
 - Sign Pattern: P-O (-) , O-Q (+) , P-Q (-). This triad has two negative links; thus, it is balanced.
 
 4. **"A friend of an enemy is an enemy"**:
 
-- Description: In this scenario, if P likes O (positive tie, +1), and O dislikes Q (negative tie, -1), then P should dislike Q (negative tie, -1) to maintain balance.
+- Description: In this scenario, if P likes O (positive tie, +1), and O dislikes Q (negative tie, -1), then P should dislike Q (negative tie, -1) to maintain balance. This configuration of triadic sentiments is depicted in @fig-balanced-4.
 - Example: Imagine that country P declares war on country O. After that, they find that country Q is an ally of country O. This means that country P *must* also declare war on country Q. 
 - Mathematical Representation: (+1) * (-1) * (-1) = +1.
 - Sign Pattern: P-O (+) , O-Q (-) , P-Q (-). This triad has two negative links; thus, it is balanced.
+
+```{r}
+#| label: fig-balanced
+#| fig-cap: "The four balanced triads according to balance theory."
+#| fig-cap-location: bottom
+#| fig-subcap:
+#|   - ""
+#|   - "" 
+#|   - ""
+#|   - ""
+#| layout-ncol: 2
+#| fig-height: 8
+#| fig-width: 8
+    library(igraph)
+    library(ggraph)
+    library(patchwork)
+
+    # Helper function to generate a plot for a specific balanced triad
+    plot_balanced_triad <- function(edge_signs, title) {
+    
+    # Define the directed edges based on the text: P->O, O->Q, P->Q
+    edges <- data.frame(
+        from = c("P", "O", "P"),
+        to   = c("O", "Q", "Q"),
+        sign = edge_signs
+    )
+    
+    # Create the igraph object
+    g <- graph_from_data_frame(edges, directed = TRUE)
+    
+    # Define a fixed layout matrix to keep the triangle uniform across all plots
+    # Node order implicitly extracted by igraph: P (1), O (2), Q (3)
+    layout_matrix <- matrix(c(
+        0.000,  1.0,  # P at the top center
+        -0.866, -0.5,  # O at the bottom left
+        0.866, -0.5   # Q at the bottom right
+    ), ncol = 2, byrow = TRUE)
+    
+    # Plot using ggraph
+    ggraph(g, layout = layout_matrix) +
+        geom_edge_link(aes(color = sign, label = sign),
+                    arrow = arrow(length = unit(8, 'mm'), type = "closed"),
+                    end_cap = circle(12, 'mm'),
+                    start_cap = circle(8, 'mm'),
+                    angle_calc = 'along',
+                    label_dodge = unit(6, 'mm'),
+                    label_size = 18,
+                    width = 2,
+                    show.legend = FALSE) +
+        geom_node_point(size = 26, color = "tan2") +
+        geom_node_text(aes(label = name), size = 12, fontface = "bold", color = "white") +
+        scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+        labs(title = title) +
+        theme_graph() + xlim(-1, 1) + ylim(-1, 1.25) +
+        theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20, margin = margin(b = 10)))
+    }
+    # 1. Zero negative links: (+), (+), (+)
+    plot_balanced_triad(c("+", "+", "+"), "1. A friend of a friend\nis a friend")
+    # 2. Two negative links: (-), (-), (+)
+    plot_balanced_triad(c("-", "-", "+"), "2. An enemy of an enemy\nis a friend")
+    # 3. Two negative links: (-), (+), (-)
+    plot_balanced_triad(c("-", "+", "-"), "3. An enemy of a friend\nis an enemy")
+    # 4. Two negative links: (+), (-), (-)
+    plot_balanced_triad(c("+", "-", "-"), "4. A friend of an enemy\nis an enemy")
+```
 
 ### Unbalanced Triads
 
@@ -59,14 +124,14 @@ Here are some concrete examples of unbalanced triadic configurations:
 
 1. **"A friend of my friend is my enemy"**:
 
-- Description: In this configuration, Person (P) likes Object (O) (a positive tie, +1), Object (O) likes a Third Party (Q) (a positive tie, +1), but Person (P) dislikes the Third Party (Q) (a negative tie, 1).
+- Description: In this configuration, Person (P) likes Object (O) (a positive tie, +1), Object (O) likes a Third Party (Q) (a positive tie, +1), but Person (P) dislikes the Third Party (Q) (a negative tie, 1). This configuration of triadic sentiments is depicted in @fig-unbalanced-1.
 - Example: "You (P) have a friend (O) whom you like and they like another classmate (Q) who you dislike".
 - Mathematical Representation: P-O (+) * O-Q (+) * P-Q (-) = (+1) * (+1) * (-1) = -1.
 - Implication: This situation creates discomfort due to the conflicting sentiment P has towards their friend and their friend's friend.
 
 2. **"A friend is my friend's enemy"**:
 
-- Description: Person (P) likes Object (O) (a positive tie, +1), Object (O) dislikes Third Party (Q) (a negative tie, -1), but Person (P) likes Third Party (Q) (a positive tie, +1).
+- Description: Person (P) likes Object (O) (a positive tie, +1), Object (O) dislikes Third Party (Q) (a negative tie, -1), but Person (P) likes Third Party (Q) (a positive tie, +1). This configuration of triadic sentiments is depicted in @fig-unbalanced-2.
 - Example: "You (P) love Marvel movies (Q) but your long time partner (O) (who you like duh!) hates them".
 - Mathematical Representation: P-O (+) * O-Q (-) * P-Q (+) = (+1) * (-1) * (+1) = -1.
 - Implication: This configuration also leads to tension in the triad due to the conflicting sentiments P and O have toward the third party Q.
@@ -74,18 +139,76 @@ Here are some concrete examples of unbalanced triadic configurations:
 3. **"My enemy's friend is also my friend"**:
 
 - Description: Person (P) dislikes Object (O) (a negative tie, -1), Object (O) likes Third Party (Q) (a positive tie, +1), but Person (P) likes Third Party (Q) (a positive tie, +1).
-- Example: Imagine (the horror) that you (P) and your archnemesis (O) are attracted to the same person (Q). This would definitely create tension and discomfort.
+- Example: Imagine (the horror) that you (P) and your archnemesis (O) are attracted to the same person (Q). This would definitely create tension and discomfort. This configuration of triadic sentiments is depicted in @fig-unbalanced-3.
 - Mathematical Representation: P-O (-) * O-Q (+) * P-Q (+) = (-1) * (+1) * (+1) = -1.
 - Implication: This also leads to tension in the triadic configuration due to the *similar* sentiments P and O have toward the third party Q.
 
 4. **"An enemy of my enemy is also my enemy"**:
 
-- Description: Person (P) dislikes Object (O) (a negative tie, -1), Object (O) dislikes Third Party (Q) (a negative tie, -1), and Person (P) also dislikes Third Party (Q) (a negative tie, -1).
+- Description: Person (P) dislikes Object (O) (a negative tie, -1), Object (O) dislikes Third Party (Q) (a negative tie, -1), and Person (P) also dislikes Third Party (Q) (a negative tie, -1). This configuration of triadic sentiments is depicted in @fig-unbalanced-4.
 - Example: Imagine that you (P) hate the Yankees (O), but that you also (correctly) hate the Red Sox (Q). However, whenever you see the Yankees playing the Red Sox, it is difficult to root for one or the other because you want them *both* to lose!
 - Mathematical Representation: P-O (-) * O-Q (-) * P-Q (-) = (-1) * (-1) * (-1) = -1.
 - Implication: This is another type of unbalanced triad that creates tension, despite all parties having negative sentiments towards each other.
 
 The basic idea of Balance Theory is that unbalanced configurations will tend to transition to balanced configurations. This transition occurs when the person (P) changes their sentiments toward O or Q to restore balance and alleviate internal tension. This can be done by P changing the sign or valence of the directed tie that goes from P to O or from P to Q. Balanced configurations, conversely, do not produce tension and are stable, yielding a positive product (+1) when multiplying their edge signs, and having either zero or two negative links.
+
+```{r}
+#| label: fig-unbalanced
+#| fig-cap: "The four unbalanced triads according to balance theory."
+#| fig-cap-location: bottom
+#| fig-subcap:
+#|   - ""
+#|   - "" 
+#|   - ""
+#|   - ""
+#| layout-ncol: 2
+#| fig-height: 8
+#| fig-width: 8
+    plot_imbalanced_triad <- function(edge_signs, title) {
+    # Define the directed edges: P->O, O->Q, P->Q
+    edges <- data.frame(
+        from = c("P", "O", "P"),
+        to   = c("O", "Q", "Q"),
+        sign = edge_signs
+    )
+    
+    # Create the igraph object
+    g <- graph_from_data_frame(edges, directed = TRUE)
+    # Define a fixed layout matrix to keep the triangle uniform across all plots
+    # Node order implicitly extracted by igraph: P (1), O (2), Q (3)
+    layout_matrix <- matrix(c(
+        0.000,  1.0,  # P at the top center
+        -0.866, -0.5,  # O at the bottom left
+        0.866, -0.5   # Q at the bottom right
+    ), ncol = 2, byrow = TRUE)
+    
+    # Plot using ggraph
+    ggraph(g, layout = layout_matrix) +
+        geom_edge_link(aes(color = sign, label = sign),
+                    arrow = arrow(length = unit(8, 'mm'), type = "closed"),
+                    end_cap = circle(12, 'mm'),
+                    start_cap = circle(8, 'mm'),
+                    angle_calc = 'along',
+                    label_dodge = unit(6, 'mm'),
+                    label_size = 18,
+                    width = 2,
+                    show.legend = FALSE) +
+        geom_node_point(size = 26, color = "tan2") +
+        geom_node_text(aes(label = name), size = 12, fontface = "bold", color = "white") +
+        scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+        labs(title = title) +
+        theme_graph() + xlim(-1, 1) + ylim(-1, 1.25) +
+        theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20, margin = margin(b = 10)))
+    }
+    # 1. One negative link: (+), (+), (-)
+    plot_imbalanced_triad(c("+", "+", "-"), "1. A friend of a friend\nis an enemy")
+    # 2. One negative link: (+), (-), (+)
+    plot_imbalanced_triad(c("+", "-", "+"), "2. An enemy of a friend\nis a friend")
+    # 3. One negative link: (-), (+), (+)
+    plot_imbalanced_triad(c("-", "+", "+"), "3. A friend of an enemy\nis a friend")
+    # 4. Three negative links: (-), (-), (-)
+    plot_imbalanced_triad(c("-", "-", "-"), "4. An enemy of an enemy\nis an enemy")
+```
 
 ## Cross-Pressure
 
@@ -113,11 +236,62 @@ The cross-pressure situation creates tension because:
 - If P likes O2 and O2 dislikes Q, then to create balance, P should dislike Q.
 - These conflicting pulls towards liking and disliking the same object create an unbalanced state.
 
-A common example of cross-pressure today pertains to politics. For instance, many people (P) have family members (O1 and O2) with opposite attitudes to one of the major political parties (Q), which creates tension for P (imagine that your brother loves the democrats but your sister hates them).
+A common example of cross-pressure today pertains to politics. For instance, many people (P) have family members (O1 and O2) with opposite attitudes to one of the major political parties (Q), which creates tension for P (imagine that your brother loves the democrats but your sister hates them). This is the configuration of triadic sentiments depicted in @fig-cross.
+
+Here, balance theory predicts that, as long as this configuration remains, your attitude towards the democrats will *ambivalent* combining both positive and negative sentiments, and moving you towards the dreaded moderate "middle," or perhaps worse, making you an "independent" with no strong partisan affiliation. 
+
+```{r}
+#| label: fig-cross
+#| fig-cap: "The cross-pressure situation."
+#| fig-cap-location: bottom
+#| fig-height: 8
+#| fig-width: 8
+# Define the nodes and directed edges for the cross-pressure example
+edges <- data.frame(
+  from = c("P", "P", "O1", "O2", "P"),
+  to   = c("O1", "O2", "Q", "Q", "Q"),
+  sign = c("+", "+", "+", "-", "?"),
+  style = c("solid", "solid", "solid", "solid", "dashed") # Dashed for the unresolved tension
+)
+
+# Create the igraph object
+g <- graph_from_data_frame(edges, directed = TRUE)
+
+# Define a fixed layout matrix
+# P at the top, O1 on the left, O2 on the right, Q at the bottom
+layout_matrix <- matrix(c(
+   0,  1,  # P (1)
+  -1,  0,  # O1 (2)
+   1,  0,  # O2 (3)
+   0, -1   # Q (4)
+), ncol = 2, byrow = TRUE)
+
+# Plot using ggraph
+ggraph(g, layout = layout_matrix) +
+  geom_edge_link(aes(color = sign, label = sign, edge_linetype = style),
+                 arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                 end_cap = circle(10, 'mm'),
+                 start_cap = circle(9, 'mm'),
+                 angle_calc = 'along',
+                 label_dodge = unit(6, 'mm'),
+                 label_size = 12,
+                 width = 1.8,
+                 show.legend = FALSE) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  # Custom colors: Green for +, Red for -, Goldenrod for the unresolved ?
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "?" = "goldenrod")) +
+  scale_edge_linetype_identity() +
+  labs(title = "Cross-Pressure Configuration",
+       subtitle = "P is torn between O1 (who likes Q) and O2 (who dislikes Q)") +
+  theme_void() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+        plot.subtitle = element_text(hjust = 0.5, size = 11, margin = margin(b = 15)))
+```
 
 ### Resolving Cross-Pressure
 
-To achieve balance and alleviate this ambivalence, Balance Theory predicts that P will take steps to resolve the tension. This might involve:
+To achieve balance and alleviate the ambivalence generated by the cross-pressure situation, Balance Theory predicts that P will take steps to resolve the tension. This might involve:
 
 1. Changing P's own attitude towards O1 or O2: P might change their attitude toward one of the friends (O1 or O2). For instance, P might decide they no longer like Friend 2 as much because of their dislike of Q, or vice versa. In the political polarization example, you might grow closer to your brother and colder towards your sister to keep a positive attitude towards the democrats. 
 2. Influencing others' attitudes: P might try to convince either O1 or O2 to change their attitude toward Q. For example, P might try to persuade Friend 2 to like Q, or Friend 1 to dislike Q, to align the sentiments. In the political polarization example, you might try to convince your sister that the Democrats are actually the best (and keep liking them). 
