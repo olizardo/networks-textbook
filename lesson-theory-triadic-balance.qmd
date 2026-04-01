@@ -56,17 +56,17 @@ Here are some concrete examples of balanced triadic configurations:
 #| fig-cap: "The four balanced triads according to balance theory."
 #| fig-cap-location: bottom
 #| fig-subcap:
-#|   - ""
-#|   - "" 
-#|   - ""
-#|   - ""
+#|   - "A friend of a friend is a friend."
+#|   - "An enemy of an enemy is a friend." 
+#|   - "A friend of an enemy is an enemy."
+#|   - "An enemy of a friend is an enemy."
 #| layout-ncol: 2
 #| fig-height: 8
 #| fig-width: 8
     library(igraph)
     library(ggraph)
     # Helper function to generate a plot for a specific balanced triad
-    plot.triad <- function(edge_signs, title) {
+    plot.triad <- function(edge_signs) {
         # Define the directed edges based on the text: P->O, O->Q, P->Q
         edges <- data.frame(
             from = c("P", "O", "P"),
@@ -98,18 +98,12 @@ Here are some concrete examples of balanced triadic configurations:
         geom_node_point(size = 26, color = "tan2") +
         geom_node_text(aes(label = name), size = 12, fontface = "bold", color = "white") +
         scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-        labs(title = title) +
-        theme_graph() + xlim(-1, 1) + ylim(-1, 1.25) +
-        theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20, margin = margin(b = 10)))
+        theme_graph() + xlim(-1, 1) + ylim(-1, 1.25) 
         }
-    #Zero negative links: (+), (+), (+)
-    plot.triad(c("+", "+", "+"), "A friend of a friend\nis a friend")
-    #Two negative links: (-), (-), (+)
-    plot.triad(c("-", "-", "+"), "An enemy of an enemy\nis a friend")
-    #Two negative links: (-), (+), (-)
-    plot.triad(c("-", "+", "-"), "A friend of an enemy\nis an enemy")
-    #Two negative links: (+), (-), (-)
-    plot.triad(c("+", "-", "-"), "An enemy of a friend\nis an enemy")
+    plot.triad(c("+", "+", "+"))
+    plot.triad(c("-", "-", "+"))
+    plot.triad(c("-", "+", "-"))
+    plot.triad(c("+", "-", "-"))
 ```
 
 ### Unbalanced Triads
@@ -153,21 +147,17 @@ The basic idea of Balance Theory is that unbalanced configurations will tend to 
 #| fig-cap: "The four unbalanced triads according to balance theory."
 #| fig-cap-location: bottom
 #| fig-subcap:
-#|   - ""
-#|   - "" 
-#|   - ""
-#|   - ""
+#|   - "A friend of a friend is an enemy."
+#|   - "An enemy of a friend is a friend." 
+#|   - "A friend of an enemy is a friend."
+#|   - "An enemy of an enemy is an enemy."
 #| layout-ncol: 2
 #| fig-height: 8
 #| fig-width: 8
-    #One negative link: (+), (+), (-)
-    plot.triad(c("+", "+", "-"), "1. A friend of a friend\nis an enemy")
-    #One negative link: (+), (-), (+)
-    plot.triad(c("+", "-", "+"), "2. An enemy of a friend\nis a friend")
-    #One negative link: (-), (+), (+)
-    plot.triad(c("-", "+", "+"), "3. A friend of an enemy\nis a friend")
-    #Three negative links: (-), (-), (-)
-    plot.triad(c("-", "-", "-"), "4. An enemy of an enemy\nis an enemy")
+    plot.triad(c("+", "+", "-"))
+    plot.triad(c("+", "-", "+"))
+    plot.triad(c("-", "+", "+"))
+    plot.triad(c("-", "-", "-"))
 ```
 
 ## Cross-Pressure
