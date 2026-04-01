@@ -24,66 +24,54 @@ This theorem implies that structural balance is equivalent to perfect **group po
 #| fig-height: 10
 #| fig-width: 10
 
-library(igraph)
-library(ggraph)
-library(dplyr)
-
-# 1. Define nodes and assign them to two mutually exclusive factions
-nodes <- data.frame(
-  name = LETTERS[1:6],
-  faction = c("Faction 1", "Faction 1", "Faction 1", 
-              "Faction 2", "Faction 2", "Faction 2")
-)
-
-# 2. Create edges for a complete (fully connected) graph
-# expand.grid creates all pairs, filter(from < to) ensures undirected, no self-loops
-edges <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors = FALSE) %>%
-  filter(from < to) 
-
-# 3. Assign signs based on the Fundamental Theorem of Structural Balance:
-# (+) Positive if in the same faction, (-) Negative if in different factions
-edges <- edges %>%
-  mutate(
-    from_faction = nodes$faction[match(from, nodes$name)],
-    to_faction = nodes$faction[match(to, nodes$name)],
-    sign = ifelse(from_faction == to_faction, "+", "-"),
-    type = ifelse(from_faction == to_faction, "Positive Tie (+)", "Negative Tie (-)")
-  )
-
-# 4. Create the igraph object
-g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
-
-# 5. Define a custom manual layout to clearly separate the two factions visually
-layout_matrix <- matrix(c(
-  -1.5,  1,   # Node 1 (Faction 1)
-  -1.5, -1,   # Node 2 (Faction 1)
-  -2.5,  0,   # Node 3 (Faction 1)
-   1.5,  1,   # Node 4 (Faction 2)
-   1.5, -1,   # Node 5 (Faction 2)
-   2.5,  0    # Node 6 (Faction 2)
-), ncol = 2, byrow = TRUE)
-
-# 6. Plot using ggraph
-ggraph(g, layout = layout_matrix) +
-  # Draw edges: solid green for positive, dashed red for negative
-  geom_edge_link(aes(color = type, linetype = type), width = 1.8, alpha = 0.8) +
-  # Draw nodes colored by their faction
-  geom_node_point(aes(fill = faction), shape = 21, size = 22, color = "white", stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 10) +
-  # Custom scales
-  scale_edge_color_manual(values = c("Positive Tie (+)" = "forestgreen", 
-                                     "Negative Tie (-)" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("Positive Tie (+)" = "solid", 
-                                        "Negative Tie (-)" = "dashed")) +
-  scale_fill_manual(values = c("Faction 1" = "steelblue", 
-                               "Faction 2" = "darkorchid")) +
-  theme_graph() + ylim(-1.2, 1.2) +
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 11, margin = margin(b = 15)),
-    legend.position = "none"
-  )
-
+    library(igraph)
+    library(ggraph)
+    library(dplyr)
+    # 1. Define nodes and assign them to two mutually exclusive factions
+    nodes <- data.frame(
+    name = LETTERS[1:6],
+    faction = c("Faction 1", "Faction 1", "Faction 1", 
+                "Faction 2", "Faction 2", "Faction 2")
+        )
+    # 2. Create edges for a complete (fully connected) graph
+    # expand.grid creates all pairs, filter(from < to) ensures undirected, no self-loops
+    edges <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors = FALSE) %>%
+    filter(from < to) 
+    # 3. Assign signs based on the Fundamental Theorem of Structural Balance:
+    # (+) Positive if in the same faction, (-) Negative if in different factions
+    edges <- edges %>%
+    mutate(
+        from_faction = nodes$faction[match(from, nodes$name)],
+        to_faction = nodes$faction[match(to, nodes$name)],
+        sign = ifelse(from_faction == to_faction, "+", "-"),
+        type = ifelse(from_faction == to_faction, "Positive Tie (+)", "Negative Tie (-)")
+        )
+    # 4. Create the igraph object
+    g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
+    # 5. Define a custom manual layout to clearly separate the two factions visually
+    layout_matrix <- matrix(c(
+    -1.5,  1,   # Node 1 (Faction 1)
+    -1.5, -1,   # Node 2 (Faction 1)
+    -2.5,  0,   # Node 3 (Faction 1)
+    1.5,  1,   # Node 4 (Faction 2)
+    1.5, -1,   # Node 5 (Faction 2)
+    2.5,  0    # Node 6 (Faction 2)
+    ), ncol = 2, byrow = TRUE)
+    # 6. Plot using ggraph
+    ggraph(g, layout = layout_matrix) +
+    # Draw edges: solid green for positive, dashed red for negative
+    geom_edge_link(aes(color = type, linetype = type), width = 1.8, alpha = 0.8) +
+    # Draw nodes colored by their faction
+    geom_node_point(aes(fill = faction), shape = 21, size = 26, color = "white", stroke = 1.5) +
+    geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 12) +
+    # Custom scales
+    scale_edge_color_manual(values = c("Positive Tie (+)" = "forestgreen", 
+                            "Negative Tie (-)" = "firebrick")) +
+    scale_edge_linetype_manual(values = c("Positive Tie (+)" = "solid", 
+                            "Negative Tie (-)" = "dashed")) +
+    scale_fill_manual(values = c("Faction 1" = "steelblue", 
+                            "Faction 2" = "darkorchid")) +
+    theme_graph() + theme(legend.position = "none")
 ```
 
 A remarkable property of a structurally balanced graph is its resilience to change in its overall polarized structure. If new nodes are added to a structurally balanced graph, the existing group polarization pattern does not change, provided that the new nodes' relationships to every other existing node are also balanced.
