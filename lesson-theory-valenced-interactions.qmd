@@ -10,6 +10,114 @@ Karma Theory, Status Theory, and Solidarity Theory are social psychological theo
 
 Karma Theory's central idea is "You get what you spread out!". It proposes that individuals tend to reciprocate the feelings or sentiments that someone sends out towards others. If an individual exhibits negative behavior or rudeness without clear provocation, others are likely to respond with negativity towards them. Conversely, if someone is kind and positive towards others, they are likely to receive positive sentiments in return. This theory specifically predicts valenced "indegree" (the sentiments one receives) based on valenced "outdegree" (the sentiments one sends out). The common expressions "bullies get bullied" and "likers get liked" illustrate this principle, indicating that the sentiments an individual expresses towards others tend to be returned to them.
 
+```{r}
+#| label: fig-karma
+#| fig-cap: "Illustration of Karma Theory (You get what you receive)."
+#| fig-cap-location: bottom
+#| fig-width: 10
+#| fig-height: 10
+
+# Load required libraries
+library(igraph)
+library(ggraph)
+library(dplyr)
+library(grid) # Required for the arrow() function
+
+# 1. Define nodes and their behavioral roles
+# We will use 14 nodes: 2 spreaders, and 6 distinct targets for each spreader.
+nodes <- data.frame(
+  name = LETTERS[1:14],
+  role = c(
+    "Positive Spreader", "Negative Spreader", 
+    "Receiver", "Receiver", "Receiver", # C, D, E
+    "Sender", "Sender", "Sender",          # F, G, H
+    "Receiver", "Receiver", "Receiver", # I, J, K
+    "Sender", "Sender", "Sender"           # L, M, N
+  )
+)
+
+# 2. Create edges representing generalized Karma flows
+# Node A sends positive ties to C, D, E, and receives positive ties from F, G, H
+# Node B sends negative ties to I, J, K, and receives negative ties from L, M, N
+edges <- data.frame(
+  from = c("A", "A", "A", "F", "G", "H", "B", "B", "B", "L", "M", "N"),
+  to   = c("C", "D", "E", "A", "A", "A", "I", "J", "K", "B", "B", "B"),
+  sign = c(rep("+", 6), rep("-", 6))
+) %>%
+  mutate(
+    type = ifelse(sign == "+", "Positive Tie (+)", "Negative Tie (-)")
+  )
+
+# 3. Create the directed igraph object
+g <- graph_from_data_frame(edges, directed = TRUE, vertices = nodes)
+
+# 4. Define a custom layout to clearly separate incoming (left) and outgoing (right)
+layout_matrix <- matrix(c(
+   # Spreaders (Center)
+   0,  5,   # Node A: Positive Spreader
+   0, -5,   # Node B: Negative Spreader
+   
+   # Positive Sphere - Outgoing (Right)
+   2,  7,   # Node C
+   2,  5,   # Node D
+   2,  3,   # Node E
+   
+   # Positive Sphere - Incoming (Left)
+  -2,  7,   # Node F
+  -2,  5,   # Node G
+  -2,  3,   # Node H
+  
+   # Negative Sphere - Outgoing (Right)
+   2, -7,   # Node I
+   2, -5,   # Node J
+   2, -3,   # Node K
+   
+   # Negative Sphere - Incoming (Left)
+  -2, -7,   # Node L
+  -2, -5,   # Node M
+  -2, -3    # Node N
+), ncol = 2, byrow = TRUE)
+
+# 5. Plot the network using ggraph
+ggraph(g, layout = layout_matrix) +
+  # Draw edges with arrows
+  geom_edge_parallel(aes(color = type, linetype = type), 
+                 arrow = arrow(length = unit(4, 'mm'), type = "closed"), 
+                 sep = unit(6, 'mm'),
+                 end_cap = circle(9, 'mm'), 
+                 width = 1.2, alpha = 0.7) +
+  
+  # Draw nodes colored by their specific role
+  geom_node_point(aes(fill = role), shape = 21, size = 15, color = "white", stroke = 1.5) +
+  
+  # Add node labels
+  geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 6) +
+  
+  # Custom colors and line types for ties
+  scale_edge_color_manual(values = c("Positive Tie (+)" = "forestgreen", 
+                                     "Negative Tie (-)" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Positive Tie (+)" = "solid", 
+                                        "Negative Tie (-)" = "dashed")) +
+  
+  # Custom colors for node roles
+  scale_fill_manual(values = c("Positive Spreader" = "dodgerblue", 
+                               "Negative Spreader" = "darkorange",
+                               "Receiver" = "darkblue",
+                               "Sender" = "darkred")) +
+  
+  # Labels and theming
+  labs(
+    # title = "Generalized Karma Theory",
+    # subtitle = "Separating direct reciprocity: You receive from the network what you spread into it.",
+    fill = "Actor Role",
+    edge_color = "Tie Type",
+    edge_linetype = "Tie Type"
+  ) +
+  theme_graph() +
+  theme(legend.position = "left")
+
+```
+
 Examples:
 
 - If S is described as a rude person, Karma Theory predicts that you would feel negatively towards him, as their outward negative valences are reciprocated.
@@ -38,6 +146,76 @@ Status theory posits that individuals generally strive to avoid losing status an
 - High-status individuals tend to accumulate positive ties, illustrating a "rich get richer" effect.
 - Low-status individuals may accumulate negative ties, described as a "gang up" effect.
 - Over time, high-status individuals tend to lose negative ties, while low-status individuals tend to lose positive ties.
+
+```{r}
+#| label: fig-status
+#| fig-cap: "Core principle of status theory: Positive ties (Deference) flow upward; Negative ties (Dominance) flow downward."
+#| fig-cap-location: bottom
+#| fig-height: 8
+#| fig-width: 10
+# Load required libraries
+
+# 1. Define nodes and their hierarchical status
+nodes <- data.frame(
+  name = c("High", "Middle", "Low")
+)
+
+# 2. Create edges representing the core mechanism of Status Theory:
+# - Positive ties (Deference) flow UP the hierarchy.
+# - Negative ties (Dominance) flow DOWN the hierarchy.
+edges <- data.frame(
+  from = c("Low", "Low", "Middle", "High", "High", "Middle"),
+  to   = c("Middle", "High", "High", "Middle", "Low", "Low"),
+  sign = c("+", "+", "+", "-", "-", "-")
+) %>%
+  mutate(
+    type = ifelse(sign == "+", "Deference (+)", "Dominance (-)")
+  )
+
+# 3. Create the directed igraph object
+g <- graph_from_data_frame(edges, directed = TRUE, vertices = nodes)
+
+# 4. Define a strict vertical layout to emphasize the hierarchy
+layout_matrix <- matrix(c(
+  0, 2,  # High Status (Top)
+  0, 1,  # Middle Status (Center)
+  0, 0   # Low Status (Bottom)
+), ncol = 2, byrow = TRUE)
+
+# 5. Plot the network using ggraph
+ggraph(g, layout = layout_matrix) +
+  # Use geom_edge_arc to curve the reciprocal ties so they don't overlap visually
+  geom_edge_arc(aes(color = type, linetype = type), 
+                arrow = arrow(length = unit(4, 'mm'), type = "closed"), 
+                end_cap = circle(14, 'mm'), # Prevents arrows from clipping into nodes
+                width = 1.2, alpha = 0.8, strength = 0.3) +
+  
+  # Draw nodes
+  geom_node_point(aes(fill = name), shape = 21, size = 25, color = "white", stroke = 2) +
+  
+  # Add node labels
+  geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 5) +
+  
+  # Custom colors and line types for ties
+  scale_edge_color_manual(values = c("Deference (+)" = "forestgreen", 
+                                     "Dominance (-)" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Deference (+)" = "solid", 
+                                        "Dominance (-)" = "dashed")) +
+  
+  # Custom colors for nodes
+  scale_fill_manual(values = c("High" = "darkred", 
+                               "Middle" = "darkorange",
+                               "Low" = "steelblue")) +
+  
+  # Labels and theming
+  labs(
+    edge_color = "Tie Type",
+    edge_linetype = "Tie Type"
+  ) +
+  theme_graph() + ylim(-0.25, 2.2) +
+  theme(legend.position = "bottom", legend.text = element_text(size = 16), legend.title = element_blank()) +
+  guides(fill = "none") # Hide node fill legend as labels are directly on the nodes
+```
 
 Examples:
 
