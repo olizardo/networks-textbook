@@ -112,8 +112,91 @@ In summary, the two-group partitioning, which is a hallmark of structural balanc
 ## From Balance to Clustering
 As we have seen, Cartwright and Harary's fundamental theorem of structural balance shows that a balanced network necessarily splits into exactly *two* polarized factions. While this works beautifully for representing two opposing armies or a strict two-party political divide, it is often too restrictive for some other real-world social networks. In 1967, Davis introduced his **Clusterability Theorem** to generalize structural balance so that a network could fragment into multiple groups, rather than just two.
 
+```{r}
+#| label: fig-davis
+#| fig-cap: A clusterable graph according to Davis
+#| cap-location: bottom
+#| fig-height: 10
+#| fig-width: 10
+
+library(igraph)
+library(ggraph)
+library(dplyr)
+
+library(igraph)
+library(ggraph)
+library(dplyr)
+
+# 1. Define nodes and assign them to three mutually exclusive clusters
+nodes <- data.frame(
+  name = LETTERS[1:9],
+  faction = c("Cluster 1", "Cluster 1", "Cluster 1", 
+              "Cluster 2", "Cluster 2", "Cluster 2",
+              "Cluster 3", "Cluster 3", "Cluster 3")
+)
+
+# 2. Create edges for a complete (fully connected) graph
+# expand.grid creates all pairs, filter(from < to) ensures undirected edges with no self-loops
+edges <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors = FALSE) %>%
+  filter(from < to) 
+
+# 3. Assign signs based on Davis's Clusterability Theorem:
+# (+) Positive if in the same cluster, (-) Negative if in different clusters
+edges <- edges %>%
+  mutate(
+    from_faction = nodes$faction[match(from, nodes$name)],
+    to_faction = nodes$faction[match(to, nodes$name)],
+    sign = ifelse(from_faction == to_faction, "+", "-"),
+    type = ifelse(from_faction == to_faction, "Positive Tie (+)", "Negative Tie (-)")
+  )
+
+# 4. Create the igraph object
+g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
+
+# 5. Define a custom layout to clearly separate the three clusters visually (a triangle formation)
+layout_matrix <- matrix(c(
+  # Cluster 1 (Top)
+   -0.35,  2.0,   # Node A
+  -0.65,  1.5,   # Node B
+   0,  1.5,   # Node C
+  
+  # Cluster 2 (Bottom Left)
+  -1.0, 0.5,   # Node D
+  -1, 0,   # Node E
+  -0.65, -0.2,   # Node F
+  
+  # Cluster 3 (Bottom Right)
+   0.5, -0.5,   # Node G
+   0, -0.5,   # Node H
+   0.5,  0    # Node I
+), ncol = 2, byrow = TRUE)
+
+# 6. Plot using ggraph
+ggraph(g, layout = layout_matrix) +
+  # Draw edges: solid green for positive, dashed red for negative
+  geom_edge_link(aes(color = type, linetype = type, width = type), alpha = 0.6) +
+  
+  # Draw nodes colored by their assigned cluster
+  geom_node_point(aes(fill = faction), shape = 21, size = 22, color = "white", stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 10) +
+  
+  # Custom scales mapping
+  scale_edge_color_manual(values = c("Positive Tie (+)" = "forestgreen", 
+                                     "Negative Tie (-)" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Positive Tie (+)" = "solid", 
+                                        "Negative Tie (-)" = "dashed")) +
+  scale_edge_width_manual(values = c("Positive Tie (+)" = 2, 
+                                        "Negative Tie (-)" = 1)) +
+  scale_fill_manual(values = c("Cluster 1" = "steelblue", 
+                               "Cluster 2" = "darkorchid",
+                               "Cluster 3" = "goldenrod")) +
+  theme_graph() + 
+  theme(legend.position = "none")
+
+```
+
 Davis realized that by relaxing the rules of balance slightly, he could account for a wider variety of social clustering. Specifically, classical balance theory considers a triad with three negative ties (where everyone hates everyone else) to be unbalanced. Davis argued that in a highly factionalized network, it makes perfect sense for three people from three completely different, competing groups to dislike one another, so it is possible to group this triad with the other balanced configurations.
 
-Accordingly, under Davis's model, a graph is **clusterable** if it contains no triads with exactly one negative tie. That is, the only triads that exist are the four balanced triads in @sec-tbalance, and the all-negative-ties triad. If this condition is met, the network can be partitioned into any number of distinct clusters, not just two. Just like in the Cartwright and Harary model, all the ties within a specific cluster are positive, but the ties between any two different clusters are entirely negative.
+Accordingly, under Davis's model, a graph is **clusterable** if it contains no triads with exactly one negative tie. That is, the only triads that exist are the four balanced triads in @sec-tbalance, and the all-negative-ties triad. If this condition is met, the network can be partitioned into any number of distinct clusters, not just two, as in the example graph shown in @fig-davis. Just like in the Cartwright and Harary model, all the ties within a specific cluster (e.g., D, E, F) are positive, but the ties between any two different clusters are entirely negative. As you can also see, all the triads in the graph either contain no negative links (the all positive triads within clusters) or if they contain negative links they contain two of them (+, -, -) or three of them (-, -, -).
 
 ## References {.unnumbered}
