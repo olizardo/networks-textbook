@@ -10,6 +10,69 @@ Transitivity is a property in which a relationship passes through nodes. In the 
 
 The concept of a perfectly linear hierarchy, where transitivity is consistently observed, can be clearly illustrated by chickens. When placed in a new environment, chickens engage in scuffles until a clear "pecking order" is established. The winner of a fight asserts dominance over the loser, and this process continues until every chicken knows its place in the hierarchy relative to all others. This hierarchy is ritually reinforced: a higher-status chicken will peck the head of a lower-status one, and the lower-status chicken will assent by lowering its head. This chicken "pecking order" is a classic example of a perfectly transitive dominance order.
 
+```{r}
+#| label: fig-linear
+#| fig-cap: Depiction of a strict linear order hierarchy.
+#| fig-cap-location: bottom
+#| fig-height: 8
+#| fig-width: 4
+# Load required libraries
+library(igraph)
+library(ggraph)
+library(dplyr)
+library(grid)
+
+# 1. Define 5 nodes ranked from top (1) to bottom (5)
+nodes <- data.frame(
+  name = c("Alpha", "Beta", "Gamma", "Delta", "Epsilon"),
+  rank = c(1, 2, 3, 4, 5),
+  x = 0,     # Keep them in a straight vertical line
+  y = 5:1    # Alpha at the top (y=5), Epsilon at the bottom (y=1)
+)
+
+# 2. Create a fully connected, perfectly transitive directed edge list
+# Every node dominates EVERY node ranked below it
+edges <- expand.grid(from = nodes$name, to = nodes$name, stringsAsFactors = FALSE) %>%
+  left_join(nodes %>% select(name, rank_from = rank), by = c("from" = "name")) %>%
+  left_join(nodes %>% select(name, rank_to = rank), by = c("to" = "name")) %>%
+  # Keep only ties where the sender is higher rank (lower numerical value) than the receiver
+  filter(rank_from < rank_to) %>%
+  # Categorize ties: direct down the chain vs. skipping levels (transitive)
+  mutate(
+    type = ifelse(rank_to - rank_from == 1, "Direct Domination", "Transitive Domination")
+  )
+
+# 3. Create the directed igraph object
+g <- graph_from_data_frame(edges, directed = TRUE, vertices = nodes)
+
+# 4. Plot using ggraph with a manual vertical layout
+ggraph(g, layout = 'manual', x = x, y = y) +
+  
+  # Draw the edges. We use arcs so the transitive ties bow outward and remain visible
+  geom_edge_arc(aes(color = type, linetype = type, alpha = type),
+                arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                end_cap = circle(14, 'mm'),
+                strength = 0.5, width = 1.2) +
+  
+  # Draw the nodes
+  geom_node_point(aes(fill = as.factor(rank)), shape = 21, size = 26, color = "white", stroke = 2) +
+  
+  # Add node labels
+  geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 4.5) +
+  
+  # Custom formatting to distinguish direct vs transitive ties
+  scale_edge_color_manual(values = c("Direct Domination" = "firebrick", 
+                                     "Transitive Domination" = "coral")) +
+  scale_edge_linetype_manual(values = c("Direct Domination" = "solid", 
+                                        "Transitive Domination" = "dashed")) +
+  scale_edge_alpha_manual(values = c("Direct Domination" = 1.0, 
+                                     "Transitive Domination" = 0.6)) +
+  
+  # Custom node colors to represent rank 
+  theme_graph() + xlim(-1, 1.2) + ylim(0.5, 5.2) + 
+  theme(legend.position = "none")
+```
+
 ### Human Hierarchies: Deviations from Perfect Transitivity
 
 Unlike chickens, human hierarchies are typically not perfectly transitive and can vary significantly depending on the context. For example, a teacher might have final authority in a classroom, but outside that setting, those authority relations may not apply or be enforceable. Similarly, someone might show deference to the President of the United States, but this hierarchy can be inverted during an election, as the President's position depends on voters' will. In other cases, two people might be members of different clubs, each holding a leadership position in one, meaning their authority or hierarchical position shifts depending on the specific decision or context. These examples highlight that while hierarchies exist, humans often tacitly recognize an ordering, but disagreements over the factors that determine status can arise, and hierarchies are more context-dependent.
@@ -29,99 +92,104 @@ Here are the different types of triadic configurations observed in dominance ord
 7. **Cyclical Triad**: In a cyclical triad, dominance relationships form a closed loop, such as A dominates B, B dominates C, and C dominates A. This type of triad violates transitivity and is not expected in a purely linear dominance order, as it signifies the absence of a clear, unambiguous hierarchy. The presence of such cycles is problematic for establishing a clear linear order.
 
 ```{r}
+#| label: fig-triads
+#| fig-cap: The 7 possible triadic configurations constructed entirely of asymmetric or null ties.
+#| fig-cap-location: bottom
+#| fig-width: 10
+#| figh-heigh: 8
 # Load required libraries
-library(tidygraph)
+library(igraph)
 library(ggraph)
 library(dplyr)
+library(grid) # Required for the arrow() function
 
-# 1. Define the nodes for all 7 triads (3 nodes per triad = 21 nodes total)
-# We will label each set of 3 nodes with the specific configuration they belong to
+# 1. Define the 21 nodes (7 triads * 3 nodes each)
+# We manually define x and y coordinates to keep the nodes in a neat triangle shape
 nodes <- data.frame(
-  name = paste0("Node_", 1:21),
-  label = rep(c("A", "B", "C"), 7),
-  configuration = factor(
-    rep(c(
-      "1. Null", 
-      "2. Single-edge", 
-      "3. Double-dominant", 
-      "4. Double-loser", 
-      "5. Pass-along", 
-      "6. Transitive", 
-      "7. Cycle"
-    ), each = 3)
-  )
+  id = 1:21,
+  name = rep(c("A", "B", "C"), 7),
+  triad = factor(
+    rep(c("003 (Null)", 
+          "012 (Single Edge)", 
+          "021D (Double Dominant)",
+          "021U (Double Loser)", 
+          "021C (Pass Along)", 
+          "030T (Transitive)", 
+          "030C (Cycle)"), each = 3),
+    levels = c("003 (Null)", "012 (Single Edge)", "021D (Double Dominant)",
+               "021U (Double Loser)", "021C (Pass Along)", 
+               "030T (Transitive)", "030C (Cycle)")
+  ),
+  # X and Y coordinates: Top (A), Bottom Left (B), Bottom Right (C)
+  x = rep(c(0, -1, 1), 7),
+  y = rep(c(1.5, 0, 0), 7)
 )
 
-# 2. Define the directed edges for each specific configuration
-# Note: The node IDs match the row numbers in the 'nodes' dataframe above
+# 2. Define the directed edges for each specific triad type
 edges <- data.frame(
   from = c(
-    # Null: No edges (skip nodes 1, 2, 3)
+    # Triad 1: 003 (Empty) -> No edges
     
-    # Single-edge: A -> B
-    4, 
+    # Triad 2: 012 (Single Edge) -> A dominates B
+    4,
     
-    # Double-dominant: A -> B, A -> C
-    7, 7, 
+    # Triad 3: 021D (Out-Star / Down) -> A dominates B and C
+    7, 7,
     
-    # Double-loser: A -> C, B -> C
-    10, 11, 
+    # Triad 4: 021U (In-Star / Up) -> B and C dominate A
+    11, 12,
     
-    # Pass-along: A -> B, B -> C
-    13, 14, 
+    # Triad 5: 021C (Chain) -> A dominates B, B dominates C
+    13, 14,
     
-    # Transitive: A -> B, B -> C, A -> C
-    16, 17, 16, 
+    # Triad 6: 030T (Transitive) -> A dominates B and C; B dominates C
+    16, 17, 16,
     
-    # Cycle: A -> B, B -> C, C -> A
+    # Triad 7: 030C (Cyclic) -> A dominates B, B dominates C, C dominates A
     19, 20, 21
   ),
   to = c(
-    # Single-edge
-    5, 
-    
-    # Double-dominant
-    8, 9, 
-    
-    # Double-loser
-    12, 12, 
-    
-    # Pass-along
-    14, 15, 
-    
-    # Transitive
-    17, 18, 18, 
-    
-    # Cycle
+    # 012
+    5,
+    # 021D
+    8, 9,
+    # 021U
+    10, 10,
+    # 021C
+    14, 15,
+    # 030T
+    17, 18, 18,
+    # 030C
     20, 21, 19
   )
 )
 
-# 3. Create the tidygraph object
-triad_graph <- tbl_graph(nodes = nodes, edges = edges, directed = TRUE)
+# 3. Create the directed igraph object
+g <- graph_from_data_frame(edges, directed = TRUE, vertices = nodes)
 
-# 4. Plot the 7 configurations using ggraph
-ggraph(triad_graph, layout = "stress") +
-  # Draw the directed edges with arrows
-  geom_edge_link(
-    arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-    end_cap = circle(6, "mm"),
-    edge_width = 1,
-    color = "darkgray"
-  ) +
-  # Draw the nodes
-  geom_node_point(size = 10, color = "steelblue") +
-  # Add labels to the nodes (A, B, C)
-  geom_node_text(aes(label = label), color = "white", fontface = "bold") +
-  # Create a separate panel for each of the 7 configurations
-  facet_nodes(~configuration, scales = "free", ncol = 4) +
-  # Clean up the theme for presentation
-  theme_graph(base_family = "sans") +
+# 4. Plot using ggraph with faceting
+ggraph(g, layout = 'manual', x = x, y = y) +
+  # Draw directed straight edges (no mutual ties, so no overlaps)
+  geom_edge_link(arrow = arrow(length = unit(5, 'mm'), type = "closed"),
+                 start_cap = circle(8, 'mm'),
+                 end_cap = circle(8, 'mm'),
+                 width = 1.2, color = "steelblue") +
+  
+  # Draw nodes
+  geom_node_point(size = 16, color = "darkorange") +
+  
+  # Add node labels (A, B, C)
+  geom_node_text(aes(label = name), color = "white", fontface = "bold", size = 8) +
+  
+  # Facet by triad name to create 7 separate panels
+  facet_nodes(~ triad, scales = "free", ncol = 4) +
+
+  theme_graph(base_family = "sans") + ylim(-0.5, 2) + xlim(-1.5, 1.5) +
   theme(
-    strip.text = element_text(size = 12, face = "bold", margin = margin(b = 10)),
-    plot.title = element_text(size = 16, face = "bold", hjust = 0.5)
-  ) +
-  labs(title = "The Seven Expected Triads in a Dominance Network")
+    strip.text = element_text(size = 12, face = "bold", color = "black"),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 12, color = "gray30")
+  )
 ```
 
 ## Models of Hierarchy Formation
