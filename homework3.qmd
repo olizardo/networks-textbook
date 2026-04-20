@@ -20,25 +20,25 @@ Consider the graph shown in @fig-grex1:
 #| fig-cap-location: margin   
 #| fig-height: 12
 #| fig-width: 12
-
-    set.seed(34789)
+    set.seed(25978457)
     w <- 0
     while (w == 0) {
-      d <- sample(3:12, 9, replace = TRUE)
+      d <- sample(2:10, 12, replace = TRUE)
       w <- as.numeric(is_graphical(d))
       }    
     gr <- play_degree(d, method = "simple")
     gr <- mutate(gr, name = LETTERS[1:length(d)])
-    gr1 <- simplify(as.igraph(gr))
-    p <- ggraph(gr1, layout = 'auto') 
+    gr <- simplify(as.igraph(gr))
+    gr <- gr - edge("J|K")
+    p <- ggraph(gr, layout = 'auto') 
     p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
     p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
     p <- p + theme_graph() 
     p
 ```
 
-1. Write down *all* the **paths** of length four ($l = 4$) connecting node *E* and node *C*:
+1. Write down *all* the **paths** of length four ($l = 4$) connecting node *B* and node *E*:
 <br>
 <br>
 <br>
@@ -49,7 +49,7 @@ Consider the graph shown in @fig-grex1:
 <br>
 <br>
 
-1. Write down *all* the **paths** of length two ($l = 2$) featuring node *F* as the **inner node**:
+1. Write down *all* the **paths** of length two ($l = 2$) featuring node *D* as the **inner node**:
 <br>
 <br>
 <br>
@@ -72,7 +72,7 @@ Consider the graph shown in @fig-grex1:
 <br>
 
 
-1. Write down *all* the **cycles** of length *four* that start and end with node *G*:
+1. Write down *all* the **cycles** of length *three* that start and end with node *H*:
 <br>
 <br>
 <br>
@@ -94,13 +94,22 @@ Consider the graph shown in @fig-grex2:
 #| fig-cap-location: margin   
 #| fig-height: 12
 #| fig-width: 16
-
-    set.seed(456324)
-    fr <- sample(toupper(letters[3:12]), 24, replace = TRUE)
-    to <- sample(toupper(letters[2:9]), 24, replace = TRUE)
-    el <- matrix(c(fr, to), nc = 2, byrow = TRUE)
-    gr <- as_tbl_graph(simplify(graph_from_edgelist(el)))
-    gr2 <- as.igraph(gr)
+    # Function to sample a weakly connected directed graph
+    sample_weakly_directed <- function(n, m) {
+    set.seed(4538503)
+    repeat {
+        g <- sample_gnm(n, m, directed = TRUE)
+        if (is_connected(g, mode = "weak")) {
+            return(g)
+            }
+        }
+    }
+    # Example: 10 nodes and 12 edgesn
+    n <- 10
+    m <- 22
+    gr2 <- sample_weakly_directed(n, m)
+    V(gr2)$name <- LETTERS[1:n]
+    #ifelse(is.finite(distances(gr2, mode = "out")), 1, 0)
     p <- ggraph(gr2, layout = 'auto') 
     p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
                             arrow = arrow(length = unit(7, 'mm')),
@@ -112,7 +121,7 @@ Consider the graph shown in @fig-grex2:
     p
 ```
 
-1. Write down *all* the **directed path(s)** of length five ($l = 5$) going *from* node *K* *to* node *C*:
+1. Write down *all* the **directed path(s)** of *any* length going *from* node *F* *to* node *A*:
 <br>
 <br>
 <br>
@@ -121,68 +130,29 @@ Consider the graph shown in @fig-grex2:
 <br>
 
 
-1. What is the length of the **shortest directed path(s)** going *from* node *L* *to* node *I*?
+1. What is the length of the **shortest directed path(s)** going *from* node *I* *to* node *H*?
 <br>
 <br>
 <br>
 
-1. If *E* wanted to send a message to *D* in the most efficient way, how many intermediaries would *E* have to use?
+1. If *B* wanted to send a message to *C* in the most efficient way, how many intermediaries would *B* have to use?
 <br>
 <br>
 <br>
 
-1. Write down *all* the directed **cycles** of length four ($l = 4$) that start and end with node *D*:
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
 
 ## Matrices
 
 - In the matrix below, write down the cell entries **geodesic distance matrix** corresponding to the graph shown in @fig-grex1:
 
 ```{r}
-    n <- vcount(gr1)
+    n <- vcount(gr)
     m <- n - 1
     a <- matrix(" ", nrow = n, ncol = n)
-    rownames(a) <- V(gr1)$name
-    colnames(a) <- V(gr1)$name
+    rownames(a) <- V(gr)$name
+    colnames(a) <- V(gr)$name
     diag(a) <- "----"
     kbl(a, format = "html", align = "c")  %>% 
-         column_spec(1, bold = TRUE) %>% 
-         column_spec (2:n, border_left = T, border_right = T) %>%
-         row_spec(1:m, extra_css = "border-bottom: 1px solid") %>%
-         kable_styling()
-```
-
-
-- In the matrix below, write down the cell entries for the **reachability matrix** corresponding to the graph shown in @fig-grex2:
-
-```{r}
-    n <- vcount(gr2)
-    m <- n - 1
-    b <- matrix(" ", nrow = n, ncol = n)
-    rownames(b) <- V(gr2)$name
-    colnames(b) <- V(gr2)$name
-    diag(b) <- "----"
-    kbl(b, format = "html", align = "c")  %>% 
-         column_spec(1, bold = TRUE) %>% 
-         column_spec (2:n, border_left = T, border_right = T) %>%
-         row_spec(1:m, extra_css = "border-bottom: 1px solid") %>%
-         kable_styling()
-```
-
-- In the matrix below, write down the cell entries **geodesic distance matrix** corresponding to the graph shown in @fig-grex2:
-
-```{r}
-    diag(b) <- "----"
-    kbl(b, format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (2:n, border_left = T, border_right = T) %>%
          row_spec(1:m, extra_css = "border-bottom: 1px solid") %>%
@@ -194,4 +164,37 @@ Consider the graph shown in @fig-grex2:
 <br>
 <br>
 
+
+- What is the **eccentricity** of each node graph shown in @fig-grex1?
+```{r}
+    n <- vcount(gr)
+    a <- matrix(" ", nrow = 1, ncol = n)
+    colnames(a) <- V(gr)$name
+    kbl(a, format = "html", align = "c")  |> 
+         column_spec(1, bold = TRUE) |> 
+         column_spec (1:n, border_left = T, border_right = T) |> 
+         row_spec(1, extra_css = "border-bottom: 1px solid; height: 50px") |> 
+         kable_styling()
+```
+
+- In the matrix below, write down the cell entries for the **reachability matrix** corresponding to the graph shown in @fig-grex2:
+
+```{r}
+    n <- vcount(gr2)
+    m <- n - 1
+    b <- matrix(" ", nrow = n, ncol = n)
+    rownames(b) <- sort(V(gr2)$name)
+    colnames(b) <- sort(V(gr2)$name)
+    diag(b) <- "----"
+    kbl(b, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (2:n, border_left = T, border_right = T) %>%
+         row_spec(1:m, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+```
+
+- What flavor of connectivity is the graph in @fig-grex2?
+<br>
+<br>
+<br>
 
