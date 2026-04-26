@@ -1,5 +1,5 @@
 ---
-title: "Homework IV: Affiliation Networks"
+title: "Homework IV: Matrix Operations"
 ---
 
 ```{r setup, include=FALSE}
@@ -10,174 +10,208 @@ title: "Homework IV: Affiliation Networks"
     require(kableExtra)
 ```
 
+Consider the graphs shown in @fig-grex1:
+
 ```{r}
 #| label: fig-grex1
-#| fig-cap: "A bipartite graph."
-#| fig-cap-location: margin   
-#| fig-height: 12
-#| fig-width: 12
-    set.seed(1234)
-    a <- sample(6:9, 1)
-    b <- sample(12:16, 1) 
-    gr <- sample_bipartite(n1 = a, n2 = b, type = "gnp", p = runif(1, 0.28, 0.30))
-    V(gr)$type <- bipartite_mapping(gr)$type
-    V(gr)$color <- ifelse(V(gr)$type, "red", "tan2")
-    V(gr)$shape <- ifelse(V(gr)$type, "circle", "square")
-    V(gr)$size <- ifelse(V(gr)$type, 18, 16)
-    V(gr)$name <- c(LETTERS[1:a], paste("E", 1:b, sep = ""))
-    E(gr)$color <- "steelblue"
-    p <- ggraph(gr, layout = 'sugiyama') 
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.1) 
-    p <- p + geom_node_point(size = V(gr)$size, color = V(gr)$color, shape = V(gr)$shape)
-    p <- p + geom_node_text(aes(label = V(gr)$name), color = "white", 
-                            size = c(rep(9, a), rep(7, b)), 
-                            fontface = "bold")
+#| fig-cap: "Two graphs representing two different set of network ties between the same people."
+#| fig-subcap:
+#|   - "Studying with network."
+#|   - "Going out with network."
+#| layout-ncol: 2 
+#| fig-height: 10
+#| fig-width: 10
+    set.seed(123)
+    n <- 8
+    m <- 13
+    g <- play_gnm(n = n, m = m, directed = FALSE, loops = FALSE)
+    g <- mutate(g, name = LETTERS[1:n])
+    p <- ggraph(g, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white", face = "bold")
+    p <- p + theme_graph() 
+    p
+    n <- 8
+    m <- 12
+    g <- play_gnm(n = n, m = m, directed = FALSE, loops = FALSE)
+    g <- mutate(g, name = LETTERS[1:n])
+    p <- ggraph(g, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white", face = "bold")
     p <- p + theme_graph() 
     p
 ```
 
-@fig-grex1 shows a **bipartite graph** corresponding to the attendance of different *people* (the tan square nodes) at different *events* (the red circle nodes).
+1. Write down the **adjacency matrix** corresponding to each network:
 
-## From Bipartite Graph to Affiliation Matrix
 
-- Write down the **affiliation matrix** corresponding to the **bipartite graph** shown in @fig-grex1. 
+
 
 ```{r}
-    A <- matrix(" ", nrow = a, ncol = b)
-    rownames(A) <- LETTERS[1:a]
-    colnames(A) <- paste("E", 1:b, sep = "")
-    kbl(A, format = "html", padding = 1, align = "c") %>% 
-        kable_classic(lightable_options = "striped") %>% 
-        row_spec(1:a, color = "black", extra_css = "border-bottom: 1px solid;") %>% 
-        column_spec(1:b+1, color = "black", border_right = TRUE, border_left = TRUE) 
+#| label: tbl-adj
+#| tbl-cap: "Two graphs representing two different set of network ties between the same people."
+#| tbl-subcap:
+#|   - "Studying with network."
+#|   - "Going out with network."
+#| layout-ncol: 2 
+
+    a <- matrix(" ", nrow = n, ncol = n)
+    rownames(a) <- LETTERS[1:n]
+    colnames(a) <- LETTERS[1:n]
+    diag(a) <- "-"
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
 ```
 
-## Bipartite Node Neighborhoods
-
-1. Write down the neighborhood of node *G*
-<br>
-<br>
-<br>
-
-2. Write down the neighborhood of event *E11*
-<br>
-<br>
-<br>
-
-3. What is the intersection of the neighborhoods nodes *A* and *E*?
-<br>
-<br>
-<br>
-
-4. What is the intersection of the neighborhoods of events *E11* and *E6*?
-<br>
-<br>
-<br>
-
-3. What is the union of the neighborhoods nodes *I* and *C*?
-<br>
-<br>
-<br>
-
-4. What is the union of the neighborhoods of events *E9* and *E5*?
-<br>
-<br>
-<br>
-
-## Bipartite Degrees
-
-1. Write down the person degree sequence
-<br>
-<br>
-<br>
-<br>
-<br>
-
-2. Write down the event degree sequence
-<br>
-<br>
-<br>
-<br>
-<br>
-
-3. What is the bipartite graph's sum of degrees?
-<br>
-<br>
-<br>
-<br>
-<br>
-
-## Bipartite Graph Metrics
-
-1. Which person(s) attend(s) the most events?
-<br>
-<br>
-<br>
-
-1. Which person(s) attend(s) the least events?
-<br>
-<br>
-<br>
-
-1. What is the average number of events attended by people?
-<br>
-<br>
-<br>
-
-1. Which is(are) the largest event(s)?
-<br>
-<br>
-<br>
-
-1. Which is(are) the smallest event(s)?
-<br>
-<br>
-<br>
-
-1. What is the average event size?
-<br>
-<br>
-<br>
 
 
-## Matrix Transpose
 
-- Write down the **transpose** of the **affiliation matrix** corresponding to the bipartite graph.
+1. Write down the **matrix sum** and the **element-wise product** of the **adjacency matrices** you filled out above:
+
+
+
 
 ```{r}
-    A <- matrix(" ", nrow = b, ncol = a)
-    rownames(A) <- paste("E", 1:b, sep = "")
-    colnames(A) <- LETTERS[1:a] 
-    kbl(A, format = "html", padding = 1, align = "c") %>% 
-        kable_classic(lightable_options = "striped") %>% 
-        row_spec(1:b, color = "black", extra_css = "border-bottom: 1px solid;") %>% 
-        column_spec(1:a+1, color = "black", border_right = TRUE, border_left = TRUE)
+#| label: tbl-sumprod
+#| tbl-cap: "The sum and element-wise product of the adjacency matrices representing two different set of network ties between the same people."
+#| tbl-subcap:
+#|   - "Matrix Sum."
+#|   - "Element-Wise Product."
+#| layout-ncol: 2 
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
 ```
 
-## The Duality of Persons and Groups
 
-Using the information in the previous tables and what you know about **matrix multiplication**:
 
-- Write down the entries corresponding to the **co-membership matrix** for the different people.
+
+1. Write the down the **dyads** that are connected via **multiplex ties** (dyads sharing more than one relationship at a time):
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+1. Write the down the **dyads** that are connected via **uniplex ties** (dyads sharing only one relationship at a time):
+<br>
+<br>
+<br>
+<br>
+
+
+Consider the graphs shown in @fig-dir:
+
 
 ```{r}
-    c.m <- matrix(" ", nrow = a, ncol = a)
-    rownames(c.m) <- LETTERS[1:a]
-    colnames(c.m) <- LETTERS[1:a]
-    kbl(c.m, format = "html", padding = 1, align = "c") %>% 
-        kable_classic(lightable_options = "striped") %>% 
-        row_spec(1:a, color = "black", extra_css = "border-bottom: 1px solid;") %>% 
-        column_spec(1:a+1, color = "black", border_right = TRUE, border_left = TRUE)
+#| label: fig-dir
+#| fig-cap: "A directed graph."
+#| fig-cap-location: margin   
+#| fig-height: 12
+#| fig-width: 12
+    n <- 7
+    gr <- sample_gnp(n = n, p = 0.45, directed = TRUE, loops = FALSE)
+    V(gr)$name <- LETTERS[1:n]
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                            arrow = arrow(length = unit(5, 'mm')),
+                            end_cap = circle(10, 'mm'), 
+                            sep = unit(8, 'mm'))    
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+    p <- p + theme_graph()
+    p
 ```
 
-- Write down the entries corresponding to the **group overlap matrix** for the different events.
+1. Fill out the four matrices below:
 
 ```{r}
-    g.o <- matrix(" ", nrow = b, ncol = b)
-    rownames(g.o) <- paste("E", 1:b, sep = "")
-    colnames(g.o) <- paste("E", 1:b, sep = "")
-    kbl(g.o, format = "html", padding = 1, align = "c") %>% 
-        kable_classic(lightable_options = "striped") %>% 
-        row_spec(1:b, color = "black", extra_css = "border-bottom: 1px solid;") %>% 
-        column_spec(1:b+1, color = "black", border_right = TRUE, border_left = TRUE)
+#| label: tbl-dirmats
+#| tbl-cap: "Some Matrices Derived From a Directed Graph."
+#| tbl-subcap:
+#|   - "Adjacency Matrix (A)."
+#|   - "Adjacency Matrix Transpose (A')."
+#|   - "One Minus Transpose (1 - A')"
+#|   - "Mutual Dyads Matrix (A * A')."
+#|   - "Asymmetric Dyads Matrix (A * 1-A')"
+#| layout-ncol: 2 
+
+    a <- matrix(" ", nrow = n, ncol = n)
+    rownames(a) <- LETTERS[1:n]
+    colnames(a) <- LETTERS[1:n]
+    diag(a) <- "-"
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
 ```
+
+
+1. How many **mutual dyads** in the graph?
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+1. How many **asymmetric dyads** in the graph?
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+1. What is the **graph reciprocity**?
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
