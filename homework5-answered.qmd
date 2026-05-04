@@ -1,159 +1,182 @@
 ---
-title: "Homework V: Centrality"
+title: "Homework V: Affiliation Networks"
 ---
 
 ```{r setup, include=FALSE}
     knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
     require(ggraph)
-    require(kableExtra)
     require(tidygraph)
     require(igraph)
+    require(kableExtra)
 ```
 
 ```{r}
 #| label: fig-grex1
-#| fig-cap: "An undirected graph."
+#| fig-cap: "A bipartite graph."
 #| fig-cap-location: margin   
 #| fig-height: 12
 #| fig-width: 12
-    set.seed(123)
-    w <- 0
-    n <- 12
-    while (w == 0) {
-      d <- sample(1:n, n, replace = TRUE)
-      w <- as.numeric(is_graphical(d, allowed.edge.types = "simple"))
-      }    
-    gr <- sample_degseq(d, method = "configuration")
-    gr <- simplify(gr)
-    V(gr)$name <- LETTERS[1:length(d)]
-    p <- ggraph(gr, layout = 'auto') 
-    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    set.seed(1234)
+    a <- sample(6:9, 1)
+    b <- sample(12:16, 1) 
+    gr <- sample_bipartite(n1 = a, n2 = b, type = "gnp", p = runif(1, 0.28, 0.30))
+    V(gr)$type <- bipartite_mapping(gr)$type
+    V(gr)$color <- ifelse(V(gr)$type, "red", "tan2")
+    V(gr)$shape <- ifelse(V(gr)$type, "circle", "square")
+    V(gr)$size <- ifelse(V(gr)$type, 18, 16)
+    V(gr)$name <- c(LETTERS[1:a], paste("E", 1:b, sep = ""))
+    E(gr)$color <- "steelblue"
+    p <- ggraph(gr, layout = 'sugiyama') 
+    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.1) 
+    p <- p + geom_node_point(size = V(gr)$size, color = V(gr)$color, shape = V(gr)$shape)
+    p <- p + geom_node_text(aes(label = V(gr)$name), color = "white", 
+                            size = c(rep(9, a), rep(7, b)), 
+                            fontface = "bold")
     p <- p + theme_graph() 
     p
 ```
 
-## Degree Centrality in Undirected Graphs
+@fig-grex1 shows a **bipartite graph** corresponding to the attendance of different *people* (the tan square nodes) at different *events* (the red circle nodes).
 
-Rank all the nodes in the graph shown in @fig-grex1 by their **degree centrality**.
+## From Bipartite Graph to Affiliation Matrix
 
-```{r}
-    a <- as.matrix(sort(degree(gr), decreasing = TRUE))
-    colnames(a) <- c("Degree")
-    kable(a, format = "html", align = "c", full_width = F)  %>% 
-         column_spec(1, bold = TRUE) %>% 
-         column_spec (1:2, border_left = T, border_right = T) %>%
-         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
-         kable_styling()
-
-```
+- Write down the **affiliation matrix** corresponding to the **bipartite graph** shown in @fig-grex1. 
 
 ```{r}
-#| label: fig-grex2
-#| fig-cap: "A directed graph."
-#| fig-cap-location: margin   
-#| fig-height: 10
-#| fig-width: 12
-    set.seed(123)
-    w <- 0
-    n <- 12
-    a <- n - 4
-    b <- n - 6
-    while (w == 0) {
-      d1 <- sample(1:a, n, replace = TRUE)
-      d2 <- sample(1:b, n, replace = TRUE)
-      w <- as.numeric(is_graphical(d1, d2, allowed.edge.types = "simple"))
-    }    
-    gr2 <- sample_degseq(d1, d2, method = "configuration")
-    gr2 <- simplify(gr2)
-    V(gr2)$name <- LETTERS[1:length(d1)]
-    gr2 <- gr2 + edge(2,6)
-    gr2 <- gr2 - edge("K|F")
-    gr2 <- gr2 - edge("L|B")
-    p <- ggraph(gr2, layout = 'kk') 
-    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
-                            arrow = arrow(length = unit(7, 'mm')),
-                            end_cap = circle(10, 'mm'), 
-                            sep = unit(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
-    p <- p + theme_graph() 
-    p
+    A <- as.matrix(as_biadjacency_matrix(gr))
+    kbl(A, format = "html", padding = 1, align = "c") %>% 
+        kable_classic(lightable_options = "striped") %>% 
+        row_spec(1:a, color = "black", extra_css = "border-bottom: 1px solid;") %>% 
+        column_spec(1:b+1, color = "black", border_right = TRUE, border_left = TRUE) 
 ```
 
-Rank all the nodes in the graph shown in @fig-grex2 by their **outdegree centrality** and **indegree centrality**.
+## Bipartite Node Neighborhoods
+
+1. Write down the neighborhood of node *G*
+<br>
+`r V(gr)$name[neighbors(gr, "G")]`
+<br>
+
+1. Write down the neighborhood of event *E11*
+<br>
+`r V(gr)$name[neighbors(gr, "E11")]`
+<br>
+
+1. What is the intersection of the neighborhoods nodes *A* and *E*?
+<br>
+`r intersect(V(gr)$name[neighbors(gr, "A")], V(gr)$name[neighbors(gr, "E")])`
+<br>
+
+1. What is the intersection of the neighborhoods of events *E11* and *E6*?
+<br>
+`r intersect(V(gr)$name[neighbors(gr, "E11")], V(gr)$name[neighbors(gr, "E6")])`
+<br>
+
+1. What is the union of the neighborhoods nodes *I* and *C*?
+<br>
+`r union(V(gr)$name[neighbors(gr, "I")], V(gr)$name[neighbors(gr, "C")])`
+<br>
+
+1. What is the union of the neighborhoods of events *E9* and *E5*?
+<br>
+`r union(V(gr)$name[neighbors(gr, "E9")], V(gr)$name[neighbors(gr, "E5")])`
+<br>
+
+## Bipartite Degrees
+
+1. Write down the person degree sequence
+<br>
+<br>
+`r kable(t(sort(degree(gr)[1:a], decreasing = TRUE)))`
+<br>
+<br>
+
+1. Write down the event degree sequence
+<br>
+<br>
+```{r} 
+    c <- a + 1
+    d <- a + b
+    kable(t(sort(degree(gr)[c:d], decreasing = TRUE)))
+```
+<br>
+<br>
+
+1. What is the bipartite graph's sum of degrees?
+<br>
+<br>
+`r sum(degree(gr))/2`
+<br>
+<br>
+
+
+
+
+
+## Bipartite Graph Metrics
+
+1. Which person(s) attend(s) the most events?
+<br>
+`r names(which(rowSums(A) == max(rowSums(A))))`
+<br>
+
+1. Which person(s) attend(s) the least events?
+<br>
+`r names(which(rowSums(A) == min(rowSums(A))))`
+<br>
+
+1. What is the average number of events attended by people?
+<br>
+`r round(mean(rowSums(A)), 3)`
+<br>
+
+1. Which is(are) the largest event(s)?
+<br>
+`r names(which(colSums(A) == max(colSums(A))))`
+<br>
+
+1. Which is(are) the smallest event(s)?
+<br>
+`r names(which(colSums(A) == min(colSums(A))))`
+<br>
+
+1. What is the average event size?
+<br>
+`r round(mean(colSums(A)), 3)`
+<br>
+
+- Write down the **transpose** of the **affiliation matrix** corresponding to the bipartite graph.
 
 ```{r}
-    a <- as.matrix(sort(degree(gr2, mode = "out"), decreasing = TRUE))
-    a <- cbind(rownames(a), a)
-    b <- as.matrix(sort(degree(gr2, mode = "in"), decreasing = TRUE))
-    b <- cbind(rownames(b), b)
-    c <- cbind(a, b)
-    colnames(c) <- c("Node", "Outdegree", "Node", "Indegree")
-    kable(c, format = "html", align = "c", full_width = F, row.names = F)  %>% 
-         column_spec(c(1, 3), bold = TRUE) %>% 
-         column_spec (1:4, border_left = T, border_right = T) %>%
-         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
-         kable_styling()
-
+    At <- t(as.matrix(as_biadjacency_matrix(gr)))
+    kbl(At, format = "html", padding = 1, align = "c") %>% 
+        kable_classic(lightable_options = "striped") %>% 
+        row_spec(1:b, color = "black", extra_css = "border-bottom: 1px solid;") %>% 
+        column_spec(1:a+1, color = "black", border_right = TRUE, border_left = TRUE) 
 ```
 
-## Closeness Centrality in Directed Graphs
-- In the matrix below, write down the cell entries **geodesic distance matrix** corresponding to the graph shown in @fig-grex2:
+Using the information in the previous tables and what you know about **matrix multiplication**:
+
+- Write down the entries corresponding to the **co-membership matrix** for the different people.
 
 ```{r}
-     b <- distances(gr2)
-     rownames(b) <- LETTERS[1:length(d1)]
-     colnames(b) <- LETTERS[1:length(d1)]
-     kbl(b, format = "html", align = "c")  %>% 
-         column_spec(1, bold = TRUE) %>% 
-         column_spec (1:n+1, border_left = T, border_right = T) %>%
-         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
-         kable_styling()
+    c.m <- A %*% t(A)
+    rownames(c.m) <- LETTERS[1:a]
+    colnames(c.m) <- LETTERS[1:a]
+    kbl(c.m, format = "html", padding = 1, align = "c") %>% 
+        kable_classic(lightable_options = "striped") %>% 
+        row_spec(1:a, color = "black", extra_css = "border-bottom: 1px solid;") %>% 
+        column_spec(1:a+1, color = "black", border_right = TRUE, border_left = TRUE)
 ```
 
-Using the information in the above matrix, rank all the nodes in the graph shown in @fig-grex2 by their **closeness centrality**.
+- Write down the entries corresponding to the **group overlap matrix** for the different events.
 
 ```{r}
-    a <- as.matrix(sort(round(closeness(gr2, normalized = TRUE), 4), decreasing = TRUE))
-    colnames(a) <- c("Closeness")
-    kable(a, format = "html", align = "c", full_width = F)  %>% 
-         column_spec(1, bold = TRUE) %>% 
-         column_spec (1:2, border_left = T, border_right = T) %>%
-         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
-         kable_styling()
-
+    g.o <- t(A) %*% A 
+    rownames(g.o) <- paste("E", 1:b, sep = "")
+    colnames(g.o) <- paste("E", 1:b, sep = "")
+    kbl(g.o, format = "html", padding = 1, align = "c") %>% 
+        kable_classic(lightable_options = "striped") %>% 
+        row_spec(1:b, color = "black", extra_css = "border-bottom: 1px solid;") %>% 
+        column_spec(1:b+1, color = "black", border_right = TRUE, border_left = TRUE)
 ```
-
-## Relative Betweenness Centrality
-
-Go back to @fig-grex1. 
-
-What is the **relative betweenness centrality** of node *I* with respect to nodes *J* and *C*? (show your work)
-```{r}
-    r <- all_shortest_paths(gr, from = "J", to = "C")$res
-    a <- matrix(names(unlist(r)), byrow = TRUE, nrow = length(r))
-    kable(a, format = "html", align = "c", full_width = F)  %>% 
-         kable_styling()
-```
-    RBC(I) = `r round(sum(as.numeric(apply(a, MARGIN = 1, FUN = function(x) {"I" %in% x})))/nrow(a), 2)`
-
-
-Go back to @fig-grex2. 
-
-What is the **relative betweenness centrality** of node *H* with respect to nodes *I* and *E*? (show your work)
-```{r}
-    r <- all_shortest_paths(gr2, from = "I", to = "E")$res
-    a <- matrix(names(unlist(r)), byrow = TRUE, nrow = length(r))
-    kable(a, format = "html", align = "c", full_width = F)  %>% 
-         kable_styling()
-```
-    RBC(H) = `r round(sum(as.numeric(apply(a, MARGIN = 1, FUN = function(x) {"H" %in% x})))/nrow(a), 2)`
-
-
-## Degree Centralization
-Compute the **degree centralization** of the graph shown in @fig-grex1.
-
-Centralization = `r round(centr_degree(gr)$centralization, 3)`
-

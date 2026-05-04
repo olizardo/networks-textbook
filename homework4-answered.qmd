@@ -1,0 +1,217 @@
+---
+title: "Homework IV: Matrix Operations"
+---
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+Consider the graphs shown in @fig-grex1:
+
+```{r}
+#| label: fig-grex1
+#| fig-cap: "Two graphs representing two different set of network ties between the same people."
+#| fig-subcap:
+#|   - "Studying with network."
+#|   - "Going out with network."
+#| layout-ncol: 2 
+#| fig-height: 10
+#| fig-width: 10
+    set.seed(123)
+    n <- 8
+    m <- 13
+    g <- play_gnm(n = n, m = m, directed = FALSE, loops = FALSE)
+    g <- mutate(g, name = LETTERS[1:n])
+    p <- ggraph(g, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white", face = "bold")
+    p <- p + theme_graph() 
+    p
+    n <- 8
+    m <- 12
+    g <- play_gnm(n = n, m = m, directed = FALSE, loops = FALSE)
+    g <- mutate(g, name = LETTERS[1:n])
+    p <- ggraph(g, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white", face = "bold")
+    p <- p + theme_graph() 
+    p
+```
+
+1. Write down the **adjacency matrix** corresponding to each network:
+
+
+
+
+```{r}
+#| label: tbl-adj
+#| tbl-cap: "Two graphs representing two different set of network ties between the same people."
+#| tbl-subcap:
+#|   - "Studying with network."
+#|   - "Going out with network."
+#| layout-ncol: 2 
+
+    a <- matrix(" ", nrow = n, ncol = n)
+    rownames(a) <- LETTERS[1:n]
+    colnames(a) <- LETTERS[1:n]
+    diag(a) <- "-"
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+```
+
+
+
+
+1. Write down the **matrix sum** and the **element-wise product** of the **adjacency matrices** you filled out above:
+
+
+
+
+```{r}
+#| label: tbl-sumprod
+#| tbl-cap: "The sum and element-wise product of the adjacency matrices representing two different set of network ties between the same people."
+#| tbl-subcap:
+#|   - "Matrix Sum."
+#|   - "Element-Wise Product."
+#| layout-ncol: 2 
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+```
+
+
+
+
+1. Write the down the **dyads** that are connected via **multiplex ties** (dyads sharing more than one relationship at a time):
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+1. Write the down the **dyads** that are connected via **uniplex ties** (dyads sharing only one relationship at a time):
+<br>
+<br>
+<br>
+<br>
+
+
+Consider the graphs shown in @fig-dir:
+
+
+```{r}
+#| label: fig-dir
+#| fig-cap: "A directed graph."
+#| fig-cap-location: margin   
+#| fig-height: 12
+#| fig-width: 12
+    n <- 7
+    gr <- sample_gnp(n = n, p = 0.45, directed = TRUE, loops = FALSE)
+    V(gr)$name <- LETTERS[1:n]
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                            arrow = arrow(length = unit(5, 'mm')),
+                            end_cap = circle(10, 'mm'), 
+                            sep = unit(8, 'mm'))    
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+    p <- p + theme_graph()
+    p
+```
+
+1. Fill out the four matrices below:
+
+```{r}
+#| label: tbl-dirmats
+#| tbl-cap: "Some Matrices Derived From a Directed Graph."
+#| tbl-subcap:
+#|   - "Adjacency Matrix (A)."
+#|   - "Adjacency Matrix Transpose (A')."
+#|   - "One Minus Transpose (1 - A')"
+#|   - "Mutual Dyads Matrix (A * A')."
+#|   - "Asymmetric Dyads Matrix (A * 1-A')"
+#| layout-ncol: 2 
+
+    a <- matrix(" ", nrow = n, ncol = n)
+    rownames(a) <- LETTERS[1:n]
+    colnames(a) <- LETTERS[1:n]
+    diag(a) <- "-"
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+```
+
+
+1. How many **mutual dyads** in the graph?
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+1. How many **asymmetric dyads** in the graph?
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+1. What is the **graph reciprocity**?
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>

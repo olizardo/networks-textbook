@@ -44,12 +44,18 @@ Thus, in a tree graph, the sum of degrees will always equal twice the number of 
 
 Tree graphs have four other unique properties. 
 
-1. First, if $G$ is a tree graph, then every node $V$ in $G$ is linked to every other node via a *single* path.
-1. Second, the one path connecting each pair of nodes is *unique*, that is, a sequence of nodes and edges that is distinctive for that node pair and does not repeat for any other pair. 
-1. Third, removing even a single edge of a tree graph disconnects the graph. Every edge of a tree graph thus counts as a **bridge** as discussed in @sec-indirect. 
-1. Fourth, following (3), if we disconnect a tree graph by removing an edge, the resulting **connected components** are also trees. 
+1. If $G$ is a tree graph, then every node $V$ in $G$ is linked to every other node via a *single* path.
+1. The one path connecting each pair of nodes is *unique*, that is, a sequence of nodes and edges that is distinctive for that node pair and does not repeat for any other pair. 
+1. Removing even a single edge of a tree graph disconnects the graph. Every edge of a tree graph thus counts as a **bridge** as discussed in @sec-indirect. 
+1. Following (3), if we disconnect a tree graph by removing an edge, the resulting **connected components** are also trees. 
 
-A disconnected graph whose components are trees is called (you guessed it) a **forest**. @fig-forest is a forest. 
+We can check properties (1) and (2) by looking at @fig-tree-2. There's only one path connected $A$ and $D$ and that's $\{AB, BD\}$. In this same way, there's only one path connecting $A$ and $E$ and that's $\{AB, BE\}$. Both of those paths are unique.
+
+We can check property (3) by imagining removing a single edge from any of the graphs shown in @fig-tree. You can verify that indeed this would disconnect those graphs. This means that *every* edge in a tree graph is a **bridge** as defined in @sec-graphconnectivity. 
+
+Another way of saying the last thing is that trees are **minimally connected** graphs. That is they are connected graphs that are connected using the *smallest* possible number of edges that we can use to connect a graph with that number of nodes.  
+
+A disconnected graph whose components are trees is called (you guessed it) a **forest**. @fig-forest is a forest. So a forest is a disconnected graph without cycles inside any of its components. 
 
 ```{r}
 #| label: fig-trees
@@ -65,7 +71,7 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
 #|   - ""
 
   gr <- create_tree(n = 5, children = 1) 
-  gr <- mutate(gr, name = toupper(letters[1:5])) 
+  gr <- mutate(gr, name = LETTERS[1:5])
   l <- ggraph(gr, layout = 'tree')
   l <- as.matrix(l$data[, 1:2])
   l[,"x"] <- c(0, 1, 2, 3, 4)
@@ -77,7 +83,7 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
   p1 <- p + theme_graph() 
   p1
   gr <- create_tree(n = 5, children = 2) 
-  gr <- mutate(gr, name = toupper(letters[1:5])) 
+  gr <- mutate(gr, name = LETTERS[1:5])
   p <- ggraph(gr, layout = 'tree')
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
   p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
@@ -86,7 +92,7 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
   p2
 
   gr <- create_tree(n = 5, children = 4) 
-  gr <- mutate(gr, name = toupper(letters[1:5])) 
+  gr <- mutate(gr, name = LETTERS[1:5])
   p <- ggraph(gr, layout = 'star')
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
   p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
@@ -103,7 +109,7 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
 #| fig-cap-location: margin
   set.seed(357)
   gr <- create_tree(n = 10, children = 2) 
-  gr <- mutate(gr, name = toupper(letters[1:10]))
+  gr <- mutate(gr, name = LETTERS[1:10])
   gr <- gr - edge("A|B")
   p <- ggraph(gr, layout = 'kk')
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
@@ -176,5 +182,89 @@ Because of the shape they form, these tree graphs are sometimes called **caterpi
 
 
 Like other graphs, tree graphs can be directed and undirected. The graphs shown in @fig-trees and @fig-caterpillars are undirected trees. 
+
+## Graph Efficiency
+
+Using some of the properties of tree graphs mentioned above, @krackhardt94 proposes a measure for how economical the connectivity of a given graph is called the **graph efficiency** ($Eff(G)$). 
+
+According to Krackhardt, a graph is efficiently connected if that connectivity is performed using the minimum number of possible edges. Thus, a tree graph is a maximally efficient graph $Eff(G) = 1.0$. The idea is then to compare an observed graph and see how close it comes to being connected in the same way as a tree graph of the same order would. 
+
+Krackhardt proposes the following formula to compute the efficiency of a graph:
+
+$$
+Eff(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]
+$$ {#eq-eff}
+
+Where $m$ is the number of edges and $n$ is the number of nodes. Note that when the graph $G$ is a tree, graph $m = n - 1$. This means that the numerator of @eq-eff turns into: $2(n - 1 -n + 1) = 2 \times 0 = 0$. This means the whole fraction on the right side of @eq-eff is zero and $1 - 0 = 1.0$ which is maximum efficiency. 
+
+As the graph deviates from that by having more edges than a tree, then the fraction on the right side of @eq-eff turns into a number that approaches 1.0 which means that the efficiency becomes smaller when we subtract that number from 1.
+
+
+```{r}
+#| label: fig-eff
+#| fig-width: 8
+#| fig-height: 8
+#| layout-ncol: 2
+#| fig-cap: "Two simple graphs."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - ""
+#|   - ""
+
+  gr1 <- play_gnm(n = 5, m = 7, directed = FALSE, loops = FALSE)
+  gr2 <- play_gnm(n = 7, m = 10, directed = FALSE, loops = FALSE)
+  gr1 <- mutate(gr1, name = LETTERS[1:5])
+  gr2 <- mutate(gr2, name = LETTERS[1:7])
+  p <- ggraph(gr1, layout = 'nicely')
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p1 <- p + theme_graph() 
+  p1
+
+  p <- ggraph(gr2, layout = 'nicely')
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p2 <- p + theme_graph() 
+  p2
+```
+
+Let's consider an example. Of the two graphs shown in @fig-eff which is the one that's most efficiently connected? Well the graph in @fig-eff-1 has five nodes and seven edges, which means that its efficiency is equal to:
+
+$$
+1 - \left[\frac{2(7 - 5 + 1)}{(5-1)(5-2)}\right] = 1 - \left[\frac{2(2 + 1)}{4 \times 3}\right] = 
+$$
+
+$$
+1 - \left[\frac{2 \times 3}{12}\right] = 1 - \left[\frac{6}{12}\right] = 1 - 0.5 = 0.5
+$$
+
+The graph in @fig-eff-2 on the other hand has seven nodes and ten edges, which means that its efficiency is equal to:
+
+$$
+1 - \left[\frac{2(10 - 7 + 1)}{(7-1)(7-2)}\right] = 1 - \left[\frac{2(3 + 1)}{6 \times 5}\right] = 
+$$
+
+$$
+1 - \left[\frac{2 \times 4}{30}\right] = 1 - \left[\frac{8}{30}\right] = 1 - 0.27 = 0.73
+$$
+
+So it looks like the graph in @fig-eff-2 is more efficiently connected than the one @fig-eff-1!
+
+Note also that the **complete graph** of any order is maximally inefficient according to @eq-eff. For instance, we know that the complete graph of order five has to have $5(5-1) \div 2$ edges (the **graph maximum size**), which is equal to $(5 \times 4) \div 2 = 10$. 
+
+So when we substitute these numbers into @eq-eff, we get:
+
+$$
+1 - \left[\frac{2(10 - 5 + 1)}{(5-1)(5-2)}\right] = 1 - \left[\frac{2(5 + 1)}{4 \times 3}\right] = 
+$$
+
+$$
+1 - \left[\frac{2 \times 6}{12}\right] = 1 - \left[\frac{12}{12}\right] = 1 - 1 = 0
+$$
+
+Showing that the **complete graph** is minimally efficient!
+
 
 ## References{.unnumbered}
