@@ -24,9 +24,9 @@ Consider the graphs shown in @fig-grex1:
     set.seed(123)
     n <- 8
     m <- 13
-    g <- play_gnm(n = n, m = m, directed = FALSE, loops = FALSE)
-    g <- mutate(g, name = LETTERS[1:n])
-    p <- ggraph(g, layout = 'auto') 
+    g1 <- play_gnm(n = n, m = m, directed = FALSE, loops = FALSE)
+    g1 <- mutate(g1, name = LETTERS[1:n])
+    p <- ggraph(g1, layout = 'auto') 
     p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
     p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
     p <- p + geom_node_text(aes(label = name), size = 12, color = "white", face = "bold")
@@ -34,9 +34,9 @@ Consider the graphs shown in @fig-grex1:
     p
     n <- 8
     m <- 12
-    g <- play_gnm(n = n, m = m, directed = FALSE, loops = FALSE)
-    g <- mutate(g, name = LETTERS[1:n])
-    p <- ggraph(g, layout = 'auto') 
+    g2 <- play_gnm(n = n, m = m, directed = FALSE, loops = FALSE)
+    g2 <- mutate(g2, name = LETTERS[1:n])
+    p <- ggraph(g2, layout = 'auto') 
     p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
     p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
     p <- p + geom_node_text(aes(label = name), size = 12, color = "white", face = "bold")
@@ -57,17 +57,18 @@ Consider the graphs shown in @fig-grex1:
 #|   - "Going out with network."
 #| layout-ncol: 2 
 
-    a <- matrix(" ", nrow = n, ncol = n)
-    rownames(a) <- LETTERS[1:n]
-    colnames(a) <- LETTERS[1:n]
-    diag(a) <- "-"
-    kbl(a, format = "html", align = "c")  %>% 
+    a <- as.matrix(as_adjacency_matrix(g1))
+    b <- as.matrix(as_adjacency_matrix(g2))
+    a1 <- a
+    b1 <- b
+    diag(a1) <- "-"
+    kbl(a1, format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (1:n+1, border_left = T, border_right = T) %>%
          row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
          kable_styling()
-
-    kbl(a, format = "html", align = "c")  %>% 
+    diag(b1) <- "-"
+    kbl(b1, format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (1:n+1, border_left = T, border_right = T) %>%
          row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
@@ -80,8 +81,6 @@ Consider the graphs shown in @fig-grex1:
 1. Write down the **matrix sum** and the **element-wise product** of the **adjacency matrices** you filled out above:
 
 
-
-
 ```{r}
 #| label: tbl-sumprod
 #| tbl-cap: "The sum and element-wise product of the adjacency matrices representing two different set of network ties between the same people."
@@ -89,13 +88,19 @@ Consider the graphs shown in @fig-grex1:
 #|   - "Matrix Sum."
 #|   - "Element-Wise Product."
 #| layout-ncol: 2 
-    kbl(a, format = "html", align = "c")  %>% 
+    c <- a + b
+    d <- a * b
+    c1 <- c
+    d1 <- d
+    diag(c1) <- "-"
+    diag(d1) <- "-"
+    kbl(c1, format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (1:n+1, border_left = T, border_right = T) %>%
          row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
          kable_styling()
 
-    kbl(a, format = "html", align = "c")  %>% 
+    kbl(d1, format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (1:n+1, border_left = T, border_right = T) %>%
          row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
@@ -103,23 +108,34 @@ Consider the graphs shown in @fig-grex1:
 ```
 
 
-
-
 1. Write the down the **dyads** that are connected via **multiplex ties** (dyads sharing more than one relationship at a time):
-<br>
-<br>
-<br>
-<br>
 
-
+```{r}
+    el <- graph_from_adjacency_matrix(c, weighted = TRUE)
+    el <- data.frame(as_edgelist(el), E(el)$weight)
+    el <- el[el[3] == 2,  ][1:2]
+    m <- apply(el, 1, paste, collapse = "")
+    sorted_strings <- vapply(strsplit(m, ""), function(chars) {
+    paste(sort(chars), collapse = "")
+    }, character(1))
+    result <- m[!duplicated(sorted_strings)]
+    kbl(result, col.names = "", row.names = F)
+```
 
 
 1. Write the down the **dyads** that are connected via **uniplex ties** (dyads sharing only one relationship at a time):
-<br>
-<br>
-<br>
-<br>
 
+```{r}
+    el <- graph_from_adjacency_matrix(c, weighted = TRUE)
+    el <- data.frame(as_edgelist(el), E(el)$weight)
+    el <- el[el[3] == 1,  ][1:2]
+    m <- apply(el, 1, paste, collapse = "")
+    sorted_strings <- vapply(strsplit(m, ""), function(chars) {
+    paste(sort(chars), collapse = "")
+    }, character(1))
+    result <- m[!duplicated(sorted_strings)]
+    kbl(result, col.names = "", row.names = F)
+```
 
 Consider the graphs shown in @fig-dir:
 
@@ -157,34 +173,35 @@ Consider the graphs shown in @fig-dir:
 #|   - "Asymmetric Dyads Matrix (A * 1-A')"
 #| layout-ncol: 2 
 
-    a <- matrix(" ", nrow = n, ncol = n)
-    rownames(a) <- LETTERS[1:n]
-    colnames(a) <- LETTERS[1:n]
-    diag(a) <- "-"
-    kbl(a, format = "html", align = "c")  %>% 
+    a <- as.matrix(as_adjacency_matrix(gr))
+    a1 <- a
+    rownames(a1) <- LETTERS[1:n]
+    colnames(a1) <- LETTERS[1:n]
+    diag(a1) <- "-"
+    kbl(a1, format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (1:n+1, border_left = T, border_right = T) %>%
          row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
          kable_styling()
 
-    kbl(a, format = "html", align = "c")  %>% 
+    kbl(t(a), format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (1:n+1, border_left = T, border_right = T) %>%
          row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
          kable_styling()
-    kbl(a, format = "html", align = "c")  %>% 
-         column_spec(1, bold = TRUE) %>% 
-         column_spec (1:n+1, border_left = T, border_right = T) %>%
-         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
-         kable_styling()
-
-    kbl(a, format = "html", align = "c")  %>% 
+    kbl(1-t(a), format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (1:n+1, border_left = T, border_right = T) %>%
          row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
          kable_styling()
 
-    kbl(a, format = "html", align = "c")  %>% 
+    kbl(a * t(a), format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (1:n+1, border_left = T, border_right = T) %>%
+         row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+
+    kbl(a * (1- t(a)), format = "html", align = "c")  %>% 
          column_spec(1, bold = TRUE) %>% 
          column_spec (1:n+1, border_left = T, border_right = T) %>%
          row_spec(1:n, extra_css = "border-bottom: 1px solid") %>%
@@ -193,25 +210,19 @@ Consider the graphs shown in @fig-dir:
 
 
 1. How many **mutual dyads** in the graph?
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+
+```{r}
+    kbl(sum(a * t(a))/2, col.names = "")
+```
 
 1. How many **asymmetric dyads** in the graph?
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+
+```{r}
+    kbl(sum(a * (1- t(a))), col.names = "")
+```
 
 1. What is the **graph reciprocity**?
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+
+```{r}
+    kbl((sum(a * t(a))/2)/sum(a * (1- t(a))), col.names = "")
+```
