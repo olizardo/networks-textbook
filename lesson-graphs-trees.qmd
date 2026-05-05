@@ -49,57 +49,13 @@ Tree graphs have four other unique properties.
 1. Removing even a single edge of a tree graph disconnects the graph. Every edge of a tree graph thus counts as a **bridge** as discussed in @sec-indirect. 
 1. Following (3), if we disconnect a tree graph by removing an edge, the resulting **connected components** are also trees. 
 
-We can verify properties (1) and (2) by examining @fig-tree-2. There's only one path connected $A$ and $D$, and that's $\{AB, BD\}$. In this same way, there's only one path connecting $A$ and $E$, and that's $\{AB, BE\}$. Both of those paths are unique.
+We can verify properties (1) and (2) by examining @fig-trees-1. There's only one path connected $A$ and $D$, and that's $\{AB, BD\}$. In this same way, there's only one path connecting $A$ and $E$, and that's $\{AB, BE\}$. Both of those paths are unique.
 
 We can check property (3) by imagining the removal of a single edge from any of the graphs shown in @fig-trees. You can verify that this would indeed disconnect those graphs. This means that *every* edge in a tree graph is a **bridge** as defined in @sec-graphconnectivity. 
 
 Another way of saying the last thing is that trees are **minimally connected** graphs. That is, they are connected graphs that are connected using the *smallest* possible number of edges that we can use to connect a graph with that number of nodes.  
 
 A disconnected graph whose components are trees is called (you guessed it) a **forest**. @fig-forest is a forest. So a forest is a disconnected graph with no cycles in any of its components. 
-
-```{r}
-#| label: fig-trees
-#| fig-width: 8
-#| fig-height: 8
-#| layout-ncol: 2
-#| fig-cap: "Tree graphs with five nodes."
-#| fig-cap-location: margin
-#| fig-subcap:
-#|   - ""
-#|   - ""
-#|   - ""
-#|   - ""
-
-  gr <- create_tree(n = 5, children = 1) 
-  gr <- mutate(gr, name = LETTERS[1:5])
-  l <- ggraph(gr, layout = 'tree')
-  l <- as.matrix(l$data[, 1:2])
-  l[,"x"] <- c(0, 1, 2, 3, 4)
-  l[,"y"] <- c(0, 0, 0, 0, 0)
-  p <- ggraph(gr, layout = l)
-  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-  p1 <- p + theme_graph() 
-  p1
-  gr <- create_tree(n = 5, children = 2) 
-  gr <- mutate(gr, name = LETTERS[1:5])
-  p <- ggraph(gr, layout = 'tree')
-  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-  p2 <- p + theme_graph() 
-  p2
-
-  gr <- create_tree(n = 5, children = 4) 
-  gr <- mutate(gr, name = LETTERS[1:5])
-  p <- ggraph(gr, layout = 'star')
-  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-  p3 <- p + theme_graph()
-  p3
-```
 
 ```{r}
 #| label: fig-forest
@@ -111,7 +67,7 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
   gr <- create_tree(n = 10, children = 2) 
   gr <- mutate(gr, name = LETTERS[1:10])
   gr <- gr - edge("A|B")
-  p <- ggraph(gr, layout = 'kk')
+  p <- ggraph(gr, layout = 'nicely')
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
   p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
   p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
@@ -122,15 +78,59 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
 As @fig-trees shows, tree graphs come in different configurations, some of which are of particular note. 
 
 ## The Line Graph
-Note, for instance, that @fig-trees-1 is just a straight path between two nodes. This graph is a tree because it is connected and has no cycles. A graph like @fig-trees(a), which is just a single long path with some set of nodes, is also called **the line graph**. Line graphs are distinguished by their order and can be referred to as $L_n$, where $n$ is the number of nodes. Thus, $L_5$ is the line graph shown in @fig-trees(a); a line graph with five nodes. 
+Note, for instance, that @fig-trees-2 is just a straight path between two nodes. This graph is a tree because it is connected and has no cycles. A graph like @fig-trees-2, which is just a single long path with some set of nodes, is also called **the line graph**. Line graphs are distinguished by their order and can be referred to as $L_n$, where $n$ is the number of nodes. Thus, $L_5$ is the line graph shown in @fig-trees-2; a line graph with five nodes. 
 
 What are line graphs useful for? Well, they can be used to model the social phenomenon known as the "telephone game." We can set up people in a line graph in a laboratory, have nodes pass a message, a piece of gossip, or a story along the line, and see how different the original message relayed by $A$ is by the time it gets to $E$. Obviously, the longer the number of edges in the line, the more distortion we should expect at the other end. 
 
 ## The Star Graph
 
-Note also the graph that is just a central node connected to all the other **end-point** nodes, which are not themselves connected to one another; for example, @fig-trees(d) also counts as a tree. This graph is sometimes called the **star graph**. As with line graphs, we can refer to star graphs by a letter and a number indicating their order, such as $S_n$. Thus, $S_5$ is the star graph with five nodes as in @fig-trees(d).
+Note also the graph that is just a central node connected to all the other **end-point** nodes, which are not themselves connected to one another; for example, @fig-trees-3 also counts as a tree. This graph is sometimes called the **star graph**. As with line graphs, we can refer to star graphs by a letter and a number indicating their order, such as $S_n$. Thus, $S_5$ is the star graph with five nodes as in @fig-trees-3.
 
 Star graphs are useful for modeling centralized systems, such as the airport network we saw in @sec-networks. Such **hub-spoke** systems feature a central node (the hub) connected to a bunch of end-point nodes not connected to one another (the spokes), as when a big airport (like LAX) sends flights to smaller regional airports. In this system, LAX is the "hub" at the center of the star, and the smaller airports are the "spokes" at the end. 
+
+```{r}
+#| label: fig-trees
+#| fig-width: 8
+#| fig-height: 8
+#| layout-ncol: 2
+#| fig-cap: "Two tree graphs with five nodes."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - "Binary Graph."
+#|   - "Line Graph."
+#|   - "Star Graph."
+
+  gr <- create_tree(n = 5, children = 2) 
+  gr <- mutate(gr, name = LETTERS[1:5])
+  p <- ggraph(gr, layout = 'tree')
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p <- p + theme_graph() 
+  p
+
+  gr <- create_tree(n = 5, children = 1) 
+  gr <- mutate(gr, name = LETTERS[1:5])
+  l <- ggraph(gr, layout = 'tree')
+  l <- as.matrix(l$data[, 1:2])
+  l[,"x"] <- c(0, 1, 2, 3, 4)
+  l[,"y"] <- c(0, 0, 0, 0, 0)
+  p <- ggraph(gr, layout = l)
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p <- p + theme_graph() 
+  p
+
+  gr <- create_tree(n = 5, children = 4) 
+  gr <- mutate(gr, name = LETTERS[1:5])
+  p <- ggraph(gr, layout = 'star')
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p <- p + theme_graph()
+  p
+```
 
 ## Caterpillar Graphs
 Tree graphs with an *even number* of nodes can sometimes be drawn like the ones in @fig-caterpillars. This is a line graph on top, with edges sticking out of each node, connecting to an equal number of ** endpoint ** nodes (half of the other nodes in the graph). 
@@ -179,7 +179,6 @@ Because of the shape they form, these tree graphs are sometimes called **caterpi
   p2 <- p + theme_graph()
   p2
 ```
-
 
 Like other graphs, tree graphs can be directed and undirected. The graphs shown in @fig-trees and @fig-caterpillars are undirected trees. 
 

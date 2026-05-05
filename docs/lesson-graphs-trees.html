@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Social Networks - 14&nbsp; Tree Graphs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-matrix-intro.html" rel="next">
+<link href="./lesson-graphs-connectivity.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Social Networks</span>
+    </a>
+  </div>
+          <div class="quarto-toggle-container ms-auto">
+              <a href="" class="quarto-color-scheme-toggle nav-link" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+          </div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Tree Graphs</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./social-ties1.jpeg" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Welcome</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Introduction to Networks</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-what-are-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What Are Networks?</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-what-are-social-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">What is A <em>Social</em> Network?</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Graph Theory: The Basics</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-theory.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Introduction to Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-types.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Types of Ties in Social Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-ties.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-neighborhoods.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-degree.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Nodes and their Degrees</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-degree-metrics.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-paths.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Indirect Connections</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-directed-paths.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-connectivity.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-trees.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Tree Graphs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">Matrices: The Basics</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-intro.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-adjacency.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Adjacency Matrix</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-row-column-sums.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Matrix Operations: Row and Column Sums</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-operations.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Basic Matrix Operations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-multiplication.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Matrix Multiplication</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">Motifs</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-triads.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Triads</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">Centrality</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-closeness.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-betweenness.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-bigthree.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">The “Big Three” Centrality Metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">Two-Mode Networks</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-affiliation-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">Ego Networks</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-ego-networks.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-ego-collect.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Collecting Ego-Network Data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-ego-homo.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Theories of Ego Network Homogeneity and Diversity</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="true">Subgroups and Blocks</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-groups-cliques.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Clique Analysis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-groups-cohesive.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Cohesive Subsets</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-equivalence.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Equivalence and Similarity</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-local-similarity.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Local Node Similarities</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" aria-expanded="true">Network Theory</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-dunbar.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Dunbar’s Theory of Social Circles</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-swt.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">The Strength of Weak Ties</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-sht.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Structural Holes and Brokerage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-smt.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Simmelian Tie Theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-dyadic-balance.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Dyadic Balance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-triadic-balance.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Triadic Balance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-structural-balance.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Structural Balance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-valenced-interactions.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Theories of Valenced Interactions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-hierarchies.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Dominance Hierarchies</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-diffusion.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">The Diffusion of Innovations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-small-world.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">The Small World</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" aria-expanded="true">Exercises</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework1.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Homework I: Graph Theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework1-answered.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Homework I: Graph Theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework2.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Homework II: Directed Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework2-answered.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Homework II: Directed Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework3.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Homework III: Indirect Connections and Matrices</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework3-answered.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">Homework III: Indirect Connections and Matrices</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework4.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Homework IV: Matrix Operations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework4-answered.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Homework IV: Matrix Operations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework5.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Homework V: Affiliation Networks</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#properties-of-tree-graphs" id="toc-properties-of-tree-graphs" class="nav-link active" data-scroll-target="#properties-of-tree-graphs"><span class="toc-section-number">14.1</span>  Properties of Tree Graphs</a></li>
+  <li><a href="#the-line-graph" id="toc-the-line-graph" class="nav-link" data-scroll-target="#the-line-graph"><span class="toc-section-number">14.2</span>  The Line Graph</a></li>
+  <li><a href="#the-star-graph" id="toc-the-star-graph" class="nav-link" data-scroll-target="#the-star-graph"><span class="toc-section-number">14.3</span>  The Star Graph</a></li>
+  <li><a href="#caterpillar-graphs" id="toc-caterpillar-graphs" class="nav-link" data-scroll-target="#caterpillar-graphs"><span class="toc-section-number">14.4</span>  Caterpillar Graphs</a></li>
+  <li><a href="#graph-efficiency" id="toc-graph-efficiency" class="nav-link" data-scroll-target="#graph-efficiency"><span class="toc-section-number">14.5</span>  Graph Efficiency</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-graphs-trees.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Tree Graphs</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>If a graph is both <strong>connected</strong> <em>and</em> has no <strong>cycles</strong>, then it is a <strong>tree graph</strong> <span class="citation" data-cites="benjamin17">(<a href="#ref-benjamin17" role="doc-biblioref">Benjamin, Chartrand, and Zhang 2017, 68</a>)</span>. The three tree graphs with five nodes are shown in <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a>. Recall from <a href="lesson-graphs-paths.html#sec-cycles"><span>Section&nbsp;11.5</span></a> in <a href="lesson-graphs-paths.html"><span>Chapter&nbsp;11</span></a>, that a cycle is a <strong>path</strong> (as defined in <a href="lesson-graphs-paths.html#sec-paths"><span>Section&nbsp;11.1</span></a>) that begins and ends with the same node. Thus, in a tree graph, you can never start with a node and trace a sequence of distinct edges and nodes that take you back to the node you started with!</p>
+<section id="properties-of-tree-graphs" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="properties-of-tree-graphs"><span class="header-section-number">14.1</span> Properties of Tree Graphs</h2>
+<p>Tree graphs have the interesting property that their number of edges <span class="math inline">\(m\)</span> is always equal to their number of nodes <span class="math inline">\(n\)</span> minus one. Thus, if a graph is a tree graph or order five, we know it <em>must</em> contain four edges (it must be of size four). For instance, in <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a>, all the graphs have four links. If we were to add a fifth link connecting any pair of nodes in any of the graphs, it would create a cycle (of some length), and thus the graph would no longer be a tree! Try it for yourself and see.</p>
+<p>In equation form, if <span class="math inline">\(G(n, m)\)</span> is a tree graph, then:</p>
+<p><span id="eq-tree1"><span class="math display">\[
+  m = n - 1
+\tag{14.1}\]</span></span></p>
+<p>Using simple algebra, we can also solve for the order of a tree graph if we know the size:</p>
+<p><span id="eq-tree2"><span class="math display">\[
+  n = m + 1
+\tag{14.2}\]</span></span></p>
+<p>This equation states that the order of a tree graph equals the number of edges plus 1.</p>
+<p>Note that, from <a href="lesson-graphs-degree-metrics.html#eq-sumki">Equation&nbsp;<span>10.4</span></a> in <a href="lesson-graphs-degree-metrics.html#sec-degsum"><span>Section&nbsp;10.5</span></a>, the sum of the degrees of an undirected graph equals twice the number of edges (<span class="math inline">\(2m\)</span>). Applying this reasoning, we can see that there is a special formula for the sum of degrees of an undirected tree graph. The reason is that if we know that:</p>
+<p><span id="eq-tree3"><span class="math display">\[
+\sum_i k_i = 2m
+\tag{14.3}\]</span></span></p>
+<p>And we also know that <span class="math inline">\(m = n - 1\)</span> as per <a href="#eq-tree1">Equation&nbsp;<span>14.1</span></a>, then substituting for <span class="math inline">\(m\)</span> in <a href="#eq-tree3">Equation&nbsp;<span>14.4</span></a>, gives us:</p>
+<p><span id="eq-tree3"><span class="math display">\[
+\sum_i k_i = 2(n-1) = 2n - 2
+\tag{14.4}\]</span></span></p>
+<p>Thus, in a tree graph, the sum of degrees will always equal twice the number of nodes minus two!</p>
+<p>Tree graphs have four other unique properties.</p>
+<ol type="1">
+<li>If <span class="math inline">\(G\)</span> is a tree graph, then every node <span class="math inline">\(V\)</span> in <span class="math inline">\(G\)</span> is linked to every other node via a <em>single</em> path.</li>
+<li>The one path connecting each pair of nodes is <em>unique</em>, that is, a sequence of nodes and edges that is distinctive for that node pair and does not repeat for any other pair.</li>
+<li>Removing even a single edge of a tree graph disconnects the graph. Every edge of a tree graph thus counts as a <strong>bridge</strong> as discussed in <a href="lesson-graphs-paths.html"><span>Chapter&nbsp;11</span></a>.</li>
+<li>Following (3), if we disconnect a tree graph by removing an edge, the resulting <strong>connected components</strong> are also trees.</li>
+</ol>
+<p>We can verify properties (1) and (2) by examining <a href="#fig-trees-1">Figure&nbsp;<span>14.2 (a)</span></a>. There’s only one path connected <span class="math inline">\(A\)</span> and <span class="math inline">\(D\)</span>, and that’s <span class="math inline">\(\{AB, BD\}\)</span>. In this same way, there’s only one path connecting <span class="math inline">\(A\)</span> and <span class="math inline">\(E\)</span>, and that’s <span class="math inline">\(\{AB, BE\}\)</span>. Both of those paths are unique.</p>
+<p>We can check property (3) by imagining the removal of a single edge from any of the graphs shown in <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a>. You can verify that this would indeed disconnect those graphs. This means that <em>every</em> edge in a tree graph is a <strong>bridge</strong> as defined in <a href="lesson-graphs-connectivity.html"><span>Chapter&nbsp;13</span></a>.</p>
+<p>Another way of saying the last thing is that trees are <strong>minimally connected</strong> graphs. That is, they are connected graphs that are connected using the <em>smallest</em> possible number of edges that we can use to connect a graph with that number of nodes.</p>
+<p>A disconnected graph whose components are trees is called (you guessed it) a <strong>forest</strong>. <a href="#fig-forest">Figure&nbsp;<span>14.1</span></a> is a forest. So a forest is a disconnected graph with no cycles in any of its components.</p>
+<div class="cell" data-fig-cap-location="margin">
+<div class="cell-output-display">
+<div id="fig-forest" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-forest-1.png" class="img-fluid figure-img" width="1152"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;14.1: A Forest with ten nodes and two components.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a> shows, tree graphs come in different configurations, some of which are of particular note.</p>
+</section>
+<section id="the-line-graph" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="the-line-graph"><span class="header-section-number">14.2</span> The Line Graph</h2>
+<p>Note, for instance, that <a href="#fig-trees-2">Figure&nbsp;<span>14.2 (b)</span></a> is just a straight path between two nodes. This graph is a tree because it is connected and has no cycles. A graph like <a href="#fig-trees-2">Figure&nbsp;<span>14.2 (b)</span></a>, which is just a single long path with some set of nodes, is also called <strong>the line graph</strong>. Line graphs are distinguished by their order and can be referred to as <span class="math inline">\(L_n\)</span>, where <span class="math inline">\(n\)</span> is the number of nodes. Thus, <span class="math inline">\(L_5\)</span> is the line graph shown in <a href="#fig-trees-2">Figure&nbsp;<span>14.2 (b)</span></a>; a line graph with five nodes.</p>
+<p>What are line graphs useful for? Well, they can be used to model the social phenomenon known as the “telephone game.” We can set up people in a line graph in a laboratory, have nodes pass a message, a piece of gossip, or a story along the line, and see how different the original message relayed by <span class="math inline">\(A\)</span> is by the time it gets to <span class="math inline">\(E\)</span>. Obviously, the longer the number of edges in the line, the more distortion we should expect at the other end.</p>
+</section>
+<section id="the-star-graph" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="the-star-graph"><span class="header-section-number">14.3</span> The Star Graph</h2>
+<p>Note also the graph that is just a central node connected to all the other <strong>end-point</strong> nodes, which are not themselves connected to one another; for example, <a href="#fig-trees-3">Figure&nbsp;<span>14.2 (c)</span></a> also counts as a tree. This graph is sometimes called the <strong>star graph</strong>. As with line graphs, we can refer to star graphs by a letter and a number indicating their order, such as <span class="math inline">\(S_n\)</span>. Thus, <span class="math inline">\(S_5\)</span> is the star graph with five nodes as in <a href="#fig-trees-3">Figure&nbsp;<span>14.2 (c)</span></a>.</p>
+<p>Star graphs are useful for modeling centralized systems, such as the airport network we saw in <a href="lesson-theory-what-are-networks.html"><span>Chapter&nbsp;1</span></a>. Such <strong>hub-spoke</strong> systems feature a central node (the hub) connected to a bunch of end-point nodes not connected to one another (the spokes), as when a big airport (like LAX) sends flights to smaller regional airports. In this system, LAX is the “hub” at the center of the star, and the smaller airports are the “spokes” at the end.</p>
+<div id="fig-trees" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-trees-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-trees-1.png" class="img-fluid figure-img" data-ref-parent="fig-trees" width="768"></p>
+<p></p><figcaption class="figure-caption">(a) Binary Graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-trees-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-trees-2.png" class="img-fluid figure-img" data-ref-parent="fig-trees" width="768"></p>
+<p></p><figcaption class="figure-caption">(b) Line Graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-trees-3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-trees-3.png" class="img-fluid figure-img" data-ref-parent="fig-trees" width="768"></p>
+<p></p><figcaption class="figure-caption">(c) Star Graph.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;14.2: Two tree graphs with five nodes.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="caterpillar-graphs" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="caterpillar-graphs"><span class="header-section-number">14.4</span> Caterpillar Graphs</h2>
+<p>Tree graphs with an <em>even number</em> of nodes can sometimes be drawn like the ones in <a href="#fig-caterpillars">Figure&nbsp;<span>14.3</span></a>. This is a line graph on top, with edges sticking out of each node, connecting to an equal number of ** endpoint ** nodes (half of the other nodes in the graph).</p>
+<p>Because of the shape they form, these tree graphs are sometimes called <strong>caterpillar graphs</strong>, with the line graph at the top playing the role of the caterpillar’s “body” and the edges incident to the end point nodes playing the role of the “legs.” <a href="#fig-caterpillars">Figure&nbsp;<span>14.3</span></a>(a) shows a caterpillar graph of order six, and <a href="#fig-caterpillars">Figure&nbsp;<span>14.3</span></a>(b) shows a caterpillar graph of order eight.</p>
+<div id="fig-caterpillars" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-caterpillars-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-caterpillars-1.png" class="img-fluid figure-img" data-ref-parent="fig-caterpillars" width="768"></p>
+<p></p><figcaption class="figure-caption">(a) Six nodes.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-caterpillars-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-caterpillars-2.png" class="img-fluid figure-img" data-ref-parent="fig-caterpillars" width="768"></p>
+<p></p><figcaption class="figure-caption">(b) Eight nodes.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;14.3: Caterpillar graphs.</figcaption><p></p>
+</figure>
+</div>
+<p>Like other graphs, tree graphs can be directed and undirected. The graphs shown in <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a> and <a href="#fig-caterpillars">Figure&nbsp;<span>14.3</span></a> are undirected trees.</p>
+</section>
+<section id="graph-efficiency" class="level2" data-number="14.5">
+<h2 data-number="14.5" class="anchored" data-anchor-id="graph-efficiency"><span class="header-section-number">14.5</span> Graph Efficiency</h2>
+<p>Using some of the properties of tree graphs mentioned above, <span class="citation" data-cites="krackhardt94">Krackhardt (<a href="#ref-krackhardt94" role="doc-biblioref">1994</a>)</span> proposes a measure for how economical the connectivity of a given graph is called the <strong>graph efficiency</strong> (<span class="math inline">\(Eff(G)\)</span>).</p>
+<p>According to Krackhardt, a graph is efficiently connected if its connectivity is accomplished using the minimum possible number of edges. Thus, a tree graph is a maximally efficient graph <span class="math inline">\(Eff(G) = 1.0\)</span>. The idea is then to compare an observed graph with a tree of the same order and see how closely it resembles it.</p>
+<p>Krackhardt proposes the following formula to compute the efficiency of a graph:</p>
+<p><span id="eq-eff"><span class="math display">\[
+Eff(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]
+\tag{14.5}\]</span></span></p>
+<p>Where <span class="math inline">\(m\)</span> is the number of edges and <span class="math inline">\(n\)</span> is the number of nodes. Note that when the graph <span class="math inline">\(G\)</span> is a tree, the graph <span class="math inline">\(m = n - 1\)</span>. This means that the numerator of <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a> turns into: <span class="math inline">\(2(n - 1 -n + 1) = 2 \times 0 = 0\)</span>. This means the whole fraction on the right side of <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a> is zero, and <span class="math inline">\(1 - 0 = 1.0\)</span>, which is maximum efficiency.</p>
+<p>As the graph deviates from that by having more edges than a tree, then the fraction on the right side of <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a> turns into a number that approaches 1.0, which means that the efficiency becomes smaller when we subtract that number from 1.</p>
+<div id="fig-eff" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-eff-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-eff-1.png" class="img-fluid figure-img" data-ref-parent="fig-eff" width="768"></p>
+<p></p><figcaption class="figure-caption">(a)</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-eff-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-eff-2.png" class="img-fluid figure-img" data-ref-parent="fig-eff" width="768"></p>
+<p></p><figcaption class="figure-caption">(b)</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;14.4: Two simple graphs.</figcaption><p></p>
+</figure>
+</div>
+<p>Let’s consider an example. Of the two graphs shown in <a href="#fig-eff">Figure&nbsp;<span>14.4</span></a>, which is the one that’s most efficiently connected? Well, the graph in <a href="#fig-eff-1">Figure&nbsp;<span>14.4 (a)</span></a> has five nodes and seven edges, which means that its efficiency is equal to:</p>
+<p><span class="math display">\[
+1 - \left[\frac{2(7 - 5 + 1)}{(5-1)(5-2)}\right] = 1 - \left[\frac{2(2 + 1)}{4 \times 3}\right] =
+\]</span></p>
+<p><span class="math display">\[
+1 - \left[\frac{2 \times 3}{12}\right] = 1 - \left[\frac{6}{12}\right] = 1 - 0.5 = 0.5
+\]</span></p>
+<p>The graph in <a href="#fig-eff-2">Figure&nbsp;<span>14.4 (b)</span></a>, on the other hand, has seven nodes and ten edges, which means that its efficiency is equal to:</p>
+<p><span class="math display">\[
+1 - \left[\frac{2(10 - 7 + 1)}{(7-1)(7-2)}\right] = 1 - \left[\frac{2(3 + 1)}{6 \times 5}\right] =
+\]</span></p>
+<p><span class="math display">\[
+1 - \left[\frac{2 \times 4}{30}\right] = 1 - \left[\frac{8}{30}\right] = 1 - 0.27 = 0.73
+\]</span></p>
+<p>So it looks like the graph in <a href="#fig-eff-2">Figure&nbsp;<span>14.4 (b)</span></a> is more efficiently connected than the one shown in <a href="#fig-eff-1">Figure&nbsp;<span>14.4 (a)</span></a>!</p>
+<p>Note also that the <strong>complete graph</strong> of any order is maximally inefficient according to <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a>. For instance, we know from <a href="lesson-graphs-metrics.html"><span>Chapter&nbsp;7</span></a> that the complete <strong>undirected graph</strong> of order five has to have <span class="math inline">\(5(5-1) \div 2\)</span> edges (the <strong>graph maximum size</strong>), which is equal to <span class="math inline">\((5 \times 4) \div 2 = 10\)</span>.</p>
+<p>So when we substitute these numbers into <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a>, we get:</p>
+<p><span class="math display">\[
+1 - \left[\frac{2(10 - 5 + 1)}{(5-1)(5-2)}\right] = 1 - \left[\frac{2(5 + 1)}{4 \times 3}\right] =
+\]</span></p>
+<p><span class="math display">\[
+1 - \left[\frac{2 \times 6}{12}\right] = 1 - \left[\frac{12}{12}\right] = 1 - 1 = 0
+\]</span></p>
+<p>Showing that the <strong>complete graph</strong> is minimally efficient!</p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-benjamin17" class="csl-entry" role="doc-biblioentry">
+Benjamin, Arthur, Gary Chartrand, and Ping Zhang. 2017. <em>The Fascinating World of Graph Theory</em>. Princeton University Press.
+</div>
+<div id="ref-krackhardt94" class="csl-entry" role="doc-biblioentry">
+Krackhardt, David. 1994. <span>“Graph Theoretical Dimensions of Informal Organizations.”</span> <em>Computational Organization Theory</em> 89 (112): 123–40.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-graphs-connectivity.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-matrix-intro.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+      <div class="nav-footer-center">Copyright 2023, Omar Lizardo &amp; Isaac Jilbert</div>
+  </div>
+</footer>
+
+
+
+</body></html>
