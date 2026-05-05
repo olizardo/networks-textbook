@@ -506,11 +506,22 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#properties-of-tree-graphs" id="toc-properties-of-tree-graphs" class="nav-link active" data-scroll-target="#properties-of-tree-graphs"><span class="toc-section-number">14.1</span>  Properties of Tree Graphs</a></li>
-  <li><a href="#the-line-graph" id="toc-the-line-graph" class="nav-link" data-scroll-target="#the-line-graph"><span class="toc-section-number">14.2</span>  The Line Graph</a></li>
-  <li><a href="#the-star-graph" id="toc-the-star-graph" class="nav-link" data-scroll-target="#the-star-graph"><span class="toc-section-number">14.3</span>  The Star Graph</a></li>
-  <li><a href="#caterpillar-graphs" id="toc-caterpillar-graphs" class="nav-link" data-scroll-target="#caterpillar-graphs"><span class="toc-section-number">14.4</span>  Caterpillar Graphs</a></li>
-  <li><a href="#graph-efficiency" id="toc-graph-efficiency" class="nav-link" data-scroll-target="#graph-efficiency"><span class="toc-section-number">14.5</span>  Graph Efficiency</a></li>
+  <li><a href="#tree-graph-metrics" id="toc-tree-graph-metrics" class="nav-link active" data-scroll-target="#tree-graph-metrics"><span class="toc-section-number">14.1</span>  Tree Graph Metrics</a>
+  <ul class="collapse">
+  <li><a href="#tree-graph-sum-of-degrees" id="toc-tree-graph-sum-of-degrees" class="nav-link" data-scroll-target="#tree-graph-sum-of-degrees"><span class="toc-section-number">14.1.1</span>  Tree Graph Sum of Degrees</a></li>
+  <li><a href="#tree-graph-density" id="toc-tree-graph-density" class="nav-link" data-scroll-target="#tree-graph-density"><span class="toc-section-number">14.1.2</span>  Tree Graph Density</a></li>
+  <li><a href="#tree-graph-average-degree" id="toc-tree-graph-average-degree" class="nav-link" data-scroll-target="#tree-graph-average-degree"><span class="toc-section-number">14.1.3</span>  Tree Graph Average Degree</a></li>
+  <li><a href="#path-and-connectivity-tree-graph-properties" id="toc-path-and-connectivity-tree-graph-properties" class="nav-link" data-scroll-target="#path-and-connectivity-tree-graph-properties"><span class="toc-section-number">14.1.4</span>  Path and Connectivity Tree Graph Properties</a></li>
+  </ul></li>
+  <li><a href="#forests" id="toc-forests" class="nav-link" data-scroll-target="#forests"><span class="toc-section-number">14.2</span>  Forests</a></li>
+  <li><a href="#special-types-of-tree-graphs" id="toc-special-types-of-tree-graphs" class="nav-link" data-scroll-target="#special-types-of-tree-graphs"><span class="toc-section-number">14.3</span>  Special Types of Tree Graphs</a>
+  <ul class="collapse">
+  <li><a href="#the-line-graph" id="toc-the-line-graph" class="nav-link" data-scroll-target="#the-line-graph"><span class="toc-section-number">14.3.1</span>  The Line Graph</a></li>
+  <li><a href="#the-star-graph" id="toc-the-star-graph" class="nav-link" data-scroll-target="#the-star-graph"><span class="toc-section-number">14.3.2</span>  The Star Graph</a></li>
+  <li><a href="#caterpillar-graphs" id="toc-caterpillar-graphs" class="nav-link" data-scroll-target="#caterpillar-graphs"><span class="toc-section-number">14.3.3</span>  Caterpillar Graphs</a></li>
+  </ul></li>
+  <li><a href="#graph-efficiency" id="toc-graph-efficiency" class="nav-link" data-scroll-target="#graph-efficiency"><span class="toc-section-number">14.4</span>  Graph Efficiency</a></li>
+  <li><a href="#spanning-trees" id="toc-spanning-trees" class="nav-link" data-scroll-target="#spanning-trees"><span class="toc-section-number">14.5</span>  Spanning Trees</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/olizardo/networks-textbook/blob/main/lesson-graphs-trees.qmd" class="toc-action">View source</a></p></div></div></nav>
@@ -535,10 +546,36 @@ div.csl-indent {
 
 </header>
 
-<p>If a graph is both <strong>connected</strong> <em>and</em> has no <strong>cycles</strong>, then it is a <strong>tree graph</strong> <span class="citation" data-cites="benjamin17">(<a href="#ref-benjamin17" role="doc-biblioref">Benjamin, Chartrand, and Zhang 2017, 68</a>)</span>. The three tree graphs with five nodes are shown in <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a>. Recall from <a href="lesson-graphs-paths.html#sec-cycles"><span>Section&nbsp;11.5</span></a> in <a href="lesson-graphs-paths.html"><span>Chapter&nbsp;11</span></a>, that a cycle is a <strong>path</strong> (as defined in <a href="lesson-graphs-paths.html#sec-paths"><span>Section&nbsp;11.1</span></a>) that begins and ends with the same node. Thus, in a tree graph, you can never start with a node and trace a sequence of distinct edges and nodes that take you back to the node you started with!</p>
-<section id="properties-of-tree-graphs" class="level2" data-number="14.1">
-<h2 data-number="14.1" class="anchored" data-anchor-id="properties-of-tree-graphs"><span class="header-section-number">14.1</span> Properties of Tree Graphs</h2>
-<p>Tree graphs have the interesting property that their number of edges <span class="math inline">\(m\)</span> is always equal to their number of nodes <span class="math inline">\(n\)</span> minus one. Thus, if a graph is a tree graph or order five, we know it <em>must</em> contain four edges (it must be of size four). For instance, in <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a>, all the graphs have four links. If we were to add a fifth link connecting any pair of nodes in any of the graphs, it would create a cycle (of some length), and thus the graph would no longer be a tree! Try it for yourself and see.</p>
+<p>If a graph is both <strong>connected</strong> <em>and</em> has no <strong>cycles</strong>, then it is a <strong>tree graph</strong> <span class="citation" data-cites="benjamin17">(<a href="#ref-benjamin17" role="doc-biblioref">Benjamin, Chartrand, and Zhang 2017, 68</a>)</span>. Recall from <a href="lesson-graphs-paths.html#sec-cycles"><span>Section&nbsp;11.5</span></a> in <a href="lesson-graphs-paths.html"><span>Chapter&nbsp;11</span></a>, that a cycle is a <strong>path</strong> (as defined in <a href="lesson-graphs-paths.html#sec-paths"><span>Section&nbsp;11.1</span></a>) that begins and ends with the same node. Thus, in a tree graph, you can never start with a node and trace a sequence of distinct edges and nodes that take you back to the node you started with!</p>
+<p><a href="#fig-tree">Figure&nbsp;<span>14.1</span></a> shows a tree graph with ten nodes.</p>
+<div id="fig-tree" class="cell quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-tree-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-tree-1.png" class="img-fluid figure-img" data-ref-parent="fig-tree" width="768"></p>
+<p></p><figcaption class="figure-caption">(a) A tree graph with ten nodes.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-tree-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-tree-2.png" class="img-fluid figure-img" data-ref-parent="fig-tree" width="768"></p>
+<p></p><figcaption class="figure-caption">(b) Just a plain old graph with ten nodes.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;14.1: Two graphs.</figcaption><p></p>
+</figure>
+</div>
+<p>We already defined tree graphs as connected graphs with no cycles. This means that if we were to add a <em>single</em> link connecting any pair of nodes to a tree graph (like the one shown in <a href="#fig-tree">Figure&nbsp;<span>14.1</span></a>), it would create a <strong>cycle</strong> (of some length), and thus the graph would no longer be a tree!</p>
+<p>For instance, <a href="#fig-tree-2">Figure&nbsp;<span>14.1 (b)</span></a> is just like <a href="#fig-tree-1">Figure&nbsp;<span>14.1 (a)</span></a>, except we added the <span class="math inline">\(\{BH\}\)</span> edge. Note that after doing this we have created the <span class="math inline">\(BFJEHB\)</span> cycle (a cycle of length five), and thus <a href="#fig-tree-2">Figure&nbsp;<span>14.1 (b)</span></a> no longer qualifies as a tree graph. So one property of tree graphs goes like this: A graph is a tree graph <em>if</em> adding a single edge creates a cycle of some length.</p>
+<section id="tree-graph-metrics" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="tree-graph-metrics"><span class="header-section-number">14.1</span> Tree Graph Metrics</h2>
+<p>Tree graphs have another interesting property. The number of edges of a tree graph <span class="math inline">\(m\)</span> is always equal to the number of nodes <span class="math inline">\(n\)</span> minus one. Thus, if a graph is a tree graph or order ten, we know it <em>must</em> contain nine edges (it must be of size nine). For instance, in <a href="#fig-tree">Figure&nbsp;<span>14.1</span></a>, there are exactly nine edges (count them).</p>
 <p>In equation form, if <span class="math inline">\(G(n, m)\)</span> is a tree graph, then:</p>
 <p><span id="eq-tree1"><span class="math display">\[
   m = n - 1
@@ -548,6 +585,8 @@ div.csl-indent {
   n = m + 1
 \tag{14.2}\]</span></span></p>
 <p>This equation states that the order of a tree graph equals the number of edges plus 1.</p>
+<section id="tree-graph-sum-of-degrees" class="level3" data-number="14.1.1">
+<h3 data-number="14.1.1" class="anchored" data-anchor-id="tree-graph-sum-of-degrees"><span class="header-section-number">14.1.1</span> Tree Graph Sum of Degrees</h3>
 <p>Note that, from <a href="lesson-graphs-degree-metrics.html#eq-sumki">Equation&nbsp;<span>10.4</span></a> in <a href="lesson-graphs-degree-metrics.html#sec-degsum"><span>Section&nbsp;10.5</span></a>, the sum of the degrees of an undirected graph equals twice the number of edges (<span class="math inline">\(2m\)</span>). Applying this reasoning, we can see that there is a special formula for the sum of degrees of an undirected tree graph. The reason is that if we know that:</p>
 <p><span id="eq-tree3"><span class="math display">\[
 \sum_i k_i = 2m
@@ -557,6 +596,30 @@ div.csl-indent {
 \sum_i k_i = 2(n-1) = 2n - 2
 \tag{14.4}\]</span></span></p>
 <p>Thus, in a tree graph, the sum of degrees will always equal twice the number of nodes minus two!</p>
+</section>
+<section id="tree-graph-density" class="level3" data-number="14.1.2">
+<h3 data-number="14.1.2" class="anchored" data-anchor-id="tree-graph-density"><span class="header-section-number">14.1.2</span> Tree Graph Density</h3>
+<p>Remember from <a href="lesson-graphs-metrics.html"><span>Chapter&nbsp;7</span></a>, that the density of an undirected graph is given by:</p>
+<p><span id="eq-dens1"><span class="math display">\[
+  d(G)^u=\frac{2m}{n(n-1)}
+\tag{14.5}\]</span></span></p>
+<p>But since in a tree graph, <span class="math inline">\(m = n- 1\)</span>, the <a href="#eq-dens1">Equation&nbsp;<span>14.5</span></a> turns into:</p>
+<p><span id="eq-dens2"><span class="math display">\[
+  d(T)=\frac{2(n-1)}{n(n-1)} = \frac{2}{n}
+\tag{14.6}\]</span></span></p>
+<p>So in a tree graph, the density is always equal to two divided by the number of nodes!</p>
+<p>So if someone were to ask you, what’s the density of the graph in <a href="#fig-tree-1">Figure&nbsp;<span>14.1 (a)</span></a>, you could immediately answer by knowing that the number of nodes is ten: <span class="math inline">\(d = 2 \div 10 = 0.2\)</span>.</p>
+</section>
+<section id="tree-graph-average-degree" class="level3" data-number="14.1.3">
+<h3 data-number="14.1.3" class="anchored" data-anchor-id="tree-graph-average-degree"><span class="header-section-number">14.1.3</span> Tree Graph Average Degree</h3>
+<p>Recall from <a href="lesson-graphs-metrics.html"><span>Chapter&nbsp;7</span></a> that the graph average degree is just the sum of degrees divided by the number of nodes. But we already know that in a tree graph, the sum of degrees is equal to <span class="math inline">\(2n - 2\)</span>, so that means that the average degree of a tree graph is always equal to:</p>
+<p><span id="eq-avgd"><span class="math display">\[
+  \bar{k} = \frac{2n - 2}{n}
+\tag{14.7}\]</span></span></p>
+<p>So without even looking at the the graph’s degree sequence and summing each number, I know that the average degree of <a href="#fig-tree">Figure&nbsp;<span>14.1</span></a> has to be equal to <span class="math inline">\([(2 \times 10) - 2] \div 10 = (20 - 2) \div 10 = 18 \div 10 = 1.8\)</span>. Neat!</p>
+</section>
+<section id="path-and-connectivity-tree-graph-properties" class="level3" data-number="14.1.4">
+<h3 data-number="14.1.4" class="anchored" data-anchor-id="path-and-connectivity-tree-graph-properties"><span class="header-section-number">14.1.4</span> Path and Connectivity Tree Graph Properties</h3>
 <p>Tree graphs have four other unique properties.</p>
 <ol type="1">
 <li>If <span class="math inline">\(G\)</span> is a tree graph, then every node <span class="math inline">\(V\)</span> in <span class="math inline">\(G\)</span> is linked to every other node via a <em>single</em> path.</li>
@@ -564,39 +627,45 @@ div.csl-indent {
 <li>Removing even a single edge of a tree graph disconnects the graph. Every edge of a tree graph thus counts as a <strong>bridge</strong> as discussed in <a href="lesson-graphs-paths.html"><span>Chapter&nbsp;11</span></a>.</li>
 <li>Following (3), if we disconnect a tree graph by removing an edge, the resulting <strong>connected components</strong> are also trees.</li>
 </ol>
-<p>We can verify properties (1) and (2) by examining <a href="#fig-trees-1">Figure&nbsp;<span>14.2 (a)</span></a>. There’s only one path connected <span class="math inline">\(A\)</span> and <span class="math inline">\(D\)</span>, and that’s <span class="math inline">\(\{AB, BD\}\)</span>. In this same way, there’s only one path connecting <span class="math inline">\(A\)</span> and <span class="math inline">\(E\)</span>, and that’s <span class="math inline">\(\{AB, BE\}\)</span>. Both of those paths are unique.</p>
-<p>We can check property (3) by imagining the removal of a single edge from any of the graphs shown in <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a>. You can verify that this would indeed disconnect those graphs. This means that <em>every</em> edge in a tree graph is a <strong>bridge</strong> as defined in <a href="lesson-graphs-connectivity.html"><span>Chapter&nbsp;13</span></a>.</p>
+<p>We can verify properties (1) and (2) by examining <a href="#fig-trees-1">Figure&nbsp;<span>14.3 (a)</span></a>. There’s only one path connected <span class="math inline">\(A\)</span> and <span class="math inline">\(D\)</span>, and that’s <span class="math inline">\(\{AB, BD\}\)</span>. In this same way, there’s only one path connecting <span class="math inline">\(A\)</span> and <span class="math inline">\(E\)</span>, and that’s <span class="math inline">\(\{AB, BE\}\)</span>. Both of those paths are unique.</p>
+<p>We can check property (3) by imagining the removal of a single edge from any of the graphs shown in <a href="#fig-trees">Figure&nbsp;<span>14.3</span></a>. You can verify that this would indeed disconnect those graphs. This means that <em>every</em> edge in a tree graph is a <strong>bridge</strong> as defined in <a href="lesson-graphs-connectivity.html"><span>Chapter&nbsp;13</span></a>.</p>
 <p>Another way of saying the last thing is that trees are <strong>minimally connected</strong> graphs. That is, they are connected graphs that are connected using the <em>smallest</em> possible number of edges that we can use to connect a graph with that number of nodes.</p>
-<p>A disconnected graph whose components are trees is called (you guessed it) a <strong>forest</strong>. <a href="#fig-forest">Figure&nbsp;<span>14.1</span></a> is a forest. So a forest is a disconnected graph with no cycles in any of its components.</p>
-<div class="cell" data-fig-cap-location="margin">
+</section>
+</section>
+<section id="forests" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="forests"><span class="header-section-number">14.2</span> Forests</h2>
+<p>A disconnected graph whose components are trees is called (you guessed it) a <strong>forest</strong>. <a href="#fig-forest">Figure&nbsp;<span>14.2</span></a> is a forest. So a forest is a disconnected graph with no cycles in any of its components.</p>
+<div class="cell">
 <div class="cell-output-display">
 <div id="fig-forest" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="lesson-graphs-trees_files/figure-html/fig-forest-1.png" class="img-fluid figure-img" width="1152"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;14.1: A Forest with ten nodes and two components.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;14.2: A Forest with ten nodes and two components.</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p>As <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a> shows, tree graphs come in different configurations, some of which are of particular note.</p>
 </section>
-<section id="the-line-graph" class="level2" data-number="14.2">
-<h2 data-number="14.2" class="anchored" data-anchor-id="the-line-graph"><span class="header-section-number">14.2</span> The Line Graph</h2>
-<p>Note, for instance, that <a href="#fig-trees-2">Figure&nbsp;<span>14.2 (b)</span></a> is just a straight path between two nodes. This graph is a tree because it is connected and has no cycles. A graph like <a href="#fig-trees-2">Figure&nbsp;<span>14.2 (b)</span></a>, which is just a single long path with some set of nodes, is also called <strong>the line graph</strong>. Line graphs are distinguished by their order and can be referred to as <span class="math inline">\(L_n\)</span>, where <span class="math inline">\(n\)</span> is the number of nodes. Thus, <span class="math inline">\(L_5\)</span> is the line graph shown in <a href="#fig-trees-2">Figure&nbsp;<span>14.2 (b)</span></a>; a line graph with five nodes.</p>
+<section id="special-types-of-tree-graphs" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="special-types-of-tree-graphs"><span class="header-section-number">14.3</span> Special Types of Tree Graphs</h2>
+<p>As <a href="#fig-trees">Figure&nbsp;<span>14.3</span></a> shows, tree graphs come in different configurations, some of which are of particular note.</p>
+<section id="the-line-graph" class="level3" data-number="14.3.1">
+<h3 data-number="14.3.1" class="anchored" data-anchor-id="the-line-graph"><span class="header-section-number">14.3.1</span> The Line Graph</h3>
+<p>Note, for instance, that <a href="#fig-trees-1">Figure&nbsp;<span>14.3 (a)</span></a> is just a straight path between two nodes. This graph is a tree because it is connected and has no cycles. A graph like <a href="#fig-trees-1">Figure&nbsp;<span>14.3 (a)</span></a>, which is just a single long path with some set of nodes, is also called <strong>the line graph</strong>. Line graphs are distinguished by their order and can be referred to as <span class="math inline">\(L_n\)</span>, where <span class="math inline">\(n\)</span> is the number of nodes. Thus, <span class="math inline">\(L_5\)</span> is the line graph shown in <a href="#fig-trees-1">Figure&nbsp;<span>14.3 (a)</span></a>; a line graph with five nodes.</p>
 <p>What are line graphs useful for? Well, they can be used to model the social phenomenon known as the “telephone game.” We can set up people in a line graph in a laboratory, have nodes pass a message, a piece of gossip, or a story along the line, and see how different the original message relayed by <span class="math inline">\(A\)</span> is by the time it gets to <span class="math inline">\(E\)</span>. Obviously, the longer the number of edges in the line, the more distortion we should expect at the other end.</p>
 </section>
-<section id="the-star-graph" class="level2" data-number="14.3">
-<h2 data-number="14.3" class="anchored" data-anchor-id="the-star-graph"><span class="header-section-number">14.3</span> The Star Graph</h2>
-<p>Note also the graph that is just a central node connected to all the other <strong>end-point</strong> nodes, which are not themselves connected to one another; for example, <a href="#fig-trees-3">Figure&nbsp;<span>14.2 (c)</span></a> also counts as a tree. This graph is sometimes called the <strong>star graph</strong>. As with line graphs, we can refer to star graphs by a letter and a number indicating their order, such as <span class="math inline">\(S_n\)</span>. Thus, <span class="math inline">\(S_5\)</span> is the star graph with five nodes as in <a href="#fig-trees-3">Figure&nbsp;<span>14.2 (c)</span></a>.</p>
+<section id="the-star-graph" class="level3" data-number="14.3.2">
+<h3 data-number="14.3.2" class="anchored" data-anchor-id="the-star-graph"><span class="header-section-number">14.3.2</span> The Star Graph</h3>
+<p>Note also the graph that is just a central node connected to all the other <strong>end-point</strong> nodes, which are not themselves connected to one another; for example, <a href="#fig-trees-2">Figure&nbsp;<span>14.3 (b)</span></a> also counts as a tree. This graph is sometimes called the <strong>star graph</strong>. As with line graphs, we can refer to star graphs by a letter and a number indicating their order, such as <span class="math inline">\(S_n\)</span>. Thus, <span class="math inline">\(S_5\)</span> is the star graph with five nodes as in <a href="#fig-trees-2">Figure&nbsp;<span>14.3 (b)</span></a>.</p>
 <p>Star graphs are useful for modeling centralized systems, such as the airport network we saw in <a href="lesson-theory-what-are-networks.html"><span>Chapter&nbsp;1</span></a>. Such <strong>hub-spoke</strong> systems feature a central node (the hub) connected to a bunch of end-point nodes not connected to one another (the spokes), as when a big airport (like LAX) sends flights to smaller regional airports. In this system, LAX is the “hub” at the center of the star, and the smaller airports are the “spokes” at the end.</p>
-<div id="fig-trees" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+<div id="fig-trees" class="cell quarto-layout-panel">
 <figure class="figure">
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
 <div id="fig-trees-1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="lesson-graphs-trees_files/figure-html/fig-trees-1.png" class="img-fluid figure-img" data-ref-parent="fig-trees" width="768"></p>
-<p></p><figcaption class="figure-caption">(a) Binary Graph.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">(a) Line Graph.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -604,7 +673,7 @@ div.csl-indent {
 <div id="fig-trees-2" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="lesson-graphs-trees_files/figure-html/fig-trees-2.png" class="img-fluid figure-img" data-ref-parent="fig-trees" width="768"></p>
-<p></p><figcaption class="figure-caption">(b) Line Graph.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">(b) Star Graph.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -614,55 +683,32 @@ div.csl-indent {
 <div id="fig-trees-3" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="lesson-graphs-trees_files/figure-html/fig-trees-3.png" class="img-fluid figure-img" data-ref-parent="fig-trees" width="768"></p>
-<p></p><figcaption class="figure-caption">(c) Star Graph.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">(c) Caterpillar Graph</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;14.2: Two tree graphs with five nodes.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;14.3: Different Types of Tree Graphs.</figcaption><p></p>
 </figure>
 </div>
 </section>
-<section id="caterpillar-graphs" class="level2" data-number="14.4">
-<h2 data-number="14.4" class="anchored" data-anchor-id="caterpillar-graphs"><span class="header-section-number">14.4</span> Caterpillar Graphs</h2>
-<p>Tree graphs with an <em>even number</em> of nodes can sometimes be drawn like the ones in <a href="#fig-caterpillars">Figure&nbsp;<span>14.3</span></a>. This is a line graph on top, with edges sticking out of each node, connecting to an equal number of ** endpoint ** nodes (half of the other nodes in the graph).</p>
-<p>Because of the shape they form, these tree graphs are sometimes called <strong>caterpillar graphs</strong>, with the line graph at the top playing the role of the caterpillar’s “body” and the edges incident to the end point nodes playing the role of the “legs.” <a href="#fig-caterpillars">Figure&nbsp;<span>14.3</span></a>(a) shows a caterpillar graph of order six, and <a href="#fig-caterpillars">Figure&nbsp;<span>14.3</span></a>(b) shows a caterpillar graph of order eight.</p>
-<div id="fig-caterpillars" class="cell quarto-layout-panel" data-fig-cap-location="margin">
-<figure class="figure">
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-caterpillars-1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="lesson-graphs-trees_files/figure-html/fig-caterpillars-1.png" class="img-fluid figure-img" data-ref-parent="fig-caterpillars" width="768"></p>
-<p></p><figcaption class="figure-caption">(a) Six nodes.</figcaption><p></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-caterpillars-2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="lesson-graphs-trees_files/figure-html/fig-caterpillars-2.png" class="img-fluid figure-img" data-ref-parent="fig-caterpillars" width="768"></p>
-<p></p><figcaption class="figure-caption">(b) Eight nodes.</figcaption><p></p>
-</figure>
-</div>
-</div>
-</div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;14.3: Caterpillar graphs.</figcaption><p></p>
-</figure>
-</div>
-<p>Like other graphs, tree graphs can be directed and undirected. The graphs shown in <a href="#fig-trees">Figure&nbsp;<span>14.2</span></a> and <a href="#fig-caterpillars">Figure&nbsp;<span>14.3</span></a> are undirected trees.</p>
+<section id="caterpillar-graphs" class="level3" data-number="14.3.3">
+<h3 data-number="14.3.3" class="anchored" data-anchor-id="caterpillar-graphs"><span class="header-section-number">14.3.3</span> Caterpillar Graphs</h3>
+<p>Tree graphs with an <em>even number</em> of nodes can sometimes be drawn like the ones in <a href="#fig-trees-3">Figure&nbsp;<span>14.3 (c)</span></a>. This is a line graph on top, with edges sticking out of each node, connecting to an equal number of ** endpoint ** nodes (half of the other nodes in the graph).</p>
+<p>Because of the shape they form, these tree graphs are sometimes called <strong>caterpillar graphs</strong>, with the line graph at the top playing the role of the caterpillar’s “body” and the edges incident to the end point pendant nodes playing the role of the “legs.” <a href="#fig-trees-3">Figure&nbsp;<span>14.3 (c)</span></a> is a caterpillar graph of order eight.</p>
 </section>
-<section id="graph-efficiency" class="level2" data-number="14.5">
-<h2 data-number="14.5" class="anchored" data-anchor-id="graph-efficiency"><span class="header-section-number">14.5</span> Graph Efficiency</h2>
+</section>
+<section id="graph-efficiency" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="graph-efficiency"><span class="header-section-number">14.4</span> Graph Efficiency</h2>
 <p>Using some of the properties of tree graphs mentioned above, <span class="citation" data-cites="krackhardt94">Krackhardt (<a href="#ref-krackhardt94" role="doc-biblioref">1994</a>)</span> proposes a measure for how economical the connectivity of a given graph is called the <strong>graph efficiency</strong> (<span class="math inline">\(Eff(G)\)</span>).</p>
 <p>According to Krackhardt, a graph is efficiently connected if its connectivity is accomplished using the minimum possible number of edges. Thus, a tree graph is a maximally efficient graph <span class="math inline">\(Eff(G) = 1.0\)</span>. The idea is then to compare an observed graph with a tree of the same order and see how closely it resembles it.</p>
 <p>Krackhardt proposes the following formula to compute the efficiency of a graph:</p>
 <p><span id="eq-eff"><span class="math display">\[
 Eff(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]
-\tag{14.5}\]</span></span></p>
-<p>Where <span class="math inline">\(m\)</span> is the number of edges and <span class="math inline">\(n\)</span> is the number of nodes. Note that when the graph <span class="math inline">\(G\)</span> is a tree, the graph <span class="math inline">\(m = n - 1\)</span>. This means that the numerator of <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a> turns into: <span class="math inline">\(2(n - 1 -n + 1) = 2 \times 0 = 0\)</span>. This means the whole fraction on the right side of <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a> is zero, and <span class="math inline">\(1 - 0 = 1.0\)</span>, which is maximum efficiency.</p>
-<p>As the graph deviates from that by having more edges than a tree, then the fraction on the right side of <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a> turns into a number that approaches 1.0, which means that the efficiency becomes smaller when we subtract that number from 1.</p>
-<div id="fig-eff" class="cell quarto-layout-panel" data-fig-cap-location="margin">
+\tag{14.8}\]</span></span></p>
+<p>Where <span class="math inline">\(m\)</span> is the number of edges and <span class="math inline">\(n\)</span> is the number of nodes. Note that when the graph <span class="math inline">\(G\)</span> is a tree, the graph <span class="math inline">\(m = n - 1\)</span>. This means that the numerator of <a href="#eq-eff">Equation&nbsp;<span>14.8</span></a> turns into: <span class="math inline">\(2(n - 1 -n + 1) = 2 \times 0 = 0\)</span>. This means the whole fraction on the right side of <a href="#eq-eff">Equation&nbsp;<span>14.8</span></a> is zero, and <span class="math inline">\(1 - 0 = 1.0\)</span>, which is maximum efficiency.</p>
+<p>As the graph deviates from that by having more edges than a tree, then the fraction on the right side of <a href="#eq-eff">Equation&nbsp;<span>14.8</span></a> turns into a number that approaches 1.0, which means that the efficiency becomes smaller when we subtract that number from 1.</p>
+<div id="fig-eff" class="cell quarto-layout-panel">
 <figure class="figure">
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
@@ -700,8 +746,8 @@ Eff(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]
 1 - \left[\frac{2 \times 4}{30}\right] = 1 - \left[\frac{8}{30}\right] = 1 - 0.27 = 0.73
 \]</span></p>
 <p>So it looks like the graph in <a href="#fig-eff-2">Figure&nbsp;<span>14.4 (b)</span></a> is more efficiently connected than the one shown in <a href="#fig-eff-1">Figure&nbsp;<span>14.4 (a)</span></a>!</p>
-<p>Note also that the <strong>complete graph</strong> of any order is maximally inefficient according to <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a>. For instance, we know from <a href="lesson-graphs-metrics.html"><span>Chapter&nbsp;7</span></a> that the complete <strong>undirected graph</strong> of order five has to have <span class="math inline">\(5(5-1) \div 2\)</span> edges (the <strong>graph maximum size</strong>), which is equal to <span class="math inline">\((5 \times 4) \div 2 = 10\)</span>.</p>
-<p>So when we substitute these numbers into <a href="#eq-eff">Equation&nbsp;<span>14.5</span></a>, we get:</p>
+<p>Note also that the <strong>complete graph</strong> of any order is maximally inefficient according to <a href="#eq-eff">Equation&nbsp;<span>14.8</span></a>. For instance, we know from <a href="lesson-graphs-metrics.html"><span>Chapter&nbsp;7</span></a> that the complete <strong>undirected graph</strong> of order five has to have <span class="math inline">\(5(5-1) \div 2\)</span> edges (the <strong>graph maximum size</strong>), which is equal to <span class="math inline">\((5 \times 4) \div 2 = 10\)</span>.</p>
+<p>So when we substitute these numbers into <a href="#eq-eff">Equation&nbsp;<span>14.8</span></a>, we get:</p>
 <p><span class="math display">\[
 1 - \left[\frac{2(10 - 5 + 1)}{(5-1)(5-2)}\right] = 1 - \left[\frac{2(5 + 1)}{4 \times 3}\right] =
 \]</span></p>
@@ -709,6 +755,55 @@ Eff(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]
 1 - \left[\frac{2 \times 6}{12}\right] = 1 - \left[\frac{12}{12}\right] = 1 - 1 = 0
 \]</span></p>
 <p>Showing that the <strong>complete graph</strong> is minimally efficient!</p>
+</section>
+<section id="spanning-trees" class="level2" data-number="14.5">
+<h2 data-number="14.5" class="anchored" data-anchor-id="spanning-trees"><span class="header-section-number">14.5</span> Spanning Trees</h2>
+<p>A <strong>connected subgraph</strong> of a larger graph (see <a href="lesson-graphs-subgraphs.html"><span>Chapter&nbsp;4</span></a>) that contains every node of the original graph but that is also a <strong>tree graph</strong> as defined earlier, is called a <strong>spanning tree</strong> of the original graph.</p>
+<p><a href="#fig-span-1">Figure&nbsp;<span>14.5 (a)</span></a> shows a standard undirected graph with order six and size eleven (six nodes eleven edges). Obviously that graph is not a tree, as it contains many, many cycles (e.g., AEDA, FBEDF, BAECB, etc.). However, by deleting the edges that form those cycles we can create a tree graph that keeps everyone connected but pares down the number of edges from the original eleven to the <span class="math inline">\(n - 1 = 6 - 1 = 5\)</span> we need to create a tree from the original graph.</p>
+<div id="fig-span" class="cell quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-span-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-span-1.png" class="img-fluid figure-img" data-ref-parent="fig-span" width="768"></p>
+<p></p><figcaption class="figure-caption">(a) A graph with six nodes and eleven edges.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-span-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-span-2.png" class="img-fluid figure-img" data-ref-parent="fig-span" width="768"></p>
+<p></p><figcaption class="figure-caption">(b) A spanning tree from a graph with six nodes and eleven edges.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-span-3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-span-3.png" class="img-fluid figure-img" data-ref-parent="fig-span" width="768"></p>
+<p></p><figcaption class="figure-caption">(c) Another spanning tree from a graph with six nodes and eleven edges.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-span-4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="lesson-graphs-trees_files/figure-html/fig-span-4.png" class="img-fluid figure-img" data-ref-parent="fig-span" width="768"></p>
+<p></p><figcaption class="figure-caption">(d) Yet another spanning tree from a graph with six nodes and eleven edges.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;14.5: One graph and three of its spanning trees.</figcaption><p></p>
+</figure>
+</div>
+<p>Such a spanning tree obtained by edge deletion from <a href="#fig-span-1">Figure&nbsp;<span>14.5 (a)</span></a> is shown in <a href="#fig-span-2">Figure&nbsp;<span>14.5 (b)</span></a>. We can see that <a href="#fig-span-2">Figure&nbsp;<span>14.5 (b)</span></a> is just an <strong>edge-deleted subgraph</strong> (see <a href="lesson-graphs-subgraphs.html"><span>Chapter&nbsp;4</span></a>) of <a href="#fig-span-1">Figure&nbsp;<span>14.5 (a)</span></a> obtained by deleting the <span class="math inline">\(\{AF, DF, AD, AE, AC, BE\}\)</span> edges.</p>
+<p>Generally, there will be multiple ways of obtaining a spanning tree from a graph via edge deletion that results in different spanning trees. For instance, <a href="#fig-span-3">Figure&nbsp;<span>14.5 (c)</span></a> is another spanning tree obtained from <a href="#fig-span-1">Figure&nbsp;<span>14.5 (a)</span></a>, obtained by deleting the <span class="math inline">\(\{AF, AD,AC, BE, BC, DE\}\)</span> from the original. <a href="#fig-span-4">Figure&nbsp;<span>14.5 (d)</span></a> shows yet another spanning tree obtained from <a href="#fig-span-1">Figure&nbsp;<span>14.5 (a)</span></a>.</p>
+<p>Note that the three graphs in <a href="#fig-span-2">Figure&nbsp;<span>14.5 (b)</span></a>, <a href="#fig-span-3">Figure&nbsp;<span>14.5 (c)</span></a>, and <a href="#fig-span-4">Figure&nbsp;<span>14.5 (d)</span></a> all count as tree graphs. They all have five edges (as we would expect a tree graph with six nodes to have), all of the edges are <strong>bridges</strong> (removing one would disconnect the graph), and adding just one more edge would create a <strong>cycle</strong>.</p>
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
