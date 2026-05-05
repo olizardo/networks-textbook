@@ -8,11 +8,11 @@
   require(patchwork)
 ```
 
-If a graph is both **connected** *and* has no **cycles**, then it is **tree graph** [@benjamin17, p. 68]. The four tree graphs with five nodes are shown in @fig-trees. Recall from @sec-cycles in @sec-indirect, that a cycle is a **path** (as defined in @sec-paths) that begins and ends with the same node. Thus in a tree graph, you can never start with a node and trace a sequence of distinct edges and nodes that take you back to the node you started with!
+If a graph is both **connected** *and* has no **cycles**, then it is a **tree graph** [@benjamin17, p. 68]. The three tree graphs with five nodes are shown in @fig-trees. Recall from @sec-cycles in @sec-indirect, that a cycle is a **path** (as defined in @sec-paths) that begins and ends with the same node. Thus, in a tree graph, you can never start with a node and trace a sequence of distinct edges and nodes that take you back to the node you started with!
 
 ## Properties of Tree Graphs 
 
-Tree graphs have the interesting property that their number of edges $m$ is always equal to their number of nodes $n$ minus one. Thus, if a graph is a tree graph or order five, we know it *must* contain four edges (it must be of size four). For instance, in @fig-trees, all the graphs have four links. If we were to add a fifth link connecting any pair of nodes to any of the graphs, it would create a cycle (of some length) and thus the graph would no longer count as a tree graph! Try it for yourself and see. 
+Tree graphs have the interesting property that their number of edges $m$ is always equal to their number of nodes $n$ minus one. Thus, if a graph is a tree graph or order five, we know it *must* contain four edges (it must be of size four). For instance, in @fig-trees, all the graphs have four links. If we were to add a fifth link connecting any pair of nodes in any of the graphs, it would create a cycle (of some length), and thus the graph would no longer be a tree! Try it for yourself and see. 
 
 In equation form, if $G(n, m)$ is a tree graph, then:
 
@@ -26,9 +26,9 @@ $$
   n = m + 1
 $${#eq-tree2}
 
-This equation says that the order of a tree graph is equal to the number of edges plus one.
+This equation states that the order of a tree graph equals the number of edges plus 1.
 
-Note that from @eq-sumki in @sec-degsum that the sum of the degrees of an undirected graph equals twice the number of edges ($2m$). Applying this reasoning, we can see that there is a special formula for the sum of degrees of an undirected tree graph. The reason is that if we know that:
+Note that, from @eq-sumki in @sec-degsum, the sum of the degrees of an undirected graph equals twice the number of edges ($2m$). Applying this reasoning, we can see that there is a special formula for the sum of degrees of an undirected tree graph. The reason is that if we know that:
 
 $$
 \sum_i k_i = 2m
@@ -40,23 +40,29 @@ $$
 \sum_i k_i = 2(n-1) = 2n - 2
 $${#eq-tree3}
 
-Thus in a tree graph, the sum of degrees will always equal to twice the number of nodes minus two!
+Thus, in a tree graph, the sum of degrees will always equal twice the number of nodes minus two!
 
 Tree graphs have four other unique properties. 
 
-1. First, if $G$ is a tree graph, then every node $V$ in $G$ is linked to every other node via a *single* path.
-1. Second, the one path connecting each pair of nodes is *unique*, that is, a sequence of nodes of and edges that is distinctive for that node pair and does not repeat for any other pair. 
-1. Third, removing even a single edge of a tree graph disconnects the graph. Every edge of a tree graph thus counts as a **bridge** as discussed in @sec-indirect. 
-1. Fourth, following (3), if we disconnect a tree graph by removing an edge, the resulting **connected components** are also trees. 
+1. If $G$ is a tree graph, then every node $V$ in $G$ is linked to every other node via a *single* path.
+1. The one path connecting each pair of nodes is *unique*, that is, a sequence of nodes and edges that is distinctive for that node pair and does not repeat for any other pair. 
+1. Removing even a single edge of a tree graph disconnects the graph. Every edge of a tree graph thus counts as a **bridge** as discussed in @sec-indirect. 
+1. Following (3), if we disconnect a tree graph by removing an edge, the resulting **connected components** are also trees. 
 
-A disconnected graph whose components are trees is called (you guessed it) a **forest**. @fig-forest is a forest. 
+We can verify properties (1) and (2) by examining @fig-trees-2. There's only one path connected $A$ and $D$, and that's $\{AB, BD\}$. In this same way, there's only one path connecting $A$ and $E$, and that's $\{AB, BE\}$. Both of those paths are unique.
+
+We can check property (3) by imagining the removal of a single edge from any of the graphs shown in @fig-trees. You can verify that this would indeed disconnect those graphs. This means that *every* edge in a tree graph is a **bridge** as defined in @sec-graphconnectivity. 
+
+Another way of saying the last thing is that trees are **minimally connected** graphs. That is, they are connected graphs that are connected using the *smallest* possible number of edges that we can use to connect a graph with that number of nodes.  
+
+A disconnected graph whose components are trees is called (you guessed it) a **forest**. @fig-forest is a forest. So a forest is a disconnected graph with no cycles in any of its components. 
 
 ```{r}
 #| label: fig-trees
 #| fig-width: 8
 #| fig-height: 8
 #| layout-ncol: 2
-#| fig-cap: "Tree graphs with five nodes"
+#| fig-cap: "Tree graphs with five nodes."
 #| fig-cap-location: margin
 #| fig-subcap:
 #|   - ""
@@ -65,7 +71,7 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
 #|   - ""
 
   gr <- create_tree(n = 5, children = 1) 
-  gr <- mutate(gr, name = toupper(letters[1:5])) 
+  gr <- mutate(gr, name = LETTERS[1:5])
   l <- ggraph(gr, layout = 'tree')
   l <- as.matrix(l$data[, 1:2])
   l[,"x"] <- c(0, 1, 2, 3, 4)
@@ -77,7 +83,7 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
   p1 <- p + theme_graph() 
   p1
   gr <- create_tree(n = 5, children = 2) 
-  gr <- mutate(gr, name = toupper(letters[1:5])) 
+  gr <- mutate(gr, name = LETTERS[1:5])
   p <- ggraph(gr, layout = 'tree')
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
   p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
@@ -86,7 +92,7 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
   p2
 
   gr <- create_tree(n = 5, children = 4) 
-  gr <- mutate(gr, name = toupper(letters[1:5])) 
+  gr <- mutate(gr, name = LETTERS[1:5])
   p <- ggraph(gr, layout = 'star')
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
   p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
@@ -99,11 +105,11 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
 #| label: fig-forest
 #| fig-width: 12
 #| fig-height: 8
-#| fig-cap: "A Forest with ten nodes and two components"
+#| fig-cap: "A Forest with ten nodes and two components."
 #| fig-cap-location: margin
   set.seed(357)
   gr <- create_tree(n = 10, children = 2) 
-  gr <- mutate(gr, name = toupper(letters[1:10]))
+  gr <- mutate(gr, name = LETTERS[1:10])
   gr <- gr - edge("A|B")
   p <- ggraph(gr, layout = 'kk')
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
@@ -116,32 +122,31 @@ A disconnected graph whose components are trees is called (you guessed it) a **f
 As @fig-trees shows, tree graphs come in different configurations, some of which are of particular note. 
 
 ## The Line Graph
+Note, for instance, that @fig-trees-1 is just a straight path between two nodes. This graph is a tree because it is connected and has no cycles. A graph like @fig-trees-1, which is just a single long path with some set of nodes, is also called **the line graph**. Line graphs are distinguished by their order and can be referred to as $L_n$, where $n$ is the number of nodes. Thus, $L_5$ is the line graph shown in @fig-trees-1; a line graph with five nodes. 
 
-Note for instance, that @fig-trees(a) is just a straight path between two nodes. This graph counts as a tree as it is both connected and has no cycles. A graph like @fig-trees(a) which are just one long path featuring some set of nodes is also called **the line graph**. Line graphs are distinguished by their order and can be referred as $L_n$ where $n$ is the number of nodes. Thus, $L_5$ is the line graph shown in @fig-trees(a); a line graph with five nodes. 
-
-What are line graphs useful for? Well, they can be used to model the social phenomenon known as a the "telephone game." We can set up people in a line graph in a laboratory, have nodes pass a message, piece of gossip or a story along the line and see how different the original message relayed by $A$ is by the time it gets to $E$. Obviously, the longer the number of edges in the line, the more distortion we should expect at the other end. 
+What are line graphs useful for? Well, they can be used to model the social phenomenon known as the "telephone game." We can set up people in a line graph in a laboratory, have nodes pass a message, a piece of gossip, or a story along the line, and see how different the original message relayed by $A$ is by the time it gets to $E$. Obviously, the longer the number of edges in the line, the more distortion we should expect at the other end. 
 
 ## The Star Graph
 
-Note also the graph that is just a central node connected to all the other **end-point** nodes who are not themselves connected to one another, like @fig-trees(d) also counts as a tree. This graph is sometimes called the **star graph**. Like line graphs, we can refer to star graphs by using a letter and a number indicating their order like $S_n$. Thus, $S_5$ is the star graph with five nodes as in @fig-trees(d).
+Note also the graph that is just a central node connected to all the other **end-point** nodes, which are not themselves connected to one another; for example, @fig-trees-4 also counts as a tree. This graph is sometimes called the **star graph**. As with line graphs, we can refer to star graphs by a letter and a number indicating their order, such as $S_n$. Thus, $S_5$ is the star graph with five nodes as in @fig-trees-4.
 
-Star graphs are useful for modelling centralized systems like the airport network we saw in @sec-networks. Such **hub-spoke** systems feature a central node (the hub) connected to a bunch of end-point nodes not connected to one another (the spokes), as when a big airport (like LAX) sends flights to smaller regional airports. In this system, LAX is the "hub" at the center of the star and the smaller airports are the "spokes" at the end. 
+Star graphs are useful for modeling centralized systems, such as the airport network we saw in @sec-networks. Such **hub-spoke** systems feature a central node (the hub) connected to a bunch of end-point nodes not connected to one another (the spokes), as when a big airport (like LAX) sends flights to smaller regional airports. In this system, LAX is the "hub" at the center of the star, and the smaller airports are the "spokes" at the end. 
 
 ## Caterpillar Graphs
-Tree graphs with an *even number* of nodes can sometimes be drawn like the ones in @fig-caterpillars. This is a line graph on top, with edges sticking out of each node in the line graph connecting to an equal number (half the other nodes in the graph) of **end point** nodes. 
+Tree graphs with an *even number* of nodes can sometimes be drawn like the ones in @fig-caterpillars. This is a line graph on top, with edges sticking out of each node, connecting to an equal number of ** endpoint ** nodes (half of the other nodes in the graph). 
 
-Because of the shape they form, these tree graphs are sometimes called **caterpillar graphs**, with the line graph at the top playing the role of the caterpillar's "body" and the edges incident to the end point nodes the role of the "legs." @fig-caterpillars(a) shows a caterpillar graph of order six and @fig-caterpillars(b) shows a caterpillar graph of order eight.   
+Because of the shape they form, these tree graphs are sometimes called **caterpillar graphs**, with the line graph at the top playing the role of the caterpillar’s "body" and the edges incident to the end point nodes playing the role of the "legs." @fig-caterpillars(a) shows a caterpillar graph of order six, and @fig-caterpillars(b) shows a caterpillar graph of order eight.   
 
 ```{r}
 #| label: fig-caterpillars
 #| fig-width: 8
 #| fig-height: 8
 #| layout-ncol: 2
-#| fig-cap: "Caterpillar graphs"
+#| fig-cap: "Caterpillar graphs."
 #| fig-cap-location: margin
 #| fig-subcap:
-#|   - "Six nodes"
-#|   - "Eight nodes"
+#|   - "Six nodes."
+#|   - "Eight nodes."
 
   fr <- c("A", "A", "C", "C", "E")
   to <- c("B", "C", "D", "E", "F")
@@ -177,3 +182,89 @@ Because of the shape they form, these tree graphs are sometimes called **caterpi
 
 
 Like other graphs, tree graphs can be directed and undirected. The graphs shown in @fig-trees and @fig-caterpillars are undirected trees. 
+
+## Graph Efficiency
+
+Using some of the properties of tree graphs mentioned above, @krackhardt94 proposes a measure for how economical the connectivity of a given graph is called the **graph efficiency** ($Eff(G)$). 
+
+According to Krackhardt, a graph is efficiently connected if its connectivity is achieved using the minimum possible number of edges. Thus, a tree graph is a maximally efficient graph $Eff(G) = 1.0$. The idea is then to compare an observed graph and see how closely it resembles a tree of the same order. 
+
+Krackhardt proposes the following formula to compute the efficiency of a graph:
+
+$$
+Eff(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]
+$$ {#eq-eff}
+
+Where $m$ is the number of edges and $n$ is the number of nodes. Note that when the graph $G$ is a tree, the graph $m = n - 1$. This means that the numerator of @eq-eff turns into: $2(n - 1 -n + 1) = 2 \times 0 = 0$. This means the whole fraction on the right side of @eq-eff is zero, and $1 - 0 = 1.0$, which is maximum efficiency. 
+
+As the graph deviates from that by having more edges than a tree, then the fraction on the right side of @eq-eff turns into a number that approaches 1.0, which means that the efficiency becomes smaller when we subtract that number from 1.
+
+
+```{r}
+#| label: fig-eff
+#| fig-width: 8
+#| fig-height: 8
+#| layout-ncol: 2
+#| fig-cap: "Two simple graphs."
+#| fig-cap-location: margin
+#| fig-subcap:
+#|   - ""
+#|   - ""
+
+  gr1 <- play_gnm(n = 5, m = 7, directed = FALSE, loops = FALSE)
+  gr2 <- play_gnm(n = 7, m = 10, directed = FALSE, loops = FALSE)
+  gr1 <- mutate(gr1, name = LETTERS[1:5])
+  gr2 <- mutate(gr2, name = LETTERS[1:7])
+  p <- ggraph(gr1, layout = 'nicely')
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p1 <- p + theme_graph() 
+  p1
+
+  p <- ggraph(gr2, layout = 'nicely')
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p2 <- p + theme_graph() 
+  p2
+```
+
+Let's consider an example. Of the two graphs shown in @fig-eff, which is the one that's most efficiently connected? Well, the graph in @fig-eff-1 has five nodes and seven edges, which means that its efficiency is equal to:
+
+$$
+1 - \left[\frac{2(7 - 5 + 1)}{(5-1)(5-2)}\right] = 1 - \left[\frac{2(2 + 1)}{4 \times 3}\right] = 
+$$
+
+$$
+1 - \left[\frac{2 \times 3}{12}\right] = 1 - \left[\frac{6}{12}\right] = 1 - 0.5 = 0.5
+$$
+
+The graph in @fig-eff-2, on the other hand, has seven nodes and ten edges, which means that its efficiency is equal to:
+
+$$
+1 - \left[\frac{2(10 - 7 + 1)}{(7-1)(7-2)}\right] = 1 - \left[\frac{2(3 + 1)}{6 \times 5}\right] = 
+$$
+
+$$
+1 - \left[\frac{2 \times 4}{30}\right] = 1 - \left[\frac{8}{30}\right] = 1 - 0.27 = 0.73
+$$
+
+So it looks like the graph in @fig-eff-2 is more efficiently connected than the one shown in @fig-eff-1!
+
+Note also that the **complete graph** of any order is maximally inefficient according to @eq-eff. For instance, we know that the complete graph of order five has to have $5(5-1) \div 2$ edges (the **graph maximum size**), which is equal to $(5 \times 4) \div 2 = 10$. 
+
+So when we substitute these numbers into @eq-eff, we get:
+
+$$
+1 - \left[\frac{2(10 - 5 + 1)}{(5-1)(5-2)}\right] = 1 - \left[\frac{2(5 + 1)}{4 \times 3}\right] = 
+$$
+
+$$
+1 - \left[\frac{2 \times 6}{12}\right] = 1 - \left[\frac{12}{12}\right] = 1 - 1 = 0
+$$
+
+Showing that the **complete graph** is minimally efficient!
+
+
+## References{.unnumbered}
