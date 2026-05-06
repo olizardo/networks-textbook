@@ -70,13 +70,11 @@ gr <- as_tbl_graph(data.frame(from = a, to = b)) %>%
 #| label: tbl-adjmat
 #| tbl-cap: "Adjacency matrix corresponding to a directed graph."
 #| tbl-cap-location: margin
-
   A <- as.matrix(as_adjacency_matrix(gr))
   kbl(A, format = "html", align = "c") %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
-
 
 Now, let's assign everyone "one" hub point to begin with. That means that the the $\mathbf{v_1}$ column vector that goes into @eq-klein1 will just be a $12 \times 1$ column vector full of ones. This is shown in @tbl-klein-1
 
@@ -108,7 +106,7 @@ Now all we need to do is plug the authority score vector $\mathbf{u_1}$ shown in
   kbl(round(a/max(a), 2), format = "html", align = "c", col.names = NULL) %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-  kbl(round(hit.res$m.h[,2], 2), format = "html", align = "c", col.names = NULL) %>% 
+  kbl(round(hit.res$h, 2), format = "html", align = "c", col.names = NULL) %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
@@ -122,8 +120,6 @@ Of course, the point is to keep this iteration going until we have minimal diffe
 #| tbl-subcap: 
 #|   - "Final authority scores"
 #|   - "Final hub scores"
-  a <- round(hit.res$m.a[, hit.res$k], 2)
-  b <- round(hit.res$m.h[, hit.res$k], 2)
   kbl(sort(a, decreasing = T), format = "html", align = "c", col.names = NULL) %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))  
@@ -186,6 +182,8 @@ C\mathbf{v} = \lambda^C \mathbf{v}
 $$ {#eq-eig2}
 
 Which means that $\mathbf{u}$ in @eq-eig1 is an eigenvector of the common in-neighbors matrix $B$ and $\mathbf{v}$ in @eq-eig2 is an eigenvector of the common out-neighbors matrix $C$ (with $\lambda^B$ and $\lambda^C$ being the corresponding eigenvalues). In fact, $\mathbf{u}$ and $\mathbf{v}$ are the leading (first) eigenvectors of the common in and out-neighbors matrices (respectively). The absolute values of these two eigenvectors are shown in @tbl-hits-eig. 
+
+
 
 ```{r}
 #| label: tbl-hits-eig
