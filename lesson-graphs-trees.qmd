@@ -10,17 +10,18 @@
 
 If a graph is both **connected** *and* has no **cycles**, then it is a **tree graph** [@benjamin17, p. 68].  Recall from @sec-cycles in @sec-indirect, that a cycle is a **path** (as defined in @sec-paths) that begins and ends with the same node. Thus, in a tree graph, you can never start with a node and trace a sequence of distinct edges and nodes that take you back to the node you started with! 
 
-@fig-tree shows a tree graph with ten nodes.
+@fig-tree-1 shows a tree graph with ten nodes.
 
 ```{r}
 #| label: fig-tree
 #| fig-width: 8
 #| fig-height: 12
 #| layout-ncol: 2
-#| fig-cap: "Two graphs."
+#| fig-cap: "Three graphs."
 #| fig-subcap:
 #|   - "A tree graph with ten nodes."
 #|   - "Just a plain old graph with ten nodes."
+#|   - "A disconnected tree graph (a forest)."
 
   set.seed(123)
   gr <- sample_tree(10, directed = FALSE)
@@ -33,8 +34,16 @@ If a graph is both **connected** *and* has no **cycles**, then it is a **tree gr
   p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
   p <- p + theme_graph() 
   p
-  gr <- add_edges(gr, c(2, 8))
-  p <- ggraph(gr, layout = l)
+  gr2 <- add_edges(gr, c(2, 8))
+  p <- ggraph(gr2, layout = l)
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+  p <- p + theme_graph() 
+  p
+
+  gr3 <- gr - edge("D|F")
+  p <- ggraph(gr3, layout = l)
   p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
   p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
   p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
@@ -42,7 +51,7 @@ If a graph is both **connected** *and* has no **cycles**, then it is a **tree gr
   p
 ```
 
-We already defined tree graphs as connected graphs with no cycles. This means that if we were to add a *single* link connecting any pair of nodes to a tree graph (like the one shown in @fig-tree), it would create a **cycle** (of some length), and thus the graph would no longer be a tree! 
+We already defined tree graphs as connected graphs with no cycles. This means that if we were to add a *single* link connecting any pair of nodes to a tree graph (like the one shown in @fig-tree-1), it would create a **cycle** (of some length), and thus the graph would no longer be a tree! 
 
 For instance, @fig-tree-2 is just like @fig-tree-1, except we added the $\{BH\}$ edge. Note that after doing this we have created the $BFJEHB$ cycle (a cycle of length five), and thus @fig-tree-2 no longer qualifies as a tree graph. So one property of tree graphs goes like this: A graph is a tree graph *if* adding a single edge creates a cycle of some length. 
 
@@ -66,7 +75,9 @@ $${#eq-tree2}
 This equation states that the order of a tree graph equals the number of edges plus 1.
 
 ### Tree Graph Sum of Degrees
-Note that, from @eq-sumki in @sec-degsum, the sum of the degrees of an undirected graph equals twice the number of edges ($2m$). Applying this reasoning, we can see that there is a special formula for the sum of degrees of an undirected tree graph. The reason is that if we know that:
+Note that, from @eq-sumki in @sec-degsum, the sum of the degrees of an undirected graph equals twice the number of edges ($2m$). Applying this reasoning, we can see that there should be a special formula for the sum of degrees of an undirected tree graph. 
+
+The reason is that if we know that:
 
 $$
 \sum_i k_i = 2m
@@ -116,32 +127,17 @@ Tree graphs have four other unique properties.
 1. Removing even a single edge of a tree graph disconnects the graph. Every edge of a tree graph thus counts as a **bridge** as discussed in @sec-indirect. 
 1. Following (3), if we disconnect a tree graph by removing an edge, the resulting **connected components** are also trees. 
 
-We can verify properties (1) and (2) by examining @fig-trees-1. There's only one path connected $A$ and $D$, and that's $\{AB, BD\}$. In this same way, there's only one path connecting $A$ and $E$, and that's $\{AB, BE\}$. Both of those paths are unique.
+We can verify properties (1) and (2) by examining @fig-tree-1. There's only one path connecting nodes $A$ and $E$, and that's $\{AD, DF, FJ, JE\}$. In the same way, there's only one path connecting $A$ and $C$, and that's $\{AD, DF, FJ, JE, EC\}$. Both of those paths are unique.
 
-We can check property (3) by imagining the removal of a single edge from any of the graphs shown in @fig-trees. You can verify that this would indeed disconnect those graphs. This means that *every* edge in a tree graph is a **bridge** as defined in @sec-graphconnectivity. 
+We can check property (3) by imagining the removal of a single edge from any of the graph shown in @fig-tree-1. You can verify that this would indeed disconnect that graph. 
 
-Another way of saying the last thing is that trees are **minimally connected** graphs. That is, they are connected graphs that are connected using the *smallest* possible number of edges that we can use to connect a graph with that number of nodes.  
+For instance, @fig-tree-3 is just the same as @fig-tree-1, except that we have removed the $\{DF\}$ edge. As you can see, the graph is indeed now split into two components.  
 
-## Forests
+This last thing means that *every* edge in a tree graph is a **bridge** as defined in @sec-graphconnectivity. Note that when we disconnect a tree graph by removing an edge (as in @fig-tree-3) then the resulting two components are also tree graphs!
 
-A disconnected graph whose components are trees is called (you guessed it) a **forest**. @fig-forest is a forest. So a forest is a disconnected graph with no cycles in any of its components. 
+Another way of saying the last thing is that trees are **minimally connected** graphs. That is, they are connected graphs that are connected using the *smallest* possible number of edges that we can use to connect a graph with that number of nodes. We will in a bit that this property allows us to define a new graph metric called the **graph efficiency**.
 
-```{r}
-#| label: fig-forest
-#| fig-width: 12
-#| fig-height: 8
-#| fig-cap: "A Forest with ten nodes and two components."
-  set.seed(357)
-  gr <- create_tree(n = 10, children = 2) 
-  gr <- mutate(gr, name = LETTERS[1:10])
-  gr <- gr - edge("A|B")
-  p <- ggraph(gr, layout = 'nicely')
-  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-  p <- p + theme_graph() 
-  p
-```
+A disconnected graph whose components are also trees is called (you guessed it) a **forest**. @fig-tree-3 is a forest with ten nodes. The **giant component** of the forest in @fig-tree-3 contains six nodes $\{B, C, E, F, H, J\}$ and the smaller component (a **line graph** as defined below) contains the other four nodes $\{A, D, G, I\}$
 
 ## Special Types of Tree Graphs
 
@@ -154,7 +150,7 @@ What are line graphs useful for? Well, they can be used to model the social phen
 
 ### The Star Graph
 
-Note also the graph that is just a central node connected to all the other **end-point** nodes, which are not themselves connected to one another; for example, @fig-trees-2 also counts as a tree. This graph is sometimes called the **star graph**. As with line graphs, we can refer to star graphs by a letter and a number indicating their order, such as $S_n$. Thus, $S_5$ is the star graph with five nodes as in @fig-trees-2.
+Note also the graph that is just a central node connected to all the other **end-point** nodes, which are not themselves connected to one another; for example, @fig-trees-2 also counts as a tree. This graph is sometimes called the **star graph**. As with line graphs, we can refer to star graphs by a letter and a number indicating their order, such as $S_n$. Thus, $S_7$ is the star graph with seven nodes as in @fig-trees-2.
 
 Star graphs are useful for modeling centralized systems, such as the airport network we saw in @sec-networks. Such **hub-spoke** systems feature a central node (the hub) connected to a bunch of end-point nodes not connected to one another (the spokes), as when a big airport (like LAX) sends flights to smaller regional airports. In this system, LAX is the "hub" at the center of the star, and the smaller airports are the "spokes" at the end. 
 
@@ -162,7 +158,7 @@ Star graphs are useful for modeling centralized systems, such as the airport net
 #| label: fig-trees
 #| fig-width: 8
 #| fig-height: 8
-#| layout-ncol: 2
+#| layout-ncol: 3
 #| fig-cap: "Different Types of Tree Graphs."
 #| fig-subcap:
 #|   - "Line Graph."
@@ -210,20 +206,20 @@ Star graphs are useful for modeling centralized systems, such as the airport net
 ```
 
 ### Caterpillar Graphs
-Tree graphs with an *even number* of nodes can sometimes be drawn like the ones in @fig-trees-3. This is a line graph on top, with edges sticking out of each node, connecting to an equal number of ** endpoint ** nodes (half of the other nodes in the graph). 
+Tree graphs with an *even number* of nodes can sometimes be drawn like the ones in @fig-trees-3. This is a line graph on top, with edges sticking out of each node, connecting to an equal number of **endpoint** or **pendant** nodes (half of the other nodes in the graph). 
 
 Because of the shape they form, these tree graphs are sometimes called **caterpillar graphs**, with the line graph at the top playing the role of the caterpillar’s "body" and the edges incident to the end point pendant nodes playing the role of the "legs." @fig-trees-3 is a caterpillar graph of order eight.
 
-## Graph Efficiency
+## The Graph Efficiency
 
-Using some of the properties of tree graphs mentioned above, @krackhardt94 proposes a measure for how economical the connectivity of a given graph is called the **graph efficiency** ($Eff(G)$). 
+Using some of the properties of tree graphs mentioned above, @krackhardt94 proposes a measure for how economical the connectivity of a given graph is called the **graph efficiency** $F(G)$. 
 
-According to Krackhardt, a graph is efficiently connected if its connectivity is accomplished using the minimum possible number of edges. Thus, a tree graph is a maximally efficient graph $Eff(G) = 1.0$. The idea is then to compare an observed graph with a tree of the same order and see how closely it resembles it. 
+According to Krackhardt, a graph is efficiently connected if its connectivity is accomplished using the minimum possible number of edges. Thus, a tree graph is a maximally efficient graph $F(G) = 1.0$. The idea is then to compare an observed graph with a tree of the same order and see how closely it resembles it. 
 
 Krackhardt proposes the following formula to compute the efficiency of a graph:
 
 $$
-Eff(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]
+F(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]
 $$ {#eq-eff}
 
 Where $m$ is the number of edges and $n$ is the number of nodes. Note that when the graph $G$ is a tree, the graph $m = n - 1$. This means that the numerator of @eq-eff turns into: $2(n - 1 -n + 1) = 2 \times 0 = 0$. This means the whole fraction on the right side of @eq-eff is zero, and $1 - 0 = 1.0$, which is maximum efficiency. 
