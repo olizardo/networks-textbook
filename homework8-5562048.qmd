@@ -22,9 +22,9 @@ toc: false
 #| fig-cap-location: margin   
 #| fig-height: 12
 #| fig-width: 12
-     set.seed(123)
-     n <- 10
-     gr <- sample_gnp_signed(n, p = 0.27, p_neg = 0.5, 
+     set.seed(4567)
+     n <- 9
+     gr <- sample_gnp_signed(n, p = 0.25, p_neg = 0.45, 
                              directed = TRUE, loops = FALSE)
      V(gr)$name <- LETTERS[1:n]
      p <- ggraph(gr, layout = 'kk') 
@@ -85,8 +85,8 @@ toc: false
 #| fig-cap-location: margin   
 #| fig-height: 12
 #| fig-width: 12
-     set.seed(4567)
-     n <- 6
+     set.seed(334567)
+     n <-7
      gr <- make_full_graph(n, directed = FALSE, loops = FALSE)
      E(gr)$sign <- sample(c(-1,1), ecount(gr), replace = TRUE)
      V(gr)$name <- LETTERS[1:n]
@@ -213,7 +213,7 @@ ANSWER: `r ans.text(ans)`
 #| fig-cap-location: margin   
 #| fig-height: 12
 #| fig-width: 12
-     set.seed(4567)
+     set.seed(334567)
      gr <- sample_islands_signed(2, 4, 1, 24)
      V(gr)$name <- LETTERS[1:8]
      p <- ggraph(gr, layout = 'auto') 
@@ -228,15 +228,22 @@ Cartwright and Harary's **fundamental theory of structural balance** says that i
 
 1. Write down the nodes that belong to each of the two cliques in @fig-grex2:
 
+
+```{r}
+   block_model <- signed_blockmodel(gr, k = 2, alpha = 0.5, annealing = TRUE)
+   n <- LETTERS[1:8]
+```
+
 - First clique:
 
-A, B, C, D
+`r n[which(block_model$membership == 1)]`
+
 
 - Second clique:
 
-E, F, G, H
+`r n[which(block_model$membership == 2)]`
 
-## Clustering 
+<!-- ## Clustering 
 
 ```{r}
 #| label: fig-grex3
@@ -269,5 +276,5 @@ D, E, F
 
 G, H, I
 
-J, K, L
+J, K, L -->
 
