@@ -80,7 +80,7 @@ Now, let's assign everyone "one" hub point to begin with. That means that the th
 
 Thus, when we plug the numbers in @tbl-klein-1 into @eq-klein1, we get a column vector with the entries shown in @tbl-klein-2. Note that these are the **in-degrees** of each node in the graph. This makes sense, because multiplying an adjacency matrix times the **all ones vector** results in a vector that is just the row sums of the original matrix (as we learned in @sec-matmult). 
 
-Multiplying the transpose of the adjacency matrix times the all ones vector gives us the row sums of the transpose, which is the same as the column sums of the original adjacency matrix (which is how we calculate in-degree centrality; see @sec-centrality).
+Multiplying the transpose of the adjacency matrix times the all ones vector gives us the row sums of the transpose, which is the same as the column sums of the original adjacency matrix (which is how we calculate in-degree centrality; see @sec-degcent).
 
 Now all we need to do is plug the authority score vector $\mathbf{u_1}$ shown in @tbl-klein-2 into @eq-klein2 to calculate the new hub score vector $\mathbf{v_2}$ But before we do that we normalize the authority score vector $\mathbf{u_1}$ by dividing by the maximum observed score ($max(\mathbf{u_1}) = 5$, to get the new authority score vector $\mathbf{u_1}$ shown in @tbl-klein-3. We plug in *these* entries into @eq-klein2 and divide by the maximum, to get the hub score vector $\mathbf{v_2}$ shown in @tbl-klein-4. 
 
@@ -93,6 +93,40 @@ Now all we need to do is plug the authority score vector $\mathbf{u_1}$ shown in
 #|   - ""
 #|   - ""
 #|   - ""
+
+  # Calculate final HITS scores iteratively
+  hits_iteration <- function(A, tol = 1e-6, max_iter = 100) {
+    n <- nrow(A)
+    h <- rep(1, n)
+    names(h) <- colnames(A)
+    u <- rep(1, n)
+    names(u) <- colnames(A)
+    h_prev <- h
+    u_prev <- u
+    v2_norm <- NULL
+    for (k in 1:max_iter) {
+      u <- t(A) %*% h
+      u <- u / max(u)
+      h <- A %*% u
+      h <- h / max(h)
+      if (k == 1) {
+        v2_norm <- h
+      }
+      if (max(abs(h - h_prev)) < tol && max(abs(u - u_prev)) < tol) {
+        break
+      }
+      h_prev <- h
+      u_prev <- u
+    }
+    return(list(h_step2 = v2_norm, h = h, u = u, k = k))
+  }
+  res <- hits_iteration(A)
+  hit.res <- list(
+    h = res$h_step2,
+    u = res$u,
+    h_final = res$h,
+    k = res$k
+  )
 
   a <- rep(1, 12)
   names(a) <- LETTERS[1:12]
@@ -120,10 +154,11 @@ Of course, the point is to keep this iteration going until we have minimal diffe
 #| tbl-subcap: 
 #|   - "Final authority scores"
 #|   - "Final hub scores"
+  a <- hit.res$u
   kbl(sort(a, decreasing = T), format = "html", align = "c", col.names = NULL) %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))  
-  a <- A %*% rep(1, 12)
+  b <- hit.res$h_final
   kbl(sort(b, decreasing = T), format = "html", align = "c", col.names = NULL) %>% 
         column_spec(1, bold = TRUE) %>% 
         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
