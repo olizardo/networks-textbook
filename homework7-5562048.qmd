@@ -18,6 +18,33 @@ title: "Homework VII: Ego-Network Metrics"
     c2 <- sample(rainbow_hcl(5), s, replace = TRUE)
     c3 <- sample(rainbow_hcl(4), s, replace = TRUE)
     c4 <- sample(rainbow_hcl(4), s, replace = TRUE)
+    
+    c1_fac <- factor(c1, levels = sort(rainbow_hcl(4)))
+    c2_fac <- factor(c2, levels = sort(rainbow_hcl(5)))
+    c3_fac <- factor(c3, levels = sort(rainbow_hcl(4)))
+    c4_fac <- factor(c4, levels = sort(rainbow_hcl(4)))
+    
+    I_gender <- sum(as.numeric(c1_fac) == 2, na.rm = TRUE)
+    E_gender <- s - I_gender
+    EI_gender <- (E_gender - I_gender) / s
+    
+    I_race <- sum(as.numeric(c2_fac) == 2, na.rm = TRUE)
+    E_race <- s - I_race
+    EI_race <- (E_race - I_race) / s
+    
+    prop_neighbors <- sum(as.numeric(c3_fac) == 1, na.rm = TRUE) / s
+    prop_hispanic <- sum(as.numeric(c2_fac) == 5, na.rm = TRUE) / s
+    prop_high_school <- sum(as.numeric(c4_fac) == 2, na.rm = TRUE) / s
+    
+    H_race <- round(1 - sum((table(c2_fac)/s)^2), 2)
+    H_edu <- round(1 - sum((table(c4_fac)/s)^2), 2)
+    H_gender <- round(1 - sum((table(c1_fac)/s)^2), 2)
+    
+    pref_race_vs_gender <- if (EI_race < EI_gender) "Yes" else "No"
+    div_race_vs_edu <- if (H_race > H_edu) "Yes" else "No"
+    
+    prop_friend_women <- sum(as.numeric(c3_fac) == 4 & as.numeric(c1_fac) == 1, na.rm = TRUE) / s
+    prop_men_women <- sum(as.numeric(c1_fac) %in% c(1, 2), na.rm = TRUE) / s
 
 ```
 
@@ -27,7 +54,7 @@ title: "Homework VII: Ego-Network Metrics"
 ```{r}
 #| label: fig-ego
 #| fig-cap: "Ego Network ties in a hypothetical ego-network."
-#| fig-cap-location: margin  
+#| fig-cap-location: bottom  
 #| fig-subcap:
 #|   - "Ego to alter ties."
 #|   - "Alter to alter ties."
@@ -89,7 +116,7 @@ ANSWER: `r round(edge_density(gr), 3)`
 #|   - "Role relations of alters with Ego."
 #|   - "Educational attainment of alters."
 #| layout-ncol: 2 
-#| fig-cap-location: margin  
+#| fig-cap-location: bottom  
 #| fig-height: 10
 #| fig-width: 10
     gr1 <- create_empty(s, directed = FALSE) %>% 
@@ -138,57 +165,57 @@ ANSWER: `r round(edge_density(gr), 3)`
 
 1. Compute Ego's EI **homophily** index with respect to gender identity.
 
-ANSWER: `r ((s - 4) - 4)/s`
+ANSWER: `r EI_gender`
 
 2. Compute Ego's EI **homophily** index with respect to Ethnoracial identification.
 
-ANSWER: `r ((s - 3) - 3)/s`
+ANSWER: `r EI_race`
 
 
 3. Compute the **proportion** of neighbors in Ego's network.
 
-ANSWER: `r 3/s`
+ANSWER: `r prop_neighbors`
 
 
 4. Compute the **proportion** of people who identify as Hispanic in Ego's network.
 
-ANSWER: `r 2/s`
+ANSWER: `r prop_hispanic`
 
-1. Compute the **proportion** of people with a high school degree in Ego's network.
+5. Compute the **proportion** of people with a high school degree in Ego's network.
 
-ANSWER: `r 5/s`
+ANSWER: `r prop_high_school`
 
 
 6. Compute the **diversity** of Ego's Network with respect to ethnoracial identity.
 
-ANSWER: `r 1 - sum((table(c2)/s)^2)`
+ANSWER: `r H_race`
 
 7. Compute the **diversity** of Ego's Network with respect to education. 
 
-ANSWER: `r 1 - sum((table(c4)/s)^2)`
+ANSWER: `r H_edu`
 
 
 8. Compute the **diversity** of Ego's Network with respect to gender identity.
 
-ANSWER: `r 1 - sum((table(c1)/s)^2)`
+ANSWER: `r H_gender`
 
 
 9. Does ego have a stronger **same-group preference** with respect to race than with respect to gender? (Yes/No, show your reasoning)
 
-ANSWER: No (Gender EI = 0.2, versus Race EI = 0.4)
+ANSWER: `r pref_race_vs_gender` (Gender EI = `r EI_gender`, versus Race EI = `r EI_race`)
 
 
 1. Is the **diversity** of ego's network larger when it comes to race than when it comes to education  (Yes/No, show your reasoning)
 
-ANSWER: Yes (Race H = 0.78, versus Education H = 0.66)
+ANSWER: `r div_race_vs_edu` (Race H = `r H_race`, versus Education H = `r H_edu`)
 
 
 1. What is the **proportion** of ego's network composed of friends who are also Women?
 
-ANSWER: `r 2/s`
+ANSWER: `r prop_friend_women`
 
 
 1. Compute the **proportion** of people who identify as either Men or Women in ego's network. 
 
-ANSWER: `r 7/s`
+ANSWER: `r prop_men_women`
 

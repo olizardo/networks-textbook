@@ -16,7 +16,7 @@ toc: false
 ```{r}
 #| label: fig-grex1
 #| fig-cap: "An undirected graph."
-#| fig-cap-location: margin   
+#| fig-cap-location: bottom   
 #| fig-height: 12
 #| fig-width: 12
     set.seed(45279)
@@ -55,7 +55,7 @@ Rank all the nodes in the graph shown in @fig-grex1 by their **degree centrality
 ```{r}
 #| label: fig-grex2
 #| fig-cap: "A directed graph."
-#| fig-cap-location: margin   
+#| fig-cap-location: bottom   
 #| fig-height: 10
 #| fig-width: 12
     set.seed(234)
@@ -143,7 +143,8 @@ Go back to @fig-grex1.
 What is the **relative betweenness centrality** of node *C* with respect to nodes *A* and *I*? (show your work)
 ```{r}
     r <- all_shortest_paths(gr, from = "A", to = "I")$res
-    a <- matrix(names(unlist(r)), byrow = TRUE, nrow = length(r))
+    paths_names <- lapply(r, function(path) V(gr)[path]$name)
+    a <- do.call(rbind, paths_names)
     kable(a, format = "html", align = "c", full_width = F)  %>% 
          kable_styling()
 ```
