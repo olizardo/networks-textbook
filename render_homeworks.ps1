@@ -1,7 +1,7 @@
 # render_homeworks.ps1
 # Script to render suffix files and place them in the output directory (docs/)
 
-$outputDir = "docs"
+$outputDir = "_sites"
 if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
 }
