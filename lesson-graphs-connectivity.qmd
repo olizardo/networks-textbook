@@ -9,6 +9,7 @@ title: "Graph Connectivity"
     require(ggraph)
     require(tidygraph)
     require(igraph)
+    require(dplyr)
 ```
 
 ## Connected and Disconnected Graphs
@@ -290,54 +291,97 @@ Formally, a local bridge is an edge that, if removed from the graph, would incre
 #| fig-width: 8
 #| fig-cap-location: bottom
 #| layout-ncol: 2
-  gr <- create_empty(14, directed = FALSE)
-  gr <- gr %>%
-       bind_edges(data.frame(from = 1, to = c(2:5))) %>% 
-       bind_edges(data.frame(from = 2, to = c(3:5))) %>% 
-       bind_edges(data.frame(from = 3, to = c(4:5))) %>% 
-       bind_edges(data.frame(from = 6, to = c(7:10))) %>% 
-       bind_edges(data.frame(from = 7, to = c(8:10))) %>% 
-       bind_edges(data.frame(from = 8, to = c(9:10)))  %>% 
-       bind_edges(data.frame(from = 11, to = c(12:14))) %>% 
-       bind_edges(data.frame(from = 12, to = c(13:14))) %>% 
-       bind_edges(data.frame(from = 13, to = 14)) %>% 
-       bind_edges(data.frame(from = 4, to = 11)) %>% 
-       bind_edges(data.frame(from = 8, to = 11)) %>% 
-       bind_edges(data.frame(from = 1, to = 7)) %>% 
-       activate(nodes) %>% 
-       mutate(name = toupper(letters[1:14]))
+  # Define nodes and edges data frames for clarity
+  nodes <- data.frame(name = toupper(letters[1:14]))
+  edges <- read.table(text = "
+   from to
+   1  2
+   1  3
+   1  4
+   1  5
+   2  3
+   2  4
+   2  5
+   3  4
+   3  5
+   6  7
+   6  8
+   6  9
+   6  10
+   7  8
+   7  9
+   7  10
+   8  9
+   8  10
+   11 12
+   11 13
+   11 14
+   12 13
+   12 14
+   13 14
+   4  11
+   8  11
+   1  7
+  ", header = TRUE)
+
+  # Create the graph using the modern tbl_graph syntax
+  gr <- tbl_graph(nodes = nodes, edges = edges, directed = FALSE)
+
+  # Fix the layout for consistent plotting
   l <- as.matrix(ggraph(gr, layout = "kk")$data[, 1:2])
 
-  ewc <- c(rep("n", 24), c("r", "p", "r"))
-  ewc[c(3, 14)] <- "r"
-  cols <- c("n" = "steelblue", "r" = "red", "p" = "purple")
-  wdts <- c("n" = .7, "r" = 1.5, "p" = 2)
-  p <- ggraph(gr, layout = l)
-  p <- p + geom_edge_link(aes(color = ewc, edge_width = ewc))
-  p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "tan2")   
-  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")   
-  p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
-  p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")
-  p <- p + theme_graph()
-  p <- p + theme(legend.position = "none")
-  p
-  gr2 <- delete_edges(gr, 26)
-  ewc <- c(rep("n", 24), c("r", "r"))
-  ewc[c(3, 14)] <- "r"
-  cols <- c("n" = "steelblue", "r" = "red")
-  wdts <- c("n" = .7, "r" = 1.5)
-  p <- ggraph(gr2, layout = l)
-  p <- p + geom_edge_link(aes(color = ewc, edge_width = ewc))
-  p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "tan2")   
-  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")   
-  p <- p + scale_discrete_manual(values = cols, aesthetics = "edge_colour")
-  p <- p + scale_discrete_manual(values = wdts, aesthetics = "edge_width")
-  p <- p + theme_graph()
-  p <- p + theme(legend.position = "none")
-  p
+  # --- Plot 1: Original graph with highlighted edges ---
+
+  # Identify edges of interest programmatically
+  gr_colored <- gr |>
+    activate(edges) |>
+    mutate(
+      from_name = .N()$name[from],
+      to_name = .N()$name[to],
+      edge_pair = paste0(pmin(from_name, to_name), "-", pmax(from_name, to_name)),
+      highlight = ifelse(edge_pair == "H-K", "purple", 
+                  ifelse(edge_pair %in% c("G-H", "A-G", "A-D", "D-K"), "red", "normal"))
+    )
+
+  # Define color and width scales
+  cols <- c("normal" = "steelblue", "red" = "red", "purple" = "purple")
+  wdts <- c("normal" = .7, "red" = 1.5, "purple" = 2)
+
+  # Create the plot
+  ggraph(gr_colored, layout = l) +
+    geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+    geom_node_point(size = 14, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    scale_edge_color_manual(values = cols) +
+    scale_edge_width_manual(values = wdts) +
+    theme_graph() + theme(legend.position = "none")
+
+
+  # --- Plot 2: Graph with local bridge removed ---
+
+  # Remove the edge and highlight the new shortest path
+  gr2_colored <- gr |>
+    activate(edges) |>
+    mutate(
+      from_name = .N()$name[from],
+      to_name = .N()$name[to],
+      edge_pair = paste0(pmin(from_name, to_name), "-", pmax(from_name, to_name))
+    ) |>
+    filter(edge_pair != "H-K") |>
+    mutate(
+      highlight = ifelse(edge_pair %in% c("G-H", "A-G", "A-D", "D-K"), "red", "normal")
+    )
+
+  ggraph(gr2_colored, layout = l) +
+    geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+    geom_node_point(size = 14, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    scale_edge_color_manual(values = c("normal" = "steelblue", "red" = "red")) +
+    scale_edge_width_manual(values = c("normal" = .7, "red" = 1.5)) +
+    theme_graph() + theme(legend.position = "none")
 ```
 
-For instance, in @fig-connected4-1, with respect to nodes $A$ and $H$, the edge $HK$ (pictured in purple) is a *local bridge of degree 4*. The reason for that is that, as shown in @fig-connected4-2, when the edge $HK$ is removed from the graph, the shortest path_ between nodes $H$ and $K$ increases from $l_{HK} =1$ ($H$ and $K$ are adjacent in @fig-connected4-1) to $l_{HK} = 4$, as given by the edge sequence $\{GH, AG, AD, DK\}$ (pictured in red). 
+For instance, in @fig-connected4-1, consider the nodes $H$ and $K$. The edge $HK$ (pictured in purple) is a *local bridge of degree 4* for this pair. The reason for that is that, as shown in @fig-connected4-2, when the edge $HK$ is removed from the graph, the shortest path between nodes $H$ and $K$ increases from $l_{HK} =1$ ($H$ and $K$ are adjacent in @fig-connected4-1) to $l_{HK} = 4$, as given by the path $H-G-A-D-K$ (pictured in red). 
 
 Note that from the perspective of nodes $D$ and $H$, the purple $HK$ edge is a local bridge of degree three, because $l_{DH} = 2$ in @fig-connected4-1 and $l_{DH} = 3$ when the edge $HK$ is removed from the graph in @fig-connected4-2.
 
