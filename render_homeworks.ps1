@@ -1,6 +1,12 @@
 # render_homeworks.ps1
 # Script to render suffix files and place them in the output directory (docs/)
 
+# Skip rendering homework files if this is a single-file render/preview invoked by Quarto
+if ($env:QUARTO_PROJECT_DIR -and $env:QUARTO_PROJECT_RENDER_ALL -ne "1") {
+    Write-Host "Skipping homework rendering during single-file render or preview."
+    exit 0
+}
+
 $outputDir = "_sites"
 if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
