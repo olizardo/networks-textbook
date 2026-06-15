@@ -18,14 +18,20 @@ library(kableExtra)
 gr_base <- tbl_graph(
   nodes = data.frame(name = 1:7),
   edges = data.frame(
-    from = c(1, 4, 4, 2, 5, 6),
-    to   = c(3, 3, 7, 5, 6, 2)
+    from = c(1, 4, 4, 2, 5, 6, 3),
+    to   = c(3, 3, 7, 5, 6, 2, 2)
   ),
   directed = FALSE
 )
 
 set.seed(42)
 layout_fr <- create_layout(gr_base, layout = "fr")
+
+# Reusable G(4, 2) graph and layout for intro slides
+gr_g42 <- create_empty(4) %>% 
+    bind_edges(data.frame(from = 1, to = 2:3)) %>% 
+    mutate(name = LETTERS[1:4])
+l_g42 <- as.matrix(ggraph(gr_g42, layout = 'tree')$data[, 1:2])
 ```
 
 # Introduction to Graphs
@@ -34,6 +40,9 @@ layout_fr <- create_layout(gr_base, layout = "fr")
 
 ## What is a Graph?
 
+:::: {.columns align=center}
+
+::: {.column width="50%"}
 ::: {.incremental}
 - A **graph** ($G$) is an abstract mathematical object consisting of two main parts:
 - A **vertex set**, $V$, which contains all the nodes (actors) in the network.
@@ -42,6 +51,23 @@ layout_fr <- create_layout(gr_base, layout = "fr")
   - e.g., $E = \{AB, AC\}$
 - Together, they define the graph: $G = \{V, E\}$
 :::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+ggraph(gr_g42, layout = 'manual', x=l_g42[,1], y=l_g42[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 30, color = "tan2") +
+  geom_node_text(aes(label = name), size = 14, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -83,26 +109,94 @@ layout_fr <- create_layout(gr_base, layout = "fr")
 
 ## What is a Graph? (An Example) (1)
 
+:::: {.columns align=center}
+
+::: {.column width="50%"}
 ::: {.incremental}
 - Let's define a graph $G$ with 4 nodes ($A, B, C, D$) and 2 edges ($AB, AC$):
   - $V = \{A, B, C, D\}$
   - $E = \{AB, AC\}$
   - $G = \{V, E\}$
-- The **cardinality** (number of members in a set) is denoted by $|N|$:
-  - Vertex set cardinality: $|V| = n = 4$
-  - Edge set cardinality: $|E| = m = 2$
 :::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+ggraph(gr_g42, layout = 'manual', x=l_g42[,1], y=l_g42[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 30, color = "tan2") +
+  geom_node_text(aes(label = name), size = 14, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
 ## What is a Graph? (An Example) (2)
 
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+::: {.incremental}
+- For the graph $G = \{V, E\}$:
+- The **cardinality** (number of members in a set) is denoted by $|N|$:
+  - Vertex set cardinality: $|V| = n = 4$
+  - Edge set cardinality: $|E| = m = 2$
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+ggraph(gr_g42, layout = 'manual', x=l_g42[,1], y=l_g42[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 30, color = "tan2") +
+  geom_node_text(aes(label = name), size = 14, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## What is a Graph? (An Example) (3)
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
 ::: {.incremental}
 - This graph can be represented by the signature $G(n, m) = G(4, 2)$
 - Note the lack of edges:
   - No edge between $B$ and $C$ means no relationship between them.
   - Node $D$ is not connected to any other node.
 :::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+ggraph(gr_g42, layout = 'manual', x=l_g42[,1], y=l_g42[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 30, color = "tan2") +
+  geom_node_text(aes(label = name), size = 14, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -116,14 +210,14 @@ layout_fr <- create_layout(gr_base, layout = "fr")
 ## G(4, 2) Variation 1
 
 ```{r}
-#| label: fig-g42-1
+#| label: plt-g42-1
 #| echo: false
 #| fig-align: "center"
 #| fig-height: 6
 #| fig-width: 6
 gr <- create_empty(4) %>% 
     bind_edges(data.frame(from = 1, to = 2:3)) %>% 
-    mutate(name = letters[1:4])
+    mutate(name = LETTERS[1:4])
 l <- as.matrix(ggraph(gr, layout = 'tree')$data[, 1:2])
 ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
   geom_edge_link(color = "steelblue", edge_width = 1.25) +
@@ -137,14 +231,14 @@ ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
 ## G(4, 2) Variation 2
 
 ```{r}
-#| label: fig-g42-2
+#| label: plt-g42-2
 #| echo: false
 #| fig-align: "center"
 #| fig-height: 6
 #| fig-width: 6
 gr <- create_empty(4) %>% 
     bind_edges(data.frame(from = c(1, 4), to = c(2, 3))) %>% 
-    mutate(name = letters[1:4])    
+    mutate(name = LETTERS[1:4])    
 ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) + 
   geom_edge_link(color = "steelblue", edge_width = 1.25) +
   geom_node_point(size = 22, color = "tan2") +
@@ -157,14 +251,14 @@ ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
 ## G(4, 2) Variation 3
 
 ```{r}
-#| label: fig-g42-3
+#| label: plt-g42-3
 #| echo: false
 #| fig-align: "center"
 #| fig-height: 6
 #| fig-width: 6
 gr <- create_empty(4) %>% 
     bind_edges(data.frame(from = c(1, 2), to = c(4, 3))) %>% 
-    mutate(name = letters[1:4])    
+    mutate(name = LETTERS[1:4])    
 ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) + 
   geom_edge_link(color = "steelblue", edge_width = 1.25) +
   geom_node_point(size = 22, color = "tan2") +
@@ -177,7 +271,7 @@ ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
 ## G(4, 2) Variation 4 (Unlabeled)
 
 ```{r}
-#| label: fig-g42-4
+#| label: plt-g42-4
 #| echo: false
 #| fig-align: "center"
 #| fig-height: 6
@@ -226,23 +320,21 @@ ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
 
 ---
 
-## Basic Graph Properties
+## Basic Graph Properties (1)
 
-:::: {.columns}
+:::: {.columns align=center}
 
 ::: {.column width="60%"}
 ::: {.incremental}
 - **Adjacent**: Joined by an edge (e.g., $A$ and $B$).
 - **Nonadjacent**: Not joined by an edge (e.g., $A$ and $C$).
 - **Isolate**: Node with zero incident edges (e.g., $D$).
-- **Incident**: An edge "touches" a node (e.g., edge $AB$ is incident on $A$).
-- **End Vertices**: Nodes at the ends of an edge (e.g., $A$ and $B$ for edge $AB$).
 :::
 :::
 
 ::: {.column width="40%"}
 ```{r}
-#| label: fig-basic-props
+#| label: plt-basic-props-1
 #| echo: false
 #| fig-align: "center"
 #| fig-height: 6
@@ -254,8 +346,44 @@ gr <- create_empty(4, directed = FALSE) %>%
 
 ggraph(gr, layout = 'circle') +
   geom_edge_link(color = "steelblue", edge_width = 1.5) +
-  geom_node_point(size = 25, color = "tan2") +
-  geom_node_text(aes(label = name), size = 12, color = "white") +
+  geom_node_point(size = 30, color = "tan2") +
+  geom_node_text(aes(label = name), size = 14, fontface = "bold", color = "white") +
+  theme_graph() +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Basic Graph Properties (2)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Incident**: An edge "touches" a node (e.g., edge $AB$ is incident on $A$).
+- **End Vertices**: Nodes at the ends of an edge (e.g., $A$ and $B$ for edge $AB$).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| label: plt-basic-props-2
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+
+gr <- create_empty(4, directed = FALSE) %>%
+  bind_edges(data.frame(from = 1:2, to = 2:3)) %>%
+  mutate(name = c("A", "B", "C", "D"))
+
+ggraph(gr, layout = 'circle') +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 30, color = "tan2") +
+  geom_node_text(aes(label = name), size = 14, fontface = "bold", color = "white") +
   theme_graph() +
   coord_cartesian(clip = "off")
 ```
@@ -276,12 +404,23 @@ ggraph(gr, layout = 'circle') +
 
 ## Graph for Complement Example
 
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+::: {.incremental}
+- Let's start with a simple graph $G$ containing 6 nodes and 5 edges.
+- Nodes $A$ and $F$ act as central connectors.
+- This original graph has many missing edges (e.g., $B-C$, $D-E$).
+:::
+:::
+
+::: {.column width="50%"}
 ```{r}
-#| label: fig-complement-slides-1
+#| label: plt-complement-slides-1
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 5.5
+#| fig-height: 5.5
 
 gr <- create_empty(6, directed = FALSE) %>%
       bind_edges(data.frame(from = 1, to = c(2, 4, 6))) %>%
@@ -291,20 +430,34 @@ p <- ggraph(gr, layout = 'kk')
 p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
 p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
 p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-p1 <- p + theme_graph()
+p1 <- p + theme_graph() + coord_cartesian(clip = "off")
 p1
 ```
+:::
+
+::::
 
 ---
 
-## The Graph Complement
+## The Graph Complement: Example
 
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+::: {.incremental}
+- The complement graph $G'$ on the right connects all pairs that were *not* connected in $G$.
+- Every edge present in the original graph is now missing.
+- Every edge missing in the original graph is now present.
+:::
+:::
+
+::: {.column width="50%"}
 ```{r}
-#| label: fig-complement-slides-2
+#| label: plt-complement-slides-2
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 5.5
+#| fig-height: 5.5
 
 gr.c <- complementer(gr)
 l <- as.matrix(p$data[, 1:2])
@@ -312,33 +465,47 @@ p <- ggraph(gr.c, layout = l)
 p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
 p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
 p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-p2 <- p + theme_graph()
+p2 <- p + theme_graph() + coord_cartesian(clip = "off")
 p2
 ```
+:::
+
+::::
 
 ---
 
 ## Simple Graphs
 
-:::: {.columns}
-
-::: {.column width="60%"}
 ::: {.incremental}
 - Most social networks are represented as **simple graphs**.
 - A graph is simple if it meets two requirements:
-  1. **No Multiple Edges**: Only one edge can join any pair of nodes (unlike $A$ and $B$).
-  2. **No Loops**: No edges connect a node to itself (unlike node $C$).
+  1. **No Multiple Edges**: Only one edge can join any pair of nodes.
+  2. **No Loops**: No edges connect a node to itself.
 - Loops and multiple edges do not make sense for most typical sociological applications.
+:::
+
+---
+
+## Non-Simple Graphs
+
+:::: {.columns}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Graphs that do not meet these requirements are **non-simple** (or multigraphs).
+- The diagram on the right shows:
+  - **Multiple Edges**: Two edges connect nodes $A$ and $B$.
+  - **Loop**: An edge connects node $C$ to itself.
 :::
 :::
 
-::: {.column width="40%"}
+::: {.column width="45%"}
 ```{r}
-#| label: fig-non-simple
+#| label: plt-non-simple
 #| echo: false
 #| fig-align: "center"
-#| fig-height: 6
-#| fig-width: 6
+#| fig-height: 5.5
+#| fig-width: 5.5
 
 gr_non_simple <- create_empty(3, directed = FALSE) %>%
   bind_edges(data.frame(from = c(1, 1, 2, 3), to = c(2, 2, 3, 3))) %>%
@@ -371,11 +538,11 @@ ggraph(gr_non_simple, layout = 'circle') +
 ## Same Graph, Different Drawings (1)
 
 ```{r}
-#| label: fig-random-slides-1
+#| label: plt-random-slides-1
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 5.5
+#| fig-height: 5.5
 
 set.seed(678)
 l <- layout_randomly(gr)
@@ -392,11 +559,11 @@ p
 ## Same Graph, Different Drawings (2)
 
 ```{r}
-#| label: fig-random-slides-2
+#| label: plt-random-slides-2
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 5.5
+#| fig-height: 5.5
 
 set.seed(789)
 l <- layout_randomly(gr)
@@ -427,11 +594,11 @@ p
 ## Original Graph
 
 ```{r}
-#| label: fig-subgraph-slides-1
+#| label: plt-subgraph-slides-1
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 5.5
+#| fig-height: 5.5
 
 set.seed(367)
 gr <- play_gnm(n = 10, m = 20, directed = FALSE, loops = FALSE) %>% 
@@ -454,21 +621,19 @@ p1
 
 ::: {.column width="50%"}
 ::: {.incremental}
-- This graph is a **subgraph** of the original graph from the previous slide.
-- It was created by taking a **subset of nodes**: 
-  - $V' = \{A, B, C, D, E\}$
-- We retained only the edges from the original graph that connect these five nodes to each other.
-- All other nodes ($F, G, H, I, J$) and any edges connected to them were removed.
+- Created by keeping a subset of nodes: $V' = \{A, B, C, D, E\}$.
+- Retains only edges connecting these five nodes.
+- All other nodes ($F, G, H, I, J$) and their incident edges are removed.
 :::
 :::
 
 ::: {.column width="50%"}
 ```{r}
-#| label: fig-subgraph-slides-2
+#| label: plt-subgraph-slides-2
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 6
-#| fig-height: 6
+#| fig-width: 5
+#| fig-height: 5
 
 gr2 <- induced_subgraph(gr, toupper(letters[1:5]))
 p <- ggraph(gr2, layout = l[1:5, ]) 
@@ -493,14 +658,25 @@ p2
 
 ---
 
-## Vertex-Induced Subgraph Example
+## Vertex-Induced Subgraphs: Example
 
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Let's select the subset of nodes:
+  $$V' = \{D, E, G, I\}$$
+- Keeping all original edges between these nodes yields the vertex-induced subgraph on the right.
+:::
+:::
+
+::: {.column width="45%"}
 ```{r}
-#| label: fig-subgraph-induced
+#| label: plt-subgraph-induced
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 5
+#| fig-height: 5
 
 gr3 <- induced_subgraph(gr, c("G", "D", "E", "I"))
 p <- ggraph(gr3, layout = l[c(4, 5, 7, 9), ]) 
@@ -510,29 +686,41 @@ p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
 p3 <- p + theme_graph() + coord_cartesian(clip = "off")
 p3
 ```
+:::
+
+::::
 
 ---
 
-## Vertex-Deleted Subgraphs (1)
+## Vertex-Deleted Subgraphs
 
-:::: {.columns}
-
-::: {.column width="60%"}
 ::: {.incremental}
-- We define a subgraph by *deleting* nodes: $G' = G - \{a, b, c\}$, where $\{a, b, c\}$ is the set of nodes being deleted.
-- **CRITICAL RULE**: When you delete nodes, **all edges incident to those nodes are automatically removed as well**.
-- For example, deleting $\{F, G, H, I, J\}$ from our 10-node graph yields the subgraph on the right.
-- This shows that a vertex-deleted subgraph can be equivalent to a vertex-induced subgraph on the remaining nodes (here, $\{A, B, C, D, E\}$).
+- A subgraph can be defined by deleting a set of nodes:
+  $$G' = G - \{a, b, c\}$$
+- **CRITICAL RULE**: Deleting nodes automatically removes all edges incident to them (edges that connect to the deleted nodes).
+:::
+
+---
+
+## Vertex-Deleted Subgraphs: Example
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Example: Deleting $\{F, G, H, I, J\}$ from the original graph.
+- This removes those 5 nodes and all their incident edges, yielding the subgraph on the right.
+- This is equivalent to the vertex-induced subgraph on $\{A, B, C, D, E\}$.
 :::
 :::
 
-::: {.column width="40%"}
+::: {.column width="45%"}
 ```{r}
-#| label: fig-subgraph-deleted-node
+#| label: plt-subgraph-deleted-node
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 6
-#| fig-height: 6
+#| fig-width: 5
+#| fig-height: 5
 
 gr_del <- gr - c("F", "G", "H", "I", "J")
 p <- ggraph(gr_del, layout = l[1:5, ]) 
@@ -547,7 +735,7 @@ p + theme_graph() + coord_cartesian(clip = "off")
 
 ---
 
-## Vertex-Deleted Subgraphs (2)
+## Special Cases of Vertex Deletion
 
 ::: {.incremental}
 - Two special cases of vertex deletion are:
@@ -559,24 +747,43 @@ p + theme_graph() + coord_cartesian(clip = "off")
 
 ## Edge-Deleted Subgraphs
 
-:::: {.columns}
+::: {.incremental}
+- A subgraph can be defined by deleting a set of edges:
+  $$G' = G - \{e_1, e_2, ...\}$$
+- **CRITICAL RULE**: Nodes remain in the graph when their edges are deleted (unlike vertex deletion, which automatically deletes incident edges).
+:::
+
+---
+
+## Spanning & Empty Subgraphs
+
+::: {.incremental}
+- Two key concepts in edge deletion:
+  - **Spanning Subgraph**: A subgraph that leaves all original nodes intact, removing only edges.
+  - **Empty Graph**: The subgraph that results from removing all edges, leaving only isolated nodes.
+:::
+
+---
+
+## Edge-Deleted Subgraphs: Example
+
+:::: {.columns align=center}
+
 ::: {.column width="55%"}
 ::: {.incremental}
-- We define a subgraph by removing edges: $G' = G - \{e_1, e_2, ...\}$, where $\{e_1, e_2, ...\}$ is the set of edges being deleted.
-- **CRITICAL RULE**: When you delete edges, the nodes that were connected by those edges **remain in the graph**.
-- **Spanning Subgraph**: A subgraph created by removing *only* edges while leaving all original nodes intact.
-- **Empty Graph**: A special case of edge deletion that results from removing *all* edges from the original graph, leaving only the set of isolated nodes.
-- The example on the right removes the six edges $\{AB, AE, AC, CI, CE, GJ\}$; notice all 10 nodes remain!
+- Example: Deleting six specific edges from the original graph.
+- This removes the edges while keeping all 10 nodes intact.
+- The resulting spanning subgraph is shown on the right.
 :::
 :::
 
 ::: {.column width="45%"}
 ```{r}
-#| label: fig-subgraph-deleted-edges
+#| label: plt-subgraph-deleted-edges
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 6
-#| fig-height: 6
+#| fig-width: 5
+#| fig-height: 5
 
 gr4 <- gr - edge("A|B") - edge("G|J") - edge("C|I") - edge("A|E") - edge("A|C") - edge("C|E")
 
@@ -594,22 +801,96 @@ p + theme_graph() + coord_cartesian(clip = "off")
 
 ## Special Subgraphs: Ego Graph
 
+:::: {.columns}
+
+::: {.column width="50%"}
 ::: {.incremental}
-- **Ego Graph**: A special type of subgraph defined by picking a central node (ego) and the nodes that are connected to it, along with the edges connecting those nodes.
-- The central node's adjacent contacts are called its **alters**.
-- Ego graphs are particularly useful for analyzing social networks at the level of individual actors.
+- **Ego Graph**: Subgraph centered on a node (ego), containing the ego, its neighbors (alters), and all ties among them.
+- Particularly useful for actor-level network analysis.
+- Example: Ego graph for node **D** (in red) and its alters **A**, **B**, and **G** (in tan).
 :::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| label: plt-subgraph-ego
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5
+#| fig-height: 5
+
+g_ego <- make_ego_graph(gr, order = 1, nodes = "D")[[1]]
+l_ego <- l[match(V(g_ego)$name, LETTERS[1:10]), ]
+
+ggraph(g_ego, layout = l_ego) +
+  geom_edge_link(color = "steelblue", width = 1.25) +
+  geom_node_point(aes(color = (name == "D")), size = 18, show.legend = FALSE) +
+  geom_node_text(aes(label = name), size = 8, color = "white") +
+  scale_color_manual(values = c("TRUE" = "tomato", "FALSE" = "tan2")) +
+  theme_graph() +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
 ## Vertex Fusion (1)
 
+:::: {.columns}
+
+::: {.column width="45%"}
 ::: {.incremental}
 - We can construct a new graph from a graph by **fusing** two vertices.
 - **Vertex Fusion**:
   - Replace two original vertices with a single vertex.
   - Keep the combined adjacency relations of both original vertices.
 :::
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6
+#| fig-height: 5
+gr_combined <- tbl_graph(
+  nodes = data.frame(
+    name = c("A", "B", "C", "D", "A", "BC", "D")
+  ),
+  edges = data.frame(
+    from = c(1, 1, 2, 2, 5, 6),
+    to   = c(2, 3, 3, 4, 6, 7)
+  ),
+  directed = FALSE
+)
+
+layout_combined <- matrix(c(
+  1, 2,
+  2, 3,
+  2, 1,
+  3, 2,
+  5, 2,
+  6, 2,
+  7, 2
+), ncol = 2, byrow = TRUE)
+
+ggraph(gr_combined, layout = 'manual', x = layout_combined[,1], y = layout_combined[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, color = "white", fontface = "bold") +
+  annotate("text", x = 2, y = 3.6, label = "Original", size = 5, fontface = "bold", color = "grey30") +
+  annotate("text", x = 6, y = 3.6, label = "Fused (B & C)", size = 5, fontface = "bold", color = "grey30") +
+  annotate("segment", x = 3.7, xend = 4.3, y = 2, yend = 2, 
+           arrow = arrow(type = "closed", length = unit(0.1, "inches")), 
+           color = "grey50", size = 1.2) +
+  theme_graph() + 
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -626,335 +907,121 @@ p + theme_graph() + coord_cartesian(clip = "off")
 
 ## Set Operations on Graphs: Union
 
+:::: {.columns}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - Because graphs are defined as sets, we can perform standard set operations on them.
 - **Union** ($\cup$): Combine the vertices and edges of two graphs.
   - $V(G_1 \cup G_2) = V(G_1) \cup V(G_2)$
   - $E(G_1 \cup G_2) = E(G_1) \cup E(G_2)$
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 4.5
+gr_union_plt <- tbl_graph(
+  nodes = data.frame(
+    name = c("A", "B", "C", "B", "C", "D", "A", "B", "C", "D")
+  ),
+  edges = data.frame(
+    from = c(1, 2, 4, 5, 7, 8, 9),
+    to   = c(2, 3, 5, 6, 8, 9, 10)
+  ),
+  directed = FALSE
+)
+
+layout_union <- matrix(c(
+  1.0, 2.0,
+  2.0, 3.0,
+  2.0, 1.0,
+  4.0, 3.0,
+  4.0, 1.0,
+  5.0, 2.0,
+  7.0, 2.0,
+  8.0, 3.0,
+  8.0, 1.0,
+  9.0, 2.0
+), ncol = 2, byrow = TRUE)
+
+ggraph(gr_union_plt, layout = 'manual', x = layout_union[,1], y = layout_union[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, color = "white", fontface = "bold") +
+  annotate("text", x = 1.5, y = 3.6, label = "G1", size = 5, fontface = "bold", color = "grey30") +
+  annotate("text", x = 3.0, y = 2.0, label = "\u222a", size = 6, fontface = "bold", color = "grey30") +
+  annotate("text", x = 4.5, y = 3.6, label = "G2", size = 5, fontface = "bold", color = "grey30") +
+  annotate("text", x = 6.0, y = 2.0, label = "=", size = 6, fontface = "bold", color = "grey30") +
+  annotate("text", x = 8.0, y = 3.6, label = "G1 \u222a G2", size = 5, fontface = "bold", color = "grey30") +
+  theme_graph() + 
+  theme(plot.margin = margin(l = 15, r = 10, t = 10, b = 10, unit = "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
 ## Set Operations on Graphs: Intersection
 
+:::: {.columns}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Intersection** ($\cap$): Keep only the vertices and edges present in *both* graphs.
   - $V(G_1 \cap G_2) = V(G_1) \cap V(G_2)$
   - $E(G_1 \cap G_2) = E(G_1) \cap E(G_2)$
 :::
-
----
-
-# Node Neighborhoods
-
----
-
-## Node Neighborhoods
-
-::: {.incremental}
-- **Neighborhood** ($\mathcal{N}(v)$):
-  - The set of nodes that are directly connected (adjacent) to node $v$.
-  - These are a node's immediate **neighbors**.
-  - Isolates have an empty neighborhood set ($\emptyset$).
-- Example: $\mathcal{N}(A) = \{B, C, D, F, H\}$
-:::
-
----
-
-## Neighborhood Intersection
-
-:::: {.columns}
-
-::: {.column width="60%"}
-::: {.incremental}
-- **Neighborhood Intersection** ($\mathcal{N}(u) \cap \mathcal{N}(v)$) is the set of **common neighbors** connected to both $u$ and $v$.
-- In our graph:
-  - $N(1) = \{3\}$
-  - $N(4) = \{3, 7\}$
-- The intersection is the single node they share:
-  - $N(1) \cap N(4) = \{3\}$
-:::
 :::
 
 ::: {.column width="40%"}
-```{r echo=FALSE}
-#| label: fig-neighborhood-intersection
-gr_base |>
-  activate(nodes) |>
-  mutate(
-    highlight = case_when(
-      name %in% c(1, 4) ~ "focal",
-      name == 3 ~ "common",
-      TRUE ~ "other"
-    )
-  ) |>
-  ggraph(layout = "manual", x = layout_fr$x, y = layout_fr$y) +
-    geom_edge_link(color = "gray80", width = 1.5) +
-    geom_node_point(aes(color = highlight), size = 25) +
-    geom_node_text(aes(label = name), color = "black", size = 8) +
-    scale_color_manual(
-      values = c("focal" = "tomato", "common" = "gold", "other" = "skyblue"),
-      name = "", labels = c("Common Neighbor", "Focal Nodes", "Other")
-    ) +
-    theme_graph() +
-    theme(legend.position = "bottom")
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 4.5
+gr_intersect_plt <- tbl_graph(
+  nodes = data.frame(
+    name = c("A", "B", "C", "B", "C", "D", "B", "C")
+  ),
+  edges = data.frame(
+    from = c(1, 2, 4, 5, 7),
+    to   = c(2, 3, 5, 6, 8)
+  ),
+  directed = FALSE
+)
+
+layout_intersect <- matrix(c(
+  1.0, 2.0,
+  2.0, 3.0,
+  2.0, 1.0,
+  4.0, 3.0,
+  4.0, 1.0,
+  5.0, 2.0,
+  7.5, 3.0,
+  7.5, 1.0
+), ncol = 2, byrow = TRUE)
+
+ggraph(gr_intersect_plt, layout = 'manual', x = layout_intersect[,1], y = layout_intersect[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, color = "white", fontface = "bold") +
+  annotate("text", x = 1.5, y = 3.6, label = "G1", size = 5, fontface = "bold", color = "grey30") +
+  annotate("text", x = 3.0, y = 2.0, label = "\u2229", size = 6, fontface = "bold", color = "grey30") +
+  annotate("text", x = 4.5, y = 3.6, label = "G2", size = 5, fontface = "bold", color = "grey30") +
+  annotate("text", x = 6.0, y = 2.0, label = "=", size = 6, fontface = "bold", color = "grey30") +
+  annotate("text", x = 7.5, y = 3.6, label = "G1 \u2229 G2", size = 5, fontface = "bold", color = "grey30") +
+  theme_graph() + 
+  theme(plot.margin = margin(l = 15, r = 10, t = 10, b = 10, unit = "pt")) +
+  coord_cartesian(clip = "off")
 ```
 :::
 
 ::::
 
----
 
-## Neighborhood Union
-
-:::: {.columns}
-
-::: {.column width="60%"}
-::: {.incremental}
-- **Neighborhood Union** ($\mathcal{N}(u) \cup \mathcal{N}(v)$) is the set of all nodes connected to *either* $u$ or $v$.
-- In our graph:
-  - $N(1) = \{3\}$
-  - $N(4) = \{3, 7\}$
-- The union contains all unique neighbors from both sets:
-  - $N(1) \cup N(4) = \{3, 7\}$
-:::
-:::
-
-::: {.column width="40%"}
-```{r echo=FALSE}
-#| label: fig-neighborhood-union
-gr_base |>
-  activate(nodes) |>
-  mutate(
-    highlight = case_when(
-      name %in% c(1, 4) ~ "focal",
-      name %in% c(3, 7) ~ "neighbor",
-      TRUE ~ "other"
-    )
-  ) |>
-  ggraph(layout = "manual", x = layout_fr$x, y = layout_fr$y) +
-    geom_edge_link(color = "gray80", width = 1.5) +
-    geom_node_point(aes(color = highlight), size = 25) +
-    geom_node_text(aes(label = name), color = "black", size = 8) +
-    scale_color_manual(
-      values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
-      name = "", labels = c("Focal Nodes", "Union of Neighbors", "Other")
-    ) +
-    theme_graph() +
-    theme(legend.position = "bottom")
-```
-:::
-
-::::
-
----
-
-# Directed Graph Elements & Metrics
-
----
-
-## Neighborhoods in Directed Graphs (1)
-
-::: {.incremental}
-- Because links are directional, nodes have two neighborhoods.
-- **In-Neighborhood** ($N^{in}(v)$):
-  - Set of source nodes pointing *to* $v$.
-  - Example: $N^{in}(D) = \{B, E, G\}$.
-:::
-
----
-
-## Neighborhoods in Directed Graphs (2)
-
-::: {.incremental}
-- **Out-Neighborhood** ($N^{out}(v)$):
-  - Set of destination nodes that $v$ points *to*.
-  - Example: $N^{out}(B) = \{A, C, D\}$.
-- A node appears in both neighborhoods only if there is a **reciprocal** tie.
-:::
-
----
-
-# Node Degree
-
----
-
-## Node Degree in Undirected Graphs
-
-::: {.incremental}
-- A node's **degree** ($k_i$) is the number of edges incident on it.
-- It is the cardinality (size) of a node's neighborhood: $k_i = |\mathcal{N}(i)|$.
-- Sociological meaning: **Popularity, Influence, or Centrality**.
-:::
-
----
-
-## Node Degree in Directed Graphs: Indegree
-
-::: {.incremental}
-- Directed graphs have two distinct degrees for each node.
-- **Indegree** ($k^{in}_i$):
-  - Number of edges pointing to node $i$ (cardinality of $N^{in}(i)$).
-  - Sociological meaning: **Popularity, Prestige, or Status**.
-:::
-
----
-
-## Node Degree in Directed Graphs: Outdegree
-
-::: {.incremental}
-- **Outdegree** ($k^{out}_i$):
-  - Number of edges pointing from node $i$ (cardinality of $N^{out}(i)$).
-  - Sociological meaning: **Sociability or Activity**.
-:::
-
----
-
-# Basic Graph Metrics
-
----
-
-## Graph Order and Size (1)
-
-::: {.incremental}
-- **Graph Order** ($n$):
-  - The number of nodes in the graph ($n = |V|$).
-  - Cardinality of the vertex set.
-- **Graph Size** ($m$):
-  - The number of edges in the graph ($m = |E|$).
-  - Cardinality of the edge set.
-:::
-
----
-
-## Graph Order and Size (2)
-
-::: {.incremental}
-- In our undirected graph (10 nodes, 20 edges): $n = 10$, $m = 20$.
-- In our directed graph (7 nodes, 11 edges): $n = 7$, $m = 11$.
-:::
-
----
-
-## Graph Maximum Size
-
-::: {.incremental}
-- The **maximum size** of a simple graph of order $n$ is the number of edges in a **complete graph** (where every node is connected to every other node).
-- Undirected: $Max(E) = \frac{n(n - 1)}{2}$
-- Directed: $Max(E) = n(n - 1)$
-:::
-
----
-
-## Graph Density
-
-::: {.incremental}
-- **Density** ($d$) is the ratio of the observed number of edges ($m$) to the maximum possible number of edges.
-- It's a value between 0 (empty) and 1 (complete).
-- Undirected: $d = \frac{2m}{n(n-1)}$
-- Directed: $d = \frac{m}{n(n-1)}$
-- It can be interpreted as the probability that any two randomly chosen nodes are connected.
-- Denser networks are less vulnerable to breakdowns when key nodes are removed.
-:::
-
----
-
-# Degree-Based Graph Metrics
-
----
-
-## Graph Degree Set and Sequence
-
-::: {.incremental}
-- **Graph Degree Set**: A list of the degrees of every node in the graph.
-- **Graph Degree Sequence**: The degree set sorted in descending order.
-- This provides a "fingerprint" of the graph's overall connectivity structure.
-:::
-
----
-
-## Degree Range & Sum
-
-::: {.incremental}
-- **Maximum Degree** ($k_{max}$) and **Minimum Degree** ($k_{min}$).
-- **Degree Range** ($k_r$): $k_{max} - k_{min}$.
-- **Sum of Degrees** ($\sum k_i$):
-  - In an undirected graph, this is always twice the number of edges: $\sum k_i = 2m$.
-:::
-
----
-
-## Graphical Degree Sequences
-
-::: {.incremental}
-- A **graphical degree sequence** is a sequence of numbers that *can* be the degree sequence of a simple graph.
-- Not every sequence of integers is graphical.
-- **Havel-Hakimi Theorem** provides a recursive algorithm to check if a sequence is graphical.
-:::
-
----
-
-## Average Degree
-
-::: {.incremental}
-- **Average Degree** ($\bar{k}$): The average of all node degrees in the graph.
-  
-  $$\bar{k} = \frac{1}{n} \sum_{i=1}^{n} k_i = \frac{2m}{n}$$
-  
-- It represents the expected degree of a randomly chosen node.
-- It is also directly related to density: $\bar{k} = d(n-1)$.
-:::
-
----
-
-## Degree Variance
-
-::: {.incremental}
-- **Degree Variance** ($\sigma^2_k$): A measure of how much the node degrees vary from the average degree.
-  
-  $$\sigma^2_k = \frac{1}{n} \sum_{i=1}^{n} (k_i - \bar{k})^2$$
-  
-- A low variance indicates a more homogeneous or uniform network (like a **regular graph**).
-- A high variance indicates a heterogeneous network with both low-degree nodes and high-degree "hubs" (like a **scale-free** network).
-:::
-
----
-
-## Regular Graphs
-
-::: {.incremental}
-- A **regular graph** is a graph where every node has the same degree.
-- This means the degree variance is zero.
-- These are often used as baseline models but are rare in real-world social networks.
-:::
-
----
-
-## Feld's Friendship Paradox
-
-::: {.incremental}
-- **Average Nearest Neighbor Degree** ($\bar{k}_{nn(i)}$):
-  - The average degree of node $i$'s neighbors:
-    $$\bar{k}_{nn(i)} = \frac{1}{k_i} \sum_{j \in \mathcal{N}(i)} k_j$$
-- **The Friendship Paradox** (Scott Feld, 1991):
-  - In almost all social networks, the average degree of a person's friends ($\bar{k}_{nn}$) is **greater** than the average degree of the people in the network ($\bar{k}$).
-  - **Your friends have more friends than you do!**
-:::
-
----
-
-# Directed Graph Elements & Metrics
-
----
-
-## Directed Degree Sets & Sequences
-
-::: {.incremental}
-- Directed graphs have two distinct degree sets (In-Degree set and Out-Degree set) and two distinct sequences.
-- **Sum of Degrees**:
-  - The sum of in-degrees is always equal to the sum of out-degrees, which is equal to the size $m$ (number of edges):
-    
-    $$\sum k^{in}_i = \sum k^{out}_i = m$$
-
-  - Since both sum to $m$, directed graphs have only **one** average degree: $\bar{k} = m/n$.
-:::
