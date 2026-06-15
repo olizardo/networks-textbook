@@ -74,38 +74,23 @@ The S-curve is characterized by three main phases:
 library(ggplot2)
 
 # 1. Generate the data using a logistic function
-# Formula: f(t) = L / (1 + exp(-k * (t - t0)))
 time_points <- seq(0, 10, length.out = 200)
-
-L <- 100     # Market capacity or maximum adoption (100%)
-k <- 1.2     # Steepness / growth rate of diffusion
-t0 <- 5      # The inflection point (time of maximum growth rate)
-
-# Calculate the cumulative adoption (the S-curve)
+L <- 100
+k <- 1.2
+t0 <- 5
 adoption <- L / (1 + exp(-k * (time_points - t0)))
-
-# Create a data frame
-diffusion_data <- data.frame(
-  Time = time_points,
-  Cumulative_Adoption = adoption
-)
+diffusion_data <- data.frame(Time = time_points, Cumulative_Adoption = adoption)
 
 # 2. Plot the S-Curve using ggplot2
 ggplot(diffusion_data, aes(x = Time, y = Cumulative_Adoption)) +
-  geom_line(color = "steelblue", size = 2) +
-  
-  # Add a vertical dashed line at the inflection point
-  geom_vline(xintercept = t0, linetype = "dashed", color = "gray50", size = 1.5) +
-  
-  # Add annotations to explain the phases of the curve
-  annotate("text", x = 2, y = 15, label = "Slow Initial\nAdoption", 
-           color = "black", fontface = "italic", size = 8) +
-  annotate("text", x = 4.75, y = 55, label = "Rapid Growth\n(Takeoff)", 
-           color = "black", fontface = "italic", size = 8, hjust = 1) +
-  annotate("text", x = 9, y = 90, label = "Saturation\n(Leveling Off)", 
-           color = "black", fontface = "italic", size = 8) +
-  
-  # Labels and theming
+  geom_line(color = "steelblue", linewidth = 2) +
+  geom_vline(xintercept = t0, linetype = "dashed", color = "gray50", linewidth = 1.5) +
+  annotate("text", x = 2, y = 15, label = "Slow Initial
+Adoption", color = "black", fontface = "italic", size = 8) +
+  annotate("text", x = 4.75, y = 55, label = "Rapid Growth
+(Takeoff)", color = "black", fontface = "italic", size = 8, hjust = 1) +
+  annotate("text", x = 9, y = 90, label = "Saturation
+(Leveling Off)", color = "black", fontface = "italic", size = 8) +
   labs(title = "The S-Curve Model of Diffusion",
        subtitle = "Cumulative adoption of an innovation over time",
        x = "Time",
@@ -115,13 +100,11 @@ ggplot(diffusion_data, aes(x = Time, y = Cumulative_Adoption)) +
     plot.title = element_text(hjust = 0.5, face = "bold", size = 24),
     plot.subtitle = element_text(hjust = 0.5, size = 16, margin = margin(b = 15)),
     axis.title = element_text(face = "bold", size = 22),
-    # Remove the arbitrary numeric labels on the x-axis for a more conceptual look
     axis.text.x = element_blank(),
     axis.text.y = element_text(size = 18, face = "bold"),
     axis.ticks.x = element_blank(),
     panel.grid.minor = element_blank()
   )
-
 ```
 
 ### The Tipping Point
@@ -176,9 +159,8 @@ Roger's classification relates to the idea of the  **tipping point** (sometimes 
 #| fig-width: 10
 library(dplyr)
 # 1. Generate the normal distribution data
-# Create a sequence of x values from -3.5 to 3.5 (representing standard deviations)
 x <- seq(-3.5, 3.5, length.out = 1000)
-y <- dnorm(x) # Calculate the exact height of the normal curve for each x
+y <- dnorm(x)
 df <- data.frame(x = x, y = y)
 
 # 2. Segment the data into Rogers's categories
@@ -190,72 +172,44 @@ df <- df %>%
     x >= 0 & x < 1 ~ "Late Majority (34%)",
     x >= 1 ~ "Laggards (16%)"
   )) %>%
-  # Convert to a factor to lock in the left-to-right order for the legend
   mutate(category = factor(category, levels = c(
-    "Innovators (2.5%)",
-    "Early Adopters (13.5%)",
-    "Early Majority (34%)",
-    "Late Majority (34%)",
-    "Laggards (16%)"
+    "Innovators (2.5%)", "Early Adopters (13.5%)", "Early Majority (34%)",
+    "Late Majority (34%)", "Laggards (16%)"
   )))
 
 # 3. Create the ggplot
 ggplot(df, aes(x = x, y = y, fill = category)) +
-  # Draw the filled segments
   geom_area(alpha = 0.9, color = "black", linewidth = 0.5) +
-  
-  # Add vertical dashed lines at the standard deviation thresholds
   geom_vline(xintercept = c(-2, -1, 0, 1), linetype = "dashed", color = "gray20", linewidth = 0.6) +
-  
-  # Apply a custom, distinct color palette
   scale_fill_manual(values = c(
-    "Innovators (2.5%)"      = "#F4A261", # Sandy Orange
-    "Early Adopters (13.5%)" = "#E9C46A", # Yellow/Gold
-    "Early Majority (34%)"   = "#2A9D8F", # Teal
-    "Late Majority (34%)"    = "#264653", # Dark Blue/Green
-    "Laggards (16%)"         = "#E76F51"  # Burnt Orange/Red
+    "Innovators (2.5%)"      = "#F4A261", "Early Adopters (13.5%)" = "#E9C46A",
+    "Early Majority (34%)"   = "#2A9D8F", "Late Majority (34%)"    = "#264653",
+    "Laggards (16%)"         = "#E76F51"
   )) +
-  
-  # Format the X-axis to show Standard Deviation mathematical notation
   scale_x_continuous(
     breaks = c(-2, -1, 0, 1),
-    labels = c(expression(mu - 2*sigma), 
-               expression(mu - 1*sigma), 
-               expression(mu), 
-               expression(mu + 1*sigma))
+    labels = c(expression(mu - 2*sigma), expression(mu - 1*sigma), expression(mu), expression(mu + 1*sigma))
   ) +
-  
-  # Add labels and titles
-  labs(
-    x = "Time of Adoption",
-    y = NULL,
-  ) +
-  
-  # Clean up the theme (removing arbitrary Y-axis numbers to keep it conceptual)
+  labs(x = "Time of Adoption", y = NULL) +
   theme_minimal() +
   theme(
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank(),
+    axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+    panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank(),
     panel.grid.minor.x = element_blank(),
-    
-    # Typography
     axis.title.x = element_text(face = "bold", margin = margin(t = 10), size = 18),
     axis.text.x = element_text(size = 16),
-    
-    # Move legend to the bottom
-    legend.position = "bottom",
-    legend.title = element_blank(),
+    legend.position = "bottom", legend.title = element_blank(),
     legend.text = element_text(size = 18)
   ) + 
-  
-  # Add in-plot text annotations for the larger chunks
-    annotate("text", x = -2.4, y = 0.02, label = "Innovators", color = "black", fontface = "bold", size = 5) +
-    annotate("text", x = -1.35, y = 0.08, label = "Early\nAdopters", color = "black", fontface = "bold", size = 5) +
-    annotate("text", x = -0.5, y = 0.15, label = "Early\nMajority", color = "white", fontface = "bold", size = 5) +
-    annotate("text", x = 0.5,  y = 0.15, label = "Late\nMajority", color = "white", fontface = "bold", size = 5) +
-    annotate("text", x = 1.4, y = 0.08, label = "Laggards", color = "white", fontface = "bold", size = 5) + guides(fill = guide_legend(nrow = 2))
+  annotate("text", x = -2.4, y = 0.02, label = "Innovators", color = "black", fontface = "bold", size = 5) +
+  annotate("text", x = -1.35, y = 0.08, label = "Early
+Adopters", color = "black", fontface = "bold", size = 5) +
+  annotate("text", x = -0.5, y = 0.15, label = "Early
+Majority", color = "white", fontface = "bold", size = 5) +
+  annotate("text", x = 0.5,  y = 0.15, label = "Late
+Majority", color = "white", fontface = "bold", size = 5) +
+  annotate("text", x = 1.4, y = 0.08, label = "Laggards", color = "white", fontface = "bold", size = 5) + 
+  guides(fill = guide_legend(nrow = 2))
 ```
 
 ### Valente's Classification of Adopters (Network Threshold Model)
@@ -295,115 +249,63 @@ Now consider Person 2 with a higher threshold ($q$) of $0.75$. This means Person
 library(igraph)
 library(ggraph)
 
-# Install required packages if you don't have them:
-# install.packages(c("igraph", "ggraph", "patchwork"))
-
-# ---------------------------------------------------------
 # 1. Define the Network and Thresholds
-# ---------------------------------------------------------
-# Create a small, interconnected graph
 edges <- data.frame(
   from = c(1, 1, 2, 2, 3, 4, 4, 5, 6, 7),
   to   = c(2, 3, 3, 4, 5, 5, 6, 7, 8, 8)
 )
 g <- graph_from_data_frame(edges, directed = FALSE)
-
-# Assign a personal threshold to each node. 
-# This is the PROPORTION of neighbors that must adopt before this node adopts.
-# Node 1 is our seed (threshold 0).
-V(g)$threshold <- c(0.00,  # Node 1 (Seed)
-                    0.30,  # Node 2
-                    0.60,  # Node 3 (Resistant, needs 60% of friends)
-                    0.40,  # Node 4
-                    0.30,  # Node 5
-                    0.50,  # Node 6
-                    0.40,  # Node 7
-                    0.50)  # Node 8
-
-# Create a label for the plot that shows Node ID and its Threshold
+V(g)$threshold <- c(0.00, 0.30, 0.60, 0.40, 0.30, 0.50, 0.40, 0.50)
 V(g)$label <- paste0("Th: ", V(g)$threshold)
 
-# ---------------------------------------------------------
 # 2. Simulate Valente's Adoption Process
-# ---------------------------------------------------------
-# Initialize Time 0 (Only the seed node has adopted)
 V(g)$state_t0 <- ifelse(V(g)$name == "1", "Adopted", "Unadopted")
-
-# Function to calculate the next time step based on Valente's rules
 simulate_step <- function(g, current_state_attr, next_state_attr) {
   states <- vertex_attr(g, current_state_attr)
   new_states <- states
-  
   for (v in V(g)) {
     if (states[v] == "Unadopted") {
       neighbors <- neighbors(g, v)
       if (length(neighbors) > 0) {
-        # Calculate the proportion of neighbors who have adopted
         adopted_count <- sum(states[neighbors] == "Adopted")
         prop_adopted <- adopted_count / length(neighbors)
-        
-        # If the proportion meets or exceeds the threshold, the node adopts
         if (prop_adopted >= V(g)$threshold[v]) {
           new_states[v] <- "Adopted"
         }
       }
     }
   }
-  # Save the new states to the graph
   g <- set_vertex_attr(g, next_state_attr, value = new_states)
   return(g)
 }
-
-# Run the simulation for 5 time steps
 g <- simulate_step(g, "state_t0", "state_t1")
 g <- simulate_step(g, "state_t1", "state_t2")
 g <- simulate_step(g, "state_t2", "state_t3")
 g <- simulate_step(g, "state_t3", "state_t4")
 g <- simulate_step(g, "state_t4", "state_t5")
 
-# ---------------------------------------------------------
 # 3. Plotting the Simulation
-# ---------------------------------------------------------
-# Generate a FIXED layout so the nodes don't move around between plots
 set.seed(123) 
 fixed_layout <- create_layout(g, layout = "fr")
-
-# Helper function to generate identical plots for different time steps
 plot_time_step <- function(graph_data, state_column, title) {
-  # Map the specific time step state to a standard column for plotting
   graph_data$current_state <- graph_data[[state_column]]
-  
   ggraph(graph_data) +
     geom_edge_link(color = "gray70", width = 1) +
     geom_node_point(aes(color = current_state), size = 18) +
     geom_node_text(aes(label = label), size = 3.5, color = "black", fontface = "bold") +
-    scale_color_manual(values = c("Adopted" = "tomato", "Unadopted" = "lightblue"),
-                       drop = FALSE) + # Keep colors consistent even if all are adopted
+    scale_color_manual(values = c("Adopted" = "tomato", "Unadopted" = "lightblue"), drop = FALSE) +
     labs(title = title) +
-    theme_graph() + + coord_cartesian(clip = "off")
+    theme_graph() + 
+    coord_cartesian(clip = "off") +
     theme(legend.position = "none",
           plot.title = element_text(hjust = 0.5, face = "bold", size = 14, margin = margin(b=10)))
 }
-
-# Generate the 6 plots
 plot_time_step(fixed_layout, "state_t0", "Time 0: Initial Seed")
 plot_time_step(fixed_layout, "state_t1", "Time 1")
 plot_time_step(fixed_layout, "state_t2", "Time 2")
 plot_time_step(fixed_layout, "state_t3", "Time 3")
 plot_time_step(fixed_layout, "state_t4", "Time 4")
 plot_time_step(fixed_layout, "state_t5", "Time 5: Full Adoption")
-
-# # Combine them into a 2x3 grid using patchwork
-# combined_plot <- (p0 | p1 | p2) / (p3 | p4 | p5) +
-#   plot_annotation(
-#     title = "Valente's Network Threshold Model of Diffusion",
-#     subtitle = "Nodes adopt when the proportion of their adopted neighbors meets or exceeds their threshold (Th).",
-#     theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
-#                   plot.subtitle = element_text(size = 12, hjust = 0.5))
-#   )
-
-# # Display the final plot
-# combined_plot
 ```
 
 Valente's model categorizes adopters based on two dimensions of their threshold: their Whole Network Threshold (their general receptiveness to adoption across the entire system) and their Personal Network Threshold (how many of their direct contacts need to adopt before they do). This creates a two-by-two matrix, yielding four types of adopters:
@@ -433,96 +335,56 @@ Valente's model also provides insights into the **Local/Cosmopolitan** split in 
 #| fig-height: 8
 #| fig-width: 8
 #| fig-subcap:
-#|   - 
-#|   -  
+#|   - ""
+#|   - ""
 #| layout-ncol: 1
-# ---------------------------------------------------------
-# 1. Prepare Data for Simple Contagion (Threshold = 1)
-# ---------------------------------------------------------
+# 1. Prepare Data for Simple Contagion
 nodes_simple <- data.frame(
   name = c("Ego", "A1", "A2", "A3"),
   state = c("Newly Adopted", "Active Adopter", "Inactive", "Inactive")
 )
-
 edges_simple <- data.frame(
-  from = c("A1", "A2", "A3"),
-  to = c("Ego", "Ego", "Ego"),
+  from = c("A1", "A2", "A3"), to = c("Ego", "Ego", "Ego"),
   type = c("Transmitting", "Dormant", "Dormant")
 )
-
 g_simple <- graph_from_data_frame(edges_simple, directed = TRUE, vertices = nodes_simple)
 
-# ---------------------------------------------------------
-# 2. Prepare Data for Complex Contagion (Threshold = 2)
-# ---------------------------------------------------------
+# 2. Prepare Data for Complex Contagion
 nodes_complex <- data.frame(
   name = c("Ego", "A1", "A2", "A3"),
   state = c("Newly Adopted", "Active Adopter", "Active Adopter", "Inactive")
 )
-
 edges_complex <- data.frame(
-  from = c("A1", "A2", "A3"),
-  to = c("Ego", "Ego", "Ego"),
+  from = c("A1", "A2", "A3"), to = c("Ego", "Ego", "Ego"),
   type = c("Transmitting", "Transmitting", "Dormant")
 )
-
 g_complex <- graph_from_data_frame(edges_complex, directed = TRUE, vertices = nodes_complex)
 
-# ---------------------------------------------------------
 # 3. Define a Fixed Layout & Plotting Function
-# ---------------------------------------------------------
-# Ego at center, Alters arranged in a triangle around Ego
-layout_mat <- matrix(c(
-   0.000,  0.0,  # Ego (Center)
-   0.000,  1.0,  # A1 (Top)
-   0.866, -0.5,  # A2 (Bottom Right)
-  -0.866, -0.5   # A3 (Bottom Left)
-), ncol = 2, byrow = TRUE)
-
-# Custom function to keep plot styling consistent
+layout_mat <- matrix(c(0,0, 0,1, 0.866,-0.5, -0.866,-0.5), ncol = 2, byrow = TRUE)
 plot_contagion <- function(g, title, subtitle) {
   ggraph(g, layout = layout_mat) +
-    # Draw edges with different styles based on whether they are transmitting
     geom_edge_link(aes(color = type, linetype = type),
                    arrow = arrow(length = unit(5, 'mm'), type = "closed"),
-                   end_cap = circle(12, 'mm'),
-                   width = 1.5) +
-    # Draw nodes
+                   end_cap = circle(12, 'mm'), width = 1.5) +
     geom_node_point(aes(color = state), size = 24) +
     geom_node_text(aes(label = name), color = "white", fontface = "bold", size = 5) +
-    
-    # Custom color palettes
-    scale_color_manual(values = c("Active Adopter" = "firebrick", 
-                                  "Newly Adopted" = "darkorange", 
-                                  "Inactive" = "gray80")) +
-    scale_edge_color_manual(values = c("Transmitting" = "firebrick", 
-                                       "Dormant" = "gray80")) +
-    scale_edge_linetype_manual(values = c("Transmitting" = "solid", 
-                                          "Dormant" = "dashed")) +
-    
-    # Titles and formatting
+    scale_color_manual(values = c("Active Adopter" = "firebrick", "Newly Adopted" = "darkorange", "Inactive" = "gray80")) +
+    scale_edge_color_manual(values = c("Transmitting" = "firebrick", "Dormant" = "gray80")) +
+    scale_edge_linetype_manual(values = c("Transmitting" = "solid", "Dormant" = "dashed")) +
     labs(title = title, subtitle = subtitle) +
-    theme_graph() + + coord_cartesian(clip = "off")
+    theme_graph() + 
+    coord_cartesian(clip = "off") + 
     theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 20),
           plot.subtitle = element_text(hjust = 0.5, size = 14, margin = margin(b = 15)),
-          legend.position = "none") # Hide legends for cleaner individual plots
+          legend.position = "none")
 }
 
-# ---------------------------------------------------------
 # 4. Generate and Combine Plots
-# ---------------------------------------------------------
-plot_contagion(
-  g_simple, 
-  "Simplex Contagion", 
-  "1 exposure is enough to transmit\n(e.g., Information, Disease)"
-)
-
-plot_contagion(
-  g_complex, 
-  "Complex Contagion", 
-  "Multiple exposures required to transmit\n(e.g., Behavior, Innovation)"
-)
-
+plot_contagion(g_simple, "Simplex Contagion", "1 exposure is enough to transmit
+(e.g., Information, Disease)")
+plot_contagion(g_complex, "Complex Contagion", "Multiple exposures required to transmit
+(e.g., Behavior, Innovation)")
 ```
 
 ### Simplex Contagion

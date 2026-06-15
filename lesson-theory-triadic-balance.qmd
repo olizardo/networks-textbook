@@ -189,7 +189,6 @@ To illustrate this, imagine you (P) have two good friends, friend O1 and friend 
     # Create the igraph object
     g <- graph_from_data_frame(edges, directed = TRUE)
     # Define a fixed layout matrix
-    # P at the top, O1 on the left, O2 on the right, Q at the bottom
     layout_matrix <- matrix(c(
         0,  1,  # P (1)
         -1,  0,  # O1 (2)
@@ -198,7 +197,7 @@ To illustrate this, imagine you (P) have two good friends, friend O1 and friend 
         ), ncol = 2, byrow = TRUE)
     # Plot using ggraph
     ggraph(g, layout = layout_matrix) +
-    geom_edge_link(aes(color = sign, label = sign, edge_linetype = style),
+    geom_edge_link(aes(color = sign, label = sign, linetype = style),
                  arrow = arrow(length = unit(4, 'mm'), type = "closed"),
                  end_cap = circle(10, 'mm'),
                  start_cap = circle(9, 'mm'),
@@ -209,14 +208,14 @@ To illustrate this, imagine you (P) have two good friends, friend O1 and friend 
                  show.legend = FALSE) +
     geom_node_point(size = 22, color = "tan2") +
     geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-    # Custom colors: Green for +, Red for -, Goldenrod for the unresolved ?
     scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "?" = "goldenrod")) +
-    scale_edge_linetype_identity() +
+    scale_linetype_identity() +
     labs(title = "Cross-Pressure Configuration",
         subtitle = "P is torn between O1 (who likes Q) and O2 (who dislikes Q)") +
-    theme_graph() + + coord_cartesian(clip = "off")
+    theme_graph() +
+    coord_cartesian(clip = "off") +
     theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
-            plot.subtitle = element_text(hjust = 0.5, size = 11, margin = margin(b = 15)))
+          plot.subtitle = element_text(hjust = 0.5, size = 11, margin = margin(b = 15)))
 ```
 
 Balance theory also tells us that unbalanced, tension-filled configurations naturally tend to transition toward balanced configurations. To eliminate cross-pressure, achieve balance, and resolve your ambivalence, you would need to alter the network's configuration of valenced ties. One way to do this is to change your attitude toward either Friend Q1 or Friend Q2, potentially distancing yourself from one of them, so their conflicting opinion no longer pressures you. Alternatively, you could try to convince either Friend Q1 or Friend Q2 to change their own attitude toward Taylor so that both of your friends are finally in agreement. By shifting these underlying sentiments, you remove the cross-pressure and restore a comfortable equilibrium to your social circle
