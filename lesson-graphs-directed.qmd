@@ -11,7 +11,7 @@
 
 ## Introduction to Directed Graphs (Digraphs)
 
-While simple undirected graphs are useful for representing symmetric relationships (where connection is naturally mutual), many social relationships are inherently directional. For these relationships, one member of a pair can claim a tie with the other, but the other person may or may not send the same tie back. Examples include giving advice, sending emails, lending money, or nominating friends.
+While simple undirected graphs are useful for representing symmetric relationships (where connection is naturally mutual), many social relationships are inherently directional (see @sec-ties). For these relationships, one member of a pair can claim a tie with the other, but the other person may or may not send the same tie back. Examples include giving advice, sending emails, lending money, or nominating friends.
 
 To represent directional relations, we use **directed graphs** (also called **digraphs**). In a directed graph, the edges are *ordered pairs* of nodes, meaning the order in which we list the nodes in an edge matters. The connection goes from a **source node** (the sender) to a **destination node** (the receiver). Therefore, the edge $AB$ is a different entity from the edge $BA$. 
 
@@ -139,6 +139,59 @@ $$
 $$
 
 This indicates that approximately 26.2% of all possible directed edges in the network are actually observed.
+
+### Degree Variance in Directed Graphs
+
+Once we have calculated the average degree, we can measure the **heterogeneity** (or inequality) in connectivity across nodes by computing the degree variance. In directed graphs, because each node has two distinct degrees, we must compute two separate variances: **indegree variance** and **outdegree variance**. 
+
+Just like in the undirected case, the degree variance represents the *average squared deviation* of each node's degree from the graph's average degree.
+
+#### Indegree Variance ($\mathcal{v}^{in}(G)$)
+The indegree variance measures the inequality in incoming connections (popularity/prestige) across nodes in the network:
+
+$
+  \mathcal{v}^{in}(G) = \frac{\sum_i (k^{in}_i - \bar{k})^2}{n}
+$ {#eq-dirindegvar}
+
+#### Outdegree Variance ($\mathcal{v}^{out}(G)$)
+The outdegree variance measures the inequality in outgoing connections (sociability) across nodes:
+
+$
+  \mathcal{v}^{out}(G) = \frac{\sum_i (k^{out}_i - \bar{k})^2}{n}
+$ {#eq-diroutdegvar}
+
+Note that because $\bar{k}^{in} = \bar{k}^{out} = \bar{k} = m/n$, both formulas use the same average degree, but the individual node values $k^{in}_i$ and $k^{out}_i$ can differ, yielding distinct variances.
+
+#### Example Calculation
+Let's compute both variances for the directed graph in @fig-directed (where $n = 7$, $m = 11$, and $\bar{k} = 11/7 \approx 1.57$). 
+
+@tbl-dirdegvar lists each node's indegree, outdegree, and squared deviations from the average degree.
+
+| Node | Indegree ($k^{in}$) | Squared Deviation $(k^{in} - 1.57)^2$ | Outdegree ($k^{out}$) | Squared Deviation $(k^{out} - 1.57)^2$ |
+|:---:|:---:|:---:|:---:|:---:|
+| **A** | 2 | 0.18 | 2 | 0.18 |
+| **B** | 2 | 0.18 | 3 | 2.04 |
+| **C** | 2 | 0.18 | 0 | 2.47 |
+| **D** | 3 | 2.04 | 1 | 0.33 |
+| **E** | 0 | 2.47 | 2 | 0.18 |
+| **F** | 2 | 0.18 | 1 | 0.33 |
+| **G** | 0 | 2.47 | 2 | 0.18 |
+| **Sum**| **11** | **7.71** | **11** | **5.71** |
+
+: Squared deviations of indegree and outdegree from the average degree {#tbl-dirdegvar}
+
+Using the sums of the squared deviations from @tbl-dirdegvar, we calculate the variances:
+
+* **Indegree Variance**:
+  $
+    \mathcal{v}^{in}(G) = \frac{7.71}{7} \approx 1.10
+  $
+* **Outdegree Variance**:
+  $
+    \mathcal{v}^{out}(G) = \frac{5.71}{7} \approx 0.82
+  $
+
+In this network, the indegree variance ($1.10$) is higher than the outdegree variance ($0.82$). Sociologically, this indicates that there is more inequality in the popularity/prestige of nodes (receiving ties) than in their sociability (sending ties). In other words, incoming connections are more heavily concentrated on a few "popular" nodes (like node $D$) while others are left as complete non-receivers (like $E$ and $G$).
 
 ---
 
