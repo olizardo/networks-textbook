@@ -1063,23 +1063,27 @@ gr_ties |>
 
 :::: {.columns align=center}
 
-::: {.column width="55%"}
+::: {.column width="60%"}
 ::: {.incremental}
 - Let's look at the undirected graph on the right:
-  - **Node Set** ($V$): $\{1, 2, 3, 4, 5, 6, 7\}$
-  - **Edge Set** ($E$): $\{13, 43, 47, 25, 56, 62, 32\}$
+  - **Node Set** ($V$): $\{A, B, C, D, E, F, G\}$
+  - **Edge Set** ($E$): $\{AC, CD, DG,$ <br> $BE, EF, FB, CB\}$
   - **Graph Order** ($n = |V|$): **7** nodes
   - **Graph Size** ($m = |E|$): **7** edges
 :::
 :::
 
-::: {.column width="45%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-ggraph(gr_base, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+gr_letters <- gr_base |>
+  activate(nodes) |>
+  mutate(name = LETTERS[as.integer(name)])
+
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
   geom_edge_link(color = "steelblue", edge_width = 1.5) +
   geom_node_point(size = 22, color = "skyblue") +
   geom_node_text(aes(label = name), color = "black", size = 6) +
@@ -1099,18 +1103,17 @@ ggraph(gr_base, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 
 :::: {.columns align=center}
 
-::: {.column width="55%"}
+::: {.column width="60%"}
 ::: {.incremental}
 - Let's look at the directed graph on the right:
   - **Node Set** ($V$): $\{A, B, C, D, E, G\}$
-  - **Edge Set** ($E$): 8 directed arcs:
-    $B \rightarrow A, B \rightarrow C, B \rightarrow D, E \rightarrow D, G \rightarrow D, A \rightarrow E, C \rightarrow G, A \rightarrow B$
+  - **Edge Set** ($E$): $\{BA, BC, BD, ED,$ <br> $GD, AE, CG, AB\}$
   - **Graph Order** ($n = |V|$): **6** nodes
   - **Graph Size** ($m = |E|$): **8** edges
 :::
 :::
 
-::: {.column width="45%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
@@ -1148,16 +1151,269 @@ ggraph(gr_dir, layout = 'circle') +
 
 ---
 
-## Graph Density
+## Maximum Size: Undirected Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the undirected graph on the right:
+  - **Order** ($n$): 7 nodes
+- **Formula**:
+  $$Max(E) = \frac{n(n - 1)}{2}$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_letters <- gr_base |>
+  activate(nodes) |>
+  mutate(name = LETTERS[as.integer(name)])
+
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Maximum Size: Undirected Calculation
+
+::: {.incremental}
+- Using the order $n = 7$ from the previous slide:
+  - **Maximum possible size** calculation:
+    $$Max(E) = \frac{7 \times (7 - 1)}{2} = \frac{42}{2} = 21\text{ edges}$$
+- **Interpretation**:
+  - A complete undirected graph with 7 nodes would have exactly **21** edges.
+:::
+
+
+---
+
+## Maximum Size: Directed Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the directed graph on the right:
+  - **Order** ($n$): 6 nodes
+- **Formula**:
+  $$Max(E) = n(n - 1)$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Maximum Size: Directed Calculation
+
+::: {.incremental}
+- Using the order $n = 6$ from the previous slide:
+  - **Maximum possible size** calculation:
+    $$Max(E) = 6 \times (6 - 1) = 6 \times 5 = 30\text{ edges}$$
+- **Interpretation**:
+  - A complete directed graph with 6 nodes would have exactly **30** directed arcs.
+:::
+
+
+---
+
+## Graph Density: Formulas
 
 ::: {.incremental}
 - **Density** ($d$) is the ratio of the observed number of edges ($m$) to the maximum possible number of edges.
-- It's a value between 0 (empty) and 1 (complete).
-- Undirected: $d = \frac{2m}{n(n-1)}$
-- Directed: $d = \frac{m}{n(n-1)}$
-- It can be interpreted as the probability that any two randomly chosen nodes are connected.
-- Denser networks are less vulnerable to breakdowns when key nodes are removed.
+- It is a value between 0 (completely empty) and 1 (complete graph).
+- **Undirected Graph**:
+  $$d = \frac{2m}{n(n-1)}$$
 :::
+
+---
+
+---
+
+## Graph Density: Formulas
+
+::: {.incremental}
+- **Density** ($d$) is the ratio of the observed number of edges ($m$) to the maximum possible number of edges.
+- It is a value between 0 (completely empty) and 1 (complete graph).
+
+- **Directed Graph**:
+  $$d = \frac{m}{n(n-1)}$$
+:::
+
+---
+
+---
+
+## Graph Density: Formulas
+
+::: {.incremental}
+- **Density** ($d$) is the ratio of the observed number of edges ($m$) to the maximum possible number of edges.
+- It is a value between 0 (completely empty) and 1 (complete graph).
+- **Undirected Graph**:
+  $$d = \frac{2m}{n(n-1)}$$
+- **Directed Graph**:
+  $$d = \frac{m}{n(n-1)}$$
+:::
+
+---
+
+## Graph Density: Interpretation
+
+::: {.incremental}
+- **Connection Probability**:
+  - Density is the probability that any two randomly chosen nodes are connected.
+- **Network Resilience**:
+  - Denser networks are generally more resilient and less vulnerable to breakdowns when key nodes are removed.
+:::
+
+
+---
+
+## Density: Undirected Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the undirected graph on the right:
+  - **Order** ($n$): 7 nodes
+  - **Size** ($m$): 7 edges
+  - **Maximum possible edges**:
+    $$Max(E) = \frac{7 \times 6}{2} = 21$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Density: Undirected Calculation
+
+::: {.incremental}
+- Using the counts from the previous slide:
+  - Observed edges ($m$): 7
+  - Maximum possible edges: 21
+- **Density Formula**:
+  $$d = \frac{m}{Max(E)} = \frac{7}{21} \approx 0.333$$
+- **Interpretation**:
+  - Exactly **33.3%** of all possible undirected ties are present in this network.
+:::
+
+
+---
+
+## Density: Directed Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the directed graph on the right:
+  - **Order** ($n$): 6 nodes
+  - **Size** ($m$): 8 directed edges
+  - **Maximum possible edges**:
+    $$Max(E) = 6 \times 5 = 30$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Density: Directed Calculation
+
+::: {.incremental}
+- Using the counts from the previous slide:
+  - Observed directed edges ($m$): 8
+  - Maximum possible edges: 30
+- **Density Formula**:
+  $$d = \frac{m}{Max(E)} = \frac{8}{30} \approx 0.267$$
+- **Interpretation**:
+  - Exactly **26.7%** of all possible directed ties are present in this network.
+:::
+
 
 ---
 
@@ -1167,21 +1423,129 @@ ggraph(gr_dir, layout = 'circle') +
 
 ## Graph Degree Set and Sequence
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Graph Degree Set**: A list of the degrees of every node in the graph.
 - **Graph Degree Sequence**: The degree set sorted in descending order.
 - This provides a "fingerprint" of the graph's overall connectivity structure.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_letters <- gr_base |>
+  activate(nodes) |>
+  mutate(name = LETTERS[as.integer(name)])
+
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Degree Set & Sequence: Undirected Example
+
+::: {.incremental}
+- For the undirected graph shown on the previous slide:
+  - **Degrees**: $k_A=1, k_B=3, k_C=3, k_D=2, k_E=2, k_F=2, k_G=1$
+- **Degree Set** (unordered list of node degrees):
+  $$\{1, 3, 3, 2, 2, 2, 1\}$$
+- **Degree Sequence** (sorted degrees):
+  $$(3, 3, 2, 2, 2, 1, 1)$$
+:::
+
+---
+
+## In-Degree Set & Sequence: Directed Example
+
+::: {.incremental}
+- For the directed graph (shown on previous directed slides):
+  - **In-Degrees**: $k^{in}_A=1, k^{in}_B=1, k^{in}_C=1, k^{in}_D=3, k^{in}_E=1, k^{in}_G=1$
+- **In-Degree Set** (unordered list of in-degrees):
+  $$\{1, 1, 1, 3, 1, 1\}$$
+- **In-Degree Sequence** (sorted in-degrees):
+  $$(3, 1, 1, 1, 1, 1)$$
+:::
+
+---
+
+## Out-Degree Set & Sequence: Directed Example
+
+::: {.incremental}
+- For the directed graph (shown on previous directed slides):
+  - **Out-Degrees**: $k^{out}_A=2, k^{out}_B=3, k^{out}_C=1, k^{out}_D=0, k^{out}_E=1, k^{out}_G=1$
+- **Out-Degree Set** (unordered list of out-degrees):
+  $$\{2, 3, 1, 0, 1, 1\}$$
+- **Out-Degree Sequence** (sorted out-degrees):
+  $$(3, 2, 1, 1, 1, 0)$$
 :::
 
 ---
 
 ## Degree Range & Sum
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Maximum Degree** ($k_{max}$) and **Minimum Degree** ($k_{min}$).
 - **Degree Range** ($k_r$): $k_{max} - k_{min}$.
 - **Sum of Degrees** ($\sum k_i$):
   - In an undirected graph, this is always twice the number of edges: $\sum k_i = 2m$.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Degree Range & Sum: Example
+
+::: {.incremental}
+- For the undirected graph shown on the previous slide:
+  - **Degrees**: $k_A=1, k_B=3, k_C=3, k_D=2, k_E=2, k_F=2, k_G=1$
+- **Max & Min Degree**:
+  - $k_{max} = 3$ (nodes B and C)
+  - $k_{min} = 1$ (nodes A and G)
+- **Degree Range**:
+  - $k_r = 3 - 1 = 2$
+- **Sum of Degrees**:
+  - $\sum k_i = 1+3+3+2+2+2+1 = 14$
+  - Double check: $2m = 2 \times 7 = 14$ (Matches!)
 :::
 
 ---
@@ -1198,6 +1562,9 @@ ggraph(gr_dir, layout = 'circle') +
 
 ## Average Degree
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Average Degree** ($\bar{k}$): The average of all node degrees in the graph.
   
@@ -1206,11 +1573,35 @@ ggraph(gr_dir, layout = 'circle') +
 - It represents the expected degree of a randomly chosen node.
 - It is also directly related to density: $\bar{k} = d(n-1)$.
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
 ## Degree Variance
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Degree Variance** ($\sigma^2_k$): A measure of how much the node degrees vary from the average degree.
   
@@ -1219,6 +1610,56 @@ ggraph(gr_dir, layout = 'circle') +
 - A low variance indicates a more homogeneous or uniform network (like a **regular graph**).
 - A high variance indicates a heterogeneous network with both low-degree nodes and high-degree "hubs" (like a **scale-free** network).
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Degree Metrics: Basic Example
+
+::: {.incremental}
+- For the undirected graph shown on the previous slides:
+  - **Node Degrees**: $k_A=1, k_B=3, k_C=3, k_D=2, k_E=2, k_F=2, k_G=1$
+  - **Degree Set**: $\{1, 3, 3, 2, 2, 2, 1\}$ (degrees of all nodes in the graph)
+  - **Degree Sequence**: $(3, 3, 2, 2, 2, 1, 1)$ (ordered from highest to lowest)
+  - **Degree Sum**: 
+    $$\sum k_i = 1+3+3+2+2+2+1 = 14 = 2m$$
+:::
+
+---
+
+## Degree Metrics: Mean & Variance Example
+
+::: {.incremental}
+- Using the degree values from the previous slide:
+  - **Order** ($n$): 7 nodes
+  - **Average Degree** ($\bar{k}$):
+    $$\bar{k} = \frac{\sum k_i}{n} = \frac{14}{7} = 2.0$$
+  - **Degree Variance** ($\sigma^2_k$):
+    $$\sigma^2_k = \frac{\sum (k_i - \bar{k})^2}{n}$$
+  - **Variance Calculation**:
+    $$\sigma^2_k = \frac{3 \times (2-2)^2 + 2 \times (3-2)^2 + 2 \times (1-2)^2}{7} = \frac{4}{7} \approx 0.571$$
+:::
+
 
 ---
 
@@ -1228,11 +1669,9 @@ ggraph(gr_dir, layout = 'circle') +
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- A **regular graph** is a graph where every node has the same degree.
-- If every node has degree $k$, it is called a **$k$-regular graph**.
-- This means the degree variance is zero:
-  $$\sigma^2_k = 0$$
-- These are often used as baseline models but are rare in real-world social networks.
+- A **regular graph** is one where every node has the same degree $k$ (called **$k$-regular**).
+- Since all node degrees are identical to the average, the degree variance is zero ($\sigma^2_k = 0$).
+- These are rare in real-world social networks but are used as baseline models.
 - Example: A **3-regular** graph on 6 nodes (shown on the right).
 :::
 :::
@@ -1241,8 +1680,8 @@ ggraph(gr_dir, layout = 'circle') +
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
+#| fig-width: 4.5
+#| fig-height: 4.5
 gr_regular <- tbl_graph(
   nodes = data.frame(name = LETTERS[1:6]),
   edges = data.frame(
@@ -1265,15 +1704,116 @@ ggraph(gr_regular, layout = 'circle') +
 
 ---
 
+## Regular Graphs: Metrics Example
+
+::: {.incremental}
+- For the **3-regular** graph shown on the previous slide:
+  - **Node Degrees**: $k_A=3, k_B=3, k_C=3, k_D=3, k_E=3, k_F=3$
+  - **Order** ($n$): 6 nodes
+- **Average Degree** ($\bar{k}$):
+  $$\bar{k} = \frac{\sum k_i}{n} = \frac{18}{6} = 3.0$$
+:::
+
+---
+
+## Regular Graphs: Variance Example
+
+::: {.incremental}
+- Using the metrics from the previous slide:
+  - Average Degree ($\bar{k}$): 3.0
+- **Degree Variance** ($\sigma^2_k$):
+  $$\sigma^2_k = \frac{6 \times (3 - 3)^2}{6} = 0$$
+- **Conclusion**:
+  - Since every node's degree matches the average degree, the deviation is zero for all nodes, resulting in **zero variance**.
+:::
+
+
+
+---
+
+## Average Nearest Neighbor Degree
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Average Nearest Neighbor Degree** ($\bar{k}_{nn(i)}$) measures the average degree of node $i$'s neighbors.
+- Formula:
+  $$\bar{k}_{nn(i)} = \frac{1}{k_i} \sum_{j \in \mathcal{N}(i)} k_j$$
+- It tells us whether a node's connections are, on average, highly connected or peripheral.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
 ## Feld's Friendship Paradox
 
 ::: {.incremental}
-- **Average Nearest Neighbor Degree** ($\bar{k}_{nn(i)}$):
-  - The average degree of node $i$'s neighbors:
-    $$\bar{k}_{nn(i)} = \frac{1}{k_i} \sum_{j \in \mathcal{N}(i)} k_j$$
-- **The Friendship Paradox** (Scott Feld, 1991):
-  - In almost all social networks, the average degree of a person's friends ($\bar{k}_{nn}$) is **greater** than the average degree of the people in the network ($\bar{k}$).
-  - **Your friends have more friends than you do!**
+- **Feld's Friendship Paradox** (Scott Feld, 1991):
+  - In almost all social networks, the average degree of a node's neighbors ($\bar{k}_{nn}$) is **greater** than the average degree of the nodes in the network ($\bar{k}$).
+- Why does this happen?
+  - Highly connected individuals (popular hubs) belong to many people's neighborhood sets, disproportionately inflating neighbor degrees across the network.
+- **Your friends, on average, have more friends than you do!**
+:::
+
+---
+
+## Friendship Paradox: Node Calculations (A-D)
+
+::: {.incremental}
+- For the undirected graph shown previously (average degree $\bar{k} = 2.0$):
+  - **Node A** (neighbor C): $\bar{k}_{nn(A)} = \frac{k_C}{1} = \frac{3}{1} = 3.0$
+  - **Node B** (neighbors C, E, F): $\bar{k}_{nn(B)} = \frac{k_C + k_E + k_F}{3} = \frac{3 + 2 + 2}{3} \approx 2.33$
+  - **Node C** (neighbors A, D, B): $\bar{k}_{nn(C)} = \frac{k_A + k_D + k_B}{3} = \frac{1 + 2 + 3}{3} = 2.0$
+  - **Node D** (neighbors C, G): $\bar{k}_{nn(D)} = \frac{k_C + k_G}{2} = \frac{3 + 1}{2} = 2.0$
+:::
+
+---
+
+## Friendship Paradox: Node Calculations (E-G)
+
+::: {.incremental}
+- Continuing calculations for the remaining nodes:
+  - **Node E** (neighbors B, F): $\bar{k}_{nn(E)} = \frac{k_B + k_F}{2} = \frac{3 + 2}{2} = 2.5$
+  - **Node F** (neighbors E, B): $\bar{k}_{nn(F)} = \frac{k_E + k_B}{2} = \frac{2 + 3}{2} = 2.5$
+  - **Node G** (neighbor D): $\bar{k}_{nn(G)} = \frac{k_D}{1} = \frac{2}{1} = 2.0$
+- **Summary of neighbor degrees**:
+  - $\bar{k}_{nn} = (3.0, 2.33, 2.0, 2.0, 2.5, 2.5, 2.0)$
+:::
+
+
+---
+
+## Friendship Paradox: Network Average
+
+::: {.incremental}
+- From the node calculations on the previous slide, the nearest neighbor degrees are:
+  - $\bar{k}_{nn} = (3.0, 2.33, 2.0, 2.0, 2.5, 2.5, 2.0)$
+- **Average neighbor degree** for the network:
+  $$\text{Mean}(\bar{k}_{nn}) = \frac{3.0 + 2.33 + 2.0 + 2.0 + 2.5 + 2.5 + 2.0}{7} \approx 2.33$$
+- **Demonstrating the Paradox**:
+  - Average degree of nodes' neighbors ($\approx 2.33$) is **greater** than the average degree of nodes ($\bar{k} = 2.0$).
+  - This numerically verifies Feld's Friendship Paradox!
 :::
 
 ---
@@ -1286,10 +1826,288 @@ ggraph(gr_regular, layout = 'circle') +
 
 ::: {.incremental}
 - Directed graphs have two distinct degree sets (In-Degree set and Out-Degree set) and two distinct sequences.
-- **Sum of Degrees**:
-  - The sum of in-degrees is always equal to the sum of out-degrees, which is equal to the size $m$ (number of edges):
-    
-    $$\sum k^{in}_i = \sum k^{out}_i = m$$
-  
-  - Since both sum to $m$, directed graphs have only **one** average degree: $\bar{k} = m/n$.
+- In our 6-node directed graph:
+  - **In-Degree Set**: $\{1, 1, 1, 3, 1, 1\}$
+  - **In-Degree Sequence**: $(3, 1, 1, 1, 1, 1)$
+  - **Out-Degree Set**: $\{2, 3, 1, 0, 1, 1\}$
+  - **Out-Degree Sequence**: $(3, 2, 1, 1, 1, 0)$
 :::
+
+---
+
+## Directed Degree Range & Sum
+
+::: {.incremental}
+- Like undirected graphs, we can define the maximum, minimum, and range of degrees.
+- In directed graphs, these are defined separately for in-degree and out-degree:
+  - **In-Degree Range**: $k^{in}_{max} - k^{in}_{min}$
+  - **Out-Degree Range**: $k^{out}_{max} - k^{out}_{min}$
+- **Degree Sum Rule**:
+  - The sum of in-degrees and the sum of out-degrees are both equal to the graph size $m$ (total number of directed edges/arcs):
+    $\sum_{i=1}^{n} k^{in}_i = \sum_{i=1}^{n} k^{out}_i = m$
+:::
+
+---
+
+## Directed Range & Sum: Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- For our 6-node directed graph (shown again on the right, $m = 8$):
+  - **In-Degrees**: $k^{in} = (1, 1, 1, 3, 1, 1)$
+    - $k^{in}_{max} = 3$ (Node D), $k^{in}_{min} = 1$
+    - Range $k^{in}_r = 3 - 1 = 2$
+    - Sum $\sum k^{in}_i = 1+1+1+3+1+1 = 8$
+  - **Out-Degrees**: $k^{out} = (2, 3, 1, 0, 1, 1)$
+    - $k^{out}_{max} = 3$ (Node B), $k^{out}_{min} = 0$ (Node D)
+    - Range $k^{out}_r = 3 - 0 = 3$
+    - Sum $\sum k^{out}_i = 2+3+1+0+1+1 = 8$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Average Degree
+
+::: {.incremental}
+- **Average In-Degree** ($\bar{k}^{in}$) and **Average Out-Degree** ($\bar{k}^{out}$):
+  $\bar{k}^{in} = \frac{1}{n} \sum_{i=1}^{n} k^{in}_i \quad \text{and} \quad \bar{k}^{out} = \frac{1}{n} \sum_{i=1}^{n} k^{out}_i$
+- **The Equivalence Theorem**:
+  - In *every* directed graph, the average in-degree is **exactly equal** to the average out-degree:
+    $\bar{k}^{in} = \bar{k}^{out} = \frac{m}{n}$
+  - **Why?** Each directed edge $u \rightarrow v$ adds exactly **1** to the out-degree of $u$ and exactly **1** to the in-degree of $v$.
+:::
+
+---
+
+## Equivalence of Means: Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- In our 6-node directed graph:
+  - **Order** ($n$): 6 nodes
+  - **Size** ($m$): 8 directed edges
+- **Mean In-Degree**:
+  $\bar{k}^{in} = \frac{1+1+1+3+1+1}{6} = \frac{8}{6} \approx 1.33$
+- **Mean Out-Degree**:
+  $\bar{k}^{out} = \frac{2+3+1+0+1+1}{6} = \frac{8}{6} \approx 1.33$
+- **They are equal!** ($\bar{k}^{in} = \bar{k}^{out} = 1.33 = m/n$)
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Degree Variance
+
+::: {.incremental}
+- While the means are always equal, the **variances** of in-degree and out-degree can be completely different!
+- **In-Degree Variance** ($\sigma^2_{in}$):
+  $\sigma^2_{in} = \frac{1}{n} \sum_{i=1}^{n} (k^{in}_i - \bar{k}^{in})^2$
+  - Sociological meaning: Measures inequality in **prestige/popularity** (do a few nodes receive all ties?).
+- **Out-Degree Variance** ($\sigma^2_{out}$):
+  $\sigma^2_{out} = \frac{1}{n} \sum_{i=1}^{n} (k^{out}_i - \bar{k}^{out})^2$
+  - Sociological meaning: Measures inequality in **sociability/activity** (do some nodes send way more ties than others?).
+:::
+
+---
+
+## Directed Degree Variance: Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- In our 6-node directed graph:
+  - Mean degree ($\bar{k}$) is $\approx 1.33$
+- **In-Degree Variance** ($\sigma^2_{in}$):
+  - Values: $k^{in} = (1, 1, 1, 3, 1, 1)$
+  - Calculation: $\frac{5 \times (1-1.33)^2 + 1 \times (3-1.33)^2}{6} = \frac{5 \times 0.11 + 2.78}{6} \approx 0.556$
+- **Out-Degree Variance** ($\sigma^2_{out}$):
+  - Values: $k^{out} = (2, 3, 1, 0, 1, 1)$
+  - Calculation: $\frac{(2-1.33)^2 + (3-1.33)^2 + 3(1-1.33)^2 + (0-1.33)^2}{6} \approx 0.889$
+- Out-degree is **more heterogeneous** than in-degree in this network!
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Comparing Density: Undirected vs. Directed
+
+::: {.incremental}
+- **Maximum Possible Edges**:
+  - Undirected: $Max(E)_{undir} = \frac{n(n - 1)}{2}$
+  - Directed: $Max(E)_{dir} = n(n - 1)$
+- **Density Scaling**:
+  - Because a directed graph can hold exactly twice as many edges as an undirected graph of the same order:
+    $d_{dir} = \frac{1}{2} d_{undir} \quad \text{for the same } m \text{ and } n$
+  - Directed density is always more "conservative"—it requires twice as many edges as an undirected graph to reach the same level of density!
+:::
+
+---
+
+## Density Scaling: A Direct Comparison
+
+| Metric | Undirected Graph | Directed Graph |
+|:-------|:----------------:|:--------------:|
+| **Formula** | $d = \frac{2m}{n(n-1)}$ | $d = \frac{m}{n(n-1)}$ |
+| **Max Edges ($n = 6$)** | $15$ edges | $30$ edges |
+| **If $m = 8$ edges** | $d \approx 0.533 \quad (53.3\%)$ | $d \approx 0.267 \quad (26.7\%)$ |
+| **If $m = 15$ edges** | $d = 1.000 \quad (100.0\%)$ | $d = 0.500 \quad (50.0\%)$ |
+
+: Density Comparison Matrix {#tbl-density-scaling}
+
+---
+
+## Reciprocity in Graphs
+
+::: {.incremental}
+- In an **undirected graph**, reciprocity is **trivial** ($100\%$):
+  - Every connection is mutual by definition ($u - v \implies v - u$).
+- In a **directed graph**, reciprocity is a **key structural metric**:
+  - It measures the extent to which directed relations are sent back and forth ($u \rightarrow v \implies v \rightarrow u$).
+  - High reciprocity is a signature of trust, mutual support, and stable social structure.
+- We measure reciprocity using two standard metrics: **Arc-based** and **Dyad-based** reciprocity.
+:::
+
+---
+
+## Reciprocity Metrics: Formulas
+
+::: {.incremental}
+- **Arc-based Reciprocity** ($r_{arc}$):
+  - The proportion of all directed edges (arcs) that are reciprocal:
+    $r_{arc} = \frac{2 \times D_{rec}}{m}$
+  - This corresponds to igraph's `"default"` reciprocity mode.
+- **Dyad-based Reciprocity** ($r_{dyad}$):
+  - The proportion of connected vertex pairs (dyads) that are reciprocal:
+    $r_{dyad} = \frac{D_{rec}}{D_{rec} + D_{asym}}$
+  - This corresponds to igraph's `"ratio"` reciprocity mode.
+:::
+
+---
+
+## Reciprocity Calculation: Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's calculate reciprocity for our 6-node digraph ($m = 8$):
+  - **Mutual Dyad**: $\{A, B\}$ (1 dyad, $2$ arcs)
+  - **Asymmetric Dyads**: $\{B, C\}, \{B, D\}, \{E, D\}, \{G, D\}, \{A, E\}, \{C, G\}$ (6 dyads, $6$ arcs)
+  - Total connected dyads: $1 + 6 = 7$
+- **Arc-based reciprocity** (igraph `"default"`):
+  $r_{arc} = \frac{2 \times 1}{8} = 0.250 \quad (25.0\%)$
+- **Dyad-based reciprocity** (igraph `"ratio"`):
+  $r_{dyad} = \frac{1}{1 + 6} = \frac{1}{7} \approx 0.143 \quad (14.3\%)$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
