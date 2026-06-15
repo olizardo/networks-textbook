@@ -32,6 +32,7 @@
     }
   </style>
   <link rel="stylesheet" href="graph-theory-slides_files/libs/revealjs/dist/theme/quarto-2740581606dc327e82f18f789b69d8a0.css">
+  <link rel="stylesheet" href="ucla-theme.css">
   <link href="graph-theory-slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="graph-theory-slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="graph-theory-slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -458,10 +459,10 @@ Figure&nbsp;13
 <div class="columns">
 <div class="column" style="width:60%;">
 <ul>
-<li class="fragment">We define a subgraph by <em>deleting</em> nodes: <span class="math inline">\(G' = G - \{F, G, H, I, J\}\)</span>.</li>
-<li class="fragment"><strong>CRITICAL RULE</strong>: When we delete nodes, all edges incident to those nodes <strong>automatically disappear</strong>.</li>
-<li class="fragment">Removing nodes is useful for seeing how important a set of actors is for holding the network together.</li>
-<li class="fragment">For instance, deleting <span class="math inline">\(\{F, G, H, I, J\}\)</span> from our 10-node graph yields the subgraph on the right.</li>
+<li class="fragment">We define a subgraph by <em>deleting</em> nodes: <span class="math inline">\(G' = G - \{a, b, c\}\)</span>, where <span class="math inline">\(\{a, b, c\}\)</span> is the set of nodes being deleted.</li>
+<li class="fragment"><strong>CRITICAL RULE</strong>: When you delete nodes, <strong>all edges incident to those nodes are automatically removed as well</strong>.</li>
+<li class="fragment">For example, deleting <span class="math inline">\(\{F, G, H, I, J\}\)</span> from our 10-node graph yields the subgraph on the right.</li>
+<li class="fragment">This shows that a vertex-deleted subgraph can be equivalent to a vertex-induced subgraph on the remaining nodes (here, <span class="math inline">\(\{A, B, C, D, E\}\)</span>).</li>
 </ul>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
@@ -483,21 +484,25 @@ Figure&nbsp;14
 <section id="vertex-deleted-subgraphs-2" class="slide level2">
 <h2>Vertex-Deleted Subgraphs (2)</h2>
 <ul>
-<li class="fragment"><strong>Null Graph</strong>: The subgraph that results from removing <em>all</em> the nodes of the original graph (cardinality of the node set is zero).</li>
-<li class="fragment"><strong>Singleton Graph</strong> (or <strong>Trivial Graph</strong>): The subgraph that results from removing all the nodes of the original graph <em>except for one</em> (cardinality of the node set is one).</li>
+<li class="fragment">Two special cases of vertex deletion are:
+<ul>
+<li class="fragment"><strong>Null Graph</strong>: The subgraph that results from removing <em>all</em> nodes from the original graph.</li>
+<li class="fragment"><strong>Singleton Graph</strong> (or <strong>Trivial Graph</strong>): The subgraph that results from removing all nodes <em>except for one</em>.</li>
+</ul></li>
 </ul>
 </section>
 <section id="edge-deleted-subgraphs" class="slide level2">
 <h2>Edge-Deleted Subgraphs</h2>
 <div class="columns">
-<div class="column" style="width:50%;">
+<div class="column" style="width:55%;">
 <ul>
-<li class="fragment">We can create subgraphs by removing edges: <span class="math inline">\(G'' = G - \{e_1, e_2\}\)</span>.</li>
-<li class="fragment"><strong>CRITICAL RULE</strong>: When we delete edges, the nodes incident to them <strong>remain intact</strong>!</li>
-<li class="fragment"><strong>Spanning Subgraph</strong>: A subgraph created by removing edges but leaving all nodes of the original graph.</li>
-<li class="fragment">The example on the right removes 6 edges from the original 10-node graph. Notice all 10 nodes are still there!</li>
+<li class="fragment">We define a subgraph by removing edges: <span class="math inline">\(G' = G - \{e_1, e_2, ...\}\)</span>, where <span class="math inline">\(\{e_1, e_2, ...\}\)</span> is the set of edges being deleted.</li>
+<li class="fragment"><strong>CRITICAL RULE</strong>: When you delete edges, the nodes that were connected by those edges <strong>remain in the graph</strong>.</li>
+<li class="fragment"><strong>Spanning Subgraph</strong>: A subgraph created by removing <em>only</em> edges while leaving all original nodes intact.</li>
+<li class="fragment"><strong>Empty Graph</strong>: A special case of edge deletion that results from removing <em>all</em> edges from the original graph, leaving only the set of isolated nodes.</li>
+<li class="fragment">The example on the right removes the six edges <span class="math inline">\(\{AB, AE, AC, CI, CE, GJ\}\)</span>; notice all 10 nodes remain!</li>
 </ul>
-</div><div class="column" style="width:50%;">
+</div><div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div id="fig-subgraph-deleted-edges" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="576">
@@ -514,15 +519,12 @@ Figure&nbsp;15
 </div>
 </div></div>
 </section>
-<section id="special-subgraphs" class="slide level2">
-<h2>Special Subgraphs</h2>
+<section id="special-subgraphs-ego-graph" class="slide level2">
+<h2>Special Subgraphs: Ego Graph</h2>
 <ul>
-<li class="fragment"><strong>Empty graph</strong>: The resulting graph when we delete all the edges in a graph (<span class="math inline">\(G' = G - E\)</span>).</li>
-<li class="fragment"><strong>Ego graph</strong>: The subgraph resulting from picking one node and deleting all nodes that are not adjacent to it.
-<ul>
-<li class="fragment">The node’s adjacent contacts are called its <strong>alters</strong>.</li>
-</ul></li>
-<li class="fragment"><strong>Null graph</strong>: The subgraph resulting from deleting all nodes in the graph.</li>
+<li class="fragment"><strong>Ego Graph</strong>: A special type of subgraph defined by picking a central node (ego) and the nodes that are connected to it, along with the edges connecting those nodes.</li>
+<li class="fragment">The central node’s adjacent contacts are called its <strong>alters</strong>.</li>
+<li class="fragment">Ego graphs are particularly useful for analyzing social networks at the level of individual actors.</li>
 </ul>
 </section>
 <section id="vertex-fusion-1" class="slide level2">
@@ -588,43 +590,71 @@ Figure&nbsp;15
 <li class="fragment">Example: <span class="math inline">\(\mathcal{N}(A) = \{B, C, D, F, H\}\)</span></li>
 </ul>
 </section>
-<section id="neighborhood-intersection-1" class="slide level2">
-<h2>Neighborhood Intersection (1)</h2>
+<section id="neighborhood-intersection" class="slide level2">
+<h2>Neighborhood Intersection</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
 <ul>
-<li class="fragment"><strong>Neighborhood Intersection</strong> (<span class="math inline">\(\mathcal{N}(u) \cap \mathcal{N}(v)\)</span>):
-<ul>
-<li class="fragment">The set of nodes connected to both <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> (<strong>common neighbors</strong>).</li>
-<li class="fragment">Can be computed for connected or disconnected dyads.</li>
-</ul></li>
-<li class="fragment">Cardinality of this set is the number of common neighbors.</li>
-<li class="fragment">Disjoint neighborhood sets have an intersection of the empty set <span class="math inline">\(\emptyset\)</span> (0 common neighbors).</li>
-</ul>
-</section>
-<section id="neighborhood-intersection-2" class="slide level2">
-<h2>Neighborhood Intersection (2)</h2>
-<ul>
+<li class="fragment"><strong>Neighborhood Intersection</strong> (<span class="math inline">\(\mathcal{N}(u) \cap \mathcal{N}(v)\)</span>) is the set of <strong>common neighbors</strong> connected to both <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span>.</li>
 <li class="fragment">In our graph:
 <ul>
-<li class="fragment"><span class="math inline">\(\mathcal{N}(A) = \{B, C, D, F, H\}\)</span></li>
-<li class="fragment"><span class="math inline">\(\mathcal{N}(D) = \{A, B, G\}\)</span></li>
+<li class="fragment"><span class="math inline">\(N(1) = \{3\}\)</span></li>
+<li class="fragment"><span class="math inline">\(N(4) = \{3, 7\}\)</span></li>
 </ul></li>
-<li class="fragment">Intersection: <span class="math inline">\(\mathcal{N}(A) \cap \mathcal{N}(D) = \{B\}\)</span>.</li>
+<li class="fragment">The intersection is the single node they share:
+<ul>
+<li class="fragment"><span class="math inline">\(N(1) \cap N(4) = \{3\}\)</span></li>
+</ul></li>
 </ul>
+</div><div class="column" style="width:40%;">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-neighborhood-intersection" class="quarto-float quarto-figure quarto-figure-center" width="960">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-neighborhood-intersection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="graph-theory-slides_files/figure-revealjs/fig-neighborhood-intersection-1.png" id="fig-neighborhood-intersection" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-neighborhood-intersection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
 </section>
 <section id="neighborhood-union" class="slide level2">
 <h2>Neighborhood Union</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
 <ul>
-<li class="fragment"><strong>Neighborhood Union</strong> (<span class="math inline">\(\mathcal{N}(u) \cup \mathcal{N}(v)\)</span>):
+<li class="fragment"><strong>Neighborhood Union</strong> (<span class="math inline">\(\mathcal{N}(u) \cup \mathcal{N}(v)\)</span>) is the set of all nodes connected to <em>either</em> <span class="math inline">\(u\)</span> or <span class="math inline">\(v\)</span>.</li>
+<li class="fragment">In our graph:
 <ul>
-<li class="fragment">The set of all nodes connected to <em>either</em> <span class="math inline">\(u\)</span> or <span class="math inline">\(v\)</span> (or both).</li>
+<li class="fragment"><span class="math inline">\(N(1) = \{3\}\)</span></li>
+<li class="fragment"><span class="math inline">\(N(4) = \{3, 7\}\)</span></li>
 </ul></li>
-<li class="fragment">Example:
+<li class="fragment">The union contains all unique neighbors from both sets:
 <ul>
-<li class="fragment"><span class="math inline">\(\mathcal{N}(A) = \{B, C, D, F, H\}\)</span></li>
-<li class="fragment"><span class="math inline">\(\mathcal{N}(D) = \{A, B, G\}\)</span></li>
-<li class="fragment">Union: <span class="math inline">\(\mathcal{N}(A) \cup \mathcal{N}(D) = \{A, B, C, F, G, H\}\)</span></li>
+<li class="fragment"><span class="math inline">\(N(1) \cup N(4) = \{3, 7\}\)</span></li>
 </ul></li>
 </ul>
+</div><div class="column" style="width:40%;">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-neighborhood-union" class="quarto-float quarto-figure quarto-figure-center" width="960">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-neighborhood-union-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="graph-theory-slides_files/figure-revealjs/fig-neighborhood-union-1.png" id="fig-neighborhood-union" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-neighborhood-union-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
 </section>
 <section class="slide level2">
 

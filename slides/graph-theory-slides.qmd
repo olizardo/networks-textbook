@@ -1,7 +1,10 @@
 ---
 title: "Graph Theory"
 subtitle: "The Basics of Social Network Analysis"
-format: revealjs
+format:
+  revealjs:
+    theme: default
+    css: ucla-theme.css
 ---
 
 ```{r setup, include=FALSE}
@@ -10,6 +13,19 @@ library(tidygraph)
 library(igraph)
 library(dplyr)
 library(kableExtra)
+
+# Base graph and layout for neighborhood slides
+gr_base <- tbl_graph(
+  nodes = data.frame(name = 1:7),
+  edges = data.frame(
+    from = c(1, 4, 4, 2, 5, 6),
+    to   = c(3, 3, 7, 5, 6, 2)
+  ),
+  directed = FALSE
+)
+
+set.seed(42)
+layout_fr <- create_layout(gr_base, layout = "fr")
 ```
 
 # Introduction to Graphs
@@ -503,10 +519,10 @@ p3
 
 ::: {.column width="60%"}
 ::: {.incremental}
-- We define a subgraph by *deleting* nodes: $G' = G - \{F, G, H, I, J\}$.
-- **CRITICAL RULE**: When we delete nodes, all edges incident to those nodes **automatically disappear**.
-- Removing nodes is useful for seeing how important a set of actors is for holding the network together.
-- For instance, deleting $\{F, G, H, I, J\}$ from our 10-node graph yields the subgraph on the right.
+- We define a subgraph by *deleting* nodes: $G' = G - \{a, b, c\}$, where $\{a, b, c\}$ is the set of nodes being deleted.
+- **CRITICAL RULE**: When you delete nodes, **all edges incident to those nodes are automatically removed as well**.
+- For example, deleting $\{F, G, H, I, J\}$ from our 10-node graph yields the subgraph on the right.
+- This shows that a vertex-deleted subgraph can be equivalent to a vertex-induced subgraph on the remaining nodes (here, $\{A, B, C, D, E\}$).
 :::
 :::
 
@@ -523,7 +539,7 @@ p <- ggraph(gr_del, layout = l[1:5, ])
 p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
 p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
 p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-p + theme_graph() + coord_cartesian(clip = "off") + coord_cartesian(clip = "off")
+p + theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
 
@@ -534,8 +550,9 @@ p + theme_graph() + coord_cartesian(clip = "off") + coord_cartesian(clip = "off"
 ## Vertex-Deleted Subgraphs (2)
 
 ::: {.incremental}
-- **Null Graph**: The subgraph that results from removing *all* the nodes of the original graph (cardinality of the node set is zero).
-- **Singleton Graph** (or **Trivial Graph**): The subgraph that results from removing all the nodes of the original graph *except for one* (cardinality of the node set is one).
+- Two special cases of vertex deletion are:
+  - **Null Graph**: The subgraph that results from removing *all* nodes from the original graph.
+  - **Singleton Graph** (or **Trivial Graph**): The subgraph that results from removing all nodes *except for one*.
 :::
 
 ---
@@ -543,16 +560,17 @@ p + theme_graph() + coord_cartesian(clip = "off") + coord_cartesian(clip = "off"
 ## Edge-Deleted Subgraphs
 
 :::: {.columns}
-::: {.column width="50%"}
+::: {.column width="55%"}
 ::: {.incremental}
-- We can create subgraphs by removing edges: $G'' = G - \{e_1, e_2\}$.
-- **CRITICAL RULE**: When we delete edges, the nodes incident to them **remain intact**!
-- **Spanning Subgraph**: A subgraph created by removing edges but leaving all nodes of the original graph.
-- The example on the right removes 6 edges from the original 10-node graph. Notice all 10 nodes are still there!
+- We define a subgraph by removing edges: $G' = G - \{e_1, e_2, ...\}$, where $\{e_1, e_2, ...\}$ is the set of edges being deleted.
+- **CRITICAL RULE**: When you delete edges, the nodes that were connected by those edges **remain in the graph**.
+- **Spanning Subgraph**: A subgraph created by removing *only* edges while leaving all original nodes intact.
+- **Empty Graph**: A special case of edge deletion that results from removing *all* edges from the original graph, leaving only the set of isolated nodes.
+- The example on the right removes the six edges $\{AB, AE, AC, CI, CE, GJ\}$; notice all 10 nodes remain!
 :::
 :::
 
-::: {.column width="50%"}
+::: {.column width="45%"}
 ```{r}
 #| label: fig-subgraph-deleted-edges
 #| echo: false
@@ -566,7 +584,7 @@ p <- ggraph(gr4, layout = l)
 p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
 p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
 p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-p + theme_graph() + coord_cartesian(clip = "off") + coord_cartesian(clip = "off")
+p + theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
 
@@ -574,13 +592,12 @@ p + theme_graph() + coord_cartesian(clip = "off") + coord_cartesian(clip = "off"
 
 ---
 
-## Special Subgraphs
+## Special Subgraphs: Ego Graph
 
 ::: {.incremental}
-- **Empty graph**: The resulting graph when we delete all the edges in a graph ($G' = G - E$).
-- **Ego graph**: The subgraph resulting from picking one node and deleting all nodes that are not adjacent to it.
-  - The node's adjacent contacts are called its **alters**.
-- **Null graph**: The subgraph resulting from deleting all nodes in the graph.
+- **Ego Graph**: A special type of subgraph defined by picking a central node (ego) and the nodes that are connected to it, along with the edges connecting those nodes.
+- The central node's adjacent contacts are called its **alters**.
+- Ego graphs are particularly useful for analyzing social networks at the level of individual actors.
 :::
 
 ---
