@@ -841,6 +841,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#average-degree-in-directed-graphs" id="toc-average-degree-in-directed-graphs" class="nav-link" data-scroll-target="#average-degree-in-directed-graphs"><span class="header-section-number">6.4.1</span> Average Degree in Directed Graphs</a></li>
   <li><a href="#density-in-directed-graphs" id="toc-density-in-directed-graphs" class="nav-link" data-scroll-target="#density-in-directed-graphs"><span class="header-section-number">6.4.2</span> Density in Directed Graphs</a></li>
+  <li><a href="#degree-variance-in-directed-graphs" id="toc-degree-variance-in-directed-graphs" class="nav-link" data-scroll-target="#degree-variance-in-directed-graphs"><span class="header-section-number">6.4.3</span> Degree Variance in Directed Graphs</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
@@ -871,7 +872,7 @@ window.Quarto = {
 
 <section id="introduction-to-directed-graphs-digraphs" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="introduction-to-directed-graphs-digraphs"><span class="header-section-number">6.1</span> Introduction to Directed Graphs (Digraphs)</h2>
-<p>While simple undirected graphs are useful for representing symmetric relationships (where connection is naturally mutual), many social relationships are inherently directional. For these relationships, one member of a pair can claim a tie with the other, but the other person may or may not send the same tie back. Examples include giving advice, sending emails, lending money, or nominating friends.</p>
+<p>While simple undirected graphs are useful for representing symmetric relationships (where connection is naturally mutual), many social relationships are inherently directional (see <a href="lesson-graphs-ties.html" class="quarto-xref"><span>Chapter 8</span></a>). For these relationships, one member of a pair can claim a tie with the other, but the other person may or may not send the same tie back. Examples include giving advice, sending emails, lending money, or nominating friends.</p>
 <p>To represent directional relations, we use <strong>directed graphs</strong> (also called <strong>digraphs</strong>). In a directed graph, the edges are <em>ordered pairs</em> of nodes, meaning the order in which we list the nodes in an edge matters. The connection goes from a <strong>source node</strong> (the sender) to a <strong>destination node</strong> (the receiver). Therefore, the edge <span class="math inline">\(AB\)</span> is a different entity from the edge <span class="math inline">\(BA\)</span>.</p>
 <p>In directed graphs, simple undirected lines are replaced by directed arrows (often called <strong>arcs</strong>). When a digraph has no loops (edges connecting a node to itself) and at most one directed edge connecting a sender to a receiver in each direction, it is called a <strong>simple directed graph</strong>.</p>
 <p><a href="lesson-graphs-ties.html#fig-directed" class="quarto-xref">Figure&nbsp;<span>8.2</span></a> shows a point-and-line diagram of a digraph representing a simple directed social network.</p>
@@ -967,7 +968,119 @@ Figure&nbsp;6.1: A simple directed graph.
   d(G)^d = \frac{11}{7(6)} = \frac{11}{42} \approx 0.262 \quad (26.2\%)
 \]</span></p>
 <p>This indicates that approximately 26.2% of all possible directed edges in the network are actually observed.</p>
+</section>
+<section id="degree-variance-in-directed-graphs" class="level3" data-number="6.4.3">
+<h3 data-number="6.4.3" class="anchored" data-anchor-id="degree-variance-in-directed-graphs"><span class="header-section-number">6.4.3</span> Degree Variance in Directed Graphs</h3>
+<p>Once we have calculated the average degree, we can measure the <strong>heterogeneity</strong> (or inequality) in connectivity across nodes by computing the degree variance. In directed graphs, because each node has two distinct degrees, we must compute two separate variances: <strong>indegree variance</strong> and <strong>outdegree variance</strong>.</p>
+<p>Just like in the undirected case, the degree variance represents the <em>average squared deviation</em> of each node’s degree from the graph’s average degree.</p>
+<section id="indegree-variance-mathcalving" class="level4" data-number="6.4.3.1">
+<h4 data-number="6.4.3.1" class="anchored" data-anchor-id="indegree-variance-mathcalving"><span class="header-section-number">6.4.3.1</span> Indegree Variance (<span class="math inline">\(\mathcal{v}^{in}(G)\)</span>)</h4>
+<p>The indegree variance measures the inequality in incoming connections (popularity/prestige) across nodes in the network:</p>
+<p>$ ^{in}(G) = $ {#eq-dirindegvar}</p>
+</section>
+<section id="outdegree-variance-mathcalvoutg" class="level4" data-number="6.4.3.2">
+<h4 data-number="6.4.3.2" class="anchored" data-anchor-id="outdegree-variance-mathcalvoutg"><span class="header-section-number">6.4.3.2</span> Outdegree Variance (<span class="math inline">\(\mathcal{v}^{out}(G)\)</span>)</h4>
+<p>The outdegree variance measures the inequality in outgoing connections (sociability) across nodes:</p>
+<p>$ ^{out}(G) = $ {#eq-diroutdegvar}</p>
+<p>Note that because <span class="math inline">\(\bar{k}^{in} = \bar{k}^{out} = \bar{k} = m/n\)</span>, both formulas use the same average degree, but the individual node values <span class="math inline">\(k^{in}_i\)</span> and <span class="math inline">\(k^{out}_i\)</span> can differ, yielding distinct variances.</p>
+</section>
+<section id="example-calculation" class="level4" data-number="6.4.3.3">
+<h4 data-number="6.4.3.3" class="anchored" data-anchor-id="example-calculation"><span class="header-section-number">6.4.3.3</span> Example Calculation</h4>
+<p>Let’s compute both variances for the directed graph in <a href="lesson-graphs-ties.html#fig-directed" class="quarto-xref">Figure&nbsp;<span>8.2</span></a> (where <span class="math inline">\(n = 7\)</span>, <span class="math inline">\(m = 11\)</span>, and <span class="math inline">\(\bar{k} = 11/7 \approx 1.57\)</span>).</p>
+<p><a href="#tbl-dirdegvar" class="quarto-xref">Table&nbsp;<span>6.1</span></a> lists each node’s indegree, outdegree, and squared deviations from the average degree.</p>
+<div id="tbl-dirdegvar" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dirdegvar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.1: Squared deviations of indegree and outdegree from the average degree
+</figcaption>
+<div aria-describedby="tbl-dirdegvar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Node</th>
+<th style="text-align: center;">Indegree (<span class="math inline">\(k^{in}\)</span>)</th>
+<th style="text-align: center;">Squared Deviation <span class="math inline">\((k^{in} - 1.57)^2\)</span></th>
+<th style="text-align: center;">Outdegree (<span class="math inline">\(k^{out}\)</span>)</th>
+<th style="text-align: center;">Squared Deviation <span class="math inline">\((k^{out} - 1.57)^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2.04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.47</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2.04</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.47</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>F</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>G</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.47</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>Sum</strong></td>
+<td style="text-align: center;"><strong>11</strong></td>
+<td style="text-align: center;"><strong>7.71</strong></td>
+<td style="text-align: center;"><strong>11</strong></td>
+<td style="text-align: center;"><strong>5.71</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Using the sums of the squared deviations from <a href="#tbl-dirdegvar" class="quarto-xref">Table&nbsp;<span>6.1</span></a>, we calculate the variances:</p>
+<ul>
+<li><strong>Indegree Variance</strong>: $ ^{in}(G) = $</li>
+<li><strong>Outdegree Variance</strong>: $ ^{out}(G) = $</li>
+</ul>
+<p>In this network, the indegree variance (<span class="math inline">\(1.10\)</span>) is higher than the outdegree variance (<span class="math inline">\(0.82\)</span>). Sociologically, this indicates that there is more inequality in the popularity/prestige of nodes (receiving ties) than in their sociability (sending ties). In other words, incoming connections are more heavily concentrated on a few “popular” nodes (like node <span class="math inline">\(D\)</span>) while others are left as complete non-receivers (like <span class="math inline">\(E\)</span> and <span class="math inline">\(G\)</span>).</p>
 <hr>
+</section>
 </section>
 </section>
 <section id="references" class="level2 unnumbered">
