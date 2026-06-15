@@ -814,7 +814,11 @@ window.Quarto = {
   <ul>
   <li><a href="#graphs-and-subgraphs" id="toc-graphs-and-subgraphs" class="nav-link active" data-scroll-target="#graphs-and-subgraphs"><span class="header-section-number">6.1</span> Graphs and Subgraphs</a></li>
   <li><a href="#vertex-and-edge-induced-subgraphs" id="toc-vertex-and-edge-induced-subgraphs" class="nav-link" data-scroll-target="#vertex-and-edge-induced-subgraphs"><span class="header-section-number">6.2</span> Vertex and Edge-Induced Subgraphs</a></li>
-  <li><a href="#vertex-and-edge-deleted-subgraphs" id="toc-vertex-and-edge-deleted-subgraphs" class="nav-link" data-scroll-target="#vertex-and-edge-deleted-subgraphs"><span class="header-section-number">6.3</span> Vertex and Edge-Deleted Subgraphs</a></li>
+  <li><a href="#creating-subgraphs-by-deleting-nodes-and-edges" id="toc-creating-subgraphs-by-deleting-nodes-and-edges" class="nav-link" data-scroll-target="#creating-subgraphs-by-deleting-nodes-and-edges"><span class="header-section-number">6.3</span> Creating Subgraphs by Deleting Nodes and Edges</a>
+  <ul class="collapse">
+  <li><a href="#vertex-deleted-subgraphs" id="toc-vertex-deleted-subgraphs" class="nav-link" data-scroll-target="#vertex-deleted-subgraphs"><span class="header-section-number">6.3.1</span> Vertex-Deleted Subgraphs</a></li>
+  <li><a href="#edge-deleted-subgraphs" id="toc-edge-deleted-subgraphs" class="nav-link" data-scroll-target="#edge-deleted-subgraphs"><span class="header-section-number">6.3.2</span> Edge-Deleted Subgraphs</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -843,90 +847,106 @@ window.Quarto = {
 
 <section id="graphs-and-subgraphs" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="graphs-and-subgraphs"><span class="header-section-number">6.1</span> Graphs and Subgraphs</h2>
-<p>Consider the graph shown in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1 (a)</span></a>. If all the actors that you are interested in studying are included here, we would refer to it as the <strong>whole network</strong>. However, sometimes, even when we collect data on a large number of actors, we may be interested in analyzing not the whole network, but only some parts of it. How do we do that?</p>
-<div id="fig-subgraph" class="quarto-layout-panel">
+<p>Consider the graph shown in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>. If all the actors that you are interested in studying are included here, we would refer to it as the <strong>whole network</strong>. However, sometimes, even when we collect data on a large number of actors, we may be interested in analyzing not the whole network, but only some parts of it. How do we do that?</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-subgraph-1" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-subgraph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="quarto-layout-row">
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-subgraph" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-subgraph-1" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
 <div aria-describedby="fig-subgraph-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-1.png" class="img-fluid figure-img" data-ref-parent="fig-subgraph" width="768">
+<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-1-1.png" class="img-fluid figure-img" width="672">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-subgraph-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a) Original graph
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-subgraph-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Original graph for subgraph examples.
 </figcaption>
 </figure>
 </div>
 </div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-subgraph" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-subgraph-2" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-subgraph-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-2.png" class="img-fluid figure-img" data-ref-parent="fig-subgraph" width="768">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-subgraph-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(b) A subgraph of the original graph.
-</figcaption>
-</figure>
-</div>
-</div>
-</div>
-<div class="quarto-layout-row">
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-subgraph" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-subgraph-3" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-subgraph-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-3.png" class="img-fluid figure-img" data-ref-parent="fig-subgraph" width="768">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-subgraph-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(c) Another subggraph of the original graph.
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-subgraph" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-subgraph-4" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-subgraph-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-4.png" class="img-fluid figure-img" data-ref-parent="fig-subgraph" width="768">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-subgraph-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(d) An edge deleted subgraph of the original graph.
-</figcaption>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-subgraph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6.1: A graph (a) and a subgraph (b).
-</figcaption>
-</figure>
 </div>
 <p>Well, good thing a graph is actually a pair of sets. If you remember your high school set theory, you can always take a set and consider only a <strong>subset</strong> of the original members.</p>
-<p>Since graphs are sets, we can do the same thing. A subset of the original nodes (or edges) of a graph is called a <strong>subgraph</strong>. So if <span class="math inline">\(G =\{E,V\}\)</span> is the original graph, the subgraph <span class="math inline">\(G' = \{E',V'\}\)</span> is a subset of <span class="math inline">\(G\)</span>, which is written <span class="math inline">\(G \subset G'\)</span>, with the understanding that <span class="math inline">\(E' \subset E\)</span> and <span class="math inline">\(V' \subset V\)</span>. In mathematics, “<span class="math inline">\(\subset\)</span>” is the symbol for subset. Thus, <span class="math inline">\(A \subset B\)</span> is read as “set A is a subset of set B.”</p>
-<p>For instance, let us say we are interested in just analyzing actors <em>A</em>, <em>B</em>, <em>C</em>, <em>D</em>, and <em>E</em> in the graph shown in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1 (a)</span></a>. They seem to be a close-knit group. In that case, as noted earlier, if we call the original graph <span class="math inline">\(G\)</span> with vertex and edge sets <span class="math inline">\(\{E, V\}\)</span>we can define a new subgraph <span class="math inline">\(G'\)</span>, whose node subset <span class="math inline">\(V'\)</span> only includes the actors we are interested in studying, in this case <span class="math inline">\(V' = \{A, B, C, D, E\}\)</span>, where <span class="math inline">\(V' \subset V\)</span>.</p>
-<p>The subgraph <span class="math inline">\(G'\)</span> is shown in <a href="#fig-subgraph-2" class="quarto-xref">Figure&nbsp;<span>6.1 (b)</span></a>. It looks exactly like we wanted, capturing the relations between an interconnected subgroup of actors in the original graph. Note that the edge set of the subgraph <span class="math inline">\(E'\)</span> only includes those edges that are <strong>incident</strong> to the other nodes in the subgraph (as defined in <a href="lesson-graphs-intro.html" class="quarto-xref"><span>Chapter 5</span></a>) and omits those in the original graph that are incident to nodes that are not in the subgraph, so <span class="math inline">\(E' \subset E\)</span>. As we will see in a later lesson, well-connected subgroups of actors in an original graph are called <strong>cohesive subsets</strong>.</p>
+<p>Since graphs are sets, we can do the same thing. A subset of the original nodes (or edges) of a graph is called a <strong>subgraph</strong>. So if <span class="math inline">\(G =\{E,V\}\)</span> is the original graph, the subgraph <span class="math inline">\(G' = \{E',V'\}\)</span> is a subset of <span class="math inline">\(G\)</span>, which is written <span class="math inline">\(G' \subset G\)</span>, with the understanding that <span class="math inline">\(E' \subset E\)</span> and <span class="math inline">\(V' \subset V\)</span>. In mathematics, “<span class="math inline">\(\subset\)</span>” is the symbol for subset. Thus, <span class="math inline">\(A \subset B\)</span> is read as “set A is a subset of set B.”</p>
+<p>For instance, let us say we are interested in just analyzing actors <em>A</em>, <em>B</em>, <em>C</em>, <em>D</em>, and <em>E</em> in the graph shown in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>. They seem to be a close-knit group. In that case, as noted earlier, if we call the original graph <span class="math inline">\(G\)</span> with vertex and edge sets <span class="math inline">\(\{E, V\}\)</span>we can define a new subgraph <span class="math inline">\(G'\)</span>, whose node subset <span class="math inline">\(V'\)</span> only includes the actors we are interested in studying, in this case <span class="math inline">\(V' = \{A, B, C, D, E\}\)</span>, where <span class="math inline">\(V' \subset V\)</span>.</p>
+<p>The subgraph <span class="math inline">\(G'\)</span> is shown in <a href="#fig-subgraph-2" class="quarto-xref">Figure&nbsp;<span>6.2</span></a>. It looks exactly like we wanted, capturing the relations between an interconnected subgroup of actors in the original graph. Note that the edge set of the subgraph <span class="math inline">\(E'\)</span> only includes those edges that are <strong>incident</strong> to the other nodes in the subgraph (as defined in <a href="lesson-graphs-intro.html" class="quarto-xref"><span>Chapter 5</span></a>) and omits those in the original graph that are incident to nodes that are not in the subgraph, so <span class="math inline">\(E' \subset E\)</span>. As we will see in a later lesson, well-connected subgroups of actors in an original graph are called <strong>cohesive subsets</strong>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-subgraph-2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-subgraph-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-2-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-subgraph-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.2: A vertex-induced subgraph based on nodes {A, B, C, D, E}.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="vertex-and-edge-induced-subgraphs" class="level2" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="vertex-and-edge-induced-subgraphs"><span class="header-section-number">6.2</span> Vertex and Edge-Induced Subgraphs</h2>
-<p>For any graph, we can define a subgraph based on <em>any</em> old random subset of the original node set. It is completely up to us. For instance, we could define a new subgraph <span class="math inline">\(G''\)</span> of the original graph shown in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1 (a)</span></a>, that includes the node set <span class="math inline">\(V'' = \{D, E, G, I\}\)</span>. That is shown in <a href="#fig-subgraph-3" class="quarto-xref">Figure&nbsp;<span>6.1 (c)</span></a>. That subgraph is weird (composed of two standalone connected dyads) and probably not very useful, but it is a subgraph of the original graph anyways!</p>
-<p>Just like we can define subgraphs based on the node set of a graph, we can define subgraphs based on subsets of the original edge set. For instance, we could pick the edges <span class="math inline">\(E' = \{AB, AC, AJ\}\)</span> and define a subgraph based on them, which will necessarily include node set <span class="math inline">\(V' = \{A, B, C, J\}\)</span>.</p>
-<p>When a subgraph is defined by selecting a subset of nodes to retain (the common case), it is called a <strong>vertex-induced subgraph</strong> of the original graph, as in <a href="#fig-subgraph-2" class="quarto-xref">Figure&nbsp;<span>6.1 (b)</span></a>. When a subgraph is defined by picking a subset of edges from the original graph to keep, it is called (you guessed it) an <strong>edge-induced subgraph</strong> of the original graph.</p>
+<p>For any graph, we can define a subgraph based on <em>any</em> old random subset of the original node set. It is completely up to us. For instance, we could define a new subgraph <span class="math inline">\(G''\)</span> of the original graph shown in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, that includes the node set <span class="math inline">\(V'' = \{D, E, G, I\}\)</span>. That is shown in <a href="#fig-subgraph-3" class="quarto-xref">Figure&nbsp;<span>6.3</span></a>. That subgraph is weird (composed of two standalone connected dyads) and probably not very useful, but it is a subgraph of the original graph anyways!</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-subgraph-3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-subgraph-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-3-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-subgraph-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.3: A vertex-induced subgraph based on nodes {D, E, G, I}.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Just like we can define subgraphs based on the node set of a graph, we can define subgraphs based on subsets of the original edge set. For instance, we could pick the edges <span class="math inline">\(E' = \{AB, AC, BJ\}\)</span> and define a subgraph based on them, as shown in <a href="#fig-subgraph-edge-induced" class="quarto-xref">Figure&nbsp;<span>6.4</span></a>. This necessarily includes the node set <span class="math inline">\(V' = \{A, B, C, J\}\)</span>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-subgraph-edge-induced" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-subgraph-edge-induced-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-edge-induced-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-subgraph-edge-induced-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.4: An edge-induced subgraph based on edges {AB, AC, BJ}.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>When a subgraph is defined by selecting a subset of nodes to retain (the common case), it is called a <strong>vertex-induced subgraph</strong> of the original graph, as in <a href="#fig-subgraph-2" class="quarto-xref">Figure&nbsp;<span>6.2</span></a>. When a subgraph is defined by picking a subset of edges from the original graph to keep, it is called (you guessed it) an <strong>edge-induced subgraph</strong> of the original graph.</p>
 </section>
-<section id="vertex-and-edge-deleted-subgraphs" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="vertex-and-edge-deleted-subgraphs"><span class="header-section-number">6.3</span> Vertex and Edge-Deleted Subgraphs</h2>
-<p>A common reason for defining subgraphs in social network analysis is to examine what a network would look like if we were to remove an actor or a set of actors. Sometimes this is useful, when we want to get a sense of how important that set of actors is for holding the network together.</p>
-<p>So it is possible to define a subgraph by <em>deleting</em> nodes. This is written <span class="math inline">\(G' = G - \{a, b, c\}\)</span>, where <span class="math inline">\(\{a, b, c\}\)</span> is the set of nodes we are deleting. So this says “give me a subgraph <span class="math inline">\(G'\)</span> that is equal to the original graph <span class="math inline">\(G\)</span> <em>minus</em> nodes <span class="math inline">\(\{a, b, c\}\)</span>.” In our previous example, <a href="#fig-subgraph-2" class="quarto-xref">Figure&nbsp;<span>6.1 (b)</span></a> is the subgraph that results when we delete nodes <span class="math inline">\(\{F, G, H, I, J\}\)</span> from the graph in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1 (a)</span></a>: <span class="math inline">\(G' = G - \{F, G, H, I, J\}\)</span>. This is called a <strong>vertex-deleted subgraph</strong> of the original graph.</p>
-<p>The subgraph that results from removing <em>all</em> the nodes of the original graph (so that the cardinality of the node set is now zero) is called the <strong>null graph</strong>. The subgraph that results from removing all the nodes of the original graph <em>except</em> for one (so that the cardinality of the node set of the resulting subgraph is equal to one) is called the <strong>singleton graph</strong>, also called the <strong>trivial graph</strong> as we saw in <a href="lesson-graphs-intro.html" class="quarto-xref"><span>Chapter 5</span></a> (one is indeed a lonely number in social networks).</p>
-<p>Just like we can create subgraphs by deleting nodes, we can also create subgraphs by removing <em>edges</em>. For instance, <a href="#fig-subgraph-4" class="quarto-xref">Figure&nbsp;<span>6.1 (d)</span></a> is the subgraph that results from removing edges <span class="math inline">\(\{AB, AE, AC, CI, CE, GJ\}\)</span> from the graph shown in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1 (a)</span></a>. This is written <span class="math inline">\(G' = G - \{AB, AE, AC, CI, CE, GJ\}\)</span>, which says “give me a new graph <span class="math inline">\(G'\)</span> which is equal to the original graph <span class="math inline">\(G\)</span> <em>minus</em> edges <span class="math inline">\(\{AB, AE, AC, CI, CE, GJ\}\)</span>. This is called the <strong>edge-deleted subgraph</strong> of the original graph.</p>
-<p>A subgraph created by removing <em>only</em> edges, but leaving <em>all</em> the nodes of the original graph intact, like in <a href="#fig-subgraph-4" class="quarto-xref">Figure&nbsp;<span>6.1 (d)</span></a>, is also called a <strong>spanning subgraph</strong> of the original graph.</p>
-<p>The subgraph that results from removing <em>all</em> the edges in a graph, such that the cardinality of the edge set turns to zero, is called the <strong>empty graph.</strong></p>
+<section id="creating-subgraphs-by-deleting-nodes-and-edges" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="creating-subgraphs-by-deleting-nodes-and-edges"><span class="header-section-number">6.3</span> Creating Subgraphs by Deleting Nodes and Edges</h2>
+<p>Another way to think about creating subgraphs is by <em>deleting</em> elements from the original graph. This approach is common in social network analysis when we want to see what a network would look like if certain actors or relationships were removed, which can help reveal how important they are for holding the network together.</p>
+<section id="vertex-deleted-subgraphs" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="vertex-deleted-subgraphs"><span class="header-section-number">6.3.1</span> Vertex-Deleted Subgraphs</h3>
+<p>It is possible to define a subgraph by deleting nodes. This is written as <span class="math inline">\(G' = G - \{a, b, c\}\)</span>, where <span class="math inline">\(\{a, b, c\}\)</span> is the set of nodes being deleted. When you delete nodes, a critical rule applies: <strong>all edges incident to those nodes are automatically removed as well</strong>.</p>
+<p>For example, starting with the graph in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, if we delete the node set <span class="math inline">\(\{F, G, H, I, J\}\)</span>, the resulting subgraph is identical to the one shown in <a href="#fig-subgraph-2" class="quarto-xref">Figure&nbsp;<span>6.2</span></a>. This shows that a <strong>vertex-deleted subgraph</strong> can be equivalent to a <strong>vertex-induced subgraph</strong>. The action of deleting <span class="math inline">\(\{F, G, H, I, J\}\)</span> <em>induces</em> a subgraph on the remaining nodes <span class="math inline">\(\{A, B, C, D, E\}\)</span>.</p>
+<p>Two special cases of vertex deletion are: - The <strong>null graph</strong>, which results from removing <em>all</em> nodes from the original graph. - The <strong>singleton graph</strong> (or <strong>trivial graph</strong>), which results from removing all nodes <em>except for one</em>.</p>
+</section>
+<section id="edge-deleted-subgraphs" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="edge-deleted-subgraphs"><span class="header-section-number">6.3.2</span> Edge-Deleted Subgraphs</h3>
+<p>Just as we can delete nodes, we can also create subgraphs by removing edges. This is written as <span class="math inline">\(G' = G - \{e_1, e_2, ...\}\)</span>, where <span class="math inline">\(\{e_1, e_2, ...\}\)</span> is the set of edges being deleted. For instance, the <strong>edge-deleted subgraph</strong> in <a href="#fig-subgraph-4" class="quarto-xref">Figure&nbsp;<span>6.5</span></a> results from removing the six edges <span class="math inline">\(\{AB, AE, AC, CI, CE, GJ\}\)</span> from the graph in <a href="#fig-subgraph-1" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>.</p>
+<p>When you delete edges, the nodes that were connected by those edges remain in the graph. A subgraph created by removing <em>only</em> edges while leaving all original nodes intact is called a <strong>spanning subgraph</strong>.</p>
+<p>A special case of edge deletion is the <strong>empty graph</strong>, which results from removing <em>all</em> edges from the original graph, leaving only the set of isolated nodes.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-subgraph-4" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-subgraph-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-subgraphs_files/figure-html/fig-subgraph-4-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-subgraph-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.5: An edge-deleted subgraph, which is also a spanning subgraph.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <p>As we will see later, subgraphs (as well as vertex and edge deletion) are a useful concept for discussing levels at an “in-between” level, above the node level but “below” the whole network level: subgroups. However, subgraphs are also useful for network concepts at the node level, because there is a special type of subgraph, called the <strong>ego graph</strong> that is defined by picking a central node and the nodes that are connected to it, along with the edges connecting the nodes surrounding ego.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
