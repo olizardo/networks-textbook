@@ -7,9 +7,23 @@
     library(patchwork)
 ```
 ## Dyads {#sec-dyads}
-In a graph, *every pair of nodes*, whether joined by an edge or not, is referred to as a **dyad.** Essentially, a dyad is *any subgraph of order two* of a larger graph. Generally researchers only refer to dyads when describing features of the network, although it it important to remember that ties that do not exist, but could exist, may be socially meaningful. 
 
-Additionally, when may consider the relationship among sets of three actors, we describe this as a **triad.** Triads have very important sociological properties that we will explore in other lessons. Dyads, triads and larger **motifs** constitute the (lego-like) building blocks of social network.s For now however, the terms provide a language that we can use to describe parts of the graph.
+In a graph, *every pair of nodes*, whether joined by an edge or not, is referred to as a **dyad.** Essentially, a dyad is *any subgraph of order two* of a larger graph. Generally researchers only refer to dyads when describing features of the network, although it is important to remember that ties that do not exist, but could exist, may be socially meaningful. 
+
+Additionally, when we consider the relationship among sets of three actors, we describe this as a **triad.** Triads have very important sociological properties that we will explore in other lessons. Dyads, triads, and larger **motifs** constitute the (lego-like) building blocks of social networks. For now, however, the terms provide a language that we can use to describe parts of the graph.
+
+Crucially, the possible types of dyads we can find in a network depend on the **type of ties** that compose the network. In @sec-ties, we introduced three fundamental types of ties based on their directionality and mathematical properties: **symmetric**, **asymmetric**, and **anti-symmetric** ties. We now connect these tie types to the distinct types of dyads they can generate.
+
+### Dyads under Symmetric Ties
+
+As we saw in @sec-ties, some relations lack any inherent directionality because mutuality (or reciprocity) is built in by construction. These are **symmetric ties**, represented by **undirected graphs**. 
+
+Using @fig-undirected as the reference graph $(G)$, we can define a subgraph $(G')$ containing only nodes *A* and *B*. This is shown in @fig-dyads1. In the same way, we could define a subgraph containing only nodes *D* and *E* (shown in @fig-dyads2). Because undirected graphs do not allow directionality, every pair of actors is either part of a **connected** or a **disconnected** dyad. 
+
+* **Disconnected Dyads** (historically referred to as **null dyads**): The two nodes do not share an edge (shown in @fig-dyads2).
+* **Connected Dyads**: The two nodes share an edge (shown in @fig-dyads1).
+
+Both types of dyads are defined by subgraphs of the same order (two), but they are different in size. The disconnected dyad is size zero (contains zero edges), and the connected dyad is size one (contains one undirected edge).
 
 ```{r}
 #| label: fig-dyads1
@@ -32,7 +46,7 @@ Additionally, when may consider the relationship among sets of three actors, we 
 
 ```{r}
 #| label: fig-dyads2
-#| fig-cap: "A null dyad."
+#| fig-cap: "A disconnected (null) dyad."
 #| fig-cap-location: bottom
 #| fig-height: 1.5
 #| fig-width: 5
@@ -49,16 +63,17 @@ Additionally, when may consider the relationship among sets of three actors, we 
     p
 ```
 
-### Types of Undirected Dyads
-Using @fig-undirected as the reference graph $(G)$, we can define a subgraph $(G')$ containing only nodes *A* and *B*. This is shown in @fig-dyads1. In the same way, we could define a subgraph containing only nodes *D* and *E*. This is shown in @fig-dyads2). Each figure portrays the two types of dyads that can exist in a undirected graph. Either a dyad with two nodes share an edge, or they don't.
+### Dyads under Asymmetric Ties
 
-The dyad shown in @fig-dyads1, with two nodes linked by an edge, is called a **connected dyad**, while the dyad shown in @fig-dyads2 is called a **null dyad**. Since there can only be two types of dyads an undirected graph, every pair of actors is either part of a **connected** or a **null** dyad. Both types of dyads are defined by subgraphs of the same order (two), but they are different in size. The null dyad is size zero, and the connected dyad is size one.
+Many social relationships allow for inherent directionality where reciprocity is possible but not guaranteed. These are **asymmetric ties**, represented by **directed graphs** (or **digraphs**). For these ties, reciprocity is an empirical event, meaning we can find three distinct kinds of dyads:
 
-### Types of Directed Dyads
+* **Disconnected Dyads** (Null): Neither node sends a directed tie to the other (size zero).
+* **Non-Reciprocal Dyads** (Asymmetric): One node sends a tie to another, but it is not reciprocated (shown in @fig-asymmetric-dyad).
+* **Reciprocal Dyads** (Mutual): Both nodes send a tie to each other (shown in @fig-mutual-dyad).
 
 ```{r}
 #| label: fig-asymmetric-dyad
-#| fig-cap: "An Asymmetric dyad."
+#| fig-cap: "A non-reciprocal dyad."
 #| fig-cap-location: bottom
 #| fig-height: 1.5
 #| fig-width: 5
@@ -77,9 +92,9 @@ The dyad shown in @fig-dyads1, with two nodes linked by an edge, is called a **c
     p
 ```
 
-```{r fig-mutual-dyad, fig.margin=TRUE, fig.cap="A Mutual Dyad", fig.height = 1.5, fig.width=5}
+```{r}
 #| label: fig-mutual-dyad
-#| fig-cap: "A mutual dyad."
+#| fig-cap: "A reciprocal dyad."
 #| fig-cap-location: bottom
 #| fig-height: 1.5
 #| fig-width: 5
@@ -98,16 +113,27 @@ The dyad shown in @fig-dyads1, with two nodes linked by an edge, is called a **c
     p <- p + theme_graph() + coord_cartesian(clip = "off")
     p
 ```
-While in an undirected graph there can only be two types of dyads, in a directed graph like the one shown in @fig-directed, there can *three* different kinds of dyads. The reason for this is that in a directed graph, connected dyads can be of two kinds. On the one hand, we can have a dyad like that of actors *C* and *B* in @fig-asymmetric-dyad, who are described as an **asymmetrically connected dyad** (or **asymmetric dyad** for short).^[Asymmetric dyads are by definition *non-reciprocal*.] This is because while *C* sends a tie to *B*, *B* does not send a tie back to *C*. 
 
-In contrast, actors *A* and *B* in @fig-directed can be described as a **mutually connected dyad** (or **mutual dyad** for short), their subgraph is shown in @fig-mutual-dyad. Actors *A* and *B* are part of a mutual dyad because *A* sends a tie to *B*, and *B* sends a tie back to *A*.^[Mutual dyads are by definition *reciprocal*.] Thus, in a directed graph representing a network of asymmetric ties, every pair of actors in the network can be classified as belonging to one of three types of dyads: **Mutual**, **Asymmetric**, and **Null**. An easy way to remember this is that this classification spells "MAN." 
+In standard social network analysis, this three-fold classification of dyads in directed graphs is referred to as the **MAN classification**, which stands for **Mutual** (reciprocal), **Asymmetric** (non-reciprocal), and **Null** (disconnected). 
 
-It is important to keep distinct the notion of **asymmetry** when used to refer to *types of edges* in a graph, from when it is used to refer to types of *dyads*. For instance, a **mutual dyad** is composed of a *pair* of **asymmetric edges**! When used to refer to edges, the notion of asymmetry implies only **directionality** of the single edge, while when used to refer to dyads the notion of asymmetry implies **non-reciprocity** of the whole dyad. 
+Using the terms **reciprocal**, **non-reciprocal**, and **disconnected** helps us avoid conceptual confusion. Notice that a **reciprocal dyad** under an asymmetric relation is actually composed of a *pair* of directed edges! When we talk about an *asymmetric tie*, we are describing a type of *relationship* (where directionality is allowed); but when we talk about a *non-reciprocal dyad*, we are describing a realized *configuration* of a pair of nodes where reciprocity failed to occur empirically.
 
-A lot of the time we collect social network information that has a directed basis. For instance, we ask people whether the "know" someone, or whether they consider somebody a "friend." These type of network data are called **nominations**, and they are very common in social network analysis. For instance may ask an individual $E$ (let's call her Jennifer) whether they nominate another individual $C$ (in their school, classroom, dorm, office) as a "friend" (let's call her Mariah), and they say "yes I know Mariah," or "Mariah is my friend." As with the "I don't know her" meme,^[https://knowyourmeme.com/memes/i-dont-know-her] sometimes it happens Jennifer says they know Mariah, or "nominates" Mariah as a friend, but Mariah says they don't know Jennifer, or fail to nominate Jennifer as a friend back! This creates a situation in which most social network data sets, end up being composed of directed dyads with asymmetric friendship or acquaintance relations, even if the researcher thought they would end up with symmetric ties [@carley_krackhardt96].
+A lot of the time we collect social network information that has a directed basis. For instance, we ask people whether they "know" someone, or whether they consider somebody a "friend." These types of network data are called **nominations**, and they are very common in social network analysis. For instance we may ask Jennifer whether she nominates Mariah as a "friend," and she says yes. But Mariah might fail to nominate Jennifer back! This creates a situation where directed networks are filled with non-reciprocal dyads, even if we conceptually think of friendship as symmetric [@carley_krackhardt96].
+
+### Dyads under Anti-Symmetric Ties
+
+In **anti-symmetric ties**, reciprocity is strictly forbidden ($AB \implies \neg BA$). 
+Examples include hierarchical relations such as "is boss of", "is parent of", or flow relations where a transaction cannot be reversed. 
+
+Because mutual interaction is structurally or logically impossible under anti-symmetric ties, reciprocal dyads cannot occur. Therefore, anti-symmetric ties can only yield **two** types of dyads:
+
+* **Disconnected Dyads**: The two nodes do not share any directed edge (size zero).
+* **Non-Reciprocal Dyads**: Only a single one-way directed tie exists between them (shown in @fig-asymmetric-dyad).
+
+This elegant restriction drastically simplifies the dyad census of anti-symmetric networks: every pair of nodes is either completely disconnected or connected by a strictly non-reciprocal arrow.
 
 ## Triads
-### Types of Undirected Triads {#sec-triads}
+### Triads under Symmetric Ties {#sec-triads}
 
 ```{r}
 #| label: fig-triads1
@@ -130,8 +156,6 @@ A lot of the time we collect social network information that has a directed basi
     p <- p + theme_graph() + coord_cartesian(clip = "off")
     p
 ```
-
-We could do the same thing we did with dyads (subgraphs of order two) with the different *subgraphs of order three* in an undirected graph. These are called **undirected triads**.
 
 Take for instance, the subgraph defined by nodes *B*, *C*, and *F* in the graph shown in @fig-undirected. This is shown in @fig-triads1. It shows three people who are not connected to one another! Like strangers in a park sitting on three different benches. This is called the **null triad**.
 
@@ -269,10 +293,33 @@ As shown in @fig-undir-triads, in an undirected graph, there can only be these *
 
 Dyads, triads, and subgraphs of higher order (called **network motifs**) are the *building blocks* of larger network structures in society [@milo02].
 
-## Advanced: Types of Directed Triads {#sec-dirtriads}
+### Triads under Anti-Symmetric Ties
+
+In **anti-symmetric ties** (e.g., hierarchical relations like "is boss of"), reciprocity is strictly forbidden ($AB \implies \neg BA$). 
+This mathematical property imposes a powerful structural constraint on the triads that can form in the network. 
+
+Because any reciprocal (mutual) dyad is completely forbidden, any triad containing a mutual connection is also forbidden! This rules out **9 of the 16** possible directed triad configurations (such as $NNM$, $MMN$, $MMA$, or $MMM$). 
+
+Under anti-symmetric ties, there are exactly **seven** permitted directed triad configurations:
+
+1. **Null Triad** ($NNN$): All three dyads are completely disconnected.
+2. **One-tie Triad** ($NNA$): Contains a single non-reciprocal directed tie and two disconnected dyads.
+3. **Out-Star Triad** ($AAN(O)$): A single node sends non-reciprocal ties to both other nodes, while the third dyad is disconnected (e.g., $A \leftarrow B \rightarrow C$).
+4. **In-Star Triad** ($AAN(I)$): Both other nodes send non-reciprocal ties to a single node, while the third dyad is disconnected (e.g., $A \rightarrow B \leftarrow C$).
+5. **Directed Line / Transitive Path** ($AAN(L)$): Non-reciprocal ties form a directed path, while the third dyad is disconnected (e.g., $A \rightarrow B \rightarrow C$).
+6. **Cycle Triad** ($AAA(C)$): A directed cycle of length three where non-reciprocal ties flow in a loop ($A \rightarrow B \rightarrow C \rightarrow A$).
+7. **Transitive Triad / Hierarchy** ($AAA(I/O)$): The classic transitive triad where $A \rightarrow B \rightarrow C$ and also $A \rightarrow C$. This represents a perfectly consistent, transitive authority hierarchy.
+
+This beautiful mathematical pruning simplifies the analysis of hierarchical systems. In formal organizations, for example, we expect to see transitive triads $AAA(I/O)$ (representing clean chains of command), while cycles $AAA(C)$ are structurally avoided as they introduce circular authority paradoxes.
+
+### Triads under Asymmetric Ties {#sec-dirtriads}
+
+When relationships are **asymmetric** (e.g., friendship, advice, or texting), reciprocity is allowed but not guaranteed. In these directed networks, because dyads can take on any of the three states (disconnected, non-reciprocal, or reciprocal), all **sixteen** directed triad configurations of the classic **MAN Triad Census** can occur. 
+
+Let us go through them systematically to understand how they are composed of different combinations of Mutual (M), Asymmetric (A), and Null (N) dyads.
 ```{r}
 #| label: fig-NNA
-#| fig-cap: "A disconnected directed triad with one asymmetric link."
+#| fig-cap: "A disconnected directed triad with one non-reciprocal link."
 #| fig-cap-location: bottom
 #| fig-height: 3
 #| fig-width: 3
@@ -296,7 +343,7 @@ Dyads, triads, and subgraphs of higher order (called **network motifs**) are the
 
 ```{r}
 #| label: fig-NNM
-#| fig-cap: "A disconnected directed triad with one mutual link."
+#| fig-cap: "A disconnected directed triad with one reciprocal link."
 #| fig-cap-location: bottom
 #| fig-height: 3
 #| fig-width: 3
@@ -321,7 +368,7 @@ Dyads, triads, and subgraphs of higher order (called **network motifs**) are the
 
 ```{r}
 #| label: fig-AANL
-#| fig-cap: "An open directed triad with a directed line configuration."
+#| fig-cap: "An open directed triad with a non-reciprocal directed line."
 #| fig-cap-location: bottom
 #| fig-height: 3
 #| fig-width: 3
@@ -346,7 +393,7 @@ Dyads, triads, and subgraphs of higher order (called **network motifs**) are the
 
 ```{r}
 #| label: fig-AANO
-#| fig-cap: "An open directed triad with an out-star configuration."
+#| fig-cap: "An open directed triad with a non-reciprocal out-star."
 #| fig-cap-location: bottom
 #| fig-height: 3
 #| fig-width: 3
@@ -371,7 +418,7 @@ Dyads, triads, and subgraphs of higher order (called **network motifs**) are the
 
 ```{r}
 #| label: fig-AANI
-#| fig-cap: "An open directed triad with an in-star configuration."
+#| fig-cap: "An open directed triad with a non-reciprocal in-star."
 #| fig-cap-location: bottom
 #| fig-height: 3
 #| fig-width: 3
@@ -396,7 +443,7 @@ Dyads, triads, and subgraphs of higher order (called **network motifs**) are the
 
 ```{r}
 #| label: fig-MANX
-#| fig-cap: "Open directed triads with one mutual."
+#| fig-cap: "Open directed triads with one reciprocal link."
 #| fig-cap-location: bottom
 #| fig-height: 6
 #| fig-width: 3
@@ -439,7 +486,7 @@ Dyads, triads, and subgraphs of higher order (called **network motifs**) are the
 
 ```{r}
 #| label: fig-MMN
-#| fig-cap: "An open directed triad with two mutuals."
+#| fig-cap: "An open directed triad with two reciprocal links."
 #| fig-cap-location: bottom
 #| fig-height: 3
 #| fig-width: 3

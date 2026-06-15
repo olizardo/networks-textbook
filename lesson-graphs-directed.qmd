@@ -1,0 +1,145 @@
+# Directed Graphs {#sec-directedgraphs}
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+    library(ggplot2)
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+    library(kableExtra)
+```
+
+## Introduction to Directed Graphs (Digraphs)
+
+While simple undirected graphs are useful for representing symmetric relationships (where connection is naturally mutual), many social relationships are inherently directional. For these relationships, one member of a pair can claim a tie with the other, but the other person may or may not send the same tie back. Examples include giving advice, sending emails, lending money, or nominating friends.
+
+To represent directional relations, we use **directed graphs** (also called **digraphs**). In a directed graph, the edges are *ordered pairs* of nodes, meaning the order in which we list the nodes in an edge matters. The connection goes from a **source node** (the sender) to a **destination node** (the receiver). Therefore, the edge $AB$ is a different entity from the edge $BA$. 
+
+In directed graphs, simple undirected lines are replaced by directed arrows (often called **arcs**). When a digraph has no loops (edges connecting a node to itself) and at most one directed edge connecting a sender to a receiver in each direction, it is called a **simple directed graph**.
+
+@fig-directed shows a point-and-line diagram of a digraph representing a simple directed social network.
+
+```{r}
+#| label: fig-directed
+#| fig-cap: "A simple directed graph."
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  fr <- c("A", "A", "B", "B", "B", "D", "E", "E", "F", "G", "G")
+  to <- c("B", "F", "A", "D", "C", "B", "C", "D", "A", "F", "D")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(5, 'mm')),
+                end_cap = circle(8, 'mm'), 
+                sep = unit(6, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
+  p
+```
+
+In directed networks, reciprocity is a major analytical focus. For some ties (such as liking, trusting, or friendship), reciprocity is binary; it either exists or it does not. If @fig-directed were an **advice network** [@cross01], we could say that *H* seeks advice from *D*, but *D* does not seek advice from *H*. This lack of reciprocity is common in formal hierarchies, where advice-seeking often flows upward to more experienced or authoritative actors, reflecting power differentials. 
+
+---
+
+## Node Neighborhoods in Directed Graphs
+
+Just like in undirected (simple) graphs, each node in a directed graph has a **node neighborhood**. However, because each node can be the **source** or **destination** for an asymmetric edge, we have to differentiate the neighborhood of a node depending on whether the node is the **sender** or the **recipient** of a given link.
+
+### In-Neighborhoods
+We say that a node *j* is an **in-neighbor** of a node *i* if there is a directed link with *j* as the source and *i* as the destination node ($j \rightarrow i$). For each node, the full set of in-neighbors forms the **in-neighborhood** of that node. This is written:
+
+$$
+  N^{in}(v)
+$$
+
+where $v$ is the label corresponding to the node. For instance, in @fig-directed, the node set $N^{in}(D) = \{B, E, G\}$ is the in-neighborhood of node *D*.
+
+### Out-Neighborhoods
+In the same way, we say that a node *i* is an **out-neighbor** of a node *j* if there is a directed link with *j* as the source and *i* as the destination ($j \rightarrow i$). For each node, the full set of out-neighbors defines the **out-neighborhood** of that node. This is written:
+
+$$
+  N^{out}(v)
+$$
+
+where $v$ is the label corresponding to the node. For instance, in @fig-directed, the node set $N^{out}(B) = \{A, C, D\}$ is the out-neighborhood of node *B*.
+
+Nodes will only appear in both the in- and out-neighborhood sets when there are **reciprocal** or mutual ties between the nodes. For instance, in @fig-directed, the out-neighborhood of node *F* is $\{A\}$ and the in-neighborhood is $\{A, G\}$. Here, node *A* appears in both the in- and out-neighborhood sets because *A* has a reciprocal tie with *F*.
+
+---
+
+## Node Degree in Directed Graphs
+
+Because in a directed graph each node has two distinct sets of neighbors, we can compute two versions of degree for the same node, corresponding directly to the cardinalities of their neighborhood sets.
+
+### Indegree
+For any node *i*, we can count the number of edges that have a given node *i* as their destination node. This is also the cardinality of the in-neighborhood set of that node. This is called a node's **indegree** and is denoted:
+
+$$
+  k^{in}_i
+$$
+
+### Outdegree
+Additionally, for any node *i*, we can count the number of edges that have a given node *i* as their source node. This is also the cardinality of the out-neighborhood set of that node. This is called the node's **outdegree** and is denoted by:
+
+$$
+  k^{out}_i
+$$
+
+For instance, in @fig-directed, $k^{out}_B = 3$ and $k^{in}_B = 2$. Node *B* has *three* **outgoing ties** (to nodes *A*, *C*, and *D*) and *two* **incoming ties** (from nodes *A* and *D*).
+
+The graph-theoretic concepts of indegree and outdegree have clear sociological interpretations. In a social network, for instance, a node having a large outdegree could indicate a *sociable person* (a person who likes to connect with others), while having a large indegree can indicate a *popular person* (e.g., a person lots of other people want to be friends with). 
+
+### Types of Nodes in Directed Graphs
+
+In a directed graph, we can categorize (non-isolate) nodes based on their sending and receiving behavior [@Harary65], and thus based on their indegree and outdegree:
+
+*   **Receivers**: Nodes that receive ties but do not send them. For receiver nodes, indegree $k^{in} > 0$ and outdegree $k^{out} = 0$. For instance, in @fig-directed, node *C* has an indegree of 2 and an outdegree of 0, making it a receiver node.
+*   **Carriers**: Nodes that both receive and send ties. For carrier nodes, $k^{in} > 0$ and $k^{out} > 0$. For instance, in @fig-directed, node *A* has an indegree of 1 and an outdegree of 2, while node *B* has an indegree of 2 and an outdegree of 3, making both nodes carriers.
+*   **Transmitters**: Nodes that send ties but do not receive them. For transmitter nodes, $k^{in} = 0$ and $k^{out} > 0$. For instance, in @fig-directed, node *E* has an indegree of 0 and an outdegree of 2, making it a transmitter node.
+
+---
+
+## Directed Graph Metrics
+
+Several basic graph-level metrics differ conceptually or mathematically when applied to directed graphs.
+
+### Average Degree in Directed Graphs
+
+We can use a variation of the undirected average degree procedure to compute the average degree in directed graphs. Take the directed graph shown in @fig-directed, which has seven nodes and 11 edges. In this case, there is no need to "double" the number of lines as in the case of an undirected graph.
+
+We could compute either the average **indegree** or the average **outdegree** of each node, and it would give us the same answer because each link serves a single purpose in determining either the outdegree or the indegree of each node. Accordingly, the average degree in the directed case is:
+
+$$
+  \bar{k} = \frac{m}{|V|} = \frac{m}{n} = \frac{11}{7} \approx 1.6
+$$ {#eq-diravgdeg}
+
+### Density in Directed Graphs
+
+To compute the density of a directed graph, we compare the observed number of directed edges $m$ to the maximum possible number of directed edges that could exist among $n$ nodes. In a directed graph, edges can go in both directions between any pair of nodes, meaning the maximum possible number of directed ties is $n(n - 1)$. 
+
+Therefore, there is no need to multiply the numerator by two as we do in undirected graphs, and the equation for computing the density of a directed graph is:
+
+$$
+  d(G)^d = \frac{m}{n(n-1)}
+$$ {#eq-dirgraphedens}
+
+If we apply this to the directed graph in @fig-directed ($m = 11$, $n = 7$):
+
+$$
+  d(G)^d = \frac{11}{7(6)} = \frac{11}{42} \approx 0.262 \quad (26.2\%)
+$$
+
+This indicates that approximately 26.2% of all possible directed edges in the network are actually observed.
+
+---
+
+## References {.unnumbered}
