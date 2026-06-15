@@ -5,31 +5,74 @@ Social networks are built on various types of connections, known as **ties** or 
 
 In **graph theory**, ties (links or edges) in graphs are classified by their inherent directionality. This classification includes **symmetric**, **asymmetric**, and **antisymmetric** ties, which are fundamental to understanding the structure and dynamics of social networks. Figure @fig-graph-theoretic-ties provides a visual summary of these types.
 
-```mermaid
-graph TD
-    A[Ties] --> B{Directionality};
-    B --> C[Symmetric / Undirected];
-    B --> D[Asymmetric / Directed];
-    D --> E[Reciprocal (A <--> B)];
-    D --> F[Non-Reciprocal (A --> B)];
-    D --> G[Anti-Reciprocal (A --> B implies NOT B --> A)];
+```{r}
+#| label: fig-graph-theoretic-ties
+#| fig-cap: "A Graph-Theoretic Classification of Ties"
+#| echo: false
 
-    subgraph "Examples"
-      C --> C1("is sibling of");
-      C --> C2("co-worker");
-      E --> E1("likes / is friends with");
-      F --> F1("sends email to");
-      G --> G1("is parent of");
-    end
+# Load libraries
+library(ggraph)
+library(tidygraph)
+library(igraph)
 
-    style C fill:#f9f,stroke:#333,stroke-width:2px;
-    style D fill:#ccf,stroke:#333,stroke-width:2px;
+# Create the data for the classification tree
+nodes <- data.frame(
+  name = c(
+    "Ties", "Directionality",
+    "Symmetric
+(Undirected)",
+    "Asymmetric
+(Directed)",
+    "Reciprocal",
+    "Non-Reciprocal",
+    "Anti-Reciprocal"
+  ),
+  description = c(
+    "", "", "e.g., 'is sibling of'", "", "e.g., 'likes'", 
+    "e.g., 'sends email to'", "e.g., 'is parent of'"
+  )
+)
+
+edges <- data.frame(
+  from = c(
+    "Ties", "Directionality", "Directionality",
+    "Asymmetric
+(Directed)", "Asymmetric
+(Directed)", "Asymmetric
+(Directed)"
+  ),
+  to = c(
+    "Directionality", "Symmetric
+(Undirected)", "Asymmetric
+(Directed)",
+    "Reciprocal", "Non-Reciprocal", "Anti-Reciprocal"
+  )
+)
+
+# Create the graph object
+g_class <- tbl_graph(nodes = nodes, edges = edges)
+
+# Plot the tree
+ggraph(g_class, layout = 'tree') +
+  geom_edge_link(arrow = arrow(length = unit(4, 'mm')),
+                 end_cap = circle(10, 'mm'),
+                 width = 1.2) +
+  geom_node_label(aes(label = paste(name, description, sep = '
+')),
+                  size = 5,
+                  label.padding = unit(0.4, "lines"),
+                  label.r = unit(0.15, "lines"),
+                  fill = "skyblue",
+                  alpha = 0.8,
+                  repel = TRUE) +
+  theme_graph() +
+  xlim(-1.2, 2.2) +
+  ylim(-0.5, 3.5)
 ```
-: A Graph-Theoretic Classification of Ties {#fig-graph-theoretic-ties}
 
-A tie is symmetric ifA tie is symmetric if the existence of a tie between A and B logically and necessarily implies that B is tied to A. Examples include being siblings, members of the same club, or spending time together. Symmetric ties thus lack meaningful *directionality*.  These are represented by **undirected graphs**. (see @sec-undirected).
+A tie is symmetric if the existence of a tie between A and B logically and necessarily implies that B is tied to A. Examples include being siblings, members of the same club, or spending time together. Symmetric ties thus lack meaningful *directionality*.  These are represented by **undirected graphs**. (see @sec-ties).
 
-A tie is asymmetric if, when we know that a tie exists from A to B, it is not a necessity for a tie to exist from B to A, though it can happen. Thus, asymmetric ties are inherently directional. For example, a tie representing a favor done for someone is asymmetric because the favor is typically done in one direction. It can be reciprocated (e.g., the other person can also do you a solid), but it need not be. Asymmetric ties are represented by **directed graphs**. (see @sec-directed).
+A tie is asymmetric if, when we know that a tie exists from A to B, it is not a necessity for a tie to exist from B to A, though it can happen. Thus, asymmetric ties are inherently directional. For example, a tie representing a favor done for someone is asymmetric because the favor is typically done in one direction. It can be reciprocated (e.g., the other person can also do you a solid), but it need not be. Asymmetric ties are represented by **directed graphs**. (see @sec-ties).
 
 Asymmetric ties come in three flavors: **Reciprocal**: A tie is reciprocal when edges exist in both directions, indicating mutual interaction (e.g., "You like me and I like you," or both parties regularly email each other). **Non-Reciprocal**: A tie is non-reciprocal when an edge only goes in one direction (e.g., "You don't like me, but I like you," or "Said ignores Tom's Facebook friend request"). **Anti-Reciprocal**: A tie is anti-reciprocal when the presence of a tie in one direction implies the absence of a tie in the opposite direction (e.g., "If you are my boss, I cannot by necessity also be your boss").
 
