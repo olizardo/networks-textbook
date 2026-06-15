@@ -1,0 +1,1001 @@
+---
+title: "Graph Theory"
+subtitle: "The Basics of Social Network Analysis"
+format: revealjs
+---
+
+```{r setup, include=FALSE}
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(kableExtra)
+```
+
+# Introduction to Graphs
+
+---
+
+## What is a Graph?
+
+::: {.incremental}
+- A **graph** ($G$) is an abstract mathematical object consisting of two main parts:
+- A **vertex set**, $V$, which contains all the nodes (actors) in the network.
+  - e.g., $V = \{A, B, C, D\}$
+- An **edge set**, $E$, which contains all the ties (relationships) between the nodes.
+  - e.g., $E = \{AB, AC\}$
+- Together, they define the graph: $G = \{V, E\}$
+:::
+
+---
+
+## The Building Blocks: Nodes
+
+
+::: {.incremental}
+- In social networks, **nodes** represent the actors
+  - Usually drawn as circles or points in a diagram
+  - Often individuals (people) or organizations (groups, companies)
+- In wider applications of **network science**:
+  - Nodes can represent any entities in a system
+  - Examples: power generation stations, servers/computers, animals in an ecosystem, towns
+
+:::
+---
+
+## The Building Blocks: Edges
+
+::: {.incremental}
+- **Edges** represent a connection or a **social tie** between two nodes
+  - Can be a permanent relationship (e.g., "brother of")
+  - Or a fleeting interaction (e.g., a text message, co-presence)
+- In set theory:
+  - The set of edges is a collection of pairs of nodes
+  - If node $A$ is linked to node $B$, then $AB \in E$ (or written as $V_A V_B$)
+:::
+
+---
+
+## Edges as Channels
+
+::: {.incremental}
+- Edges act as channels for **flows of content**:
+  - Positive/Neutral: influence, advice, information, support, power, traffic
+  - Negative: disease, bullying, gossip, conflict
+:::
+---
+
+## What is a Graph? (An Example) (1)
+
+
+::: {.incremental}
+- Let's define a graph $G$ with 4 nodes ($A, B, C, D$) and 2 edges ($AB, AC$):
+  - $V = \{A, B, C, D\}$
+  - $E = \{AB, AC\}$
+  - $G = \{V, E\}$
+- The **cardinality** (number of members in a set) is denoted by $|N|$:
+  - Vertex set cardinality: $|V| = n = 4$
+  - Edge set cardinality: $|E| = m = 2$
+:::
+
+---
+
+## What is a Graph? (An Example) (2)
+
+
+::: {.incremental}
+- This graph can be represented by the signature $G(n, m) = G(4, 2)$
+- Note the lack of edges:
+  - No edge between $B$ and $C$ means no relationship between them.
+  - Node $D$ is not connected to any other node.
+:::
+---
+
+## Variations of $G(4, 2)$
+
+- The signature $G(4, 2)$ (4 nodes, 2 edges) does not uniquely define a single graph.
+- It can describe multiple topologically distinct graphs.
+
+---
+
+## G(4, 2) Variation 1
+
+```{r}
+#| label: fig-g42-1
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+gr <- create_empty(4) %>% 
+    bind_edges(data.frame(from = 1, to = 2:3)) %>% 
+    mutate(name = letters[1:4])
+l <- as.matrix(ggraph(gr, layout = 'tree')$data[, 1:2])
+ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), size = 12, color = "white") +
+  theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+```
+
+---
+
+## G(4, 2) Variation 2
+
+```{r}
+#| label: fig-g42-2
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+gr <- create_empty(4) %>% 
+    bind_edges(data.frame(from = c(1, 4), to = c(2, 3))) %>% 
+    mutate(name = letters[1:4])    
+ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) + 
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), size = 12, color = "white") +
+  theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+```
+
+---
+
+## G(4, 2) Variation 3
+
+```{r}
+#| label: fig-g42-3
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+gr <- create_empty(4) %>% 
+    bind_edges(data.frame(from = c(1, 2), to = c(4, 3))) %>% 
+    mutate(name = letters[1:4])    
+ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) + 
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), size = 12, color = "white") +
+  theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+```
+
+---
+
+## G(4, 2) Variation 4 (Unlabeled)
+
+```{r}
+#| label: fig-g42-4
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+gr <- create_empty(4) %>% 
+    bind_edges(data.frame(from = 1, to = 2:3))  
+ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 22, color = "tan2") +
+  theme_graph() + ylim(-0.2, 1.1) + xlim(-1.1, 1.65)
+```
+
+---
+
+## Graph Labeling
+
+
+::: {.incremental}
+- **Labeled Graph**:
+  - The nodes have letters or numbers that function as "names" (e.g., node $A$, node $B$, or $V_1, V_2$).
+  - Allows us to refer to specific actors.
+- **Unlabeled Graph**:
+  - The names are not specified because they do not matter for structural representation (e.g., the last graph in the previous slide).
+- *Note*: Graph metrics are mathematically identical regardless of whether a graph is labeled or unlabeled.
+
+:::
+---
+
+## Trivial Graphs
+
+
+::: {.incremental}
+- **Trivial Graph**:
+  - A $G(1, 0)$ graph: a single isolated node with zero connections.
+  - Social equivalent: An isolated person with no connections (e.g., the Japanese *Hikikomori*).
+:::
+
+---
+
+## Non-Trivial Graphs
+
+
+::: {.incremental}
+- **Non-Trivial Graphs**:
+  - Any graph larger than $G(1, 0)$ used for social network analysis.
+  - **Connected Dyad**: The $G(2, 1)$ graph. Two nodes connected by a single link. The "hydrogen atom" of society.
+  - **Disconnected Dyad**: A $G(2, 0)$ graph. Two nodes with no link (e.g., two people on a deserted island not speaking).
+:::
+---
+
+## Basic Graph Properties
+
+:::: {.columns}
+::: {.column width="60%"}
+::: {.incremental}
+- **Adjacent**: Joined by an edge (e.g., $A$ and $B$).
+- **Nonadjacent**: Not joined by an edge (e.g., $A$ and $C$).
+- **Isolate**: Node with zero incident edges (e.g., $D$).
+- **Incident**: An edge "touches" a node (e.g., edge $AB$ is incident on $A$).
+- **End Vertices**: Nodes at the ends of an edge (e.g., $A$ and $B$ for edge $AB$).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| label: fig-basic-props
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+
+gr <- create_empty(4, directed = FALSE) %>%
+  bind_edges(data.frame(from = 1:2, to = 2:3)) %>%
+  mutate(name = c("A", "B", "C", "D"))
+
+ggraph(gr, layout = 'circle') +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 25, color = "tan2") +
+  geom_node_text(aes(label = name), size = 12, color = "white") +
+  theme_graph() +
+  coord_cartesian(clip = "off")
+```
+:::
+::::
+
+---
+
+## The Graph Complement
+
+
+::: {.incremental}
+- For any graph $G$, its **graph complement** $G'$ is its "evil twin" which satisfies two conditions:
+  1. Every pair of nodes adjacent in $G$ is non-adjacent in $G'$.
+  2. Every pair of nodes non-adjacent in $G$ is adjacent in $G'$.
+- All connections in $G$ become disconnections in $G'$, and vice versa.
+- **Usage**: Useful when we want to count or analyze *non-relations* in a network.
+
+:::
+---
+
+## Graph for Complement Example
+
+```{r}
+#| label: fig-complement-slides-1
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 8
+
+gr <- create_empty(6, directed = FALSE) %>%
+      bind_edges(data.frame(from = 1, to = c(2, 4, 6))) %>%
+      bind_edges(data.frame(from = 6, to = c(3, 5))) %>%
+      mutate(name = toupper(letters[1:6])) 
+p <- ggraph(gr, layout = 'kk') 
+p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+p1 <- p + theme_graph()
+p1
+```
+
+---
+
+## The Graph Complement
+
+```{r}
+#| label: fig-complement-slides-2
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 8
+
+gr.c <- complementer(gr)
+l <- as.matrix(p$data[, 1:2])
+p <- ggraph(gr.c, layout = l) 
+p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+p2 <- p + theme_graph()
+p2
+```
+
+---
+
+## Simple Graphs
+
+:::: {.columns}
+::: {.column width="60%"}
+::: {.incremental}
+- Most social networks are represented as **simple graphs**.
+- A graph is simple if it meets two requirements:
+  1. **No Multiple Edges**: Only one edge can join any pair of nodes (unlike $A$ and $B$).
+  2. **No Loops**: No edges connect a node to itself (unlike node $C$).
+- Loops and multiple edges do not make sense for most typical sociological applications.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| label: fig-non-simple
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+
+gr_non_simple <- create_empty(3, directed = FALSE) %>%
+  bind_edges(data.frame(from = c(1, 1, 2, 3), to = c(2, 2, 3, 3))) %>%
+  mutate(name = c("A", "B", "C"))
+
+ggraph(gr_non_simple, layout = 'circle') +
+  geom_edge_fan(color = "steelblue", edge_width = 1.5, strength = 1.5) +
+  geom_edge_loop(color = "tomato", edge_width = 1.5) +
+  geom_node_point(size = 25, color = "tan2") +
+  geom_node_text(aes(label = name), size = 12, color = "white") +
+  theme_graph() +
+  coord_cartesian(clip = "off")
+```
+:::
+::::
+---
+
+## Graphs are Not Pictures!
+
+
+::: {.incremental}
+- Do not confuse a mathematical "graph" (a set of two sets of objects) with its visual representation or picture.
+- There is no single "true" picture of a graph:
+  - The positioning of points and lines in two-dimensional space is completely arbitrary.
+  - The same mathematical graph (same vertex set, same edge set) can be drawn in countless different ways.
+
+:::
+---
+
+## Same Graph, Different Drawings (1)
+
+```{r}
+#| label: fig-random-slides-1
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 8
+
+set.seed(678)
+l <- layout_randomly(gr)
+p <- ggraph(gr, layout = l) 
+p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+p <- p + theme_graph() + coord_cartesian(clip = "off")
+p
+```
+
+---
+
+## Same Graph, Different Drawings (2)
+
+```{r}
+#| label: fig-random-slides-2
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 8
+
+set.seed(789)
+l <- layout_randomly(gr)
+p <- ggraph(gr, layout = l) 
+p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+p <- p + theme_graph() + coord_cartesian(clip = "off")
+p
+```
+
+# Graphs and Subgraphs
+
+---
+
+## Graphs and Subgraphs
+
+
+::: {.incremental}
+- Sometimes we are interested in analyzing only some parts of a **whole network**.
+- A **subgraph** $G' = \{V', E'\}$ is a subset of the original graph $G = \{V, E\}$, which is written as $G' \subset G$:
+  - The node set $V'$ is a subset of $V$ ($V' \subset V$).
+  - The edge set $E'$ is a subset of $E$ ($E' \subset E$).
+  - Edges in the subgraph must have both endpoints in the node subset $V'$.
+
+:::
+---
+
+## Original Graph
+
+```{r}
+#| label: fig-subgraph-slides-1
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 8
+
+set.seed(367)
+gr <- play_gnm(n = 10, m = 20, directed = FALSE, loops = FALSE) %>% 
+  mutate(name = LETTERS[1:10])
+l <- ggraph(gr, layout = 'kk')
+l <- as.matrix(l$data[, 1:2])
+p <- ggraph(gr, layout = l) 
+p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+p1 <- p + theme_graph() + ylim(-1,1)
+p1
+```
+
+---
+
+## A Subgraph of the Original
+
+:::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- This graph is a **subgraph** of the original graph from the previous slide.
+- It was created by taking a **subset of nodes**: 
+  - $V' = \{A, B, C, D, E\}$
+- We retained only the edges from the original graph that connect these five nodes to each other.
+- All other nodes ($F, G, H, I, J$) and any edges connected to them were removed.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| label: fig-subgraph-slides-2
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6
+#| fig-height: 6
+
+gr2 <- induced_subgraph(gr, toupper(letters[1:5]))
+p <- ggraph(gr2, layout = l[1:5, ]) 
+p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+p2 <- p + theme_graph() + ylim(-1,1)
+p2
+```
+:::
+::::
+
+---
+
+## Vertex-Induced Subgraphs
+
+
+::: {.incremental}
+- A subgraph can be induced by selecting a subset of vertices to retain.
+- **Vertex-induced subgraph**: Keep the selected nodes and all edges from the original graph that connect these nodes.
+- Useful for identifying cohesive subsets or local cliques.
+
+:::
+---
+
+## Vertex-Induced Subgraph Example
+
+```{r}
+#| label: fig-subgraph-induced
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 8
+
+gr3 <- induced_subgraph(gr, c("G", "D", "E", "I"))
+p <- ggraph(gr3, layout = l[c(4, 5, 7, 9), ]) 
+p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+p3 <- p + theme_graph() + ylim(-1,1)
+p3
+```
+
+---
+
+## Vertex-Deleted Subgraphs (1)
+
+:::: {.columns}
+::: {.column width="60%"}
+::: {.incremental}
+- We define a subgraph by *deleting* nodes: $G' = G - \{F, G, H, I, J\}$.
+- **CRITICAL RULE**: When we delete nodes, all edges incident to those nodes **automatically disappear**.
+- Removing nodes is useful for seeing how important a set of actors is for holding the network together.
+- For instance, deleting $\{F, G, H, I, J\}$ from our 10-node graph yields the subgraph on the right.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| label: fig-subgraph-deleted-node
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6
+#| fig-height: 6
+
+gr_del <- gr - c("F", "G", "H", "I", "J")
+p <- ggraph(gr_del, layout = l[1:5, ]) 
+p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+p + theme_graph() + ylim(-1,1) + coord_cartesian(clip = "off")
+```
+:::
+::::
+
+---
+
+## Vertex-Deleted Subgraphs (2)
+
+::: {.incremental}
+- **Null Graph**: The subgraph that results from removing *all* the nodes of the original graph (cardinality of the node set is zero).
+- **Singleton Graph** (or **Trivial Graph**): The subgraph that results from removing all the nodes of the original graph *except for one* (cardinality of the node set is one).
+:::
+---
+
+## Edge-Deleted Subgraphs
+
+:::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- We can create subgraphs by removing edges: $G'' = G - \{e_1, e_2\}$.
+- **CRITICAL RULE**: When we delete edges, the nodes incident to them **remain intact**!
+- **Spanning Subgraph**: A subgraph created by removing edges but leaving all nodes of the original graph.
+- The example on the right removes 6 edges from the original 10-node graph. Notice all 10 nodes are still there!
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| label: fig-subgraph-deleted-edges
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6
+#| fig-height: 6
+
+gr4 <- gr - edge("A|B") - edge("G|J") - edge("C|I") - edge("A|E") - edge("A|C") - edge("C|E")
+
+p <- ggraph(gr4, layout = l) 
+p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+p + theme_graph() + ylim(-1,1) + coord_cartesian(clip = "off")
+```
+:::
+::::
+
+---
+
+## Special Subgraphs
+
+
+::: {.incremental}
+- **Null Graph**: The subgraph resulting from deleting *all* nodes (vertex set cardinality = 0).
+- **Empty Graph**: The subgraph resulting from deleting *all* edges (edge set cardinality = 0).
+- **Singleton (Trivial) Graph**: A subgraph consisting of exactly one node ($G(1,0)$).
+- **Ego Graph**: A special subgraph centered around a single node ("ego"), containing the ego, its immediate neighbors ("alters"), and all edges among them.
+
+# Vertex Fusion & Set Operations
+
+:::
+---
+
+## Vertex Fusion (1)
+
+
+::: {.incremental}
+- We can construct a new graph from a graph by **fusing** two vertices.
+- **Vertex Fusion**:
+  - Replace two original vertices with a single vertex.
+  - Keep the combined adjacency relations of both original vertices.
+:::
+
+---
+
+## Vertex Fusion (2)
+
+
+::: {.incremental}
+- Vertex fusion is useful in social network analysis for:
+  - Collapsing equivalence classes.
+  - Analyzing blockmodels.
+  - Merging groups or roles.
+:::
+---
+
+## Set Operations on Graphs: Union
+
+::: {.incremental}
+- Because graphs are defined as sets, we can perform standard set operations on them.
+- **Union** ($\cup$): Combine the vertices and edges of two graphs.
+  - $V(G_1 \cup G_2) = V(G_1) \cup V(G_2)$
+  - $E(G_1 \cup G_2) = E(G_1) \cup E(G_2)$
+:::
+
+---
+
+## Set Operations on Graphs: Intersection
+
+::: {.incremental}
+- **Intersection** ($\cap$): Keep only the vertices and edges present in *both* graphs.
+  - $V(G_1 \cap G_2) = V(G_1) \cap V(G_2)$
+  - $E(G_1 \cap G_2) = E(G_1) \cap E(G_2)$
+:::
+
+---
+
+# Node Neighborhoods
+---
+
+## Node Neighborhoods
+
+::: {.columns}
+::: {.column width="50%"}
+- In a graph $G$, the **neighbors** of node $v$ are the nodes adjacent to it.
+- **Neighborhood** ($\mathcal{N}(v)$): The subset of all vertices adjacent to $v$.
+  - $\mathcal{N}(v) \subset V$
+  - Neighbors of an isolate is the empty set $\emptyset$.
+  - In the graph on the right: $\mathcal{N}(A) = \{B, C, D, F\}$.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| label: fig-simple2-slides
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 6
+#| fig-width: 6
+
+set.seed(329)
+gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
+gr <- mutate(gr, name = toupper(letters[1:6]))
+p <- ggraph(gr, layout = 'auto') 
+p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+p <- p + theme_graph() + ylim(-1, 1)
+p
+```
+:::
+:::
+
+---
+
+## Neighborhood Intersection (1)
+
+
+::: {.incremental}
+- **Neighborhood Intersection** ($\mathcal{N}(u) \cap \mathcal{N}(v)$):
+  - The set of nodes connected to both $u$ and $v$ (common neighbors).
+  - Can be computed for connected or disconnected dyads.
+- Cardinality of this set is the number of common neighbors.
+- Disjoint neighborhood sets have an intersection of the empty set $\emptyset$ (0 common neighbors).
+:::
+
+---
+
+## Neighborhood Intersection (2)
+
+
+::: {.incremental}
+- In our graph:
+  - $\mathcal{N}(A) = \{B, C, D, F\}$
+  - $\mathcal{N}(D) = \{A, B, F\}$
+- Intersection: $\mathcal{N}(A) \cap \mathcal{N}(D) = \{B, F\}$.
+:::
+---
+
+## Neighborhood Union
+
+
+::: {.incremental}
+- **Neighborhood Union** ($\mathcal{N}(u) \cup \mathcal{N}(v)$):
+  - The set of nodes connected to either $u$ or $v$.
+  - In our graph: $\mathcal{N}(A) \cup \mathcal{N}(D) = \{B, C, F\}$.
+- Neighborhood intersection and union form the basis of mathematical measures of **structural similarity** between nodes (e.g., Jaccard similarity).
+
+:::
+---
+
+## Neighborhoods in Directed Graphs (1)
+
+::: {.incremental}
+- Because links are directional, nodes have two neighborhoods.
+- **In-Neighborhood** ($N^{in}(v)$):
+  - Set of source nodes pointing *to* $v$.
+  - In previous slide's directed graph: $N^{in}(D) = \{B, E, G\}$.
+:::
+
+---
+
+## Neighborhoods in Directed Graphs (2)
+
+::: {.incremental}
+- **Out-Neighborhood** ($N^{out}(v)$):
+  - Set of destination nodes that $v$ points *to*.
+  - In previous slide's directed graph: $N^{out}(B) = \{A, C, D\}$.
+- A node appears in both neighborhoods only if there is a **reciprocal** tie.
+:::
+
+---
+
+# Node Degree
+---
+
+## Node Degree in Undirected Graphs
+
+
+::: {.incremental}
+- The **degree** ($k_i$) of a node is the number of connections it has.
+- Formally, it can be defined in two ways:
+  1. The **cardinality** of its neighborhood set:
+     $$k_i = |\mathcal{N}(i)|$$
+  2. The number of edges **incident** upon that node.
+- **Degree Centrality**: The simplest measure of node position (connectedness).
+- **Endpoints**: Nodes with degree equal to one (having a single neighbor).
+
+:::
+---
+
+## Node Degree in Directed Graphs: Indegree
+
+::: {.incremental}
+- Directed graphs have two distinct degrees for each node.
+- **Indegree** ($k^{in}_i$):
+  - Number of edges pointing to node $i$ (cardinality of $N^{in}(i)$).
+  - Sociological meaning: **Popularity, Prestige, or Status**.
+:::
+
+---
+
+## Node Degree in Directed Graphs: Outdegree
+
+::: {.incremental}
+- **Outdegree** ($k^{out}_i$):
+  - Number of edges pointing from node $i$ (cardinality of $N^{out}(i)$).
+  - Sociological meaning: **Sociability or Activity**.
+:::
+
+---
+
+# Basic Graph Metrics
+---
+
+## Graph Order and Size (1)
+
+
+::: {.incremental}
+- **Graph Order** ($n$):
+  - The number of nodes in the graph ($n = |V|$).
+  - Cardinality of the vertex set.
+- **Graph Size** ($m$):
+  - The number of edges in the graph ($m = |E|$).
+  - Cardinality of the edge set.
+:::
+
+---
+
+## Graph Order and Size (2)
+
+
+::: {.incremental}
+- In our undirected graph (9 nodes, 16 edges): $n = 9$, $m = 16$.
+- In our directed graph (7 nodes, 11 edges): $n = 7$, $m = 11$.
+:::
+---
+
+## Graph Maximum Size
+
+
+::: {.incremental}
+- The maximum possible number of edges if a graph of order $n$ were complete.
+- **Undirected Graph**:
+  
+  $$Max(E)^u = \frac{n(n-1)}{2}$$
+
+- **Directed Graph**:
+  
+  $$Max(E)^d = n(n-1)$$
+
+- *Example*: In a classroom of 10 kids, if everyone is friends with everyone else, the number of friendships is:
+  $$\frac{10(10-1)}{2} = 45 \text{ friendships}$$
+
+:::
+---
+
+## Graph Density
+
+
+::: {.incremental}
+- Network density $d(G)$ is the ratio of observed edges $m$ to maximum possible edges. Represents tight-knit vs loose-knit networks.
+- **Undirected Density**:
+  
+  $$d(G)^u = \frac{2m}{n(n-1)}$$
+
+- **Directed Density**:
+  
+  $$d(G)^d = \frac{m}{n(n-1)}$$
+
+- *Probability interpretation*: The probability that two randomly chosen nodes will be connected.
+- Denser networks are less vulnerable to breakdowns when key nodes are removed.
+:::
+
+---
+
+# Degree-Based Graph Metrics
+
+---
+
+## Graph Degree Set and Sequence
+
+
+::: {.incremental}
+- **Graph Degree Set** ($\mathbf{k}$):
+  - A vector containing the degree of each node. Length of vector equals graph order $n$.
+  - In our undirected graph example: $\mathbf{k} = (4, 3, 3, 4, 4, 4, 3, 3, 4)$.
+- **Graph Degree Sequence** ($\mathbf{d}$):
+  - The graph degree set sorted in decreasing order.
+  - In our undirected graph example: $\mathbf{d} = (4, 4, 4, 4, 4, 3, 3, 3, 3)$.
+
+:::
+---
+
+## Degree Range & Sum
+
+
+::: {.incremental}
+- **Degree Range** ($k_r$):
+  - The difference between maximum and minimum degrees: $k_r = k_{max} - k_{min}$.
+  - Measures heterogeneity of node connectivity.
+- **Sum of Degrees** ($\sum k_i$):
+  - **The First Theorem of Graph Theory**: In an undirected graph, the sum of degrees is twice the number of edges:
+    
+    $$\sum_i k_i = 2m$$
+
+  - Each edge is incident to two nodes, so it is counted twice in the sum.
+
+:::
+---
+
+## Graphical Degree Sequences
+
+
+::: {.incremental}
+- Because $\sum_i k_i = 2m$, the sum of degrees in an undirected graph **must be an even number**.
+- **Graphical Sequence**: A sequence of integers that can represent the degree sequence of a real graph.
+- **Handshaking Lemma**:
+  - A degree sequence is graphical only if the number of nodes with **odd degrees** (odd nodes) is an **even number**.
+  - Example: $\{4, 3, 3, 3, 2, 1, 1\}$ has 5 odd nodes, so it is **not graphical** (no such graph can exist).
+
+:::
+---
+
+## Average Degree
+
+
+::: {.incremental}
+- The average connectivity of the nodes in a graph:
+- **Undirected Average Degree**:
+  
+  $$\bar{k} = \frac{\sum_i k_i}{n} = \frac{2m}{n}$$
+
+- **Directed Average Degree**:
+  
+  $$\bar{k} = \frac{m}{n}$$
+
+- **Connection to Density**:
+  
+  $$d(G)^u = \frac{\bar{k}}{n-1}$$
+
+:::
+---
+
+## Degree Variance
+
+
+::: {.incremental}
+- Captures the inequality or heterogeneity in connectivity across nodes.
+- **Degree Variance** ($\mathcal{v}(G)$):
+  
+  $$\mathcal{v}(G) = \frac{\sum_i (k_i - \bar{k})^2}{n}$$
+
+- The higher the variance, the higher the inequality (a few popular stars, many isolates).
+
+:::
+---
+
+## Regular Graphs
+
+::: {.columns}
+::: {.column width="50%"}
+- **Regular Graph**: A graph where every node has the exact same degree ($k$).
+  - Denoted as a *$k$-regular graph of order $n$*.
+  - Because $k_i = \bar{k}$ for all nodes, the degree variance of a regular graph is **always zero**.
+  - The example on the right is a **3-regular graph of order 10**.
+:::
+
+::: {.column width="50%"}
+```{r}
+#| label: fig-regular-slides
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6
+#| fig-height: 6
+
+set.seed(123)
+gr <- sample_k_regular(10, 3)
+gr <- gr %>% 
+  as_tbl_graph() %>% 
+  mutate(name = toupper(letters[1:10])) 
+p <- ggraph(gr, layout = 'kk') 
+p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+p <- p + theme_graph()
+p
+```
+:::
+:::
+
+---
+
+## Feld's Friendship Paradox
+
+
+::: {.incremental}
+- **Average Nearest Neighbor Degree** ($\bar{k}_{nn(i)}$):
+  - The average degree of node $i$'s neighbors:
+    $$\bar{k}_{nn(i)} = \frac{1}{k_i} \sum_{j \in \mathcal{N}(i)} k_j$$
+- **The Friendship Paradox (Scott Feld, 1991)**:
+  - In almost all networks (except regular graphs), the average degree of a person's friends ($\bar{k}_{nn}$) is **greater** than the average degree of the people in the network ($\bar{k}$).
+  - **Your friends have more friends than you do!**
+:::
+
+---
+
+# Directed Graph Elements & Metrics
+
+---
+
+## Directed Degree Sets & Sequences
+
+
+::: {.incremental}
+- Directed graphs have two distinct degree sets (In-Degree set and Out-Degree set) and two distinct sequences.
+- **Sum of Degrees**:
+  - The sum of in-degrees is always equal to the sum of out-degrees, which is equal to the size $m$ (number of edges):
+    
+    $$\sum k^{in}_i = \sum k^{out}_i = m$$
+
+  - Since both sum to $m$, directed graphs have only **one** average degree: $\bar{k} = m/n$.
+
+:::
+---
+
+## Average Nearest Neighbor Degree
+
+::: {.incremental}
+- **Average Nearest Neighbor Degree** ($\bar{k}_{nn(i)}$):
+  - The average degree of node $i$'s neighbors:
+    $$\bar{k}_{nn(i)} = \frac{1}{k_i} \sum_{j \in \mathcal{N}(i)} k_j$$
+- This metric gives us the expected number of "friends of friends" for an average person in the network.
+:::
+
+---
+
+## Feld's Friendship Paradox
+
+::: {.incremental}
+- **The Friendship Paradox** (Scott Feld, 1991):
+  - In almost all social networks, the average degree of a person's friends ($\bar{k}_{nn}$) is **greater** than the average degree of the people in the network ($\bar{k}$).
+  - This means, on average, **your friends have more friends than you do!**
+  - This is not a personal failing, but a structural property of most social networks.
+:::
