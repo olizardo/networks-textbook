@@ -1,23 +1,33 @@
 # Types of Ties and Their Graphs {#sec-ties}
+
 ```{r setup, include=FALSE}
   knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
-  require(ggraph)
-  require(tidygraph)
-  require(igraph)
+  library(ggplot2)
+  library(ggraph)
+  library(tidygraph)
+  library(igraph)
+  library(patchwork)
 ```
+
+## Introduction
+
+Nodes and edges are the fundamental building blocks of a graph. However, the types of relationships that the edges represent can change both how we understand the network conceptually and what mathematical techniques we can apply to the graph when computing *graph metrics* (the subject of @sec-graphmetrics). When doing social network analysis, we map our understanding of the nature of the **social relationships** we are studying to the **types of graphs** we use to represent the network formed by the **concatenation** of those relationships [@martin09]. 
+
+This chapter integrates the sociological classifications of ties with their graph-theoretic representations, demonstrating how different social relations dictate the mathematical properties and structures of the networks they form.
+
+---
 
 ## Symmetric Ties and Undirected Graphs 
 
-As noted in @sec-graphtheory, Nodes and edges are indeed the building blocks of a graph. However, the types of relationships that the edges represent can change both how we understand the network conceptually and what mathematical techniques we can apply to the graph when computing *graph metrics* (the subject of @sec-graphmetrics). The basic idea is that when we do network analysis, we want to map our understanding of the nature of the **social relationships** we are studying to the **types of graphs** we use to represent the network formed by the **concatenation** of those relationships [@martin09]. 
+By definition, some relations lack any inherent directionality. **Mutuality** (or **reciprocity**) is built in by construction. For example, "spending time together" or "being siblings" are relations where mutuality is logically and necessarily implied. It would be nonsensical for a person (say *A*) to claim that they spend time with another person (say *B*) and for *B* to say that they do not spend time with *A*. In social network analysis, these are called **symmetric ties** [@heider46]. Formally, if a tie is symmetric, then the existence of a tie from *A* to *B* logically implies that *B* is also tied to *A* ($AB \implies BA$).
 
-In @sec-types, we began discussing how sociologists and graph-theory people classify ties and how they could be represented using different graphs. In this chapter, we elaborate on these considerations and provide examples. 
-
+Social networks composed of symmetric ties are represented as **undirected graphs**, such as the one shown in @fig-undirected. When an undirected graph has no **loops** (edges connecting a node to itself), and there is only one edge connecting adjacent vertices to one another (the graph has no **multiedges**), it is called a **simple undirected graph**.
 
 ```{r}
 #| label: fig-undirected
-#| fig-cap: "A undirected graph"
+#| fig-cap: "An undirected graph"
 #| fig-cap-location: bottom
-#| fig-height: 8
+#| fig-height: 6
 #| fig-width: 8
 
   gr <- create_empty(9, directed = FALSE)
@@ -30,35 +40,40 @@ In @sec-types, we began discussing how sociologists and graph-theory people clas
     bind_edges(data.frame(from = 7, to = c(8:9))) %>%
     bind_edges(data.frame(from = 8, to = c(9))) %>%
     mutate(name = toupper(letters[1:9]))
-  p <- ggraph(gr, layout = 'kk') 
-  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-  p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-  p <- p + theme_graph()
+    
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_link(color = "steelblue", width = 1.25) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
   p
 ```
 
-Let us assume that @fig-undirected represents a network of people who *spend time together* (what we called a **similarity** in @sec-types). One way to build this network would be to ask people on your dorm floor who they spend some time (e.g., more than an hour a week) hanging out with. By definition, the relation "spending time together" lacks any inherent directionality. **Mutuality** (or **reciprocity**) is built in by construction. It would be nonsensical for a person (say *A*) to claim that they spend time with another person (say *B*) and for *B* to say that they do not spend time with *A*. In social network analysis, these types of ties are called **symmetric ties** [@heider46]. So if $AB$ means that *A* spends time with *B*, if we know $AB$ is true, then we know that $BA$ is also true. 
+### Real-World Examples of Symmetric Ties
 
-In the same way, two people being in the same place at the same time (co-location), even if they do not know one another, constitutes a symmetric tie. You also have the symmetric tie of "being in the same class as" every other student taking your Social Networks seminar this term. Note that, in this sense, all **co-memberships** create symmetric ties among all involved actors (we will revisit this topic when discussing **affiliation networks** in @sec-affiliation). For instance, if I am a member of your family, you are also my family member; if we are both members of the soccer club, we are considered teammates. 
+1.  **Similarity and Propinquity**: Two people being in the same place at the same time (co-location), or having similar socio-demographic attributes (e.g., sharing nationality or gender).
+2.  **Co-membership / Affiliations**: "Being in the same class as" every other student in your seminar. All **co-memberships** create symmetric ties among all involved actors (we will revisit this in @sec-affiliation). If *A* is a teammate of *B* in a soccer club, *B* is necessarily a teammate of *A*.
 
-Social networks composed of symmetric ties are represented as **undirected graphs**, such as the one shown in @fig-undirected. When an undirected graph has no **loops** (edges connecting a node to itself), and there is only one edge connecting adjacent vertices to one another (the graph has no **multiedges**), it is called a **simple undirected graph**.
+In undirected graphs, the order in which we name the nodes in an edge does not matter ($AB$ and $BA$ refer to the exact same edge).
 
-Networks composed of symmetric ties have some interesting properties. If we know that the relationship (**R**) linking two nodes *A* and B is **symmetric**, then only a single edge exists that links them, and it does not matter whether we call this edge *AB* or *BA*. The order does not matter. In this way, we can formally define a **symmetric tie** as one that lacks directionality; if a tie is symmetric, then if we know that A is related to B (the AB edge is part of the edge set of the graph), then we know by necessity that B is related to A. 
-
-Can you think of other examples of symmetric ties? Is friendship, as culturally defined in the contemporary world, a symmetric tie?
+---
 
 ## Asymmetric Ties and Directed Graphs 
 
-In contrast to spending time together, being members of the same family, or being in the same place at the same time, some social ties allow for inherent **directionality**. Edges in these graphs are called **asymmetric ties** [@heider46]. That is, one member of the pair can claim to have a particular type of social relationship with the other, but it is possible (though not necessary) that the other person does not have the same relationship with the first. 
+In contrast to co-membership or spending time together, many social relationships allow for inherent **directionality**. These are represented by **asymmetric ties** [@heider46]. For these ties, one member of a pair can claim a relationship with the other, but it is possible (though not necessary) that the other person does not send the same relationship back. 
 
-Helping or **social support** relations are like this. For instance, you can help someone with their homework, or give them personal advice, but this does not *necessarily* mean that that person will return the favor. They may, or they may not. The point is that, in contrast to a symmetric tie, **mutuality** or **reciprocity** is not built in by definition, but must happen as an empirical event in the world. We need to ask the other person to find out (or check their email logs). Can you think of other examples of asymmetric social ties?
+Helping, texting, and **social support** relations are prime examples. You can help someone with their homework or give them personal advice, but this does not *necessarily* mean that that person will return the favor. **Mutuality** or **reciprocity** is not built-in by definition; instead, it must happen as an empirical event in the world. 
+
+Social networks composed of asymmetric ties are represented by **directed graphs** (or **digraphs**). @fig-directed shows a point-and-line diagram of a digraph, where simple undirected lines are replaced by directed arrows (also called **arcs**).
 
 ```{r}
 #| label: fig-directed
 #| fig-cap: "A directed graph"
 #| fig-cap-location: bottom
-#| fig-height: 8
+#| fig-height: 6
 #| fig-width: 8
 
   fr <- c("A", "A", "B", "B", "B", "D", "E", "E", "F", "G", "G")
@@ -66,74 +81,328 @@ Helping or **social support** relations are like this. For instance, you can hel
   edge.dat <- data.frame(fr, to)
   node.dat <- data.frame(name = union(fr, to))
   gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
-  p <- ggraph(gr, layout = 'kk')
-  p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
-              arrow = arrow(length = unit(7, 'mm')),
-              end_cap = circle(10, 'mm'), 
-              sep = unit(8, 'mm'))
-  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
-  p <- p + theme_graph() 
+  
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(5, 'mm')),
+                end_cap = circle(8, 'mm'), 
+                sep = unit(6, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
   p
 ```
 
-**Reciprocity** is an important concept in social network analysis. Some have said it is perhaps *the most* important concept for understanding human society [@gouldner60], which may be an exaggeration. Only asymmetric ties may have the property of being non-reciprocal or having more or less reciprocity. If I think you are my friend, I very much hope that you also think you are my friend. 
+In a directed graph, for every edge, there is a **source node** and a **destination node**. Therefore, *the order in which you list the nodes when you name the edges matters*. The edge $AB$ is a different entity from the edge $BA$. When a digraph has no loops and at most one directed edge connecting a sender to a receiver in each direction, it is called a **simple directed graph**.
 
-That said, sociologists have found that in many natural social settings, this is not the case. Sometimes people think they are friends with others, but those other people disagree [@carley_krackhardt96]. For this reason, sociologists typically ask: if I do you a favor, would you do me a favor in the future? Additionally, sociologists often ask: if I treat you with respect, will you also treat me with respect? If I text you, will you text me back? If this is true, we have a level of reciprocity in our relationship. 
+### Reciprocity as an Empirical Concept
 
-For some ties, such as advice, support, or friendship, reciprocity is all-or-none; it either exists or it does not. For instance, the friendship offer you extend to someone may be reciprocated (or not). In the same way, you can like someone, and they may like you back (or not), like the notes you passed around in middle school. For other ties, such as communication ties (e.g., those defined by the amount of texting or calling), reciprocity is a matter of degree; there may be more or less. For instance, you can text someone 10 times a day, but they may text you back only half the time. In all cases, reciprocity is at its maximum when the content of the relationship is exchanged equally between actors. 
+In directed networks, reciprocity is a major analytical focus. For some ties (such as liking, trusting, or friendship), reciprocity is binary; it either exists or it does not. For other ties (such as communication networks built on text volume or call duration), reciprocity is a matter of degree. For instance, you can text someone 10 times a day, but they may text you back only half the time. 
 
-Can you think of relationships in your life characterized by more or less reciprocity?
-
-Just like symmetric ties are represented using a particular type of graph (namely, an **undirected graph**), social networks composed of asymmetric ties are best represented by a type of graph called a **directed graph** (or **digraphs** for short). @fig-directed shows the point-and-line diagram of a digraph. What were simple lines for in the undirected graph shown in @fig-undirected have been replaced with arrows indicating directionality. 
-
-A node **sends** a relationship to the node that the arrow points to, which in turn *receives* the relationship. In a digraph, up to two directed arrows may link nodes, allowing them to go in both directions. When an undirected graph has no **loops** (edges connecting a node to itself), and there is only one edge connecting a sender node to a receiving node (the graph has no **multiedges**), like @fig-directed, it is called a **simple directed graph**. 
-
-In a directed graph, for every edge, there is a **source node** and a **destination node**. So in the case of "A helps B," the source node is *A* and the destination node is *B*. In the case of "B helps A," the source node is *B* and the destination node is *A*. This means that in a directed graph, in contrast to an undirected one, *the order in which you list the nodes when you name the edges matters*. Thus, the edge *AB* is a different one from the edge *BA*. The first one may exist, but the second one may not exist (edges in a directed graph are sometimes also called **arcs**). 
-
-For instance, if @fig-directed were an **advice network** [@cross01], we could say that *H* seeks advice from *D*, but *D* does not seek advice from *H*. This may be because *D* is higher in the office hierarchy or more experienced than *H*, in which case a lack of reciprocity may indicate an authority relationship between the two nodes. 
-
-One must always be careful when examining a directed network to make sure one properly understands the direction of the underlying social relationships!
+If @fig-directed were an **advice network** [@cross01], we could say that *H* seeks advice from *D*, but *D* does not seek advice from *H*. This lack of reciprocity is common in formal hierarchies, where advice-seeking often flows upward to more experienced or authoritative actors, reflecting power differentials.
 
 ### Types of Nodes in Directed Graphs {#sec-typedir}
 
-In a directed graph, there will typically be three types of (non-isolate) nodes [@Harary65]: 
+In a directed graph, we can categorize (non-isolate) nodes based on their sending and receiving behavior [@Harary65]: 
 
-- First, there will be nodes that receive ties but don't send them. These are called **receivers** (like node *C* in @fig-directed). For receiver nodes $k_{in} > 0$ and $k_{out} = 0$.
-- Second, there will be nodes that receive ties and also send out ties. These are called **carriers** (like nodes *A* and *B* in @fig-directed. For carrier nodes, $k_{in} > 0$ and $k_{out} > 0$.
-- Finally, there will be nodes that send ties but don't receive them. These are called **transmitters** (like nodes *E* and *G* in @fig-directed). For transmitter nodes, $k_{in} = 0$ and $k_{out} > 0$.
+*   **Receivers**: Nodes that receive ties but do not send them (e.g., node *C* in @fig-directed). For receiver nodes, indegree $k_{in} > 0$ and outdegree $k_{out} = 0$.
+*   **Carriers**: Nodes that both receive and send ties (e.g., nodes *A* and *B* in @fig-directed). For carrier nodes, $k_{in} > 0$ and $k_{out} > 0$.
+*   **Transmitters**: Nodes that send ties but do not receive them (e.g., nodes *E* and *G* in @fig-directed). For transmitter nodes, $k_{in} = 0$ and $k_{out} > 0$.
 
-## Anti-Symmetric Ties and Tree Graphs
+---
 
-There is a particular type of directed relationship that has the property of only going in one direction. These are called **anti-symmetric ties**. Like asymmetric ties, anti-symmetric ties have a directionality (and thus source and destination nodes), but reciprocity is forbidden by definition. That means that if *A* is anti-symmetrically connected to *B*, then *B* *cannot* send the *same type of tie* back to *A*.
+## Visual and Sociological Taxonomies
 
-Although not a particularly important social relationship, *being taller than someone* is an anti-symmetric tie. If you are taller than someone else, they cannot be taller than you. If you are taller than someone else, that means the "being taller than" link has you as the source and the person you are taller than as the destination, but it can never go the other way around. However, if someone else* is taller than you, then that link will have them as the source and you as the destination. 
+To systematically synthesize the types of ties, we can classify them both graph-theoretically and sociologically.
 
-More sociologically interesting types of anti-symmetric links in social networks include **authority relations**, such as hierarchical ties at work, and **cross-generational relations**, such as kinship ties in families. For instance, the authority relation *gives orders to* can only go in one direction. Imagine an organization where the boss tells you what to do, and you, in turn, tell your boss what they should do. It would be pretty anarchic. In the kinship ties domain, the relationship *being the parent of* is a classic anti-symmetric tie. If you are a parent, you cannot, in turn, be your own parent. 
+### Graph-Theoretic Classification of Ties
 
-Usually, anti-symmetric links in social networks have a *complementary* relationship that is also anti-symmetric, but that goes in the other direction. Note that this is not an exception to the rule that anti-symmetric ties go only one way, because the complementary relationship is a *different* tie. For instance, the complement of the relationship "gives orders to" or "is the boss of" is the relationship "takes orders from" or is "the subordinate of" in the authority ranking domain. In the family domain, the complement of the relationship "is the parent of" is, of course, "being the son/daughter of." Just like the original anti-symmetric link, if you are someone's son or daughter, then they cannot also be your son or daughter. 
+In graph theory, we categorize directed and undirected ties based on their inherent directionality. Figure @fig-graph-theoretic-ties provides a visual summary of these types.
 
 ```{r}
-#| label: fig-tree
-#| fig-cap: "A tree graph with thirteen nodes."
-#| fig-cap-location: bottom
-#| fig-width: 10
-#| fig-height: 10
+#| label: fig-graph-theoretic-ties
+#| fig-cap: "A Graph-Theoretic Classification of Ties"
+#| echo: false
+#| fig-width: 8
+#| fig-height: 6
 
-  gr <- create_tree(n = 13, children = 3) 
-  gr <- mutate(gr, name = toupper(letters[1:13])) 
-  p <- ggraph(gr, layout = 'tree')
-  p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25,
-              arrow = arrow(length = unit(6, 'mm')),
-              end_cap = circle(10, 'mm'))
-  p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-  p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-  p <- p + theme_graph() 
+# Function to create a clean, minimalist 2-node graph plot
+plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cross = FALSE) {
+  g <- tbl_graph(nodes = nodes, edges = edges)
+  
+  p <- ggraph(g, layout = "manual", x = x, y = y)
+  
+  if (directed) {
+    p <- p + geom_edge_arc(aes(strength = strength, color = color, linetype = linetype),
+                           arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                           end_cap = circle(8, 'mm'),
+                           start_cap = circle(8, 'mm'),
+                           width = 1.1,
+                           show.legend = FALSE) +
+             scale_edge_color_identity() +
+             scale_edge_linetype_identity()
+  } else {
+    p <- p + geom_edge_link(color = "#2c3e50",
+                            width = 1.1,
+                            end_cap = circle(8, 'mm'),
+                            start_cap = circle(8, 'mm'),
+                            show.legend = FALSE)
+  }
+  
+  # Add nodes
+  p <- p + geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+    geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50")
+  
+  # Add red "forbidden" cross if needed
+  if (has_cross) {
+    p <- p + annotate("text", x = 1.5, y = 0.88, label = "✕", color = "#e74c3c", size = 8, fontface = "bold")
+  }
+  
+  p <- p + 
+    labs(title = title, subtitle = subtitle) +
+    theme_graph() +
+    theme(
+      plot.title = element_text(size = 12, face = "bold", color = "#2c3e50", hjust = 0.5),
+      plot.subtitle = element_text(size = 9.5, color = "#7f8c8d", hjust = 0.5, lineheight = 1.1),
+      plot.margin = margin(10, 10, 10, 10)
+    ) +
+    coord_cartesian(xlim = c(0.6, 2.4), ylim = c(0.7, 1.3), clip = "off")
+  
+  return(p)
+}
+
+# Define Nodes
+nodes_2 <- data.frame(name = c("A", "B"), x = c(1, 2), y = c(1, 1))
+
+# 1. Symmetric (Undirected)
+edges_sym <- data.frame(from = 1, to = 2)
+p1 <- plot_tie_type(nodes_2, edges_sym, "Symmetric", "Undirected tie\ne.g., 'is sibling of'", directed = FALSE)
+
+# 2. Asymmetric: Reciprocal
+edges_rec <- data.frame(from = c(1, 2), to = c(2, 1), strength = c(0.2, 0.2), color = c("#2c3e50", "#2c3e50"), linetype = c("solid", "solid"))
+p2 <- plot_tie_type(nodes_2, edges_rec, "Asymmetric: Reciprocal", "Mutual directed ties\ne.g., 'A likes B' & 'B likes A'", directed = TRUE)
+
+# 3. Asymmetric: Non-Reciprocal
+edges_nonrec <- data.frame(from = 1, to = 2, strength = 0, color = "#2c3e50", linetype = "solid")
+p3 <- plot_tie_type(nodes_2, edges_nonrec, "Asymmetric: Non-Reciprocal", "One-way directed tie\ne.g., 'A sends email to B'", directed = TRUE)
+
+# 4. Asymmetric: Anti-Reciprocal
+edges_anti <- data.frame(
+  from = c(1, 2), 
+  to = c(2, 1), 
+  strength = c(0.2, 0.2), 
+  color = c("#2c3e50", "#e74c3c"), 
+  linetype = c("solid", "dashed")
+)
+p4 <- plot_tie_type(nodes_2, edges_anti, "Asymmetric: Anti-Reciprocal", "Reverse tie is impossible\ne.g., 'A is boss of B'", directed = TRUE, has_cross = TRUE)
+
+# Combine using patchwork
+combined <- (p1 + p2) / (p3 + p4) + 
+  plot_annotation(
+    title = "Graph-Theoretic Classification of Ties",
+    theme = theme(
+      plot.title = element_text(size = 14, face = "bold", color = "#2c3e50", hjust = 0.5, margin = margin(b = 15))
+    )
+  )
+
+combined
+```
+
+*   **Symmetric (Undirected)**: Lack meaningful directionality (e.g., "is sibling of"). Represented by undirected graphs.
+*   **Asymmetric (Directed)**: Direction-dependent relations. They split into three flavors:
+    *   **Reciprocal**: Edges exist in both directions, indicating mutual interaction (e.g., mutual liking or active email exchange).
+    *   **Non-Reciprocal**: An edge exists in only one direction (e.g., sending an email without getting a reply).
+    *   **Anti-Reciprocal**: The presence of a tie in one direction logically implies the absence of a tie in the opposite direction (e.g., hierarchical relations like "is boss of").
+
+### Sociological Classification of Social Ties
+
+Sociologists categorize social ties into four main types: **Similarities**, **Social Relations**, **Interactions**, and **Flows**. These four types can be further grouped into **states** (static situations that persist over time, like similarities and social relations) and **events** (repeated behavioral processes that unfold over time, like interactions and flows). Table @tbl-sociological-ties provides a summary.
+
+| Category | Type | Description | Examples |
+|:---------|:---------------------|:----------------------------------------------------------------------------|:---------------------------------------------------------------------------|
+| **States** | **Similarities** | Connections based on having something in common; typically symmetric. | Propinquity (same school), Memberships (same club), Attributes (same gender). |
+| | **Social Relations** | Connections based on a culturally recognized role or an affective/cognitive attitude. | **Roles**: Kinship (sibling, parent), Non-Kin (friend, boss). <br> **Attitudes**: Affective (like, hate), Cognitive (knows, is aware of). |
+| **Events** | **Interactions** | Regular communication or behavior directed at another person; usually asymmetric. | Communications (texting, calling), Social Support (advice, help), Dominance (bullying, fighting). |
+| | **Flows** | Transmission of something from one person to another; inherently directed. | Information (gossip, influence), Beliefs, Resources (economic transactions). |
+
+: A Sociological Classification of Social Ties {#tbl-sociological-ties}
+
+#### Similarities
+Similarities represent static states where individuals share a common attribute or context. Ties based on similarities are typically symmetric. Examples include *propinquities* (being co-located in a neighborhood), *memberships* (belonging to the same professional organization), and *demographic attributes* (sharing the same age or ethnicity).
+
+#### Social Relations
+Social relations describe culturally recognized roles or cognitive/affective attitudes. These are also static states. They can be symmetric (friendship, sibling) or asymmetric (boss-subordinate, parent-child). Sibling ties are symmetric, while parent/child ties are anti-reciprocal (if *A* is the parent of *B*, *B* cannot be the parent of *A*). Affective ties (liking, trusting, hating) and cognitive ties (knowing of someone, being aware of someone) are inherently asymmetric.
+
+#### Interactions
+Interactions are behavioral events occurring in time. They are asymmetric by default but can be reciprocal. Typical examples include *communications* (texting, calling), *social support* (exchanging advice or lending money), and *dominance* or negative interactions (bullying, physical fighting).
+
+#### Flows
+Flows involve the directed movement of some entity (information, resources, or beliefs) from a sender to a receiver. They are dynamic events that unfold over time and are inherently directional. Examples include the diffusion of *information* (gossip, news, influence) and the transfer of *resources* (economic transactions, disease transmission).
+
+---
+
+## Special Classes of Directed Graphs
+
+By imposing structural restrictions on reciprocity, degree, or edge directionality, we can define special classes of directed graphs.
+
+### Symmetric Directed Graphs
+
+If, in a directed graph, every pair of connected nodes is linked by a bi-directional, reciprocal relationship, the graph is a **symmetric directed graph**. 
+
+```{r}
+#| label: fig-symm
+#| fig-cap: "A symmetric directed graph"
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  fr <- c("A", "B", "D", "A", "B", "C", "E", "C", "F", "A", "G", "D", "C", "D", "E", "G")
+  to <- c("B", "A", "A", "D", "C", "B", "C", "E", "A", "F", "D", "G", "D", "C", "G", "E")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(5, 'mm')),
+                end_cap = circle(8, 'mm'), 
+                sep = unit(6, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
   p
 ```
 
-There is a special kind of anti-symmetric link that, when concatenated across multiple ties, creates a graph called a **tree graph**. Consider the relationship "being the father of." You have a father, and your father has a father, and they have a father. Such a **generational tree** creates a graph like the one shown in @fig-tree. In this figure, node $A$ is the earliest common ancestor, and the other nodes are anti-symmetrically related to him via the "father of" relation (we could draw a similar graph for the "mother of" relation among women). 
+@fig-symm shows a symmetric directed graph with eight nodes and sixteen bi-directional edges (thirty-two directed arcs). For every edge from $u$ to $v$, there exists a corresponding edge from $v$ to $u$.
 
-In the authority relations case, we could also draw a similar graph for the "takes direct orders from" or "is the direct supervisor of" relation. An interesting thing about a tree graph like the one shown in @fig-tree is that every node only has one in-neighbor (you only have one father/mother), but can have multiple out-neighbors (a father/mother can have multiple children).
+### Functional Graphs
+
+A **functional graph** is a special kind of digraph built by imposing the restriction that each node can only have a *single out-neighbor* (i.e., the outdegree of every node is exactly equal to one, $k_{out} = 1$). Functional graphs have important applications in the anthropological analysis of kinship exchange systems in traditional societies [@hageharary96].
+
+```{r}
+#| label: fig-func
+#| fig-cap: "A functional directed graph"
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  fr <- c("A", "B", "C", "D", "E", "F", "G", "H")
+  to <- c("C", "G", "G", "H", "A", "A", "B", "C")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(5, 'mm')),
+                end_cap = circle(8, 'mm'), 
+                sep = unit(6, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
+  p
+```
+
+@fig-func shows a functional graph with eight nodes. If a graph $G$ is a functional graph, then the number of nodes $V$ is always equal to the number of directed edges $E$ ($V = E = 8$). This is mathematically constrained because each of the $V$ nodes sends out exactly one edge.
+
+### Oriented Graphs {#sec-oriented}
+
+An **oriented graph** is a directed graph containing no symmetric (reciprocal) dyads. If there is a directed link from $u$ to $v$, there cannot be a link from $v$ to $u$. It is the structural opposite of a symmetric directed graph.
+
+```{r}
+#| label: fig-oriented
+#| fig-cap: "An oriented directed graph"
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  fr <- c("A", "D", "C", "C", "A", "D", "D", "G", "C", "B", "G")
+  to <- c("B", "A", "F", "E", "F", "G", "C", "E", "A", "F", "A")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(5, 'mm')),
+                end_cap = circle(8, 'mm'), 
+                sep = unit(6, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
+  p
+```
+
+In the oriented graph shown in @fig-oriented, every connected pair is linked *only* by a one-way directed tie; reciprocal dyads are forbidden by the nature of the relationship (e.g., strict hierarchy or non-reversible flows).
+
+### Anti-Symmetric Ties and Tree Graphs
+
+As we saw earlier, an asymmetric relation is **anti-reciprocal** if reciprocity is strictly forbidden. If *A* is anti-reciprocally connected to *B*, then *B* *cannot* send the *same type of tie* back to *A*. When these relations are concatenated across multiple nodes, they can form a **directed tree graph** (for a more general consideration of tree graphs see @sec-trees). 
+
+Consider the relationship "being the father of." You have a father, your father has a father, and so on. This creates a generational lineage represented as a tree. 
+
+```{r}
+#| label: fig-tree
+#| fig-cap: "A tree graph with thirteen nodes"
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  gr <- create_tree(n = 13, children = 3) 
+  gr <- mutate(gr, name = toupper(letters[1:13])) 
+  
+  p <- ggraph(gr, layout = 'tree') +
+    geom_edge_link(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(4, 'mm')),
+                end_cap = circle(8, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
+  p
+```
+
+In @fig-tree, node $A$ is the earliest common ancestor, and all other nodes are anti-reciprocally related to it. Similarly, formal organizational structures where subordinates "take orders from" a single supervisor generate tree graphs. A notable property of tree graphs is that every node (except the root) has exactly one in-neighbor (one supervisor or one father), but can have multiple out-neighbors (children or subordinates).
+
+---
+
+## Real-World Structural Overlays
+
+In real-world settings, simple graph models are often combined to capture the rich social environments of families, organizations, and communities.
+
+*   **Hierarchies in Organizations**: Formal organizations overlay distinct tie types:
+    *   **Same-level ties** (e.g., coworkers, office mates) are typically **symmetric**, implying parity and equality.
+    *   **Cross-level ties** (e.g., supervisor-subordinate) are **anti-reciprocal** and **oriented**, representing vertical authority. These ties are often transitive: if *A* is the boss of *B*, and *B* is the boss of *C*, then *A* is also effectively the boss of *C*.
+*   **Kinship Networks in Families**: Family structures mirror this logic:
+    *   **Same-generation ties** (e.g., siblings, cousins) are **symmetric**.
+    *   **Cross-generation ties** (e.g., parent-of, uncle-of) are **anti-reciprocal** and transitive.
+
+### Multiplexity in Social Relations
+
+In actual social networks, actors are rarely linked by only one relationship. **Multiplexity** refers to the presence of multiple, distinct types of ties linking the same pair of nodes simultaneously. 
+
+For example, two individuals in an office might be linked by a formal, anti-reciprocal role relationship (supervisor and employee) and also by an informal, asymmetric sentiment tie (mutual friendship or liking). Multiplexity adds rich, multi-layered complexity to networks, as the behavior or pattern in one relation (e.g., friendship) often heavily influences or moderates another (e.g., work productivity).
+
+### The Growth of Social Networks
+
+Social networks are highly dynamic. They grow and evolve as new ties form, often linking previously separate network structures. 
+
+A classic example is the formation of a new family unit. A romantic tie (an asymmetric, non-kin relation) between two individuals from separate families can culminate in a marriage tie (a symmetric, kin relation). This single event triggers a cascade of new "in-law" ties (both symmetric same-generation ties and anti-reciprocal cross-generation ties). This effectively merges two separate kinship trees into a highly complex, interconnected network structure.
+
+---
 
 ## References {.unnumbered}
