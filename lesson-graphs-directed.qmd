@@ -74,6 +74,46 @@ where $v$ is the label corresponding to the node. For instance, in @fig-directed
 
 Nodes will only appear in both the in- and out-neighborhood sets when there are **reciprocal** or mutual ties between the nodes. For instance, in @fig-directed, the out-neighborhood of node *F* is $\{A\}$ and the in-neighborhood is $\{A, G\}$. Here, node *A* appears in both the in- and out-neighborhood sets because *A* has a reciprocal tie with *F*.
 
+### Neighborhood Intersection in Directed Graphs
+
+Just as in the undirected case, the sets of neighbors for any two nodes in a directed graph can share members in common. However, because directed neighborhoods are differentiated by directionality, we can examine two types of intersection:
+
+* **In-Neighborhood Intersection** ($N^{in}(u) \cap N^{in}(v)$): Represents the set of common "nominators" or senders—nodes that direct an edge to *both* $u$ and $v$. In a social network, a high in-neighborhood intersection suggests that $u$ and $v$ share similar sources of prestige, influence, or advice.
+* **Out-Neighborhood Intersection** ($N^{out}(u) \cap N^{out}(v)$): Represents the set of common targets—nodes that *both* $u$ and $v$ direct an edge to. In a social network, this indicates shared sociability targets (e.g., $u$ and $v$ both sending advice to the same set of people).
+
+Let's find these intersections for nodes $C$ and $D$ in @fig-directed:
+* For **In-Neighborhoods**: $N^{in}(C) = \{B, E\}$ and $N^{in}(D) = \{B, E, G\}$. The intersection is:
+  $$
+    N^{in}(C) \cap N^{in}(D) = \{B, E\}
+  $$
+  This means both $C$ and $D$ receive incoming connections from nodes $B$ and $E$.
+* For **Out-Neighborhoods**: $N^{out}(C) = \emptyset$ and $N^{out}(D) = \{B\}$. The intersection is:
+  $$
+    N^{out}(C) \cap N^{out}(D) = \emptyset
+  $$
+  Since node $C$ sends no outgoing ties, there is no overlap in their outgoing targets. If we instead intersect $E$ and $G$ (where $N^{out}(E) = \{C, D\}$ and $N^{out}(G) = \{F, D\}$), we find:
+  $$
+    N^{out}(E) \cap N^{out}(G) = \{D\}
+  $$
+  This indicates that both $E$ and $G$ share $D$ as a common out-neighbor.
+
+### Neighborhood Union in Directed Graphs
+
+Similarly, we can compute the union of neighborhood sets to identify the total set of unique nodes connected to either $u$ or $v$ (or both):
+
+* **In-Neighborhood Union** ($N^{in}(u) \cup N^{in}(v)$): The total set of unique nodes that send a directed edge to either $u$ or $v$.
+* **Out-Neighborhood Union** ($N^{out}(u) \cup N^{out}(v)$): The total set of unique nodes that receive a directed edge from either $u$ or $v$.
+
+Using our examples from @fig-directed:
+* The union of the in-neighborhoods of $C$ and $D$ is:
+  $$
+    N^{in}(C) \cup N^{in}(D) = \{B, E, G\}
+  $$
+* The union of the out-neighborhoods of $E$ and $G$ is:
+  $$
+    N^{out}(E) \cup N^{out}(G) = \{C, D, F\}
+  $$
+
 ---
 
 ## Node Degree in Directed Graphs
@@ -106,39 +146,135 @@ In a directed graph, we can categorize (non-isolate) nodes based on their sendin
 *   **Carriers**: Nodes that both receive and send ties. For carrier nodes, $k^{in} > 0$ and $k^{out} > 0$. For instance, in @fig-directed, node *A* has an indegree of 1 and an outdegree of 2, while node *B* has an indegree of 2 and an outdegree of 3, making both nodes carriers.
 *   **Transmitters**: Nodes that send ties but do not receive them. For transmitter nodes, $k^{in} = 0$ and $k^{out} > 0$. For instance, in @fig-directed, node *E* has an indegree of 0 and an outdegree of 2, making it a transmitter node.
 
+### Directed Degree Sets
+
+Computing the degrees of all nodes in a directed network yields two separate vectors (called **directed degree sets**), each of length $n$: the **indegree set** (written $\mathbf{k}^{in}$) and the **outdegree set** (written $\mathbf{k}^{out}$). 
+
+For the directed graph in @fig-directed, these sets list each node's incoming and outgoing degrees:
+
+$$
+  \mathbf{k}^{in} = (k^{in}_A, k^{in}_B, \dots, k^{in}_G) = (2, 2, 2, 3, 0, 2, 0)
+$$
+
+$$
+  \mathbf{k}^{out} = (k^{out}_A, k^{out}_B, \dots, k^{out}_G) = (2, 3, 0, 1, 2, 1, 2)
+$$
+
+### Directed Degree Sequences
+
+When we arrange the elements of a degree set in decreasing order, from largest to smallest, we obtain the **degree sequence**. In directed graphs, this gives us two distinct sequences:
+
+* **Indegree Sequence** ($\mathbf{d}^{in}$): For @fig-directed, ordering the indegree set yields:
+  $$
+    \mathbf{d}^{in} = (3, 2, 2, 2, 2, 0, 0)
+  $$
+* **Outdegree Sequence** ($\mathbf{d}^{out}$): Ordering the outdegree set yields:
+  $$
+    \mathbf{d}^{out} = (3, 2, 2, 2, 1, 1, 0)
+  $$
+
+### Minimum and Maximum Degree in Directed Graphs
+
+We can examine the upper and lower bounds of connectivity in a directed network by taking the maximum and minimum values of the directed degree sets. This yields four distinct metrics:
+
+* **Maximum Indegree** ($k^{in}_{max}$): The highest number of incoming ties received by any node:
+  $$
+    k^{in}_{max} = \max(\mathbf{k}^{in}) = 3 \quad (\text{Node } D)
+  $$
+* **Minimum Indegree** ($k^{in}_{min}$): The lowest number of incoming ties received by any node:
+  $$
+    k^{in}_{min} = \min(\mathbf{k}^{in}) = 0 \quad (\text{Nodes } E \text{ and } G)
+  $$
+* **Maximum Outdegree** ($k^{out}_{max}$): The highest number of outgoing ties sent by any node:
+  $$
+    k^{out}_{max} = \max(\mathbf{k}^{out}) = 3 \quad (\text{Node } B)
+  $$
+* **Minimum Outdegree** ($k^{out}_{min}$): The lowest number of outgoing ties sent by any node:
+  $$
+    k^{out}_{min} = \min(\mathbf{k}^{out}) = 0 \quad (\text{Node } C)
+  $$
+
+### Indegree and Outdegree Range
+
+The arithmetic difference between the maximum and minimum degrees represents the heterogeneity range of connectivity in the digraph:
+
+* **Indegree Range** ($k^{in}_r$): The gap between the most popular and least popular nodes:
+  $$
+    k^{in}_r = k^{in}_{max} - k^{in}_{min} = 3 - 0 = 3
+  $$
+* **Outdegree Range** ($k^{out}_r$): The gap between the most active sender and the least active sender:
+  $$
+    k^{out}_r = k^{out}_{max} - k^{out}_{min} = 3 - 0 = 3
+  $$
+
 ---
 
 ## Directed Graph Metrics
 
 Several basic graph-level metrics differ conceptually or mathematically when applied to directed graphs.
 
-### Average Degree in Directed Graphs
+### Directed Graph Maximum Size
 
-We can use a variation of the undirected average degree procedure to compute the average degree in directed graphs. Take the directed graph shown in @fig-directed, which has seven nodes and 11 edges. In this case, there is no need to "double" the number of lines as in the case of an undirected graph.
+As we saw in @sec-graphtheory, the **graph size** is the number of edges (or arcs) $m$ in the graph. The **maximum size** represents the maximum possible number of edges that can exist in a graph with $n$ nodes. 
 
-We could compute either the average **indegree** or the average **outdegree** of each node, and it would give us the same answer because each link serves a single purpose in determining either the outdegree or the indegree of each node. Accordingly, the average degree in the directed case is:
+In an undirected graph, loops are not allowed, meaning the maximum possible number of edges is $\frac{n(n - 1)}{2}$. However, in a directed graph, edges have directionality, which means there can be two directed edges (arcs) between any pair of nodes—one in each direction (e.g., $u \rightarrow v$ and $v \rightarrow u$).
+
+Therefore, the maximum possible number of directed edges in a directed graph of order $n$ is exactly twice that of an undirected graph:
 
 $$
-  \bar{k} = \frac{m}{|V|} = \frac{m}{n} = \frac{11}{7} \approx 1.6
-$$ {#eq-diravgdeg}
+  m_{max} = n(n - 1)
+$$ {#eq-dirmaxsize}
 
-### Density in Directed Graphs
+For our directed graph in @fig-directed of order $n = 7$:
 
-To compute the density of a directed graph, we compare the observed number of directed edges $m$ to the maximum possible number of directed edges that could exist among $n$ nodes. In a directed graph, edges can go in both directions between any pair of nodes, meaning the maximum possible number of directed ties is $n(n - 1)$. 
+$$
+  m_{max} = 7(7 - 1) = 7(6) = 42
+$$
 
-Therefore, there is no need to multiply the numerator by two as we do in undirected graphs, and the equation for computing the density of a directed graph is:
+This tells us that in a network of 7 nodes, there are 42 possible directed pathways.
+
+### Directed Graph Density
+
+The **density** $d(G)^d$ of a directed graph measures *how many directed ties exist compared to how many directed ties are possible*. It is computed as the ratio of the observed number of directed edges $m$ to the maximum possible number of directed edges:
 
 $$
   d(G)^d = \frac{m}{n(n-1)}
 $$ {#eq-dirgraphedens}
 
-If we apply this to the directed graph in @fig-directed ($m = 11$, $n = 7$):
+If we apply this to the directed graph in @fig-directed, where we observe $m = 11$ directed edges among $n = 7$ nodes:
 
 $$
   d(G)^d = \frac{11}{7(6)} = \frac{11}{42} \approx 0.262 \quad (26.2\%)
 $$
 
-This indicates that approximately 26.2% of all possible directed edges in the network are actually observed.
+This indicates that approximately 26.2% of all possible directed edges in the network are actually observed. Another way to interpret density is as the *probability* that, if we were to select two random nodes $u$ and $v$ from the network, the directed dyad from $u$ to $v$ would be connected by an arrow.
+
+### Average Indegree and Outdegree (Means)
+
+We can compute the average (mean) connectivity across nodes in a directed graph. Because each node has two distinct degrees, we can calculate both the **average indegree** ($\bar{k}^{in}$) and the **average outdegree** ($\bar{k}^{out}$):
+
+* **Average Indegree** ($\bar{k}^{in}$): The sum of all indegrees divided by the number of nodes:
+  $$
+    \bar{k}^{in} = \frac{\sum_i k^{in}_i}{n}
+  $$
+* **Average Outdegree** ($\bar{k}^{out}$): The sum of all outdegrees divided by the number of nodes:
+  $$
+    \bar{k}^{out} = \frac{\sum_i k^{out}_i}{n}
+  $$
+
+Crucially, **the average indegree and the average outdegree are always mathematically identical**:
+
+$$
+  \bar{k}^{in} = \bar{k}^{out} = \bar{k} = \frac{m}{n}
+$$ {#eq-diravgdeg}
+
+This identity exists because every directed edge (arc) must start at exactly one node (contributing to that node's outdegree) and end at exactly one node (contributing to that node's indegree). Consequently, the sum of all indegrees and the sum of all outdegrees are both exactly equal to the total number of edges $m$ ($\sum_i k^{in}_i = \sum_i k^{out}_i = m$).
+
+For our directed graph in @fig-directed ($m = 11$, $n = 7$):
+
+$$
+  \bar{k} = \frac{m}{n} = \frac{11}{7} \approx 1.57
+$$
 
 ### Degree Variance in Directed Graphs
 
@@ -192,6 +328,140 @@ Using the sums of the squared deviations from @tbl-dirdegvar, we calculate the v
   $
 
 In this network, the indegree variance ($1.10$) is higher than the outdegree variance ($0.82$). Sociologically, this indicates that there is more inequality in the popularity/prestige of nodes (receiving ties) than in their sociability (sending ties). In other words, incoming connections are more heavily concentrated on a few "popular" nodes (like node $D$) while others are left as complete non-receivers (like $E$ and $G$).
+
+## Special Classes of Directed Graphs
+
+By imposing structural restrictions on reciprocity, degree, or edge directionality, we can define special classes of directed graphs.
+
+### Symmetric Directed Graphs
+
+If, in a directed graph, every pair of connected nodes is linked by a bi-directional, reciprocal relationship, the graph is a **symmetric directed graph**. 
+
+```{r}
+#| label: fig-symm
+#| fig-cap: "A symmetric directed graph"
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  fr <- c("A", "B", "D", "A", "B", "C", "E", "C", "F", "A", "G", "D", "C", "D", "E", "G")
+  to <- c("B", "A", "A", "D", "C", "B", "C", "E", "A", "F", "D", "G", "D", "C", "G", "E")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(5, 'mm')),
+                end_cap = circle(8, 'mm'), 
+                sep = unit(6, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
+  p
+```
+
+@fig-symm shows a symmetric directed graph with eight nodes and sixteen bi-directional edges (thirty-two directed arcs). For every edge from $u$ to $v$, there exists a corresponding edge from $v$ to $u$.
+
+### Functional Graphs
+
+A **functional graph** is a special kind of digraph built by imposing the restriction that each node can only have a *single out-neighbor* (i.e., the outdegree of every node is exactly equal to one, $k_{out} = 1$). Functional graphs have important applications in the anthropological analysis of kinship exchange systems in traditional societies [@hageharary96].
+
+```{r}
+#| label: fig-func
+#| fig-cap: "A functional directed graph"
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  fr <- c("A", "B", "C", "D", "E", "F", "G", "H")
+  to <- c("C", "G", "G", "H", "A", "A", "B", "C")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(5, 'mm')),
+                end_cap = circle(8, 'mm'), 
+                sep = unit(6, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
+  p
+```
+
+@fig-func shows a functional graph with eight nodes. If a graph $G$ is a functional graph, then the number of nodes $V$ is always equal to the number of directed edges $E$ ($V = E = 8$). This is mathematically constrained because each of the $V$ nodes sends out exactly one edge.
+
+### Oriented Graphs {#sec-oriented}
+
+An **oriented graph** is a directed graph containing no symmetric (reciprocal) dyads. If there is a directed link from $u$ to $v$, there cannot be a link from $v$ to $u$. It is the structural opposite of a symmetric directed graph.
+
+```{r}
+#| label: fig-oriented
+#| fig-cap: "An oriented directed graph"
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  fr <- c("A", "D", "C", "C", "A", "D", "D", "G", "C", "B", "G")
+  to <- c("B", "A", "F", "E", "F", "G", "C", "E", "A", "F", "A")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+  
+  p <- ggraph(gr, layout = 'kk') +
+    geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(5, 'mm')),
+                end_cap = circle(8, 'mm'), 
+                sep = unit(6, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
+  p
+```
+
+In the oriented graph shown in @fig-oriented, every connected pair is linked *only* by a one-way directed tie; reciprocal dyads are forbidden by the nature of the relationship (e.g., strict hierarchy or non-reversible flows).
+
+### Anti-Symmetric Ties and Directed Tree Graphs
+
+As we saw earlier, a relation is **anti-symmetric** if reciprocity is strictly forbidden. If *A* is anti-symmetrically connected to *B*, then *B* *cannot* send the *same type of tie* back to *A*. When these relations are concatenated across multiple nodes, they can form a **directed tree graph** (for a more general consideration of tree graphs see @sec-trees). 
+
+Consider the relationship "being the father of." You have a father, your father has a father, and so on. This creates a generational lineage represented as a tree. 
+
+```{r}
+#| label: fig-tree
+#| fig-cap: "A tree graph with thirteen nodes"
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+  gr <- create_tree(n = 13, children = 3) 
+  gr <- mutate(gr, name = toupper(letters[1:13])) 
+  
+  p <- ggraph(gr, layout = 'tree') +
+    geom_edge_link(color = "steelblue", edge_width = 1.25,
+                arrow = arrow(length = unit(4, 'mm')),
+                end_cap = circle(8, 'mm')) +
+    geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") +
+    geom_node_text(aes(label = name), size = 8, color = "white") +
+    theme_graph() +
+    scale_x_continuous(expand = expansion(mult = 0.15)) +
+    scale_y_continuous(expand = expansion(mult = 0.15)) +
+    coord_cartesian(clip = "off")
+  p
+```
+
+In @fig-tree, node $A$ is the earliest common ancestor, and all other nodes are anti-symmetrically related to it. Similarly, formal organizational structures where subordinates "take orders from" a single supervisor generate tree graphs. A notable property of tree graphs is that every node (except the root) has exactly one in-neighbor (one supervisor or one father), but can have multiple out-neighbors (children or subordinates).
 
 ---
 
