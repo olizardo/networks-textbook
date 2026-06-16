@@ -135,95 +135,9 @@ This restriction drastically simplifies the **dyad census** of anti-symmetric ne
 ## Triads
 ### Triads under Symmetric Ties {#sec-triads}
 
-```{r}
-#| label: fig-triads1
-#| fig-cap: "A null triad."
-#| fig-cap-location: bottom
-#| fig-height: 4
-#| fig-width: 5
+We could do the same thing we did with dyads (subgraphs of order two) with the different *subgraphs of order three* in a graph. These are called **triads**. Just as with dyads, the possible configurations of triads depend heavily on the nature of the relationship (the tie type) we are studying.
 
-    set.seed(329)
-    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
-    gr <- mutate(gr, name = toupper(letters[1:6]))
-    gr <- induced_subgraph(gr, c(2, 3, 6))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-Take for instance, the subgraph defined by nodes *B*, *C*, and *F* in the graph shown in @fig-undirected. This is shown in @fig-triads1. It shows three people who are not connected to one another! Like strangers in a park sitting on three different benches. This is called the **null triad**.
-
-```{r}
-#| label: fig-triads2
-#| fig-cap: "A disconnected triad"
-#| fig-cap-location: bottom
-#| fig-height: 4
-#| fig-width: 5
-
-    set.seed(329)
-    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
-    gr <- mutate(gr, name = toupper(letters[1:6]))
-    gr <- induced_subgraph(gr, c(1, 3, 5))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-Now let's define a subgraph using nodes *A*, *C*, and *E*. The resulting triad is shown in @fig-triads2. Now this looks like a pair of friends *A* and *C*, in the same room with a stranger (*E*) whom they are not acquainted with. You may have experienced this before at a social gathering. This is called the **disconnected triad**. It is disconnected, because the subgraph formed by the three nodes is disconnected, as defined earlier; there is no way that either *A* or *C* can reach *E*, given that *E* is an isolate in the subgraph.
-
-```{r}
-#| label: fig-triads3
-#| fig-cap: "An open triad."
-#| fig-cap-location: bottom
-#| fig-height: 4
-#| fig-width: 5
-
-    set.seed(329)
-    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
-    gr <- mutate(gr, name = toupper(letters[1:6]))
-    gr <- induced_subgraph(gr, c(1, 2, 3))
-    p <- ggraph(gr, layout = 'tree')
-    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-We can continue. Let's define a subgraph from the larger graph in shown in @fig-undirected, but this time we will pick nodes *A*, *B*, and *C*. What comes out? This is shown in @fig-triads3. This time, there is one person, node *A*, who is acquainted with two other people, nodes *B* and *C*, but they don't seem to know one another. It's like when you have friends from work and friends from school who have never met. This is called the **open triad**, because even though the subgraph is connected (there are no isolate nodes like in @fig-triads2, there is a "open hole" in the triad separating nodes *B* and *C*. Perhaps *A* should introduce their friends to one another!
-
-```{r}
-#| label: fig-triads4
-#| fig-cap: "A closed triad."
-#| fig-cap-location: bottom
-#| fig-height: 4
-#| fig-width: 5
-
-    set.seed(329)
-    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
-    gr <- mutate(gr, name = toupper(letters[1:6]))
-    gr <- induced_subgraph(gr, c(1, 4, 6))
-    p <- ggraph(gr, layout = 'grid')
-    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-One last one. Let's define a subgraph from @fig-undirected, but this time let's pick nodes *A*, *D*, and *F*. The result is shown in @fig-triads4. Now we have three friends all of whom know one another! So there are three distinct pairs of relations in the triad: *AD*, *AF* and *DF*. It's like that group of three friends that always seems to hang out together. This is called the **closed triad**, because there is no room to add more links to it. It is also called the closed triad because it is the configuration you get when you add a final link to the open triad (thus "closing" it).
+If we are examining a symmetric relationship (such as siblings or co-membership), the network is represented as an **undirected graph**. Because undirected dyads can only be either connected or disconnected, there are only **four** possible undirected triad configurations. These are shown in @fig-undir-triads.
 
 ```{r}
 #| label: fig-undir-triads
@@ -289,26 +203,34 @@ One last one. Let's define a subgraph from @fig-undirected, but this time let's 
     p1 + p2 + p3 + p4 +  plot_layout(nrow = 2)
 ```
 
+Take for instance, the subgraph defined by nodes *B*, *C*, and *F* in the graph shown in @fig-undirected. This is represented by the panel labeled **Null** in @fig-undir-triads. It shows three people who are not connected to one another! Like strangers in a park sitting on three different benches. This is called the **null triad**.
+
+Now let's define a subgraph using nodes *A*, *C*, and *E*. This is represented by the panel labeled **Disconnected** in @fig-undir-triads. Now this looks like a pair of friends *A* and *C*, in the same room with a stranger (*E*) whom they are not acquainted with. This is called the **disconnected triad** because the subgraph formed by the three nodes is disconnected, as defined earlier; there is no way that either *A* or *C* can reach *E*, given that *E* is an isolate in the subgraph.
+
+We can continue. Let's define a subgraph from the larger graph shown in @fig-undirected, but this time we will pick nodes *A*, *B*, and *C*. This is represented by the panel labeled **Open** in @fig-undir-triads. This time, there is one person, node *A*, who is acquainted with two other people, nodes *B* and *C*, but they don't seem to know one another. It's like when you have friends from work and friends from school who have never met. This is called the **open triad** because even though the subgraph is connected (there are no isolate nodes like in the disconnected case), there is an "open hole" in the triad separating nodes *B* and *C*. Perhaps *A* should introduce their friends to one another!
+
+One last one. Let's define a subgraph from @fig-undirected, but this time let's pick nodes *A*, *D*, and *F*. This is represented by the panel labeled **Closed** in @fig-undir-triads. Now we have three friends all of whom know one another! So there are three distinct pairs of relations in the triad: *AD*, *AF* and *DF*. It's like that group of three friends that always seems to hang out together. This is called the **closed triad** because there is no room to add more links to it. It is also called the closed triad because it is the configuration you get when you add a final link to the open triad (thus "closing" it).
+
 As shown in @fig-undir-triads, in an undirected graph, there can only be these *four* types of triads. So every threesome of actors is part of a **null**, **disconnected**, **open**, or **closed** triad. All four triads are subgraphs of the same order (three), but they are different in size. The null triad is size zero, the disconnected triad is size one, the open triad is size two, and the closed triad is size three. 
 
 Dyads, triads, and subgraphs of higher order (called **network motifs**) are the *building blocks* of larger network structures in society [@milo02].
 
 ### Triads under Anti-Symmetric Ties
 
-In **anti-symmetric ties** (e.g., hierarchical relations like "is boss of"), reciprocity is strictly forbidden ($AB \implies \neg BA$). 
-This mathematical property imposes a powerful structural constraint on the triads that can form in the network. 
+In **anti-symmetric ties** (e.g., hierarchical relations like "is boss of"), reciprocity is strictly forbidden ($AB \implies \neg BA$).^[This is logical syntax for "The existence of AB implies the non-existence of BA".] 
+This mathematical necessity imposes a powerful structural constraint on the triads that can form in the network. 
 
-Because any reciprocal (mutual) dyad is completely forbidden, any triad containing a mutual connection is also forbidden! This rules out **9 of the 16** possible directed triad configurations (such as $NNM$, $MMN$, $MMA$, or $MMM$). 
+Because any reciprocal (mutual) dyad is completely forbidden, any triad containing a mutual connection is also forbidden! This rules out **9 of the 16** possible directed triad configurations (such as $NNM$, $MMN$, $MMA$, or $MMM$) shown in @fig-dirtriads.
 
-Under anti-symmetric ties, there are exactly **seven** permitted directed triad configurations (which can be seen as specific panels in the complete set of directed triads shown in @fig-dirtriads):
+Under anti-symmetric ties, there are exactly **seven** permitted directed triadic configurations (which can be seen as specific panels in the complete set of directed triads shown in @fig-dirtriads):
 
-1. **Null Triad** ($NNN$, panel **NNN**): All three dyads are completely disconnected.
-2. **One-tie Triad** ($NNA$, panel **NNA**): Contains a single non-reciprocal directed tie and two disconnected dyads.
-3. **Out-Star Triad** ($AAN(O)$, panel **AAN(O)**): A single node sends non-reciprocal ties to both other nodes, while the third dyad is disconnected (e.g., $A \leftarrow B \rightarrow C$).
-4. **In-Star Triad** ($AAN(I)$, panel **AAN(I)**): Both other nodes send non-reciprocal ties to a single node, while the third dyad is disconnected (e.g., $A \rightarrow B \leftarrow C$).
-5. **Directed Line / Transitive Path** ($AAN(L)$, panel **AAN(L)**): Non-reciprocal ties form a directed path, while the third dyad is disconnected (e.g., $A \rightarrow B \rightarrow C$).
-6. **Cycle Triad** ($AAA(C)$, panel **AAA(C)**): A directed cycle of length three where non-reciprocal ties flow in a loop ($A \rightarrow B \rightarrow C \rightarrow A$).
-7. **Transitive Triad / Hierarchy** ($AAA(I/O)$, panel **AAA(I/O)**): The classic transitive triad where $A \rightarrow B \rightarrow C$ and also $A \rightarrow C$. This represents a perfectly consistent, transitive authority hierarchy.
+1. **Null Triad** ($NNN$, panel **NNN**): All three dyads are completely disconnected. Here no one is yet in a hierarchical relationship with anyone else. This is the null triad because it contains no edges at all.
+2. **One-tie Triad** ($NNA$, panel **NNA**): Contains a single non-reciprocal directed tie and two disconnected dyads. This could be the beginning of a hierarchy, but it is not yet a triadic hierarchy because the third node is not yet connected to the other two.
+3. **Out-Star Triad** ($AAN(O)$, panel **AAN(O)**): A single node sends non-reciprocal ties to both other nodes, while the third dyad is disconnected (e.g., $A \leftarrow B \rightarrow C$). This could be a a dominant actor who is above two subordinates who are not connected to one another.
+4. **In-Star Triad** ($AAN(I)$, panel **AAN(I)**): Both other nodes send non-reciprocal ties to a single node, while the third dyad is disconnected (e.g., $A \rightarrow B \leftarrow C$). This is an example of a subordinate actor who is below two dominant actors who are not connected to one another.
+5. **Directed Line / Transitive Path** ($AAN(L)$, panel **AAN(L)**): Non-reciprocal ties form a directed path, while the third dyad is disconnected (e.g., $A \rightarrow B \rightarrow C$). This is the beginning of a dominance chain, but it is not yet a triadic hierarchy because the first and third nodes are not yet connected to one another.
+6. **Cycle Triad** ($AAA(C)$, panel **AAA(C)**): A directed cycle of length three where non-reciprocal ties flow in a loop ($A \rightarrow B \rightarrow C \rightarrow A$). If this were a dominant network this would be an anomalous situation where $A$ is above $B$, $B$ is above $C$, but $C$ is above $A$. This is a paradoxical situation that cannot be resolved into a consistent hierarchy. In real life, we would expect to see this configuration only in very small groups (e.g., three children playing rock-paper-scissors), but not in larger organizations.
+7. **Transitive Triad / Hierarchy** ($AAA(I/O)$, panel **AAA(I/O)**): The classic transitive triad where $A \rightarrow B \rightarrow C$ and also $A \rightarrow C$. This represents a perfectly consistent, transitive authority hierarchy. This is the building block of larger hierarchical structures in society, such as organizational charts, family trees, or dominance hierarchies in animal groups.
 
 This mathematical pruning simplifies the analysis of hierarchical systems composed of anti-symmetric ties, especially when we eliminate the cycle to create a strict hierarchy (see @sec-dominance). In formal organizations, for example, we expect to see transitive triads $AAA(I/O)$ (representing clean chains of command), while cycles $AAA(C)$ are structurally avoided as they introduce circular authority paradoxes.
 
