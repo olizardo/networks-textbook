@@ -122,7 +122,7 @@ A lot of the time we collect social network information that has a directed basi
 
 ### Dyads under Anti-Symmetric Ties
 
-In **anti-symmetric ties**, reciprocity is strictly forbidden ($AB \implies \neg BA$). 
+In **anti-symmetric ties**, reciprocity is strictly forbidden ($AB \implies \n\neg BA$). 
 Examples include hierarchical relations such as "is boss of", "is parent of", or flow relations where a transaction cannot be reversed. 
 
 Because mutual interaction is structurally or logically impossible under anti-symmetric ties, reciprocal dyads cannot occur. Therefore, anti-symmetric ties can only yield **two** types of dyads:
@@ -130,7 +130,7 @@ Because mutual interaction is structurally or logically impossible under anti-sy
 * **Disconnected Dyads**: The two nodes do not share any directed edge (size zero).
 * **Non-Reciprocal Dyads**: Only a single one-way directed tie exists between them (shown in @fig-asymmetric-dyad).
 
-This elegant restriction drastically simplifies the dyad census of anti-symmetric networks: every pair of nodes is either completely disconnected or connected by a strictly non-reciprocal arrow.
+This restriction drastically simplifies the **dyad census** of anti-symmetric networks (see @sec-dirgraphsmetrics): every pair of nodes is either completely disconnected or connected by a strictly non-reciprocal arrow.
 
 ## Triads
 ### Triads under Symmetric Ties {#sec-triads}
@@ -300,423 +300,23 @@ This mathematical property imposes a powerful structural constraint on the triad
 
 Because any reciprocal (mutual) dyad is completely forbidden, any triad containing a mutual connection is also forbidden! This rules out **9 of the 16** possible directed triad configurations (such as $NNM$, $MMN$, $MMA$, or $MMM$). 
 
-Under anti-symmetric ties, there are exactly **seven** permitted directed triad configurations:
+Under anti-symmetric ties, there are exactly **seven** permitted directed triad configurations (which can be seen as specific panels in the complete set of directed triads shown in @fig-dirtriads):
 
-1. **Null Triad** ($NNN$): All three dyads are completely disconnected.
-2. **One-tie Triad** ($NNA$): Contains a single non-reciprocal directed tie and two disconnected dyads.
-3. **Out-Star Triad** ($AAN(O)$): A single node sends non-reciprocal ties to both other nodes, while the third dyad is disconnected (e.g., $A \leftarrow B \rightarrow C$).
-4. **In-Star Triad** ($AAN(I)$): Both other nodes send non-reciprocal ties to a single node, while the third dyad is disconnected (e.g., $A \rightarrow B \leftarrow C$).
-5. **Directed Line / Transitive Path** ($AAN(L)$): Non-reciprocal ties form a directed path, while the third dyad is disconnected (e.g., $A \rightarrow B \rightarrow C$).
-6. **Cycle Triad** ($AAA(C)$): A directed cycle of length three where non-reciprocal ties flow in a loop ($A \rightarrow B \rightarrow C \rightarrow A$).
-7. **Transitive Triad / Hierarchy** ($AAA(I/O)$): The classic transitive triad where $A \rightarrow B \rightarrow C$ and also $A \rightarrow C$. This represents a perfectly consistent, transitive authority hierarchy.
+1. **Null Triad** ($NNN$, panel **NNN**): All three dyads are completely disconnected.
+2. **One-tie Triad** ($NNA$, panel **NNA**): Contains a single non-reciprocal directed tie and two disconnected dyads.
+3. **Out-Star Triad** ($AAN(O)$, panel **AAN(O)**): A single node sends non-reciprocal ties to both other nodes, while the third dyad is disconnected (e.g., $A \leftarrow B \rightarrow C$).
+4. **In-Star Triad** ($AAN(I)$, panel **AAN(I)**): Both other nodes send non-reciprocal ties to a single node, while the third dyad is disconnected (e.g., $A \rightarrow B \leftarrow C$).
+5. **Directed Line / Transitive Path** ($AAN(L)$, panel **AAN(L)**): Non-reciprocal ties form a directed path, while the third dyad is disconnected (e.g., $A \rightarrow B \rightarrow C$).
+6. **Cycle Triad** ($AAA(C)$, panel **AAA(C)**): A directed cycle of length three where non-reciprocal ties flow in a loop ($A \rightarrow B \rightarrow C \rightarrow A$).
+7. **Transitive Triad / Hierarchy** ($AAA(I/O)$, panel **AAA(I/O)**): The classic transitive triad where $A \rightarrow B \rightarrow C$ and also $A \rightarrow C$. This represents a perfectly consistent, transitive authority hierarchy.
 
-This beautiful mathematical pruning simplifies the analysis of hierarchical systems. In formal organizations, for example, we expect to see transitive triads $AAA(I/O)$ (representing clean chains of command), while cycles $AAA(C)$ are structurally avoided as they introduce circular authority paradoxes.
+This mathematical pruning simplifies the analysis of hierarchical systems composed of anti-symmetric ties, especially when we eliminate the cycle to create a strict hierarchy (see @sec-dominance). In formal organizations, for example, we expect to see transitive triads $AAA(I/O)$ (representing clean chains of command), while cycles $AAA(C)$ are structurally avoided as they introduce circular authority paradoxes.
 
 ### Triads under Asymmetric Ties {#sec-dirtriads}
 
 When relationships are **asymmetric** (e.g., friendship, advice, or texting), reciprocity is allowed but not guaranteed. In these directed networks, because dyads can take on any of the three states (disconnected, non-reciprocal, or reciprocal), all **sixteen** directed triad configurations of the classic **MAN Triad Census** can occur. 
 
 Let us go through them systematically to understand how they are composed of different combinations of Mutual (M), Asymmetric (A), and Null (N) dyads.
-```{r}
-#| label: fig-NNA
-#| fig-cap: "A disconnected directed triad with one non-reciprocal link."
-#| fig-cap-location: bottom
-#| fig-height: 3
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-NNM
-#| fig-cap: "A disconnected directed triad with one reciprocal link."
-#| fig-cap-location: bottom
-#| fig-height: 3
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 1)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-AANL
-#| fig-cap: "An open directed triad with a non-reciprocal directed line."
-#| fig-cap-location: bottom
-#| fig-height: 3
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 3)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-AANO
-#| fig-cap: "An open directed triad with a non-reciprocal out-star."
-#| fig-cap-location: bottom
-#| fig-height: 3
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 1, to = 3)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-AANI
-#| fig-cap: "An open directed triad with a non-reciprocal in-star."
-#| fig-cap-location: bottom
-#| fig-height: 3
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 3, to = 1)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-MANX
-#| fig-cap: "Open directed triads with one reciprocal link."
-#| fig-cap-location: bottom
-#| fig-height: 6
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 1, to = 2)) %>% 
-        bind_edges(data.frame(from = 3, to = 1)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 15, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 7, color = "white")
-    p1 <- p + theme_graph() + coord_cartesian(clip = "off")
-    
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 1, to = 2)) %>% 
-        bind_edges(data.frame(from = 1, to = 3)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 15, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 7, color = "white")
-    p2 <- p + theme_graph() + coord_cartesian(clip = "off")
-    p1 /  p2
-```
-
-```{r}
-#| label: fig-MMN
-#| fig-cap: "An open directed triad with two reciprocal links."
-#| fig-cap-location: bottom
-#| fig-height: 3
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 1, to = 2)) %>% 
-        bind_edges(data.frame(from = 3, to = 2)) %>% 
-        bind_edges(data.frame(from = 2, to = 3)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 15, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 7, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-AAAC
-#| fig-cap: "A closed directed triad with a cycle configuration."
-#| fig-cap-location: bottom
-#| fig-height: 3
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 3)) %>%
-        bind_edges(data.frame(from = 3, to = 1)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-AAAIO
-#| fig-cap: "A closed directed triad with an in/out star configuration."
-#| fig-cap-location: bottom
-#| fig-height: 3
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 1, to = 3)) %>%
-        bind_edges(data.frame(from = 2, to = 3)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-MAAT
-#| fig-cap: "Closed directed triads with one mutual."
-#| fig-cap-location: bottom
-#| fig-height: 9
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 2, to = 3)) %>% 
-        bind_edges(data.frame(from = 3, to = 1)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p1 <- p + theme_graph() + coord_cartesian(clip = "off")
-    
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 3, to = 1)) %>% 
-        bind_edges(data.frame(from = 3, to = 2)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p2 <- p + theme_graph() + coord_cartesian(clip = "off")
-    
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 1, to = 3)) %>% 
-        bind_edges(data.frame(from = 2, to = 3)) %>% 
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 17, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p3 <- p + theme_graph() + coord_cartesian(clip = "off")
-    p1 / p2 / p3
-```
-
-```{r}
-#| label: fig-MMCT
-#| fig-cap: "Closed directed triads with two mutuals."
-#| fig-cap-location: bottom
-#| fig-height: 6
-#| fig-width: 3
-
-    gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 1, to = 2)) %>% 
-        bind_edges(data.frame(from = 3, to = 2)) %>% 
-        bind_edges(data.frame(from = 2, to = 3)) %>%
-        bind_edges(data.frame(from = 1, to = 3)) %>%
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 15, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 7, color = "white")
-    p1 <- p + theme_graph() + coord_cartesian(clip = "off")
-
-        gr <- create_empty(3, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 2, to = 1)) %>%
-        bind_edges(data.frame(from = 1, to = 2)) %>% 
-        bind_edges(data.frame(from = 3, to = 2)) %>% 
-        bind_edges(data.frame(from = 2, to = 3)) %>%
-        bind_edges(data.frame(from = 1, to = 3)) %>%
-        bind_edges(data.frame(from = 3, to = 1)) %>%
-        mutate(name = toupper(letters[1:3]))
-    l <- ggraph(gr, layout = 'grid')
-    l <- as.matrix(l$data[, 1:2])
-    l[3,1] <- 0.5
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.2,
-                            arrow = arrow(length = unit(5, 'mm')),
-                            end_cap = circle(8, 'mm'))    
-    p <- p + geom_node_point(aes(x = x, y = y), size = 15, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 7, color = "white")
-    p2 <- p + theme_graph() + coord_cartesian(clip = "off")
-    p1 /  p2 
-```
-
-Just in the same way we can enumerate all the directed triads that exist in a directed graph, we can do the same for subgraphs of order three, namely **triads**. However, now that we are talking about threesomes, things get more complicated because we have a larger number of combinations to deal with. Let us go through them. 
-
-First, it is useful to think about what we are dealing with. First, with a subgraph of order three we have three "slots" in the structure to consider. Each of these slots is a **directed dyad**. Thus, a triad can also be thought of as a *concatenation of three directed dyads*. That means that in a directed dyad, each of the slots can only be in on of three states (just like regular directed dyads): It can be mutual (M), asymmetric (A), or null (N)!
-
-### The Null Triad
-So we know that right off the bat, one of the configurations is just going to be composed of three null dyads. Let's call it $NNN$, and is going to look like just like the null dyad in the directed case (see @fig-triads1. 
-
-### Disconnected Directed Triads
-Another set of configurations is going to be composed **disconnected directed triads** that are going to feature one connected dyad and two null dyads. Let's call them $NNC$. However, while there was only one such configuration in the undirected triad case, there's going to be *two* in the directed triad case, because there are two kinds of directed connected dyads (asymmetric and mutual). So, one of the disconnected directed triads is going to have two null dyads and one asymmetric connected dyad. It looks like @fig-NNA. The other one is going to have two null dyads and a **mutual connected dyad**. It's going to look like @fig-NNM. That's it for the two null dyad configurations. We have collected a total of *three* directed triadic configurations so far!
-
-### Open Directed Triads
-Now let's think about directed triadic configurations featuring *two* asymmetric directed edges and one null dyad. These are directed versions of the **open triad** we considered in the undirected case. Here things get a bit interesting because edge directionality generates distinct configurations even when the number of links within the triad is the same (in this case two). So let's call this configuration set $AAN(*)$, where the $*$ will be substituted with a letter to distinguish between the different arrangements.
-
-- In one set up, we have a person who directs an asymmetric edge to another person, and this person directs an asymmetric edge to a third. This is called the **directed line**, so let's call this triad $NNA(L)$, where "L" stands for "Line." It looks like @fig-AANL. Think of when someone tells you a secret and then you tell someone else.
-
-- In another set up, we have a person who directs two asymmetric edges at two people at the same time. This is called the **out star**, so let' call this triad $NNA(O)$, where "O" stands for "out-star." It looks like @fig-AANO. Think of you sending a text to two of your friends on a groupchat. 
-
-- In yet another set up, we have two people who direct two asymmetric edges to a third person at the same time. This is called (you guessed it) the **in star**, so let' call this triad $NNA(I)$, where "I" stands for "in-star." It looks like @fig-AANI. Think of two of your friends performing an intervention on you. 
-
-With these three additional entries, our total set of directed triadic configurations has grown to *six*!
-
-Now, let's consider cases where: (a) the triad is both *connected* and *open*, and (b) there is *one* **mutual** dyad in the triad. There are two of these cases (let's call them $MAN1$, and $MAN2$). These are less interesting because only difference is whether the asymmetric edge is going in one direction or the other direction. These cases are shown in @fig-MANX. 
-
-Finally, let's consider the case where: (a) the triad is both *connected* and *open*, and (b) there are *two* **mutual** dyad in the triad. There is only one case like this (let's call it $MMN$), and is shown in @fig-MMN.
-
-Notably, these three additional configurations brings our total to *nine* (with six of these being versions of open directed triads)
-
-### Closed Directed Triads
-Now, let's consider the cases of **closed directed triads**. These are triads featuring three connected dyads. Once again, there was only one option in the undirected case, but there's a much larger number in the directed case because dyads can be connected in two ways (asymmetric and mutual). Let us take the configurations featuring *three asymmetric links* and called the $AAA(*)$, where the $*$ will be substituted with a letter to distinguish between the different arrangements.
-
-- In one setup, we have a person who directs an asymmetric edge to another person, this person directs an asymmetric edge to a third, and this third person directs an asymmetric edge back to the first person! As we will see later, this is called a **cycle**, so let's call this triad $AAA(C)$, where "C" stands for "cycle." It looks like @fig-AAAC.
-
-- In another setup, we have a person who directs two asymmetric edges to two other people, who are themselves connected by an asymmetric edge. Let's call this triad $AAA(I/O)$. Why this weird name? Well if you look at @fig-AAAIO, this triad combines both the in and out start configurations! In the Figure, node *A* is the out-star and node *C* is the in-star. Hence $AAA(I/O)$, where "I/O" stands for "in/out."
-
-So these two configurations brings our total to *eleven* so far! We are almost getting there.
-
-Now let's consider directed triadic configurations that are: (a) closed and (b) feature exactly one **mutual dyad**. Since the triad is closed, we therefore know that the other two non-mutual dyads will be joined by an asymmetric link (no null dyads). Let's call this generic set $MAA(*)$ triads, where the $*$ will be substituted with a letter to distinguish between the different arrangements. 
-
-Let's ignore the mutual dyad and focus on the nodes joined by asymmetric links ($AA$). We know from our consideration of open triads containing asymmetric links (@fig-AANL, @fig-AANO, and @fig-AANI above) that there are only three ways nodes in a triad can be connected via asymmetric links: 1) the line, 2), the out-star, and the in-star. So that's exactly how many triads of these type are there. We can call them $MAA(L)$, $MAA(O)$, and $MM(I)$ and they are shown in @fig-MAAT.
-
-These three additional configurations bring our total number of directed triadic configurations to *fourteen*! Are we done counting directed triad types?
-
-We aren't. We still have to consider a (final) set of triadic configurations, namely, *closed triads containing at least two mutual dyads*. Now, since these triads will all have two mutuals and are closed, their only distinguishing feature will be the nature of the third connected dyad. Since connected dyads can only take on of two states (Asymmetric or Mutual), then we know there will also be two subtypes:  $MMA$ (two mutual dyads with a third asymmetric dyad), and $MMM$ (the triad with all mutual dyads!). These are shown in @fig-MMCT. So, with these two triads, the true (and final) number of directed triadic configurations is sixteen! 
 
 ```{r}
 #| label: fig-dirtriads
@@ -1004,6 +604,41 @@ We aren't. We still have to consider a (final) set of triadic configurations, na
 	
 	r1 / r2 / r3 / r4
 ```
+
+The full sixteen-member set of possible directed triadic subgraphs is shown in @fig-dirtriads.
+
+Just as in the undirected case, we can enumerate all the directed triads that exist in a directed graph. However, now that we are talking about threesomes under asymmetric ties, things get more complicated because we have a larger number of combinations to deal with. Let us go through them.
+
+First, it is useful to think about what we are dealing with. With a subgraph of order three, we have three "slots" in the structure to consider. Each of these slots is a **directed dyad**. Thus, a triad can also be thought of as a *concatenation of three directed dyads*. That means that in a directed dyad, each of the slots can only be in one of three states (just like regular directed dyads): Mutual (M), Asymmetric/non-reciprocal (A), or Null/disconnected (N)!
+
+### The Null Triad
+So we know that right off the bat, one of the configurations is just going to be composed of three null dyads. Let's call it $NNN$, represented by the panel labeled **NNN** in @fig-dirtriads.
+
+### Disconnected Directed Triads
+Another set of configurations is composed of **disconnected directed triads** that feature one connected dyad and two null dyads. Let's call them $NNC$ configurations. However, while there was only one such configuration in the undirected triad case, there are *two* in the directed triad case, because there are two kinds of directed connected dyads (non-reciprocal and reciprocal). 
+- One of the disconnected directed triads has two null dyads and one non-reciprocal connected dyad. This is represented by the panel labeled **NNA** in @fig-dirtriads. 
+- The other one has two null dyads and a **reciprocal connected dyad**. This is represented by the panel labeled **NNM** in @fig-dirtriads. 
+
+### Open Directed Triads
+Now let's think about directed triadic configurations featuring *two* asymmetric directed edges and one null dyad. These are directed versions of the **open triad** we considered in the undirected case. Here, edge directionality generates distinct configurations even when the number of links within the triad is the same (in this case, two). So let's call this configuration set $AAN(*)$, where the $*$ distinguishes between the different arrangements:
+
+- In one setup, we have a person who directs an asymmetric edge to another person, and this person directs an asymmetric edge to a third. This is called the **directed line**, labeled as **AAN(L)** in @fig-dirtriads. Think of when someone tells you a secret and then you tell someone else.
+- In another setup, we have a person who directs two asymmetric edges at two people at the same time. This is called the **out star**, labeled as **AAN(O)** in @fig-dirtriads. Think of sending a text to two of your friends in a group chat.
+- In yet another setup, we have two people who direct two asymmetric edges to a third person at the same time. This is called the **in star**, labeled as **AAN(I)** in @fig-dirtriads. Think of two of your friends performing an intervention on you.
+
+Now, let's consider cases where: (a) the triad is both *connected* and *open*, and (b) there is *one* **reciprocal** dyad in the triad. There are two of these cases, represented by the panels labeled **MAN1** and **MAN2** in @fig-dirtriads. The only difference between them is whether the non-reciprocal edge is going in one direction or the other.
+
+Finally, let's consider the case where: (a) the triad is both *connected* and *open*, and (b) there are *two* **reciprocal** dyads in the triad. There is only one case like this, represented by the panel labeled **MMN** in @fig-dirtriads.
+
+### Closed Directed Triads
+Now, let's consider the cases of **closed directed triads**. These are triads featuring three connected dyads. Once again, there was only one option in the undirected case, but there is a much larger number in the directed case because dyads can be connected in two ways (non-reciprocal and reciprocal). Let us take the configurations featuring *three non-reciprocal links*, called the $AAA(*)$ set:
+
+- In one setup, we have a person who directs an asymmetric edge to another person, this person directs an asymmetric edge to a third, and this third person directs an asymmetric edge back to the first person! This is called a **cycle**, represented by the panel labeled **AAA(C)** in @fig-dirtriads.
+- In another setup, we have a person who directs two asymmetric edges to two other people, who are themselves connected by an asymmetric edge. This combines both the in and out star configurations, represented by the panel labeled **AAA(I/O)** in @fig-dirtriads.
+
+Now let's consider directed triadic configurations that are: (a) closed and (b) feature exactly one **reciprocal dyad**. Since the triad is closed, we therefore know that the other two non-mutual dyads will be joined by non-reciprocal links (no null dyads). These are represented by the panels labeled **MAA(C)**, **MAA(O)**, and **MAA(I)** in @fig-dirtriads, which correspond directly to the line, out-star, and in-star arrangements of the non-reciprocal edges.
+
+We still have to consider a final set of triadic configurations: *closed triads containing at least two reciprocal dyads*. Since these triads will all have two reciprocal dyads and are closed, their only distinguishing feature is the nature of the third connected dyad. Since connected dyads can only be non-reciprocal or reciprocal, there are two subtypes: **MMA** (two reciprocal dyads with a third non-reciprocal dyad) and **MMM** (the triad with all reciprocal dyads!). These are represented by the panels labeled **MMA** and **MMM** in @fig-dirtriads.
 
 The full sixteen-member set of possible directed triadic subgraphs is shown in @fig-dirtriads.
 
