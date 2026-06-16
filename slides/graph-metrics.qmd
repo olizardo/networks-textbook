@@ -1,5 +1,5 @@
 ---
-title: "Graph Theory: Neighborhoods & Degree"
+title: "Graph Metrics"
 subtitle: "The Basics of Social Network Analysis"
 format:
   revealjs:
@@ -748,6 +748,175 @@ gr_dir |>
   theme_graph() +
   theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
   coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+# Special Classes of Directed Graphs
+
+---
+
+## Symmetric Directed Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Symmetric Directed Graph**:
+  - A digraph where for every directed arc $u \rightarrow v$, the reverse arc $v \rightarrow u$ is also present.
+  - Formally: $AB \iff BA$.
+- **Key Properties**:
+  - It is a directed representation of an undirected (symmetric) graph.
+  - Every connected dyad is **reciprocal** (Mutual).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_sym_slide <- tbl_graph(
+  nodes = data.frame(name = 1:4),
+  edges = data.frame(from = c(1, 2, 2, 3, 3, 4), to = c(2, 1, 3, 2, 4, 3)),
+  directed = TRUE
+)
+ggraph(gr_sym_slide, layout = "circle") +
+  geom_edge_parallel(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'), end_cap = circle(8.5, 'mm'),
+    color = "steelblue", edge_width = 1.25, sep = unit(3.5, 'mm')
+  ) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Functional Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Functional Graph**:
+  - A directed graph where every node has an outdegree of **exactly 1**:
+    $$k^{out}_v = 1 \quad \text{for all } v \in V$$
+- **Key Properties**:
+  - Represents a single-valued function $f: V \rightarrow V$, mapping each node to exactly one target.
+  - e.g., "Who is your best friend?" or "Who is your immediate boss?"
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_func_slide <- tbl_graph(
+  nodes = data.frame(name = 1:4),
+  edges = data.frame(from = c(1, 2, 3, 4), to = c(2, 3, 4, 1)),
+  directed = TRUE
+)
+ggraph(gr_func_slide, layout = "circle") +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'), end_cap = circle(8.5, 'mm'),
+    color = "steelblue", edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Oriented Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Oriented Graph**:
+  - A directed graph obtained by choosing a **single direction** for each edge in an undirected graph.
+- **Key Properties**:
+  - **No reciprocal (mutual) arcs** can exist: if $u \rightarrow v$ is present, then $v \rightarrow u$ is forbidden.
+  - Represents purely non-reciprocal systems of interaction or asymmetric flows.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_orient_slide <- tbl_graph(
+  nodes = data.frame(name = 1:4),
+  edges = data.frame(from = c(1, 2, 3, 1), to = c(2, 3, 4, 4)),
+  directed = TRUE
+)
+ggraph(gr_orient_slide, layout = "circle") +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'), end_cap = circle(8.5, 'mm'),
+    color = "steelblue", edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Tree Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Directed Tree Graph**:
+  - A directed, acyclic graph where a single root node has an indegree of 0, and all other nodes have an indegree of **exactly 1**:
+    $$k^{in}_{root} = 0 \quad \text{and} \quad k^{in}_v = 1 \quad \text{for all other } v$$
+- **Key Properties**:
+  - Naturally models **strict authority hierarchies** or family trees.
+  - Every node has exactly one parent or supervisor, with zero loops or overlapping chains of command.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_tree_slide <- tbl_graph(
+  nodes = data.frame(name = 1:4),
+  edges = data.frame(from = c(1, 1, 2), to = c(2, 3, 4)),
+  directed = TRUE
+)
+ggraph(gr_tree_slide, layout = "tree") +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'), end_cap = circle(8.5, 'mm'),
+    color = "steelblue", edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
 
@@ -1592,21 +1761,6 @@ Before using complex algorithms, we can apply two fast screening tests:
   - *A node in a 4-person group cannot have 7 unique friends!*
 :::
 
----
-
-## Checking Complexity: Havel-Hakimi
-
-::: {.incremental}
-- Passing the simple tests does **not** guarantee a sequence is graphical (e.g., $\mathbf{d} = (3, 3, 3, 1)$ has sum 10, max degree 3, but is non-graphical!).
-- To check completely, we use the **Havel-Hakimi Theorem**:
-  1. Sort the sequence in descending order.
-  2. Remove the first element (let its value be $d_1$).
-  3. Subtract 1 from each of the next $d_1$ elements.
-  4. Repeat. If you end up with all zeros, the sequence is **graphical**. If you get negative numbers, it is **non-graphical**.
-:::
-
----
-
 ## Average Degree
 
 :::: {.columns align=center}
@@ -1651,9 +1805,7 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 - Recall the undirected density formula:
   $$d = \frac{2m}{n(n-1)}$$
 - We can rewrite this by pulling out the average degree term ($\bar{k} = \frac{2m}{n}$):
-  $$d = \left(\frac{2m}{n}\right) \times \frac{1}{n-1} = \bar{k} \times \frac{1}{n-1}$$
-- This simplifies to a beautiful direct identity!
-  $$d = \frac{\bar{k}}{n-1} \qquad \iff \qquad \bar{k} = d(n-1)$$
+  $$d = \left(\frac{2m}{n}\right) \times \frac{1}{n-1} = \bar{k} \times \frac{1}{n-1} = \frac{\bar{k}}{n-1} \qquad \iff \qquad \bar{k} = d(n-1)$$
 :::
 
 ---
@@ -1684,8 +1836,7 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
   
   $$\sigma^2_k = \frac{1}{n} \sum_{i=1}^{n} (k_i - \bar{k})^2$$
   
-- A low variance indicates a more homogeneous or uniform network (like a **regular graph**).
-- A high variance indicates a heterogeneous network with both low-degree nodes and high-degree "hubs" (like a **scale-free** network).
+- A low variance mean less inequality in connectivity (more homogeneous), while a high variance indicates more inequality (more heterogeneous). 
 :::
 :::
 
@@ -1724,13 +1875,22 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 
 ---
 
-## Degree Metrics: Mean & Variance Example
+## Degree Metrics: Average Degree
 
 ::: {.incremental}
 - Using the degree values from the previous slide:
   - **Order** ($n$): 7 nodes
   - **Average Degree** ($\bar{k}$):
     $$\bar{k} = \frac{\sum k_i}{n} = \frac{14}{7} = 2.0$$
+:::
+
+
+---
+
+## Degree Metrics: Degree Variance
+
+::: {.incremental}
+- Using the degree values from the previous slide:
   - **Degree Variance** ($\sigma^2_k$):
     $$\sigma^2_k = \frac{\sum (k_i - \bar{k})^2}{n}$$
   - **Variance Calculation**:
@@ -1803,9 +1963,6 @@ ggraph(gr_regular, layout = 'circle') +
 - **Conclusion**:
   - Since every node's degree matches the average degree, the deviation is zero for all nodes, resulting in **zero variance**.
 :::
-
-
-
 ---
 
 ## Average Nearest Neighbor Degree
@@ -1874,7 +2031,7 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
   - **Node E** (neighbors B, F): $\bar{k}_{nn(E)} = \frac{k_B + k_F}{2} = \frac{3 + 2}{2} = 2.5$
   - **Node F** (neighbors E, B): $\bar{k}_{nn(F)} = \frac{k_E + k_B}{2} = \frac{2 + 3}{2} = 2.5$
   - **Node G** (neighbor D): $\bar{k}_{nn(G)} = \frac{k_D}{1} = \frac{2}{1} = 2.0$
-- **Summary of neighbor degrees**:
+- **Summary of average neighbor degrees**:
   - $\bar{k}_{nn} = (3.0, 2.33, 2.0, 2.0, 2.5, 2.5, 2.0)$
 :::
 
@@ -1884,13 +2041,12 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 ## Friendship Paradox: Network Average
 
 ::: {.incremental}
-- From the node calculations on the previous slide, the nearest neighbor degrees are:
+- From the node calculations on the previous slide, the average nearest neighbor degrees are:
   - $\bar{k}_{nn} = (3.0, 2.33, 2.0, 2.0, 2.5, 2.5, 2.0)$
 - **Average neighbor degree** for the network:
   $$\text{Mean}(\bar{k}_{nn}) = \frac{3.0 + 2.33 + 2.0 + 2.0 + 2.5 + 2.5 + 2.0}{7} \approx 2.33$$
 - **Demonstrating the Paradox**:
   - Average degree of nodes' neighbors ($\approx 2.33$) is **greater** than the average degree of nodes ($\bar{k} = 2.0$).
-  - This numerically verifies Feld's Friendship Paradox!
 :::
 
 ---
@@ -1930,13 +2086,51 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 
 :::: {.columns align=center}
 
-::: {.column width="60%"}
+::: {.column width="65%"}
 ::: {.incremental}
 - For our 6-node directed graph (shown again on the right, $m = 8$):
   - **In-Degrees**: $k^{in} = (1, 1, 1, 3, 1, 1)$
     - $k^{in}_{max} = 3$ (Node D), $k^{in}_{min} = 1$
     - Range $k^{in}_r = 3 - 1 = 2$
     - Sum $\sum k^{in}_i = 1+1+1+3+1+1 = 8$
+:::
+:::
+
+::: {.column width="35%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Range & Sum: Example
+
+:::: {.columns align=center}
+
+::: {.column width="65%"}
+::: {.incremental}
+- For our 6-node directed graph (shown again on the right, $m = 8$):
   - **Out-Degrees**: $k^{out} = (2, 3, 1, 0, 1, 1)$
     - $k^{out}_{max} = 3$ (Node B), $k^{out}_{min} = 0$ (Node D)
     - Range $k^{out}_r = 3 - 0 = 3$
@@ -1944,7 +2138,7 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 :::
 :::
 
-::: {.column width="40%"}
+::: {.column width="35%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
@@ -1989,7 +2183,7 @@ ggraph(gr_dir, layout = 'circle') +
 
 :::: {.columns align=center}
 
-::: {.column width="60%"}
+::: {.column width="65%"}
 ::: {.incremental}
 - In our 6-node directed graph:
   - **Order** ($n$): 6 nodes
@@ -2002,7 +2196,7 @@ ggraph(gr_dir, layout = 'circle') +
 :::
 :::
 
-::: {.column width="40%"}
+::: {.column width="35%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
@@ -2048,21 +2242,65 @@ ggraph(gr_dir, layout = 'circle') +
 
 :::: {.columns align=center}
 
-::: {.column width="60%"}
+::: {.column width="65%"}
 ::: {.incremental}
 - In our 6-node directed graph:
   - Mean degree ($\bar{k}$) is $\approx 1.33$
 - **In-Degree Variance** ($\sigma^2_{in}$):
-  - Values: $k^{in} = (1, 1, 1, 3, 1, 1)$
-  - Calculation: $\frac{5 \times (1-1.33)^2 + 1 \times (3-1.33)^2}{6} = \frac{5 \times 0.11 + 2.78}{6} \approx 0.556$
+  - Values: 
+    - $k^{in} = (1, 1, 1, 3, 1, 1)$
+  - Calculation: 
+    - $\frac{5 \times (1-1.33)^2 + 1 \times (3-1.33)^2}{6} =$ 
+    - $\frac{5 \times 0.11 + 2.78}{6} \approx 0.556$
+:::
+:::
+
+::: {.column width="35%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Degree Variance: Example
+
+:::: {.columns align=center}
+
+::: {.column width="65%"}
+::: {.incremental}
+- In our 6-node directed graph:
+  - Mean degree ($\bar{k}$) is $\approx 1.33$
 - **Out-Degree Variance** ($\sigma^2_{out}$):
-  - Values: $k^{out} = (2, 3, 1, 0, 1, 1)$
-  - Calculation: $\frac{(2-1.33)^2 + (3-1.33)^2 + 3(1-1.33)^2 + (0-1.33)^2}{6} \approx 0.889$
+  - Values: 
+    - $k^{out} = (2, 3, 1, 0, 1, 1)$
+  - Calculation: 
+    - $\frac{(2-1.33)^2 + (3-1.33)^2 + 3(1-1.33)^2 + (0-1.33)^2}{6} \approx 0.889$
 - Out-degree is **more heterogeneous** than in-degree in this network!
 :::
 :::
 
-::: {.column width="40%"}
+::: {.column width="35%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
@@ -2136,11 +2374,9 @@ ggraph(gr_dir, layout = 'circle') +
 - **Arc-based Reciprocity** ($r_{arc}$):
   - The proportion of all directed edges (arcs) that are reciprocal:
     $r_{arc} = \frac{2 \times D_{rec}}{m}$
-  - This corresponds to igraph's `"default"` reciprocity mode.
 - **Dyad-based Reciprocity** ($r_{dyad}$):
   - The proportion of connected vertex pairs (dyads) that are reciprocal:
     $r_{dyad} = \frac{D_{rec}}{D_{rec} + D_{asym}}$
-  - This corresponds to igraph's `"ratio"` reciprocity mode.
 :::
 
 ---
