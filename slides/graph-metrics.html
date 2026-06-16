@@ -1104,12 +1104,64 @@
 </ul></li>
 </ul>
 </section>
-<section id="graphical-degree-sequences" class="slide level2">
-<h2>Graphical Degree Sequences</h2>
+<section id="graphical-vs.-non-graphical-sequences" class="slide level2">
+<h2>Graphical vs.&nbsp;Non-Graphical Sequences</h2>
 <ul>
-<li class="fragment">A <strong>graphical degree sequence</strong> is a sequence of numbers that <em>can</em> be the degree sequence of a simple graph.</li>
-<li class="fragment">Not every sequence of integers is graphical.</li>
-<li class="fragment"><strong>Havel-Hakimi Theorem</strong> provides a recursive algorithm to check if a sequence is graphical.</li>
+<li class="fragment">A sequence of non-negative integers is <strong>graphical</strong> if there exists at least one simple, undirected graph (no loops, no multiple edges) that has it as its degree sequence.</li>
+<li class="fragment">Otherwise, the sequence is <strong>non-graphical</strong>—no such simple graph can possibly exist in the real world.</li>
+<li class="fragment">Why can’t certain sequences exist?
+<ul>
+<li class="fragment">They violate core mathematical rules of graph structure!</li>
+</ul></li>
+</ul>
+</section>
+<section id="two-quick-tests-for-graphicality" class="slide level2">
+<h2>Two Quick Tests for Graphicality</h2>
+<p>Before using complex algorithms, we can apply two fast screening tests:</p>
+<ol type="1">
+<li class="fragment"><strong>The Even Sum Rule (Handshake Lemma)</strong>:
+<ul>
+<li class="fragment">The sum of degrees must be <strong>even</strong>: <span class="math inline">\(\sum k_i = 2m\)</span>.</li>
+<li class="fragment"><em>If the sum of a sequence is odd, it is automatically non-graphical!</em></li>
+</ul></li>
+<li class="fragment"><strong>The Maximum Degree Bound</strong>:
+<ul>
+<li class="fragment">In a simple graph of order <span class="math inline">\(n\)</span>, no node can have a degree larger than <span class="math inline">\(n-1\)</span>.</li>
+<li class="fragment"><em>If any degree in the sequence exceeds <span class="math inline">\(n-1\)</span>, it is automatically non-graphical!</em></li>
+</ul></li>
+</ol>
+</section>
+<section id="graphicality-concrete-examples" class="slide level2">
+<h2>Graphicality: Concrete Examples</h2>
+<ul>
+<li class="fragment"><strong>Graphical Sequence</strong>: <span class="math inline">\(\mathbf{d} = (4, 3, 3, 2, 2, 1, 1)\)</span> with <span class="math inline">\(n = 7\)</span>
+<ul>
+<li class="fragment">Sum is <span class="math inline">\(16\)</span> (even). Max degree is <span class="math inline">\(4 \le 6\)</span>.</li>
+<li class="fragment">A real simple graph can easily be constructed with these degrees.</li>
+</ul></li>
+<li class="fragment"><strong>Non-Graphical Sequence (Odd Sum Violation)</strong>: <span class="math inline">\(\mathbf{d} = (4, 3, 3, 3, 2, 1, 1)\)</span> with <span class="math inline">\(n = 7\)</span>
+<ul>
+<li class="fragment">Sum is <span class="math inline">\(17\)</span> (odd). Violates Handshake Lemma.</li>
+<li class="fragment"><em>No simple graph can ever have this sequence.</em></li>
+</ul></li>
+<li class="fragment"><strong>Non-Graphical Sequence (Degree Bound Violation)</strong>: <span class="math inline">\(\mathbf{d} = (7, 2, 2, 1)\)</span> with <span class="math inline">\(n = 4\)</span>
+<ul>
+<li class="fragment">Max degree is <span class="math inline">\(7\)</span>, which is greater than <span class="math inline">\(n-1 = 3\)</span>.</li>
+<li class="fragment"><em>A node in a 4-person group cannot have 7 unique friends!</em></li>
+</ul></li>
+</ul>
+</section>
+<section id="checking-complexity-havel-hakimi" class="slide level2">
+<h2>Checking Complexity: Havel-Hakimi</h2>
+<ul>
+<li class="fragment">Passing the simple tests does <strong>not</strong> guarantee a sequence is graphical (e.g., <span class="math inline">\(\mathbf{d} = (3, 3, 3, 1)\)</span> has sum 10, max degree 3, but is non-graphical!).</li>
+<li class="fragment">To check completely, we use the <strong>Havel-Hakimi Theorem</strong>:
+<ol type="1">
+<li class="fragment">Sort the sequence in descending order.</li>
+<li class="fragment">Remove the first element (let its value be <span class="math inline">\(d_1\)</span>).</li>
+<li class="fragment">Subtract 1 from each of the next <span class="math inline">\(d_1\)</span> elements.</li>
+<li class="fragment">Repeat. If you end up with all zeros, the sequence is <strong>graphical</strong>. If you get negative numbers, it is <strong>non-graphical</strong>.</li>
+</ol></li>
 </ul>
 </section>
 <section id="average-degree" class="slide level2">
