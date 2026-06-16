@@ -30,20 +30,40 @@ edges_dir <- data.frame(
   from = c("A", "A", "C", "D", "E", "D", "E", "B", "B", "E"),
   to   = c("C", "D", "E", "C", "D", "E", "B", "E", "D", "C")
 )
-gr_dir_base <- tbl_graph(nodes = data.frame(name = c("A", "B", "C", "D", "E")), edges = edges_dir, directed = TRUE)
-# Layout coordinates for directed graph matching the slides
 l_dir <- data.frame(name = c("B", "E", "C", "D", "A"), x = c(0, 1, 2, 2, 3), y = c(0, 0, 1, -1, 0))
 gr_dir <- tbl_graph(nodes = l_dir, edges = edges_dir, directed = TRUE)
-layout_dir <- create_layout(gr_dir, layout = "manual", x = x, y = y)
 
-# 8-node directed graph for connectivity flavors
+# Disconnected graph showing components and giant component
+nodes_disconnected <- data.frame(
+  name = c("A", "B", "C", "D", "E", "F", "G", "H", "I"),
+  x    = c(0, 1, 1, 0, -1, -1, 3, 4, 3.5),
+  y    = c(1, 0.5, -0.5, -1, -0.5, 0.5, 0.5, 0, -1)
+)
+edges_disconnected <- data.frame(
+  from = c(1, 1, 2, 2, 3, 3, 4, 4, 5, 7, 7, 8),
+  to   = c(2, 6, 3, 5, 4, 5, 5, 6, 6, 8, 9, 9)
+)
+gr_disconnected <- tbl_graph(nodes = nodes_disconnected, edges = edges_disconnected, directed = FALSE)
+
+# 8-node directed graphs for connectivity flavors
 nodes_8 <- data.frame(name = paste0("v", 1:8))
 edges_8_strong <- data.frame(
   from = c("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8"),
   to   = c("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v1")
 )
 gr_strong <- tbl_graph(nodes = nodes_8, edges = edges_8_strong, directed = TRUE)
-layout_8 <- create_layout(gr_strong, layout = "circle")
+
+edges_8_uni <- data.frame(
+  from = c("v1", "v2", "v3", "v4", "v5", "v6", "v7"),
+  to   = c("v2", "v3", "v4", "v5", "v6", "v7", "v8")
+)
+gr_uni <- tbl_graph(nodes = nodes_8, edges = edges_8_uni, directed = TRUE)
+
+edges_8_weak <- data.frame(
+  from = c("v1", "v2", "v3", "v4", "v5", "v6", "v8"),
+  to   = c("v2", "v3", "v4", "v5", "v6", "v7", "v7")
+)
+gr_weak <- tbl_graph(nodes = nodes_8, edges = edges_8_weak, directed = TRUE)
 ```
 
 # Part 1: Indirect Connections & Paths
@@ -59,9 +79,7 @@ layout_8 <- create_layout(gr_strong, layout = "circle")
 - **Adjacency** captures direct connections between nodes:
   - If $A$ is adjacent to $B$, they share an edge.
 - But many network processes operate **indirectly**:
-  - Information diffuses through a chain of acquaintances.
-  - Gossip reaches you from "friends of friends."
-  - Disease spreads via intermediate contacts.
+  - We must look beyond immediate contacts to the "friends of our friends."
 - In graph theory, indirect connections are formalized using three core concepts:
   - **Path**, **Connectivity**, and **Reachability**.
 :::
@@ -85,6 +103,19 @@ ggraph(gr_undir, layout = "manual", x = x, y = y) +
 
 ---
 
+## Why Indirect Connections Matter
+
+::: {.incremental}
+- Indirect pathways are the engine of diffusion and flow in a network.
+- They act as channels for:
+  - **Information & Gossip**: Diffusing through chains of acquaintances ("six degrees of separation").
+  - **Disease & Contagion**: Spreading via intermediate, infected contacts.
+  - **Influence & Support**: Reaching distant nodes through brokers.
+- *Two strangers meeting at an airport who discover a common contact are connected by a path of length two.*
+:::
+
+---
+
 ## What is a Path?
 
 :::: {.columns align=center}
@@ -95,10 +126,47 @@ ggraph(gr_undir, layout = "manual", x = x, y = y) +
   - Begins with an **origin node** ($u$).
   - Ends with a **destination node** ($v$).
   - Does **not repeat any nodes** (which implies edges are not repeated either!).
-- **Example**: Path from $B$ to $D$
+- Every path is actually a **subgraph** of the original graph, connected in a single line.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 4), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Anatomy of a Path
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at our red path from $B$ to $D$:
   - Written as: $B-D = \{BE, ED\}$
-  - $B$ is the origin, $D$ is the destination, and $E$ is an **inner node**.
-  - Length ($l$) is the number of edges: $l = 2$.
+- **Key Elements**:
+  - **Origin Node**: $B$ (the start of the sequence)
+  - **Destination Node**: $D$ (the end of the sequence)
+  - **Inner Nodes**: $E$ (the nodes in between)
+- Together, the origin and destination are called the **end nodes** of the path.
+- The length of a path ($l$) is the number of edges: $l = 2$.
 :::
 :::
 
@@ -131,15 +199,52 @@ gr_undir |>
 
 ::: {.column width="60%"}
 ::: {.incremental}
-- Multiple paths can connect the same pair of nodes.
-- Let's trace paths from $B$ to $A$:
+- The same two nodes can be connected via multiple distinct paths.
+- Let's trace the pathways from $B$ to $A$:
   - $P_1 = \{BE, ED, DA\} \quad (l = 3)$
   - $P_2 = \{BE, EC, CA\} \quad (l = 3)$
   - $P_3 = \{BE, ED, DC, CA\} \quad (l = 4)$
   - $P_4 = \{BE, EC, CD, DA\} \quad (l = 4)$
+- Each path represents a valid, non-repeating sequence of contacts.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Shortest Paths & Geodesics
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
 - **Shortest Path (Geodesic)**:
-  - The path(s) of minimum length between two nodes.
-  - Here, the geodesic distance between $B$ and $A$ is $l = 3$ (with two tied shortest paths: $P_1$ and $P_2$).
+  - The path of minimum length connecting two nodes.
+- **Geodesic Distance**:
+  - The length of the shortest path between two nodes (the "degrees of separation").
+- **For Nodes $B$ and $A$**:
+  - The geodesic distance is $l = 3$.
+  - There are **multiple shortest paths** (a tie between $P_1$ and $P_2$).
 :::
 :::
 
@@ -177,8 +282,6 @@ gr_undir |>
 - **Examples**:
   - $Cycle_1 = \{ED, DC, CE\} \quad (l = 3)$
     - This is a **triangle** (closed triad), the smallest possible cycle.
-  - $Cycle_2 = \{ED, DA, AC, CE\} \quad (l = 4)$
-- Cycle structures represent closed loops where information or gossip can flow back to its source.
 :::
 :::
 
@@ -205,18 +308,67 @@ gr_undir |>
 
 ---
 
-## Walks and Trails: The Structural Hierarchy
+## Cycle Length & Girth
 
-To understand paths fully, we must compare them to other edge sequences:
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Cycles are characterized by their length (number of edges).
+- **Graph Girth**:
+  - The length of the **shortest** cycle in a graph.
+  - In our undirected house graph, the girth is $3$ (triangle $\{ED, DC, CE\}$).
+- **Graph Circumference**:
+  - The length of the **longest** cycle in a graph.
+  - In our graph, the circumference is $4$ ($\{ED, DA, AC, CE\}$).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 2 & to == 3) | (from == 3 & to == 4) | (from == 2 & to == 4), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Walks and Trails
 
 ::: {.incremental}
-- **Walk**: An arbitrary sequence of nodes and edges connecting $u$ to $v$.
+- **Walk**: Any sequence of alternating nodes and edges from $u$ to $v$.
   - *No restrictions*: Nodes and edges can be repeated as much as you want!
-- **Trail**: A walk that is forbidden from repeating any **edges**.
+  - e.g., $\{AD, DC, CE, ED, DC, EC, EB\}$ is a walk.
+- **Trail**: A walk that does not repeat any **edges**.
   - *Repeated nodes are allowed*, but every edge in the sequence must be unique.
-- **Path**: A walk that is forbidden from repeating any **nodes**.
-  - Since nodes cannot be repeated, edges cannot be repeated either. This is the most restrictive sequence.
-- **Hierarchy**: All paths are trails, and all trails are walks, but the reverse is not true!
+  - e.g., $\{CA, AD, DC, CE, ED\}$ is a trail (nodes $C$ and $D$ are visited twice, but all edges are unique).
+:::
+
+---
+
+## The Sequence Hierarchy
+
+::: {.incremental}
+- **Path**: A walk that does not repeat any **nodes** (which means edges cannot be repeated either).
+- **The Nested Hierarchy**:
+  - Every **path** is a **trail**.
+  - Every **trail** is a **walk**.
+  - *All paths are trails, and all trails are walks, but the reverse is not true!*
+- Paths are the most restrictive, while walks are the least restricted.
 :::
 
 # Part 2: Directed Paths & Reachability
@@ -269,23 +421,95 @@ gr_dir |>
 
 ---
 
-## Reachability is Asymmetric
+## Asymmetric Reachability
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - In directed networks, **reachability is asymmetric**:
-  - $A$ can reach $B$ ($l_{AB} = 3$).
+  - $A$ can reach $B$ via path $\{AD, DE, EB\}$ ($l_{AB} = 3$).
   - $B$ cannot reach $A$ ($l_{BA} = \infty$).
-- **Mutual Reachability**:
-  - Two nodes $u$ and $v$ are mutually reachable if there exists a directed path from $u$ to $v$ AND a directed path from $v$ to $u$.
-  - These two paths **do not** have to be the same length!
-  - **Example**: Nodes $B$ and $C$ are mutually reachable:
-    - $B$ reaches $C$ via $\{BE, ED, DC\} \quad (l = 3)$.
-    - $C$ reaches $B$ via shortest path $\{CE, EB\} \quad (l = 2)$.
+- This asymmetric structure is a primary driver of inequality and unilateral flows in social networks (e.g. hierarchical power).
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(edges) |>
+  mutate(
+    from_name = .N()$name[from],
+    to_name = .N()$name[to],
+    highlight = ifelse((from_name == "A" & to_name == "D") | (from_name == "D" & to_name == "E") | (from_name == "E" & to_name == "B"), "yes", "no")
+  ) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = highlight, width = highlight),
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm')) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
-## Directed Cycles & Acyclic Graphs (DAGs)
+## Mutual Reachability
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Mutual Reachability**:
+  - Two nodes $u$ and $v$ are mutually reachable if there exists a directed path from $u \rightarrow v$ AND from $v \rightarrow u$.
+- The two paths **do not** have to be the same length!
+- **Example**: Nodes $B$ and $C$ are mutually reachable:
+  - $B$ reaches $C$ via $\{BE, ED, DC\} \quad (l = 3)$
+  - $C$ reaches $B$ via shortest path $\{CE, EB\} \quad (l = 2)$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(edges) |>
+  mutate(
+    from_name = .N()$name[from],
+    to_name = .N()$name[to],
+    highlight = ifelse((from_name == "B" & to_name == "E") | (from_name == "E" & to_name == "D") | (from_name == "D" & to_name == "C") | (from_name == "C" & to_name == "E") | (from_name == "E" & to_name == "B"), "yes", "no")
+  ) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = highlight, width = highlight),
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm')) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Cycles
 
 :::: {.columns align=center}
 
@@ -296,8 +520,7 @@ gr_dir |>
   - $\{CE, ED, DC\} \quad (l = 3)$
 - **Directed Acyclic Graphs (DAGs)**:
   - Directed graphs that contain **no directed cycles**.
-  - Directed trees are always DAGs.
-  - Anti-symmetric relations (like "is boss of") structurally forbid cycles to maintain consistent hierarchy.
+  - e.g. strict organizational command structures.
 :::
 :::
 
@@ -333,14 +556,45 @@ gr_dir |>
 
 ## Ignoring the Arrows: Semipaths
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - What if we want to trace connections in a directed graph but **ignore the arrows**?
 - This is called a **semipath** (or semicycle if it is a closed loop).
 - A semipath treats directed arcs as undirected edges.
 - **Example**: Semipath connecting $B$ and $A$
-  - $\{BE, EC, CA\}$
-- Semipaths are critical for defining the baseline structural continuity of directed networks.
+  - $\{BE, EC, CA\}$ (visualized in red on the right).
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(edges) |>
+  mutate(
+    from_name = .N()$name[from],
+    to_name = .N()$name[to],
+    highlight = ifelse((from_name == "B" & to_name == "E") | (from_name == "E" & to_name == "C") | (from_name == "A" & to_name == "C"), "yes", "no")
+  ) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = highlight, width = highlight),
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm')) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 # Part 3: Graph Connectivity & Components
 
@@ -348,16 +602,92 @@ gr_dir |>
 
 ## Connected vs. Disconnected Graphs
 
+:::: {.columns align=center}
+
+::: {.column width="50%"}
 ::: {.incremental}
-- In an undirected graph:
-  - A graph is **connected** if there exists a finite path between *every* pair of nodes.
-  - A graph is **disconnected** if at least one pair of nodes is not connected by any path.
+- **Connected Graph**:
+  - An undirected graph where there exists a finite path between **every** pair of nodes (left).
+- **Disconnected Graph**:
+  - An undirected graph where at least one pair of nodes is not connected by any path (right).
+  - There is a "gap" splitting the graph into separate components.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4
+gr_conn <- create_empty(5, directed = FALSE) %>% 
+  bind_edges(data.frame(from = c(1, 1, 2, 3, 4), to = c(2, 3, 3, 4, 5))) %>% 
+  mutate(name = LETTERS[1:5])
+
+gr_disconn <- create_empty(5, directed = FALSE) %>% 
+  bind_edges(data.frame(from = c(1, 1, 2, 4), to = c(2, 3, 3, 5))) %>% 
+  mutate(name = LETTERS[1:5])
+
+p1 <- ggraph(gr_conn, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Connected") + coord_cartesian(clip = "off")
+
+p2 <- ggraph(gr_disconn, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Disconnected") + coord_cartesian(clip = "off")
+
+p1 + p2
+```
+:::
+
+::::
+
+---
+
+## Components and the Giant Component
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+::: {.incremental}
 - **Component**:
   - A connected subgraph within a larger disconnected graph.
-  - If a graph has more than one component, it is disconnected by definition.
+  - If a graph has more than one component, it is disconnected.
 - **Giant Component**:
-  - The largest connected component in a disconnected graph (contains the maximum number of nodes).
+  - The largest connected component in a disconnected graph.
+  - In our 9-node graph (right), the component of order 6 $\{A, B, C, D, E, F\}$ is the giant component.
 :::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+# Highlight giant component in red, others in steelblue
+gr_disconnected_colors <- gr_disconnected |>
+  activate(edges) |>
+  mutate(highlight = ifelse(from <= 6 & to <= 6, "giant", "small"))
+
+ggraph(gr_disconnected_colors, layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("giant" = "red", "small" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("giant" = 1.8, "small" = 0.8), guide = "none") +
+  geom_node_point(aes(color = ifelse(name %in% c("G", "H", "I"), "small", "giant")), size = 18) +
+  scale_color_manual(values = c("giant" = "tan2", "small" = "skyblue"), guide = "none") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+# Part 4: Node and Edge Connectivity (Bridges & Cutsets)
 
 ---
 
@@ -372,7 +702,6 @@ gr_dir |>
 - **Bridge**:
   - A single edge whose removal disconnects the graph, splitting it into separate components.
   - Bridges are highly important; they represent critical linkages connecting otherwise isolated groups.
-  - Bridges are the ultimate bottleneck for network flow.
 :::
 :::
 
@@ -400,6 +729,70 @@ ggraph(gr_bridge, layout = 'kk') +
 
 ---
 
+## The Sociological Power of Bridges
+
+::: {.incremental}
+- Mark Granovetter's seminal paper **"The Strength of Weak Ties"** (1973):
+  - Bridges represent critical pathways for novel information diffusing between separate social clusters.
+- **Local Bridge**:
+  - An edge that, if removed, does not necessarily disconnect the entire graph, but significantly increases the shortest path length between its end nodes.
+  - Local bridges act as shortcuts that facilitate efficient, cross-group communication.
+:::
+
+---
+
+## Vertex Deletion & Node Connectivity
+
+::: {.incremental}
+- We can also disconnect a graph by **removing nodes** (vertices).
+- Removing a node also removes all edges incident to it—nodes "take their links with them"!
+- Consequently, it is often much easier to disrupt or disconnect a network by removing key intermediate nodes than by removing edges.
+- **Node Cutset (Vertex Cutset)**:
+  - The minimum set of nodes whose removal disconnects the graph (or a specific pair of non-adjacent nodes $u, v$).
+- Nodes in the cutset represent critical **brokerage** or "connector" positions.
+:::
+
+---
+
+## K-Connected Graphs
+
+::: {.incremental}
+- A graph is **$k$-connected** (or $k$-node connected) if the minimum number of nodes required to disconnect it is $k$:
+  - **1-Connected**: Removing 1 node can disconnect the graph (contains an articulation point or cutpoint).
+  - **2-Connected**: Requires removing at least 2 nodes to disconnect it.
+  - **3-Connected**: Requires removing at least 3 nodes to disconnect it.
+- Higher $k$-connectivity indicates a more robust, cohesive, and redundant network.
+:::
+
+---
+
+## Graph Cutsets: Quantitative Cohesion
+
+::: {.incremental}
+- **Cohesion** can be directly translated to graph-theoretic cutsets:
+  - **Cohesive Groups**: Have large edge-cutsets and node-cutsets. Many connections or individuals must be removed to disrupt or fragment the group.
+  - **Fragmented Groups**: Have small cutsets (such as bridges or single cutpoints). They are vulnerable to rapid disruption if key facilitators are removed.
+- Any network can be decomposed into hierarchical subgraphs with specific levels of $k$-connectivity.
+:::
+
+---
+
+## Menger's Theorem
+
+::: {.incremental}
+- A foundational result in graph theory proposed by Karl Menger (1927):
+  - **Menger's Theorem**: If a graph is $k$-connected, there are at least $k$ node-independent paths (paths that do not share any common inner nodes) connecting each non-adjacent pair of vertices.
+- **Sociological Implication**:
+  - In a 3-connected cohesive subgroup, any two non-adjacent members are connected in at least **three separate, independent ways**.
+  - This ensures highly redundant, reliable information flow that cannot be blocked by a single broker!
+:::
+
+# Part 5: Directed Connectivity & Matrices
+
+
+
+---
+
 ## Flavors of Connectivity in Directed Graphs
 
 Because of edge directionality, directed graphs have three distinct levels of connectivity:
@@ -413,7 +806,64 @@ Because of edge directionality, directed graphs have three distinct levels of co
    - Every pair of nodes is connected by at least a **semipath** (connected if we ignore arrow directions).
 :::
 
-# Part 4: Reachability & Distance Matrices
+---
+
+## Directed Connectivity: Visual Examples
+
+:::: {.columns align=center}
+
+::: {.column width="33%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+ggraph(gr_strong, layout = "circle") +
+  geom_edge_fan(arrow = arrow(length = unit(3, 'mm'), type = "closed"),
+                start_cap = circle(4, 'mm'), end_cap = circle(6, 'mm'),
+                color = "steelblue", edge_width = 1) +
+  geom_node_point(size = 10, color = "tan2") +
+  geom_node_text(aes(label = name), size = 5, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("Strongly Connected") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+```
+:::
+
+::: {.column width="33%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+ggraph(gr_uni, layout = "circle") +
+  geom_edge_fan(arrow = arrow(length = unit(3, 'mm'), type = "closed"),
+                start_cap = circle(4, 'mm'), end_cap = circle(6, 'mm'),
+                color = "steelblue", edge_width = 1) +
+  geom_node_point(size = 10, color = "tan2") +
+  geom_node_text(aes(label = name), size = 5, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("Unilaterally Connected") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+```
+:::
+
+::: {.column width="33%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+ggraph(gr_weak, layout = "circle") +
+  geom_edge_fan(arrow = arrow(length = unit(3, 'mm'), type = "closed"),
+                start_cap = circle(4, 'mm'), end_cap = circle(6, 'mm'),
+                color = "steelblue", edge_width = 1) +
+  geom_node_point(size = 10, color = "tan2") +
+  geom_node_text(aes(label = name), size = 5, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("Weakly Connected") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+```
+:::
+
+::::
 
 ---
 
@@ -427,9 +877,6 @@ Because of edge directionality, directed graphs have three distinct levels of co
   - $D_r(i,j) = 1$ if node $i$ can reach node $j$ via a path of any length.
   - $D_r(i,j) = 0$ otherwise.
   - Diagonal cells are ignored (`--`).
-- **Matrix Patterns**:
-  - **Receiver nodes** have all zeros in their corresponding row (cannot reach anyone).
-  - **Transmitter nodes** have all zeros in their corresponding column (cannot be reached).
 :::
 :::
 
@@ -442,10 +889,23 @@ Because of edge directionality, directed graphs have three distinct levels of co
 | **D** | 0 | 0 | 0 | -- | 0 |
 | **E** | 0 | 0 | 0 | 1 | -- |
 
-: Reachability Matrix for our Directed Graph {#tbl-reach}
+: Reachability Matrix for our Directed Graph {#tbl-reach-slides}
 :::
 
 ::::
+
+---
+
+## Matrix Row & Column Patterns
+
+The reachability matrix reveals structural node behaviors:
+
+::: {.incremental}
+- **Receiver Nodes**:
+  - Have all zeros in their corresponding row of $D_r$ (cannot reach anyone, e.g. Node $D$ above).
+- **Transmitter Nodes**:
+  - Have all zeros in their corresponding column of $D_r$ (cannot be reached by anyone, e.g. Node $A$ or $B$ or $C$ above).
+:::
 
 ---
 
@@ -459,7 +919,7 @@ The reachability matrix reveals the global connectivity type of the digraph:
 - **Unilaterally Connected**:
   - The matrix contains some zeros, but for any pair, either $D_r(i,j) = 1$ or $D_r(j,i) = 1$. There are no mutually unreachable pairs.
 - **Weakly Connected**:
-  - Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$).
+  - Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$, e.g. Nodes $B$ and $C$ are mutually unreachable in a weak graph).
 :::
 
 ---
@@ -471,7 +931,7 @@ The reachability matrix reveals the global connectivity type of the digraph:
 - Mathematically, it is the **density of the directed reachability matrix**:
   $$C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}$$
 - **Example Calculation**:
-  - Sum of ones in our reachability matrix ($D_r$): $1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 = 8$ (Wait! Let's sum the table ones: row A has 3 ones, row B has 2 ones, row C has 2 ones, row E has 1 one. Sum is 8.)
+  - Sum of ones in our reachability matrix ($D_r$): $3 + 2 + 2 + 1 = 8$.
   - Total possible connections: $n(n-1) = 5(4) = 20$.
   - Connectedness: $C = \frac{8}{20} = 0.40 \quad (40\%)$.
 :::
@@ -489,8 +949,7 @@ The reachability matrix reveals the global connectivity type of the digraph:
   - Adjacent nodes get a distance of $1$.
   - Non-adjacent nodes get the length of their shortest path.
   - Unconnected nodes (unreachable) get a distance of **infinity** ($\infty$ or `Inf`).
-- In undirected graphs, $D_g$ is symmetric.
-- In directed graphs, $D_g$ is asymmetric.
+- In undirected graphs, $D_g$ is symmetric. In directed graphs, $D_g$ is asymmetric.
 :::
 :::
 
@@ -503,7 +962,7 @@ The reachability matrix reveals the global connectivity type of the digraph:
 | **D** | Inf | 3 | 1 | -- | 2 |
 | **E** | Inf | 1 | 2 | 1 | -- |
 
-: Geodesic Distance Matrix for our Digraph {#tbl-dist}
+: Geodesic Distance Matrix for our Digraph {#tbl-dist-slides}
 :::
 
 ::::

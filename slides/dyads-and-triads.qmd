@@ -44,6 +44,34 @@ l_triad[3, 1] <- 0.5  # Form a nice triangle layout
 
 ---
 
+## The Four Criteria for Social Ties
+
+::: {.incremental}
+- How do we decide when two actors share a connection? Network analysts use **four main criteria** ([Borgatti et al. 2009](https://doi.org/10.1126/science.1165821)):
+  1. **Similarities**: Having something in common (e.g., co-location, co-membership in a club, shared attributes like gender/nationality).
+  2. **Social Relations**: Acknowledging one another via culturally recognized labels or sentiments (e.g., friend, sibling, boss, spouse, liking/disliking).
+  3. **Interactions**: Regular communication or behavior directed at another (e.g., texting, talking, helping, bullying).
+  4. **Flows**: Transmission of information, resources, or states from one to another (e.g., information flow, virus infection, lending/borrowing).
+:::
+
+---
+
+## States vs. Events in Social Networks
+
+::: {.incremental}
+- We can divide these four types of ties into two fundamental clusters:
+- **States (Static Situations)**:
+  - **Similarities** & **Social Relations**.
+  - They represent continuous, long-standing conditions.
+  - *Examples*: Being in the same class, being siblings, being coworker/boss.
+- **Events (Discrete Activities)**:
+  - **Interactions** & **Flows**.
+  - They occur at specific points in time and are transient.
+  - *Examples*: Texting someone, lending money, transmitting a virus.
+:::
+
+---
+
 ## 1. Symmetric Ties
 
 :::: {.columns align=center}
@@ -56,6 +84,10 @@ l_triad[3, 1] <- 0.5  # Form a nice triangle layout
 - **Representation**: Represented by **undirected graphs**.
 - **Examples**:
   - Siblinghood, marriage, co-membership, co-presence.
+  - *Similarities are necessarily symmetric*:
+    - If you are in the same place at the same time as someone, they are also there with you.
+    - If you are zooming with someone, they are zooming with you.
+    - If you go to UCLA with someone, they also go to UCLA with you.
 - **Structural Constraint**: 
   - Pairs of actors can only be **disconnected** or **connected** by a single undirected edge.
 :::
@@ -94,6 +126,10 @@ ggraph(gr_sym, layout = 'linear') +
 - **Representation**: Represented by **directed graphs** (digraphs).
 - **Examples**:
   - Friendship nominations, advice-seeking, texting.
+  - *Interactions/sentiments are naturally asymmetric*:
+    - You can follow someone on Twitter, but they don't have to follow you back.
+    - You can send a text to someone, but they don't have to respond.
+    - You can seek advice from someone without them seeking advice from you.
 - **Structural Constraint**:
   - Reciprocity is an **empirical event** (it may or may not occur), yielding three possible dyad configurations.
 :::
@@ -134,6 +170,9 @@ ggraph(gr_asym, layout = 'linear') +
 - **Representation**: Represented by **directed graphs** (specifically oriented graphs, DAGs, or trees).
 - **Examples**:
   - Father-of, boss-of, lending money.
+  - *Hierarchical role relations are anti-symmetric*:
+    - Kinship: If you are someone's parent, they cannot be your parent.
+    - Formal: If you are someone's boss, they cannot be your boss at the same time.
 - **Structural Constraint**:
   - Reciprocity is structurally impossible, yielding only two possible dyad configurations.
 :::
@@ -169,6 +208,53 @@ ggraph(gr_anti, layout = 'linear') +
 | **Co-membership, Propinquity** | **Symmetric** | • Disconnected<br>• Connected | Undirected Graph ($A - B$) |
 | **Sentiments, Advice-seeking** | **Asymmetric** | • Disconnected<br>• Non-reciprocal<br>• Reciprocal | Directed Graph ($A \rightarrow B$ or $A \leftrightarrow B$) |
 | **Formal Hierarchies, Kinship** | **Anti-symmetric** | • Disconnected<br>• Non-reciprocal | Oriented Graph/Tree ($A \rightarrow B$, no cycles) |
+
+---
+
+## Structure and Symmetry in Organizations
+
+::: {.incremental}
+- Formal organizations are a mixture of symmetric, asymmetric, and anti-symmetric relations:
+- **Same-Level Ties (Symmetric)**:
+  - Relations like "coworker" or "officemate" represent parity.
+  - If $A$ is a coworker of $B$, then $B$ is a coworker of $A$ (implying equality).
+- **Cross-Level Ties (Anti-symmetric)**:
+  - Authority relations like "boss of" or "supervisor of" represent hierarchy.
+  - If $A$ has authority over $B$, $B$ cannot have authority over $A$ (implying inequality).
+- **Informal Ties (Asymmetric)**:
+  - Sentiment/interaction ties like "liking" or "advice-seeking" exist alongside formal ones.
+:::
+
+---
+
+## Structure and Symmetry in Families
+
+::: {.incremental}
+- Family kinship networks display similar mathematical structures:
+- **Same-Generation Ties (Symmetric)**:
+  - Relations like "sibling" or "cousin" represent horizontal equality.
+  - If $A$ is a sibling of $B$, $B$ is necessarily a sibling of $A$.
+- **Cross-Generation Ties (Anti-symmetric)**:
+  - Relations like "parent of" or "uncle of" represent vertical lineage.
+  - If $A$ is the parent of $B$, $B$ cannot be the parent of $A$.
+- **Kinship Network Growth**:
+  - Marriage merges separate family trees, generating a cascade of new symmetric (sibling-in-law) and anti-symmetric (parent-in-law) ties.
+:::
+
+---
+
+## Transitivity in Hierarchical Ties
+
+::: {.incremental}
+- **Transitivity** is a key property of anti-symmetric hierarchical relations:
+  - Formally: If $A \to B$ and $B \to C$, then $A \to C$.
+- **In Organizations (Chain of Command)**:
+  - If the Executive ($A$) has authority over the Manager ($B$), and the Manager has authority over the Staff member ($C$):
+  - Then the Executive ($A$) has authority over the Staff member ($C$).
+- **In Families (Lineage)**:
+  - If $A$ is the parent of $B$, and $B$ is the parent of $C$:
+  - Then $A$ is the grandparent of $C$ (establishing transitive kinship).
+:::
 
 ---
 
