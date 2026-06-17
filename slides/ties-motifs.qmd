@@ -65,14 +65,14 @@ plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cr
                             show.legend = FALSE)
   }
   
-  p <- p + geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  pBase <- p + geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
     geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50")
   
   if (has_cross) {
-    p <- p + annotate("text", x = 1.5, y = 0.90, label = "✕", color = "#e74c3c", size = 8, fontface = "bold")
+    pBase <- pBase + annotate("text", x = 1.5, y = 0.90, label = "✕", color = "#e74c3c", size = 8, fontface = "bold")
   }
   
-  p <- p + 
+  pBase <- pBase + 
     labs(title = title, subtitle = subtitle) +
     theme_graph() +
     theme(
@@ -82,7 +82,7 @@ plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cr
     ) +
     coord_fixed(ratio = 1, xlim = c(0.6, 2.4), ylim = c(0.65, 1.35), clip = "off")
   
-  return(p)
+  return(pBase)
 }
 
 # Define Nodes
@@ -108,8 +108,7 @@ edges_anti <- data.frame(
 ## The Relational Basis of Networks
 
 ::: {.incremental}
-- In social network analysis, a **graph** is more than an abstract structure.
-- It represents concrete **relationships** (ties) between actors.
+- In social network analysis, a **graph** represents concrete **relationships** (ties) between actors.
 - Not all relationships are created equal!
   - Some ties are naturally mutual (e.g., being siblings).
   - Others are directional (e.g., seeking advice).
@@ -160,37 +159,29 @@ edges_anti <- data.frame(
 
 ---
 
-## 1. Symmetric Ties
+## 1. Symmetric Ties & Similarities
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Definition**: A relation where connection is built-in and mutual by construction:
   - Formally: $AB \iff BA$
 - **Representation**: Represented by **undirected graphs**.
-- **Structural Constraint**: 
-  - Pairs of actors can only be **disconnected** or **connected** by a single undirected edge.
-- **Key Examples**:
-  - Siblinghood, marriage, co-membership, co-presence.
-:::
-
----
-
-## Symmetric Ties: Visual Example
-
-:::: {.columns align=center}
-
-::: {.column width="30%"}
-::: {.incremental}
-- A single undirected edge represents a mutual relationship.
-- Both actors share the tie equally and simultaneously.
-- e.g., $A$ is married to $B$ implies $B$ is married to $A$.
+- **Structural Constraint**: Pairs of actors can only be **disconnected** or **connected** by a single undirected edge.
+- **Symmetric Similarities**:
+  - *Similarities are necessarily symmetric*:
+    - If you are in the same place at the same time as someone, they are there with you.
+    - If you are zooming with someone, they are zooming with you.
+    - If you go to UCLA with someone, they also go to UCLA with you.
 :::
 :::
 
-::: {.column width="70%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 7
+#| fig-width: 5.5
 #| fig-height: 5.5
 plot_tie_type(nodes_2, edges_sym, "Symmetric Tie", "e.g., 'is sibling of'", directed = FALSE)
 ```
@@ -200,50 +191,29 @@ plot_tie_type(nodes_2, edges_sym, "Symmetric Tie", "e.g., 'is sibling of'", dire
 
 ---
 
-## Symmetric Similarities
+## 2. Asymmetric Ties & Interactions
 
-::: {.incremental}
-- Many symmetric relations are based on **similarities** or **co-presence**:
-  - *Similarities are necessarily symmetric*:
-    - If you are in the same place at the same time as someone, they are there with you.
-    - If you are zooming with someone, they are zooming with you.
-    - If you go to UCLA with someone, they also go to UCLA with you.
-- Sharing similarities creates the structural opportunity for interaction to occur.
-:::
+:::: {.columns align=center}
 
----
-
-## 2. Asymmetric Ties
-
+::: {.column width="60%"}
 ::: {.incremental}
 - **Definition**: A relation with natural directionality where reciprocity is possible but *not guaranteed*:
   - Formally: $AB \implies$ nothing about $BA$
 - **Representation**: Represented by **directed graphs** (digraphs).
-- **Structural Constraint**:
-  - Reciprocity is an **empirical event** (it may or may not occur), yielding three possible dyad configurations.
-- **Key Examples**:
-  - Friendship nominations, advice-seeking, texting.
-:::
-
----
-
-## Asymmetric Ties: Visual Example
-
-:::: {.columns align=center}
-
-::: {.column width="30%"}
-::: {.incremental}
-- A single directed arrow represents a one-way relationship.
-- Reciprocity is **optional** (empirical).
-- e.g., $A$ likes $B$ (solid arrow), but $B$ liking $A$ is optional (dashed arrow with question mark).
+- **Structural Constraint**: Reciprocity is an **empirical event** (it may or may not occur), yielding three possible dyad configurations.
+- **Asymmetric Interactions**:
+  - *Interactions/sentiments are naturally asymmetric*:
+    - You can follow someone on Twitter, but they don't have to follow you back.
+    - You can send a text to someone, but they don't have to respond.
+    - You can seek advice from someone without them seeking advice from you.
 :::
 :::
 
-::: {.column width="70%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
+#| fig-width: 6.5
 #| fig-height: 5.5
 p1 <- plot_tie_type(nodes_2, edges_rec, "Asymmetric: Reciprocal Dyad", "e.g., 'A likes B' & 'B likes A'", directed = TRUE)
 p2 <- plot_tie_type(nodes_2, edges_nonrec, "Asymmetric: Non-Reciprocal Dyad", "e.g., 'A sends email to B'", directed = TRUE)
@@ -255,50 +225,28 @@ p1 + p2
 
 ---
 
-## Asymmetric Interactions & Sentiments
+## 3. Anti-Symmetric Ties & Hierarchies
 
-::: {.incremental}
-- Many directed ties are based on **interactions** or **sentiments**:
-  - *Interactions/sentiments are naturally asymmetric*:
-    - You can follow someone on Twitter, but they don't have to follow you back.
-    - You can send a text to someone, but they don't have to respond.
-    - You can seek advice from someone without them seeking advice from you.
-- Reciprocity is therefore an empirical puzzle to explain, not a definition.
-:::
+:::: {.columns align=center}
 
----
-
-## 3. Anti-Symmetric Ties
-
+::: {.column width="60%"}
 ::: {.incremental}
 - **Definition**: An inherently directional relation where reciprocity is **strictly forbidden**:
   - Formally: $AB \implies \neg BA$
 - **Representation**: Represented by **directed graphs** (oriented graphs, DAGs, or trees).
-- **Structural Constraint**:
-  - Reciprocity is structurally impossible, yielding only two possible dyad configurations.
-- **Key Examples**:
-  - Parent-of, boss-of, lending money.
-:::
-
----
-
-## Anti-Symmetric Ties: Visual Example
-
-:::: {.columns align=center}
-
-::: {.column width="30%"}
-::: {.incremental}
-- Reciprocity is forbidden by logical or structural definition.
-- e.g., $A$ is the parent of $B$ (solid arrow).
-- The reverse arrow $B \rightarrow A$ is strictly forbidden (red dashed arrow crossed out with "✕").
+- **Structural Constraint**: Reciprocity is structurally impossible, yielding only two possible dyad configurations.
+- **Anti-Symmetric Hierarchies**:
+  - *Hierarchical role relations are anti-symmetric*:
+    - Kinship: If you are someone's parent, they cannot be your parent.
+    - Formal: If you are someone's boss, they cannot be your boss at the same time.
 :::
 :::
 
-::: {.column width="70%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 7
+#| fig-width: 5.5
 #| fig-height: 5.5
 plot_tie_type(nodes_2, edges_anti, "Anti-Symmetric Tie", "e.g., 'A is boss of B'", directed = TRUE, has_cross = TRUE)
 ```
@@ -308,30 +256,15 @@ plot_tie_type(nodes_2, edges_anti, "Anti-Symmetric Tie", "e.g., 'A is boss of B'
 
 ---
 
-## Anti-Symmetric Hierarchies
+## Mapping Sociological to Graph-Theoretic Classifications
 
-::: {.incremental}
-- Many anti-symmetric ties are based on **formal hierarchies** or **kinship**:
-  - *Hierarchical role relations are anti-symmetric*:
-    - Kinship: If you are someone's parent, they cannot be your parent.
-    - Formal: If you are someone's boss, they cannot be your boss at the same time.
-- These relations represent irreversible flows or asymmetric structures.
-:::
+| Sociological Classification (Types of Ties) | Graph-Theoretic Classification (Mathematical Properties) | Allowed Dyads | Visual Graph Representation |
+|:---|:---|:---|:---|
+| **Co-membership, Propinquity** | **Symmetric** | • Disconnected<br>• Connected | Undirected Graph ($A - B$) |
+| **Sentiments, Advice-seeking** | **Asymmetric** | • Disconnected<br>• Non-reciprocal<br>• Reciprocal | Directed Graph ($A \rightarrow B$ or $A \leftrightarrow B$) |
+| **Formal Hierarchies, Kinship** | **Anti-symmetric** | • Disconnected<br>• Non-reciprocal | Oriented Graph/Tree ($A \rightarrow B$, no cycles) |
 
 ---
-
-## Mapping Social Ties to Graphs
-
-<div style="font-size: 0.60em;">
-
-| Category | Sociological Type | Graph-Theoretic Class | Mathematical Properties | Allowed Dyads | Examples |
-|:---|:---|:---|:---|:---|:---|
-| **States** | **Similarities** | **Undirected Graph** | Symmetric ($AB \iff BA$) | Connected / Disconnected | Co-membership, propinquity, shared attributes |
-| **States** | **Social Relations** | **Undirected or Directed** | Symmetric, Asymmetric, or Anti-symmetric | Reciprocal, Non-reciprocal, Disconnected | Friendship (Sym), Liking (Asym), Kinship/Boss (Anti-sym) |
-| **Events** | **Interactions** | **Directed Graph** | Asymmetric ($AB \implies$ optional $BA$) | Reciprocal, Non-reciprocal, Disconnected | Texting, advice-seeking, helping |
-| **Events** | **Flows** | **Directed Graph** | Asymmetric / Directed | Non-reciprocal, Disconnected | Gossip, transactions, virus transmission |
-
-</div>
 
 ## Multiplexity in Social Relations
 
@@ -400,36 +333,31 @@ ggraph(gr_mult, layout = "manual", x = x, y = y) +
   4. This merges two previously separate, independent kinship trees into a single, cohesive, multiplex social network.
 :::
 
+# Part 2: Dyads and Their Realizations
+
 ---
 
 ## What is a Dyad?
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - A **dyad** is any pair of nodes in a graph, whether they are joined by an edge or not.
 - Mathematically, a dyad is *any subgraph of order two* ($n = 2$).
 - Crucially, a dyad represents the **realized configuration** of ties between two nodes.
 - **Sociological Insight**: Ties that do *not* exist (disconnected dyads) are often just as socially meaningful as those that do!
-- The possible dyadic states are strictly constrained by the relational type of the tie.
-:::
-
----
-
-## Dyads: The Building Blocks
-
-:::: {.columns align=center}
-
-::: {.column width="30%"}
-::: {.incremental}
-- The simplest possible subgraph of order two.
-- Can contain zero, one, or two directed edges depending on relational constraints.
+- **Dyads: The Building Blocks**:
+  - The simplest possible subgraph of order two.
+  - Can contain zero, one, or two directed edges depending on relational constraints.
 :::
 :::
 
-::: {.column width="70%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 7
+#| fig-width: 5.5
 #| fig-height: 5.5
 gr_dyad_base <- create_empty(2, directed = FALSE) %>% mutate(name = toupper(letters[1:2]))
 ggraph(gr_dyad_base, layout = 'linear') +
@@ -445,31 +373,22 @@ ggraph(gr_dyad_base, layout = 'linear') +
 
 ## Dyads under Symmetric Ties
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - Because undirected graphs do not allow directionality, a symmetric relation can only take on **two** dyadic states:
   1. **Disconnected Dyads** (historically called **null dyads**): The two nodes do not share an edge (size zero).
   2. **Connected Dyads**: The two nodes share an edge (size one).
 - Every pair of actors in an undirected graph is either connected or disconnected.
 :::
-
----
-
-## Symmetric Dyads: Visual Examples
-
-:::: {.columns align=center}
-
-::: {.column width="30%"}
-::: {.incremental}
-- **Connected**: A single undirected edge (size one).
-- **Disconnected**: No edge (size zero).
-:::
 :::
 
-::: {.column width="70%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 7
+#| fig-width: 6
 #| fig-height: 5.5
 gr1 <- create_empty(2, directed = FALSE) %>% mutate(name = c("A", "B"))
 gr2 <- create_empty(2, directed = FALSE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
@@ -497,34 +416,23 @@ p1 / p2
 
 ## Dyads under Asymmetric Ties
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - In directed graphs, reciprocity is possible but optional.
-- Thus, asymmetric ties can yield **three** distinct kinds of dyads:
+- Thus, asymmetric ties can yield **three** distinct kinds of dyads (the classic **MAN classification**):
   1. **Disconnected Dyads** (Null): Neither node sends a directed tie to the other (size zero).
   2. **Non-Reciprocal Dyads** (Asymmetric): One node sends a tie to another, but it is not reciprocated (size one).
   3. **Reciprocal Dyads** (Mutual): Both nodes send directed ties to each other (size two).
-- In standard SNA, this three-fold classification is called the **MAN classification**: **M**utual, **A**symmetric, **N**ull.
-:::
-
----
-
-## Asymmetric Dyads: Visual Examples
-
-:::: {.columns align=center}
-
-::: {.column width="30%"}
-::: {.incremental}
-- **Null**: 0 edges.
-- **Asymmetric**: 1 directed edge.
-- **Mutual**: 2 reciprocal directed edges.
 :::
 :::
 
-::: {.column width="70%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 7
+#| fig-width: 6
 #| fig-height: 5.5
 gr1 <- create_empty(2, directed = TRUE) %>% mutate(name = c("A", "B"))
 gr2 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
@@ -574,6 +482,9 @@ p1 / p2 / p3
 
 ## Dyads under Anti-Symmetric Ties
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - Because reciprocity is strictly forbidden under anti-symmetric ties, mutual (reciprocal) dyads cannot occur.
 - Therefore, anti-symmetric ties can only yield **two** types of dyads:
@@ -581,25 +492,13 @@ p1 / p2 / p3
   2. **Non-Reciprocal Dyads**: Only a single one-way directed tie exists between them ($A \rightarrow B$).
 - This simplifies the dyad census of hierarchical networks: every pair of nodes is either completely disconnected or connected by a strictly non-reciprocal arrow.
 :::
-
----
-
-## Anti-Symmetric Dyads: Visual Examples
-
-:::: {.columns align=center}
-
-::: {.column width="30%"}
-::: {.incremental}
-- Mutual dyads are strictly impossible.
-- Every pair of nodes is either disconnected or connected by a strictly non-reciprocal arrow.
-:::
 :::
 
-::: {.column width="70%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 7
+#| fig-width: 6
 #| fig-height: 5.5
 gr1 <- create_empty(2, directed = TRUE) %>% mutate(name = c("A", "B"))
 gr2 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
@@ -642,6 +541,9 @@ p1 / p2
 
 ## Triads under Symmetric Ties
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - Since undirected dyads can only be connected or disconnected, there are only **four** possible undirected triad configurations:
   1. **Null Triad**: 0 connected dyads ($DDD$).
@@ -650,25 +552,13 @@ p1 / p2
   4. **Closed Triad**: 3 connected dyads ($CCC$).
 - These constitute the classic undirected subgraphs shown on the right.
 :::
-
----
-
-## Symmetric Triads: Visual Examples
-
-:::: {.columns align=center}
-
-::: {.column width="30%"}
-::: {.incremental}
-- Subgraphs of order three are built from combinations of undirected connected and disconnected dyads.
-- Zero, one, two, or three edges can be present, creating distinct micro-structures.
-:::
 :::
 
-::: {.column width="70%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 7
+#| fig-width: 5.5
 #| fig-height: 5.5
 gr <- create_empty(3, directed = FALSE) %>% mutate(name = toupper(letters[1:3]))
 p3_ex <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
@@ -741,14 +631,6 @@ p3_ex
   1. **Null Triad** ($NNN$, panel 1): All three dyads are completely disconnected.
   2. **One-tie Triad** ($NNA$, panel 2): Contains a single non-reciprocal directed tie.
   3. **Directed Line** ($AAN(L)$, panel 3): Non-reciprocal ties form a directed path.
-:::
-
----
-
-## Anti-Symmetric Star & Closed Triads
-
-::: {.incremental}
-- Continuing our enumeration of the seven permitted anti-symmetric triads:
   4. **Out-Star Triad** ($AAN(O)$, panel 4): A single node sends ties to both other nodes.
   5. **In-Star Triad** ($AAN(I)$, panel 5): Both other nodes send ties to a single node.
   6. **Cycle Triad** ($AAA(C)$, panel 6): A directed cycle of length three ($A \rightarrow B \rightarrow C \rightarrow A$).
