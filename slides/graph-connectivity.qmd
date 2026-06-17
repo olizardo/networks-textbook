@@ -1270,9 +1270,6 @@ The reachability matrix reveals the global connectivity type of the digraph:
 
 ## The Geodesic Distance Matrix ($D_g$)
 
-:::: {.columns align=center}
-
-::: {.column width="60%"}
 ::: {.incremental}
 - The **geodesic distance matrix** ($D_g$) records the length of the **shortest path** (geodesic) connecting each pair of nodes.
 - **Rules**:
@@ -1281,9 +1278,82 @@ The reachability matrix reveals the global connectivity type of the digraph:
   - Unconnected nodes (unreachable) get a distance of **infinity** ($\infty$ or `Inf`).
 - In undirected graphs, $D_g$ is symmetric. In directed graphs, $D_g$ is asymmetric.
 :::
+
+---
+
+## Undirected Geodesic Distance Matrix
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+**Undirected Graph**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+ggraph(gr_undir, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+- **Symmetric Matrix**: $D_g(i,j) = D_g(j,i)$
+- **Example**: The distance $d(B, A) = 3$ (via path $B-E-C-A$ or $B-E-D-A$).
 :::
 
-::: {.column width="40%"}
+::: {.column width="50%"}
+**Geodesic Distance Matrix ($D_g$)**
+
+::: {.small}
+
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 3 | 1 | 1 | 2 |
+| **B** | 3 | -- | 2 | 2 | 1 |
+| **C** | 1 | 2 | -- | 1 | 1 |
+| **D** | 1 | 2 | 1 | -- | 1 |
+| **E** | 2 | 1 | 1 | 1 | -- |
+
+:::
+:::
+
+::::
+
+---
+
+## Directed Geodesic Distance Matrix
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+**Directed Graph**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+ggraph(gr_dir, layout = "manual", x = x, y = y) +
+  geom_edge_fan(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                start_cap = circle(6, 'mm'), end_cap = circle(7, 'mm'),
+                color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+- **Asymmetric Matrix**: $D_g(i,j) \neq D_g(j,i)$
+- **Example**: $d(B, A) = \infty$ (Node $A$ is unreachable from $B$ due to arrow directions).
+:::
+
+::: {.column width="50%"}
+**Geodesic Distance Matrix ($D_g$)**
+
+::: {.small}
+
 | | A | B | C | D | E |
 |---|---|---|---|---|---|
 | **A** | -- | 3 | 1 | 1 | 2 |
@@ -1292,14 +1362,14 @@ The reachability matrix reveals the global connectivity type of the digraph:
 | **D** | Inf | 3 | 1 | -- | 2 |
 | **E** | Inf | 1 | 2 | 1 | -- |
 
-: Geodesic Distance Matrix for our Digraph {#tbl-dist-slides}
+:::
 :::
 
 ::::
 
 ---
 
-## Node Eccentricity, Diameter & Girth
+## Node Eccentricity & Graph Diameter
 
 From the geodesic distance matrix, we extract several fundamental whole-graph metrics:
 
@@ -1307,8 +1377,6 @@ From the geodesic distance matrix, we extract several fundamental whole-graph me
 - **Node Eccentricity**: The maximum geodesic distance from a focal node to any other reachable node in the graph.
 - **Graph Diameter** ($d$): The *maximum* geodesic distance across all pairs of connected nodes (longest shortest path).
   - For our undirected graph, $d = 3$.
-- **Graph Girth**: The length of the *shortest* cycle in a graph (smallest loop).
-  - For our undirected graph, the girth is $3$ (the triangle $\{ED, DC, CE\}$).
 :::
 
 ---

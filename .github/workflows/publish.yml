@@ -33,13 +33,15 @@ jobs:
           quarto render
         shell: pwsh
 
+      - name: Render Slides
+        run: |
+          quarto render slides/
+          New-Item -ItemType Directory -Force -Path _sites/slides
+          Copy-Item -Path slides/* -Destination _sites/slides/ -Recurse -Force
+        shell: pwsh
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_sites
-
-      - name: Render Slides
-        run: quarto render slides/ --to revealjs
-        with:
-          publish_dir: ./slides
