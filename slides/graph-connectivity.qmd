@@ -1063,7 +1063,71 @@ p_k1 + p_k2 + p_k3
 
 # Part 5: Directed Connectivity & Matrices
 
+---
 
+## The Reachability Matrix ($D_r$)
+
+:::: {.columns align=center}
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Directed Graph**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+edges_reach <- data.frame(
+  from = c("A", "A", "B", "C", "C", "E"),
+  to   = c("C", "D", "E", "D", "E", "D")
+)
+gr_reach_ref <- tbl_graph(nodes = nodes_5, edges = edges_reach, directed = TRUE)
+
+ggraph(gr_reach_ref, layout = "manual", x = x, y = y) +
+  geom_edge_fan(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                start_cap = circle(6, 'mm'), end_cap = circle(7, 'mm'),
+                color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Reachability Matrix ($D_r$)**
+
+::: {.small}
+
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 0 | 1 | 1 | 1 |
+| **B** | 0 | -- | 0 | 1 | 1 |
+| **C** | 0 | 0 | -- | 1 | 1 |
+| **D** | 0 | 0 | 0 | -- | 0 |
+| **E** | 0 | 0 | 0 | 1 | -- |
+
+:::
+:::
+
+::::
+
+- **Definition**: $D_r(i,j) = 1$ if node $i$ can reach node $j$ via a path of any length ($0$ otherwise).
+- **Examples**: 
+  - $A$ can reach $E$ via path $A \rightarrow C \rightarrow E$, so $D_r(A, E) = 1$.
+  - $B$ cannot reach $A$, so $D_r(B, A) = 0$.
+
+---
+
+## Matrix Row & Column Patterns
+
+The reachability matrix reveals structural node behaviors:
+
+::: {.incremental}
+- **Receiver Nodes**:
+  - Have all zeros in their corresponding row of $D_r$ (cannot reach anyone, e.g. Node $D$ above).
+- **Transmitter Nodes**:
+  - Have all zeros in their corresponding column of $D_r$ (cannot be reached by anyone, e.g. Node $A$ or $B$ or $C$ above).
+:::
 
 ---
 
@@ -1197,7 +1261,33 @@ ggraph(gr_weak, layout = "manual", x = nodes_5_conn$x, y = nodes_5_conn$y) +
 
 ---
 
-## The Reachability Matrix ($D_r$)
+## Reachability and Connectivity Types
+
+The reachability matrix reveals the global connectivity type of the digraph:
+
+::: {.incremental}
+- **Strongly Connected**:
+  - The reachability matrix is the **all-ones matrix** (excluding diagonal). Every node can reach every other node.
+- **Unilaterally Connected**:
+  - The matrix contains some zeros, but for any pair, either $D_r(i,j) = 1$ or $D_r(j,i) = 1$. There are no mutually unreachable pairs.
+- **Weakly Connected**:
+  - Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$, e.g., Nodes $A$ and $E$ are mutually unreachable in a weak graph).
+:::
+
+---
+
+## Graph Connectedness ($C$): Concept
+
+- **Graph Connectedness** ($C$) measures the extent to which a network approaches the ideal where *everyone can reach everyone else*.
+- Mathematically, it is the **density of the directed reachability matrix** ($D_r$):
+  $$C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}$$
+  - Where the numerator is the sum of all ones in the reachability matrix (excluding the diagonal).
+  - The denominator $n(n-1)$ is the total possible off-diagonal cells (all possible paths).
+- It ranges from $0$ (completely disconnected) to $1.0$ (strongly connected, where everyone can reach everyone).
+
+---
+
+## Graph Connectedness ($C$): Example
 
 :::: {.columns align=center}
 
@@ -1209,12 +1299,6 @@ ggraph(gr_weak, layout = "manual", x = nodes_5_conn$x, y = nodes_5_conn$y) +
 #| fig-align: "center"
 #| fig-width: 4
 #| fig-height: 4
-edges_reach <- data.frame(
-  from = c("A", "A", "B", "C", "C", "E"),
-  to   = c("C", "D", "E", "D", "E", "D")
-)
-gr_reach_ref <- tbl_graph(nodes = nodes_5, edges = edges_reach, directed = TRUE)
-
 ggraph(gr_reach_ref, layout = "manual", x = x, y = y) +
   geom_edge_fan(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
                 start_cap = circle(6, 'mm'), end_cap = circle(7, 'mm'),
@@ -1243,52 +1327,10 @@ ggraph(gr_reach_ref, layout = "manual", x = x, y = y) +
 
 ::::
 
-- **Definition**: $D_r(i,j) = 1$ if node $i$ can reach node $j$ via a path of any length ($0$ otherwise).
-- **Examples**: 
-  - $A$ can reach $E$ via path $A \rightarrow C \rightarrow E$, so $D_r(A, E) = 1$.
-  - $B$ cannot reach $A$, so $D_r(B, A) = 0$.
-
----
-
-## Matrix Row & Column Patterns
-
-The reachability matrix reveals structural node behaviors:
-
-::: {.incremental}
-- **Receiver Nodes**:
-  - Have all zeros in their corresponding row of $D_r$ (cannot reach anyone, e.g. Node $D$ above).
-- **Transmitter Nodes**:
-  - Have all zeros in their corresponding column of $D_r$ (cannot be reached by anyone, e.g. Node $A$ or $B$ or $C$ above).
-:::
-
----
-
-## Reachability and Connectivity Types
-
-The reachability matrix reveals the global connectivity type of the digraph:
-
-::: {.incremental}
-- **Strongly Connected**:
-  - The reachability matrix is the **all-ones matrix** (excluding diagonal). Every node can reach every other node.
-- **Unilaterally Connected**:
-  - The matrix contains some zeros, but for any pair, either $D_r(i,j) = 1$ or $D_r(j,i) = 1$. There are no mutually unreachable pairs.
-- **Weakly Connected**:
-  - Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$, e.g., Nodes $A$ and $E$ are mutually unreachable in a weak graph).
-:::
-
----
-
-## Graph Connectedness ($C$)
-
-::: {.incremental}
-- **Graph Connectedness** ($C$) measures the extent to which a network approaches the ideal where *everyone can reach everyone else*.
-- Mathematically, it is the **density of the directed reachability matrix**:
-  $$C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}$$
-- **Example Calculation**:
-  - Sum of ones in our reachability matrix ($D_r$): $3 + 2 + 2 + 1 = 8$.
+- **Step-by-Step Calculation**:
+  - Sum of ones in our reachability matrix ($D_r$): $3 \text{ (Row A)} + 2 \text{ (Row B)} + 2 \text{ (Row C)} + 0 \text{ (Row D)} + 1 \text{ (Row E)} = 8$.
   - Total possible connections: $n(n-1) = 5(4) = 20$.
   - Connectedness: $C = \frac{8}{20} = 0.40 \quad (40\%)$.
-:::
 
 ---
 
