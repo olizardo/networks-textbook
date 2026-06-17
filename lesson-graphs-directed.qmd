@@ -11,11 +11,9 @@
 
 ## Introduction to Directed Graphs (Digraphs)
 
-While simple undirected graphs are useful for representing symmetric relationships (where connection is naturally mutual), many social relationships are inherently directional (see @sec-ties). In these relationships, one member of a pair can claim a tie with the other, but the other person may or may not send the same tie back. Examples include giving advice, sending emails, lending money, or nominating friends.
+In our everyday social lives, many relationships do not flow symmetrically. While a business partnership or a co-authorship on a paper is naturally mutual, other interactions are inherently directional. Consider giving advice, sending an email, lending money, or nominating a colleague as a close friend. In all these cases, one person initiates the connection, but the recipient may or may not return the favor. To represent these directional ties, we use **directed graphs** (also commonly referred to as **digraphs**). 
 
-To represent directional relations, we use **directed graphs** (also called **digraphs**). In a directed graph, the edges are *ordered pairs* of nodes, meaning the order in which we list the nodes in an edge matters. The connection goes from a **source node** (the sender) to a **destination node** (the receiver). Therefore, the edge $AB$ is a different entity from the edge $BA$. 
-
-In directed graphs, simple undirected lines are replaced by directed arrows (often called **arcs**). When a digraph has no loops (edges connecting a node to itself) and at most one directed edge connecting a sender to a receiver in each direction, it is called a **simple directed graph**.
+Unlike undirected graphs where edges are simple lines connecting two vertices, a directed graph uses arrows (often called **arcs** or **directed edges**) that point from a **source node** (the sender of the tie) to a **destination node** (the receiver). This means that the order of the nodes matters: a directed edge from $A$ to $B$ (written as the ordered pair $(A, B)$) is a completely different relationship from a directed edge from $B$ to $A$ (written as $(B, A)$). If a digraph contains no loops (where a node connects to itself) and has at most one directed edge from any sender to any receiver, we refer to it as a **simple directed graph**.
 
 @fig-directed shows a point-and-line diagram of a digraph representing a simple directed social network.
 
@@ -46,295 +44,210 @@ In directed graphs, simple undirected lines are replaced by directed arrows (oft
   p
 ```
 
-In directed networks, reciprocity is a major analytical focus. For some ties (such as liking, trusting, or friendship), reciprocity is binary; it either exists or it does not. If @fig-directed were an **advice network** [@cross01], we could say that *H* seeks advice from *D*, but *D* does not seek advice from *H*. This lack of reciprocity is common in formal hierarchies, where advice-seeking often flows upward to more experienced or authoritative actors, reflecting power differentials. 
+If we view this network as an **advice network** within an organization [@cross01], directionality immediately reveals the social dynamics at play. For instance, we can see that node $E$ sends an arrow to node $D$ (meaning $E$ seeks advice from $D$), but $D$ does not send an arrow back to $E$. This lack of reciprocity is common in formal hierarchies, where advice-seeking typically flows upward to more experienced or authoritative actors, reflecting status and power differentials. On the other hand, the mutual arrows between $A$ and $B$ represent a reciprocal advising relationship, suggesting a balanced peer-to-peer exchange where both parties value each other's expertise.
+
+---
+
+## Subgraphs in Directed Graphs
+
+Before diving into how individual nodes navigate directed networks, let's explore how we can examine smaller portions of a directed graph. In many real-world applications, we are not interested in the entire network, but rather in a specific subset of actors or a particular set of relationships. In graph theory, we analyze these sub-structures using the concept of **subgraphs**.
+
+A **directed subgraph** $H = (V_H, E_H)$ of a directed graph $G = (V, E)$ is simply a network formed by choosing a subset of nodes $V_H$ from the original network ($V_H \subseteq V$) and a subset of directed edges $E_H$ ($E_H \subseteq E$). The only rule is that any edge we include in our subgraph must connect nodes that are also included in the subgraph.
+
+For example, let's say we are studying the communication network of a large corporation ($G$), but we want to focus specifically on the mentoring relationships within the management team. If we select a subset of managers ($V_H$) and only look at the directed mentoring links between them ($E_H$), we have constructed a directed subgraph.
+
+### Induced Subgraphs in Directed Graphs
+
+A particularly important type of subgraph is the **induced directed subgraph**. To create an induced subgraph, we select a subset of nodes $V_H$ from the main graph, and then we must include *every single directed edge* from the original graph that connects those chosen nodes. In other words, we do not filter or select edges; if an arrow exists between two of our chosen nodes in the main network, it must be present in the induced subgraph.
+
+Sociologically, an induced subgraph represents the *complete local network* of a sub-group. For instance, if we want to understand the informal advice dynamics within the marketing department of a firm, we would select the marketing staff as our node subset. The induced subgraph on this group will show all advising ties that occur strictly among the marketing team members, ignoring any ties that go to other departments.
+
+Let's look at a concrete example using our reference network in @fig-directed. 
+
+Suppose we choose a subset of nodes $V_H = \{A, B, D, E\}$. 
+
+If we construct a simple subgraph $H_1$ by selecting these nodes and only including the directed edges $A \rightarrow B$, $B \rightarrow A$, and $B \rightarrow D$, we have a valid directed subgraph. We have chosen a subset of nodes and a subset of edges, and all edges connect nodes in our set.
+
+However, if we want to find the **induced directed subgraph** on the set $\{A, B, D, E\}$, we must go back to the original network in @fig-directed and pull *all* arrows that run between these four nodes. Looking at the main graph, we find:
+1. $A \rightarrow B$ and $B \rightarrow A$ (the reciprocal pair between $A$ and $B$)
+2. $B \rightarrow D$ and $D \rightarrow B$ (the reciprocal pair between $B$ and $D$)
+3. $E \rightarrow D$ (the one-way tie from $E$ to $D$)
+
+Thus, the induced directed subgraph $H_2$ on the node set $\{A, B, D, E\}$ must contain all five of these directed edges. Notice that we exclude the edges involving $C$, $F$, and $G$ (such as $B \rightarrow C$, $A \rightarrow F$, or $G \rightarrow D$), because those nodes are not members of our subset.
 
 ---
 
 ## Node Neighborhoods in Directed Graphs
 
-Just like in undirected (simple) graphs, each node in a directed graph has a **node neighborhood**. However, because each node can be the **source** or **destination** for an asymmetric edge, we have to differentiate the neighborhood of a node depending on whether the node is the **sender** or the **recipient** of a given link.
+In an undirected graph, a node's neighborhood is simply the set of other nodes it is connected to. However, in a directed network, directionality splits this concept in two. We must distinguish between the people who send ties to a node and the people who receive ties from that node. Think of a Twitter account: your followers (who receive your updates) form a very different group from the people you follow (whose updates you receive). In graph theory, we capture this distinction through **in-neighborhoods** and **out-neighborhoods**.
 
-### In-Neighborhoods
-We say that a node *j* is an **in-neighbor** of a node *i* if there is a directed link with *j* as the source and *i* as the destination node ($j \rightarrow i$). For each node, the full set of in-neighbors forms the **in-neighborhood** of that node. This is written:
+The **in-neighborhood** of a node $v$, written as $N^{in}(v)$, consists of all the nodes that send a directed edge toward it. Sociologically, in an office advice network, a person's in-neighborhood represents their "advice-seekers"—the group of people who come to them for help. For example, looking at our reference network in @fig-directed, we can see that node $D$ receives arrows from nodes $B$, $E$, and $G$. Therefore, its in-neighborhood is $N^{in}(D) = \{B, E, G\}$. 
 
-$$
-  N^{in}(v)
-$$
+Conversely, the **out-neighborhood** of a node $v$, written as $N^{out}(v)$, consists of all the nodes to which $v$ sends a directed edge. In our office context, this represents a person's "advice-givers"—the group of people they go to when they need help. In @fig-directed, node $B$ sends arrows to $A$, $C$, and $D$, which gives us the out-neighborhood set $N^{out}(B) = \{A, C, D\}$.
 
-where $v$ is the label corresponding to the node. For instance, in @fig-directed, the node set $N^{in}(D) = \{B, E, G\}$ is the in-neighborhood of node *D*.
+Notice that a node will only appear in both neighborhoods of another node if there is a mutual, reciprocal relationship between them. For instance, if we look at node $F$ in @fig-directed, its out-neighborhood is $\{A\}$ and its in-neighborhood is $\{A, G\}$. Node $A$ is the only node that appears in both sets, which directly reflects the reciprocal advising partnership between $A$ and $F$.
 
-### Out-Neighborhoods
-In the same way, we say that a node *i* is an **out-neighbor** of a node *j* if there is a directed link with *j* as the source and *i* as the destination ($j \rightarrow i$). For each node, the full set of out-neighbors defines the **out-neighborhood** of that node. This is written:
+### Neighborhood Intersections
 
-$$
-  N^{out}(v)
-$$
+Just as we do with undirected networks, we can analyze the structural overlap between different actors by intersecting their neighborhoods. Because directed graphs have two types of neighborhoods, we can look at two distinct kinds of overlap, each carrying a different social meaning.
 
-where $v$ is the label corresponding to the node. For instance, in @fig-directed, the node set $N^{out}(B) = \{A, C, D\}$ is the out-neighborhood of node *B*.
+First, the **in-neighborhood intersection** ($N^{in}(u) \cap N^{in}(v)$) finds the common senders who target both $u$ and $v$. In a social setting, if two individuals share many of the same senders, it suggests they occupy a similar role or share a common audience. For instance, let's look at nodes $C$ and $D$ in @fig-directed. Node $C$ receives ties from $B$ and $E$, so $N^{in}(C) = \{B, E\}$. Since $N^{in}(D) = \{B, E, G\}$, their in-neighborhood intersection is:
 
-Nodes will only appear in both the in- and out-neighborhood sets when there are **reciprocal** or mutual ties between the nodes. For instance, in @fig-directed, the out-neighborhood of node *F* is $\{A\}$ and the in-neighborhood is $\{A, G\}$. Here, node *A* appears in both the in- and out-neighborhood sets because *A* has a reciprocal tie with *F*.
-
-### Neighborhood Intersection in Directed Graphs
-
-Just as in the undirected case, the sets of neighbors for any two nodes in a directed graph can share members in common. However, because directed neighborhoods are differentiated by directionality, we can examine two types of intersection.
-
-**In-Neighborhood Intersection** ($N^{in}(u) \cap N^{in}(v)$): Represents the set of common "nominators" or senders—nodes that direct an edge to *both* $u$ and $v$. In a social network, a high in-neighborhood intersection suggests that $u$ and $v$ share similar sources of prestige, influence, or advice.
-
-**Out-Neighborhood Intersection** ($N^{out}(u) \cap N^{out}(v)$): Represents the set of common targets—nodes that *both* $u$ and $v$ direct an edge to. In a social network, this indicates shared sociability targets (e.g., $u$ and $v$ both sending advice to the same set of people).
-
-Let's find these two types of intersections for nodes $C$ and $D$ in @fig-directed:
-
-For **In-Neighborhoods**: $N^{in}(C) = \{B, E\}$ and $N^{in}(D) = \{B, E, G\}$. The intersection is:
 $$
   N^{in}(C) \cap N^{in}(D) = \{B, E\}
 $$
-  
-This means both $C$ and $D$ receive incoming connections from nodes $B$ and $E$.
 
-For **Out-Neighborhoods**: $N^{out}(C) = \emptyset$ and $N^{out}(D) = \{B\}$. The intersection is:
+This tells us that both $C$ and $D$ are sought out by the exact same advisors, $B$ and $E$. 
+
+Second, the **out-neighborhood intersection** ($N^{out}(u) \cap N^{out}(v)$) identifies the common targets to which both $u$ and $v$ send ties. Sociologically, this indicates shared outreach or common sources of advice. If we intersect the out-neighborhoods of $C$ and $D$ in @fig-directed, we find:
+
 $$
   N^{out}(C) \cap N^{out}(D) = \emptyset
 $$
-  
-Since node $C$ sends no outgoing ties, there is no overlap in their outgoing targets. If we instead intersect $E$ and $G$ (where $N^{out}(E) = \{C, D\}$ and $N^{out}(G) = \{F, D\}$), we find:
+
+Because node $C$ is a "sink" that sends no outgoing ties ($N^{out}(C) = \emptyset$), there is no overlap. However, if we look at nodes $E$ and $G$ (where $N^{out}(E) = \{C, D\}$ and $N^{out}(G) = \{F, D\}$), their out-neighborhood intersection is:
+
 $$
   N^{out}(E) \cap N^{out}(G) = \{D\}
 $$
- 
-This shows that both $E$ and $G$ share $D$ as a common out-neighbor.
 
-### Neighborhood Union in Directed Graphs
+This shows that both $E$ and $G$ turn to node $D$ for advice, making $D$ a shared resource for them.
 
-Similarly, we can compute the union of neighborhood sets to identify the total set of unique nodes connected to either $u$ or $v$ (or both):
+### Neighborhood Unions
 
-**In-Neighborhood Union** ($N^{in}(u) \cup N^{in}(v)$): The total set of unique nodes that send a directed edge to either $u$ or $v$.
+We can also look at the union of neighborhoods to find the total reach or combined coverage of two nodes. The **in-neighborhood union** ($N^{in}(u) \cup N^{in}(v)$) combines all unique nodes that send ties to either $u$ or $v$ (or both). For nodes $C$ and $D$ in @fig-directed, this union is:
 
-**Out-Neighborhood Union** ($N^{out}(u) \cup N^{out}(v)$): The total set of unique nodes that receive a directed edge from either $u$ or $v$.
-
-Using our examples from @fig-directed, the union of the in-neighborhoods of $C$ and $D$ is:
 $$
   N^{in}(C) \cup N^{in}(D) = \{B, E, G\}
 $$
 
-And the union of the out-neighborhoods of $E$ and $G$ is:
+This represents the entire collective audience of both nodes. Similarly, the **out-neighborhood union** ($N^{out}(u) \cup N^{out}(v)$) combines all unique nodes that receive ties from either $u$ or $v$. For nodes $E$ and $G$, this is:
+
 $$
   N^{out}(E) \cup N^{out}(G) = \{C, D, F\}
 $$
+
+This represents the total combined set of people from whom $E$ and $G$ seek advice.
 
 ---
 
 ## Node Degree in Directed Graphs
 
-Because in a directed graph each node has two distinct sets of neighbors, we can compute two versions of degree for the same node, corresponding directly to the cardinalities of their neighborhood sets.
+Because each node in a directed graph is associated with two different sets of neighbors, we can calculate two distinct measures of degree for every actor. These measures correspond directly to the sizes of their in-neighborhood and out-neighborhood sets. 
 
-### Indegree
-
-For any node $i$, we can count the number of directed edges that have node $i$ as their destination node. Since each incoming arrow comes from an in-neighbor of node $i$, the indegree (denoted $k^{in}_i$) is mathematically defined as the **cardinality of the in-neighborhood set** of that node:
+The first measure is **indegree** ($k^{in}_i$), which counts the number of directed edges pointing to node $i$ as their destination. In a social network, indegree is often interpreted as a measure of popularity, prestige, or authority; it shows how many people nominate or seek out that individual. Mathematically, it is the size of the node's in-neighborhood:
 
 $$
   k^{in}_i = |N^{in}(i)|
 $$ {#eq-indegree-card}
 
-### Outdegree
-
-Additionally, for any node $i$, we can count the number of directed edges that have node $i$ as their source node. Since each outgoing arrow goes to an out-neighbor of node $i$, the outdegree (denoted $k^{out}_i$) is mathematically defined as the **cardinality of the out-neighborhood set** of that node:
+The second measure is **outdegree** ($k^{out}_i$), which counts the number of directed edges originating from node $i$ as their source. Sociologically, outdegree reflects an actor's activity, sociability, or expansiveness; it indicates how many ties they actively initiate. Mathematically, it is the size of the node's out-neighborhood:
 
 $$
   k^{out}_i = |N^{out}(i)|
 $$ {#eq-outdegree-card}
 
-### Concrete Examples
+### Walkthrough of Individual Node Degrees
 
-Let's see how this works in practice by calculating the indegree and outdegree as neighborhood cardinalities for nodes $B$ and $D$ in @fig-directed.
+To see how these play out, let's calculate the degrees for a few key nodes in our reference network (@fig-directed).
 
-#### Node B
-* **Neighborhood Sets**:
-  - In-neighborhood set: $N^{in}(B) = \{A, D\}$
-  - Out-neighborhood set: $N^{out}(B) = \{A, C, D\}$
-* **Degree Calculation**:
-  - **Indegree**: $k^{in}_B = |N^{in}(B)| = |\{A, D\}| = 2$. This tells us that node $B$ has two incoming connections.
-  - **Outdegree**: $k^{out}_B = |N^{out}(B)| = |\{A, C, D\}| = 3$. This tells us that node $B$ has three outgoing connections.
+Let's start with node $B$. Looking at the arrows, node $B$ receives incoming ties from $A$ and $D$, so its in-neighborhood is $N^{in}(B) = \{A, D\}$, giving it an indegree of $k^{in}_B = 2$. At the same time, $B$ sends outgoing ties to $A$, $C$, and $D$, so its out-neighborhood is $N^{out}(B) = \{A, C, D\}$, giving it an outdegree of $k^{out}_B = 3$. This means $B$ is highly active in both sending and receiving connections.
 
-#### Node D
-* **Neighborhood Sets**:
-  - In-neighborhood set: $N^{in}(D) = \{B, E, G\}$
-  - Out-neighborhood set: $N^{out}(D) = \{B\}$
-* **Degree Calculation**:
-  - **Indegree**: $k^{in}_D = |N^{in}(D)| = |\{B, E, G\}| = 3$. This tells us that node $D$ has three incoming connections.
-  - **Outdegree**: $k^{out}_D = |N^{out}(D)| = |\{B\}| = 1$. This tells us that node $D$ has one outgoing connection.
+Now consider node $D$. It receives ties from $B$, $E$, and $G$, so its in-neighborhood is $N^{in}(D) = \{B, E, G\}$, yielding an indegree of $k^{in}_D = 3$. However, $D$ only sends a single tie back to $B$, so its out-neighborhood is $N^{out}(D) = \{B\}$, giving it an outdegree of $k^{out}_D = 1$. Node $D$ is the most sought-after advisor in this small group, despite being relatively quiet in sending out ties.
 
-Can you calculate the indegree and outdegree as neighborhood cardinalities for node $C$ in @fig-directed?
+Finally, let's look at node $C$. It receives arrows from $B$ and $E$, meaning its in-neighborhood is $N^{in}(C) = \{B, E\}$, which gives it an indegree of $k^{in}_C = 2$. On the other hand, $C$ sends no outgoing arrows whatsoever, so its out-neighborhood is empty ($N^{out}(C) = \emptyset$), which gives it an outdegree of $k^{out}_C = 0$. Node $C$ acts purely as a consumer of advice without offering advice to anyone else.
 
-The graph-theoretic concepts of indegree and outdegree have clear sociological interpretations. In a social network, for instance, a node having a large outdegree (large out-neighborhood cardinality) indicates a *sociable person* (someone active in sending out connections), while having a large indegree (large in-neighborhood cardinality) can indicate a *popular person* or an actor of high prestige (someone whom many others want to connect with). 
+### Social Roles: Receivers, Carriers, and Transmitters
 
-### Types of Nodes in Directed Graphs
+By comparing these two degrees, we can classify actors into distinct social roles [@Harary65] based on how they process flows in the network.
 
-In a directed graph, we can categorize (non-isolate) nodes based on their sending and receiving behavior [@Harary65], and thus based on their indegree and outdegree:
+**Transmitters** are actors who send ties but do not receive any. They have an outdegree greater than zero, but an indegree of zero ($k^{in} = 0, k^{out} > 0$). In @fig-directed, nodes $E$ and $G$ are transmitters. Both send out advice queries (node $E$ has $k^{out}_E = 2$ and node $G$ has $k^{out}_G = 2$), but neither is consulted by anyone else ($k^{in}_E = 0$ and $k^{in}_G = 0$). In an information network, transmitters act as pure source nodes or broadcasters.
 
--  **Receivers**: Nodes that receive ties but do not send them. For receiver nodes, indegree $k^{in} > 0$ and outdegree $k^{out} = 0$. For instance, in @fig-directed, node *C* has an indegree of 2 and an outdegree of 0, making it a receiver node.
-- **Carriers**: Nodes that both receive and send ties. For carrier nodes, $k^{in} > 0$ and $k^{out} > 0$. For instance, in @fig-directed, node *A* has an indegree of 1 and an outdegree of 2, while node *B* has an indegree of 2 and an outdegree of 3, making both nodes carriers.
-- **Transmitters**: Nodes that send ties but do not receive them. For transmitter nodes, $k^{in} = 0$ and $k^{out} > 0$. For instance, in @fig-directed, node *E* has an indegree of 0 and an outdegree of 2, making it a transmitter node.
+**Receivers** are actors who receive ties but do not send them. They have an indegree greater than zero, but an outdegree of zero ($k^{in} > 0, k^{out} = 0$). Node $C$ is a receiver ($k^{in}_C = 2, k^{out}_C = 0$). In a team setting, a receiver acts as an information "sink"—someone who consumes resources but does not pass them along.
 
-### Directed Degree Sets
+**Carriers** are the intermediaries who both receive and send ties ($k^{in} > 0, k^{out} > 0$). In our graph, nodes $A$, $B$, $D$, and $F$ are all carriers. For example, node $A$ has an indegree of 2 and an outdegree of 2, while node $F$ has an indegree of 2 and an outdegree of 1. These nodes act as brokers or relays, facilitating the flow of advice or information through the network.
 
-Computing the degrees of all nodes in a directed network yields two separate vectors (called **directed degree sets**), each of length $n$: the **indegree set** (written $\mathbf{k}^{in}$) and the **outdegree set** (written $\mathbf{k}^{out}$). 
+### Degree Sets, Sequences, and Ranges
 
-For the directed graph in @fig-directed, these sets list each node's incoming and outgoing degrees:
+If we calculate the degrees of all nodes in a directed network, we get two separate vectors of length $n$: the **indegree set** ($\mathbf{k}^{in}$) and the **outdegree set** ($\mathbf{k}^{out}$). For the directed graph in @fig-directed, these sets are:
 
 $$
-  \mathbf{k}^{in} = (k^{in}_A, k^{in}_B, \dots, k^{in}_G) = (2, 2, 2, 3, 0, 2, 0)
+  \mathbf{k}^{in} = (k^{in}_A, k^{in}_B, k^{in}_C, k^{in}_D, k^{in}_E, k^{in}_F, k^{in}_G) = (2, 2, 2, 3, 0, 2, 0)
 $$
 
 $$
-  \mathbf{k}^{out} = (k^{out}_A, k^{out}_B, \dots, k^{out}_G) = (2, 3, 0, 1, 2, 1, 2)
+  \mathbf{k}^{out} = (k^{out}_A, k^{out}_B, k^{out}_C, k^{out}_D, k^{out}_E, k^{out}_F, k^{out}_G) = (2, 3, 0, 1, 2, 1, 2)
 $$
 
-### Directed Degree Sequences
+To get a clearer picture of the overall network structure, we can sort these sets in descending order to create **degree sequences**. Sorting the indegree set gives us the indegree sequence $\mathbf{d}^{in} = (3, 2, 2, 2, 2, 0, 0)$, which ranks actors by their popularity. Sorting the outdegree set gives us the outdegree sequence $\mathbf{d}^{out} = (3, 2, 2, 2, 1, 1, 0)$, which ranks them by their activity.
 
-When we arrange the elements of a degree set in decreasing order, from largest to smallest, we obtain the **degree sequence**. In directed graphs, this gives us two distinct sequences:
+We can also look at the extreme points of these sequences. In our network, the **maximum indegree** is $k^{in}_{max} = 3$ (held by the popular node $D$), while the **minimum indegree** is $k^{in}_{min} = 0$ (held by the quiet nodes $E$ and $G$). The **maximum outdegree** is $k^{out}_{max} = 3$ (held by node $B$), and the **minimum outdegree** is $k^{out}_{min} = 0$ (held by node $C$). 
 
-The **Indegree Sequence** ($\mathbf{d}^{in}$): For @fig-directed, ordering the indegree set yields:
-$$
-  \mathbf{d}^{in} = (3, 2, 2, 2, 2, 0, 0)
-$$
-
-The **Outdegree Sequence** ($\mathbf{d}^{out}$): Ordering the outdegree set yields:
-$$
-  \mathbf{d}^{out} = (3, 2, 2, 2, 1, 1, 0)
-$$
-
-### Minimum and Maximum Degree in Directed Graphs
-
-We can examine the upper and lower bounds of connectivity in a directed network by taking the maximum and minimum values of the directed degree sets. This yields four distinct metrics:
-
-the **Maximum Indegree** ($k^{in}_{max}$): The highest number of incoming ties received by any node:
-$$
-  k^{in}_{max} = \max(\mathbf{k}^{in}) = 3 \quad (\text{Node } D)
-$$
-
-The **Minimum Indegree** ($k^{in}_{min}$): The lowest number of incoming ties received by any node:
-$$
-  k^{in}_{min} = \min(\mathbf{k}^{in}) = 0 \quad (\text{Nodes } E \text{ and } G)
-$$
-
-The **Maximum Outdegree** ($k^{out}_{max}$): The highest number of outgoing ties sent by any node:
-$$
-  k^{out}_{max} = \max(\mathbf{k}^{out}) = 3 \quad (\text{Node } B)
-$$
-
-The **Minimum Outdegree** ($k^{out}_{min}$): The lowest number of outgoing ties sent by any node:
-$$
-  k^{out}_{min} = \min(\mathbf{k}^{out}) = 0 \quad (\text{Node } C)
-$$
-
-### Indegree and Outdegree Range
-
-The arithmetic difference between the maximum and minimum degrees represents the heterogeneity range of connectivity in the digraph:
-
-The **Indegree Range** ($k^{in}_r$): The gap between the most popular and least popular nodes:
-$$
-  k^{in}_r = k^{in}_{max} - k^{in}_{min} = 3 - 0 = 3
-$$
-
-The **Outdegree Range** ($k^{out}_r$): The gap between the most active sender and the least active sender:
-$$
-  k^{out}_r = k^{out}_{max} - k^{out}_{min} = 3 - 0 = 3
-$$
+Subtracting the minimum from the maximum gives us the range, which measures the gap between the most connected and least connected actors. For our network, both the **indegree range** ($k^{in}_r = 3 - 0 = 3$) and the **outdegree range** ($k^{out}_r = 3 - 0 = 3$) indicate a moderate spread between the star players and the peripheral members of the group.
 
 ---
 
 ## Directed Graph Metrics
 
-Several basic graph-level metrics differ conceptually or mathematically when applied to directed graphs.
+When we shift from undirected to directed graphs, basic network-wide metrics like size, density, and average degree take on new mathematical and conceptual meanings.
 
-### Directed Graph Maximum Size
-
-As we saw in @sec-graphtheory, the **graph size** is the number of edges (or arcs) $m$ in the graph. The **maximum size** represents the maximum possible number of edges that can exist in a graph with $n$ nodes. 
-
-In an undirected graph, loops are not allowed, meaning the maximum possible number of edges is $\frac{n(n - 1)}{2}$. However, in a directed graph, edges have directionality, which means there can be two directed edges (arcs) between any pair of nodes—one in each direction (e.g., $u \rightarrow v$ and $v \rightarrow u$).
-
-Therefore, the maximum possible number of directed edges in a directed graph of order $n$ is exactly twice that of an undirected graph:
+First, consider the **maximum size** ($m_{max}$) of a directed network. In an undirected graph of order $n$, the maximum number of edges is $\frac{n(n - 1)}{2}$ because edges are symmetric. In a directed graph, however, connections can run in both directions (e.g., $u \rightarrow v$ and $v \rightarrow u$ are distinct edges). This means that a directed graph has exactly double the capacity of an undirected graph of the same size, which is expressed as:
 
 $$
   m_{max} = n(n - 1)
 $$ {#eq-dirmaxsize}
 
-For our directed graph in @fig-directed of order $n = 7$:
+For our reference network in @fig-directed, which has $n = 7$ nodes, the maximum size is $7(7 - 1) = 42$ possible directed edges.
 
-$$
-  m_{max} = 7(7 - 1) = 7(6) = 42
-$$
-
-This tells us that in a network of 7 nodes, there are 42 possible directed pathways.
-
-### Directed Graph Density
-
-The **density** $d(G)^d$ of a directed graph measures *how many directed ties exist compared to how many directed ties are possible*. It is computed as the ratio of the observed number of directed edges $m$ to the maximum possible number of directed edges:
+Using this maximum size, we can calculate the **directed graph density** ($d(G)^d$), which is the proportion of potential directed ties that are actually observed in the network:
 
 $$
   d(G)^d = \frac{m}{n(n-1)}
 $$ {#eq-dirgraphedens}
 
-If we apply this to the directed graph in @fig-directed, where we observe $m = 11$ directed edges among $n = 7$ nodes:
+In our reference network, we observe $m = 11$ directed edges out of the 42 possible, resulting in a density of:
 
 $$
-  d(G)^d = \frac{11}{7(6)} = \frac{11}{42} \approx 0.262 \quad (26.2\%)
+  d(G)^d = \frac{11}{42} \approx 0.262 \quad (26.2\%)
 $$
 
-This indicates that approximately 26.2% of all possible directed edges in the network are actually observed. Another way to interpret density is as the *probability* that, if we were to select two random nodes $u$ and $v$ from the network, the directed dyad from $u$ to $v$ would be connected by an arrow.
+From a sociological perspective, this tells us that 26.2% of all possible advising relationships in this office have been realized. If we were to randomly select two employees, $u$ and $v$, there is a 26.2% chance that $u$ goes to $v$ for advice.
 
-### Average Indegree and Outdegree
-
-We can compute the average (mean) connectivity across nodes in a directed graph. Because each node has two distinct degrees, we can calculate both the **average indegree** ($\bar{k}^{in}$) and the **average outdegree** ($\bar{k}^{out}$):
-
-The **Average Indegree** ($\bar{k}^{in}$): The sum of all indegrees divided by the number of nodes:
-$$
-  \bar{k}^{in} = \frac{\sum_i k^{in}_i}{n}
-$$
-* **Average Outdegree** ($\bar{k}^{out}$): The sum of all outdegrees divided by the number of nodes:
-$$
-  \bar{k}^{out} = \frac{\sum_i k^{out}_i}{n}
-$$
-
-An important result in graph theory is that **the average indegree and the average outdegree are always mathematically identical**:
+We can also look at the **average degree** of the network. Because each node has both an indegree and an outdegree, we might expect to calculate two different averages: an average indegree ($\bar{k}^{in}$) and an average outdegree ($\bar{k}^{out}$). However, one of the most fundamental rules of graph theory is that these two averages are always mathematically identical:
 
 $$
   \bar{k}^{in} = \bar{k}^{out} = \bar{k} = \frac{m}{n}
 $$ {#eq-diravgdeg}
 
-This identity exists because every directed edge (arc) must start at exactly one node (contributing to that node's outdegree) and end at exactly one node (contributing to that node's indegree). Consequently, the sum of all indegrees and the sum of all outdegrees are both exactly equal to the total number of edges $m$ ($\sum_i k^{in}_i = \sum_i k^{out}_i = m$).
-
-For our directed graph in @fig-directed ($m = 11$, $n = 7$):
+This identity must hold because every directed arrow in a graph has exactly one starting point (adding 1 to the network's total outdegree) and exactly one ending point (adding 1 to the network's total indegree). Consequently, the sum of all indegrees in the network must equal the sum of all outdegrees, and both sums must equal the total number of edges $m$. For our reference network of 7 nodes and 11 edges, the average degree is:
 
 $$
-  \bar{k} = \frac{m}{n} = \frac{11}{7} \approx 1.57
+  \bar{k} = \frac{11}{7} \approx 1.57
 $$
+
+This means that, on average, a member of this network seeks advice from 1.57 colleagues, and is also sought out for advice by 1.57 colleagues.
+
+---
 
 ## Degree Variance in Directed Graphs
 
-Once we have calculated the average degree, we can measure the **heterogeneity** (or inequality) in connectivity across nodes by computing the degree variance. In directed graphs, because each node has two distinct degrees, we must compute two separate variances: **indegree variance** and **outdegree variance**. 
+Measuring the average degree of a network gives us a general sense of how active its members are, but it does not tell us how that activity is distributed. For example, is everyone equally active, or do a few dominant players hold all the ties? To capture this inequality, we compute the degree variance, which measures how much individual node degrees deviate from the network average. In a directed graph, because nodes have two distinct degrees, we must calculate two separate measures: **indegree variance** ($\mathcal{v}^{in}(G)$) and **outdegree variance** ($\mathcal{v}^{out}(G)$).
 
-Just like in the undirected case, the degree variance represents the *average squared deviation* of each node's degree from the graph's average degree.
-
-### Indegree Variance ($\mathcal{v}^{in}(G)$)
-The indegree variance measures the inequality in incoming connections (popularity/prestige) across nodes in the network:
+The **indegree variance** measures the inequality in incoming ties—sociologically, the concentration of popularity or prestige across nodes. It is calculated by taking the average of the squared deviations of each node's indegree from the average degree:
 
 $$
   \mathcal{v}^{in}(G) = \frac{\sum_i (k^{in}_i - \bar{k})^2}{n}
 $${#eq-dirindegvar}
 
-### Outdegree Variance ($\mathcal{v}^{out}(G)$)
-The outdegree variance measures the inequality in outgoing connections (sociability) across nodes:
+Similarly, the **outdegree variance** measures the inequality in outgoing ties—the concentration of sociability or outreach:
 
 $$
   \mathcal{v}^{out}(G) = \frac{\sum_i (k^{out}_i - \bar{k})^2}{n}
 $$ {#eq-diroutdegvar}
 
-Note that because $\bar{k}^{in} = \bar{k}^{out} = \bar{k} = m/n$, both formulas use the same average degree, but the individual node values $k^{in}_i$ and $k^{out}_i$ can differ, yielding distinct variances.
+Note that because the average indegree and outdegree are always equal ($\bar{k}^{in} = \bar{k}^{out} = \bar{k}$), both formulas use the same benchmark average, but the actual node values ($k^{in}_i$ and $k^{out}_i$) vary independently, resulting in two distinct variances.
 
-Let's compute both variances for the directed graph in @fig-directed (where $n = 7$, $m = 11$, and $\bar{k} = 11/7 \approx 1.57$). 
-
-@tbl-dirdegvar lists each node's indegree, outdegree, and squared deviations from the average degree.
+Let's compute both variances for our reference network in @fig-directed (where $n = 7$, $m = 11$, and $\bar{k} \approx 1.57$). @tbl-dirdegvar lists each node's indegree, outdegree, and squared deviations from this average.
 
 | Node | Indegree ($k^{in}$) | Squared Deviation $(k^{in} - 1.57)^2$ | Outdegree ($k^{out}$) | Squared Deviation $(k^{out} - 1.57)^2$ |
 |:---:|:---:|:---:|:---:|:---:|
@@ -349,28 +262,27 @@ Let's compute both variances for the directed graph in @fig-directed (where $n =
 
 : Squared deviations of indegree and outdegree from the average degree {#tbl-dirdegvar}
 
-Using the sums of the squared deviations from @tbl-dirdegvar, we calculate the variances:
+Using the sums of the squared deviations from the table, we find the following variances:
 
-**Indegree Variance**:
 $$
   \mathcal{v}^{in}(G) = \frac{7.71}{7} \approx 1.10
 $$
 
-**Outdegree Variance**:
-  
 $$
   \mathcal{v}^{out}(G) = \frac{5.71}{7} \approx 0.82
 $$
 
-In this network, the indegree variance ($1.10$) is higher than the outdegree variance ($0.82$). Sociologically, this indicates that there is more inequality in the popularity/prestige of nodes (receiving ties) than in their sociability (sending ties). In other words, incoming connections are more heavily concentrated on a few "popular" nodes (like node $D$) while others are left as complete non-receivers (like $E$ and $G$).
+Comparing these two results reveals an interesting sociological insight: the indegree variance ($1.10$) is higher than the outdegree variance ($0.82$). This indicates that popularity and prestige are more heavily concentrated in this network than sociability. In other words, while employees are relatively similar in how often they seek out advice (with most sending 1 to 3 ties), they are highly unequal in how often they are sought out. A single "expert" (node $D$) receives the lion's share of nominations, while others (like $E$ and $G$) receive none.
+
+---
 
 ## Special Classes of Directed Graphs
 
-By imposing structural restrictions on reciprocity, degree, or edge directionality, we can define special classes of directed graphs.
+In the same way that games are defined by their rules, we can define special classes of directed graphs by placing specific constraints on their structure. These constraints might limit who can send a tie, force relationships to be reciprocal, or forbid reciprocity entirely. Each set of rules produces a unique network structure that mirrors a specific type of social system.
 
 ### Symmetric Directed Graphs
 
-If, in a directed graph, every pair of connected nodes is linked by a bi-directional, reciprocal relationship, the graph is a **symmetric directed graph**. 
+A **symmetric directed graph** is built under the rule of mandatory reciprocity: if an edge exists from node $u$ to node $v$, then an edge must also exist from $v$ to $u$. This is the digraph equivalent of a standard undirected graph. We often see this structure in surveys that measure strong social ties like "close friendship." If a researcher only counts a friendship if *both* parties nominate each other, the resulting network is forced to be symmetric.
 
 ```{r}
 #| label: fig-symm
@@ -399,11 +311,13 @@ If, in a directed graph, every pair of connected nodes is linked by a bi-directi
   p
 ```
 
-@fig-symm shows a symmetric directed graph with eight nodes and sixteen bi-directional edges (thirty-two directed arcs). For every edge from $u$ to $v$, there exists a corresponding edge from $v$ to $u$.
+@fig-symm shows a symmetric directed graph containing eight nodes and sixteen bi-directional edges (which represent thirty-two individual directed arcs). Because every connection is mutual, the graph-wide flow of information is highly fluid, and there are no structural bottlenecks or one-way dead ends.
 
 ### Functional Graphs
 
-A **functional graph** is a special kind of digraph built by imposing the restriction that each node can only have a *single out-neighbor* (i.e., the outdegree of every node is exactly equal to one, $k_{out} = 1$). Functional graphs have important applications in the anthropological analysis of kinship exchange systems in traditional societies [@hageharary96].
+A **functional graph** is created by imposing a strict constraint on activity: every single node in the network must have an outdegree of exactly one ($k^{out} = 1$). This means that every actor is required to direct exactly one tie to one specific target. 
+
+This type of graph has important applications in anthropology, particularly in the study of kinship exchange systems in traditional societies where strict marriage rules dictate which clan a family must marry into [@hageharary96]. It also describes systems where every employee reports to exactly one supervisor, or where every computer terminal is routed to a single gateway server.
 
 ```{r}
 #| label: fig-func
@@ -432,11 +346,13 @@ A **functional graph** is a special kind of digraph built by imposing the restri
   p
 ```
 
-@fig-func shows a functional graph with eight nodes. If a graph $G$ is a functional graph, then the number of nodes $V$ is always equal to the number of directed edges $E$ ($V = E = 8$). This is mathematically constrained because each of the $V$ nodes sends out exactly one edge.
+@fig-func shows a functional graph with eight nodes. An interesting mathematical consequence of this structure is that the number of nodes ($n$) is always exactly equal to the number of directed edges ($m$). In this case, $n = m = 8$. Because everyone has exactly one outgoing tie, the edges cannot exceed the number of nodes, leading to a network of chains and cycles where information or resources flow in a single, predictable loop.
 
 ### Oriented Graphs {#sec-oriented}
 
-An **oriented graph** is a directed graph containing no symmetric (reciprocal) dyads. If there is a directed link from $u$ to $v$, there cannot be a link from $v$ to $u$. It is the structural opposite of a symmetric directed graph.
+An **oriented graph** is the structural opposite of a symmetric graph: it strictly forbids reciprocity. If there is a directed edge from $u$ to $v$, there cannot be a directed edge from $v$ to $u$. 
+
+This structure represents relationships that are inherently unequal or competitive. For example, in a sports tournament where nodes represent teams and directed arrows point from the winner to the loser, reciprocity is physically impossible (a team cannot both beat and lose to another in the same match). Similarly, strict status hierarchies (like pecking orders in animal groups or seniority ladders in military organizations) are oriented graphs.
 
 ```{r}
 #| label: fig-oriented
@@ -465,13 +381,13 @@ An **oriented graph** is a directed graph containing no symmetric (reciprocal) d
   p
 ```
 
-In the oriented graph shown in @fig-oriented, every connected pair is linked *only* by a one-way directed tie; reciprocal dyads are forbidden by the nature of the relationship (e.g., strict hierarchy or non-reversible flows).
+As shown in @fig-oriented, every connected pair in an oriented graph is linked by a one-way street. Information or authority flows strictly in one direction, creating clear hierarchies and preventing mutual exchanges.
 
 ### Anti-Symmetric Ties and Directed Tree Graphs
 
-As we saw in @sec-ties, a relation is **anti-symmetric** if reciprocity is strictly forbidden. If *A* is anti-symmetrically connected to *B*, then *B* *cannot* send the *same type of tie* back to *A*. When these relations are concatenated across multiple nodes, they can form a **directed tree graph** (for a more general consideration of tree graphs see @sec-trees). 
+A relation is **anti-symmetric** if reciprocity is strictly forbidden by the very definition of the tie. Consider the relationship "being the parent of" or "being the father of." If person $A$ is the father of person $B$, it is biologically impossible for $B$ to be the father of $A$. When we trace these anti-symmetric ties across generations or levels of authority, they naturally form a **directed tree graph** (which we explore in more detail in @sec-trees).
 
-Consider the relationship "being the father of." You have a father, your father has a father, and so on. This creates a generational lineage represented as a tree. 
+We see directed trees in family genealogies, but also in corporate organizational charts where subordinates take orders from a single supervisor. 
 
 ```{r}
 #| label: fig-tree
@@ -496,7 +412,7 @@ Consider the relationship "being the father of." You have a father, your father 
   p
 ```
 
-In @fig-tree, node $A$ is the earliest common ancestor, and all other nodes are anti-symmetrically related to it. Similarly, formal organizational structures where subordinates "take orders from" a single supervisor generate tree graphs. A notable property of tree graphs is that every node (except the root) has exactly one in-neighbor (one supervisor or one father), but can have multiple out-neighbors (children or subordinates).
+In the tree graph shown in @fig-tree, node $A$ sits at the top as the root (the earliest ancestor or CEO). A defining structural property of a directed tree is that every node except the root has an indegree of exactly one ($k^{in} = 1$), representing a single father or a single direct manager. However, nodes are free to have multiple out-neighbors (representing multiple children or multiple direct reports). This structure ensures a clean, hierarchical cascade of authority or inheritance without any cross-cutting or conflicting paths.
 
 ---
 
