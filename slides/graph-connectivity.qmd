@@ -3,6 +3,7 @@ title: "Graph Theory: Paths & Connectivity"
 subtitle: "The Basics of Social Network Analysis"
 format:
   revealjs:
+    scrollable: true
     theme: default
     css: ucla-theme.css
     width: 1280
@@ -970,18 +971,32 @@ gr_bridge_local |>
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr_undir |>
+#| fig-width: 8
+#| fig-height: 4.5
+p_before <- gr_undir |>
   activate(edges) |>
   mutate(highlight = ifelse((from == 3 & to == 5) | (from == 4 & to == 5), "yes", "no")) |>
   ggraph(layout = "manual", x = x, y = y) +
   geom_edge_link(aes(color = highlight, edge_width = highlight)) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
-  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
-  geom_node_point(size = 20, color = "tan2") +
-  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+  scale_edge_width_manual(values = c("yes" = 1.8, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (With Edge Cutset)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+gr_undir_after_edges <- gr_undir |>
+  activate(edges) |>
+  filter(!((from == 3 & to == 5) | (from == 4 & to == 5)))
+
+p_after <- ggraph(gr_undir_after_edges, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Edges Removed)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p_before + p_after
 ```
 :::
 
@@ -1006,15 +1021,28 @@ gr_undir |>
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr_undir |>
+#| fig-width: 8
+#| fig-height: 4.5
+p_before <- gr_undir |>
   ggraph(layout = "manual", x = x, y = y) +
   geom_edge_link(color = "steelblue", edge_width = 1.0) +
-  geom_node_point(aes(color = ifelse(name == "E", "yes", "no")), size = 20) +
+  geom_node_point(aes(color = ifelse(name == "E", "yes", "no")), size = 15) +
   scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
-  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (With Node Cutset)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+gr_undir_after_node <- gr_undir |>
+  filter(name != "E")
+
+p_after <- ggraph(gr_undir_after_node, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Node Removed)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p_before + p_after
 ```
 :::
 
