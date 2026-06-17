@@ -999,44 +999,152 @@ gr_undir |>
 
 ---
 
-## Levels of k-Connectivity: Visual Examples
+## 1-Connected Graph: Vulnerable Structure
+
+:::: {.columns align=center}
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Before (Star Graph)**
 
 ```{r}
-#| label: fig-kconn-slides
-#| fig-cap: "Graphs with different levels of k-connectivity."
-#| fig-cap-location: bottom
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
 #| fig-height: 4
-#| fig-width: 12
+nodes_star <- data.frame(name = c("A", "B", "C", "D"), x = c(0, 0, -0.86, 0.86), y = c(0, 1, -0.5, -0.5))
+edges_star <- data.frame(from = c(1, 1, 1), to = c(2, 3, 4))
+gr_star <- tbl_graph(nodes = nodes_star, edges = edges_star, directed = FALSE)
 
-# 1-connected star
-gr_k1 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 1, 1), to = c(2, 3, 4)), directed = FALSE)
-p_k1 <- ggraph(gr_k1, layout = "circle") +
-  geom_edge_link(color = "steelblue", edge_width = 1) +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("1-Connected (Star)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
-
-# 2-connected ring
-gr_k2 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 2, 3, 4), to = c(2, 3, 4, 1)), directed = FALSE)
-p_k2 <- ggraph(gr_k2, layout = "circle") +
-  geom_edge_link(color = "steelblue", edge_width = 1) +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("2-Connected (Ring)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
-
-# 3-connected complete K4
-gr_k3 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 1, 1, 2, 2, 3), to = c(2, 3, 4, 3, 4, 4)), directed = FALSE)
-p_k3 <- ggraph(gr_k3, layout = "circle") +
-  geom_edge_link(color = "steelblue", edge_width = 1) +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("3-Connected (Complete)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
-
-p_k1 + p_k2 + p_k3
+ggraph(gr_star, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
 ```
+:::
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**After (Removing Node A)**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+nodes_star_after <- data.frame(name = c("B", "C", "D"), x = c(0, -0.86, 0.86), y = c(1, -0.5, -0.5))
+gr_star_after <- tbl_graph(nodes = nodes_star_after, edges = data.frame(from = integer(0), to = integer(0)), directed = FALSE)
+
+ggraph(gr_star_after, layout = "manual", x = x, y = y) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+- **1-Connected**: Only requires removing $k=1$ node to disconnect the graph.
+- Node **A** is the **articulation point** (cutpoint). Removing it isolates nodes B, C, and D.
+
+---
+
+## 2-Connected Graph: Moderate Redundancy
+
+:::: {.columns align=center}
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Before (Ring Graph)**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+nodes_ring <- data.frame(name = c("A", "B", "C", "D"), x = c(0, 1, 0, -1), y = c(1, 0, -1, 0))
+edges_ring <- data.frame(from = c(1, 2, 3, 4), to = c(2, 3, 4, 1))
+gr_ring <- tbl_graph(nodes = nodes_ring, edges = edges_ring, directed = FALSE)
+
+ggraph(gr_ring, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**After (Removing Nodes A and C)**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+nodes_ring_after <- data.frame(name = c("B", "D"), x = c(1, -1), y = c(0, 0))
+gr_ring_after <- tbl_graph(nodes = nodes_ring_after, edges = data.frame(from = integer(0), to = integer(0)), directed = FALSE)
+
+ggraph(gr_ring_after, layout = "manual", x = x, y = y) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+- **2-Connected**: Requires removing $k=2$ nodes to disconnect the graph.
+- Removing only $1$ node (e.g. A) leaves a connected path (D-C-B), so it does not disconnect the graph.
+- Removing $2$ nodes (e.g. A and C) breaks the ring, completely isolating nodes **B** and **D**.
+
+---
+
+## 3-Connected Graph: High Cohesion
+
+:::: {.columns align=center}
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Before (Wheel Graph)**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+nodes_wheel <- data.frame(name = c("A", "B", "C", "D", "E"), x = c(0, 0, 1, 0, -1), y = c(0, 1, 0, -1, 0))
+edges_wheel <- data.frame(from = c(2, 3, 4, 5, 1, 1, 1, 1), to = c(3, 4, 5, 2, 2, 3, 4, 5))
+gr_wheel <- tbl_graph(nodes = nodes_wheel, edges = edges_wheel, directed = FALSE)
+
+ggraph(gr_wheel, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**After (Removing Nodes A, B, and D)**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+nodes_wheel_after <- data.frame(name = c("C", "E"), x = c(1, -1), y = c(0, 0))
+gr_wheel_after <- tbl_graph(nodes = nodes_wheel_after, edges = data.frame(from = integer(0), to = integer(0)), directed = FALSE)
+
+ggraph(gr_wheel_after, layout = "manual", x = x, y = y) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+- **3-Connected**: Requires removing $k=3$ nodes to disconnect the graph.
+- Removing $1$ or $2$ nodes (e.g. A and B) still leaves path E-D-C connected, meaning it remains connected.
+- Removing $3$ nodes (e.g. Center **A** and opposite base nodes **B** and **D**) isolates **C** and **E**.
 
 ---
 
@@ -1063,7 +1171,71 @@ p_k1 + p_k2 + p_k3
 
 # Part 5: Directed Connectivity & Matrices
 
+---
 
+## The Reachability Matrix ($D_r$)
+
+:::: {.columns align=center}
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Directed Graph**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+edges_reach <- data.frame(
+  from = c("A", "A", "B", "C", "C", "E"),
+  to   = c("C", "D", "E", "D", "E", "D")
+)
+gr_reach_ref <- tbl_graph(nodes = nodes_5, edges = edges_reach, directed = TRUE)
+
+ggraph(gr_reach_ref, layout = "manual", x = x, y = y) +
+  geom_edge_fan(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                start_cap = circle(6, 'mm'), end_cap = circle(7, 'mm'),
+                color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Reachability Matrix ($D_r$)**
+
+::: {.small}
+
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 0 | 1 | 1 | 1 |
+| **B** | 0 | -- | 0 | 1 | 1 |
+| **C** | 0 | 0 | -- | 1 | 1 |
+| **D** | 0 | 0 | 0 | -- | 0 |
+| **E** | 0 | 0 | 0 | 1 | -- |
+
+:::
+:::
+
+::::
+
+- **Definition**: $D_r(i,j) = 1$ if node $i$ can reach node $j$ via a path of any length ($0$ otherwise).
+- **Examples**: 
+  - $A$ can reach $E$ via path $A \rightarrow C \rightarrow E$, so $D_r(A, E) = 1$.
+  - $B$ cannot reach $A$, so $D_r(B, A) = 0$.
+
+---
+
+## Matrix Row & Column Patterns
+
+The reachability matrix reveals structural node behaviors:
+
+::: {.incremental}
+- **Receiver Nodes**:
+  - Have all zeros in their corresponding row of $D_r$ (cannot reach anyone, e.g. Node $D$ above).
+- **Transmitter Nodes**:
+  - Have all zeros in their corresponding column of $D_r$ (cannot be reached by anyone, e.g. Node $A$ or $B$ or $C$ above).
+:::
 
 ---
 
@@ -1197,48 +1369,6 @@ ggraph(gr_weak, layout = "manual", x = nodes_5_conn$x, y = nodes_5_conn$y) +
 
 ---
 
-## The Reachability Matrix ($D_r$)
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- The **reachability matrix** ($D_r$) of a graph records whether each pair of nodes can reach each other:
-  - $D_r(i,j) = 1$ if node $i$ can reach node $j$ via a path of any length.
-  - $D_r(i,j) = 0$ otherwise.
-  - Diagonal cells are ignored (`--`).
-:::
-:::
-
-::: {.column width="40%"}
-| | A | B | C | D | E |
-|---|---|---|---|---|---|
-| **A** | -- | 0 | 1 | 1 | 1 |
-| **B** | 0 | -- | 0 | 1 | 1 |
-| **C** | 0 | 0 | -- | 1 | 1 |
-| **D** | 0 | 0 | 0 | -- | 0 |
-| **E** | 0 | 0 | 0 | 1 | -- |
-
-: Reachability Matrix for our Directed Graph {#tbl-reach-slides}
-:::
-
-::::
-
----
-
-## Matrix Row & Column Patterns
-
-The reachability matrix reveals structural node behaviors:
-
-::: {.incremental}
-- **Receiver Nodes**:
-  - Have all zeros in their corresponding row of $D_r$ (cannot reach anyone, e.g. Node $D$ above).
-- **Transmitter Nodes**:
-  - Have all zeros in their corresponding column of $D_r$ (cannot be reached by anyone, e.g. Node $A$ or $B$ or $C$ above).
-:::
-
----
-
 ## Reachability and Connectivity Types
 
 The reachability matrix reveals the global connectivity type of the digraph:
@@ -1254,17 +1384,61 @@ The reachability matrix reveals the global connectivity type of the digraph:
 
 ---
 
-## Graph Connectedness ($C$)
+## Graph Connectedness ($C$): Concept
 
-::: {.incremental}
 - **Graph Connectedness** ($C$) measures the extent to which a network approaches the ideal where *everyone can reach everyone else*.
-- Mathematically, it is the **density of the directed reachability matrix**:
+- Mathematically, it is the **density of the directed reachability matrix** ($D_r$):
   $$C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}$$
-- **Example Calculation**:
-  - Sum of ones in our reachability matrix ($D_r$): $3 + 2 + 2 + 1 = 8$.
+  - Where the numerator is the sum of all ones in the reachability matrix (excluding the diagonal).
+  - The denominator $n(n-1)$ is the total possible off-diagonal cells (all possible paths).
+- It ranges from $0$ (completely disconnected) to $1.0$ (strongly connected, where everyone can reach everyone).
+
+---
+
+## Graph Connectedness ($C$): Example
+
+:::: {.columns align=center}
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Directed Graph**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+ggraph(gr_reach_ref, layout = "manual", x = x, y = y) +
+  geom_edge_fan(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                start_cap = circle(6, 'mm'), end_cap = circle(7, 'mm'),
+                color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Reachability Matrix ($D_r$)**
+
+::: {.small}
+
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 0 | 1 | 1 | 1 |
+| **B** | 0 | -- | 0 | 1 | 1 |
+| **C** | 0 | 0 | -- | 1 | 1 |
+| **D** | 0 | 0 | 0 | -- | 0 |
+| **E** | 0 | 0 | 0 | 1 | -- |
+
+:::
+:::
+
+::::
+
+- **Step-by-Step Calculation**:
+  - Sum of ones in our reachability matrix ($D_r$): $3 \text{ (Row A)} + 2 \text{ (Row B)} + 2 \text{ (Row C)} + 0 \text{ (Row D)} + 1 \text{ (Row E)} = 8$.
   - Total possible connections: $n(n-1) = 5(4) = 20$.
   - Connectedness: $C = \frac{8}{20} = 0.40 \quad (40\%)$.
-:::
 
 ---
 
