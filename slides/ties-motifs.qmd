@@ -89,6 +89,19 @@ plot_tr <- function(edges, title) {
 
 ---
 
+## Graph-Theoretic Classification of Ties
+
+::: {.incremental}
+- While sociologists classify ties by their **substantive content** (similarities, relations, interactions, flows)...
+- Mathematicians and graph theorists classify ties by their **formal, directionality properties**:
+  - **Symmetric Ties**: Inherently mutual and undirected ($AB \iff BA$).
+  - **Asymmetric Ties**: Directional, where reciprocity is optional ($AB \implies$ optional $BA$).
+  - **Anti-Symmetric Ties**: Directional, where reciprocity is forbidden ($AB \implies \neg BA$).
+- **The Link**: To represent a network, we must map our sociological tie types (e.g. boss-of, friend-of) onto these three graph-theoretic classes!
+:::
+
+---
+
 ## 1. Symmetric Ties
 
 ::: {.incremental}
@@ -182,17 +195,17 @@ ggraph(gr_sym, layout = 'linear') +
 #| fig-width: 7
 #| fig-height: 5.5
 gr_asym <- create_empty(2, directed = TRUE) %>% 
-  bind_edges(data.frame(from = c(1, 2), to = c(2, 1), type = c("solid", "dashed"))) %>% 
+  bind_edges(data.frame(from = c(1, 2), to = c(2, 1), type = c("solid", "dashed"), label = c("", "?"))) %>% 
   mutate(name = toupper(letters[1:2]))
 ggraph(gr_asym, layout = 'linear') +
-  geom_edge_parallel(aes(linetype = type, color = type), edge_width = 1.5,
+  geom_edge_parallel(aes(linetype = type, color = type, label = label), edge_width = 1.5,
                   arrow = arrow(length = unit(5, 'mm'), type = "closed"),
-                  end_cap = circle(8, 'mm'), sep = unit(4, 'mm')) +
+                  end_cap = circle(8, 'mm'), sep = unit(4, 'mm'),
+                  label_colour = "gray40", label_size = 7, show.legend = FALSE) +
   scale_edge_color_manual(values = c("solid" = "steelblue", "dashed" = "gray60"), guide = "none") +
   scale_edge_linetype_manual(values = c("solid" = "solid", "dashed" = "dashed"), guide = "none") +
   geom_node_point(size = 25, color = "tan2") +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-  annotate("text", x = 1.5, y = -0.3, label = "?", size = 8, fontface = "bold", color = "gray40") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
@@ -247,17 +260,17 @@ ggraph(gr_asym, layout = 'linear') +
 #| fig-width: 7
 #| fig-height: 5.5
 gr_anti <- create_empty(2, directed = TRUE) %>% 
-  bind_edges(data.frame(from = c(1, 2), to = c(2, 1), type = c("solid", "dashed"))) %>% 
+  bind_edges(data.frame(from = c(1, 2), to = c(2, 1), type = c("solid", "dashed"), label = c("", "✕"))) %>% 
   mutate(name = toupper(letters[1:2]))
 ggraph(gr_anti, layout = 'linear') +
-  geom_edge_parallel(aes(linetype = type, color = type), edge_width = 1.5,
+  geom_edge_parallel(aes(linetype = type, color = type, label = label), edge_width = 1.5,
                   arrow = arrow(length = unit(5, 'mm'), type = "closed"),
-                  end_cap = circle(8, 'mm'), sep = unit(4, 'mm')) +
+                  end_cap = circle(8, 'mm'), sep = unit(4, 'mm'),
+                  label_colour = "red", label_size = 7, show.legend = FALSE) +
   scale_edge_color_manual(values = c("solid" = "steelblue", "dashed" = "red"), guide = "none") +
   scale_edge_linetype_manual(values = c("solid" = "solid", "dashed" = "dashed"), guide = "none") +
   geom_node_point(size = 25, color = "tan2") +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-  annotate("text", x = 1.5, y = -0.3, label = "✕", size = 8, fontface = "bold", color = "red") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
@@ -278,9 +291,9 @@ ggraph(gr_anti, layout = 'linear') +
 
 ---
 
-## Mapping Social Ties to Graph Representations
+## Mapping Sociological to Graph-Theoretic Classifications
 
-| Sociological Category | Relational Property | Allowed Dyads | Visual Graph representation |
+| Sociological Classification (Types of Ties) | Graph-Theoretic Classification (Mathematical Properties) | Allowed Dyads | Visual Graph Representation |
 |:---|:---|:---|:---|
 | **Co-membership, Propinquity** | **Symmetric** | • Disconnected<br>• Connected | Undirected Graph ($A - B$) |
 | **Sentiments, Advice-seeking** | **Asymmetric** | • Disconnected<br>• Non-reciprocal<br>• Reciprocal | Directed Graph ($A \rightarrow B$ or $A \leftrightarrow B$) |
@@ -355,60 +368,160 @@ ggraph(gr_mult, layout = "manual", x = x, y = y) +
 
 ---
 
-## Network Growth: Visualizing the Marriage Cascade
+## Network Growth: Two Separate Systems
 
+:::: {.columns align=center}
+
+::: {.column width="45%"}
+::: {.incremental}
+- Networks grow by linking different types of ties across previously disconnected systems.
+- Consider two separate family trees:
+  - **Family 1**: Parent 1, You, Sis (anti-symmetric parent-child ties, symmetric sibling tie).
+  - **Family 2**: Parent 2, Riley, Bro (anti-symmetric parent-child ties, symmetric sibling tie).
+- You and Riley fall in love!
+  - This creates an **asymmetric romantic tie** (red dashed arrow) between the two systems.
+:::
+:::
+
+::: {.column width="55%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 12
+#| fig-width: 6.5
 #| fig-height: 5.5
-  gr_g1 <- tbl_graph(
-    nodes = data.frame(name = c("C", "A", "B", "D"), x = c(0, 1, 2.5, 3.5), y = c(0, 0, 0, 0)),
-    edges = data.frame(from = c(1, 2, 4), to = c(2, 3, 3), type = c("kin", "rom", "kin")),
-    directed = TRUE
-  )
-  p_g1 <- ggraph(gr_g1, layout="manual", x=x, y=y) +
-    geom_edge_link(aes(color=type, linetype=type), arrow = arrow(length = unit(3, 'mm')), end_cap = circle(5, 'mm')) +
-    scale_edge_color_manual(values = c("kin" = "black", "rom" = "red"), guide = "none") +
-    scale_edge_linetype_manual(values = c("kin" = "solid", "rom" = "dashed"), guide = "none") +
-    geom_node_point(size = 12, color = "tan2") +
-    geom_node_text(aes(label = name), size = 6, color = "white") +
-    theme_graph() + ggtitle("1. Romantic Tie (Event)") + coord_cartesian(clip = "off") +
-    theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
+nodes_g1 <- data.frame(
+  name = c("Parent 1", "You", "Sis", "Parent 2", "Riley", "Bro"),
+  x    = c(0, -0.5, 0.5, 3, 2.5, 3.5),
+  y    = c(2, 1, 1, 2, 1, 1)
+)
+edges_g1 <- data.frame(
+  from = c(1, 1, 2, 3, 4, 4, 5, 6, 2),
+  to   = c(2, 3, 3, 2, 5, 6, 6, 5, 5),
+  type = c("parent", "parent", "sibling", "sibling", "parent", "parent", "sibling", "sibling", "romantic")
+)
+gr_g1 <- tbl_graph(nodes = nodes_g1, edges = edges_g1, directed = TRUE)
 
-  gr_g2 <- tbl_graph(
-    nodes = data.frame(name = c("C", "A", "B", "D"), x = c(0, 1, 2.5, 3.5), y = c(0, 0, 0, 0)),
-    edges = data.frame(from = c(1, 2, 4), to = c(2, 3, 3), type = c("kin", "mar", "kin")),
-    directed = FALSE
-  )
-  p_g2 <- ggraph(gr_g2, layout="manual", x=x, y=y) +
-    geom_edge_link(aes(color=type), edge_width = 1.2) +
-    scale_edge_color_manual(values = c("kin" = "black", "mar" = "red"), guide = "none") +
-    geom_node_point(size = 12, color = "tan2") +
-    geom_node_text(aes(label = name), size = 6, color = "white") +
-    theme_graph() + ggtitle("2. Marriage State (Tie)") + coord_cartesian(clip = "off") +
-    theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
-
-  gr_g3 <- tbl_graph(
-    nodes = data.frame(name = c("C", "A", "B", "D"), x = c(0, 1, 2.5, 3.5), y = c(0, 0, 0, 0)),
-    edges = data.frame(from = c(1, 2, 4, 1, 2, 4), to = c(2, 3, 3, 4, 4, 1), type = c("kin", "mar", "kin", "inlaw", "inlaw", "inlaw")),
-    directed = FALSE
-  )
-  p_g3 <- ggraph(gr_g3, layout="manual", x=x, y=y) +
-    geom_edge_link(aes(color=type, linetype=type), edge_width = 1.2) +
-    scale_edge_color_manual(values = c("kin" = "black", "mar" = "red", "inlaw" = "blue"), guide = "none") +
-    scale_edge_linetype_manual(values = c("kin" = "solid", "mar" = "solid", "inlaw" = "dotted"), guide = "none") +
-    geom_node_point(size = 12, color = "tan2") +
-    geom_node_text(aes(label = name), size = 6, color = "white") +
-    theme_graph() + ggtitle("3. In-Law Cascade") + coord_cartesian(clip = "off") +
-    theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
-
-  p_g1 + p_g2 + p_g3
+ggraph(gr_g1, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = type, linetype = type),
+                     arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     sep = unit(4, 'mm'), edge_width = 1.25) +
+  scale_edge_color_manual(values = c("parent" = "black", "sibling" = "royalblue", "romantic" = "red")) +
+  scale_edge_linetype_manual(values = c("parent" = "solid", "sibling" = "dotted", "romantic" = "dashed")) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
 ```
+:::
 
-# Part 2: Dyads and Their Realizations
+::::
 
 ---
+
+## Network Growth: The Marriage Cascade
+
+:::: {.columns align=center}
+
+::: {.column width="45%"}
+::: {.incremental}
+- You and Riley get married!
+  - The asymmetric romantic tie becomes a **symmetric marriage tie** (solid red).
+- This single event immediately triggers a cascade of new "in-law" ties:
+  - **Symmetric Sibling-in-Law**: You $\leftrightarrow$ Bro, Riley $\leftrightarrow$ Sis (blue dotted).
+  - **Anti-Symmetric Parent-in-Law**: Parent 1 $
+ightarrow$ Riley, Parent 2 $
+ightarrow$ You (dashed gray).
+- The two families are now merged!
+:::
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6.5
+#| fig-height: 5.5
+nodes_g2 <- data.frame(
+  name = c("Parent 1", "You", "Sis", "Parent 2", "Riley", "Bro"),
+  x    = c(0, -0.5, 0.5, 3, 2.5, 3.5),
+  y    = c(2, 1, 1, 2, 1, 1)
+)
+# Add parent-in-law (1->5, 4->2) and sibling-in-law (2->6, 5->3)
+edges_g2 <- data.frame(
+  from = c(1, 1, 2, 3, 4, 4, 5, 6, 2, 5, 1, 4, 2, 6, 5, 3),
+  to   = c(2, 3, 3, 2, 5, 6, 6, 5, 5, 2, 5, 2, 6, 2, 3, 5),
+  type = c("parent", "parent", "sibling", "sibling", "parent", "parent", "sibling", "sibling", 
+           "marriage", "marriage", "inlaw", "inlaw", "inlaw", "inlaw", "inlaw", "inlaw")
+)
+gr_g2 <- tbl_graph(nodes = nodes_g2, edges = edges_g2, directed = TRUE)
+
+ggraph(gr_g2, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = type, linetype = type),
+                     arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     sep = unit(4, 'mm'), edge_width = 1.2) +
+  scale_edge_color_manual(values = c("parent" = "black", "sibling" = "royalblue", "marriage" = "red", "inlaw" = "gray60")) +
+  scale_edge_linetype_manual(values = c("parent" = "solid", "sibling" = "dotted", "marriage" = "solid", "inlaw" = "dotted")) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Network Growth: Adding a Baby
+
+:::: {.columns align=center}
+
+::: {.column width="45%"}
+::: {.incremental}
+- You and Riley have a baby!
+  - Great news, but even more network complexity!
+- The baby adds a **cascade of new anti-symmetric kinship ties** to everyone in both systems:
+  - Parent-child to You/Riley.
+  - Grandchild to Parent 1/Parent 2.
+  - Niece/Nephew to Sis/Bro.
+- This child permanently anchors the two systems into a single, cohesive multiplex network.
+:::
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6.5
+#| fig-height: 5.5
+nodes_g3 <- data.frame(
+  name = c("Parent 1", "You", "Sis", "Parent 2", "Riley", "Bro", "Baby"),
+  x    = c(0, -0.5, 0.5, 3, 2.5, 3.5, 1.5),
+  y    = c(2, 1, 1, 2, 1, 1, 0)
+)
+# Add baby parent-child ties (2->7, 5->7), grandparent ties (1->7, 4->7), aunt/uncle (3->7, 6->7)
+edges_g3 <- data.frame(
+  from = c(1, 1, 2, 3, 4, 4, 5, 6, 2, 5, 2, 5, 1, 4, 3, 6),
+  to   = c(2, 3, 3, 2, 5, 6, 6, 5, 5, 2, 7, 7, 7, 7, 7, 7),
+  type = c("parent", "parent", "sibling", "sibling", "parent", "parent", "sibling", "sibling", 
+           "marriage", "marriage", "baby", "baby", "baby", "baby", "baby", "baby")
+)
+gr_g3 <- tbl_graph(nodes = nodes_g3, edges = edges_g3, directed = TRUE)
+
+ggraph(gr_g3, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = type, linetype = type),
+                     arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     sep = unit(4, 'mm'), edge_width = 1.1) +
+  scale_edge_color_manual(values = c("parent" = "black", "sibling" = "royalblue", "marriage" = "red", "baby" = "darkorange2")) +
+  scale_edge_linetype_manual(values = c("parent" = "solid", "sibling" = "dotted", "marriage" = "solid", "baby" = "dashed")) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ## What is a Dyad?
 
@@ -749,6 +862,14 @@ p3_ex
   1. **Null Triad** ($NNN$, panel 1): All three dyads are completely disconnected.
   2. **One-tie Triad** ($NNA$, panel 2): Contains a single non-reciprocal directed tie.
   3. **Directed Line** ($AAN(L)$, panel 3): Non-reciprocal ties form a directed path.
+:::
+
+---
+
+## Anti-Symmetric Star & Closed Triads
+
+::: {.incremental}
+- Continuing our enumeration of the seven permitted anti-symmetric triads:
   4. **Out-Star Triad** ($AAN(O)$, panel 4): A single node sends ties to both other nodes.
   5. **In-Star Triad** ($AAN(I)$, panel 5): Both other nodes send ties to a single node.
   6. **Cycle Triad** ($AAA(C)$, panel 6): A directed cycle of length three ($A \rightarrow B \rightarrow C \rightarrow A$).
@@ -819,9 +940,9 @@ gr_hierarchy <- tbl_graph(
 ggraph(gr_hierarchy, layout = "tree") +
   geom_edge_link(color = "steelblue", edge_width = 1.5,
                  arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-                 end_cap = circle(8, 'mm'), start_cap = circle(8, 'mm')) +
-  geom_node_point(size = 20, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+                 end_cap = circle(11, 'mm'), start_cap = circle(11, 'mm')) +
+  geom_node_point(size = 32, color = "tan2") +
+  geom_node_text(aes(label = name), size = 5.5, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
@@ -863,7 +984,7 @@ ggraph(gr_hierarchy, layout = "tree") +
     p8 <- plot_tr(data.frame(from=c(2,1,3,2,1), to=c(1,2,2,3,3)), "8. MMA")
     p9 <- plot_tr(data.frame(from=c(2,1,3,2,1,3), to=c(1,2,2,3,3,1)), "9. MMM")
     
-    (p1 + p2 + p3) / (p4 + p5 + p6) / (p7 + p8 + p9)
+    (p1 + p2 + p3 + p4 + p5) / (p6 + p7 + p8 + p9 + plot_spacer())
 ```
 
 ---
