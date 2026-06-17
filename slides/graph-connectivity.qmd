@@ -46,25 +46,26 @@ edges_disconnected <- data.frame(
 )
 gr_disconnected <- tbl_graph(nodes = nodes_disconnected, edges = edges_disconnected, directed = FALSE)
 
-# 5-node directed hourglass graphs for connectivity flavors
-nodes_hour <- data.frame(name = c("A", "B", "C", "D", "E"), x = c(-0.75, 0.75, 0, -0.75, 0.75), y = c(1, 1, 0, -1, -1))
-edges_strong <- data.frame(
-  from = c(1, 2, 4, 5, 1, 2, 3, 3, 4), 
-  to   = c(2, 1, 5, 4, 3, 3, 4, 5, 1)
-)
-gr_strong <- tbl_graph(nodes = nodes_hour, edges = edges_strong, directed = TRUE)
+# 7-node directed graphs for connectivity flavors (large, non-toy)
+nodes_7 <- data.frame(name = LETTERS[1:7])
 
-edges_uni <- data.frame(
-  from = c(1, 2, 4, 5, 1, 2, 3, 3), 
-  to   = c(2, 1, 5, 4, 3, 3, 4, 5)
+edges_large_strong <- data.frame(
+  from = c(1, 2, 3, 4, 5, 6, 7, 1, 3, 6), 
+  to   = c(2, 3, 4, 5, 6, 7, 1, 4, 6, 2)
 )
-gr_uni <- tbl_graph(nodes = nodes_hour, edges = edges_uni, directed = TRUE)
+gr_large_strong <- tbl_graph(nodes = nodes_7, edges = edges_large_strong, directed = TRUE)
 
-edges_weak <- data.frame(
-  from = c(1, 2, 4, 5, 1, 2, 4, 5), 
-  to   = c(2, 1, 5, 4, 3, 3, 3, 3)
+edges_large_uni <- data.frame(
+  from = c(1, 2, 3, 4, 5, 6, 1, 3, 2), 
+  to   = c(2, 3, 4, 5, 6, 7, 4, 6, 5)
 )
-gr_weak <- tbl_graph(nodes = nodes_hour, edges = edges_weak, directed = TRUE)
+gr_large_uni <- tbl_graph(nodes = nodes_7, edges = edges_large_uni, directed = TRUE)
+
+edges_large_weak <- data.frame(
+  from = c(1, 1, 2, 2, 2, 4, 5, 5, 6, 7, 7), 
+  to   = c(2, 6, 1, 4, 3, 2, 3, 4, 1, 6, 4)
+)
+gr_large_weak <- tbl_graph(nodes = nodes_7, edges = edges_large_weak, directed = TRUE)
 
 # 7-node directed graph for directed components slide
 edges_dir_7 <- data.frame(
@@ -1297,42 +1298,107 @@ ggraph(gr_ineq, layout = "manual", x = x, y = y) +
 
 ---
 
-## Directed Connectivity: Visual Examples
+## Strongly Connected: A Visual Example
 
+:::: {.columns align=center}
+
+::: {.column width="45%"}
+::: {.incremental}
+- **Strong Connectivity**:
+  - A directed graph is strongly connected if there is a directed path from **every node to every other node** (mutual reachability).
+- **7-Node Example** (Right):
+  - Consists of a complete spanning cycle ($A \rightarrow B \rightarrow C \rightarrow D \rightarrow E \rightarrow F \rightarrow G \rightarrow A$) plus chord arcs.
+  - Because of the continuous cycle, any node can reach any other node, ensuring complete mutual reachability.
+:::
+:::
+
+::: {.column width="55%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 12
-#| fig-height: 4.5
-p1 <- ggraph(gr_strong, layout = "manual", x = x, y = y) +
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_large_strong, layout = "circle") +
   geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
                      start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
-                     color = "steelblue", edge_width = 1.1) +
+                     color = "steelblue", edge_width = 1.1, sep = unit(3.5, 'mm')) +
   geom_node_point(size = 15, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Strongly Connected") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p2 <- ggraph(gr_uni, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
-                     color = "steelblue", edge_width = 1.1) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Unilaterally Connected") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p3 <- ggraph(gr_weak, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
-                     color = "steelblue", edge_width = 1.1) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Weakly Connected") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p1 + p2 + p3
+  theme_graph() + coord_cartesian(clip = "off")
 ```
+:::
+
+::::
+
+---
+
+## Unilaterally Connected: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="45%"}
+::: {.incremental}
+- **Unilateral Connectivity**:
+  - A directed graph is unilaterally connected if for every pair of nodes, there is **at least one directed path** connecting them.
+- **7-Node Example** (Right):
+  - Same 7 nodes, but the feedback edge $G \rightarrow A$ and other backward chords are removed. Edges flow strictly forward ($A \rightarrow B \rightarrow C \dots \rightarrow G$).
+  - Here, $A$ can reach $G$, but $G$ cannot reach $A$ (no mutual reachability).
+  - However, for every single pair, at least one directed pathway exists.
+:::
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_large_uni, layout = "circle") +
+  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     color = "steelblue", edge_width = 1.1, sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Weakly Connected: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="45%"}
+::: {.incremental}
+- **Weak Connectivity**:
+  - A directed graph that is connected only if we **ignore the direction of the arrowheads** (treating it like an undirected graph).
+- **7-Node Example** (Right):
+  - Uses our textbook's 7-node directed graph.
+  - Nodes $E$ and $G$ are transmitter nodes (indegree 0) that cannot reach each other, nor can they be reached by anyone else.
+  - Thus, $\{E, G\}$ is a mutually unreachable pair (violating unilateral connectivity).
+:::
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_large_weak, layout = "circle") +
+  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     color = "steelblue", edge_width = 1.1, sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -1610,9 +1676,14 @@ ggraph(gr_tree_5, layout = 'tree') +
 ::: {.incremental}
 - Because of the strict $m = n - 1$ edge constraint, tree graph density and average degree simplify beautifully:
   - **Density of a Tree Graph**:
-    $$d(T) = rac{2m}{n(n-1)} = rac{2(n-1)}{n(n-1)} = rac{2}{n}$$
+    $$d(T) = 
+rac{2m}{n(n-1)} = 
+rac{2(n-1)}{n(n-1)} = 
+rac{2}{n}$$
   - **Average Degree of a Tree Graph**:
-    $$ar{k} = rac{\sum k_i}{n} = rac{2n - 2}{n}$$
+    $$ar{k} = 
+rac{\sum k_i}{n} = 
+rac{2n - 2}{n}$$
 - *For our 5-node tree graph: density is $2/5 = 0.40$ ($40\%$), and average degree is $(10-2)/5 = 1.6$.*
 :::
 
