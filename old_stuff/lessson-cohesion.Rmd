@@ -1,0 +1,138 @@
+---
+title: "Lesson: Cohesion in Networks"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+    toc: true
+    smart: true
+bibliography: networks.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+
+# invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+    require(patchwork)
+```
+
+# Groups and Cohesion
+When we are studying a social system a common question that comes up is whether the social structure is **cohesive** or **fragmented**. That is, we ask whether the system is composed of a lot of overlapping subgroups which are themselves densely connected, or whether it is held together by just a few links or people.
+
+```{r}
+    set.seed(1234)
+    gr.l <- play_islands(n_islands = 5, size_islands = 4, p_within = 0.8, m_between = 1) %>% 
+         mutate(name = toupper(letters[1:20]))
+    l <- ggraph(gr.l, layout = 'auto')
+    l <- as.matrix(l$data[, 1:2])
+    gr.h <- play_islands(n_islands = 5, size_islands = 4, p_within = 0.9, m_between = 3) %>% 
+         mutate(name = toupper(letters[1:length(V(gr.l))]))
+    p <- ggraph(gr.h, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(color = "tan2", size = 22) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p1 <- p + theme_graph() + theme(legend.position = "none")
+    p <- ggraph(gr.l, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(color = "tan2", size = 22) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p2 <- p + theme_graph() + theme(legend.position = "none")
+    gr.h.nd <- gr.h - "A"
+    p <- ggraph(gr.h.nd, layout = l[2:20,]) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(color = "tan2", size = 22) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p3 <- p + theme_graph() + theme(legend.position = "none")
+    gr.l.nd <- gr.l - "A"
+    p <- ggraph(gr.l.nd, layout = l[2:20,]) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(color = "tan2", size = 22) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p4 <- p + theme_graph() + theme(legend.position = "none")
+    gr.l.ed <- gr.l - edge("A|C")
+    gr.l.ed <- gr.l.ed - edge("A|D")
+    p <- ggraph(gr.l.ed, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(color = "tan2", size = 22) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p5 <- p + theme_graph() + theme(legend.position = "none")
+    gr.h.ed <- gr.h - edge("A|C")
+    gr.h.ed <- gr.h.ed - edge("A|D")
+    p <- ggraph(gr.h.ed, layout = l) 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(color = "tan2", size = 22) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p6 <- p + theme_graph() + theme(legend.position = "none")
+```
+This would be difference between the networks represented by the two graphs shown in Figure \@ref(fig:cohesion)A and \@ref(fig:cohesion)B. The graphs are of the same order (they have identical  node sets) but they are of different size. Figure \@ref(fig:cohesion)A shows a highly cohesive social system, with many interlinked connections across actors creating a densely knit structure. The graph in Figure \@ref(fig:cohesion)B is much less well-connected and seems like it could split apart very easily. 
+
+```{r cohesion, fig.margin = TRUE, fig.cap="A series of undirected graphs.", fig.width=18, fig.height=28}
+    wrap_plots(p1, p2, p3, p4, p6, p5, ncol = 2) + plot_annotation(tag_levels = 'A') & theme(plot.tag = element_text(size = 40))
+```
+
+So how can we think of cohesiveness in network terms? As you may have already gathered, the great thing about graph theory is that it allows us to move beyond vague terminology like "split apart," "fragmented" and "densely knit." Instead, we can *precisely* specify what we mean when a graph is cohesive versus when it is fragmented. 
+
+## Cohesiveness and Adhesiveness
+There are two ways social networks analysts have specified the concept of cohesion, so we will need two separate terms. Both use the same idea: Namely, a system is stronger and better knit together if it is resistant to disruption when we remove actors from the system. Disruption, in its turn, is defined by graph connectivity. So this leads to the technical definition of **cohesion**. A network is **cohesive** if we *we can remove many actors from it and the remaining graph remains connected*. How many actors can be removed in this way has a special name we will get to in a bit.
+
+But of course, a graph can also transition from being connected to disconnected when we remove *edges* from it. This is why we need a second concept, referred to as **adhesion**. A network is **adhesive** *if we can remove many edges from it without disconnecting the graph that represents the network*. So clearly, very dense networks like the ones shown in \@ref(fig:cohesion)A are more adhesive than **sparse** networks like the ones shown in Figure \@ref(fig:cohesion)B.
+
+The property of cohesiveness can be exemplified by comparing the graphs shown in Figures \@ref(fig:cohesion)B and \@ref(fig:cohesion)D. The graph shown in Figure \@ref(fig:cohesion)D is exactly the same as the one on shown in Figure  Figure \@ref(fig:cohesion)B, except that node *A* has been removed from the network.^[As you may recall from the graph theory lesson, this means that the first graph is an **node-deleted subgraph** of the second.] As you can see, removing *A* from  Figure \@ref(fig:cohesion)B results a **disconnected graph** featuring nodes *B*, *C*, and *D* in their own **component** isolated from the rest (now the graph's **giant component**). 
+
+Figures \@ref(fig:cohesion)A and \@ref(fig:cohesion)C shows the same comparison for the more densely knit network. The graph shown in Figure \@ref(fig:cohesion)C is exactly the same as the one shown in Figure \@ref(fig:cohesion)A, except that node *A* has been removed from the network. As you can see, removing node *A* from the original graph makes little difference regarding connectivity, the graph shown in Figure \@ref(fig:cohesion)C is still heavily connected, demonstrating that the graph shown in Figure \@ref(fig:cohesion)A has higher levels of cohesiveness than the left-hand graph shown in Figure \@ref(fig:cohesion)B. 
+
+Similarly, the property of adhesiveness can be exemplified by comparing Figures \@ref(fig:cohesion)B and \@ref(fig:cohesion)F. The graph shown in \@ref(fig:cohesion)F is exactly the same as the one shown in \@ref(fig:cohesion)B, except that edges *AC* and *AD* have been removed from the network.^[As you may recall from the graph theory lesson, this means that the first graph is an **edge-deleted subgraph** of the second.] Like before, removing edges *AC* and *AD* from Figure \@ref(fig:cohesion)B results in a **disconnected graph** featuring nodes *B*, *C*, and *D* in their own **component** isolated from the rest (now the graph's **giant component**).
+
+Figures \@ref(fig:cohesion)A and \@ref(fig:cohesion)E shows the same comparison for the more densely knit network. The graph shown in Figure \@ref(fig:cohesion)C is exactly the same as the one shown in Figure \@ref(fig:cohesion)A, except that edges *AC* and *AD* have been removed from the network. As you can see, removing these edges from the original graph makes little difference regarding connectivity, the graph shown in Figure \@ref(fig:cohesion)E is still heavily connected, demonstrating that the graph shown in Figure \@ref(fig:cohesion)A has higher levels of adhesiveness than the left-hand graph shown in Figure \@ref(fig:cohesion)B. 
+
+```{r cutset, fig.margin = TRUE, fig.cap = "An undirected graph.", fig.width=10, fig.height=10}
+    gr1 <- create_empty(5) %>% 
+      mutate(name = toupper(letters[1:5])) %>% 
+      bind_edges(from = 1, to = c(3:5)) %>% 
+      bind_edges(from = 2, to = c(3:5)) %>% 
+      simplify()
+    l <- matrix(c(0, 1, 0.5, 0.5, 0.5, 0, 0, 1, 0, -1), ncol = 2) 
+    p <- ggraph(gr1, layout = l)
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(color = "tan2", size = 28) 
+    p <- p + geom_node_text(aes(label = name), size = 18, color = "white")
+    p <- p + theme_graph() + theme(legend.position = "none")
+    p
+    nc <- matrix("--", nrow = 5, ncol = 5)
+    ec <- matrix("--", nrow = 5, ncol = 5)
+    a <- matrix(as_adjacency_matrix(gr1), ncol = 5)
+    for (i in 1:5) {
+        for (j in 1:5) {
+          if (i != j & a[i, j] != 1) {
+            nc[i, j] <- vertex_connectivity(gr1, source = i, target = j)
+            ec[i, j] <- edge_connectivity(gr1, source = i, target = j)
+          }
+        }
+    }
+    colnames(nc) <- toupper(letters[1:5])
+    rownames(nc) <- toupper(letters[1:5])
+```
+
+
+## Pairwise Node and Edge Connectivity and Cutsets
+To quantify cohesion in a social system it is useful to define notions of the *strength* of indirect connectivity between *pairs* nodes in a graph. Just like at the graph level, we want to say that a pair of nodes in a graph has a more robust indirect connections, if the removal of other nodes or edges from the graph does not disconnect them. 
+
+This leads to two definitions of the strength of indirect pairwise connectivity of nodes. 
+
+In a graph, the **node connectivity**, written $NC_{uv}$, of two nodes in a graph is equal to the *minimum number* of nodes that would have to be removed for them to become disconnected. Similarly, the **edge connectivity**, written $EC_{uv}$, of two nodes in a graph is equal to the *minimum number* of edges that would have to be removed for them to become disconnected. 
+
+For instance, in the graph shown in Figure \@ref(fig:cutset), the node connectivity of nodes *A* and *B* is three ($NC_{AB} = 3$) because it would take removing a minimum of three nodes (*C*, *D*, and *E*) to disconnect them. Thus, we say that the set of nodes $\{C, D, E\}$ is the pairwise **node cutset** of nodes *A* and *B*. In the same way, the node connectivity between nodes *C* and *D* is two $NC_{CD} = 2$ because it would take removing a minimum of two nodes (*A* and *B*) to disconnect them. Thus, we say that the set of nodes $\{A, B\}$ is the pairwise node cutset of nodes *C* and *D*. Table \@ref(tab:cutsettab) show the pairwise node connectivities for all the non-adjacent nodes in Figure \@ref(fig:cutset).
+
+```{r cutsettab}
+    kbl(nc, caption = "Pairwise node connectivities of nodes in a graph.")
+```
+
+Similarly, in the graph shown in Figure \@ref(fig:cutset), the edge connectivity of nodes *A* and *B* is three ($EC_{AB} = 3$) because it would take removing a minimum of three edges (*AC*, *AD*, and *AE* or *BC*, *BD*, and *BE*) to disconnect them. Thus, we say that either the edge sets $\{AC, AD, AE\}$ or $\{BC, BD, BE\}$ are the pairwise edge cutsets of nodes *A* and *B*. This means that neither edge or node cutsets have to be unique. In the same way, the edge connectivity between nodes *C* and *D* is two ($EC_{CD} = 2$) because it would take removing a minimum of two edges (e.g., *DA* or *DB*) to disconnect them. Accordingly, the edge set $\{DA, DB\}$ is the pairwise edge cutset of nodes *C* and *D* in Figure \@ref(fig:cutset).

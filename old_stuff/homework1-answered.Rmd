@@ -1,0 +1,107 @@
+---
+title: "Homework I: Graph Theory"
+date: "`r Sys.Date()`"
+output:
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+```
+
+# Vertex and edge sets
+
+```{r grex1, fig.cap="A simple graph.", fig.height=4}
+    set.seed(529)
+    gr <- play_erdos_renyi(n = 5, m = 5, directed = FALSE, loops = FALSE)
+    gr <- mutate(gr, name = toupper(letters[1:5]))
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() + ylim(-1, 1)
+    p
+```
+Consider the graph shown in Figure \@ref(fig:grex1):
+
+(@) Write down the **vertex set** of the graph:
+
+- $V = \{A, B, C, D, E\}$
+
+or
+
+- $V = \{V_A, V_B, V_C, V_D, V_E\}$ 
+
+- (Same alternative for the answers below that involving listing node subsets)
+
+
+
+(@) Write down the **edge set** of the graph:
+
+- $E = \{AB, AC, BC, BE, CD\}$ 
+
+or
+
+- $V = \{V_AV_B, V_AV_C, V_BV_C, V_BV_E, V_CV_D\}$ 
+
+- With the understanding that the order of listing node labels in the edge doesn't matter in the undirected case: $AB = BA$ and $V_AV_B = V_BV_A$.
+
+# Node Neighborhoods
+
+```{r grex2, fig.cap="A simple graph.", fig.width=8, fig.height=6.75}
+    set.seed(471)
+    gr <- play_erdos_renyi(n = 8, m = 13, directed = FALSE, loops = FALSE)
+    gr <- mutate(gr, name = toupper(letters[1:8]))
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() 
+    p
+    
+```
+Consider the graph shown in Figure \@ref(fig:grex2):
+
+(@) Write down the **neighborhood** of node *D*
+
+- $N(D) = \{A, B, C, H\}$
+
+(@) Write down the **neighborhood** of node *E*
+
+- $N(E) = \{A, C, G, H\}$
+
+(@) What is the **intersection** of the neighborhoods of nodes *D* and *E*?
+
+- $N(D) \cap N(E) = \{A, C, H\}$
+
+(@) What is the **intersection** of the neighborhoods of nodes *C* and *G*?
+
+- $N(C) \cap N(G) = \{E\}$
+
+(@) What is the **union** of the neighborhoods of nodes *B* and *C*? 
+
+- $N(B) \cup N(C) = \{D, E, F, G\}$
+
+# Node Degree
+
+Consider the graph shown in Figure \@ref(fig:grex2):
+
+(@) What is the **degree** of node *B*?
+
+- $k_B = 3$
+
+(@) What are the nodes with the largest **degree**?
+
+- $\{D, E, G\}$
+
+(@) What is the node with the smallest **degree**?
+
+- $\{F\}$

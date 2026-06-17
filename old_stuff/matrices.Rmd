@@ -1,0 +1,240 @@
+---
+title: "From Graph to Matrix"
+date: "`r Sys.Date()`"
+output:
+  bookdown::tufte_html2: default
+bibliography: networks.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+# Matrices {#matrices}
+The lessons so far have been dedicated to exploring the various ways social networks can be represented in graph form, and computing metrics directly from graphs. This chapter will focus on using a **matrix** as a second way of representing networks. More accurately, as noted in the first lesson, matrices are useful way to represent graphs quantitatively, which in their turn, represent networks^[Flashback to the **three-step network shuffle**.]
+
+Networks represented as graphs feel quite intuitive to us. Actors are points (nodes) and links or interactions between actors are lines (edges). We feel as if we can get a good sense of the network by looking at the pictorial network diagram, with points representing actors and lines representing pairwise links between actors. Networks represented as a matrix, however, are a bit more abstract. They are far more mathematically useful however. With many tens, hundreds, thousands, or millions of nodes and edges, creating a graph with these amounts of data only results in what network analysts call a "hairball." Nothing can be understood through intuition.
+
+Thus, switching to representing the network as a matrix provides us with more analytic leverage. When we represent the network as a matrix, we are able to efficiently calculate features of the network that we would not be able to estimate via "eyeballing."
+
+What is matrix?^[Note that the answer to this question is simpler than the more profound: "What is **the** Matrix?" [https://www.youtube.com/watch?v=O5b0ZxUWNf0](https://www.youtube.com/watch?v=O5b0ZxUWNf0)] A **matrix** is, quite simply, a set of attributes that represent the values of a particular case. Breaking that explanation down, we can imagine a matrix as in Table \@ref(tab:genmatrix).
+
+|        | Attribute 1 | Attribute 2 | Attribute 3 |
+|:-------|:-----------:|:-----------:|:-----------:|
+| Case 1 |   Value 1   |   Value 4   |   Value 7   |
+| Case 2 |   Value 2   |   Value 5   |   Value 8   |
+| Case 3 |   Value 3   |   Value 6   |   Value 9   |
+| Case 4 |  Value 10   |  Value 11   |  Value 12   |
+| Case 5 |  Value 13   |  Value 14   |  Value 15   |
+
+: (\#tab:genmatrix) Example of a general matrix.
+
+This common matrix, which we will refer to as an **attribute-value matrix**, a toy example of which is presented in Table \@ref(tab:genmatrix), seems similar to a spreadsheet. Well, that is because a spreadsheet can be thought of as a matrix! If you have ever seen statistical regression models in the social or other sciences, this is actually what a computer is doing in converting the values in the various cells into inputs that go in a regression equation! It is all quite cool, but not exactly what we are going to need going forward in studying the basics of network analysis.
+
+The most important feature of a matrix is thus its organization into **rows** and **columns**. The number of rows and the number of columns define the **dimensions** of the matrix (like the length and and the width of your apartment define its dimensions in space). So when we say that a matrix is 5 $\times$ 3 when mean that it has five rows and three columns. When referring to the dimensions of matrix the rows always come first, and the columns always come second. So the more general way of saying is that the dimensions of a matrix are *R* $\times$ *C*, where *R* is the number of rows and *C* is the number of columns.
+
+The *intersection* of a particular row (say row 2 in Table \@ref(tab:genmatrix)) and a particular column (say column 3 Table \@ref(tab:genmatrix)) defines a **cell** in the matrix. So when referring to a particular value in Table \@ref(tab:genmatrix) we would speak of the *ij* cell in the matrix (or $cell_{ij}$), where is *i* a general stand-in for a given row and *j* is a generic stand-in for a given column. We refer to *i* as the matrix **row index** and *j* as the matrix **column index**.
+
+Typically we give matrices names using boldfaced capital letters, so if we call the matrix shown in Table \@ref(tab:genmatrix), matrix **B**, then we can refer to a specific cell in the matrix using the notation **b**$_{ij}$ (note the lowercase), which says "the cell corresponding to row *i* and column *j* of the **B** matrix."
+
+Thus, in Table \@ref(tab:genmatrix), cell **b**$_{32}$ refers to the intersection between row 3 (representing case 3) and column 2 (representing attribute 2), where we can find *value 6*. For instance, let's say cases are people and attributes are information we collected on each person (e.g., by surveying them) like their age, gender identity, and racial identification and so forth. Thus, if attribute 2 in Table \@ref(tab:genmatrix) was age, and case 3 was a person, then *value 6* would record that persons age (e.g., 54 years old).
+
+## Relationship Matrices
+
+We do not generally use attribute-value matrices to represent networks. Instead, we typically use a particular type of matrix called a **relationship matrix**. A relationship matrix is when, instead of asking what value of an attribute a case has, we ask about the value of describing how a case relates to other cases. If attribute-value matrices relate cases to attributes, then relationship matrices relate cases to one another (which is precisely the idea behind a "network").
+
+To do that, we put the same list of cases on *both* the rows and columns the matrix. Thus, we create a matrix with the following organizational properties as shown in Table \@ref(tab:relmatrix).
+
+A relationship matrix thus captures exactly that, the relationship between two cases as shown in Table \@ref(tab:relmatrix). So each cell, as the intersection of two cases (the row case and column case) gives us the value of the relationship between the cases. This value could be "friends" (if the two people are friends) or "not friends" (if they are not friends). The value could be the **strength** of the relationship. For instance each cell could contain the number of times a given case (e.g., a person) messaged another case.
+
+```{block, type = 'rmdimportant'}
+Relationship matrices are different from attribute value matrices, in that the latter are typically **rectangular matrices**. In a rectangular matrix, the number of rows (e.g., people) can be different from the number of columns (e.g., attributes). For instance, the typical attribute-value matrix used by social scientists who collect survey data on people are typically rectangular containing many more cases (rows) and columns (attributes). Some networks, like **two mode networks** represented as bipartite graphs, are best studied using rectangular matrices.
+```
+
+Relationship matrices have some unique attributes. For instance, all relationship matrices are **square matrices**. A square matrix is one that has the *same number of rows and columns*: *R* = *C*. So the relationship matrix shown in Table \@ref(tab:relmatrix) is $3 \times 3$. A square matrix with *n* rows (and thus the same number of columns) is said to be a matrix of order *n*.
+
+|            |  Case 1   |  Case 2   |  Case 3   |
+|:-----------|:---------:|:---------:|:---------:|
+| **Case 1** | *Value 1* |  Value 2  |  Value 3  |
+| **Case 2** |  Value 4  | *Value 5* |  Value 6  |
+| **Case 3** |  Value 7  |  Value 8  | *Value 9* |
+
+: (\#tab:relmatrix) Example of a relationship matrix.
+
+In a relationship matrix, we need to distinguish between two types of cells. First, there are the cells that fall along the **main diagonal** an imaginary line that runs from the uppermost left corner to the lowermost right corner; these are called **diagonal cells**, the values corresponding to which are shown in italics in Table \@ref(tab:relmatrix). So if we name the matrix in Table \@ref(tab:relmatrix) matrix **A**, then we can see that any cell **a**$_{ij}$ in which i\* = *j* falls along the main diagonal; these are Values 1, 5, and 9 Table \@ref(tab:relmatrix). Every other cell in which *i* $\neq$ *j*, is an off-diagonal cell\*\*.[^matrices-2]
+
+[^matrices-2]: The mathematical symbol for "does not equal" is $\neq$.
+
+In reference to the main diagonal, off-diagonal cells are said to be *above* the main diagonal if the row index for that cell is smaller than the column index (e.g., **a**$_{i < j}$). So in Table \@ref(tab:relmatrix), values 2, 3, and 6, corresponding to cells **a**$_{12}$ **a**$_{13}$ and **a**$_{23}$, respectively, are above the main diagonal. In the same way, cells in which the row index is larger than the column index are said to be *below* the main diagonal (e.g., **a**$_{i > j}$). So in Table \@ref(tab:relmatrix), values 4, 7, and 8, corresponding to cells **a**$_{21}$ **a**$_{31}$ and **a**$_{32}$, respectively, are below the main diagonal.
+
+```{block, type = 'rmdnote'}
+Note that in a square matrix, the values above and below the main diagonal have a "triangular" arrangement. Accordingly, sometimes we refer to these areas of a square matrix as the **upper and lower triangles**.
+```
+
+Note that if the relationship matrix represents the relationship between the cases, and the cases are people in a social network, then the diagonal cells in a relationship matrix represent the relationship of people with themselves! Now if you have seen M. Night Shyamalan movies about people with split personalities, it is quite possible for people to have a rich set of relationships with themselves. Some of these may even form a social network inside a single head [@martin17]. But we are not psychiatrists, so we are interested primarily in *interpersonal* not *intrapersonal* relations.
+
+|            | Case 1  | Case 2  | Case 3  |
+|:-----------|:-------:|:-------:|:-------:|
+| **Case 1** |  *--*   | Value 1 | Value 2 |
+| **Case 2** | Value 3 |  *--*   | Value 4 |
+| **Case 3** | Value 5 | Value 6 |  *--*   |
+
+: (\#tab:relmatrixnd) Example of a relationship matrix with blocked diagonals.
+
+This means that most of the time, we can ignore the diagonal cells in relationship matrices and rewrite them as in Table \@ref(tab:relmatrixnd), in which values appear only for the off-diagonal cells. So here we can see the relationship between Case 1 and Case 2 is Value 1, and the relationship between Case 2 and Case 1 is Value 3. Wait, would that mean Value 2 and 4 are the same? The answer is maybe. Depends on what *type of network tie* is being captured, as these were discussed in Chapter \@ref(graph-theory). If the tie is **symmetric** (and thus represented in an **undirected graph**), then the values will have to be the same. But if the **asymmetric** (and thus represented in a **directed graph**) then they don't have to be.
+
+By convention, in a relationship matrix, we say that the case located in row *i* **sends** (a tie) to the case located in column *j*, so if the relationship matrix was capturing friendship, we might say that *i* considers *j* to be a friend (sends the consideration) and so if *i* is Case 1 (row 1) and *j* is Case 2 (column 2), that would be Value 1 (e.g., "Are we friends?" Value 1 = Yes/No). But when *i* is now Case 2 (row 2) and *j* is Case 1 (column 1), we are now asking if Case 2 considers Case 1 to be a friend (e.g., "Are we friends?" Value 3 = Yes/No). If friendship is considered an asymmetric tie in this case, then that could be true, or it could not be. For instance, Case 2 can rebuff Case 1's friendship offer.
+
+Note that if the tie we recorded in a relationship matrix is symmetric, we can simplify the presentation even further. The reason is that as already noted, if a relationship is symmetric, then the value of the tie that *i* sends to *j* is necessarily the same as the value of the tie that *j* sends to *i*. This means that, in the relationship matrix, the *value* of cell **a**$_{ij}$ *has* to be the same as the value of the cell **a**$_{ji}$ for all rows *i* and columns *j* in the matrix. This yields a **symmetric relationship matrix**, like that shown in Table \@ref(tab:relmatrixndsymm).
+
+|            | Case 1  | Case 2  | Case 3  |
+|:-----------|:-------:|:-------:|:-------:|
+| **Case 1** |  *--*   | Value 1 | Value 2 |
+| **Case 2** | Value 1 |  *--*   | Value 3 |
+| **Case 3** | Value 2 | Value 3 |  *--*   |
+
+: (\#tab:relmatrixndsymm) Example of a symmetric relationship matrix with blocked diagonals.
+
+Note that a symmetric relationship matrix is simpler than its asymmetric counterpart, because now we only have to worry about *half* of the values. So before, in Table \@ref(tab:relmatrixnd) we had to worry about six distinct relationship values, but now we only have to worry about three. This means that, in a symmetric matrix, all the network information we need to look at is contained in either the **lower triangle** or the **upper triangle**. As we will see, in many applications, we can ignore one of the triangles altogether!
+
+There are many types of relationship and attribute-value matrices as the basic principles just stated can be varied to capture different underlying facets of relationships. This chapter will cover the **adjacency matrix**, the **reachability matrix**, the **distance matrix**, and the **affiliation matrix** as examples of how different types of networks can be best captured in a matrix form and then manipulated to produce sociologically meaningful results.
+
+## The Symmetric Adjacency Matrix {#sec:symmadjmat}
+
+The **adjacency matrix** is the most important, most commonly used way of formatting data in network analysis. An adjacency matrix asks if two cases share a relationship or not. As we saw in Chapter \@ref(graph-theory), two actors have a relationship, they are next to each other (**adjacent**) in the network, whereas if they do not share a relationship, they are not next to each other (**non-adjacent**).
+
+If we want to build an adjacency matrix of a network, we simply list all the actors in the rows and columns, and ask if the two share a relationship in order to fill in the values. A great way of understanding this is to start with a graph and to convert it into a matrix. This is done below where the **undirected graph** from Figure \@ref(fig:undirected) is converted into its **symmetric adjacency matrix** equivalent, shown in Table \@ref(tab:symmadjmat).
+
+|       |  A  |  B  |  C  |  D  |  E  |  F  |  G  |  H  |  I  |
+|:-----:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **A** | --  |  1  |  1  |  1  |  1  |  0  |  0  |  0  |  0  |
+| **B** |  1  | --  |  1  |  1  |  0  |  0  |  0  |  0  |  0  |
+| **C** |  1  |  1  | --  |  1  |  1  |  0  |  0  |  0  |  0  |
+| **D** |  1  |  1  |  1  | --  |  1  |  1  |  0  |  0  |  0  |
+| **E** |  1  |  0  |  1  |  1  | --  |  0  |  0  |  0  |  0  |
+| **F** |  0  |  0  |  0  |  1  |  0  | --  |  1  |  1  |  1  |
+| **G** |  0  |  0  |  0  |  0  |  0  |  1  | --  |  1  |  1  |
+| **H** |  0  |  0  |  0  |  0  |  0  |  1  |  1  | --  |  1  |
+| **I** |  0  |  0  |  0  |  0  |  0  |  1  |  1  |  1  | --  |
+
+: (\#tab:symmadjmat) Symmetric adjacency matrix corresponding to Figure \@ref(fig:undirected2).
+
+The first step in building the adjacency matrix that represents the graph is to list all the nodes {A, B, C, D, E, F, G, H, I} as both a row and a column entry for each node. Next, one goes sequentially across the rows and columns, asking the question "does actor i have the relationship I am examining with actor j?" If the question asked is about the absence or presence of a relationship, 0's and 1's are used. If A has a relationship with B, the value 1 is marked. Otherwise, 0.
+
+As we can see in matrix above, A indeed has a relationship with B, so the corresponding cell is marked 1. In fact, A has a relationship with B, C, D, and E and has 1's in each of the cells corresponding to these actors, but not with F, G, H, or I and so 0's are in these cells.
+
+But what do we do about the cells where we are theoretically supposed to ask if A has a relationship with A? As we have seen, for most sociological applications, it makes sense to just put a dash there, thus **blocking the diagonals**. It's not sociologically meaningful for A to have a relationship with itself. For example, asking "Is A friends with A?" does not make much sense, but there are rare cases when it does, such as when A is a group of people and not an individual, and the relationship under examination might occur both within and between groups. These are called **reflexive-ties** or **loops**. But if the network is represented as a **simple graph** it should contain no loops.
+
+After completing the first row, we ask does actor B have a relationship with actor A? Well yes, it does. In fact, we can know without even looking because if you recall, this network is defined ahead of time as reciprocal, meaning if A is friends with B, B is friends with A. We can remember this because the graph we are using is undirected. This means that the resulting matrix is going to be symmetric. **Symmetric matrices** are those that, when flipped along the diagonal (as shown in Figure \@ref(tab:symmadjmat)), the two sides of the matrix will be mirror images of each other.
+
+## The Asymmetric Adjacency Matrix {#sec:asymmadjmat}
+
+Conversely, a directed graph describing a network of asymmetric or anti-symmetric ties will create an **asymmetric matrix**. An asymmetric graph means that the values contained in the matrix do not mirror each other. In other words, an asymmetric graph means that the cell values are not necessarily the same (the relationship is not necessarily equivalent) between two of the cases.
+
+Figure \@ref(fig:directed2) shows the previous example of an directed graph.The corresponding **asymmetric adjacency matrix** is the following:
+
+|       |  A  |  B  |  C  |  D  |  E  |  F  |  G  |
+|:-----:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **A** | --  |  1  |  0  |  0  |  0  |  1  |  0  |
+| **B** |  1  | --  |  0  |  1  |  0  |  0  |  0  |
+| **C** |  0  |  1  | --  |  0  |  0  |  0  |  0  |
+| **D** |  0  |  1  |  0  | --  |  0  |  0  |  0  |
+| **E** |  0  |  0  |  1  |  1  | --  |  0  |  0  |
+| **F** |  1  |  0  |  0  |  0  |  0  | --  |  0  |
+| **G** |  0  |  0  |  0  |  1  |  0  |  1  | --  |
+
+: (\#tab:asymmadjmat) Asymmetric adjacency matrix corresponding to Figure \@ref(fig:directed2).
+
+```{r directed2, fig.margin=TRUE, fig.cap="A directed graph.", echo = FALSE, warning = FALSE, message=FALSE, fig.height = 8, fig.width = 6}
+fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D")
+edge.dat <- data.frame(fr, to)
+node.dat <- data.frame(name = union(fr, to))
+gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+p <- ggraph(gr, layout = 'kk')
+p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                        arrow = arrow(length = unit(7, 'mm')),
+                        end_cap = circle(10, 'mm'), 
+                        sep = unit(8, 'mm'))
+p <- p + geom_node_point(aes(x = x, y = y), size = 26, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+p <- p + theme_graph() + ylim(-1.25,1.5) + xlim(-1.25,1.25)
+p
+```
+
+Note that in Table \@ref(tab:asymmadjmat), while some relationships (such as between node A and B) are reciprocated, not all connections in the network are reciprocated. Node G sends ties to D and F, but does not receive any ties back. In the resulting matrix, A to B and B to A each have a 1 listed for the value, while G to D and G to F also have a value of 1. However, the cells corresponding to F to G and D to G each have a value of 0 because the ties are unreciprocated. These unreciprocated ties make the resulting matrix asymmetric. The two halves across the diagonal are no longer mirror images, but contain different entries.
+
+Why are the ties are not reciprocated? You might remember this was discussed in Chapter \@ref(graph-theory), but it is because of the type of data that the graph and matrix are representing. For example, the matrix in Table \@ref(tab:asymmadjmat) and graph shown in Figure \@ref(fig:directed2) could represent a intramural basketball club where they ask everyone in the club who they like to have as a teammate. Not everyone could agree that they like to have one another as teammates, and the matrix and graph in Figure \@ref(fig:directed2) would represent that. In this case, a node like G and E look really lonely since they have nobody who wants to play with them. However, if the tie were to be about advice, such that actually G gives advice to D and F, but does not take their advice back, G (and E) now look like respected figures in the network.
+
+```
+
+## Matrix Operations
+
+While a matrix is a mathematical representation of the network, taking the matrix and performing mathematical operations on the matrix can actually unveil patterns or features about the social world that we are trying to understand through the network. While the matrices we've worked with so far are simple, recall that in reality networks can be as complicated as the social world they represent. Facebook's friendship networks, the connections between servers on the World Wide Web, and airline transportation networks have millions of nodes and edges. It's important to understand some of the fundamentals of how to manipulate a matrix if we were to ever look at networks beyond many of the simple examples in this book.
+
+### Matrix Addition
+
+Adding two matrices together is a relatively straightforward matter. By taking two matrices of the same dimension *n*X*m*, add up each corresponding cell *i,j* in the two matrices, and return the result into the same cell *i,j* in a new matrix size *n*x*m*.
+
+$$
+\begin{equation}
+\begin{bmatrix} 4 & 2 & 6\\ 3 & -1 & 3\\ \end{bmatrix}
++\begin{bmatrix} 5 & 3 & 7\\ 7 & 3 & 4\\ \end{bmatrix}
+=\begin{bmatrix} 9 & 8 & 13\\ 10 & 2 & 7\\ \end{bmatrix}
+\end{equation}
+$$
+
+In the above example, cell *1,1* in the first matrix is 4, while in the second matrix the value of cell *1,1* is 5. Adding them together, 9 is returned and placed in cell *1,1* in the resulting new matrix. Similarly, cell *2,3* in the first matrix is 3 and 4 in the second matrix. Cell *2,3* in the summed matrix is thus 7.
+
+Note that we are unable to add together matrices of different dimensions. Only matrices with the same dimenstion *n*x*m* are capable of being summed together, as would become easily apparent if you tried. Subtraction of two matrices works in the same way as addition.
+
+### Scalar Multiplication
+
+Scalar multiplication is essentially the type of multiplication you are familiar with. Taking a single *scalar*, one can shape the original matrix into an essentially larger or smaller version of itself, the scale changing based on the size of the scalar.
+
+$$
+\begin{equation}
+3
+\begin{bmatrix} 5 & 6 & 3\\ 3 & 2 & 4\\ \end{bmatrix}
+= \begin{bmatrix} 15 & 18 & 9\\ 9 & 6 & 12\\ \end{bmatrix}
+\end{equation}
+$$ In the example above, one simply multiplies each cell by the scalar term, in this case 3. Thus, the resulting cell *1,1* is simply the scalar multiplied by cell *1,1* in the original matrix. In this case, 3x5 returns 15, which becomes cell 1,1 of the resulting matrix. This is similarly done for each cell, such that the final cell *2,3* multiplied by 3, returns 12, which then is the cell *2,3* in the resulting matrix.
+
+### Matrix Multiplication
+
+Multiplying matrices is a type of multiplication that you are likely unfamiliar with unless you've studied some linear algebra. One thing that will help in learning matrix multiplication is that you should not rely on your prior understanding of multiplication to a large degree.
+
+When we multiply two matrices together, we are fundamentally multiplying along rows in the first matrix, and columns in the second matrix. Matrix multiplication is not commutative in the same way normal multiplication is. Multiplying two matrices together, in different orders, will not give the same results.
+
+$$
+\begin{equation}
+{[n_1*m_1][n_2*m_2]}
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\begin{bmatrix} 5 & 6 & 3\\ 3 & 2 & 2\\ \end{bmatrix}
+\begin{bmatrix} 5 & 6 \\ 5 & 6 \\ 5 & 6\\ \end{bmatrix}
+= \begin{bmatrix} 70 & 88 \\ 35  &  42\\ \end{bmatrix}
+\end{equation}
+$$
+
+Left to Right Right Down
+
+## Matrix Powers
+
+The walk matrix is able to be derived from multiplying the adjacency matrix by itself.
+
+```{block, type = 'rmdtip'}
+While graphs and matrices provide us powerful tools to examine the social world, we must never lose sight of the ultimate goal is to *learn about the social world*, and we can adapt the techniques to suit our particular question and data. 
+```
+

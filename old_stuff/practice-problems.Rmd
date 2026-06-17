@@ -1,0 +1,376 @@
+---
+title: "Types of Graphs"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+    toc: true
+    smart: true
+bibliography: networks.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+    require(patchwork)
+```
+
+# Practice Problems
+
+## Balance
+1.Does the following graphs represent balanced or unbalanced relations between actors? (Dotted lines are negative ties)
+[picture]
+1.Why is balance important sociologically? What is the name for the theory that thinks balance is something people do?
+1.Name the personality trait from the Five Factor Model that describes the following situations.
+	i.Someone does not want to try a food because they haven't had it before.
+	i.Someone gets a bad grade, they get a little sad but generally have a good day.
+	i.Someone's two friends are fighting, that someone does nothing.
+	i.Someone really likes going to parties and meeting new people.
+	i.Someone is totally ok trying a new food on the recommendation of the waiter.
+	i.You invite a friend over for food, they bring someone else with them without asking you.
+	i.Someone gets a bad grade on a homework. It ruins their entire weekend.
+	i.You order appetizers for the table. You pay for them yourself because you didn't ask other people if they wanted them or not (2 answers!)
+
+
+###
+```{r directed_exercise_5_1, echo = FALSE, warning = FALSE, message=FALSE, fig.height=8}
+from <- c("A", "A", "A", "A", "B", "B", "C", "C", "D", "D", "E", "E", "I", "F", "J", "H", "G", "K", "K", "L", "L", "L", "L", "M", "P", "M", "N", "N", "O")
+to <- c("B", "D", "I", "E", "E", "I", "M", "I", "G", "F", "J", "J", "F", "I", "G", "G", "M", "M", "L", "M" , "P", "N", "O", "N", "M", "O", "P", "O", "P")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'kk')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from,to))), size = 8)
+p <- p + theme_graph()
+p
+```
+
+a) The graph is k-connected with what k?
+b) What is the diameter of the graph?
+c) What is a name for node H? What does it do?
+d) Let us remove node H. Notice that we have essentially done some c by removing the fewest node/edges to create network components. What are the resulting n-cliques for each of the resulting components?
+e) Calculate the Connectedness score for each of the two components. Which is the more centralized component?
+
+###
+```{r directed_exercise_5_2, echo = FALSE, warning = FALSE, message=FALSE, fig.height=8}
+from <- c("A", "A", "B", "D", "F", "D", "C", "C", "E", "H", "G", "K", "I", "L", "J")
+to <- c("B", "D", "C", "C", "D", "E", "F", "E", "H", "F", "H", "G", "G", "K", "I")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'kk')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from,to))), size = 8)
+p <- p + theme_graph()
+p
+```
+
+The Ministry of Silly Walks: Both J and L would like to get approval for funding the development of their new idea, which can only be approved by person A. The bureaucracy to A though is a little convoluted. What is the shortest path for person J and L to get their idea passed up the chain of command for approval?
+
+
+###
+
+```{r directed_exercise_5_3, fig.margin=FALSE, echo = FALSE, warning = FALSE, message=FALSE, fig.height=8}
+from <- c("A", "A", "A", "E", "E", "I", "I", "J", "A", "B", "C", "K", "D", "L", "L", "L", "L", "L", "L", "M", "M", "M", "N", "N")
+to <- c("B", "E", "I", "J", "F", "F", "J", "F", "C", "C", "D", "D", "L", "K", "M", "N", "O", "P", "N", "P", "O", "P", "O", "P")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'kk')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 14, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from,to))), size = 8)
+p <- p + theme_graph()
+p
+```
+
+a) How many components are there in the graph?
+b) The giant component is k-connected with what k?
+c) What is the diameter of the graph?
+
+Remove component G-H so now the graph is what was before the giant component and answer the following questions.
+d) What is the diameter of the graph? 
+e) The graph is k-connected with what k?
+f) What type of clique is subgraph (L, M, N, O, P)?
+g) What type of clique is subgraph (A, E, I, F, J)?
+
+
+
+```{r directed-practice1, fig.cap="Example 1", echo=FALSE, warning=FALSE, message=FALSE}
+    g.nodes <- data.frame(name = c("A", "B", "C", "D", "E", "F", "G"))
+    g.edges <- data.frame(from = c(rep("A", 2), rep("B", 4), rep("C", 2), rep("D", 3), rep("E", 3),
+                                   rep("F", 1), rep("G", 3)),
+                          to = c("B", "C", "A", "C", "D", "G", "A", "B", "E", "G", "B", "D", "G",
+                                 "F", "E", "B", "D", "E"))
+    gr <- tbl_graph(nodes = g.nodes, edges = g.edges)
+    
+    p <- ggraph(gr, layout = 'auto')
+    p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "lightblue") 
+    p <- p + geom_node_text(aes(label = name), size = 8)
+    p <- p + theme_graph() + ylim(-1.25,1.25)
+    p
+```
+
+
+1. What type of graph is pictured above? What type of relationships might the graph represent?
+1. How many nodes and edges are in the above graph?
+1. What is the set that describes the above graph?
+1. What is the average in-degree of the above graph? The average out-degree?
+1. What is modal degree in the above graph?
+1. What is the degree distribution of the above graph?
+1. What is the density of the above graph?
+
+
+```{r directed-practice2, fig.cap="Example 2", echo=FALSE, warning=FALSE, message=FALSE}
+    g.nodes <- data.frame(name = c("L", "M", "N", "O", "P", "Q", "R"))
+    g.edges <- data.frame(from = c(rep("L", 3), rep("M", 3), rep("N", 2), rep("O", 3), rep("P", 3),
+                                   rep("Q", 1), rep("R", 1)),
+                          to = c("M", "N", "O", "Q", "P", "L", "L", "O", "L", "N", "R", "M", "Q",
+                                 "M", "P", "O"))
+    gr <- tbl_graph(nodes = g.nodes, edges = g.edges)
+    p <- ggraph(gr, layout = 'auto')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5) 
+p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "lightblue") 
+p <- p + geom_node_text(aes(label = name), size = 8)
+p <- p + theme_graph() + ylim(-1.25,1.25)
+p
+```
+
+1. What type of graph is pictured above? What type of relationships might the graph represent?
+1. How many nodes and edges are in the above graph?
+1. What is the set that describes the above graph?
+1. What is the average in-degree of the above graph? The average out-degree?
+1. What is modal degree in the above graph?
+1. What is the degree distribution of the above graph?
+1. What is the density of the above graph?
+
+
+```{r directed-practice3, fig.cap="Example 3", echo=FALSE, warning=FALSE, message=FALSE}
+    g.nodes <- data.frame(name = c("A", "B", "C", "D", "E", "F", "G"))
+    g.edges <-  data.frame(from = c(rep("A", 2), rep("B", 3), rep("C", 2), rep("D", 1), rep("E", 1),
+                                   rep("F", 1), rep("G", 2)),
+                          to = c("D", "C", "A", "F", "D", "E", "B", "B", "D", "A", "F", "A"))
+    gr <- tbl_graph(nodes = g.nodes, edges = g.edges)
+    p <- ggraph(gr, layout = 'auto')
+    p <- p + geom_edge_parallel(color = "darkgray", edge_width = 1.5,
+                        arrow = arrow(length = unit(6, 'mm')),
+                        end_cap = circle(7, 'mm'), 
+                        sep = unit(6, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "lightblue") 
+    p <- p + geom_node_text(aes(label = name), size = 8)
+    p <- p + theme_graph() + ylim(-1, 1)
+    p
+```
+
+1. What type of graph is pictured above? What type of relationships might the graph represent?
+1. How many nodes and edges are in the above graph?
+1. What is the set that describes the above graph?
+1. What is the average in-degree of the above graph? The average out-degree?
+1. What is modal degree in the above graph?
+1. What is the degree distribution of the above graph?
+1. What is the density of the above graph?
+
+
+
+
+
+```{r directed_practice5, fig.cap="Example 5", echo=FALSE, warning=FALSE, message=FALSE}
+from <- c("Hassan", "Farid", "Haifa", "Haifa", "Hisham", "Latifa", "Tamer", "Ahmed", "Nora", "Haifa", "Ahmed")
+to <- c("Haifa", "Haifa", "Nora", "Hisham", "Latifa", "Nora", "Hisham", "Latifa", "Hisham", "Latifa", "Nora")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'star')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from, to))), size = 5)
+p <- p + theme_graph()
+p <- p + expand_limits(x = c(-1.5,1.5), y = c(-1.5, 1.5))
+p
+```
+
+
+```{r directed_practice6, fig.cap="Example 6", echo=FALSE, warning=FALSE, message=FALSE}
+from<- c("Vishal", "Prakriti", "Prakriti", "Arjun", "Neha", "Karan", "Navv", "Navv", "Raja", "Sukriti", "Neja", "Raja")
+to <- c("Arjun", "Arjun", "Neha", "Neha", "Arjun", "Neha", "Karan", "Raja", "Sukriti", "Neha", "Sukriti", "Karan")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'star')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from, to))), size = 5)
+p <- p + theme_graph() + theme(plot.margin = unit(c(0,0,0,0), "cm"))
+p <- p + expand_limits(x = c(-1.5,1.5), y = c(-1.5, 1.5))
+p
+```
+
+
+```{r undirected_practice8, , fig.cap="Example 8", echo=FALSE, warning=FALSE, message=FALSE}
+from <- c("Yeeun", "Yeeun", "Sunye", "Sunmi", "Sohee", "Hyun Seung", "Hyun-a", "Hyun-a", "Hyun-a", "Hyun-a", "Hyun-a", "Hyun-a", "Hyun-a", "Hyun-a", "Ji-hyun", "Ji-hyun", "Ji-hyun","Ga-yoon", "Ji-yoon", "So-hyun", "Ji-yoon") 
+to <- c("Sunmi", "Sohee", "Yeeun", "Sunye", "Sunmi", "Hyun-a", "Yeeun", "Sunye", "Sunmi", "Sohee", "Ji-hyun", "Ga-yoon", "Ji-yoon", "So-hyun", "Ga-yoon", "Ji-yoon", "So-hyun", "Ji-yoon", "So-hyun", "Ji-yoon", "So-hyun")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'star')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 24, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from, to))), size = 5)
+p <- p + theme_graph() + theme(plot.margin = unit(c(0,0,0,0), "cm"))
+p <- p + expand_limits(x = c(-1.5,1.5), y = c(-1.5, 1.5))
+p
+```
+
+```{r bib, include=FALSE}
+# create a bib file for the R packages used in this document
+knitr::write_bib(c('base', 'rmarkdown'), file = 'skeleton.bib')
+```
+
+
+## Practice Problems
+
+### 
+
+```{r directed_practice3_1, fig.margin=FALSE, fig.cap="A directed graph", echo = FALSE, warning = FALSE, message=FALSE, fig.height=8}
+from <- c("A", "B", "B", "D", "I", "G", "F", "J")
+to <- c("B", "I", "D", "G", "G", "E", "F", "J")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'kk')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from, to))), size = 12)
+p <- p + theme_graph()
+p
+```
+
+a)  Create a reachability matrix describing the above graph.
+
+### 
+
+```{r directed_practice3_2, fig.margin=FALSE, fig.cap="An undirected graph", echo = FALSE, warning = FALSE, message=FALSE, fig.height=8}
+from <- c("A", "F", "A", "B", "D", "B", "I", "G", "B", "D")
+to <- c("F", "A", "B", "I", "B", "D", "J", "J", "G", "E")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'kk')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from, to))), size = 12)
+p <- p + theme_graph()
+p
+```
+
+### 
+
+```{r directed_practice3_3, fig.margin=FALSE, fig.cap="A directed graph", echo = FALSE, warning = FALSE, message=FALSE, fig.height=6}
+from <- c("Diane", "Lynne", "Lynne", "Lynne", "Lynne", "Lisa", "Lisa", "Kevin")
+to <- c("Lynne", "Kevin", "Jacob", "Lisa", "Mike", "Mike", "Jacob", "Jacob")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'kk')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 30, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from, to))), size = 8)
+p <- p + theme_graph() + expand_limits(x = c(-2,1.5), y = c(-2.2, .5))
+p
+```
+
+Above we have a made-up network consisting of academics who have worked together on projects that was presented in the exercises of Chapter 1. Please conduct the following exercises using data from the above graph.
+
+a)  Please turn the above graph into an undirected matrix
+b)  Is the above matrix an asymmetric, symmetric, or antisymmetric matrix?
+c)  What are examples of non-adjacent ties in the graph?
+
+### 
+
+Please solve the following matrix multiplication problems, if possible. $$
+\begin{equation}
+\begin{bmatrix} 8 & 9 & 3\\ 3 & 2 & 2\\ \end{bmatrix}
+\begin{bmatrix} 5 & 4\\ 1 & 2\\ 3 & 2\\ \end{bmatrix}
+=
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\begin{bmatrix} 2 & 1 & 4\\ \end{bmatrix}
+\begin{bmatrix} 3\\ 3\\ 0\\ \end{bmatrix}
+=
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\begin{bmatrix} 8\\ 2\\ \end{bmatrix}
+\begin{bmatrix} 8 & 5\\ 7 & 6\\ 9 & 3\\ \end{bmatrix}
+=
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\begin{bmatrix} 2 & 5\\ 3 & 5\\ 2 & 5\\ \end{bmatrix}
+\begin{bmatrix} 2\\ 3\\ \end{bmatrix}
+=
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\begin{bmatrix} 5 & 9 & 1\\ 4 & 5 & 2\\ \end{bmatrix}
+\begin{bmatrix} 7 & 4\\ 1 & 2\\ 3 & 6 \end{bmatrix}
+=
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\begin{bmatrix} 4 & 8 & 2\\ \end{bmatrix}
+\begin{bmatrix} 3\\ 7\\ 5\\ \end{bmatrix}
+=
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\begin{bmatrix} 4\\ 5\\ \end{bmatrix}
+\begin{bmatrix} 4 & 8\\ 5 & 8\\ 9 & 7 \end{bmatrix}
+=
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\begin{bmatrix} 4 & 8\\ 5 & 8\\ 9 & 7 \end{bmatrix}
+\begin{bmatrix} 4\\ 5\\ \end{bmatrix}
+=
+\end{equation}
+$$
+
+### 
+
+```{r directed_practice3_5, fig.margin=FALSE, fig.cap="An undirected graph", echo = FALSE, warning = FALSE, message=FALSE, fig.height=5}
+from <- c("A", "B")
+to <- c("B", "C")
+dat <- data.frame(from, to)
+gr <- as_tbl_graph(dat)
+p <- ggraph(gr, layout = 'kk')
+p <- p + geom_edge_link(color = "darkgray", edge_width = 1.5)
+p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "lightblue")
+p <- p + geom_node_text(aes(label = unique(c(from, to))), size = 12)
+p <- p + theme_graph() + expand_limits(x = c(-.75,0.25), y = c(-0.75, .2))
+p
+```
+
+a)  Multiply the adjacency matrix for the above graph by itself. What is the resulting matrix and interpret the results
+
+
+
+

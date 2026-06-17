@@ -1,0 +1,226 @@
+---
+title: "Homework IV: Ego-Network Metrics"
+date: "`r Sys.Date()`"
+output:
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(colorspace)
+    require(patchwork)
+```
+
+Consider Figure \@ref(fig:egoalter). This shows the **ego-to-alter** ties in a hypothetical ego-network (the **star-subgraph**).
+
+```{r}
+    set.seed(123)
+    c1 <- sample(rainbow_hcl(4), 11, replace = TRUE)
+    c2 <- sample(rainbow_hcl(5), 11, replace = TRUE)
+    c3 <- sample(rainbow_hcl(4), 11, replace = TRUE)
+    c4 <- sample(rainbow_hcl(4), 11, replace = TRUE)
+
+```
+
+```{r egoalter, fig.cap="Ego to alter ties in a hypothetical ego-network.", fig.margin=TRUE, fig.width = 8, fig.height=8}
+    gr <- create_empty(12, directed = FALSE)
+        gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:12)) %>% 
+        mutate(name = c("Ego", toupper(letters[1:11])))
+    p <- ggraph(gr, layout = 'star') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.5) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = c(24, rep(18, 11)), color = c("red", rep("tan2", 11))) 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph()
+    p
+```
+
+(@) What is the **size** of ego's network?
+
+- $S = 11$
+
+Consider Figure \@ref(fig:alteralter). This shows the **alter-to-alter** ties in the hypothetical ego-network shown in Figure \@ref(fig:egoalter).
+
+```{r alteralter, fig.cap="Alter to alter ties in a hypothetical ego-network.", fig.width = 8, fig.height=8, fig.margin=TRUE}
+    set.seed(934)
+    d <- c(2, 3, 5, 8, 0, 2, 0, 4, 2, 4, 6)
+    gr <- play_degree(d, method = "simple")
+    gr <- mutate(gr, name = toupper(letters[1:length(d)]))
+    p <- ggraph(gr, layout = 'circle') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 16, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 7, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+
+(@) What is ego's clustering coefficient?
+
+- $CC_i = `r round(edge_density(gr), 2)`$
+
+
+```{r altersdem1, fig.cap="Gender identification of alters in a hypothetical ego-network.", fig.width = 10, fig.height=10, fig.margin=TRUE}
+    gr <- create_empty(11, directed = FALSE)
+        gr <- gr %>% 
+        mutate(name = toupper(letters[1:11]))
+    p <- ggraph(gr, layout = 'circle') 
+    p <- p + geom_node_point(aes(x = x, y = y, color = c1), size = 24)
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() + theme(legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = 18))
+    p <- p + guides(color = guide_legend(override.aes = list(size = 14))) 
+    p1 <- p + scale_color_discrete(labels = c("Women", "Men", "Genderfluid", "Non-binary"))
+    p1
+```
+
+```{r altersdem2, fig.cap="Ethnoracial identification of alters in a hypothetical ego-network.", fig.width = 10, fig.height=10, fig.margin=TRUE}
+    gr <- create_empty(11, directed = FALSE)
+        gr <- gr %>% 
+        mutate(name = toupper(letters[1:11]))
+    p <- ggraph(gr, layout = 'circle') 
+    p <- p + geom_node_point(aes(x = x, y = y, color = c2), size = 24)
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() + theme(legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = 18))
+    p <- p + guides(color = guide_legend(override.aes = list(size = 14))) 
+    p2 <- p + scale_color_discrete(labels = c("Asian", "Black", "White", "Native", "Hispanic"))
+    p2
+```
+
+```{r altersdem3, fig.cap="Role relations of alters in a hypothetical ego-network.", fig.width = 10, fig.height=10, fig.margin=TRUE}
+    gr <- create_empty(11, directed = FALSE)
+        gr <- gr %>% 
+        mutate(name = toupper(letters[1:11]))
+    cl <- sample(rainbow_hcl(4), 11, replace = TRUE)
+    p <- ggraph(gr, layout = 'circle') 
+    p <- p + geom_node_point(aes(x = x, y = y, color = c3), size = 24)
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() + theme(legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = 18))
+    p <- p + guides(color = guide_legend(override.aes = list(size = 14))) 
+    p3 <- p + scale_color_discrete(labels = c("Neighbor", "Kin", "Acquaintance", "Friend"))
+    p3
+```
+
+```{r altersdem4, fig.cap="Employment status of alters in a hypothetical ego-network.", fig.width = 10, fig.height=10, fig.margin=TRUE}
+    gr <- create_empty(11, directed = FALSE)
+        gr <- gr %>% 
+        mutate(name = toupper(letters[1:11]))
+    cl <- sample(rainbow_hcl(4), 11, replace = TRUE)
+    p <- ggraph(gr, layout = 'circle') 
+    p <- p + geom_node_point(aes(x = x, y = y, color = c4), size = 24)
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() + theme(legend.position = "bottom", legend.title = element_blank(), legend.text = element_text(size = 18))
+    p <- p + guides(color = guide_legend(override.aes = list(size = 14))) 
+    p4 <- p + scale_color_discrete(labels = c("Employed Outside the Home", "Retired", "Student", "Full-Time Parent"))
+    p4
+```
+Figures \@ref(fig:altersdem1), \@ref(fig:altersdem2), \@ref(fig:altersdem3), and \@ref(fig:altersdem4) show some sociodemographic and role-relational characteristics of alters in ego's network. Ego is a *UCLA student who identifies as Hispanic and as a Woman*. Using this information:
+
+(@) Compute Ego's **homophily** with respect to gender identity.
+
+
+- $EI_G = \frac{6 - 5}{6 + 5} = \frac{1}{11} = `r round(1/11, 2)`$
+
+
+(@) Compute Ego's **homophily** with respect to Ethnoracial identification.
+
+
+- $EI_R = \frac{7 - 4}{7 + 4} = \frac{3}{11} = `r round(3/11, 2)`$
+
+
+(@) Compute the **proportion** kin in Ego's network.
+
+
+- $P_k = \frac{2}{11} = `r round(2/11, 2)`$
+
+
+(@) Compute the **proportion** non-Hispanic in Ego's network.
+
+
+- $P_{nh} = \frac{7}{11} = `r round(7/11, 2)`$
+
+
+(@) Compute the **proportion** of individuals employed outside the home in Ego's network.
+
+
+- $P_E = \frac{4}{11} = `r round(4/11, 2)`$
+
+
+(@) Compute the **diversity** of Ego's Network with respect to ethnoracial identity.
+
+- $H_R = 1 - \left( \left[\frac{1}{11}\right]^2  + \left[\frac{3}{11}\right]^2  + \left[\frac{1}{11}\right]^2  + \left[\frac{2}{11}\right]^2  + \left[\frac{4}{11}\right]^2 \right)$ 
+
+- $H_R = 1 - \left( `r round(1/11, 2)`^2 + `r round(3/11, 2)`^2 + `r round(1/11, 2)`^2 +`r round(2/11, 2)`^2 + `r round(4/11, 2)`^2 \right)$
+
+- $H_R = 1 - \left( `r round((1/11)^2, 2)` + `r round((3/11)^2, 2)` + `r round((1/11)^2, 2)` + `r round((2/11)^2, 2)` + `r round((4/11)^2, 2)` \right)$
+
+- $H_R = 1 - `r round((1/11)^2, 2) + round((3/11)^2, 2) + round((1/11)^2, 2) + round((2/11)^2, 2) + round((4/11)^2, 2)`$
+
+- $H_R = `r 1 - (round((1/11)^2, 2) + round((3/11)^2, 2) + round((1/11)^2, 2) + round((2/11)^2, 2) + round((4/11)^2, 2))`$
+
+
+(@) Compute the **diversity** of Ego's Network with respect to employment status. 
+
+- $H_R = 1 - \left( \left[\frac{4}{11}\right]^2  + \left[\frac{1}{11}\right]^2  + \left[\frac{2}{11}\right]^2  + \left[\frac{4}{11}\right]^2 \right)$ 
+
+- $H_ES = 1 - \left( `r round(4/11, 2)`^2 + `r round(1/11, 2)`^2 + `r round(2/11, 2)`^2 +`r round(4/11, 2)`^2 \right)$
+
+- $H_ES = 1 - \left( `r round((4/11)^2, 2)` + `r round((1/11)^2, 2)` + `r round((2/11)^2, 2)` + `r round((4/11)^2, 2)` \right)$
+
+- $H_ES = 1 - `r round((4/11)^2, 2) + round((1/11)^2, 2) + round((2/11)^2, 2) + round((4/11)^2, 2)`$
+
+- $H_ES = `r 1 - (round((4/11)^2, 2) + round((1/11)^2, 2) + round((2/11)^2, 2) + round((4/11)^2, 2))`$
+
+(@) Compute the **diversity** of Ego's Network with respect to gender identity.
+
+- $H_R = 1 - \left( \left[\frac{5}{11}\right]^2  + \left[\frac{4}{11}\right]^2  + \left[\frac{1}{11}\right]^2  + \left[\frac{1}{11}\right]^2 \right)$ 
+
+- $H_G = 1 - \left( `r round(5/11, 2)`^2 + `r round(4/11, 2)`^2 + `r round(1/11, 2)`^2 +`r round(1/11, 2)`^2 \right)$
+
+- $H_G = 1 - \left( `r round((5/11)^2, 2)` + `r round((4/11)^2, 2)` + `r round((1/11)^2, 2)` + `r round((1/11)^2, 2)` \right)$
+
+- $H_G = 1 - `r round((5/11)^2, 2) + round((4/11)^2, 2) + round((1/11)^2, 2) + round((1/11)^2, 2)`$
+
+- $H_G = `r 1 - (round((5/11)^2, 2) + round((4/11)^2, 2) + round((1/11)^2, 2) + round((1/11)^2, 2))`$
+
+
+(@) Compute the **proportion** of fellow students in Ego's network.
+
+
+- $P_s = \frac{2}{11} = `r round(2/11, 2)`$
+
+
+(@) Does ego have a stronger **same-group preference** with respect to race than with respect to gender? (Yes/No)
+
+
+- No. $(EI_G < EI_R)$
+
+
+(@) Is the **diversity** of ego's network larger when it comes to race than when it comes to employment status (Yes/No)
+
+
+- Yes. $(H_G < H_R)$
+
+
+(@) What is the **proportion** of ego's network composed of kin who are also full-time parents?
+
+- $k = \{E, C, G, J\}$
+- $p = \{C, H, J, K\}$
+- $k \cap p = \{C, J\}$
+- $P_{k \cap p} = \frac{2}{11} = `r round(2/11, 2)`$
+
+
+(@) Compute the **proportion** of people who identify as Men or Women in ego's network. 
+
+
+- $P_{m \lor w} = \frac{9}{11} = `r round(9/11, 2)`$
+
+
+
+

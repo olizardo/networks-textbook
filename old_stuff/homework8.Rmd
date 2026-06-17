@@ -1,0 +1,150 @@
+---
+title: "Homework VIII: Centrality, Groups, and Positions"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+    toc: true
+    smart: true
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+```{r close, fig.height=12, fig.width=12,fig.cap="An undirected graph."}
+    set.seed(12345)
+    gr <- play_islands(n_islands = 5, size_islands = 3, p_within = 0.7, m_between = 2)
+    n <- length(V(gr))
+    labs <- toupper(letters[1:n])
+    V(gr)$name <- labs
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.15) 
+    p <- p + geom_node_point(color = "tan2", size = 22) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+(@) Write down the **(Geodesic) Distance Matrix** for the graph shown in Figure \@ref(fig:close). [Recall that in the Distance Matrix](http://olizardo.bol.ucla.edu/classes/soc-111/lessons-winter-2022/7-lesson-from-graph-to-matrix.html#the-geodesic-distance-matrix), the $ij_{th}$ cell contains the **length** of the shortest path between nodes *i* and *j* (2pts).
+
+```{r}
+    a <- matrix(" ", nrow = n, ncol = n)
+    diag(a) <- "0"
+    rownames(a) <- labs
+    colnames(a) <- labs
+    kbl(a, format = "html", padding = 1, align = "c") %>% 
+        kable_classic(lightable_options = "striped") %>% 
+        kable_styling(bootstrap_options = c("hover", "condensed", "responsive")) %>% 
+        row_spec(1:n, color = "black", extra_css = "border-bottom: 1px solid;height:10px") %>% 
+        column_spec(1:n, color = "black", border_right = TRUE, border_left = TRUE)
+```
+(@) Using the information in the distance matrix, compute the **closeness centrality** of each node in the graph shown in Figure \@ref(fig:close) (2pts).
+
+```{r}
+    a <- matrix(" ", nrow = n, ncol = 2)
+    rownames(a) <- labs
+    colnames(a) <- c("Work Space", "Closeness")
+    kbl(a, format = "html", padding = 1, align = "c") %>% 
+        kable_classic(lightable_options = "striped") %>% 
+        kable_styling(bootstrap_options = c("hover", "condensed", "responsive")) %>% 
+        row_spec(1:n, color = "black", extra_css = "border-bottom: 1px solid; height:60px;") %>% 
+        column_spec(1:3, color = "black", border_right = TRUE, border_left = TRUE, extra_css = "vertical-align:middle;") %>% 
+        column_spec(c(1,3), width = "0.5in") %>% 
+        column_spec(1, extra_css = "text-align: center;")
+```
+
+(@) Which node has the highest closeness centrality in Figure \@ref(fig:close)?
+
+-
+
+(@) Which node has the smallest closeness centrality in Figure \@ref(fig:close)?
+
+-
+
+```{r clique, fig.height=12, fig.width=12, fig.cap="An undirected graph"}
+    set.seed(123)
+    gr1 <- create_complete(5) %>% 
+        mutate(name = toupper(letters[1:5]))
+    gr2 <- create_complete(5) %>% 
+        mutate(name = toupper(letters[6:10]))
+    gr3 <- create_complete(4) %>% 
+        mutate(name = toupper(letters[11:14]))
+    gr4 <- play_islands(n_islands = 4, size_islands = 3, p_within = 1, m_between = 1) %>% 
+        mutate(name = toupper(letters[1:12]))
+    gr <- bind_graphs(gr1) %>% 
+        bind_graphs(gr3) %>% 
+        graph_join(gr4)
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.15) 
+    p <- p + geom_node_point(color = "tan2", size = 22) 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+(@) Enumerate all the **cliques** of *size four or larger* found in the graph shown in Figure \@ref(fig:clique) (2pts).
+
+- 
+-
+-
+-
+-
+-
+-
+-
+  
+(@) How many cliques (of any size) does node *E* in Figure \@ref(fig:clique) belong to?
+
+(@) What edges would have to be added to the graph shown in Figure \@ref(fig:clique) to make nodes $\{B, D, G, H, I\}$ into a clique of size 5?
+
+```{r equiv, fig.height=12, fig.width=12,fig.cap="An undirected graph."}
+    set.seed(123)
+    pm <- matrix(c( 0,.7,.5, 1, 
+                   .7,.7,.2, 0,
+                   .5,.2,.7, 0,
+                    1, 0, 0, 0), nrow=4)
+    pm[lower.tri(pm)] = t(pm)[lower.tri(pm)]
+    gr <- play_blocks(n = 12, size_blocks = c(2, 4, 3, 3), p_between = pm)
+    n <- length(V(gr))
+    labs <- toupper(letters[1:n])
+    V(gr)$name <- labs
+    p <- ggraph(gr, layout = 'lgl') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.07) 
+    p <- p + geom_node_point(color = "tan2", size = 20) 
+    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+
+(@) Fill out the **Structural Similarity Matrix** for the graph shown in Figure \@ref(fig:equiv) using the [**Dice Similarity Index**](http://olizardo.bol.ucla.edu/classes/soc-111/lessons-winter-2022/11-groups-and-positions.html#dice-similarity) metric (3pts).
+
+```{r} 
+    J <- round(similarity(gr, method = "dice"), 2)
+    rownames(J) <- V(gr)$name
+    colnames(J) <- V(gr)$name
+    diag(J) <- "--"
+    J[lower.tri(J)] <- "--"
+    J[upper.tri(J)] <- " "
+    kbl(J, format = "html", align = "c", padding = 1,
+        caption = "Structural similarities for pairs of nodes in an undirected graph (Dice).") %>% 
+        kable_classic(lightable_options = "striped") %>% 
+        kable_styling(bootstrap_options = c("hover", "condensed", "responsive")) %>% 
+        row_spec(1:nrow(J), color = "black", extra_css = "border-bottom: 1px solid;") %>% 
+        column_spec(1:ncol(J), color = "black", border_right = TRUE, border_left = TRUE)
+```
+
+(@) Write down the set of nodes that are **structurally equivalent** (e.g., connected to the same set of neighbors) in Figure \@ref(fig:equiv). 
+
+-
+
+(@) Out of the nodes that are not structurally equivalent, which pairs of nodes have the highest **structural similarity** in Figure \@ref(fig:equiv)?
+
+-
+

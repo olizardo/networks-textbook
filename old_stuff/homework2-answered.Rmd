@@ -1,0 +1,127 @@
+---
+title: "Homework II: Directed Graphs"
+date: "`r Sys.Date()`"
+output:
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+```
+
+
+```{r grex1, fig.cap="A directed graph.", fig.width=10, fig.height=10}
+    set.seed(529)
+    gr <- play_erdos_renyi(n = 10, m = 20, directed = TRUE, loops = FALSE)
+    gr <- mutate(gr, name = toupper(letters[1:10]))
+    p <- ggraph(gr, layout = 'auto') 
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                            arrow = arrow(length = unit(5, 'mm')),
+                            end_cap = circle(10, 'mm'), 
+                            sep = unit(8, 'mm'))    
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+    p <- p + theme_graph()
+    p
+```
+Consider the graph shown in Figure \@ref(fig:grex1):
+
+(@) Write down the **edge set** of the graph:
+
+- $E = \{AB, AD, AE, BA, BE, CH, EA, EC, ED, EH, FC, FE, FJ, FI, GC, GI, HD, IC, JD, JH\}$
+
+- (Also accept $V_X$ notation for all that follows) 
+
+
+(@) Who are the **out-neighbors** of node *F*?
+
+- $N_{out}(F) = \{C, E, I, J\}$
+
+
+(@) Who are the **in-neighbors** of node *D*?
+
+- $N_{in}(D) = \{A, E, H, J\}$
+
+(@) What is the **intersection** of the **out-neighborhoods** of vertices *E* and *A*?
+
+- $N_{out}(A) = \{B, D, E\}$
+
+- $N_{out}(E) = \{A, C, D, H\}$
+
+- $N_{out}(A) \cap N_{out}(E) = \{D\}$
+
+
+(@) What is the **union** of the **in-neighborhoods** of vertices *D* and *H*?
+
+- $N_{in}(D) = \{A, E, H, J\}$
+
+- $N_{in}(H) = \{C, E, J\}$
+
+- $N_{in}(D) \cup N_{in}(H) = \{A, C, E, H, J\}$
+
+
+(@) What is the **out-degree** of node *F*?
+
+- $k_F^{out} = 4$
+
+
+(@) What is the **in-degree** of node *D*?
+
+
+- $k_F^{in} = 4$
+
+
+(@) What are the nodes with the largest **out-degree**?
+
+
+- $\{E, F\}$
+
+
+(@) What are the nodes with the largest **in-degree**?
+
+
+- $\{C, D\}$
+
+
+(@) Which one is the **receiver node** in the graph?
+
+
+- $\{D\}$
+
+
+(@) Which are the **transmitter nodes** in the graph?
+
+
+- $\{F, G\}$
+
+
+(@) What type of **dyad** is formed by the subgraph containing nodes *A* and *B*?
+
+
+- *Mutual*
+
+
+(@) What type of **dyad** is formed by the subgraph containing nodes *C* and *F*?
+
+
+- *Asymmetric*
+
+
+(@) What type of **dyad** is formed by the subgraph containing nodes *B* and *C*?
+
+
+- *Null*
+
+
+(@) How many **mutual dyads** are there in the graph?
+
+- $M = 2$
+

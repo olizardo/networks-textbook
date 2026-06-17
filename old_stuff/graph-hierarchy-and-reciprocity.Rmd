@@ -1,0 +1,205 @@
+---
+title: "Directed Graph Metrics"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+    toc: true
+    smart: true
+bibliography: networks.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+    require(patchwork)
+```
+
+There are a number of graph metrics that makes the most sense to compute in **directed graphs**. In this chapter, we discuss the most important ones.
+
+# Graph Connectedness
+Recall that in our discussion of indirect relationships, we found that paths work differently in undirected versus directed graphs. In an undirected graph, if we know the graph is connected (it is not split into separate components), then we also know that every node can reach every other node via a an undirected path of some length, even if that path is very long. The reason is that undirected paths are *symmetric*: In an undirected graph, if a path exists with node *A* as source and node *B* as destination, then necessarily a path also exists with node *B* as source and node *A* as destination. In an undirected graph that is also connected, all nodes are **mutually reachable** by construction.
+
+In a directed graph, things work differently. Directed paths are asymmetric. This means that In a directed graph, a path may with node *A* as source and node *B* as destination. However, this does not necessarily mean a path also exists with node *B* as source and node *A* as destination. It could (in which case the two nodes are strongly connected), but it could also not (in which case the nodes are only unilaterally connected). One can reach the other, but not the reverse. This means that a directed graph can be connected, but at the same time some nodes may not be able to reach other nodes via a directed path that respect the direction of the arrows. 
+
+```{r directed1, fig.margin=TRUE, fig.cap="A directed graph.", fig.width=9, fig.height=8}
+    set.seed(359)
+    gr <- play_erdos_renyi(n = 7, m = 18)
+    name <- toupper(letters[1:7])
+    p <- ggraph(gr, layout = 'auto')
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                                arrow = arrow(length = unit(6, 'mm')),
+                                end_cap = circle(10, 'mm'), 
+                                sep = unit(9, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+
+We can compute a metric telling us the extent to which a directed graph is connected. To do this, we can use the **reachability matrix** as we defined it in the lesson on social network matrices. Recall that the reachability matrix is a square matrix with the nodes on the row and columns. Each cell of the reachability contains a $1$ if node *i* can reach node *j* and a $0$ otherwise. Consider for instance the graph shown in Figure \@ref(fig:direx1). The corresponding reachability matrix is shown as Table \@ref(tab:reachmat1)
+
+```{r reachmat1}
+  set.seed(359)
+  gr <- play_erdos_renyi(n = 7, m = 18)
+  r <-distances(gr, mode = "out")
+  r <- ifelse(r == Inf, 0, 1)
+  diag(r) <- "--"
+  kbl(r, caption = "Reachability matrix for a directed graph.")
+```
+
+<!--
+
+
+# Graph Hierarchy
+```{r tree, fig.margin=TRUE, fig.cap="A tree graph.", , fig.width=6, fig.height=6}
+fr <- c("A", "A", "B", "B", "C", "C")
+to <- c("B", "C", "D", "E", "F", "G")
+edge.dat <- data.frame(fr, to)
+node.dat <- data.frame(name = union(fr, to))
+gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+p <- ggraph(gr, layout = 'tree')
+p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25,
+                        arrow = arrow(length = unit(6, 'mm')),
+                        end_cap = circle(6, 'mm'))
+p <- p + geom_node_point(aes(x = x, y = y), size = 16, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+p <- p + theme_graph() + ylim(-.1, 3.1)
+p
+```
+
+In the lesson on network matrices, we defined the **reachability matrix** for a directed graph in a social network. This is a matrix that contains a one in each cell of the row node can reach the column node via a path of any length. In Table \@ref(tab:reachmat), we derived the corresponding reachability matrix for that directed graph. Now let us do the same, but this time for a tree graph describing hierarchical anti-symmetric relations like the one shown in Figure \@ref(fig:tree). Table \@ref(tab:treereachmat) shows the results.
+
+```{r treereachmat}
+  fr <- c("A", "A", "B", "B", "C", "C")
+  to <- c("B", "C", "D", "E", "F", "G")
+  edge.dat <- data.frame(fr, to)
+  node.dat <- data.frame(name = union(fr, to))
+  gr <- tbl_graph(edges=edge.dat, nodes=node.dat, directed = TRUE)
+  r <-distances(gr, mode = "out")
+  r <- ifelse(r == Inf, 0, 1)
+  diag(r) <- "--"
+  kbl(r, caption = "Reachability matrix for an anti-symmetric tree graph.")
+```
+
+One interesting thing to observe about the reachability matrix shown in Table Table \@ref(tab:treereachmat) is that it only has non-zero entries "above" the diagonal, in what we called the **upper triangle** of the matrix in the lesson on network matrices. Recall this are cells in which the row index *i* is always smaller than the column index *j*. You can see for yourself that all the cells in which the row index is larger than the column index (the **lower triangle** of the matrix) are indeed zero. 
+
+The other thing to observe is that the reachability matrix *encodes the authority or hierarchical structure of the tree graph*. This is easy to see by the fact that the row corresponding to the "top" node (*A*) is full of ones. This says that this node can reach every other node in the graph via some path. So if this was the general in an army, they could influence every other node, by giving an order to the people directly connected to them (e.g., *B*, *C*, or *D*) and then they would pass it down to the others. 
+
+Now if we look at *A*'s *column*, we see that it is full of zeroes, indicating that while *A* can reach everybody, no one can reach them back. The same goes for every level; the nodes at the top can reach the ones at the bottom, but they can't reach them back. This is why the lower triangle of the matrix has to be made up of all zeroes.
+
+```{r rectree, fig.margin=TRUE, fig.cap="An asymmetric graph arranged as a tree.", fig.width=6, fig.height=6}
+    fr <- c("A", "A", "B", "B", "C", "C", "B", "D", "G")
+    to <- c("B", "C", "D", "E", "F", "G", "A", "B", "C")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    p <- ggraph(gr, layout = 'tree')
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                            arrow = arrow(length = unit(6, 'mm')),
+                            end_cap = circle(10, 'mm'), 
+                            sep = unit(6, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 16, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() + ylim(-.05,2.05)
+    p
+```
+
+Now let's break the anti-symmetry principle and add some reciprocal directed ties to the network shown in Figure \@ref(fig:tree), keeping the same set of nodes. This transforms the graph from an anti-symmetric to an asymmetric one. The new graph is shown as Figure \@ref(fig:rectree). In this network, node *B* sends a reciprocal link to *A*, node *D* sends a reciprocal link to *B*, and *G* reciprocates their tie to **C*. The reachability matrix for this graph, is shown in table \@ref(tab:asymmreachmat).
+
+```{r asymmreachmat}
+    fr <- c("A", "A", "B", "B", "C", "C", "B", "D", "G")
+    to <- c("B", "C", "D", "E", "F", "G", "A", "B", "C")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges=edge.dat, nodes=node.dat, directed = TRUE)
+    r <-distances(gr, mode = "out")
+    r <- ifelse(r == Inf, 0, 1)
+    diag(r) <- "--"
+    kbl(r, caption = "Reachability matrix for an anti-symmetric tree graph.")
+```
+
+Note that one big difference between Tables \@ref(tab:treereachmat) and \@ref(tab:asymmreachmat) is that Table \@ref(tab:asymmreachmat) now features some non-zero entries in the lower-triangle. So it seems like the lower triangle in the reachability matrix of an asymmetric graph, records *anti-symmetry violations*. 
+
+Another big difference between Tables \@ref(tab:treereachmat) and \@ref(tab:asymmreachmat) is that now nodes *B* and *D*, like *A* in the original tree graph, can reach everybody else in the network. They can do that because now they can reach *A*, and since *A* could reach everyone initially, they can do so through that node.
+
+Thus, if we think of the tree graph as representing a purely *hierarchical* structure, in which authority, influence, orders, and so forth only flow in one direction, then the addition of reciprocity into the structure can be seen as a relaxation of the hierarchy principle. In Figure \@ref(fig:directed4) *A* doesn't just influence or order *B* around in a unidirectional way like they do in Figure \@ref(fig:tree2), *B* can "talk back", or exert influence upon *A* and so forth. So by adding asymmetric reciprocal links, we have made the graph less hierarchical. 
+
+This insight can be taken as motivation to develop a graph metric called **graph hierarchy** [@krackhardt94]. The measure is simple, and rides on the contrast between Tables \@ref(tab:treereachmat) and \@ref(tab:asymmreachmat) we talked about earlier. A graph is most hierarchical, when the lower triangle of its corresponding reachability matrix is completely full of zeros, and it is less hierarchical once some ones (produced by the addition of reciprocal links that break the anti-symmetry principle) begin to show up there. So we can measure graph hierarchy ($H(G)$) using the following formula: 
+
+\begin{equation}
+    H(G) = 1 - \frac{\sum_i \sum_j d^r_{ij}d^r_{ji}}{\frac{1}{2}\sum_i \sum_j d^r_{ij}}
+    (#eq:hier)
+\end{equation}
+
+Which is equivalent to computing the reciprocal of the **graph reciprocity** of the reachability matrix. A completely non-reciprocal reachability matrix, where if a node can reach another node then that node cannot reach the first node back, implies maximum graph hierarchy, with $H(G) = 1.0$ (as the numerator of the right-hand side fraction of equation \@ref(eq:hier) would be zero). A completely reciprocal reachability matrix, where if a node can reach another node then that node can always reach the first back,  implies maximum graph hierarchy, with $H(G) = 0$. 
+
+For instance, applying equation \@ref(eq:hier), to the graph shown in Figure \@ref(fig:tree2) gives us the expected value of 1.0, but applying the same equation to the graph shown in Figure \@ref(fig:directed4) gives us the lower value of 0.64.
+
+There are several measures that can be implemented to capture whether more or less hierarchy is prevailing within a network. Connectedness measures the reachability of nodes in an undirected graph. Conversely, hierarchy measures the reachability in a directed graph. The measures are calculated with the same equation, but their interpretation and what constitutes _V_ is quite different! Connectedness measures reachability, while hierarchy measures the violations of transitivity in a network. Finally, reciprocity measures the percentage of ties in a directed network that are part of a reciprocal relationship. 
+
+# Graph Connectedness
+Using a reachability matrix, connectedness is premised on asking if any given nodes are able to reach one another through a path of some finite length. **Graph Connectedness** is a measure of the percentage of nodes in an undirected graph that are able to reach one another. Reachability, and thus connectedness is a measure of the transitivity of the relationship to non-directly connected others. A might not know C, but as A knows B and B knows C, A is able to still reach C through B, and thus there is a degree of transitivity to the relationship of knowing. We have previously mentioned how this is important in questions of indirect influence as opposed to direct influence. 
+
+As discussed in the lesson on network matrices, a reachability matrix has a cell marked 1 if to nodes are able to reach one another, and 0 if two nodes are unable to reach one another. Therefore, we can count the number of 0’s in a matrix, divide by 2, and this is the number of pairs of nodes that are unable to reach each other. One can also simply count the number of 0’s below (or above!) the diagonal, as the matrix is symmetric so the result will be the same. The number of node pairs that are not able to reach one another are violations of connectivity. The number of these violations in the network are inserted into the equation as _V_.  
+
+The equation for connectedness is simply 1 minus the percentage of violations of connectivity. When subtracting the number of violations of connectivity (V) divided by the total number of possible connections $\N(N-1)$, the result is the percentage of nodes that are able to reach one another through a path of a finite length.
+
+Thus, when the connectedness is $C=1$, there is complete connectivity in the graph. Every node can reach every other node through a path of some length. Conversely, a connectivity score of 0 would mean that no nodes can reach any other nodes through a path of some length. If we have a score of 0, this would mean that the network has no edges connecting nodes, and thus no nodes can reach any other node.
+
+Notice that density measures the frequency of connections, while connectedness simply measures the frequency of a path of some length between nodes. A network could have high density and low connectivity, or high connectivity and low density for example! The network could also have high density and connectivity, and low density and connectivity. Putting both measures together can be useful for the theoretic interpretation of a network! 
+
+# Graph Reciprocity
+
+```{r direx1, fig.margin=TRUE, fig.cap="A directed graph.", fig.width=9, fig.height=8}
+set.seed(359)
+gr <- play_erdos_renyi(n = 7, m = 24)
+name <- toupper(letters[1:7])
+p <- ggraph(gr, layout = 'auto')
+p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                            arrow = arrow(length = unit(6, 'mm')),
+                            end_cap = circle(10, 'mm'), 
+                            sep = unit(9, 'mm'))
+p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+p <- p + theme_graph() 
+p
+```
+
+Remember from our discussion in the lesson types of graphs, that a key difference between undirected and directed graphs, is that they allow for possibly non-reciprocal links between dyads. That is while dyads in an undirected graph can either be **null** or **connected**, connected dyads in directed graphs, can be either **asymmetric** or **mutual**. This means that not all directed graphs are created the same. Some of them, like the graph shown in Figure \@ref(fig:direx1) feature many mutual dyads (drawn as double-headed arrows), while others, like the graph shown in Figure \@ref(fig:direx2) just have many asymmetric dyads (drawn as single-headed arrows). As such, it would be useful to have a summary metric telling us the extent to which mutual dyads featuring reciprocal ties dominate the network. Ideally, such a metric should be at a maximum (e.g. 1.0), when all dyads are mutual, and at minimum when all dyads are asymmetric.
+
+This metric exists and it is called the **graph reciprocity**. It can be computed from the asymmetric adjacency matrix of the corresponding directed graph. 
+
+```{r direx2, fig.margin=TRUE, fig.cap="Another directed graph.", fig.width=9, fig.height=8}
+set.seed(359)
+gr <- play_erdos_renyi(n = 7, m = 12)
+name <- toupper(letters[1:7])
+p <- ggraph(gr, layout = 'auto')
+p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                            arrow = arrow(length = unit(6, 'mm')),
+                            end_cap = circle(10, 'mm'), 
+                            sep = unit(9, 'mm'))
+p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+p <- p + geom_node_text(aes(label = name), size = 12, color = "white")
+p <- p + theme_graph() 
+p
+```
+
+
+Out of all the ties in the network, what percentage of those ties are involved in a reciprocal relationship? **Graph Reciprocity** measures the percentage of connected dyads in a directed network that are part of a reciprocal relationship. 
+
+Unlike hierarchy, which uses a reachability matrix, reciprocity uses a the **asymmetric adjacency matrix**. It thus directly asks about two connected nodes in a directed network. Reciprocity is measured by taking the number of edges in reciprocal (mutual) dyads (V) (the number of mutual dyads), and divides by the total number of edges (E).
+
+Dyads that are part of a reciprocal relationship (V) can be counted individually. Thus, for a reciprocal dyad, there are 2 edges that are part of the reciprocal relationship, despite it being only 1 reciprocal relationship. 
+
+For example, a tree graph like \@ref(fig:tree) should have a reciprocity score of $R=0$. This is because for anti-symmetric ties, it is impossible for there to be any reciprocity in the relations. For a graph with complete reciprocity in all ties, then $R=1$. However, for a graph with 6 connected dyads, four of which are mutual and two of which are asymmetric, then the reciprocity is $R=4/6=.66$. 
+
+Imagine a network with a high degree of reciprocity compared to a network with a low degree of reciprocity. The network with the high reciprocity might be happier due to a sense of mutual community, or the actors that compose the network might be more equal in terms of their underlying “quality,” requiring less deference for connections to form. Many other interpretations might be possible, as depending on the theoretic question and outcome of interest, the measure of reciprocity might be used to reach creative insights into the network! 

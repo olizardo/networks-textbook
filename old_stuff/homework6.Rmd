@@ -1,0 +1,169 @@
+---
+title: "Homework VI: Directed Graph Metrics"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+    toc: true
+    smart: true
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+```{r grex1, fig.cap="A directed graph.", fig.height=10, fig.width=10}
+    set.seed(123)
+    gr <- play_blocks(10, 10, 0.4, directed = TRUE, loops = FALSE)
+    V(gr)$name <- toupper(letters[1:length(V(gr))])
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.05,
+                            arrow = arrow(length = unit(4, 'mm')),
+                            end_cap = circle(7, 'mm'), 
+                            sep = unit(5, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 16, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+
+This is the **adjacency matrix** of the **directed graph** shown in Figure \@ref(fig:grex1): 
+
+```{r adj}
+    a <- matrix(as_adjacency_matrix(gr), nrow = length(V(gr)))
+    rownames(a) <- V(gr)$name
+    colnames(a) <- V(gr)$name
+    diag(a) <- "--"
+    a <- a[order(row.names(a)), order(row.names(a))]
+    kable(a, format = "pipe", padding = 2, caption = "Adjancency Matrix of a Directed Graph") 
+```
+
+(@) Write down the cell entries for the **transpose** ($A'$) of the **adjacency matrix** ($A$) shown in Table \@ref(tab:adj) (2pts):
+
+```{r}
+    a <- matrix(" ", nrow = length(V(gr)), ncol = length(V(gr)))
+    rownames(a) <- toupper(letters[1:length(V(gr))])
+    colnames(a) <- toupper(letters[1:length(V(gr))])
+    diag(a) <- "--"
+    kable(a, format = "pipe", padding = 2) 
+```
+
+(@) Write down the cell entries for the matrix corresponding to the **element-wise product** of the **adjacency matrix** ($A$) and the **transpose** of the adjacency matrix ($A'$) corresponding to the graph shown in Figure \@ref(fig:grex1) ($A \circ A'$) (2pts):
+
+```{r}
+    a <- matrix(" ", nrow = length(V(gr)), ncol = length(V(gr)))
+    rownames(a) <- toupper(letters[1:length(V(gr))])
+    colnames(a) <- toupper(letters[1:length(V(gr))])
+    diag(a) <- "--"
+    kable(a, format = "pipe", padding = 2) 
+```
+
+Using the information from the answers obtained for questions 1 and 2 answer the following:
+
+(@) What is the number of **mutual dyads** in the graph?
+
+
+-
+
+
+(@) What is the number of **asymmetric dyads** in the graph?
+
+
+-
+
+
+(@) What is the number of **null dyads** in the graph?
+
+
+-
+
+
+(@) From the answers to questions 3 and 4, Compute the **Graph Reciprocity**:
+
+
+-
+
+
+```{r grex2, fig.cap="A directed graph.", fig.height=10, fig.width=10}
+    set.seed(123)
+    gr <- play_blocks(12, 12, 0.2, directed = TRUE, loops = FALSE)
+    V(gr)$name <- toupper(letters[1:length(V(gr))])
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.05,
+                            arrow = arrow(length = unit(4, 'mm')),
+                            end_cap = circle(7, 'mm'), 
+                            sep = unit(5, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 16, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+
+
+This is the **reachability matrix** of the graph shown in Figure \@ref(fig:grex2): 
+
+```{r reach}
+    r <-distances(gr, mode = "out")
+    r <- ifelse(r == Inf, 0, 1)
+    rownames(r) <- V(gr)$name
+    colnames(r) <- V(gr)$name
+    diag(r) <- "--"
+    kable(r, format = "pipe", padding = 2, caption = "Reachability Matrix of a Directed Graph") 
+```
+
+(@) What is the **Graph Connectedness**?
+
+
+-
+
+
+(@) Write down the cell entries for the **transpose** ($R'$) of the **reachability matrix** ($R$) corresponding to the graph shown in Figure \@ref(fig:grex2) (2pts):
+
+```{r}
+    a <- matrix(" ", nrow = length(V(gr)), ncol = length(V(gr)))
+    rownames(a) <- toupper(letters[1:length(V(gr))])
+    colnames(a) <- toupper(letters[1:length(V(gr))])
+    diag(a) <- "--"
+    kable(a, format = "pipe", padding = 2) 
+```
+
+
+(@) Write down the cell entries for the matrix corresponding to the **element-wise product** of the **reachability matrix** ($R$) and the **transpose** of the reachability matrix ($R'$) corresponding to the graph shown in Figure \@ref(fig:grex2) ($R \circ R'$) (2pts):
+
+```{r}
+    a <- matrix(" ", nrow = length(V(gr)), ncol = length(V(gr)))
+    rownames(a) <- toupper(letters[1:length(V(gr))])
+    colnames(a) <- toupper(letters[1:length(V(gr))])
+    diag(a) <- "--"
+    kable(a, format = "pipe", padding = 2) 
+```
+
+Using the information from the answers obtained for questions 8 and 9 answer the following:
+
+
+(@) What is the number of **mutually reachable dyads** in the graph?
+
+
+-
+
+
+(@) What is the number of **asymmetrically reachable dyads** in the graph?
+
+
+-
+
+(@) From the answers to questions 10 and 11, Compute the **Graph Hierarchy**:
+
+-
+
+
+

@@ -1,0 +1,438 @@
+---
+title: "Graph Metrics"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::tufte_html2: 
+    tufte_variant: "envisioned"
+    number_sections: true
+    toc: true
+    smart: true
+bibliography: networks.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+    # invalidate cache when the package version changes
+    knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = FALSE, message=FALSE, warning=FALSE)
+    options(htmltools.dir.version = FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+# Computing Metrics on Graphs
+`r newthought('As graphs are really just representations of real world-networks')`, they can be as varied as different networks are from one another. Some social networks are small (composed of just a few people), while others are large. In some social networks there is not much connectivity, while other networks feature thousands if not millions of ties between people. We can precisely quantify a lot of these properties of real world networks by computing **graph metrics**. This is fancy word for counting various numbers most of which are a function of the number of nodes and edges in a graph. In this lesson, we will review the most important graph metrics in social networks.
+
+```{r undirected, fig.margin=TRUE, fig.cap="A undirected graph", fig.width = 5, fig.height=8}
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+        bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+        bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+        bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+        bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+        bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+        bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+        bind_edges(data.frame(from = 8, to = c(9))) %>%
+        mutate(name = toupper(letters[1:9]))
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() + xlim(-1,1) + ylim(-2,2.1)
+    p
+```
+
+```{r directed, fig.margin=TRUE, fig.cap="A directed graph.", fig.height = 8, fig.width = 6}
+    fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+    to <- c("B", "F", "A", "D", "B", "B", "C", "D", "A", "F", "D")
+    edge.dat <- data.frame(fr, to)
+    node.dat <- data.frame(name = union(fr, to))
+    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
+    p <- ggraph(gr, layout = 'kk')
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                            arrow = arrow(length = unit(7, 'mm')),
+                            end_cap = circle(10, 'mm'), 
+                            sep = unit(8, 'mm'))
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+    p <- p + theme_graph() + ylim(-1.25,1.5) + xlim(-1.25,1.25)
+    p
+```
+
+## Graph Order
+The **order** of a graph (typically written as $n$), is the *number of nodes* in the graph. Technically speaking, keeping in mind that the graph is really a set of a set of nodes and edges, the order is the cardinality of node set $n = |V|$. **Cardinality** is simply a technical term from set theory indicating *how many elements* there are in a set. Thus, the graph in Figure \@ref(fig:undirected) has an order of 9, while Figure \@ref(fig:directed) has an order of 7.
+
+## Graph Size
+Likewise, the **size** of a graph (typically written as $m$), is the *number of edges* in the graph, which is (like with nodes) the **cardinality** of the edge set $m = |E|$. Thus, the **size** of the graph in Figure \@ref(fig:undirected) is 16, while the size of the graph in Figure \@ref(fig:directed) it is 11.
+
+This means that if you say the **size** of the graph in Figure \@ref(fig:undirected)  is 16, we will all understand that you are referring to the number of edges, as you would use the term **order** if you were talking about the number of nodes. 
+
+## The Graph Degree Set
+Computing the degree of each node in the network gives us a vector (called *k*), containing the degree of each node. The vector is of "length" *n* where this is the number of nodes in the network. This is called the graph's **degree set**, written **k**.
+
+>What is a vector? A vector is a sequence of numbers. Thus, $(1, 2, 3, 4)$ is a vector, and so is $(0, 1, 1, 0, 1, 1, 1)$ and $(0.23, 0.39, 0.89)$. The **length** of a vector is the numbers of elements in it. Thus, the length of the vector  $(1, 2, 3, 4)$ is 4 and the the length of the vector $(0, 1, 1, 0, 1, 1, 1)$ is 7. When vectors are considered as **sets** of numbers, the length of the vector is equivalent to the **cardinality** of the set defined by the vector.
+
+As you may have already figured out, there are as many members of this set as there are nodes in the graph, so the cardinality of the degree set is the same as that of graph's node set $|\mathbf{k}| = |V|$.
+
+## The Graph Degree Sequence
+When we list the members of the degree set (each node's degree) in decreasing order from bigger to smaller, this is called the graph's **degree sequence**, and it is written **d**. Every graph has its own degree sequence, but graphs with very different structure (in terms of other graph metrics) can have the same degree sequence [@kim_etal09].
+
+Let's consider the graph shown in Figure \@ref(fig:undirected) again. The graph's degree set **k** is shown in Table \@ref(tab:degset)
+
+```{r degset}
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+    d <- t(degree(gr))
+    kbl(d, caption = "Degree set of an undirected graph") 
+```
+
+It is easy to see that if we order the values of the degree set from higher to lower, we would obtain the following degree sequence:
+
+```{r degseq}
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+    d <- degree(gr)
+    d <- t(sort(d, decreasing = T))
+    kbl(d, caption = "Degree sequence of an undirected graph", col.names = NULL) 
+```
+
+# Minimum and Maximum Degree
+When studying a network, we are usually interested in the **range** of connectivity of people. What is the most connections somebody has in the network? What is the smallest set of neighbors someone has? These two graph metrics are called the **maximum** and **minimum degree** respectively. And are written $k_{max}$ and $k_{min}$. They are given by taking the maximum or the minimum values of the graph degree set describing the network:
+
+\begin{equation}
+  k_{max} = max(\mathbf{k})
+  (#eq:maxdegree)
+\end{equation}
+
+\begin{equation}
+  k_{min} = min(\mathbf{k})
+  (#eq:mindegree)
+\end{equation}
+
+To go back to our running example of the graph shown in Figure \@ref(fig:undirected), it is easy to see from the degree set shown in Table \@ref(tab:degset), that for this network, $k_{max} = 5$, and $k_{min} = 3$. The difference between these numbers gives us a sense of the heterogeneity or gap between the connectivity of the best connected and the least well connected nodes in the graph. This is called the **degree range**, and it is written $k_r$:
+
+\begin{equation}
+k_r = k_{max} - k_{min}
+(#eq:degrange)
+\end{equation}
+
+In this case, $k_r = 5 - 3 = 2$, which tell us than in this graph, the difference between the best and most poorly connected nodes is really not that large. Most nodes have a fair number of links to others.
+
+# Average Degree 
+Note that if we know the degree set of an undirected graph, we can figure out how many total edges there are in the graph. The reason for this is that the degree of each node can be defined in terms of the total number of edges incident on the node (as we noted earlier). So that means that if we know each node's degree, then we ca also know how many total edges there are in the graph.
+
+## Sum of Degrees
+The first step we need to do is compute the **sum of degrees** of each node in the graph. This quantity is written $\sum_i k_i$. For the degree set of the graph shown in Figure \@ref(fig:undirected), we can see that the sum of the degrees $\sum_i k_i = 32$ (go ahead use a calculator to add up all the numbers in Table \@ref(tab:degset)).
+
+If you go back to the graph shown in Figure \@ref(fig:undirected) and count the number of lines, you can see that there are 16. So summing up the degrees of each node ended up totaling *twice* the number of edges shown in the graph: $16 \times 2 = 32$. The reason for this is that each edge is incident (touches) two nodes, so it makes sense that when you add up the degrees of each node you end up with twice the amount of lines shown in the visual representation of the graph.
+
+So the relationship between the sum of the degrees and the number of edges in an undirected graph is one of simple doubling. In equation form, this is written:
+
+\begin{equation}
+  \sum_i k_i = 2m
+  (#eq:sumki)
+\end{equation}
+
+Where *m* is the cardinality of the graph's edge set $|E|$. Some people call this **the first theorem of graph theory** [@benjamin15, pp. 20]!
+
+Another way to think about why we end up with twice the number of edges, is that in an undirected graph $G$, if node *A* is a member of the set of neighbors of node *B*, then node *B* is necessarily also a member of the set of neighbors of node *A*. Thus, when computing the degree of each node, the edge *AB* does double duty, counting for the computation of both node *A* and node *B*'s degree scores, when we sum the degrees the edge thus shows up twice. Note that in the directed case we don't have that problem, in which case $\sum_i k_i = m$.
+
+Knowing the link between the sum of degrees and the number of edges, we can begin to calculate some other important graph metrics.
+
+## Average Degree in Undirected Graphs
+Once we know what sum of the degrees is, we can compute an important graph metric called the **average degree**. This gives us a sense of whether there are lots of well-connected nodes in the graph (in which case the average degree is high), or whether the typical node in the graph only has a small number of neighbors (in which case the average degree is low).
+
+To get the average degree for a graph, written $\bar{k}$, all we need to do is compute the sum of degrees (like earlier) and divided it by the total number of nodes in the graph:
+
+
+\begin{equation}
+  \bar{k} = \frac{\sum_i k_i}{n}
+  (#eq:avgdeg1)
+\end{equation}
+
+In an undirected graph *G* like the one shown in Figure \@ref(fig:undirected), the graph average degree is given by *twice* the total number of symmetric ties (the cardinality of the edge set as defined earlier) divided by the total number of nodes (the cardinality of the node node set). Because of the identity identified in equation \@ref(eq:sumki), where $\sum_i k_i = 2m$, we can also write the formula for the average degree as follows by switching the numerator:
+
+
+\begin{equation}
+  \bar{k} = \frac{2m}{n}
+  (#eq:avgdeg1)
+\end{equation}
+
+For Figure \@ref(fig:undirected), the average degree of the graph is:
+
+\begin{equation}
+  \bar{k} = \frac{2m}{n} = \frac{2 \times 16}{9} = \frac{32}{9} = 3.6
+  (#eq:avgdeg2)
+\end{equation}
+
+## Average Degree in Directed Graphs
+We can use a variation of the same procedure to compute the average degre in directed graphs. Take the directed graph shown in Figure \@ref(fig:directed), which has seven nodes and 11 edges. In this case, there is no need to "double" the number of lines as in the case of an undirected graph. 
+
+We could compute *either* the average **indegree** or the average **outdegree** of each node and it would give us the same answer, because each link unless does single duty in determining either the outdegree or indegree of each node. Accordingly, the average degree in the directed case is:
+
+\begin{equation}
+  \bar{k} = \frac{m}{|V|} = \frac{m}{n} = \frac{ 11}{7}=1.6
+  (#eq:avgdeg3)
+\end{equation}
+  
+Even easier!
+
+Although straightforward, the graph average degree provides a powerful tool to analyze the social world. For example, if we have two school clubs of the same size and we ask students who they are friends with in the club, we might get very different average degrees. Let us assume that the average degree in the first network is two, while in the second network it is five. This statistic informs us that people in the second network have more friends within the group than in the first network. If we are interested in why the first group failed and the second group kept meeting, we might understand that the underlying social relations of friendship, which might be theorized as contributing to the clubs survival, were weaker in the first group to begin with than they were in the second group. We are thus able to gain insight into the causes and/or underlying conditions that shape the social world.
+
+# The Graph Maximum Size
+
+In some cases we may be interested to know how many edges there *could* be in a graph if everyone had a relationship with everyone else in the network. This is the *maximum possible number of edges* that could exist in a network of order $n$.
+
+Recall that, as we discussed previously, the number of edges in a graph is called the **graph size**. Additionally, a graph in which all the edges that could exist are actually present is called the **complete graph**. The **maximum size** of a graph of order $n$ is the number of edges that would exist in that graph is the graph was complete.^[A graph in which *no* edges exist (every node is an isolate), is called an **empty graph**.
+
+While this may seem like a complicated thing, it is actually given by a simple (and important) formula. For an **undirected graph** this is:
+
+\begin{equation}
+  Max(E)^{u}=\frac{n(n-1)}{2}
+  (#eq:graphmax1)
+\end{equation}
+
+For a **directed graph**, the same computation is even simpler. The maximum number of possible edges in this case is:
+
+\begin{equation}
+  Max(E)^d=n(n-1)
+  (#eq:graphmax2)
+\end{equation}
+
+## Explainer
+Where do these formulas for maximum graph size come from? Let's consider the directed case first. A graph would be complete if every node was connected to every other node. It is easy to see that for each node, this would be every other node in the graph except themselves. So in a complete graph of order $n$, the degree of each node *has* to be $n-1$. So if we call the degree of the first node in the graph $(n-1)_1$, then the **degree set** ($\mathbf{k}^c$) of a complete graph would be:
+
+\begin{equation}
+  \mathbf{k}^{c} = [(n-1)_1, (n-1)_2, (n-1)_3 \dots (n-1)_n]  
+  (#eq:graphmax3)
+\end{equation}
+
+It is easy to see the that the **sum of degrees** ($\sum k_i^c$) of the complete graph, will give us the maximum size for any graph of that order. So we can write that sum as:
+
+\begin{equation}
+  \sum k_i^{c} = \sum_i^{n} n-1 
+  (#eq:graphmax4)
+\end{equation}
+
+Essentially we add up $n-1$ to $n-1$ to $n-1$, etc. $n$ times, once for each node in the graph. From basic arithmetic, we know that adding the same number $n$ number of times is the same as multiplying that number by $n$. So therefore, the maximum size of a complete graph of order $n$ is $n \times n-1 = n(n-1)$, the formula written as equation \@ref(eq:graphmax2)!
+
+In the undirected case (equation \@ref(eq:graphmax1), the procedure is the same, except that now each edge shows up twice in the degree sum, but one of those is redundant. Therefore we divide the whole sum of degrees by 2 to eliminate double-counting, resulting in $\frac{n(n-1)}{2}$ as the formula for the maximum size of an undirected graph or order $n$.
+
+## Applying your knowledge
+You can now look a genius. If somebody were to ask you: 
+
+**Q**: In classroom with 10 kindergartners, how many total pairs of friends would exist if every kid was friends with every other kid? 
+
+Using your graph theory metrics knowledge, you can now pull out your phone calculator and compute:
+
+\begin{equation*}
+\frac{10(10-1)}{2} = \frac{10(9)}{2} = \frac{90}{2} = 45
+\end{equation*}
+
+Impressing your audience immensely!
+
+# Graph Density
+In a classic study, the British social anthropologist Elizabeth Bott, made a classic distinction between two types of network structure. According to Bott, some networks are **tight-knit** and others are **loose-knit** [@bott57]. Tight-knit networks feature a lot of connections and actors can reach others via multiple pathways. Loose-knit networks are more sparsely connected and actors are only reachable to one another via a very restricted set of pathways.
+
+It was soon realized that a very simple graph metric, called the **network density** could be a useful index of Bott's ideas of tight versus loose-knit networks. Tight-knit networks are **dense** featuring a lot of inter-connections between actors, while loose-knit networks are less dense [@barnes69]. How can we think of this in terms of graph theory concepts?
+
+## Density in Undirected Graphs
+The density $d(G)$ of a graph is a measure of *how many ties between actors exist compared to how many ties between actors are possible*, given the **graph size** (number of nodes) and the **graph order** (number of links). As such, the density of an undirected graph is quite simply calculated as, the ratio between the observed number of edges $m$ (the cardinality of the edge set), and the graph maximum size as defined using equation \@ref(eq:graphmax1).
+
+\begin{equation}
+  d(G)^u=\frac{m}{\frac{n(n-1)}{2}}=m \times \frac{2}{n(n-1)}=\frac{2m}{n(n-1)}
+  (#eq:dens1)
+\end{equation}
+
+Where $m$ is the number of edges (graph size) and $n$ is the number of nodes (graph order) in the network.
+
+For the graph shown in Figure \@ref(fig:undirected), of size $m = 16$ and order $n=9$, we can use equation \@ref(eq:dens1) to compute the graph density as follows:
+
+\begin{equation}
+  d(G)^u = \frac{2m}{n(n-1)} = \frac{2 \times 16}{9 \times (9-1)}=\frac{32}{9 \times 8} = \frac{32}{72} = 0.44
+\end{equation}
+
+The estimated density of the network, $d = 0.44$ tell us that 44% of the total possible number of edges are actually observed. Another way to think about density, is as giving the *probability* that, if we were to choose two random nodes in the network, this random dyad will have probability $p = 0.44$ of being **connected** (as opposed to **null**).
+
+## Density in Directed Graphs
+To compute the density of a directed graph, there is no need to multiply the numerator by two, as each edge does single duty. As such, the equation for computing the density of a directed graph is: 
+
+\begin{equation}
+  d(G)^d==\frac{m}{n(n-1)}
+  (#eq:densdir)
+\end{equation}
+
+Which is even simpler than in the directed case!
+
+## Why is density important?
+
+The density of a network property is important to consider for two reasons. First, (which is the definition of density!) is that it can help us understand how connected the network is compared to how connected it might be. Second, when comparing two networks with the same number of nodes and the same type of relationships, it can tell us how the networks are different.
+
+For example, let us imagine that there are two organizations, each with 10 people in them. The one organization has high density and the other has low density in terms of the interactions among the members. What might be some of the underlying social differences between the two organizations? While we would need more information, we could posit that the one issue might be that information does not transmit very efficiently across the low density organization because it has to go from member to member, rather than diffusing from one member rapidly to all the others. Another issue might be the "hit by a bus" problem, where if one or two members are taken out of the network, you can suffer breakdown because they are no longer there to coordinate the different parts that don't talk to each other. Denser networks are less vulnerable to disruption due to remove of key nodes.
+
+# Advanced Topics 
+## The Connection Between Density and Average Degree
+There is an intimate mathematical relationship between the **graph density** and the **graph average degree**. Let's see what it is.
+
+Take another look at equation \@ref(eq:dens1). It says that density is equal to:
+
+\begin{equation}
+  d(G)^u = \frac{2m}{n(n-1)} 
+  (#eq:dens3)
+\end{equation}
+
+We can write the same equation as the product of two different fractions. Like this:
+
+\begin{equation}
+  d(G)^u = \frac{2m}{n} \times \frac{1}{n-1} 
+  (#eq:dens4)
+\end{equation}
+
+Now, take a look at the first (left-hand) fraction of this product. Does it look familiar? It should, because it is the formula for the average degree we wrote down in equation \@ref(eq:avgdeg1)!
+
+So that means that if we know the average degree and we know the number of nodes in a graph, we also know the density of the graph without knowing anything about the number of edges. Mathematical magic.
+
+How do we do that? Well, substituting the fraction $\frac{2m}{n}$ for its equivalent, the average degree $\bar{k}$, in equation \@ref(eq:dens4), we get:
+
+\begin{equation}
+  d(G)^u = \bar{k} \times \frac{1}{n-1} =  \frac{\bar{k}}{n-1}
+  (#eq:dens5)
+\end{equation}
+
+So this formula tells us that the density of a graph is equivalent to its average degree divided by the number of nodes minus one. Pretty simple!
+
+## Degree Variance
+Once we know the average degree of a graph, it is possible to compute more complex measures of the **heterogeneity** in connectivity across nodes (e.g., the extent to which there is a very big spread between well-connected and not so well-connected nodes in the graph) beyond the simpler measures of range such as the difference between $k_{max}$ and $k_{min}$.
+
+One such measure was proposed by the sociologist and statistician [**Tom Snijders**](https://en.wikipedia.org/wiki/Tom_Snijders) in a paper written in 1981 [@snijders81]. It is called the **degree variance** of the graph. It is written $\mathcal{v}(G)$ and it is defined as the *average squared deviation* between the degree degree of each node and the average degree:
+
+\begin{equation}
+  \mathcal{v}(G) = \frac{\sum_i (k_i - \bar{k})^2}{n}
+  (#eq:degvar)
+\end{equation}
+
+The equation says that to compute the degree variance, first we create a vector of the square of the difference between each node's degree and the average degree of the graph $(k_i - \bar{k})^2$, then we sum all the values in this vector (note that since we are squaring all these values will be a positive number), and divide the result by the total number of nodes $n$.
+
+To compute the degree variance of the graph shown in Figure \@ref(fig:undirected) using equation \@ref(eq:degvar), we can thus go through the following steps.
+
+(@) First we compute the vector of differences between each node's degree $k_i$ (shown in Table \@ref(tab:degset)) and the average degree $\bar{k}$ (already computed in equation \@ref(eq:avgdeg2)), yielding the following vector: 
+
+```{r devs}
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+    d <- t(degree(gr))
+    d <- round(d - sum(d)/length(d), 2)
+    kbl(d, caption = "Vector of deviations between the degree degree of each node and the average degree of an undirected graph.") 
+```
+
+(@)  Then we square each of these numbers $(k_i - \bar{k})^2$, which results in the following vector of squared deviations: 
+
+
+```{r sqdevs}
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+    d <- t(degree(gr))
+    d <- round((d - sum(d)/length(d))^2, 2)
+    kbl(d, caption = "Vector of squared deviations between the degree degree of each node and the average degree of an undirected graph.") 
+```
+
+(@)  Then we compute the sum of all these numbers $\sum_i (k_i - \bar{k})^2$, which is 4.2.
+(@)  Finally we divide this sum by the number of nodes in the graph, which gives us:
+
+\begin{equation}
+  \mathcal{v}(G) = \frac{4.2}{9} = 0.47
+\end{equation}
+
+```{r regular, fig.margin=TRUE, fig.cap="A 3-regular graph of order 10", fig.height=8, fig.width=9}
+    set.seed(123)
+    gr <- sample_k_regular(10, 3)
+    gr <- gr %>% 
+      as_tbl_graph() %>% 
+      mutate(name = toupper(letters[1:10])) 
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+    p <- p + theme_graph()
+    p
+```
+
+The degree variance is supposed to capture the extent to which there is inequality in the connectivity of nodes in a graph. Inequality exists when a few nodes have a lot of connections and most nodes only have a few. The more inequality, the higher the degree variance. This means that in graphs where there is very little variation in the connectivity of each node (all nodes have roughly the same number of connections), the degree variance should be at a minimum. 
+
+The most extreme version of the low inequality case is shown in Figure \@ref(fig:regular). This graph has ten nodes, and every node has the same degree $k = 3$, which means that the average degree is also the same number $\bar{k} = 3$. This is called a **regular graph**. 
+
+Because $k - \bar{k} = 3 - 3 = 0$ for all nodes in the regular graph, *The degree variance of a regular graph is always zero*. Regular graphs are referred to by their node degree and their order as *k-regular graphs of order n*. So, the example shown in Figure \@ref(fig:regular) is a *three-regular graph of order ten*.
+
+## Node Average Nearest Neighbor Degree
+Just in the same way we can compute the degree of each node, we may be interested in in the question of whether nodes in the network tend to connect to others of high degree, or whether the connections in the network occur at random, irrespective of degree. The first situation, where people tend to connect to other people of high degree is called **preferential attachment** in network science [@barabasi_albert99]. It is also referred to as a **popularity tournament structure** in sociology [@waller37]. If you went to a real live high school, you may know how this works.
+
+To get a sense of whether a given node prefers to connect to others who also have a large number of connections, we can compute an index called the **average nearest neighbor degree**, which is conventionally written $\bar{k}_{nn(i)}$.
+
+This is given by the following formula:
+
+\begin{equation}
+  \bar{k}_{nn(i)} = \frac{1}{k_i} \sum_{j \in \mathcal{N(i)}} k_j
+  (#eq:annd1)
+\end{equation}
+
+The formula says that to compute the *knn* of node *i* we take sum of the degrees of each of their neighbors *j* (remember that $j \in \mathcal{N(i)}$ means "as long as node *j* belongs to the set $N(i)$"), and then divide it by the degree of node *i*.
+
+```{r knntab}
+    gr <- create_empty(9, directed = FALSE)
+    gr <- gr %>% 
+    bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+    bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+    bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+    bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+    bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+    bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+    bind_edges(data.frame(from = 8, to = c(9))) %>%
+    mutate(name = toupper(letters[1:9]))
+    knn <- t(round(knn(gr)$knn, 1))
+    kbl(knn, caption = "Average nearest neighbor degree of nodes in an undirected graph") 
+```
+
+As an example, the $\bar{k}_{nn(i)}$ for each node in the undirected graph shown in Figure \@ref(fig:undirected) are shown in Table \@ref(tab:knntab). This is the *vector* of average nearest neighbor degrees for the graph **$k_{nn}$**. The table tells us that, nodes *B* and and *E* seem to have the strongest tendencies to connect to others who are also popular, while *G*, *H*, and *I* display the weakest such tendencies.
+
+But how the we know if a $\bar{k}_{nn(i)} = 4.3$ is a big number or a small number? Well, we can compare each node's $\bar{k}_{nn(i)}$ to the **average degree** ($\bar{k}$)     as defined previously. If a node's $\bar{k}_{nn(i)}$ is bigger than the average degree of the graph, then we can say that their neighbors are more likely to be popular than expected by chance. For instance, we know, from the calculation shown in equation \@ref(eq:avgdeg2), that the average degree for this graph is 3.6, so a $\bar{k}_{nn(i)} = 4.3$ tells us that a node connects to others that are (on average) more popular than the average person.
+
+## The Graph Average Nearest Neighbor Degree
+If we take the average of the average nearest neighbor degree vector for each node shown in Table \@ref(tab:knntab), this would give us the graph's **average nearest neighbor degree** ($\bar{k}_{nn}$). But what could this possibly mean? Well, this would tell us the typical number of friends that the typical friend of the typical node in the graph has! Essentially, the expected number of *friends of friends* of the average person.
+
+In a mind-bending paper, the sociologist Scott @feld91 showed, that with very few exceptions (e.g., regular graphs), *the average number of friends of the typical person* (the graph's average degree) is **smaller** than the *average number of friends of friends of the typical person in the same social network* (the graph's average nearest neighbor degree). That is, **your friends have more friends than you do**. Don't get depressed. This is just how social networks work.
+
+Check it out for yourself! If we compute the graph's average nearest neighbor degree from the numbers in the vector shown in Table \@ref(tab:knntab), this would give us $\bar{k}_{nn} = 3.7$ which is larger than the same graph's average degree we computed earlier ($\bar{k} = 3.6$). Weird!

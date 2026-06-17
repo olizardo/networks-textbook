@@ -1,0 +1,67 @@
+```{r centralityfig, fig.width=12, fig.height=8}
+    gr <- create_empty(19) %>% 
+        bind_edges(from = 1, to = c(2, 4, 6)) %>% 
+        bind_edges(from = 2, to = c(4, 5, 7)) %>% 
+        bind_edges(from = 3, to = c(6, 8)) %>% 
+        bind_edges(from = 4, to = c(5, 6, 7)) %>% 
+        bind_edges(from = 5, to = 7) %>% 
+        bind_edges(from = 6, to = 7) %>% 
+        bind_edges(from = 8, to = c(7, 9, 18)) %>% 
+        bind_edges(from = 9, to = c(9, 10, 14, 16)) %>% 
+        bind_edges(from = 10, to = c(11, 12, 13, 14, 15, 16)) %>% 
+        bind_edges(from = 13, to = c(12, 17)) %>% 
+        bind_edges(from = 19, to = 17) %>% 
+        bind_edges(from = 11, to = c(12, 16)) %>% 
+        bind_edges(from =15, to = 14) %>% 
+        simplify()
+    V(gr)$name <- letters[1:19]
+  p <- ggraph(gr, layout = 'kk') 
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), colour = "tan2", size = 16)
+  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + theme_graph() 
+  p
+    
+```
+
+
+```{r cliquefig, , fig.width=8, fig.height=6}
+    gr1 <- create_complete(4) %>% 
+        mutate(name = letters[1:4])
+    gr2 <- create_complete(5) %>% 
+        mutate(name = letters[5:9])
+    gr3 <- create_complete(3) %>% 
+        mutate(name = letters[10:12])
+    gr <- graph_join(gr1, gr2)
+    gr <- graph_join(gr, gr3) %>% 
+        bind_edges(from = 2, to = 5) %>% 
+        bind_edges(from = 4, to = c(6, 11)) %>% 
+        bind_edges(from = 6, to = 11) %>% 
+        as.undirected()
+    clique.el <- data.frame(matrix(ncol = 2, nrow = 0))
+    c <- rep(0, length(V(gr))*23)
+    clique.mat <- matrix(c, nrow = length(V(gr)))
+    clique.list <- cliques(gr, min = 3)
+    len <- sapply(clique.list, length)
+    clique.list <-  clique.list[order(len, decreasing = TRUE)]
+    for (i in 1:length(V(gr))) {
+      for (j in 1:length(clique.list)) {
+        if (i %in% clique.list[[j]] == 1) {
+          clique.mat[i,j] = 1
+          clique.el <- rbind(clique.el, c(toupper(letters[i]),j))
+          }
+        }
+      }
+    rownames(clique.mat) <- toupper(letters[1:length(V(gr))])
+    colnames(clique.mat) <- paste("C", 1:23, sep = "")
+    colnames(clique.el) <- c("Node", "Clique")
+    O <- t(clique.mat) %*% clique.mat
+  p <- ggraph(gr, layout = 'kk') 
+  p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
+  p <- p + geom_node_point(aes(x = x, y = y), colour = "tan2", size = 16)
+  p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+  p <- p + theme_graph() 
+  p
+```
+
+
