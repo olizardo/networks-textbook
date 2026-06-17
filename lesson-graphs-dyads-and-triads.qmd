@@ -18,100 +18,89 @@ Crucially, the possible types of dyads we can find in a network depend on the **
 
 As we saw in @sec-ties, some relations lack any inherent directionality because mutuality (or reciprocity) is built in by construction. These are **symmetric ties**, represented by **undirected graphs**. 
 
-Using @fig-undirected as the reference graph $(G)$, we can define a subgraph $(G')$ containing only nodes *A* and *B*. This is shown in @fig-dyads1. In the same way, we could define a subgraph containing only nodes *D* and *E* (shown in @fig-dyads2). Because undirected graphs do not allow directionality, every pair of actors is either part of a **connected** or a **disconnected** dyad. 
+Using @fig-undirected as the reference graph $(G)$, we can define a subgraph $(G')$ containing only nodes *A* and *B*. This is shown in the panel labeled **Connected Dyad** in @fig-undir-dyads. In the same way, we could define a subgraph containing only nodes *D* and *E* (shown in the panel labeled **Disconnected (Null) Dyad** in @fig-undir-dyads). Because undirected graphs do not allow directionality, every pair of actors is either part of a **connected** or a **disconnected** dyad. 
 
-* **Disconnected Dyads** (historically referred to as **null dyads**): The two nodes do not share an edge (shown in @fig-dyads2).
-* **Connected Dyads**: The two nodes share an edge (shown in @fig-dyads1).
+* **Disconnected Dyads** (historically referred to as **null dyads**): The two nodes do not share an edge (shown in the panel labeled **Disconnected (Null) Dyad** in @fig-undir-dyads).
+* **Connected Dyads**: The two nodes share an edge (shown in the panel labeled **Connected Dyad** in @fig-undir-dyads).
 
 Both types of dyads are defined by subgraphs of the same order (two), but they are different in size. The disconnected dyad is size zero (contains zero edges), and the connected dyad is size one (contains one undirected edge).
 
 ```{r}
-#| label: fig-dyads1
-#| fig-cap: "A connected dyad."
+#| label: fig-undir-dyads
+#| fig-cap: "The two types of undirected dyads: connected and disconnected."
 #| fig-cap-location: bottom
-#| fig-height: 1.5
-#| fig-width: 5
+#| fig-height: 2
+#| fig-width: 8
 
     set.seed(329)
-    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
-    gr <- mutate(gr, name = toupper(letters[1:6]))
-    gr <- induced_subgraph(gr, c(1, 2))
-    p <- ggraph(gr, layout = 'linear')
-    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph()  + coord_cartesian(clip = "off")
-    p
-```
-
-```{r}
-#| label: fig-dyads2
-#| fig-cap: "A disconnected (null) dyad."
-#| fig-cap-location: bottom
-#| fig-height: 1.5
-#| fig-width: 5
+    gr1 <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
+    gr1 <- mutate(gr1, name = toupper(letters[1:6]))
+    gr1 <- induced_subgraph(gr1, c(1, 2))
+    p1 <- ggraph(gr1, layout = 'linear')
+    p1 <- p1 + geom_edge_link(color = "steelblue", width = 1.25) 
+    p1 <- p1 + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p1 <- p1 + geom_node_text(aes(label = name), size = 8, color = "white")
+    p1 <- p1 + theme_graph()  + coord_cartesian(clip = "off") + ggtitle("Connected Dyad")
 
     set.seed(329)
-    gr <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
-    gr <- mutate(gr, name = toupper(letters[1:6]))
-    gr <- induced_subgraph(gr, c(4, 5))
-    p <- ggraph(gr, layout = 'linear')
-    p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
+    gr2 <- play_erdos_renyi(n = 6, m = 8, directed = FALSE, loops = FALSE)
+    gr2 <- mutate(gr2, name = toupper(letters[1:6]))
+    gr2 <- induced_subgraph(gr2, c(4, 5))
+    p2 <- ggraph(gr2, layout = 'linear')
+    p2 <- p2 + geom_edge_link(color = "steelblue", width = 1.25) 
+    p2 <- p2 + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p2 <- p2 + geom_node_text(aes(label = name), size = 8, color = "white")
+    p2 <- p2 + theme_graph() + coord_cartesian(clip = "off") + ggtitle("Disconnected (Null) Dyad")
+    
+    p1 + p2 + plot_layout(ncol = 2)
 ```
-
-### Dyads under Asymmetric Ties
 
 Many social relationships allow for inherent directionality where reciprocity is possible but not guaranteed. These are **asymmetric ties**, represented by **directed graphs** (or **digraphs**). For these ties, reciprocity is an empirical event, meaning we can find three distinct kinds of dyads:
 
-* **Disconnected Dyads** (Null): Neither node sends a directed tie to the other (size zero).
-* **Non-Reciprocal Dyads** (Asymmetric): One node sends a tie to another, but it is not reciprocated (shown in @fig-asymmetric-dyad).
-* **Reciprocal Dyads** (Mutual): Both nodes send a tie to each other (shown in @fig-mutual-dyad).
+* **Disconnected Dyads** (Null): Neither node sends a directed tie to the other (size zero) (shown in the panel labeled **Null** in @fig-dir-dyads).
+* **Non-Reciprocal Dyads** (Asymmetric): One node sends a tie to another, but it is not reciprocated (shown in the panel labeled **Asymmetric** in @fig-dir-dyads).
+* **Reciprocal Dyads** (Mutual): Both nodes send a tie to each other (shown in the panel labeled **Mutual** in @fig-dir-dyads).
 
 ```{r}
-#| label: fig-asymmetric-dyad
-#| fig-cap: "A non-reciprocal dyad."
+#| label: fig-dir-dyads
+#| fig-cap: "The three types of directed dyads in the MAN classification: Null (disconnected), Asymmetric (non-reciprocal), and Mutual (reciprocal)."
 #| fig-cap-location: bottom
-#| fig-height: 1.5
-#| fig-width: 5
+#| fig-height: 2
+#| fig-width: 10
 
-    gr <- create_empty(2)
-    gr <- gr %>% 
+    gr1 <- create_empty(2, directed = TRUE) %>% 
+        mutate(name = toupper(letters[4:5])) 
+    p1 <- ggraph(gr1, layout = 'linear') 
+    p1 <- p1 + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p1 <- p1 + geom_node_text(aes(label = name), size = 8, color = "white")
+    p1 <- p1 + theme_graph() + coord_cartesian(clip = "off") + ggtitle("Null")
+
+    gr2 <- create_empty(2, directed = TRUE)
+    gr2 <- gr2 %>% 
         bind_edges(data.frame(from = 1, to = 2)) %>% 
         mutate(name = toupper(letters[3:2])) 
-    p <- ggraph(gr, layout = 'linear') 
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.5,
+    p2 <- ggraph(gr2, layout = 'linear') 
+    p2 <- p2 + geom_edge_link(color = "steelblue", edge_width = 1.5,
                             arrow = arrow(length = unit(5, 'mm')),
                             end_cap = circle(8, 'mm'))
-    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
-```
+    p2 <- p2 + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p2 <- p2 + geom_node_text(aes(label = name), size = 8, color = "white")
+    p2 <- p2 + theme_graph() + coord_cartesian(clip = "off") + ggtitle("Asymmetric")
 
-```{r}
-#| label: fig-mutual-dyad
-#| fig-cap: "A reciprocal dyad."
-#| fig-cap-location: bottom
-#| fig-height: 1.5
-#| fig-width: 5
-
-    gr <- create_empty(2, directed = TRUE)
-    gr <- gr %>% 
+    gr3 <- create_empty(2, directed = TRUE)
+    gr3 <- gr3 %>% 
         bind_edges(data.frame(from = c(1,2), to = c(2,1))) %>% 
         mutate(name = toupper(letters[1:2]))
-    p <- ggraph(gr, layout = 'linear') 
-    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.5,
+    p3 <- ggraph(gr3, layout = 'linear') 
+    p3 <- p3 + geom_edge_parallel(color = "steelblue", edge_width = 1.5,
                         arrow = arrow(length = unit(5, 'mm')),
                         end_cap = circle(8, 'mm'), 
                         sep = unit(6, 'mm'))
-    p <- p + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() + coord_cartesian(clip = "off")
-    p
+    p3 <- p3 + geom_node_point(aes(x = x, y = y), size = 20, color = "tan2") 
+    p3 <- p3 + geom_node_text(aes(label = name), size = 8, color = "white")
+    p3 <- p3 + theme_graph() + coord_cartesian(clip = "off") + ggtitle("Mutual")
+    
+    p1 + p2 + p3 + plot_layout(ncol = 3)
 ```
 
 In standard social network analysis, this three-fold classification of dyads in directed graphs is referred to as the **MAN classification**, which stands for **Mutual** (reciprocal), **Asymmetric** (non-reciprocal), and **Null** (disconnected). 
@@ -122,13 +111,13 @@ A lot of the time we collect social network information that has a directed basi
 
 ### Dyads under Anti-Symmetric Ties
 
-In **anti-symmetric ties**, reciprocity is strictly forbidden ($AB \implies \n\neg BA$). 
+In **anti-symmetric ties**, reciprocity is strictly forbidden ($AB \implies \neg BA$). 
 Examples include hierarchical relations such as "is boss of", "is parent of", or flow relations where a transaction cannot be reversed. 
 
 Because mutual interaction is structurally or logically impossible under anti-symmetric ties, reciprocal dyads cannot occur. Therefore, anti-symmetric ties can only yield **two** types of dyads:
 
 * **Disconnected Dyads**: The two nodes do not share any directed edge (size zero).
-* **Non-Reciprocal Dyads**: Only a single one-way directed tie exists between them (shown in @fig-asymmetric-dyad).
+* **Non-Reciprocal Dyads**: Only a single one-way directed tie exists between them (shown in the panel labeled **Asymmetric** in @fig-dir-dyads).
 
 This restriction drastically simplifies the **dyad census** of anti-symmetric networks (see @sec-dirgraphsmetrics): every pair of nodes is either completely disconnected or connected by a strictly non-reciprocal arrow.
 
