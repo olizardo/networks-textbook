@@ -155,6 +155,7 @@
 <li class="fragment">But many network processes operate <strong>indirectly</strong>:
 <ul>
 <li class="fragment">We must look beyond immediate contacts to the “friends of our friends.”</li>
+<li class="fragment"><strong>Diffusion Channels</strong>: Indirect connections act as channels for gossip, information transmission, disease contagion, or social influence.</li>
 </ul></li>
 <li class="fragment">In graph theory, indirect connections are formalized using three core concepts:
 <ul>
@@ -173,19 +174,6 @@
 </div>
 </div></div>
 </section>
-<section id="why-indirect-connections-matter" class="slide level2">
-<h2>Why Indirect Connections Matter</h2>
-<ul>
-<li class="fragment">Indirect pathways are the engine of diffusion and flow in a network.</li>
-<li class="fragment">They act as channels for:
-<ul>
-<li class="fragment"><strong>Information &amp; Gossip</strong>: Diffusing through chains of acquaintances (“six degrees of separation”).</li>
-<li class="fragment"><strong>Disease &amp; Contagion</strong>: Spreading via intermediate, infected contacts.</li>
-<li class="fragment"><strong>Influence &amp; Support</strong>: Reaching distant nodes through brokers.</li>
-</ul></li>
-<li class="fragment"><em>Two strangers meeting at an airport who discover a common contact are connected by a path of length two.</em></li>
-</ul>
-</section>
 <section id="what-is-a-path" class="slide level2">
 <h2>What is a Path?</h2>
 <div class="columns" data-align="center">
@@ -197,7 +185,12 @@
 <li class="fragment">Ends with a <strong>destination node</strong> (<span class="math inline">\(v\)</span>).</li>
 <li class="fragment">Does <strong>not repeat any nodes</strong> (which implies edges are not repeated either!).</li>
 </ul></li>
-<li class="fragment">Every path is actually a <strong>subgraph</strong> of the original graph, connected in a single line.</li>
+<li class="fragment"><strong>Anatomy of a Path</strong> (e.g.&nbsp;Red path from <span class="math inline">\(B\)</span> to <span class="math inline">\(D\)</span> on the right):
+<ul>
+<li class="fragment">Written as: <span class="math inline">\(B-D = \{BE, ED\}\)</span> (length <span class="math inline">\(l = 2\)</span>).</li>
+<li class="fragment"><strong>Origin</strong>: <span class="math inline">\(B\)</span>, <strong>Destination</strong>: <span class="math inline">\(D\)</span> (together called the <strong>end nodes</strong>).</li>
+<li class="fragment"><strong>Inner Nodes</strong>: <span class="math inline">\(E\)</span> (the nodes in between).</li>
+</ul></li>
 </ul>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
@@ -211,23 +204,24 @@
 </div>
 </div></div>
 </section>
-<section id="anatomy-of-a-path" class="slide level2">
-<h2>Anatomy of a Path</h2>
+<section id="multiple-paths-geodesics" class="slide level2">
+<h2>Multiple Paths &amp; Geodesics</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:60%;">
 <ul>
-<li class="fragment">Let’s look at our red path from <span class="math inline">\(B\)</span> to <span class="math inline">\(D\)</span>:
+<li class="fragment">Multiple distinct paths can connect the same pair of nodes.</li>
+<li class="fragment">Let’s trace paths from <span class="math inline">\(B\)</span> to <span class="math inline">\(A\)</span>:
 <ul>
-<li class="fragment">Written as: <span class="math inline">\(B-D = \{BE, ED\}\)</span></li>
+<li class="fragment"><span class="math inline">\(P_1 = \{BE, ED, DA\} \quad (l = 3)\)</span></li>
+<li class="fragment"><span class="math inline">\(P_2 = \{BE, EC, CA\} \quad (l = 3)\)</span></li>
+<li class="fragment"><span class="math inline">\(P_3 = \{BE, ED, DC, CA\} \quad (l = 4)\)</span></li>
+<li class="fragment"><span class="math inline">\(P_4 = \{BE, EC, CD, DA\} \quad (l = 4)\)</span></li>
 </ul></li>
-<li class="fragment"><strong>Key Elements</strong>:
+<li class="fragment"><strong>Shortest Path (Geodesic)</strong>:
 <ul>
-<li class="fragment"><strong>Origin Node</strong>: <span class="math inline">\(B\)</span> (the start of the sequence)</li>
-<li class="fragment"><strong>Destination Node</strong>: <span class="math inline">\(D\)</span> (the end of the sequence)</li>
-<li class="fragment"><strong>Inner Nodes</strong>: <span class="math inline">\(E\)</span> (the nodes in between)</li>
+<li class="fragment">The path of minimum length between two nodes.</li>
+<li class="fragment"><strong>Geodesic Distance</strong>: The length of the geodesic path (here, geodesic distance <span class="math inline">\(d(B, A) = 3\)</span>, with tied geodesics <span class="math inline">\(P_1\)</span> and <span class="math inline">\(P_2\)</span>).</li>
 </ul></li>
-<li class="fragment">Together, the origin and destination are called the <strong>end nodes</strong> of the path.</li>
-<li class="fragment">The length of a path (<span class="math inline">\(l\)</span>) is the number of edges: <span class="math inline">\(l = 2\)</span>.</li>
 </ul>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
@@ -241,20 +235,18 @@
 </div>
 </div></div>
 </section>
-<section id="multiple-paths-of-different-lengths" class="slide level2">
-<h2>Multiple Paths of Different Lengths</h2>
+<section id="what-is-a-cycle" class="slide level2">
+<h2>What is a Cycle?</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:60%;">
 <ul>
-<li class="fragment">The same two nodes can be connected via multiple distinct paths.</li>
-<li class="fragment">Let’s trace the pathways from <span class="math inline">\(B\)</span> to <span class="math inline">\(A\)</span>:
+<li class="fragment">A <strong>cycle</strong> is a path of length 3 or larger that starts and ends on the same node.</li>
+<li class="fragment"><strong>Key Concepts</strong>:
 <ul>
-<li class="fragment"><span class="math inline">\(P_1 = \{BE, ED, DA\} \quad (l = 3)\)</span></li>
-<li class="fragment"><span class="math inline">\(P_2 = \{BE, EC, CA\} \quad (l = 3)\)</span></li>
-<li class="fragment"><span class="math inline">\(P_3 = \{BE, ED, DC, CA\} \quad (l = 4)\)</span></li>
-<li class="fragment"><span class="math inline">\(P_4 = \{BE, EC, CD, DA\} \quad (l = 4)\)</span></li>
+<li class="fragment">Origin and destination are identical, but inner nodes are unique.</li>
+<li class="fragment"><strong>Graph Girth</strong>: The length of the <strong>shortest</strong> cycle in a graph (here, girth is <span class="math inline">\(3\)</span>, the triangle <span class="math inline">\(\{ED, DC, CE\}\)</span>).</li>
+<li class="fragment"><strong>Graph Circumference</strong>: The length of the <strong>longest</strong> cycle in a graph (here, circumference is <span class="math inline">\(4\)</span>, <span class="math inline">\(\{ED, DA, AC, CE\}\)</span>).</li>
 </ul></li>
-<li class="fragment">Each path represents a valid, non-repeating sequence of contacts.</li>
 </ul>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
@@ -268,193 +260,31 @@
 </div>
 </div></div>
 </section>
-<section id="shortest-paths-geodesics" class="slide level2">
-<h2>Shortest Paths &amp; Geodesics</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
+<section id="cycle-length-girth-vs.-circumference" class="slide level2">
+<h2>Cycle Length: Girth vs.&nbsp;Circumference</h2>
+
+<img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"></section>
+<section id="walks-trails-and-paths" class="slide level2">
+<h2>Walks, Trails, and Paths</h2>
 <ul>
-<li class="fragment"><strong>Shortest Path (Geodesic)</strong>:
-<ul>
-<li class="fragment">The path of minimum length connecting two nodes.</li>
-</ul></li>
-<li class="fragment"><strong>Geodesic Distance</strong>:
-<ul>
-<li class="fragment">The length of the shortest path between two nodes (the “degrees of separation”).</li>
-</ul></li>
-<li class="fragment"><strong>For Nodes <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span></strong>:
-<ul>
-<li class="fragment">The geodesic distance is <span class="math inline">\(l = 3\)</span>.</li>
-<li class="fragment">There are <strong>multiple shortest paths</strong> (a tie between <span class="math inline">\(P_1\)</span> and <span class="math inline">\(P_2\)</span>).</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="what-is-a-cycle" class="slide level2">
-<h2>What is a Cycle?</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment">A <strong>cycle</strong> is a path of length 3 or larger that starts and ends on the same node.</li>
-<li class="fragment">In other words, origin and destination are identical, but inner nodes are unique.</li>
-<li class="fragment"><strong>Examples</strong>:
-<ul>
-<li class="fragment"><span class="math inline">\(Cycle_1 = \{ED, DC, CE\} \quad (l = 3)\)</span>
-<ul>
-<li class="fragment">This is a <strong>triangle</strong> (closed triad), the smallest possible cycle.</li>
-</ul></li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="graph-girth-shortest-cycle" class="slide level2">
-<h2>Graph Girth: Shortest Cycle</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment">Cycles are characterized by their length (number of edges).</li>
-<li class="fragment"><strong>Graph Girth</strong>:
-<ul>
-<li class="fragment">The length of the <strong>shortest</strong> cycle in a graph.</li>
-<li class="fragment">In our undirected house graph on the right, the girth is <strong>3</strong>.</li>
-<li class="fragment">This is the triangle <span class="math inline">\(\{ED, DC, CE\}\)</span>, highlighted in red.</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="graph-circumference-longest-cycle" class="slide level2">
-<h2>Graph Circumference: Longest Cycle</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><strong>Graph Circumference</strong>:
-<ul>
-<li class="fragment">The length of the <strong>longest</strong> cycle in a graph.</li>
-<li class="fragment">In our undirected house graph on the right, the circumference is <strong>4</strong>.</li>
-<li class="fragment">This is the cycle <span class="math inline">\(\{ED, DA, AC, CE\}\)</span>, highlighted in red.</li>
-<li class="fragment"><em>Notice that node <span class="math inline">\(D\)</span> and node <span class="math inline">\(C\)</span> are connected directly, but we bypass that direct edge to form the longest cycle.</em></li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="walks-and-trails" class="slide level2">
-<h2>Walks and Trails</h2>
-<ul>
-<li class="fragment"><strong>Walk</strong>: Any sequence of alternating nodes and edges from <span class="math inline">\(u\)</span> to <span class="math inline">\(v\)</span>.
+<li class="fragment"><strong>Walk</strong>: Any sequence of alternating nodes and edges connecting <span class="math inline">\(u\)</span> to <span class="math inline">\(v\)</span>.
 <ul>
 <li class="fragment"><em>No restrictions</em>: Nodes and edges can be repeated as much as you want!</li>
-<li class="fragment">e.g., <span class="math inline">\(\{AD, DC, CE, ED, DC, EC, EB\}\)</span> is a walk.</li>
+<li class="fragment">e.g., <span class="math inline">\(\{B \rightarrow E \rightarrow C \rightarrow E \rightarrow D\}\)</span> (traverses <span class="math inline">\(E\)</span> and edge <span class="math inline">\(E-C\)</span> twice).</li>
 </ul></li>
 <li class="fragment"><strong>Trail</strong>: A walk that does not repeat any <strong>edges</strong>.
 <ul>
 <li class="fragment"><em>Repeated nodes are allowed</em>, but every edge in the sequence must be unique.</li>
-<li class="fragment">e.g., <span class="math inline">\(\{CA, AD, DC, CE, ED\}\)</span> is a trail (nodes <span class="math inline">\(C\)</span> and <span class="math inline">\(D\)</span> are visited twice, but all edges are unique).</li>
+<li class="fragment">e.g., <span class="math inline">\(\{A \rightarrow C \rightarrow D \rightarrow E \rightarrow C \rightarrow B\}\)</span> (repeats node <span class="math inline">\(C\)</span> but all edges are unique).</li>
 </ul></li>
-</ul>
-</section>
-<section id="walks-a-visual-example" class="slide level2">
-<h2>Walks: A Visual Example</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><strong>Walk</strong>: <span class="math inline">\(B \rightarrow E \rightarrow C \rightarrow E \rightarrow D\)</span> (length 4)</li>
-<li class="fragment"><strong>Characteristics</strong>:
-<ul>
-<li class="fragment">Traverses the highlighted edges in red.</li>
-<li class="fragment">Repeats node <strong>E</strong> (visited twice).</li>
-<li class="fragment">Repeats edge <strong>E-C</strong> (traversed back and forth).</li>
-<li class="fragment"><em>No restrictions on repetition!</em></li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="trails-a-visual-example" class="slide level2">
-<h2>Trails: A Visual Example</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><strong>Trail</strong>: <span class="math inline">\(A \rightarrow C \rightarrow D \rightarrow E \rightarrow C \rightarrow B\)</span> (length 5)</li>
-<li class="fragment"><strong>Characteristics</strong>:
-<ul>
-<li class="fragment">Traverses the highlighted edges in red.</li>
-<li class="fragment">Repeats node <strong>C</strong> (visited twice).</li>
-<li class="fragment"><strong>No edges are repeated</strong>: All five edges (<span class="math inline">\(AC, CD, DE, EC, EB\)</span>) are completely unique!</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="the-sequence-hierarchy" class="slide level2">
-<h2>The Sequence Hierarchy</h2>
-<ul>
 <li class="fragment"><strong>Path</strong>: A walk that does not repeat any <strong>nodes</strong> (which means edges cannot be repeated either).</li>
-<li class="fragment"><strong>The Nested Hierarchy</strong>:
-<ul>
-<li class="fragment">Every <strong>path</strong> is a <strong>trail</strong>.</li>
-<li class="fragment">Every <strong>trail</strong> is a <strong>walk</strong>.</li>
-<li class="fragment"><em>All paths are trails, and all trails are walks, but the reverse is not true!</em></li>
-</ul></li>
-<li class="fragment">Paths are the most restrictive, while walks are the least restricted.</li>
+<li class="fragment"><strong>The Nested Hierarchy</strong>: All paths are trails, and all trails are walks, but the reverse is not true: <span class="math display">\[Paths \subset Trails \subset Walks\]</span></li>
 </ul>
-</section></section>
+</section>
+<section id="walks-trails-visual-examples" class="slide level2">
+<h2>Walks &amp; Trails: Visual Examples</h2>
+
+<img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"></section></section>
 <section>
 <section id="part-2-directed-paths-reachability" class="title-slide slide level1 center">
 <h1>Part 2: Directed Paths &amp; Reachability</h1>
@@ -482,79 +312,54 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
 </figure>
 </div>
 </div>
 </div>
 </div></div>
 </section>
-<section id="asymmetric-reachability" class="slide level2">
-<h2>Asymmetric Reachability</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
+<section id="directed-reachability" class="slide level2">
+<h2>Directed Reachability</h2>
 <ul>
-<li class="fragment">In directed networks, <strong>reachability is asymmetric</strong>:
+<li class="fragment"><strong>Asymmetric Reachability</strong>:
 <ul>
-<li class="fragment"><span class="math inline">\(A\)</span> can reach <span class="math inline">\(B\)</span> via path <span class="math inline">\(\{AD, DE, EB\}\)</span> (<span class="math inline">\(l_{AB} = 3\)</span>).</li>
-<li class="fragment"><span class="math inline">\(B\)</span> cannot reach <span class="math inline">\(A\)</span> (<span class="math inline">\(l_{BA} = \infty\)</span>).</li>
+<li class="fragment">Node <span class="math inline">\(A\)</span> can reach <span class="math inline">\(B\)</span> via directed path <span class="math inline">\(\{AD, DE, EB\}\)</span> (<span class="math inline">\(l_{AB} = 3\)</span>).</li>
+<li class="fragment">But node <span class="math inline">\(B\)</span> <strong>cannot</strong> reach <span class="math inline">\(A\)</span> because we cannot travel against the arrows (<span class="math inline">\(l_{BA} = \infty\)</span>).</li>
 </ul></li>
-<li class="fragment">This asymmetric structure is a primary driver of inequality and unilateral flows in social networks (e.g.&nbsp;hierarchical power).</li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="mutual-reachability" class="slide level2">
-<h2>Mutual Reachability</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
 <li class="fragment"><strong>Mutual Reachability</strong>:
 <ul>
 <li class="fragment">Two nodes <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are mutually reachable if there exists a directed path from <span class="math inline">\(u \rightarrow v\)</span> AND from <span class="math inline">\(v \rightarrow u\)</span>.</li>
-</ul></li>
-<li class="fragment">The two paths <strong>do not</strong> have to be the same length!</li>
+<li class="fragment">These two paths <strong>do not</strong> have to be the same length!</li>
 <li class="fragment"><strong>Example</strong>: Nodes <span class="math inline">\(B\)</span> and <span class="math inline">\(C\)</span> are mutually reachable:
 <ul>
 <li class="fragment"><span class="math inline">\(B\)</span> reaches <span class="math inline">\(C\)</span> via <span class="math inline">\(\{BE, ED, DC\} \quad (l = 3)\)</span></li>
 <li class="fragment"><span class="math inline">\(C\)</span> reaches <span class="math inline">\(B\)</span> via shortest path <span class="math inline">\(\{CE, EB\} \quad (l = 2)\)</span></li>
 </ul></li>
+</ul></li>
 </ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
 </section>
-<section id="directed-cycles" class="slide level2">
-<h2>Directed Cycles</h2>
+<section id="directed-reachability-visual-examples" class="slide level2">
+<h2>Directed Reachability: Visual Examples</h2>
+
+<img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"></section>
+<section id="directed-cycles-dags" class="slide level2">
+<h2>Directed Cycles &amp; DAGs</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:60%;">
 <ul>
-<li class="fragment">A <strong>directed cycle</strong> is a cycle where all arrows flow in a single, continuous direction.</li>
-<li class="fragment"><strong>Example</strong>: Cycle starting and ending at <span class="math inline">\(C\)</span>
+<li class="fragment">A <strong>directed cycle</strong> is a cycle where all arrows flow in a single, continuous direction.
+<ul>
+<li class="fragment"><strong>Example</strong>: Cycle starting and ending at <span class="math inline">\(C\)</span>:
 <ul>
 <li class="fragment"><span class="math inline">\(\{CE, ED, DC\} \quad (l = 3)\)</span></li>
+</ul></li>
 </ul></li>
 <li class="fragment"><strong>Directed Acyclic Graphs (DAGs)</strong>:
 <ul>
 <li class="fragment">Directed graphs that contain <strong>no directed cycles</strong>.</li>
-<li class="fragment">e.g.&nbsp;strict organizational command structures.</li>
+<li class="fragment">e.g.&nbsp;strict organizational command structures, directed trees.</li>
+<li class="fragment">Anti-symmetric relations (like “is boss of”) structurally forbid cycles to maintain consistent hierarchy.</li>
 </ul></li>
 </ul>
 </div><div class="column" style="width:40%;">
@@ -562,7 +367,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
 </figure>
 </div>
 </div>
@@ -577,9 +382,9 @@
 <li class="fragment">What if we want to trace connections in a directed graph but <strong>ignore the arrows</strong>?</li>
 <li class="fragment">This is called a <strong>semipath</strong> (or semicycle if it is a closed loop).</li>
 <li class="fragment">A semipath treats directed arcs as undirected edges.</li>
-<li class="fragment"><strong>Example</strong>: Semipath connecting <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span>
+<li class="fragment"><strong>Example</strong>: Semipath connecting <span class="math inline">\(B\)</span> and <span class="math inline">\(A\)</span>:
 <ul>
-<li class="fragment"><span class="math inline">\(\{BE, EC, CA\}\)</span> (visualized in red on the right).</li>
+<li class="fragment"><span class="math inline">\(\{BE, EC, CA\}\)</span> (highlighted in red on the right).</li>
 </ul></li>
 </ul>
 </div><div class="column" style="width:40%;">
@@ -587,7 +392,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
 </figure>
 </div>
 </div>
@@ -602,19 +407,143 @@
 <section id="connected-vs.-disconnected-graphs" class="slide level2">
 <h2>Connected vs.&nbsp;Disconnected Graphs</h2>
 <div class="columns" data-align="center">
-<div class="column" style="width:50%;">
+<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+<p><strong>Connected Graph</strong></p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+<p><strong>Disconnected Graph</strong></p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
 <ul>
-<li class="fragment"><strong>Connected Graph</strong>:
+<li><strong>Connected</strong>: A path of some finite length exists between <em>every</em> pair of nodes.</li>
+<li><strong>Disconnected</strong>: At least one pair of nodes is unreachable (e.g.&nbsp;no path between A and G).</li>
+</ul>
+</section>
+<section id="components-the-giant-component" class="slide level2">
+<h2>Components &amp; The Giant Component</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+<p><strong>Disconnected Graph with 2 Components</strong></p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
 <ul>
-<li class="fragment">An undirected graph where there exists a finite path between <strong>every</strong> pair of nodes (left).</li>
+<li><strong>Component</strong>: A maximally connected subgraph within a larger disconnected graph.
+<ul>
+<li>The graph on the left contains exactly <strong>two components</strong>.</li>
 </ul></li>
-<li class="fragment"><strong>Disconnected Graph</strong>:
+<li><strong>Giant Component</strong>: The largest connected component in a disconnected graph.
 <ul>
-<li class="fragment">An undirected graph where at least one pair of nodes is not connected by any path (right).</li>
-<li class="fragment">There is a “gap” splitting the graph into separate components.</li>
+<li>The red component <span class="math inline">\(\{A, B, C, D, E, F\}\)</span> is the <strong>giant component</strong> (of order 6).</li>
+<li>The blue component <span class="math inline">\(\{G, H, I\}\)</span> is a smaller component (of order 3).</li>
 </ul></li>
 </ul>
-</div><div class="column" style="width:50%;">
+</div></div>
+</section></section>
+<section>
+<section id="part-4-node-and-edge-connectivity-bridges-cutsets" class="title-slide slide level1 center">
+<h1>Part 4: Node and Edge Connectivity (Bridges &amp; Cutsets)</h1>
+
+</section>
+<section id="bridges-local-bridges" class="slide level2">
+<h2>Bridges &amp; Local Bridges</h2>
+<ul>
+<li class="fragment">We can disconnect a graph by removing edges.</li>
+<li class="fragment"><strong>Bridge</strong>:
+<ul>
+<li class="fragment">A single edge whose removal disconnects the graph, splitting it into separate components.</li>
+<li class="fragment">Represents the most critical, yet vulnerable transmission links in a network.</li>
+</ul></li>
+<li class="fragment"><strong>Mark Granovetter’s “Strength of Weak Ties” (1973)</strong>:
+<ul>
+<li class="fragment">Bridges represent critical pathways for novel information diffusing between separate social clusters.</li>
+</ul></li>
+<li class="fragment"><strong>Local Bridge</strong>:
+<ul>
+<li class="fragment">An edge that, if removed, does not necessarily disconnect the entire graph, but significantly increases the shortest path length between its end nodes (acting as a key shortcut).</li>
+</ul></li>
+</ul>
+</section>
+<section id="bridges-visual-examples" class="slide level2">
+<h2>Bridges: Visual Examples</h2>
+
+<img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"></section>
+<section id="node-connectivity-k-connected-graphs" class="slide level2">
+<h2>Node Connectivity &amp; k-Connected Graphs</h2>
+<ul>
+<li class="fragment">We can also disconnect a graph by <strong>removing nodes</strong> (vertices).</li>
+<li class="fragment">Removing a node also removes all edges incident to it—nodes “take their links with them”!</li>
+<li class="fragment"><strong>Node Cutset (Vertex Cutset)</strong>:
+<ul>
+<li class="fragment">The minimum set of nodes whose removal disconnects the graph.</li>
+<li class="fragment">Nodes in the cutset represent critical <strong>brokerage</strong> or “connector” positions.</li>
+</ul></li>
+<li class="fragment"><strong><span class="math inline">\(k\)</span>-Connected Graph</strong>:
+<ul>
+<li class="fragment">A graph is <span class="math inline">\(k\)</span>-connected if the minimum number of nodes required to disconnect it is <span class="math inline">\(k\)</span>:
+<ul>
+<li class="fragment"><strong>1-Connected</strong>: Removing 1 node can disconnect the graph (contains a cutpoint).</li>
+<li class="fragment"><strong>2-Connected</strong>: Requires removing at least 2 nodes to disconnect it.</li>
+<li class="fragment"><strong>3-Connected</strong>: Requires removing at least 3 nodes to disconnect it.</li>
+</ul></li>
+</ul></li>
+<li class="fragment"><strong>Menger’s Theorem (1927)</strong>: If a graph is <span class="math inline">\(k\)</span>-connected, there are at least <span class="math inline">\(k\)</span> node-independent paths connecting each non-adjacent pair of vertices.</li>
+</ul>
+</section>
+<section id="edge-cutset-a-visual-example" class="slide level2">
+<h2>Edge Cutset: A Visual Example</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:40%;">
+<ul>
+<li class="fragment">An <strong>edge cutset</strong> is a set of edges whose removal disconnects the graph.</li>
+<li class="fragment">Removing both <strong>C-A</strong> and <strong>D-A</strong> (red) completely disconnects node <span class="math inline">\(A\)</span>.</li>
+<li class="fragment">This is an edge cutset of size <strong>2</strong>.</li>
+</ul>
+</div><div class="column" style="width:60%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="node-cutset-a-visual-example" class="slide level2">
+<h2>Node Cutset: A Visual Example</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:40%;">
+<ul>
+<li class="fragment">A <strong>node cutset</strong> is a set of nodes whose removal disconnects the graph.</li>
+<li class="fragment">Removing node <strong>E</strong> (red) also removes its incident edges, completely isolating node <span class="math inline">\(B\)</span>.</li>
+<li class="fragment">This is a node cutset of size <strong>1</strong> (Node <span class="math inline">\(E\)</span> is a <strong>cutpoint</strong>).</li>
+</ul>
+</div><div class="column" style="width:60%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -626,293 +555,12 @@
 </div>
 </div></div>
 </section>
-<section id="components-and-the-giant-component" class="slide level2">
-<h2>Components and the Giant Component</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:50%;">
-<ul>
-<li class="fragment"><strong>Component</strong>:
-<ul>
-<li class="fragment">A connected subgraph within a larger disconnected graph.</li>
-<li class="fragment">If a graph has more than one component, it is disconnected.</li>
-</ul></li>
-<li class="fragment"><strong>Giant Component</strong>:
-<ul>
-<li class="fragment">The largest connected component in a disconnected graph.</li>
-<li class="fragment">In our 9-node graph (right), the component of order 6 <span class="math inline">\(\{A, B, C, D, E, F\}\)</span> is the giant component.</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-17-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section></section>
-<section>
-<section id="part-4-node-and-edge-connectivity-bridges-cutsets" class="title-slide slide level1 center">
-<h1>Part 4: Node and Edge Connectivity (Bridges &amp; Cutsets)</h1>
+<section id="levels-of-k-connectivity-visual-examples" class="slide level2">
+<h2>Levels of k-Connectivity: Visual Examples</h2>
 
-</section>
-<section id="edge-cutsets" class="slide level2">
-<h2>Edge Cutsets</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
-<ul>
-<li><strong>Edge Cutset</strong>: Any set of edges whose removal disconnects the graph into two or more components.</li>
-<li><strong>Example</strong>: The set of edges <strong>{A-C, B-C}</strong> (highlighted in red) is an edge cutset of size 2.
-<ul>
-<li>Removing both edges isolates node <strong>C</strong> (and <span class="math inline">\(\{D, E\}\)</span>) from <span class="math inline">\(\{A, B\}\)</span>.</li>
-</ul></li>
-<li><strong>Edge Connectivity</strong> (<span class="math inline">\(\lambda(G)\)</span>): The size of the <em>minimum</em> edge cutset.</li>
-</ul>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-18-1.png" class="quarto-figure quarto-figure-center" width="432"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="bridges" class="slide level2">
-<h2>Bridges</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
-<ul>
-<li><strong>Bridge</strong>: A single edge whose removal disconnects the graph (a cutset of size 1).</li>
-<li><strong>Example</strong>: The edge <strong>C-D</strong> (highlighted in red) is a bridge.
-<ul>
-<li>Removing <strong>C-D</strong> splits the network into two separate components: <span class="math inline">\(\{A, B, C\}\)</span> and <span class="math inline">\(\{D, E\}\)</span>.</li>
-</ul></li>
-<li>Bridges represent the most critical, yet vulnerable transmission links in a network.</li>
-</ul>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-19-1.png" class="quarto-figure quarto-figure-center" width="432"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="the-sociological-power-of-bridges" class="slide level2">
-<h2>The Sociological Power of Bridges</h2>
-<ul>
-<li class="fragment">Mark Granovetter’s seminal paper <strong>“The Strength of Weak Ties”</strong> (1973):
-<ul>
-<li class="fragment">Bridges represent critical pathways for novel information diffusing between separate social clusters.</li>
-</ul></li>
-<li class="fragment"><strong>Local Bridge</strong>:
-<ul>
-<li class="fragment">An edge that, if removed, does not necessarily disconnect the entire graph, but significantly increases the shortest path length between its end nodes.</li>
-<li class="fragment">Local bridges act as shortcuts that facilitate efficient, cross-group communication.</li>
-</ul></li>
-</ul>
-</section>
-<section id="local-bridge-a-visual-example" class="slide level2">
-<h2>Local Bridge: A Visual Example</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment">Let’s look at the edge <strong>C-D</strong> highlighted in red:
-<ul>
-<li class="fragment">It connects the left cluster <span class="math inline">\(\{A, B, C\}\)</span> to the right cluster <span class="math inline">\(\{D, E, F\}\)</span>.</li>
-</ul></li>
-<li class="fragment"><strong>Is it a bridge?</strong> No.&nbsp;If removed, the graph remains connected via the bottom path (<span class="math inline">\(B-G-H-I-E\)</span>).</li>
-<li class="fragment"><strong>Is it a local bridge?</strong> Yes!
-<ul>
-<li class="fragment">Observed distance: <span class="math inline">\(d(C, D) = 1\)</span>.</li>
-<li class="fragment">If removed, the distance increases to: <span class="math display">\[d(C, D) = 5 \quad (C-B-G-H-I-E-D)\]</span></li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-20-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="vertex-deletion-node-connectivity" class="slide level2">
-<h2>Vertex Deletion &amp; Node Connectivity</h2>
-<ul>
-<li class="fragment">We can also disconnect a graph by <strong>removing nodes</strong> (vertices).</li>
-<li class="fragment">Removing a node also removes all edges incident to it—nodes “take their links with them”!</li>
-<li class="fragment">Consequently, it is often much easier to disrupt or disconnect a network by removing key intermediate nodes than by removing edges.</li>
-<li class="fragment"><strong>Node Cutset (Vertex Cutset)</strong>:
-<ul>
-<li class="fragment">The minimum set of nodes whose removal disconnects the graph (or a specific pair of non-adjacent nodes <span class="math inline">\(u, v\)</span>).</li>
-</ul></li>
-<li class="fragment">Nodes in the cutset represent critical <strong>brokerage</strong> or “connector” positions.</li>
-</ul>
-</section>
-<section id="edge-cutset-a-visual-example" class="slide level2">
-<h2>Edge Cutset: A Visual Example</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment">An <strong>edge cutset</strong> is a set of edges whose removal disconnects the graph.</li>
-<li class="fragment">In our house graph on the right, the edges <strong>C-A</strong> and <strong>D-A</strong> are highlighted in red.</li>
-<li class="fragment"><strong>Removing both edges</strong> completely disconnects node <span class="math inline">\(A\)</span> from the rest of the network.</li>
-<li class="fragment">This is a valid edge cutset of size <strong>2</strong>.</li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-21-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="node-cutset-a-visual-example" class="slide level2">
-<h2>Node Cutset: A Visual Example</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment">A <strong>node cutset</strong> is a set of nodes whose removal disconnects the graph.</li>
-<li class="fragment">In our house graph on the right, node <strong>E</strong> is highlighted in red.</li>
-<li class="fragment"><strong>Removing node E</strong> (which also removes all of its incident edges: <span class="math inline">\(B-E, E-C, E-D\)</span>) completely disconnects node <span class="math inline">\(B\)</span> from the rest of the network.</li>
-<li class="fragment">This is a minimum node cutset of size <strong>1</strong> (Node <span class="math inline">\(E\)</span> is a <strong>cutpoint</strong> or <strong>articulation point</strong>).</li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-22-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="k-connected-graphs" class="slide level2">
-<h2>K-Connected Graphs</h2>
-<ul>
-<li class="fragment">A graph is <strong><span class="math inline">\(k\)</span>-connected</strong> (or <span class="math inline">\(k\)</span>-node connected) if the minimum number of nodes required to disconnect it is <span class="math inline">\(k\)</span>:
-<ul>
-<li class="fragment"><strong>1-Connected</strong>: Removing 1 node can disconnect the graph (contains an articulation point or cutpoint).</li>
-<li class="fragment"><strong>2-Connected</strong>: Requires removing at least 2 nodes to disconnect it.</li>
-<li class="fragment"><strong>3-Connected</strong>: Requires removing at least 3 nodes to disconnect it.</li>
-</ul></li>
-<li class="fragment">Higher <span class="math inline">\(k\)</span>-connectivity indicates a more robust, cohesive, and redundant network.</li>
-</ul>
-</section>
-<section id="connected-graph-vulnerable-structure" class="slide level2">
-<h2>1-Connected Graph: Vulnerable Structure</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Before (Star Graph)</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-23-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>After (Removing Node A)</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-24-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<ul>
-<li><strong>1-Connected</strong>: Only requires removing <span class="math inline">\(k=1\)</span> node to disconnect the graph.</li>
-<li>Node <strong>A</strong> is the <strong>articulation point</strong> (cutpoint). Removing it isolates nodes B, C, and D.</li>
-</ul>
-</section>
-<section id="connected-graph-moderate-redundancy" class="slide level2">
-<h2>2-Connected Graph: Moderate Redundancy</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Before (Ring Graph)</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-25-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>After (Removing Nodes A and C)</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-26-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<ul>
-<li><strong>2-Connected</strong>: Requires removing <span class="math inline">\(k=2\)</span> nodes to disconnect the graph.</li>
-<li>Removing only <span class="math inline">\(1\)</span> node (e.g.&nbsp;A) leaves a connected path (D-C-B), so it does not disconnect the graph.</li>
-<li>Removing <span class="math inline">\(2\)</span> nodes (e.g.&nbsp;A and C) breaks the ring, completely isolating nodes <strong>B</strong> and <strong>D</strong>.</li>
-</ul>
-</section>
-<section id="connected-graph-high-cohesion" class="slide level2">
-<h2>3-Connected Graph: High Cohesion</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Before (Wheel Graph)</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-27-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>After (Removing Nodes A, B, and D)</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-28-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<ul>
-<li><strong>3-Connected</strong>: Requires removing <span class="math inline">\(k=3\)</span> nodes to disconnect the graph.</li>
-<li>Removing <span class="math inline">\(1\)</span> or <span class="math inline">\(2\)</span> nodes (e.g.&nbsp;A and B) still leaves path E-D-C connected, meaning it remains connected.</li>
-<li>Removing <span class="math inline">\(3\)</span> nodes (e.g.&nbsp;Center <strong>A</strong> and opposite base nodes <strong>B</strong> and <strong>D</strong>) isolates <strong>C</strong> and <strong>E</strong>.</li>
-</ul>
-</section>
+<img data-src="graph-connectivity_files/figure-revealjs/fig-kconn-slides-1.png" width="1152" class="r-stretch quarto-figure-center" id="fig-kconn-slides"><p class="caption">
+Figure&nbsp;1: Graphs with different levels of k-connectivity.
+</p></section>
 <section id="graph-cutsets-quantitative-cohesion" class="slide level2">
 <h2>Graph Cutsets: Quantitative Cohesion</h2>
 <ul>
@@ -923,401 +571,46 @@
 </ul></li>
 <li class="fragment">Any network can be decomposed into hierarchical subgraphs with specific levels of <span class="math inline">\(k\)</span>-connectivity.</li>
 </ul>
-</section>
-<section id="mengers-theorem" class="slide level2">
-<h2>Menger’s Theorem</h2>
-<ul>
-<li class="fragment">A foundational result in graph theory proposed by Karl Menger (1927):
-<ul>
-<li class="fragment"><strong>Menger’s Theorem</strong>: If a graph is <span class="math inline">\(k\)</span>-connected, there are at least <span class="math inline">\(k\)</span> node-independent paths (paths that do not share any common inner nodes) connecting each non-adjacent pair of vertices.</li>
-</ul></li>
-<li class="fragment"><strong>Sociological Implication</strong>:
-<ul>
-<li class="fragment">In a 3-connected cohesive subgroup, any two non-adjacent members are connected in at least <strong>three separate, independent ways</strong>.</li>
-<li class="fragment">This ensures highly redundant, reliable information flow that cannot be blocked by a single broker!</li>
-</ul></li>
-</ul>
 </section></section>
 <section>
 <section id="part-5-directed-connectivity-matrices" class="title-slide slide level1 center">
 <h1>Part 5: Directed Connectivity &amp; Matrices</h1>
 
 </section>
-<section id="the-reachability-matrix-d_r" class="slide level2">
-<h2>The Reachability Matrix (<span class="math inline">\(D_r\)</span>)</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Directed Graph</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-29-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Reachability Matrix (<span class="math inline">\(D_r\)</span>)</strong></p>
-<div class="small">
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>A</strong></td>
-<td>–</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>B</strong></td>
-<td>0</td>
-<td>–</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>C</strong></td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>D</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-<td>0</td>
-</tr>
-<tr class="odd">
-<td><strong>E</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>–</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div></div>
-<ul>
-<li><strong>Definition</strong>: <span class="math inline">\(D_r(i,j) = 1\)</span> if node <span class="math inline">\(i\)</span> can reach node <span class="math inline">\(j\)</span> via a path of any length (<span class="math inline">\(0\)</span> otherwise).</li>
-<li><strong>Examples</strong>:
-<ul>
-<li><span class="math inline">\(A\)</span> can reach <span class="math inline">\(E\)</span> via path <span class="math inline">\(A \rightarrow C \rightarrow E\)</span>, so <span class="math inline">\(D_r(A, E) = 1\)</span>.</li>
-<li><span class="math inline">\(B\)</span> cannot reach <span class="math inline">\(A\)</span>, so <span class="math inline">\(D_r(B, A) = 0\)</span>.</li>
-</ul></li>
-</ul>
-</section>
-<section id="matrix-row-column-patterns" class="slide level2">
-<h2>Matrix Row &amp; Column Patterns</h2>
-<p>The reachability matrix reveals structural node behaviors:</p>
-<ul>
-<li class="fragment"><strong>Receiver Nodes</strong>:
-<ul>
-<li class="fragment">Have all zeros in their corresponding row of <span class="math inline">\(D_r\)</span> (cannot reach anyone, e.g.&nbsp;Node <span class="math inline">\(D\)</span> above).</li>
-</ul></li>
-<li class="fragment"><strong>Transmitter Nodes</strong>:
-<ul>
-<li class="fragment">Have all zeros in their corresponding column of <span class="math inline">\(D_r\)</span> (cannot be reached by anyone, e.g.&nbsp;Node <span class="math inline">\(A\)</span> or <span class="math inline">\(B\)</span> or <span class="math inline">\(C\)</span> above).</li>
-</ul></li>
-</ul>
-</section>
 <section id="flavors-of-connectivity-in-directed-graphs" class="slide level2 scrollable">
 <h2>Flavors of Connectivity in Directed Graphs</h2>
-<p>Because of edge directionality, directed graphs have three distinct levels of connectivity:</p>
+<ul>
+<li class="fragment">Because of edge directionality, directed graphs have three levels of connectivity:</li>
+</ul>
 <ol type="1">
-<li class="fragment"><strong>Strongly Connected</strong>:
-<ul>
-<li class="fragment">Every pair of nodes is <strong>mutually reachable</strong> via directed paths.</li>
-</ul></li>
-<li class="fragment"><strong>Unilaterally Connected</strong>:
-<ul>
-<li class="fragment">Every pair of nodes is connected by <strong>at least one directed path</strong> (from <span class="math inline">\(u \rightarrow v\)</span> OR <span class="math inline">\(v \rightarrow u\)</span>, but not necessarily both).</li>
-</ul></li>
-<li class="fragment"><strong>Weakly Connected</strong>:
-<ul>
-<li class="fragment">Every pair of nodes is connected by at least a <strong>semipath</strong> (connected if we ignore arrow directions).</li>
-</ul></li>
+<li class="fragment"><strong>Strongly Connected</strong>: Every pair of nodes is <strong>mutually reachable</strong> via directed paths.</li>
+<li class="fragment"><strong>Unilaterally Connected</strong>: Every pair is connected by <strong>at least one directed path</strong> (from <span class="math inline">\(u \rightarrow v\)</span> OR <span class="math inline">\(v \rightarrow u\)</span>, but not necessarily both).</li>
+<li class="fragment"><strong>Weakly Connected</strong>: Every pair of nodes is connected by at least a <strong>semipath</strong> (connected if we ignore arrow directions).</li>
 </ol>
 </section>
 <section id="directed-connectivity-visual-examples" class="slide level2">
 <h2>Directed Connectivity: Visual Examples</h2>
+
+<img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-17-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"></section>
+<section id="the-reachability-matrix-d_r" class="slide level2">
+<h2>The Reachability Matrix (<span class="math inline">\(D_r\)</span>)</h2>
 <div class="columns" data-align="center">
-<div class="column" style="width:33%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-30-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:33%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-31-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:33%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-32-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="reachability-matrices-of-connectivity-flavors" class="slide level2">
-<h2>Reachability Matrices of Connectivity Flavors</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:33%;">
-<h3 id="strongly-connected">Strongly Connected</h3>
-<div class="small">
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>A</strong></td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>B</strong></td>
-<td>1</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>C</strong></td>
-<td>1</td>
-<td>1</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>D</strong></td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>–</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>E</strong></td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>–</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div><div class="column" style="width:33%;">
-<h3 id="unilaterally-connected">Unilaterally Connected</h3>
-<div class="small">
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>A</strong></td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>B</strong></td>
-<td>1</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>C</strong></td>
-<td>1</td>
-<td>1</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>D</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>E</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div><div class="column" style="width:33%;">
-<h3 id="weakly-connected">Weakly Connected</h3>
-<div class="small">
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>A</strong></td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr class="even">
-<td><strong>B</strong></td>
-<td>1</td>
-<td>–</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr class="odd">
-<td><strong>C</strong></td>
-<td>1</td>
-<td>1</td>
-<td>–</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr class="even">
-<td><strong>D</strong></td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>–</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>E</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div></div>
-</section>
-<section id="reachability-and-connectivity-types" class="slide level2">
-<h2>Reachability and Connectivity Types</h2>
-<p>The reachability matrix reveals the global connectivity type of the digraph:</p>
+<div class="column" style="width:60%;">
 <ul>
-<li class="fragment"><strong>Strongly Connected</strong>:
+<li class="fragment">The <strong>reachability matrix</strong> (<span class="math inline">\(D_r\)</span>) of a graph records whether each pair of nodes can reach each other (<span class="math inline">\(D_r(i,j) = 1\)</span> if node <span class="math inline">\(i\)</span> can reach <span class="math inline">\(j\)</span> via a path of any length).</li>
+<li class="fragment"><strong>Matrix Row &amp; Column Patterns</strong>:
 <ul>
-<li class="fragment">The reachability matrix is the <strong>all-ones matrix</strong> (excluding diagonal). Every node can reach every other node.</li>
-</ul></li>
-<li class="fragment"><strong>Unilaterally Connected</strong>:
-<ul>
-<li class="fragment">The matrix contains some zeros, but for any pair, either <span class="math inline">\(D_r(i,j) = 1\)</span> or <span class="math inline">\(D_r(j,i) = 1\)</span>. There are no mutually unreachable pairs.</li>
-</ul></li>
-<li class="fragment"><strong>Weakly Connected</strong>:
-<ul>
-<li class="fragment">Contains at least one pair of nodes that are mutually unreachable (<span class="math inline">\(D_r(i,j) = 0\)</span> AND <span class="math inline">\(D_r(j,i) = 0\)</span>, e.g., Nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(E\)</span> are mutually unreachable in a weak graph).</li>
+<li class="fragment"><strong>Receiver Nodes</strong>: Have all zeros in their corresponding row of <span class="math inline">\(D_r\)</span> (cannot reach anyone, e.g.&nbsp;Node <span class="math inline">\(D\)</span> on the right).</li>
+<li class="fragment"><strong>Transmitter Nodes</strong>: Have all zeros in their corresponding column of <span class="math inline">\(D_r\)</span> (cannot be reached by anyone, e.g.&nbsp;Nodes <span class="math inline">\(A, B, C\)</span> on the right).</li>
 </ul></li>
 </ul>
-</section>
-<section id="graph-connectedness-c-concept" class="slide level2">
-<h2>Graph Connectedness (<span class="math inline">\(C\)</span>): Concept</h2>
-<ul>
-<li><strong>Graph Connectedness</strong> (<span class="math inline">\(C\)</span>) measures the extent to which a network approaches the ideal where <em>everyone can reach everyone else</em>.</li>
-<li>Mathematically, it is the <strong>density of the directed reachability matrix</strong> (<span class="math inline">\(D_r\)</span>): <span class="math display">\[C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}\]</span>
-<ul>
-<li>Where the numerator is the sum of all ones in the reachability matrix (excluding the diagonal).</li>
-<li>The denominator <span class="math inline">\(n(n-1)\)</span> is the total possible off-diagonal cells (all possible paths).</li>
-</ul></li>
-<li>It ranges from <span class="math inline">\(0\)</span> (completely disconnected) to <span class="math inline">\(1.0\)</span> (strongly connected, where everyone can reach everyone).</li>
-</ul>
-</section>
-<section id="graph-connectedness-c-example" class="slide level2">
-<h2>Graph Connectedness (<span class="math inline">\(C\)</span>): Example</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Directed Graph</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-33-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Reachability Matrix (<span class="math inline">\(D_r\)</span>)</strong></p>
-<div class="small">
+</div><div class="column" style="width:40%;">
+<div id="tbl-reach-slides" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-reach-slides-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Reachability Matrix for our Directed Graph
+</figcaption>
+<div aria-describedby="tbl-reach-slides-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1373,18 +666,105 @@
 </tbody>
 </table>
 </div>
+</figure>
+</div>
 </div></div>
+</section>
+<section id="reachability-directed-connectivity" class="slide level2">
+<h2>Reachability &amp; Directed Connectivity</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:60%;">
 <ul>
-<li><strong>Step-by-Step Calculation</strong>:
+<li class="fragment">The reachability matrix reveals the global connectivity type of the digraph:
 <ul>
-<li>Sum of ones in our reachability matrix (<span class="math inline">\(D_r\)</span>): <span class="math inline">\(3 \text{ (Row A)} + 2 \text{ (Row B)} + 2 \text{ (Row C)} + 0 \text{ (Row D)} + 1 \text{ (Row E)} = 8\)</span>.</li>
-<li>Total possible connections: <span class="math inline">\(n(n-1) = 5(4) = 20\)</span>.</li>
-<li>Connectedness: <span class="math inline">\(C = \frac{8}{20} = 0.40 \quad (40\%)\)</span>.</li>
+<li class="fragment"><strong>Strongly Connected</strong>: The matrix is the <strong>all-ones matrix</strong> (excluding diagonal).</li>
+<li class="fragment"><strong>Unilaterally Connected</strong>: The matrix contains some zeros, but for any pair, either <span class="math inline">\(D_r(i,j) = 1\)</span> or <span class="math inline">\(D_r(j,i) = 1\)</span>. There are no mutually unreachable pairs.</li>
+<li class="fragment"><strong>Weakly Connected</strong>: Contains at least one pair of nodes that are mutually unreachable (<span class="math inline">\(D_r(i,j) = 0\)</span> AND <span class="math inline">\(D_r(j,i) = 0\)</span>).</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:40%;">
+<div id="tbl-reach-slides-2" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-reach-slides-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Reachability Matrix for our Directed Graph
+</figcaption>
+<div aria-describedby="tbl-reach-slides-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>A</strong></td>
+<td>–</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><strong>B</strong></td>
+<td>0</td>
+<td>–</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><strong>C</strong></td>
+<td>0</td>
+<td>0</td>
+<td>–</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><strong>D</strong></td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>–</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><strong>E</strong></td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>–</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</div></div>
+</section>
+<section id="graph-connectedness-c" class="slide level2">
+<h2>Graph Connectedness (<span class="math inline">\(C\)</span>)</h2>
+<ul>
+<li class="fragment"><strong>Graph Connectedness</strong> (<span class="math inline">\(C\)</span>) measures the extent to which a network approaches the ideal where <em>everyone can reach everyone else</em>.</li>
+<li class="fragment">Mathematically, it is the <strong>density of the directed reachability matrix</strong>: <span class="math display">\[C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}\]</span></li>
+<li class="fragment"><strong>Example Calculation</strong>:
+<ul>
+<li class="fragment">Sum of ones in our reachability matrix (<span class="math inline">\(D_r\)</span>): <span class="math inline">\(3 + 2 + 2 + 1 = 8\)</span>.</li>
+<li class="fragment">Total possible connections: <span class="math inline">\(n(n-1) = 5(4) = 20\)</span>.</li>
+<li class="fragment">Connectedness: <span class="math inline">\(C = \frac{8}{20} = 0.40 \quad (40\%)\)</span>.</li>
 </ul></li>
 </ul>
 </section>
 <section id="the-geodesic-distance-matrix-d_g" class="slide level2">
 <h2>The Geodesic Distance Matrix (<span class="math inline">\(D_g\)</span>)</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:60%;">
 <ul>
 <li class="fragment">The <strong>geodesic distance matrix</strong> (<span class="math inline">\(D_g\)</span>) records the length of the <strong>shortest path</strong> (geodesic) connecting each pair of nodes.</li>
 <li class="fragment"><strong>Rules</strong>:
@@ -1395,102 +775,13 @@
 </ul></li>
 <li class="fragment">In undirected graphs, <span class="math inline">\(D_g\)</span> is symmetric. In directed graphs, <span class="math inline">\(D_g\)</span> is asymmetric.</li>
 </ul>
-</section>
-<section id="undirected-geodesic-distance-matrix" class="slide level2">
-<h2>Undirected Geodesic Distance Matrix</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Undirected Graph</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-34-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Geodesic Distance Matrix (<span class="math inline">\(D_g\)</span>)</strong></p>
-<div class="small">
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>A</strong></td>
-<td>–</td>
-<td>3</td>
-<td>1</td>
-<td>1</td>
-<td>2</td>
-</tr>
-<tr class="even">
-<td><strong>B</strong></td>
-<td>3</td>
-<td>–</td>
-<td>2</td>
-<td>2</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>C</strong></td>
-<td>1</td>
-<td>2</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>D</strong></td>
-<td>1</td>
-<td>2</td>
-<td>1</td>
-<td>–</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>E</strong></td>
-<td>2</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>–</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div></div>
-<ul>
-<li><strong>Symmetric Matrix</strong>: <span class="math inline">\(D_g(i,j) = D_g(j,i)\)</span></li>
-<li><strong>Example</strong>: The distance <span class="math inline">\(d(B, A) = 3\)</span> (via path <span class="math inline">\(B-E-C-A\)</span> or <span class="math inline">\(B-E-D-A\)</span>).</li>
-</ul>
-</section>
-<section id="directed-geodesic-distance-matrix" class="slide level2">
-<h2>Directed Geodesic Distance Matrix</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Directed Graph</strong></p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-35-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-<p><strong>Geodesic Distance Matrix (<span class="math inline">\(D_g\)</span>)</strong></p>
-<div class="small">
+</div><div class="column" style="width:40%;">
+<div id="tbl-dist-slides" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dist-slides-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Geodesic Distance Matrix for our Digraph
+</figcaption>
+<div aria-describedby="tbl-dist-slides-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1546,20 +837,22 @@
 </tbody>
 </table>
 </div>
+</figure>
+</div>
 </div></div>
-<ul>
-<li><strong>Asymmetric Matrix</strong>: <span class="math inline">\(D_g(i,j) \neq D_g(j,i)\)</span></li>
-<li><strong>Example</strong>: <span class="math inline">\(d(B, A) = \infty\)</span> (Node <span class="math inline">\(A\)</span> is unreachable from <span class="math inline">\(B\)</span> due to arrow directions).</li>
-</ul>
 </section>
-<section id="node-eccentricity-graph-diameter" class="slide level2">
-<h2>Node Eccentricity &amp; Graph Diameter</h2>
+<section id="node-eccentricity-diameter-girth" class="slide level2">
+<h2>Node Eccentricity, Diameter &amp; Girth</h2>
 <p>From the geodesic distance matrix, we extract several fundamental whole-graph metrics:</p>
 <ul>
 <li class="fragment"><strong>Node Eccentricity</strong>: The maximum geodesic distance from a focal node to any other reachable node in the graph.</li>
 <li class="fragment"><strong>Graph Diameter</strong> (<span class="math inline">\(d\)</span>): The <em>maximum</em> geodesic distance across all pairs of connected nodes (longest shortest path).
 <ul>
 <li class="fragment">For our undirected graph, <span class="math inline">\(d = 3\)</span>.</li>
+</ul></li>
+<li class="fragment"><strong>Graph Girth</strong>: The length of the <em>shortest</em> cycle in a graph (smallest loop).
+<ul>
+<li class="fragment">For our undirected graph, the girth is <span class="math inline">\(3\)</span> (the triangle <span class="math inline">\(\{ED, DC, CE\}\)</span>).</li>
 </ul></li>
 </ul>
 </section>
@@ -1579,6 +872,9 @@
 <li class="fragment">The <strong>reachability matrix</strong> (<span class="math inline">\(D_r\)</span>) and the <strong>distance matrix</strong> (<span class="math inline">\(D_g\)</span>) let us calculate connectedness, diameter, and eccentricity, transforming qualitative network structures into rigorous quantitative indices.</li>
 </ul></li>
 </ul>
+</section>
+<section id="references" class="slide level2 unnumbered">
+<h2>References</h2>
 
 </section></section>
     </div>
