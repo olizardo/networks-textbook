@@ -983,7 +983,7 @@ ggraph(gr_bridge, layout = 'kk') +
 
 ---
 
-## Advanced: Local Bridges
+## Local Bridges
 
 ::: {.incremental}
 - In a classic paper on "The Strength of Weak Ties" (1973), Mark Granovetter developed the concept of a **local bridge**:
@@ -1984,4 +1984,40 @@ p_line + p_star + p_cat
 ::::
 
 ---
-## References {.unnumbered}
+## Summary: Connectivity & Components 
+
+:::: {.columns align=center}  
+::: {.column width="50%"}
+::: {.incremental}
+- **Connectivity**:
+  - Measures how robustly connected a graph is, based on the size of minimum cutsets.
+  - Higher connectivity means more redundancy and resilience to node/edge removal.  
+- **Components**:
+  - Subgraphs that are internally connected but disconnected from each other.
+  - In undirected graphs: connected components. In directed graphs: weakly, unilaterally, and strongly connected components.
+- **Tree Graphs**:
+  - Connected, acyclic graphs with $m = n - 1$ edges.
+  - Every edge is a bridge, and they have unique paths between nodes.
+:::
+::: {.column width="50%"}
+```{r}
+#| echo: false  
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_summary <- tbl_graph(
+  nodes = data.frame(name = LETTERS[1:5], x = c(0, 1, 1, 2, 3), y = c(0, 0, 1, 0, 0)),
+  edges = data.frame(from = c(1, 2, 2, 4), to = c(2, 3, 4, 5)),
+  directed = FALSE
+)
+ggraph(gr_summary, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+:::
+:::
+
+
