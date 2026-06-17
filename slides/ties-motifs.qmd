@@ -68,7 +68,7 @@ plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cr
     geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50")
   
   if (has_cross) {
-    p <- p + annotate("text", x = 1.5, y = 0.88, label = "✕", color = "#e74c3c", size = 8, fontface = "bold")
+    p <- p + annotate("text", x = 1.5, y = 0.94, label = "✕", color = "#e74c3c", size = 8, fontface = "bold")
   }
   
   p <- p + 
@@ -79,7 +79,7 @@ plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cr
       plot.subtitle = element_text(size = 9.5, color = "#7f8c8d", hjust = 0.5, lineheight = 1.1),
       plot.margin = margin(10, 10, 10, 10)
     ) +
-    coord_cartesian(xlim = c(0.6, 2.4), ylim = c(0.7, 1.3), clip = "off")
+    coord_cartesian(xlim = c(0.6, 2.4), ylim = c(0.88, 1.12), clip = "off")
   
   return(p)
 }
@@ -89,12 +89,12 @@ nodes_2 <- data.frame(name = c("A", "B"), x = c(1, 2), y = c(1, 1))
 
 # Define Edges for symmetric, reciprocal, non-reciprocal, and anti-symmetric
 edges_sym <- data.frame(from = 1, to = 2)
-edges_rec <- data.frame(from = c(1, 2), to = c(2, 1), strength = c(0.2, 0.2), color = c("#2c3e50", "#2c3e50"), linetype = c("solid", "solid"))
+edges_rec <- data.frame(from = c(1, 2), to = c(2, 1), strength = c(0.06, 0.06), color = c("#2c3e50", "#2c3e50"), linetype = c("solid", "solid"))
 edges_nonrec <- data.frame(from = 1, to = 2, strength = 0, color = "#2c3e50", linetype = "solid")
 edges_anti <- data.frame(
   from = c(1, 2), 
   to = c(2, 1), 
-  strength = c(0.2, 0.2), 
+  strength = c(0.06, 0.06), 
   color = c("#2c3e50", "#e74c3c"), 
   linetype = c("solid", "dashed")
 )
@@ -941,21 +941,20 @@ p3_ex
 
 ```{r}
 #| label: fig-antisym-triads-slides
-#| fig-cap: "The Seven Permitted Triads Under Anti-Symmetric Ties"
+#| fig-cap: "The Seven Permitted Triads Under Anti-Symmetric Ties (Strict Hierarchies)"
 #| fig-cap-location: bottom
-#| fig-height: 5.5
-#| fig-width: 11
+#| fig-height: 2.8
+#| fig-width: 12
 
-    # We reuse plot_tr helper defined in setup (perfect triangle coordinates)
-    p1 <- plot_tr(data.frame(), "1. NNN (Null)")
-    p2 <- plot_tr(data.frame(from=1, to=2), "2. NNA (One-tie)")
-    p3 <- plot_tr(data.frame(from=c(1,2), to=c(2,3)), "3. AAN(L) (Line)")
-    p4 <- plot_tr(data.frame(from=c(1,1), to=c(2,3)), "4. AAN(O) (Out-Star)")
-    p5 <- plot_tr(data.frame(from=c(2,3), to=c(1,1)), "5. AAN(I) (In-Star)")
-    p6 <- plot_tr(data.frame(from=c(1,2,3), to=c(2,3,1)), "6. AAA(C) (Cycle)")
-    p7 <- plot_tr(data.frame(from=c(1,1,2), to=c(2,3,3)), "7. AAA(I/O) (Transitive)")
+    p1 <- plot_tr(data.frame(), "1. NNN")
+    p2 <- plot_tr(data.frame(from=1, to=2), "2. NNA")
+    p3 <- plot_tr(data.frame(from=c(1,2), to=c(2,3)), "3. AAN(L)")
+    p4 <- plot_tr(data.frame(from=c(1,1), to=c(2,3)), "4. AAN(O)")
+    p5 <- plot_tr(data.frame(from=c(2,3), to=c(1,1)), "5. AAN(I)")
+    p6 <- plot_tr(data.frame(from=c(1,2,3), to=c(2,3,1)), "6. AAA(C)")
+    p7 <- plot_tr(data.frame(from=c(1,1,2), to=c(2,3,3)), "7. AAA(I/O)")
     
-    (p1 + p2 + p3 + p4) / (p5 + p6 + p7 + plot_spacer())
+    p1 + p2 + p3 + p4 + p5 + p6 + p7 + plot_layout(nrow = 1)
 ```
 
 ---
@@ -999,9 +998,9 @@ gr_hierarchy <- tbl_graph(
 ggraph(gr_hierarchy, layout = "tree") +
   geom_edge_link(color = "steelblue", edge_width = 1.5,
                  arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-                 end_cap = circle(11, 'mm'), start_cap = circle(11, 'mm')) +
-  geom_node_point(size = 32, color = "tan2") +
-  geom_node_text(aes(label = name), size = 5.5, fontface = "bold", color = "white") +
+                 end_cap = circle(13, 'mm'), start_cap = circle(13, 'mm')) +
+  geom_node_point(size = 38, color = "tan2") +
+  geom_node_text(aes(label = name), size = 5.0, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
@@ -1030,8 +1029,8 @@ ggraph(gr_hierarchy, layout = "tree") +
 #| label: fig-recip-triads-slides
 #| fig-cap: "The Nine Directed Triads Requiring Reciprocal (Mutual) Ties"
 #| fig-cap-location: bottom
-#| fig-height: 5.5
-#| fig-width: 9.5
+#| fig-height: 2.8
+#| fig-width: 12
 
     p1 <- plot_tr(data.frame(from=c(1,2), to=c(2,1)), "1. NNM")
     p2 <- plot_tr(data.frame(from=c(2,1,3), to=c(1,2,1)), "2. MAN1")
@@ -1043,7 +1042,7 @@ ggraph(gr_hierarchy, layout = "tree") +
     p8 <- plot_tr(data.frame(from=c(2,1,3,2,1), to=c(1,2,2,3,3)), "8. MMA")
     p9 <- plot_tr(data.frame(from=c(2,1,3,2,1,3), to=c(1,2,2,3,3,1)), "9. MMM")
     
-    (p1 + p2 + p3 + p4 + p5) / (p6 + p7 + p8 + p9 + plot_spacer())
+    p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + plot_layout(nrow = 1)
 ```
 
 ---
