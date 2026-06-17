@@ -50,11 +50,15 @@ Look at the graph shown in @fig-paths1 (in the previous lesson) again. Are there
 
 For instance, if you compare the undirected graphs @fig-connected1-1 and @fig-connected1-2 you can appreciate the difference between a **connected graph** and a **disconnected graph**. The difference between @fig-connected1-1 and @fig-connected1-2 is that the @fig-connected1-2 graph is a subgraph of the @fig-connected1-1 graph, in which the $DF$ edge has been removed (an **edge-deleted subgraph** according to what we discussed in @sec-subgraphs): $G(b) = G(a) - DF$. 
 
-Removing the $DF$ edge has resulted in $G(b)$ being disconnected. There is no way we can trace a path connecting any of the vertices in the $\{F, G, H, I\}$ subset with any of the vertices in the $\{A, B, C, D, E\}$ subset. This is different from @fig-connected1-1, where we can trace a finite path between any two vertices, even if it is very long. Thus, we can come up with a formal definition of **graph connectivity**:
+When we remove the $DF$ edge the resulting graph $G(b)$ is now disconnected. There is no way we can trace a path connecting any of the vertices in the $\{F, G, H, I\}$ subset with any of the vertices in the $\{A, B, C, D, E\}$ subset. This is different from @fig-connected1-1, where we can trace a finite path between any two vertices, even if it is very long. 
+
+Thus, we can come up with a formal definition of **graph connectivity**:
 
 - A graph is **connected** if there exists a (finite) path between each pair of nodes.
 
-- A graph is **disconnected** if there does not exist a path connecting every pair of nodes
+- A graph is **disconnected** if there does not exist a path connecting every pair of nodes.
+
+Note that a graph is disconnected even if there is just one pair of nodes that cannot reach each other. In @fig-connected1-2, for instance, the graph is disconnected because there is no path connecting any node in the $\{F, G, H, I\}$ subset to any node in the $\{A, B, C, D, E\}$ subset.
 
 ```{r}
 #| label: fig-connected-c
@@ -90,11 +94,11 @@ Removing the $DF$ edge has resulted in $G(b)$ being disconnected. There is no wa
 ```
 
 ## Components and the Giant Component
-When a graph goes from connected (like @fig-connected1-1) to disconnected (like @fig-connected1-2), it is split into a number of subgraphs that are themselves connected. 
+When a graph goes from connected (like @fig-connected1-1) to disconnected (like @fig-connected1-2), it is split into a number of **subgraphs** that are themselves connected. The pairs of nodes inside the subgraph can reach one another, but they can't reach the nodes outside the subgraph.
 
-For instance, in @fig-connected1-2, the set of nodes $\{A, B, C, D, E\}$ forms a **connected subgraph** of the larger disconnected graph. A connected subgraph within a larger disconnected graph is called a **component**.  
+For instance, in @fig-connected1-2, the set of nodes $\{A, B, C, D, E\}$ forms a **connected subgraph** of the larger disconnected graph. A connected subgraph within a larger disconnected graph is called a **component** of the larger graph. Disconnected graphs, by definition, have multiple components, with the smallest number of components being two.  
 
-In @fig-connected1-2, there are two components, one formed by the connected subgraph with node set $\{A, B, C, D, E\}$, and the other formed by the connected subgraph with node set $\{F, G, H, I\}$. 
+For instance, in @fig-connected1-2, there are two components, one formed by the connected subgraph with node set $\{A, B, C, D, E\}$, and the other formed by the connected subgraph with node set $\{F, G, H, I\}$. 
 
 ```{r}
 #| label: fig-connected2
@@ -132,13 +136,13 @@ In @fig-connected1-2, there are two components, one formed by the connected subg
     plot.graph(gr6)
 ```
 
-It is possible to split a graph into multiple components, not just two. For instance, take a look at the **unlabeled graph** in @fig-connected-c. If we were to generate a subgraph from @fig-connected-c by deleting the two red edges and the one purple edge, we would end up with the graph shown in @fig-connected2-1. This graph is disconnected, and it features *three* separate components (connected subgraphs). 
+As we noted, it is possible to split a graph into multiple components, not just two. For instance, take a look at the **unlabeled graph** (see @sec-graphtheory for the distinction between unlabeled and labeled graphs) in @fig-connected-c. If we were to generate a subgraph from @fig-connected-c by deleting the two red edges and the one purple edge, we would end up with the graph shown in @fig-connected2-1. This graph is disconnected, and it features *three* separate components (connected subgraphs). 
 
 If we were to delete just the red edges from @fig-connected-c and keep the purple edge, we would end up with the graph shown in @fig-connected2-2. Like @fig-connected2-1, @fig-connected2-2 is also disconnected, but it is split into *two* components, not three. 
 
 Note that one of the connected components in the graphs shown in @fig-connected2-2, @fig-connected2-3, and @fig-connected2-4 is way larger than the other one. For instance, the larger connected component of the graph in @fig-connected2-2 is of order 10, but the smaller component is only of order 4. 
 
-When a disconnected graph is split into multiple components, the component containing the largest number of nodes (the largest connected subgraph) is called the graph's **giant component**.
+When a disconnected graph is split into multiple components, the component containing the largest number of nodes (the largest connected subgraph) is called the graph's **giant component**. In @fig-connected2-3 and @fig-connected2-4, the giant component is the one with 9 nodes, while the smaller component has 5 nodes.
 
 ## Edge Connectivity {#sec-edgecon}
 
@@ -157,13 +161,14 @@ A **minimum edge cutset** of a graph is any edge cutset that also happens to be 
 The graph in @fig-connected-c has edge-connectivity $\lambda(G) = 2$ because we need to remove at least two edges to disconnect it. As we saw earlier, these could be either the set of the two red edges or any combination that includes one of the red edges with the purple one.
 
 When a graph has edge-connectivity larger than one, like @fig-connected-c, it means that we could remove *any one edge* and the graph would still be connected. 
+
 For instance, looking at @fig-connected-c, if we were to remove just the purple edge, the graph would still be connected and look like @fig-connected2-5, which is a connected graph. 
 
 The same would happen if we removed just one of the red edges from @fig-connected-c. If we were to do that, we would end up with the graph shown in @fig-connected2-6, which is still connected.
 
 ### Bridges {#sec-bridges}
 
-As you might imagine, the smallest edge connectivity a connected graph can have is $\lambda(G) = 1$. A graph with edge-connectivity 1 has a special edge called a **bridge**. This is the *single* edge whose removal disconnects a graph with edge-connectivity 1. 
+As you might imagine, the smallest edge connectivity a connected graph can have is $\lambda(G) = 1$. A graph with edge-connectivity 1 has a special edge called a **bridge**. This is the *single* edge whose removal disconnects a graph with edge-connectivity equal to 1. 
 
 For instance, in @fig-connected1-1, the $DF$ edge is a bridge. When a graph is like the one shown in @fig-connected1-1 and has a bridge (such as $DF$), that edge has two interesting properties [@buckleyharary90, p. 17]. 
 
@@ -227,7 +232,7 @@ In a graph, a **node cutset** is *any* set of nodes whose removal results in a g
     p
 ```
 
-@fig-connected3-1 shows a graph that is the same as @fig-connected2, except that the nodes are **labeled**. In that graph, the set of nodes $\{A, D\}$ is a cutset of the graph $G$ since deleting these nodes disconnects the graph, as shown by the resulting node-deleted subgraph shown in @fig-connected3-2. This graph is now disconnected, featuring a nine-node giant component and a smaller three-node component containing nodes $\{B, C, E\}$
+@fig-connected3-1 shows a graph that is the same as the one in @fig-connected-c, except that the nodes are **labeled**. In that graph, the set of nodes $\{A, D\}$ is a cutset of the graph $G$ since deleting these nodes disconnects the graph, as shown by the resulting node-deleted subgraph shown in @fig-connected3-2. This graph is now disconnected, featuring a nine-node giant component and a smaller three-node component containing nodes $\{B, C, E\}$
 
 In the same way, we can see that the set of nodes $\{G, H\}$ is also a cutset of the graph, because removing these nodes would separate $\{F, I, J\}$ from the rest of their friends, creating a graph with two separate components, as shown in @fig-connected3-3.  
 
@@ -263,7 +268,7 @@ $${#eq-connect}
 
 Neat! These can be interpreted as three criteria that indicate how well-connected a whole graph, a subgraph, or a component of a larger graph is. Having a high minimum degree is the weakest, followed by high edge-connectivity, with high node-connectivity being the strongest criterion. 
 
-## Advanced: Local Bridges
+## Local Bridges
 
 In a classic paper on "The Strength of Weak Ties," Mark @granovetter73 developed the concept of a *local bridge*. Recall from section @sec-bridges that a bridge is an edge that, if removed, would completely disconnect the graph. 
 
