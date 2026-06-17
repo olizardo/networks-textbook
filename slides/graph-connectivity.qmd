@@ -213,6 +213,78 @@ gr_undir |>
 
 ---
 
+## Multiple Shortest Paths (Geodesic Ties)
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+::: {.incremental}
+- In real networks, **geodesic distances are often tied**:
+  - There can be multiple distinct shortest paths of equal minimum length connecting the exact same pair of nodes.
+- **Example**: Shortest paths from $B$ to $A$ in our undirected graph:
+  - Both paths have a geodesic distance of $d(B, A) = 3$.
+  - **Path 1**: $B \rightarrow E \rightarrow D \rightarrow A$ (Top)
+  - **Path 2**: $B \rightarrow E \rightarrow C \rightarrow A$ (Bottom)
+- **Redundancy and Reliability**:
+  - Having multiple geodesics provides alternative routes of maximum efficiency.
+  - If a node or edge on one path fails (e.g. node $D$), communication is unaffected because Path 2 is still open!
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5
+#| fig-height: 8.5
+p1 <- gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 4) | (from == 4 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Geodesic 1 (B-E-D-A)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
+
+p2 <- gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Geodesic 2 (B-E-C-A)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
+
+p1 + p2 + plot_layout(ncol = 1)
+```
+:::
+
+::::
+
+## Sociological Significance of Geodesics
+
+::: {.incremental}
+- Why do social scientists care so much about shortest paths (geodesics) in real networks?
+- **1. Speed and Bandwidth of Transmission**:
+  - Information, trust, and influence decay as they travel along long paths.
+  - Geodesic paths represent the channels through which diffusion (of gossip, innovation, or virus) happens **fastest** and with **least loss**.
+- **2. Power, Brokerage, and Betweenness**:
+  - Actors who lie on the geodesics of *many other pairs* of nodes in the network play a major role as **information brokers** or gatekeepers.
+  - They control information flow, filter messages, and can extract rents or gain social influence (this is the basis of **Betweenness Centrality**).
+- **3. Search and the "Small World" Phenomenon**:
+  - Stanley Milgram's classic "six degrees of separation" experiment showed that human social networks have surprisingly short geodesic distances.
+  - Even in massive networks of millions of people, any two individuals are connected by incredibly short paths of friendship!
+:::
+
+---
+
+
 ## Node Eccentricity
 
 :::: {.columns align=center}
@@ -1799,9 +1871,11 @@ ggraph(gr_8, layout = "manual", x = x, y = y) +
 - **Forest**:
   - A disconnected graph whose components are all tree graphs.
 - **Before** (Left):
-  - A connected 6-node tree graph.
+  - A connected 9-node tree graph.
 - **After** (Right):
-  - Removing edge **B-D** splits the graph into two separate multi-node trees (a **forest**).
+  - Removing edge **D-H** splits the graph into two separate trees (a **forest**):
+    - A **bigger tree** of 6 nodes on the left ($\{A, B, C, D, E, F\}$).
+    - A **smaller tree** of 3 nodes on the right ($\{G, H, I\}$).
 :::
 :::
 
@@ -1812,18 +1886,18 @@ ggraph(gr_8, layout = "manual", x = x, y = y) +
 #| fig-width: 8
 #| fig-height: 4.5
 nodes_f <- data.frame(
-  name = LETTERS[1:6],
-  x = c(0, 1, 0, 2, 3, 3),
-  y = c(0.5, 0, -0.5, 0, 0.5, -0.5)
+  name = LETTERS[1:9],
+  x = c(0, 1, 0, 2, 3, 3, 5, 4, 5),
+  y = c(0.5, 0, -0.5, 0, 0.5, -0.5, 0.5, 0, -0.5)
 )
 edges_f <- data.frame(
-  from = c(2, 2, 2, 4, 4),
-  to   = c(1, 3, 4, 5, 6)
+  from = c(2, 2, 2, 4, 4, 4, 8, 8),
+  to   = c(1, 3, 4, 5, 6, 8, 7, 9)
 )
 gr_f <- tbl_graph(nodes = nodes_f, edges = edges_f, directed = FALSE)
 
 p_before <- ggraph(gr_f, layout = "manual", x = x, y = y) +
-  geom_edge_link(aes(color = ifelse(from == 2 & to == 4, "yes", "no")), edge_width = 1.25) +
+  geom_edge_link(aes(color = ifelse(from == 4 & to == 8, "yes", "no")), edge_width = 1.25) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
   geom_node_point(size = 14, color = "tan2") +
   geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
@@ -1832,13 +1906,13 @@ p_before <- ggraph(gr_f, layout = "manual", x = x, y = y) +
 
 gr_f_after <- gr_f %>% 
   activate(edges) %>% 
-  filter(!(from == 2 & to == 4))
+  filter(!(from == 4 & to == 8))
 
 p_after <- ggraph(gr_f_after, layout = "manual", x = x, y = y) +
   geom_edge_link(color = "steelblue", edge_width = 1.0) +
   geom_node_point(size = 14, color = "tan2") +
   geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("After (Forest: 2 Tree Components)") + coord_cartesian(clip = "off") +
+  theme_graph() + ggtitle("After (Forest: 2 Disconnected Trees)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5))
 
 p_before + p_after
@@ -1846,8 +1920,6 @@ p_before + p_after
 :::
 
 ::::
-
----
 
 ## Special Types of Trees: Line, Star & Caterpillar Graphs
 
