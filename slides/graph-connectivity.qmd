@@ -223,8 +223,8 @@ gr_undir |>
   - There can be multiple distinct shortest paths of equal minimum length connecting the exact same pair of nodes.
 - **Example**: Shortest paths from $B$ to $A$ in our undirected graph:
   - Both paths have a geodesic distance of $d(B, A) = 3$.
-  - **Path 1**: $B \rightarrow E \rightarrow D \rightarrow A$ (Left)
-  - **Path 2**: $B \rightarrow E \rightarrow C \rightarrow A$ (Right)
+  - **Path 1**: $B \rightarrow E \rightarrow D \rightarrow A$ (Top)
+  - **Path 2**: $B \rightarrow E \rightarrow C \rightarrow A$ (Bottom)
 - **Redundancy and Reliability**:
   - Having multiple geodesics provides alternative routes of maximum efficiency.
   - If a node or edge on one path fails (e.g. node $D$), communication is unaffected because Path 2 is still open!
@@ -235,19 +235,19 @@ gr_undir |>
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 10
-#| fig-height: 4.8
+#| fig-width: 5
+#| fig-height: 8.5
 p1 <- gr_undir |>
   activate(edges) |>
   mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 4) | (from == 4 & to == 5), "yes", "no")) |>
   ggraph(layout = "manual", x = x, y = y) +
   geom_edge_link(aes(color = highlight, edge_width = highlight)) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
-  scale_edge_width_manual(values = c("yes" = 1.8, "no" = 0.9), guide = "none") +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
   theme_graph() + ggtitle("Geodesic 1 (B-E-D-A)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 10, face="bold", hjust=0.5))
+  theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
 
 p2 <- gr_undir |>
   activate(edges) |>
@@ -255,19 +255,17 @@ p2 <- gr_undir |>
   ggraph(layout = "manual", x = x, y = y) +
   geom_edge_link(aes(color = highlight, edge_width = highlight)) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
-  scale_edge_width_manual(values = c("yes" = 1.8, "no" = 0.9), guide = "none") +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
   theme_graph() + ggtitle("Geodesic 2 (B-E-C-A)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 10, face="bold", hjust=0.5))
+  theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
 
-p1 + p2
+p1 + p2 + plot_layout(ncol = 1)
 ```
 :::
 
 ::::
-
----
 
 ## Sociological Significance of Geodesics
 
