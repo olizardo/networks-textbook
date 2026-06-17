@@ -1,0 +1,244 @@
+---
+title: "Graph Theory: Sub-Groups & Cliques"
+subtitle: "The Cohesive Structures of Social Networks"
+format:
+  revealjs:
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+library(patchwork)
+
+# Reusable 5-node undirected graph for subgraphs/cliques
+nodes_5 <- data.frame(name = c("B", "E", "C", "D", "A"), x = c(0, 1, 2, 2, 3), y = c(0, 0, 1, -1, 0))
+edges_undir <- data.frame(from = c(1, 2, 2, 3, 4, 3), to = c(2, 3, 4, 5, 5, 4)) # B-E, E-C, E-D, C-A, D-A, C-D
+gr_undir <- tbl_graph(nodes = nodes_5, edges = edges_undir, directed = FALSE)
+
+# 4-node clique
+gr_clique_4 <- create_complete(4) %>% mutate(name = 1:4)
+# 5-node clique
+gr_clique_5 <- create_complete(5) %>% mutate(name = 1:5)
+```
+
+# Part 1: Cohesion & Subgroups
+
+---
+
+## Levels of Analysis in Social Networks
+
+::: {.incremental}
+- In social network analysis, we navigate several levels of structure:
+  1. **Individual (Micro-Node)**: Node centrality and actor attributes.
+  2. **Dyads (Subgraphs of Order 2)**: Core ties and direct reciprocity.
+  3. **Triads (Subgraphs of Order 3)**: Brokerage, balance, and small-group dynamics.
+  4. **Subgroups, Cliques, & Communities**: Meso-level clusters of cohesive actors.
+  5. **Whole Network (Macro)**: Global density, diameter, and centralization.
+- The **Subgroup Level** acts as the crucial bridge between micro-interactions and macro-network systems.
+:::
+
+---
+
+## Why Study Subgroups?
+
+::: {.incremental}
+- **Solidarity and Social Support**:
+  - Subgroups are primary units of social support, shared identity, and face-to-face interaction (e.g. family cliques, support groups).
+- **Functional Units in Organizations**:
+  - Teams, departments, and cross-functional task forces drive productivity, collaboration, and creative innovation.
+- **Engines of Influence and Conformity**:
+  - High internal connectivity fosters strong social pressure, leading to high ideational homogeneity, shared values, and rapid behavioral conformity.
+:::
+
+---
+
+## Translating "Groups" to Graph Theory
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- "Group," "community," or "clique" are intuitive but fuzzy sociological concepts.
+- **Graph-Theoretic Translation**:
+  - A cohesive subgroup is a relatively dense subgraph featuring more links among the subset of vertices that belong to the subgraph than links to vertices in the rest of the graph.
+- We can define these subgraphs formally using criteria with varying degrees of strictness.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_undir, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+# Part 2: Cliques & Relaxed Cliques
+
+---
+
+## Graphs and Subgraphs: A Review
+
+::: {.incremental}
+- Recall that a subgraph $G' = (V', E')$ of a graph $G = (V, E)$ exists when:
+  - $V' \subseteq V$ (the node subset)
+  - $E' \subseteq E$ (the edge subset)
+- A subgraph is **maximal** with respect to a given property if:
+  - No additional nodes or edges from the larger graph can be added to the subgraph without losing that property.
+  - e.g., a "maximal connected subgraph" is a **component**.
+- We use the principle of **maximality** to define cohesive subgroups.
+:::
+
+---
+
+## What is a Clique?
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Clique**:
+  - A maximally complete subgraph where every node is directly connected to every other node (density = 1.0).
+  - e.g. a closed triad is a clique of size 3!
+- **Size of a Clique**:
+  - The number of vertices in it (clique of size 3, size 4, size 5, etc.).
+  - Overlapping cliques are common; the same actor can belong to multiple cliques simultaneously, acting as a crucial bridge.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_clique_4, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Clique of Size 4") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+```
+:::
+
+::::
+
+---
+
+## The Limitation of Strict Cliques
+
+::: {.incremental}
+- While theoretically elegant, strict cliques are **notoriously rare** in real-world social networks.
+  - Social groups are often friendly and cohesive without being perfectly complete.
+  - A single missing tie in a 10-person group immediately disqualifies the entire group from being a clique!
+- To handle this, network analysts use **relaxed clique criteria**, focusing on distance or degree bounds.
+:::
+
+---
+
+## $n$-Cliques: Relaxing by Distance
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- An **$n$-clique** is a maximal subgraph where the geodesic (shortest path) distance between any pair of nodes *within* the subgraph is at most $n$:
+  - $$d(u, v) \le n \quad \text{for all } u, v \in V'$$
+- **Types of $n$-cliques**:
+  - **1-Clique**: A standard strict clique ($d_{ij} = 1$).
+  - **2-Clique**: Every pair can reach each other in at most 2 steps ($d_{ij} \le 2$).
+  - **3-Clique**: Every pair can reach each other in at most 3 steps ($d_{ij} \le 3$).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+# A 2-clique of size 5 (a line of 5 nodes has distance up to 4, but a circular layout with some chords is 2-clique)
+gr_2clique <- tbl_graph(
+  nodes = data.frame(name = 1:5),
+  edges = data.frame(from = c(1, 1, 2, 3, 4), to = c(2, 3, 4, 5, 5)),
+  directed = FALSE
+)
+ggraph(gr_2clique, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("2-Clique (Max Distance = 2)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+```
+:::
+
+::::
+
+# Part 3: Cohesive Blocking
+
+---
+
+## $K$-Connectivity as Social Cohesion
+
+::: {.incremental}
+- In 2003, sociologists James Moody and Douglas White proposed translating **social cohesion** directly to graph-theoretic **$k$-connectivity**:
+  - A group is structurally cohesive to the extent that it can remain connected despite the removal of members.
+- **The Core Intuition**:
+  - The larger the **node-cutset** (the minimum number of nodes required to disconnect the subgraph), the more structurally integrated and robust the group is.
+  - A group that requires removing 3 nodes to fragment is more cohesive than one that can be split by removing a single broker.
+:::
+
+---
+
+## Cohesive Blocking Algorithm
+
+::: {.incremental}
+- Moody and White developed a recursive algorithm to identify nested, hierarchically organized cohesive subgroups (cohesive blocks):
+  1. Identify the **node $k$-connectivity** of the input graph ($G$).
+  2. Find and remove the **minimum $k$-node cutset** (the specific vertices that disconnect the graph).
+  3. This splits the graph into separate connected subgraphs.
+  4. Repeat steps 1–3 on each resulting subgraph recursively until no more subdivisions can be obtained.
+:::
+
+---
+
+## Hierarchical Nested Cohesive Blocks
+
+::: {.incremental}
+- Cohesive blocking reveals the **structural nest** of a network:
+  - The whole network might be 1-connected (vulnerable to single brokers).
+  - Inside, we find 2-connected blocks (more robust).
+  - Deep within those, we find highly cohesive, 3-connected cores.
+- This provides an elegant quantitative map of social groups, moving from loose, sprawling associations down to highly integrated, resilient social cliques.
+:::
+
+---
+
+## Conclusion & Summary
+
+::: {.incremental}
+- **Subgroups capture the meso-level of society**:
+  - They represent departments, friendship circles, and task units.
+- **Cliques are highly strict**:
+  - While complete ($d = 1.0$), they are rare in the real world, necessitating relaxed definitions like **$n$-cliques** based on distance.
+- **Cohesive Blocking operationalizes structural cohesion**:
+  - By recursively identifying $k$-node cutsets, we map the nested, hierarchical, and robust core subgroups of a social system.
+:::
