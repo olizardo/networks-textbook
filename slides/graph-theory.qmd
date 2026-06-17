@@ -289,7 +289,7 @@ ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
 
 :::: {.columns align=center}
 
-::: {.column width="60%"}
+::: {.column width="55%"}
 ::: {.incremental}
 - **Labeled Graphs**:
   - Distinctions are made between nodes (e.g., A, B, C are different people).
@@ -300,19 +300,19 @@ ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
 :::
 :::
 
-::: {.column width="40%"}
+::: {.column width="45%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
-#| fig-height: 4
+#| fig-width: 9.5
+#| fig-height: 5.5
 gr_lab <- create_empty(4) %>% 
     bind_edges(data.frame(from = c(1, 2), to = c(4, 3))) %>% 
     mutate(name = LETTERS[1:4])
 p1 <- ggraph(gr_lab, layout = 'manual', x=l[,1], y=l[,2]) + 
   geom_edge_link(color = "steelblue", edge_width = 1.25) +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, color = "white") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, color = "white") +
   theme_graph() + ggtitle("Labeled") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
 
@@ -320,7 +320,7 @@ gr_unlab <- create_empty(4) %>%
     bind_edges(data.frame(from = c(1, 2), to = c(4, 3)))
 p2 <- ggraph(gr_unlab, layout = 'manual', x=l[,1], y=l[,2]) + 
   geom_edge_link(color = "steelblue", edge_width = 1.25) +
-  geom_node_point(size = 12, color = "tan2") +
+  geom_node_point(size = 20, color = "tan2") +
   theme_graph() + ggtitle("Unlabeled") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
 
@@ -735,28 +735,37 @@ p3
 
 :::: {.columns align=center}
 
-::: {.column width="55%"}
+::: {.column width="40%"}
 ::: {.incremental}
 - Example: Deleting $\{F, G, H, I, J\}$ from the original graph.
-- This removes those 5 nodes and all their incident edges, yielding the subgraph on the right.
+- This removes those 5 nodes (highlighted in red, left) and all their incident edges, yielding the disconnected subgraph (right).
 - This is equivalent to the vertex-induced subgraph on $\{A, B, C, D, E\}$.
 :::
 :::
 
-::: {.column width="45%"}
+::: {.column width="60%"}
 ```{r}
-#| label: plt-subgraph-deleted-node
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5
-#| fig-height: 5
+#| fig-width: 8
+#| fig-height: 4.5
+p_before <- ggraph(gr, layout = l) +
+  geom_edge_link(color = "steelblue", width = 1.0) +
+  geom_node_point(aes(color = ifelse(name %in% c("F", "G", "H", "I", "J"), "yes", "no")), size = 15) +
+  scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (Deleting Red Nodes)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
 
 gr_del <- gr - c("F", "G", "H", "I", "J")
-p <- ggraph(gr_del, layout = l[1:5, ]) 
-p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
-p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-p + theme_graph() + coord_cartesian(clip = "off")
+p_after <- ggraph(gr_del, layout = l[1:5, ]) +
+  geom_edge_link(color = "steelblue", width = 1.0) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Nodes & Edges Removed)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p_before + p_after
 ```
 :::
 
@@ -788,30 +797,53 @@ p + theme_graph() + coord_cartesian(clip = "off")
 
 :::: {.columns align=center}
 
-::: {.column width="55%"}
+::: {.column width="40%"}
 ::: {.incremental}
 - Example: Deleting six specific edges from the original graph:
   - $\{AB, GJ, CI, AE, AC, CE\}$
-- This removes the edges while keeping all 10 nodes intact.
-- The resulting edge-deleted subgraph is shown on the right.
+- Removing these edges (highlighted in red, left) keeps all 10 nodes intact, yielding the edge-deleted subgraph (right).
 :::
 :::
 
-::: {.column width="45%"}
+::: {.column width="60%"}
 ```{r}
-#| label: plt-subgraph-deleted-edges
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5
-#| fig-height: 5
+#| fig-width: 8
+#| fig-height: 4.5
+p_before <- gr |>
+  activate(edges) |>
+  mutate(
+    from_name = .N()$name[from],
+    to_name = .N()$name[to],
+    highlight = ifelse(
+      (from_name == "A" & to_name == "B") | (from_name == "B" & to_name == "A") |
+      (from_name == "G" & to_name == "J") | (from_name == "J" & to_name == "G") |
+      (from_name == "C" & to_name == "I") | (from_name == "I" & to_name == "C") |
+      (from_name == "A" & to_name == "E") | (from_name == "E" & to_name == "A") |
+      (from_name == "A" & to_name == "C") | (from_name == "C" & to_name == "A") |
+      (from_name == "C" & to_name == "E") | (from_name == "E" & to_name == "C"),
+      "yes", "no"
+    )
+  ) |>
+  ggraph(layout = l) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (Deleting Red Edges)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
 
 gr4 <- gr - edge("A|B") - edge("G|J") - edge("C|I") - edge("A|E") - edge("A|C") - edge("C|E")
+p_after <- ggraph(gr4, layout = l) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Edges Removed)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
 
-p <- ggraph(gr4, layout = l) 
-p <- p + geom_edge_link(color = "steelblue", width = 1.25) 
-p <- p + geom_node_point(aes(x = x, y = y), size = 18, color = "tan2") 
-p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-p + theme_graph() + coord_cartesian(clip = "off")
+p_before + p_after
 ```
 :::
 
