@@ -46,23 +46,23 @@ edges_disconnected <- data.frame(
 gr_disconnected <- tbl_graph(nodes = nodes_disconnected, edges = edges_disconnected, directed = FALSE)
 
 # 5-node directed graphs for connectivity flavors (non-circle graphs)
-nodes_5_conn <- data.frame(name = paste0("v", 1:5), x = c(0, 1, 2, 3, 4), y = c(0, 1, 0, -1, 0))
+nodes_5_conn <- data.frame(name = LETTERS[1:5], x = c(0, 1, 2, 3, 4), y = c(0, 1, 0, -1, 0))
 
 edges_5_strong <- data.frame(
-  from = c("v1", "v2", "v3", "v3", "v4", "v5"),
-  to   = c("v2", "v3", "v1", "v4", "v5", "v3")
+  from = c("A", "B", "C", "C", "D", "E"),
+  to   = c("B", "C", "A", "D", "E", "C")
 )
 gr_strong <- tbl_graph(nodes = nodes_5_conn, edges = edges_5_strong, directed = TRUE)
 
 edges_5_uni <- data.frame(
-  from = c("v1", "v2", "v3", "v3", "v4"),
-  to   = c("v2", "v3", "v1", "v4", "v5")
+  from = c("A", "B", "C", "C", "D"),
+  to   = c("B", "C", "A", "D", "E")
 )
 gr_uni <- tbl_graph(nodes = nodes_5_conn, edges = edges_5_uni, directed = TRUE)
 
 edges_5_weak <- data.frame(
-  from = c("v1", "v2", "v3", "v4", "v4"),
-  to   = c("v2", "v3", "v1", "v3", "v5")
+  from = c("A", "B", "C", "D", "D"),
+  to   = c("B", "C", "A", "C", "E")
 )
 gr_weak <- tbl_graph(nodes = nodes_5_conn, edges = edges_5_weak, directed = TRUE)
 
@@ -823,9 +823,10 @@ ggraph(gr_disconnected_colors, layout = "manual", x = x, y = y) +
 ::: {.incremental}
 - We can disconnect a graph by removing edges.
 - **Edge Cutset**: Any set of edges whose removal disconnects the graph.
+  - *Example (from figure)*: The set of edges **{A-C, B-C}** is an edge cutset of size 2; removing both isolates node $C$ from $\{A, B\}$.
 - **Bridge**:
   - A single edge whose removal disconnects the graph, splitting it into separate components.
-  - Bridges are highly important; they represent critical linkages connecting otherwise isolated groups.
+  - *Example (from figure)*: The edge **C-D** (highlighted in red) is a bridge. Removing it splits the network into two components: $\{A, B, C\}$ and $\{D, E\}$.
 :::
 :::
 
@@ -1100,6 +1101,15 @@ ggraph(gr_strong, layout = "manual", x = nodes_5_conn$x, y = nodes_5_conn$y) +
   theme_graph() + ggtitle("Strongly Connected") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
 ```
+<small>
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 1 | 1 | 1 | 1 |
+| **B** | 1 | -- | 1 | 1 | 1 |
+| **C** | 1 | 1 | -- | 1 | 1 |
+| **D** | 1 | 1 | 1 | -- | 1 |
+| **E** | 1 | 1 | 1 | 1 | -- |
+</small>
 :::
 
 ::: {.column width="33%"}
@@ -1117,6 +1127,15 @@ ggraph(gr_uni, layout = "manual", x = nodes_5_conn$x, y = nodes_5_conn$y) +
   theme_graph() + ggtitle("Unilaterally Connected") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
 ```
+<small>
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 1 | 1 | 1 | 1 |
+| **B** | 1 | -- | 1 | 1 | 1 |
+| **C** | 1 | 1 | -- | 1 | 1 |
+| **D** | 0 | 0 | 0 | -- | 1 |
+| **E** | 0 | 0 | 0 | 0 | -- |
+</small>
 :::
 
 ::: {.column width="33%"}
@@ -1134,6 +1153,15 @@ ggraph(gr_weak, layout = "manual", x = nodes_5_conn$x, y = nodes_5_conn$y) +
   theme_graph() + ggtitle("Weakly Connected") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
 ```
+<small>
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 1 | 1 | 0 | 0 |
+| **B** | 1 | -- | 1 | 0 | 0 |
+| **C** | 1 | 1 | -- | 0 | 0 |
+| **D** | 1 | 1 | 1 | -- | 1 |
+| **E** | 0 | 0 | 0 | 0 | -- |
+</small>
 :::
 
 ::::
@@ -1192,7 +1220,7 @@ The reachability matrix reveals the global connectivity type of the digraph:
 - **Unilaterally Connected**:
   - The matrix contains some zeros, but for any pair, either $D_r(i,j) = 1$ or $D_r(j,i) = 1$. There are no mutually unreachable pairs.
 - **Weakly Connected**:
-  - Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$, e.g. Nodes $B$ and $C$ are mutually unreachable in a weak graph).
+  - Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$, e.g., Nodes $A$ and $E$ are mutually unreachable in a weak graph).
 :::
 
 ---
