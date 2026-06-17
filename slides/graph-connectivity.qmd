@@ -213,6 +213,43 @@ gr_undir |>
 
 ---
 
+## Node Eccentricity
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Definition**: The **eccentricity** of a node is the maximum geodesic distance from that node to any other node in the network.
+  - It measures the "worst-case" distance to reach any other actor.
+- **Example 1: Node E (Central Hub)**:
+  - Distances from $E$: $d(E, B) = 1$, $d(E, C) = 1$, $d(E, D) = 1$, $d(E, A) = 2$.
+  - The maximum distance is $2$ (to node $A$).
+  - **Eccentricity of $E$ = 2**.
+- **Example 2: Node B (Peripheral Leaf)**:
+  - Distances from $B$: $d(B, E) = 1$, $d(B, C) = 2$, $d(B, D) = 2$, $d(B, A) = 3$.
+  - The maximum distance is $3$ (to node $A$).
+  - **Eccentricity of $B$ = 3**.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_undir, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
 ## What is a Cycle?
 
 :::: {.columns align=center}
@@ -221,9 +258,42 @@ gr_undir |>
 ::: {.incremental}
 - A **cycle** is a path of length 3 or larger that starts and ends on the same node.
 - **Key Concepts**:
-  - Origin and destination are identical, but inner nodes are unique.
-  - **Graph Girth**: The length of the **shortest** cycle in a graph (here, girth is $3$, the triangle $\{ED, DC, CE\}$).
-  - **Graph Circumference**: The length of the **longest** cycle in a graph (here, circumference is $4$, $\{ED, DA, AC, CE\}$).
+  - Origin and destination are identical (the same vertex).
+  - All inner nodes and all edges must be completely unique.
+  - Cycles are the fundamental building blocks of network redundancy and feedback loops.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_undir, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Graph Girth
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Definition**: The **girth** of a graph is the length of its **shortest cycle**.
+- **Properties**:
+  - If a graph contains no cycles at all (like a tree graph), its girth is defined as **infinity** ($\infty$).
+  - For our 5-node undirected graph on the right, the shortest cycle is the triangle:
+    $$E \rightarrow D \rightarrow C \rightarrow E$$
+  - Thus, the **girth** of this graph is **3**.
 :::
 :::
 
@@ -250,39 +320,41 @@ gr_undir |>
 
 ---
 
-## Cycle Length: Girth vs. Circumference
+## Graph Circumference
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Definition**: The **circumference** of a graph is the length of its **longest cycle**.
+- **Properties**:
+  - If a graph is acyclic, its circumference is defined as **zero** or undefined.
+  - For our 5-node undirected graph on the right, the longest cycle is the four-loop:
+    $$E \rightarrow D \rightarrow A \rightarrow C \rightarrow E$$
+  - Thus, the **circumference** of this graph is **4**.
+:::
+:::
+
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 12
+#| fig-width: 5.5
 #| fig-height: 5.5
-p1 <- gr_undir |>
-  activate(edges) |>
-  mutate(highlight = ifelse((from == 2 & to == 3) | (from == 3 & to == 4) | (from == 2 & to == 4), "yes", "no")) |>
-  ggraph(layout = "manual", x = x, y = y) +
-  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
-  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
-  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("Girth (Shortest Cycle, Length 3)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
-
-p2 <- gr_undir |>
+gr_undir |>
   activate(edges) |>
   mutate(highlight = ifelse((from == 2 & to == 3) | (from == 3 & to == 5) | (from == 4 & to == 5) | (from == 2 & to == 4), "yes", "no")) |>
   ggraph(layout = "manual", x = x, y = y) +
   geom_edge_link(aes(color = highlight, edge_width = highlight)) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
   scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("Circumference (Longest Cycle, Length 4)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
-
-p1 + p2
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
 ```
+:::
+
+::::
 
 ---
 
@@ -1565,20 +1637,18 @@ ggraph(gr_metric, layout = "manual", x = x, y = y) +
 
 ---
 
-## Tree Graph Density & Average Degree
+## Tree Graph Density
 
 :::: {.columns align=center}
 
 ::: {.column width="60%"}
 ::: {.incremental}
-- Because of the strict $m = n - 1$ edge constraint, tree graph density and average degree simplify beautifully:
-  - **Density of a Tree Graph**:
-    $$d(T) = \frac{2m}{n(n-1)} = \frac{2(n-1)}{n(n-1)} = \frac{2}{n}$$
-  - **Average Degree of a Tree Graph**:
-    $$\bar{k} = \frac{\sum k_i}{n} = \frac{2n - 2}{n}$$
-- *For our 5-node tree graph:*
-  - Density is $$\frac{2}{5} = 0.40 \quad (40\%)$$
-  - Average degree is $$\frac{2(5) - 2}{5} = 1.6$$
+- Because of the strict $m = n - 1$ edge constraint, tree graph density simplifies beautifully.
+- **Density of a Tree Graph**:
+  $$d(T) = \frac{2m}{n(n-1)} = \frac{2(n-1)}{n(n-1)} = \frac{2}{n}$$
+- *For our 5-node tree graph on the right ($n = 5$)*:
+  - The density is:
+    $$d(T) = \frac{2}{5} = 0.40 \quad (40\%)$$
 :::
 :::
 
@@ -1599,6 +1669,37 @@ ggraph(gr_metric, layout = "manual", x = x, y = y) +
 ::::
 
 ---
+
+## Tree Graph Average Degree
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Average degree in a tree graph also simplifies beautifully due to the edge constraint.
+- **Average Degree of a Tree Graph**:
+  $$\bar{k} = \frac{\sum k_i}{n} = \frac{2m}{n} = \frac{2n - 2}{n}$$
+- *For our 5-node tree graph on the right ($n = 5$)*:
+  - The average degree is:
+    $$\bar{k} = \frac{2(5) - 2}{5} = \frac{8}{5} = 1.6$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_metric, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white", vjust = 0.3) +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ## Trees as Minimally Connected Graphs
 
@@ -1700,7 +1801,7 @@ ggraph(gr_8, layout = "manual", x = x, y = y) +
 - **Before** (Left):
   - A connected 6-node tree graph.
 - **After** (Right):
-  - Removing edge **D-F** splits the graph into two separate trees (a **forest**).
+  - Removing edge **B-D** splits the graph into two separate multi-node trees (a **forest**).
 :::
 :::
 
@@ -1710,20 +1811,19 @@ ggraph(gr_8, layout = "manual", x = x, y = y) +
 #| fig-align: "center"
 #| fig-width: 8
 #| fig-height: 4.5
-gr_f <- as_tbl_graph(sample_tree(6, directed = FALSE)) %>% mutate(name = LETTERS[1:6])
-# Force manual layout for consistency
-layout_f <- create_layout(gr_f, layout = "tree")
-x_f <- layout_f$x
-y_f <- layout_f$y
+nodes_f <- data.frame(
+  name = LETTERS[1:6],
+  x = c(0, 1, 0, 2, 3, 3),
+  y = c(0.5, 0, -0.5, 0, 0.5, -0.5)
+)
+edges_f <- data.frame(
+  from = c(2, 2, 2, 4, 4),
+  to   = c(1, 3, 4, 5, 6)
+)
+gr_f <- tbl_graph(nodes = nodes_f, edges = edges_f, directed = FALSE)
 
-# Find a valid edge to highlight and remove, say edge 3-4 (C-D) or similar
-edges_f <- as.data.frame(gr_f %>% activate(edges) %>% as_tibble())
-# Let's highlight the first edge
-from_node <- edges_f$from[1]
-to_node <- edges_f$to[1]
-
-p_before <- ggraph(gr_f, layout = "manual", x = x_f, y = y_f) +
-  geom_edge_link(aes(color = ifelse(from == from_node & to == to_node, "yes", "no")), edge_width = 1.25) +
+p_before <- ggraph(gr_f, layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = ifelse(from == 2 & to == 4, "yes", "no")), edge_width = 1.25) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
   geom_node_point(size = 14, color = "tan2") +
   geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
@@ -1732,9 +1832,9 @@ p_before <- ggraph(gr_f, layout = "manual", x = x_f, y = y_f) +
 
 gr_f_after <- gr_f %>% 
   activate(edges) %>% 
-  filter(!(from == from_node & to == to_node))
+  filter(!(from == 2 & to == 4))
 
-p_after <- ggraph(gr_f_after, layout = "manual", x = x_f, y = y_f) +
+p_after <- ggraph(gr_f_after, layout = "manual", x = x, y = y) +
   geom_edge_link(color = "steelblue", edge_width = 1.0) +
   geom_node_point(size = 14, color = "tan2") +
   geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
@@ -1749,7 +1849,7 @@ p_before + p_after
 
 ---
 
-## Special Types of Trees: Line and Star Graphs
+## Special Types of Trees: Line, Star & Caterpillar Graphs
 
 :::: {.columns align=center}
 
@@ -1761,6 +1861,8 @@ p_before + p_after
 - **The Star Graph ($S_n$)**:
   - A central hub connected to $n-1$ leaf nodes.
   - Represents extreme structural centralization.
+- **The Caterpillar Graph**:
+  - A central path ("body") with pendant leaf nodes ("legs") sticking out of it.
 :::
 :::
 
@@ -1768,7 +1870,7 @@ p_before + p_after
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 8
+#| fig-width: 12
 #| fig-height: 4.5
 gr_line <- tbl_graph(nodes = data.frame(name = LETTERS[1:5]), edges = data.frame(from = 1:4, to = 2:5), directed = FALSE)
 p_line <- ggraph(gr_line, layout = "linear") +
@@ -1786,12 +1888,28 @@ p_star <- ggraph(gr_star, layout = "star") +
   theme_graph() + ggtitle("Star Graph (S5)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
 
-p_line + p_star
+fr <- c("A", "A", "C", "C", "E", "E", "G")
+to <- c("B", "C", "D", "E", "F", "G", "H")
+edge.dat <- data.frame(fr, to)
+node.dat <- data.frame(name = union(fr, to))
+gr_cat <- tbl_graph(edges = edge.dat, nodes = node.dat, directed = FALSE)
+l_cat <- ggraph(gr_cat, layout = 'grid')
+l_cat_mat <- as.matrix(l_cat$data[, 1:2])
+l_cat_mat[,"x"] <- c(0, 1, 2, 3, 0, 1, 2, 3)
+l_cat_mat[,"y"] <- c(1, 1, 1, 1, 0, 0, 0, 0)
+
+p_cat <- ggraph(gr_cat, layout = l_cat_mat) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Caterpillar Graph (Order 8)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p_line + p_star + p_cat
 ```
 :::
 
 ::::
 
 ---
-
 ## References {.unnumbered}
