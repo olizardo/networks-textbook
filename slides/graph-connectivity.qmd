@@ -672,86 +672,253 @@ ggraph(gr_disconnected_colors, layout = "manual", x = x, y = y) +
 
 ::::
 
-# Part 4: Node and Edge Connectivity (Bridges & Cutsets)
+# Part 4: Edge and Node Connectivity (Cutsets & Bridges)
 
 ---
 
-## Bridges & Local Bridges
+## Edge Cutsets & Connectivity
 
 ::: {.incremental}
-- We can disconnect a graph by removing edges.
+- We can disconnect a connected graph by removing a subset of its edges.
+- **Edge Cutset**:
+  - Any set of edges whose removal disconnects the graph into two or more components.
+- **Minimum Edge Cutset**:
+  - An edge cutset containing the minimum possible number of edges needed to disconnect the graph.
+- **Edge-Connectivity** ($\lambda(G)$):
+  - The number of edges in a minimum edge cutset.
 - **Bridge**:
-  - A single edge whose removal disconnects the graph, splitting it into separate components.
-  - Represents the most critical, yet vulnerable transmission links in a network.
-- **Mark Granovetter's "Strength of Weak Ties" (1973)**:
-  - Bridges represent critical pathways for novel information diffusing between separate social clusters.
-- **Local Bridge**:
-  - An edge that, if removed, does not necessarily disconnect the entire graph, but significantly increases the shortest path length between its end nodes (acting as a key shortcut).
+  - A single edge whose removal disconnects the graph (a minimum edge cutset of size 1, so $\lambda(G) = 1$).
 :::
 
 ---
 
-## Bridges: Visual Examples
-
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 12
-#| fig-height: 5.5
-p1 <- ggraph(gr_bridge, layout = 'kk') +
-  geom_edge_link(aes(color = ifelse(from == 3 & to == 4, "red", "normal"),
-                     edge_width = ifelse(from == 3 & to == 4, "red", "normal"))) +
-  scale_edge_color_manual(values = c("red" = "red", "normal" = "steelblue"), guide = "none") +
-  scale_edge_width_manual(values = c("red" = 2.0, "normal" = 1.0), guide = "none") +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("A Strict Bridge (C-D, removal disconnects graph)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p2 <- gr_bridge_local |>
-  activate(edges) |>
-  mutate(highlight = ifelse(from == 3 & to == 4, "yes", "no")) |>
-  ggraph(layout = "manual", x = x, y = y) +
-  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
-  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
-  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("A Local Bridge (C-D, removal increases distance from 1 to 5)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p1 + p2
-```
-
----
-
-## Node Connectivity & k-Connected Graphs
-
-::: {.incremental}
-- We can also disconnect a graph by **removing nodes** (vertices).
-- Removing a node also removes all edges incident to it—nodes "take their links with them"!
-- **Node Cutset (Vertex Cutset)**:
-  - The minimum set of nodes whose removal disconnects the graph.
-  - Nodes in the cutset represent critical **brokerage** or "connector" positions.
-- **$k$-Connected Graph**:
-  - A graph is $k$-connected if the minimum number of nodes required to disconnect it is $k$:
-    - **1-Connected**: Removing 1 node can disconnect the graph (contains a cutpoint).
-    - **2-Connected**: Requires removing at least 2 nodes to disconnect it.
-    - **3-Connected**: Requires removing at least 3 nodes to disconnect it.
-- **Menger's Theorem (1927)**: If a graph is $k$-connected, there are at least $k$ node-independent paths connecting each non-adjacent pair of vertices.
-:::
-
----
-
-## Edge Cutset: A Visual Example
+## Edge Cutsets: A Visual Example
 
 :::: {.columns align=center}
 
 ::: {.column width="40%"}
 ::: {.incremental}
-- An **edge cutset** is a set of edges whose removal disconnects the graph.
-- Removing both **C-A** and **D-A** (red) completely disconnects node $A$.
-- This is an edge cutset of size **2**.
+- In our 5-node graph on the right:
+  - Edges **A-C** and **B-C** are highlighted in red (Before).
+- **Removing both edges**:
+  - Disconnects $\{C, D, E\}$ from $\{A, B\}$ (After).
+  - This is an edge cutset of size **2**.
+:::
+:::
+
+::: {.column width="60%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4.5
+gr_cutset <- create_empty(5, directed = FALSE) %>% 
+  bind_edges(data.frame(from = c(1, 1, 2, 3, 4), to = c(2, 3, 3, 4, 5))) %>% 
+  mutate(name = LETTERS[1:5])
+
+p_before <- ggraph(gr_cutset, layout = 'kk') +
+  geom_edge_link(aes(color = ifelse((from == 1 & to == 3) | (from == 2 & to == 3), "yes", "no")), edge_width = 1.25) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (With Cutset)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+gr_cutset_after <- gr_cutset |>
+  activate(edges) |>
+  filter(!((from == 1 & to == 3) | (from == 2 & to == 3)))
+
+p_after <- ggraph(gr_cutset_after, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Disconnected)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p_before + p_after
+```
+:::
+
+::::
+
+---
+
+## Bridges: A Cutset of Size 1
+
+:::: {.columns align=center}
+
+::: {.column width="40%"}
+::: {.incremental}
+- **Bridge**:
+  - A single edge whose removal disconnects the graph (so $\lambda(G) = 1$).
+- In our graph on the right, the edge **C-D** is highlighted in red.
+  - **Removing edge C-D** completely disconnects $\{A, B, C\}$ from $\{D, E\}$.
+  - Bridges represent the most critical, yet vulnerable transmission links in any network.
+:::
+:::
+
+::: {.column width="60%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4.5
+gr_bridge <- create_empty(5, directed = FALSE) %>% 
+  bind_edges(data.frame(from = c(1, 1, 2, 3, 4), to = c(2, 3, 3, 4, 5))) %>% 
+  mutate(name = LETTERS[1:5])
+
+p_before <- ggraph(gr_bridge, layout = 'kk') +
+  geom_edge_link(aes(color = ifelse(from == 3 & to == 4, "yes", "no")), edge_width = 1.25) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (With Bridge)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+gr_bridge_after <- gr_bridge |>
+  activate(edges) |>
+  filter(!(from == 3 & to == 4))
+
+p_after <- ggraph(gr_bridge_after, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Bridge Removed)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p_before + p_after
+```
+:::
+
+::::
+
+---
+
+## Advanced: Local Bridges
+
+::: {.incremental}
+- In a classic paper on "The Strength of Weak Ties" (1973), Mark Granovetter developed the concept of a **local bridge**:
+  - An edge that, if removed, does *not* disconnect the entire graph, but significantly increases the shortest path length between its end nodes.
+- **Sociological Power**:
+  - Local bridges act as crucial "shortcuts" that facilitate efficient, cross-group communication.
+  - They are the primary channels through which novel information diffuses between separate social clusters.
+:::
+
+---
+
+## Local Bridge: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="40%"}
+::: {.incremental}
+- Let's look at the edge **C-D** highlighted in red:
+  - It connects the left cluster $\{A, B, C\}$ to the right cluster $\{D, E, F\}$.
+- **Is it a bridge?** No. If removed, the graph remains connected via the bottom path ($B-G-H-I-E$).
+- **Is it a local bridge?** Yes! 
+  - Observed distance: $d(C, D) = 1$.
+  - If removed, the distance increases to:
+    $$d(C, D) = 5 \quad (C-B-G-H-I-E-D)$$
+:::
+:::
+
+::: {.column width="60%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4.5
+gr_bridge_local |>
+  activate(edges) |>
+  mutate(highlight = ifelse(from == 3 & to == 4, "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Node Cutsets & Connectivity
+
+::: {.incremental}
+- We can also disconnect a graph by **removing nodes** (vertices).
+- Removing a node also removes all edges incident to it—nodes "take their links with them"!
+- **Node Cutset (Vertex Cutset)**:
+  - Any set of nodes whose removal disconnects the remaining graph into two or more components.
+- **Minimum Node Cutset**:
+  - A node cutset containing the minimum possible number of nodes needed to disconnect the graph.
+- **Node-Connectivity** ($\kappa(G)$):
+  - The number of nodes in a minimum node cutset.
+- **Articulation Node (Cutpoint)**:
+  - A single node whose removal disconnects the graph (so $\kappa(G) = 1$).
+:::
+
+---
+
+## Articulation Nodes: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="40%"}
+::: {.incremental}
+- In our house graph on the right, node **E** is highlighted in red.
+- **Removing node E**:
+  - Removes all of its incident edges: $B-E, E-C, E-D$.
+  - Completely disconnects node $B$ from the rest of the network.
+  - This is a node cutset of size **1** (Node $E$ is an **articulation node**).
+:::
+:::
+
+::: {.column width="60%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4.5
+p_before <- gr_undir |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(aes(color = ifelse(name == "E", "yes", "no")), size = 15) +
+  scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (With Node Cutset)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+gr_undir_after_node <- gr_undir |>
+  filter(name != "E")
+
+p_after <- ggraph(gr_undir_after_node, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Node Removed)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p_before + p_after
+```
+:::
+
+::::
+
+---
+
+## Node Cutset: An Edge Cutset Comparison
+
+:::: {.columns align=center}
+
+::: {.column width="40%"}
+::: {.incremental}
+- Let's look at node $A$ in our house graph on the right.
+- To disconnect $A$ by removing edges, we must remove **2 edges**: $C-A$ and $D-A$ (red).
+- But to disconnect $A$ by removing nodes, we only need to remove **1 node**: $E$ (the cutpoint that isolates $B$).
+- This illustrates how node and edge connectivity can differ in the same graph.
 :::
 :::
 
@@ -792,48 +959,18 @@ p_before + p_after
 
 ---
 
-## Node Cutset: A Visual Example
+## k-Connected Graphs & Robustness
 
-:::: {.columns align=center}
-
-::: {.column width="40%"}
 ::: {.incremental}
-- A **node cutset** is a set of nodes whose removal disconnects the graph.
-- Removing node **E** (red) also removes its incident edges, completely isolating node $B$.
-- This is a node cutset of size **1** (Node $E$ is a **cutpoint**).
+- **$k$-Connected Graph**:
+  - A graph is $k$-connected (or $k$-node connected) if the minimum number of nodes required to disconnect it is $k$.
+  - **1-Connected**: Removing 1 node disconnects the graph (contains an articulation point).
+  - **2-Connected**: Requires removing at least 2 nodes to disconnect it.
+  - **3-Connected**: Requires removing at least 3 nodes to disconnect it.
+- **Menger's Theorem (1927)**:
+  - If a graph is $k$-connected, there are at least $k$ node-independent paths (paths that do not share any common inner nodes) connecting each non-adjacent pair of vertices.
+- **Social Cohesion**: Higher $k$-connectivity indicates a more robust, cohesive, and redundant communication structure.
 :::
-:::
-
-::: {.column width="60%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 8
-#| fig-height: 4.5
-p_before <- gr_undir |>
-  ggraph(layout = "manual", x = x, y = y) +
-  geom_edge_link(color = "steelblue", edge_width = 1.0) +
-  geom_node_point(aes(color = ifelse(name == "E", "yes", "no")), size = 15) +
-  scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("Before (With Node Cutset)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-gr_undir_after_node <- gr_undir |>
-  filter(name != "E")
-
-p_after <- ggraph(gr_undir_after_node, layout = "manual", x = x, y = y) +
-  geom_edge_link(color = "steelblue", edge_width = 1.0) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("After (Node Removed)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p_before + p_after
-```
-:::
-
-::::
 
 ---
 
@@ -846,9 +983,9 @@ p_before + p_after
 - **1-Connected Graph**:
   - A graph where removing **exactly 1 node** can disconnect the network.
 - **Before** (Left):
-  - Star graph of 4 nodes, with the center node highlighted in red.
+  - A 7-node symmetric bow-tie graph, with the central bridge node (node 7) highlighted in red.
 - **After** (Right):
-  - The center node is removed, leaving 3 isolated nodes (disconnected).
+  - The central node 7 is removed, leaving two completely separate connected components (triangles).
 :::
 :::
 
@@ -858,21 +995,34 @@ p_before + p_after
 #| fig-align: "center"
 #| fig-width: 8
 #| fig-height: 4.5
-gr_k1 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 1, 1), to = c(2, 3, 4)), directed = FALSE)
-p_before <- ggraph(gr_k1, layout = "circle") +
-  geom_edge_link(color = "steelblue", edge_width = 1) +
-  geom_node_point(aes(color = ifelse(name == "1", "yes", "no")), size = 15) +
-  scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
-  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Before (With Cutpoint)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
+gr_k1 <- tbl_graph(
+  nodes = data.frame(
+    name = as.character(1:7),
+    x = c(-2, -2, -1, 1, 2, 2, 0),
+    y = c(1, -1, 0, 0, 1, -1, 0)
+  ),
+  edges = data.frame(
+    from = c(1, 2, 3, 4, 5, 6, 3, 4),
+    to   = c(2, 3, 1, 5, 6, 4, 7, 7)
+  ),
+  directed = FALSE
+)
 
-gr_k1_after <- gr_k1 |> filter(name != "1")
-p_after <- ggraph(gr_k1_after, layout = "circle") +
+p_before <- ggraph(gr_k1, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(aes(color = ifelse(name == "7", "yes", "no")), size = 15) +
+  scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (7-Node Bow-Tie with Cutpoint 7)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+gr_k1_after <- gr_k1 |> filter(name != "7")
+p_after <- ggraph(gr_k1_after, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
   geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("After (Disconnected)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Node 7 Removed, Disconnected)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
 
 p_before + p_after
 ```
@@ -891,9 +1041,9 @@ p_before + p_after
 - **2-Connected Graph**:
   - A graph where it requires removing at least **2 nodes** to disconnect it.
 - **Before** (Left):
-  - Ring graph of 4 nodes, with nodes 1 and 2 (the cutset) highlighted in red.
+  - A 6-node cycle with a diagonal chord (edge 2-5), with nodes 2 and 5 highlighted in red.
 - **After** (Right):
-  - Removing nodes 1 and 2 leaves nodes 3 and 4 completely disconnected.
+  - Removing nodes 2 and 5 leaves the graph split into two disconnected components: {1, 6} and {3, 4}.
 :::
 :::
 
@@ -903,20 +1053,29 @@ p_before + p_after
 #| fig-align: "center"
 #| fig-width: 8
 #| fig-height: 4.5
-gr_k2 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 2, 3, 4), to = c(2, 3, 4, 1)), directed = FALSE)
+gr_k2 <- tbl_graph(
+  nodes = data.frame(name = as.character(1:6)),
+  edges = data.frame(
+    from = c(1, 2, 3, 4, 5, 6, 2),
+    to   = c(2, 3, 4, 5, 6, 1, 5)
+  ),
+  directed = FALSE
+)
+
 p_before <- ggraph(gr_k2, layout = "circle") +
   geom_edge_link(color = "steelblue", edge_width = 1) +
-  geom_node_point(aes(color = ifelse(name %in% c("1", "2"), "yes", "no")), size = 15) +
+  geom_node_point(aes(color = ifelse(name %in% c("2", "5"), "yes", "no")), size = 15) +
   scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
   geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Before (Minimum Cutset of 2)") + coord_cartesian(clip = "off") +
+  theme_graph() + ggtitle("Before (6-Node Ring with Chord, Cutset {2, 5})") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
 
-gr_k2_after <- gr_k2 |> filter(!name %in% c("1", "2"))
+gr_k2_after <- gr_k2 |> filter(!name %in% c("2", "5"))
 p_after <- ggraph(gr_k2_after, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1) +
   geom_node_point(size = 15, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("After (Disconnected)") + coord_cartesian(clip = "off") +
+  theme_graph() + ggtitle("After (Nodes 2 & 5 Removed, Disconnected)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
 
 p_before + p_after
@@ -936,9 +1095,9 @@ p_before + p_after
 - **3-Connected Graph**:
   - A graph where it requires removing at least **3 nodes** to disconnect it.
 - **Before** (Left):
-  - Complete $K_4$ graph of 4 nodes, with nodes 1, 2, and 3 highlighted in red.
+  - A 3-regular 6-node prism graph (two concentric triangles), with nodes 1, 2, and 6 highlighted in red.
 - **After** (Right):
-  - Removing 3 nodes leaves a single isolated node (trivial graph).
+  - Removing nodes 1, 2, and 6 leaves the single edge 4-5 and completely isolates node 3 (disconnected).
 :::
 :::
 
@@ -948,20 +1107,34 @@ p_before + p_after
 #| fig-align: "center"
 #| fig-width: 8
 #| fig-height: 4.5
-gr_k3 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 1, 1, 2, 2, 3), to = c(2, 3, 4, 3, 4, 4)), directed = FALSE)
-p_before <- ggraph(gr_k3, layout = "circle") +
-  geom_edge_link(color = "steelblue", edge_width = 1) +
-  geom_node_point(aes(color = ifelse(name %in% c("1", "2", "3"), "yes", "no")), size = 15) +
+nodes_prism <- data.frame(
+  name = as.character(1:6),
+  x = c(0, -0.43, 0.43, 0, -1.04, 1.04),
+  y = c(0.5, -0.25, -0.25, 1.2, -0.6, -0.6)
+)
+gr_k3 <- tbl_graph(
+  nodes = nodes_prism,
+  edges = data.frame(
+    from = c(1, 2, 3, 4, 5, 6, 1, 2, 3),
+    to   = c(2, 3, 1, 5, 6, 4, 4, 5, 6)
+  ),
+  directed = FALSE
+)
+
+p_before <- ggraph(gr_k3, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.1) +
+  geom_node_point(aes(color = ifelse(name %in% c("1", "2", "6"), "yes", "no")), size = 15) +
   scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
   geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Before (Minimum Cutset of 3)") + coord_cartesian(clip = "off") +
+  theme_graph() + ggtitle("Before (6-Node Prism, Cutset {1, 2, 6})") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
 
-gr_k3_after <- gr_k3 |> filter(!name %in% c("1", "2", "3"))
-p_after <- ggraph(gr_k3_after, layout = "circle") +
+gr_k3_after <- gr_k3 |> filter(!name %in% c("1", "2", "6"))
+p_after <- ggraph(gr_k3_after, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.1) +
   geom_node_point(size = 15, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("After (Disconnected/Trivial)") + coord_cartesian(clip = "off") +
+  theme_graph() + ggtitle("After (Nodes Removed, Node 3 Isolated)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
 
 p_before + p_after
