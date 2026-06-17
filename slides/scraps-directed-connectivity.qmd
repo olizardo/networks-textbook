@@ -1,0 +1,230 @@
+---
+title: "Scraps: Directed Connectivity & Matrices"
+---
+
+# Part 5: Directed Connectivity & Matrices
+
+---
+
+## Flavors of Connectivity in Directed Graphs
+
+::: {.incremental}
+- Because of edge directionality, directed graphs have four levels of connectivity:
+1. **Strongly Connected**: Every pair of nodes is **mutually reachable** via directed paths.
+2. **Recursively Connected**: Strongly connected, AND the directed paths in both directions share the exact same set of intermediate nodes (like $B$ and $C$ sharing $\{C, D, E\}$).
+3. **Unilaterally Connected**: Every pair is connected by **at least one directed path** (from $u \rightarrow v$ OR $v \rightarrow u$, but not necessarily both).
+4. **Weakly Connected**: Every pair of nodes is connected by at least a **semipath** (connected if we ignore arrow directions).
+:::
+
+---
+
+## Directed Connectivity: Visual Examples
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 12
+#| fig-height: 4.5
+p1 <- ggraph(gr_strong, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     color = "steelblue", edge_width = 1.1) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("Strongly Connected") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p2 <- ggraph(gr_uni, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     color = "steelblue", edge_width = 1.1) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("Unilaterally Connected") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p3 <- ggraph(gr_weak, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     color = "steelblue", edge_width = 1.1) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("Weakly Connected") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p1 + p2 + p3
+```
+
+---
+
+## The Reachability Matrix ($D_r$)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- The **reachability matrix** ($D_r$) of a graph records whether each pair of nodes can reach each other ($D_r(i,j) = 1$ if node $i$ can reach $j$ via a path of any length).
+- **Matrix Row & Column Patterns**:
+  - **Receiver Nodes**: Have all zeros in their corresponding row of $D_r$ (cannot reach anyone, e.g. Node $D$ on the right).
+  - **Transmitter Nodes**: Have all zeros in their corresponding column of $D_r$ (cannot be reached by anyone, e.g. Nodes $A, B, C$ on the right).
+:::
+:::
+
+::: {.column width="40%"}
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 0 | 1 | 1 | 1 |
+| **B** | 0 | -- | 0 | 1 | 1 |
+| **C** | 0 | 0 | -- | 1 | 1 |
+| **D** | 0 | 0 | 0 | -- | 0 |
+| **E** | 0 | 0 | 0 | 1 | -- |
+
+: Reachability Matrix for our Directed Graph {#tbl-reach-slides}
+:::
+
+::::
+
+---
+
+## Reachability & Directed Connectivity
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- The reachability matrix reveals the global connectivity type of the digraph:
+  - **Strongly Connected**: The matrix is the **all-ones matrix** (excluding diagonal).
+  - **Unilaterally Connected**: The matrix contains some zeros, but for any pair, either $D_r(i,j) = 1$ or $D_r(j,i) = 1$.
+  - **Weakly Connected**: Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm'), color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Graph Connectedness ($C$)
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+::: {.incremental}
+- **Graph Connectedness** ($C$) measures the extent to which a network approaches the ideal where *everyone can reach everyone else*.
+- Mathematically, it is the **density of the directed reachability matrix**:
+  $$C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}$$
+- **Example Calculation**:
+  - Sum of ones in our reachability matrix ($D_r$): $3 + 2 + 2 + 1 = 8$.
+  - Total possible connections: $n(n-1) = 5(4) = 20$.
+  - Connectedness: $C = \frac{8}{20} = 0.40 \quad (40\%)$.
+:::
+:::
+
+::: {.column width="50%"}
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 0 | 1 | 1 | 1 |
+| **B** | 0 | -- | 0 | 1 | 1 |
+| **C** | 0 | 0 | -- | 1 | 1 |
+| **D** | 0 | 0 | 0 | -- | 0 |
+| **E** | 0 | 0 | 0 | 1 | -- |
+
+: Reachability Matrix for our Directed Graph {#tbl-reach-slides-conn}
+:::
+
+::::
+
+---
+
+## The Geodesic Distance Matrix ($D_g$)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- The **geodesic distance matrix** ($D_g$) records the length of the **shortest path** (geodesic) connecting each pair of nodes.
+- **Rules**:
+  - Adjacent nodes get a distance of $1$.
+  - Non-adjacent nodes get the length of their shortest path.
+  - Unconnected nodes (unreachable) get a distance of **infinity** ($\infty$ or `Inf`).
+- In undirected graphs, $D_g$ is symmetric. In directed graphs, $D_g$ is asymmetric.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm'), color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Node Eccentricity, Diameter & Girth
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- **Node Eccentricity**: The maximum geodesic distance from a focal node to any other reachable node in the graph (from $D_g$ row).
+- **Graph Diameter** ($d$): The *maximum* geodesic distance across all pairs of connected nodes (longest shortest path).
+  - For our undirected graph, $d = 3$.
+- **Graph Girth**: The length of the *shortest* cycle in a graph (smallest loop).
+  - For our undirected graph, the girth is $3$ (the triangle $\{ED, DC, CE\}$).
+:::
+:::
+
+::: {.column width="45%"}
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 3 | 1 | 1 | 2 |
+| **B** | Inf | -- | 3 | 2 | 1 |
+| **C** | Inf | 2 | -- | 1 | 1 |
+| **D** | Inf | 3 | 1 | -- | 2 |
+| **E** | Inf | 1 | 2 | 1 | -- |
+
+: Geodesic Distance Matrix for our Digraph {#tbl-dist-slides-ecc}
+:::
+
+::::
+
+---
+
+## Conclusion & Core Takeaways
+
+::: {.incremental}
+- **Indirect connection is the engine of diffusion**:
+  - Paths trace how resources, information, and influence flow through networks.
+- **Directed path flows are asymmetric**:
+  - Edge directions create unequal access, where some nodes can reach everyone, but are completely unreachable themselves.
+- **Matrices provide global signatures**:
+  - The **reachability matrix** ($D_r$) and the **distance matrix** ($D_g$) let us calculate connectedness, diameter, and eccentricity, transforming qualitative network structures into rigorous quantitative indices.
+:::
+
+---

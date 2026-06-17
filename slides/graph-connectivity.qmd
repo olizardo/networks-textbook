@@ -1156,245 +1156,243 @@ p_before + p_after
 
 ## The Connectivity Inequality
 
-::: {.incremental}
-- For any simple, undirected graph $G$, we can formulate a fundamental mathematical theorem linking node-connectivity ($\kappa$), edge-connectivity ($\lambda$), and minimum degree ($\delta$):
-  $$\kappa(G) \le \lambda(G) \le \delta(G)$$
-- **Why this holds**:
-  - Removing a vertex deletes all its incident edges, so it is always easier or equal to disconnect a graph by removing nodes than by removing edges.
-  - Both are bounded by the minimum degree, as you can always isolate the least-connected node by removing all of its neighbors/incident edges.
-- **Example**: In our undirected house graph:
-  - Minimum degree $\delta(G) = 1$ (node $B$ has degree 1).
-  - Edge connectivity $\lambda(G) = 1$ (the bridge edge $B-E$).
-  - Node connectivity $\kappa(G) = 1$ (the cutpoint node $E$).
-  - Here, $1 \le 1 \le 1$ holds with perfect equality!
-:::
-
----
-
-# Part 5: Directed Connectivity & Matrices
-
----
-
-## Flavors of Connectivity in Directed Graphs
-
-::: {.incremental}
-- Because of edge directionality, directed graphs have four levels of connectivity:
-1. **Strongly Connected**: Every pair of nodes is **mutually reachable** via directed paths.
-2. **Recursively Connected**: Strongly connected, AND the directed paths in both directions share the exact same set of intermediate nodes (like $B$ and $C$ sharing $\{C, D, E\}$).
-3. **Unilaterally Connected**: Every pair is connected by **at least one directed path** (from $u \rightarrow v$ OR $v \rightarrow u$, but not necessarily both).
-4. **Weakly Connected**: Every pair of nodes is connected by at least a **semipath** (connected if we ignore arrow directions).
-:::
-
----
-
-## Directed Connectivity: Visual Examples
-
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 12
-#| fig-height: 4.5
-p1 <- ggraph(gr_strong, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
-                     color = "steelblue", edge_width = 1.1) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Strongly Connected") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p2 <- ggraph(gr_uni, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
-                     color = "steelblue", edge_width = 1.1) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Unilaterally Connected") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p3 <- ggraph(gr_weak, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
-                     color = "steelblue", edge_width = 1.1) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
-  theme_graph() + ggtitle("Weakly Connected") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
-
-p1 + p2 + p3
-```
-
----
-
-## The Reachability Matrix ($D_r$)
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- The **reachability matrix** ($D_r$) of a graph records whether each pair of nodes can reach each other ($D_r(i,j) = 1$ if node $i$ can reach $j$ via a path of any length).
-- **Matrix Row & Column Patterns**:
-  - **Receiver Nodes**: Have all zeros in their corresponding row of $D_r$ (cannot reach anyone, e.g. Node $D$ on the right).
-  - **Transmitter Nodes**: Have all zeros in their corresponding column of $D_r$ (cannot be reached by anyone, e.g. Nodes $A, B, C$ on the right).
-:::
-:::
-
-::: {.column width="40%"}
-| | A | B | C | D | E |
-|---|---|---|---|---|---|
-| **A** | -- | 0 | 1 | 1 | 1 |
-| **B** | 0 | -- | 0 | 1 | 1 |
-| **C** | 0 | 0 | -- | 1 | 1 |
-| **D** | 0 | 0 | 0 | -- | 0 |
-| **E** | 0 | 0 | 0 | 1 | -- |
-
-: Reachability Matrix for our Directed Graph {#tbl-reach-slides}
-:::
-
-::::
-
----
-
-## Reachability & Directed Connectivity
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- The reachability matrix reveals the global connectivity type of the digraph:
-  - **Strongly Connected**: The matrix is the **all-ones matrix** (excluding diagonal).
-  - **Unilaterally Connected**: The matrix contains some zeros, but for any pair, either $D_r(i,j) = 1$ or $D_r(j,i) = 1$.
-  - **Weakly Connected**: Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$).
-:::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_dir, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
-                     sep = unit(3.5, 'mm'), color = "steelblue", edge_width = 1.0) +
-  geom_node_point(size = 20, color = "tan2") +
-  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
-```
-:::
-
-::::
-
----
-
-## Graph Connectedness ($C$)
-
-:::: {.columns align=center}
-
-::: {.column width="50%"}
-::: {.incremental}
-- **Graph Connectedness** ($C$) measures the extent to which a network approaches the ideal where *everyone can reach everyone else*.
-- Mathematically, it is the **density of the directed reachability matrix**:
-  $$C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}$$
-- **Example Calculation**:
-  - Sum of ones in our reachability matrix ($D_r$): $3 + 2 + 2 + 1 = 8$.
-  - Total possible connections: $n(n-1) = 5(4) = 20$.
-  - Connectedness: $C = \frac{8}{20} = 0.40 \quad (40\%)$.
-:::
-:::
-
-::: {.column width="50%"}
-| | A | B | C | D | E |
-|---|---|---|---|---|---|
-| **A** | -- | 0 | 1 | 1 | 1 |
-| **B** | 0 | -- | 0 | 1 | 1 |
-| **C** | 0 | 0 | -- | 1 | 1 |
-| **D** | 0 | 0 | 0 | -- | 0 |
-| **E** | 0 | 0 | 0 | 1 | -- |
-
-: Reachability Matrix for our Directed Graph {#tbl-reach-slides-conn}
-:::
-
-::::
-
----
-
-## The Geodesic Distance Matrix ($D_g$)
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- The **geodesic distance matrix** ($D_g$) records the length of the **shortest path** (geodesic) connecting each pair of nodes.
-- **Rules**:
-  - Adjacent nodes get a distance of $1$.
-  - Non-adjacent nodes get the length of their shortest path.
-  - Unconnected nodes (unreachable) get a distance of **infinity** ($\infty$ or `Inf`).
-- In undirected graphs, $D_g$ is symmetric. In directed graphs, $D_g$ is asymmetric.
-:::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_dir, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
-                     sep = unit(3.5, 'mm'), color = "steelblue", edge_width = 1.0) +
-  geom_node_point(size = 20, color = "tan2") +
-  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
-```
-:::
-
-::::
-
----
-
-## Node Eccentricity, Diameter & Girth
-
 :::: {.columns align=center}
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- **Node Eccentricity**: The maximum geodesic distance from a focal node to any other reachable node in the graph (from $D_g$ row).
-- **Graph Diameter** ($d$): The *maximum* geodesic distance across all pairs of connected nodes (longest shortest path).
-  - For our undirected graph, $d = 3$.
-- **Graph Girth**: The length of the *shortest* cycle in a graph (smallest loop).
-  - For our undirected graph, the girth is $3$ (the triangle $\{ED, DC, CE\}$).
+- For any undirected graph $G$, node-connectivity ($\kappa$), edge-connectivity ($\lambda$), and minimum degree ($\delta$) obey a fundamental structural hierarchy:
+  $$\kappa(G) \le \lambda(G) \le \delta(G)$$
+- **A Strict Inequality Example ($1 < 2 < 3$)**:
+  - In our 9-node "double-clique" graph on the right:
+    - **Minimum Degree ($\delta = 3$)**: The least connected nodes ($3, 4, 7, 8$) have exactly 3 edges.
+    - **Edge-Connectivity ($\lambda = 2$)**: Removing $\{1-9, 2-9\}$ separates the left clique from the waist. No single bridge exists.
+    - **Node-Connectivity ($\kappa = 1$)**: Removing the central cutpoint (node 9) completely disconnects the graph.
 :::
 :::
 
 ::: {.column width="45%"}
-| | A | B | C | D | E |
-|---|---|---|---|---|---|
-| **A** | -- | 3 | 1 | 1 | 2 |
-| **B** | Inf | -- | 3 | 2 | 1 |
-| **C** | Inf | 2 | -- | 1 | 1 |
-| **D** | Inf | 3 | 1 | -- | 2 |
-| **E** | Inf | 1 | 2 | 1 | -- |
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_ineq <- tbl_graph(
+  nodes = data.frame(
+    name = as.character(1:9),
+    x = c(-1, -1, -2, -2, 1, 1, 2, 2, 0),
+    y = c(0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0)
+  ),
+  edges = data.frame(
+    from = c(1, 1, 1, 2, 2, 3, 5, 5, 5, 6, 6, 7, 1, 2, 5, 6),
+    to   = c(2, 3, 4, 3, 4, 4, 6, 7, 8, 7, 8, 8, 9, 9, 9, 9)
+  ),
+  directed = FALSE
+)
 
-: Geodesic Distance Matrix for our Digraph {#tbl-dist-slides-ecc}
+ggraph(gr_ineq, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
 :::
 
 ::::
 
 ---
 
-## Conclusion & Core Takeaways
+# Part 5: Tree Graphs & Forests
+
+---
+
+## What is a Tree Graph?
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- If a graph is both **connected** *and* has no **cycles** (acyclic), then it is a **tree graph**.
+- **The Cycle Restriction**:
+  - A cycle is a path that begins and ends with the same node.
+  - In a tree graph, you can never start with a node and trace a sequence of distinct edges that take you back to where you started!
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+set.seed(123)
+gr_tree_5 <- as_tbl_graph(sample_tree(5, directed = FALSE)) %>% mutate(name = LETTERS[1:5])
+ggraph(gr_tree_5, layout = 'tree') +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Properties of Tree Graphs
 
 ::: {.incremental}
-- **Indirect connection is the engine of diffusion**:
-  - Paths trace how resources, information, and influence flow through networks.
-- **Directed path flows are asymmetric**:
-  - Edge directions create unequal access, where some nodes can reach everyone, but are completely unreachable themselves.
-- **Matrices provide global signatures**:
-  - The **reachability matrix** ($D_r$) and the **distance matrix** ($D_g$) let us calculate connectedness, diameter, and eccentricity, transforming qualitative network structures into rigorous quantitative indices.
+- Tree graphs possess several unique mathematical and structural properties:
+  1. **The Single Path Property**:
+     - *Every* pair of nodes in a tree graph is linked by exactly **one unique path**.
+     - There are no redundant or alternative paths between any two actors.
+  2. **The One-Cycle Property**:
+     - Adding a *single* new edge connecting any pair of non-adjacent nodes always creates **exactly one cycle**, destroying its tree status.
 :::
+
+---
+
+## Tree Graph Metrics: Vertices & Edges
+
+::: {.incremental}
+- In any tree graph, the number of edges ($m$) is always exactly equal to the number of nodes ($n$) minus one:
+  $$m = n - 1 \qquad \iff \qquad n = m + 1$$
+- **Sum of Degrees Identity**:
+  - Recall that the sum of degrees in any undirected graph is $2m$. 
+  - Substituting $m = n - 1$, the sum of degrees of a tree graph is always:
+    $$\sum_i k_i = 2(n - 1) = 2n - 2$$
+  - *In a tree graph, the sum of degrees is always exactly twice the number of nodes minus two!*
+:::
+
+---
+
+## Tree Graph Density & Average Degree
+
+::: {.incremental}
+- Because of the strict $m = n - 1$ edge constraint, tree graph density and average degree simplify beautifully:
+  - **Density of a Tree Graph**:
+    $$d(T) = rac{2m}{n(n-1)} = rac{2(n-1)}{n(n-1)} = rac{2}{n}$$
+  - **Average Degree of a Tree Graph**:
+    $$ar{k} = rac{\sum k_i}{n} = rac{2n - 2}{n}$$
+- *For our 5-node tree graph: density is $2/5 = 0.40$ ($40\%$), and average degree is $(10-2)/5 = 1.6$.*
+:::
+
+---
+
+## Trees as Minimally Connected Graphs
+
+::: {.incremental}
+- Trees are **minimally connected** graphs:
+  - They are connected using the *smallest possible number of edges* needed to connect $n$ vertices.
+- **The Bridges Rule**:
+  - Removing even a *single* edge from a tree graph completely disconnects the graph.
+  - Thus, **every edge of a tree graph is a bridge** (a minimum edge cutset of size 1)!
+- Disconnecting a tree graph by removing any edge splits it into separate connected components, which are themselves trees.
+:::
+
+---
+
+## Forests: Visualizing Disconnection
+
+:::: {.columns align=center}
+
+::: {.column width="40%"}
+::: {.incremental}
+- **Forest**:
+  - A disconnected graph whose components are all tree graphs.
+- **Before** (Left):
+  - A connected 6-node tree graph.
+- **After** (Right):
+  - Removing edge **D-F** splits the graph into two separate trees (a **forest**).
+:::
+:::
+
+::: {.column width="60%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4.5
+gr_f <- as_tbl_graph(sample_tree(6, directed = FALSE)) %>% mutate(name = LETTERS[1:6])
+# Force manual layout for consistency
+layout_f <- create_layout(gr_f, layout = "tree")
+x_f <- layout_f$x
+y_f <- layout_f$y
+
+# Find a valid edge to highlight and remove, say edge 3-4 (C-D) or similar
+edges_f <- as.data.frame(gr_f %>% activate(edges) %>% as_tibble())
+# Let's highlight the first edge
+from_node <- edges_f$from[1]
+to_node <- edges_f$to[1]
+
+p_before <- ggraph(gr_f, layout = "manual", x = x_f, y = y_f) +
+  geom_edge_link(aes(color = ifelse(from == from_node & to == to_node, "yes", "no")), edge_width = 1.25) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Before (Connected Tree)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5))
+
+gr_f_after <- gr_f %>% 
+  activate(edges) %>% 
+  filter(!(from == from_node & to == to_node))
+
+p_after <- ggraph(gr_f_after, layout = "manual", x = x_f, y = y_f) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("After (Forest: 2 Tree Components)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5))
+
+p_before + p_after
+```
+:::
+
+::::
+
+---
+
+## Special Types of Trees: Line and Star Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="30%"}
+::: {.incremental}
+- **The Line Graph ($L_n$)**:
+  - A single straight path connecting $n$ nodes.
+  - Used to model sequential diffusion processes (like the "Telephone Game").
+- **The Star Graph ($S_n$)**:
+  - A central hub connected to $n-1$ leaf nodes.
+  - Represents extreme structural centralization.
+:::
+:::
+
+::: {.column width="70%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4.5
+gr_line <- tbl_graph(nodes = data.frame(name = LETTERS[1:5]), edges = data.frame(from = 1:4, to = 2:5), directed = FALSE)
+p_line <- ggraph(gr_line, layout = "linear") +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Line Graph (L5)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+gr_star <- tbl_graph(nodes = data.frame(name = LETTERS[1:5]), edges = data.frame(from = c(1, 1, 1, 1), to = 2:5), directed = FALSE)
+p_star <- ggraph(gr_star, layout = "star") +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Star Graph (S5)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face = "bold", hjust = 0.5))
+
+p_line + p_star
+```
+:::
+
+::::
 
 ---
 

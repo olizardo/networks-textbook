@@ -803,134 +803,50 @@
 </section>
 <section id="the-connectivity-inequality" class="slide level2">
 <h2>The Connectivity Inequality</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:55%;">
 <ul>
-<li class="fragment">For any simple, undirected graph <span class="math inline">\(G\)</span>, we can formulate a fundamental mathematical theorem linking node-connectivity (<span class="math inline">\(\kappa\)</span>), edge-connectivity (<span class="math inline">\(\lambda\)</span>), and minimum degree (<span class="math inline">\(\delta\)</span>): <span class="math display">\[\kappa(G) \le \lambda(G) \le \delta(G)\]</span></li>
-<li class="fragment"><strong>Why this holds</strong>:
+<li class="fragment">For any undirected graph <span class="math inline">\(G\)</span>, node-connectivity (<span class="math inline">\(\kappa\)</span>), edge-connectivity (<span class="math inline">\(\lambda\)</span>), and minimum degree (<span class="math inline">\(\delta\)</span>) obey a fundamental structural hierarchy: <span class="math display">\[\kappa(G) \le \lambda(G) \le \delta(G)\]</span></li>
+<li class="fragment"><strong>A Strict Inequality Example (<span class="math inline">\(1 &lt; 2 &lt; 3\)</span>)</strong>:
 <ul>
-<li class="fragment">Removing a vertex deletes all its incident edges, so it is always easier or equal to disconnect a graph by removing nodes than by removing edges.</li>
-<li class="fragment">Both are bounded by the minimum degree, as you can always isolate the least-connected node by removing all of its neighbors/incident edges.</li>
+<li class="fragment">In our 9-node “double-clique” graph on the right:
+<ul>
+<li class="fragment"><strong>Minimum Degree (<span class="math inline">\(\delta = 3\)</span>)</strong>: The least connected nodes (<span class="math inline">\(3, 4, 7, 8\)</span>) have exactly 3 edges.</li>
+<li class="fragment"><strong>Edge-Connectivity (<span class="math inline">\(\lambda = 2\)</span>)</strong>: Removing <span class="math inline">\(\{1-9, 2-9\}\)</span> separates the left clique from the waist. No single bridge exists.</li>
+<li class="fragment"><strong>Node-Connectivity (<span class="math inline">\(\kappa = 1\)</span>)</strong>: Removing the central cutpoint (node 9) completely disconnects the graph.</li>
 </ul></li>
-<li class="fragment"><strong>Example</strong>: In our undirected house graph:
-<ul>
-<li class="fragment">Minimum degree <span class="math inline">\(\delta(G) = 1\)</span> (node <span class="math inline">\(B\)</span> has degree 1).</li>
-<li class="fragment">Edge connectivity <span class="math inline">\(\lambda(G) = 1\)</span> (the bridge edge <span class="math inline">\(B-E\)</span>).</li>
-<li class="fragment">Node connectivity <span class="math inline">\(\kappa(G) = 1\)</span> (the cutpoint node <span class="math inline">\(E\)</span>).</li>
-<li class="fragment">Here, <span class="math inline">\(1 \le 1 \le 1\)</span> holds with perfect equality!</li>
 </ul></li>
 </ul>
+</div><div class="column" style="width:45%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-23-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
 </section>
 <section class="slide level2">
 
 </section></section>
 <section>
-<section id="part-5-directed-connectivity-matrices" class="title-slide slide level1 center">
-<h1>Part 5: Directed Connectivity &amp; Matrices</h1>
+<section id="part-5-tree-graphs-forests" class="title-slide slide level1 center">
+<h1>Part 5: Tree Graphs &amp; Forests</h1>
 
 </section>
-<section id="flavors-of-connectivity-in-directed-graphs" class="slide level2 scrollable">
-<h2>Flavors of Connectivity in Directed Graphs</h2>
-<ul>
-<li class="fragment">Because of edge directionality, directed graphs have four levels of connectivity:</li>
-</ul>
-<ol type="1">
-<li class="fragment"><strong>Strongly Connected</strong>: Every pair of nodes is <strong>mutually reachable</strong> via directed paths.</li>
-<li class="fragment"><strong>Recursively Connected</strong>: Strongly connected, AND the directed paths in both directions share the exact same set of intermediate nodes (like <span class="math inline">\(B\)</span> and <span class="math inline">\(C\)</span> sharing <span class="math inline">\(\{C, D, E\}\)</span>).</li>
-<li class="fragment"><strong>Unilaterally Connected</strong>: Every pair is connected by <strong>at least one directed path</strong> (from <span class="math inline">\(u \rightarrow v\)</span> OR <span class="math inline">\(v \rightarrow u\)</span>, but not necessarily both).</li>
-<li class="fragment"><strong>Weakly Connected</strong>: Every pair of nodes is connected by at least a <strong>semipath</strong> (connected if we ignore arrow directions).</li>
-</ol>
-</section>
-<section id="directed-connectivity-visual-examples" class="slide level2">
-<h2>Directed Connectivity: Visual Examples</h2>
-
-<img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-23-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"></section>
-<section id="the-reachability-matrix-d_r" class="slide level2">
-<h2>The Reachability Matrix (<span class="math inline">\(D_r\)</span>)</h2>
+<section id="what-is-a-tree-graph" class="slide level2">
+<h2>What is a Tree Graph?</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:60%;">
 <ul>
-<li class="fragment">The <strong>reachability matrix</strong> (<span class="math inline">\(D_r\)</span>) of a graph records whether each pair of nodes can reach each other (<span class="math inline">\(D_r(i,j) = 1\)</span> if node <span class="math inline">\(i\)</span> can reach <span class="math inline">\(j\)</span> via a path of any length).</li>
-<li class="fragment"><strong>Matrix Row &amp; Column Patterns</strong>:
+<li class="fragment">If a graph is both <strong>connected</strong> <em>and</em> has no <strong>cycles</strong> (acyclic), then it is a <strong>tree graph</strong>.</li>
+<li class="fragment"><strong>The Cycle Restriction</strong>:
 <ul>
-<li class="fragment"><strong>Receiver Nodes</strong>: Have all zeros in their corresponding row of <span class="math inline">\(D_r\)</span> (cannot reach anyone, e.g.&nbsp;Node <span class="math inline">\(D\)</span> on the right).</li>
-<li class="fragment"><strong>Transmitter Nodes</strong>: Have all zeros in their corresponding column of <span class="math inline">\(D_r\)</span> (cannot be reached by anyone, e.g.&nbsp;Nodes <span class="math inline">\(A, B, C\)</span> on the right).</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div id="tbl-reach-slides" class="quarto-float quarto-figure quarto-figure-center">
-<figure class="quarto-float quarto-float-tbl">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-reach-slides-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: Reachability Matrix for our Directed Graph
-</figcaption>
-<div aria-describedby="tbl-reach-slides-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>A</strong></td>
-<td>–</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>B</strong></td>
-<td>0</td>
-<td>–</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>C</strong></td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>D</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-<td>0</td>
-</tr>
-<tr class="odd">
-<td><strong>E</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>–</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-</div></div>
-</section>
-<section id="reachability-directed-connectivity" class="slide level2">
-<h2>Reachability &amp; Directed Connectivity</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment">The reachability matrix reveals the global connectivity type of the digraph:
-<ul>
-<li class="fragment"><strong>Strongly Connected</strong>: The matrix is the <strong>all-ones matrix</strong> (excluding diagonal).</li>
-<li class="fragment"><strong>Unilaterally Connected</strong>: The matrix contains some zeros, but for any pair, either <span class="math inline">\(D_r(i,j) = 1\)</span> or <span class="math inline">\(D_r(j,i) = 1\)</span>.</li>
-<li class="fragment"><strong>Weakly Connected</strong>: Contains at least one pair of nodes that are mutually unreachable (<span class="math inline">\(D_r(i,j) = 0\)</span> AND <span class="math inline">\(D_r(j,i) = 0\)</span>).</li>
+<li class="fragment">A cycle is a path that begins and ends with the same node.</li>
+<li class="fragment">In a tree graph, you can never start with a node and trace a sequence of distinct edges that take you back to where you started!</li>
 </ul></li>
 </ul>
 </div><div class="column" style="width:40%;">
@@ -945,209 +861,118 @@ Table&nbsp;1: Reachability Matrix for our Directed Graph
 </div>
 </div></div>
 </section>
-<section id="graph-connectedness-c" class="slide level2">
-<h2>Graph Connectedness (<span class="math inline">\(C\)</span>)</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:50%;">
+<section id="properties-of-tree-graphs" class="slide level2 scrollable">
+<h2>Properties of Tree Graphs</h2>
 <ul>
-<li class="fragment"><strong>Graph Connectedness</strong> (<span class="math inline">\(C\)</span>) measures the extent to which a network approaches the ideal where <em>everyone can reach everyone else</em>.</li>
-<li class="fragment">Mathematically, it is the <strong>density of the directed reachability matrix</strong>: <span class="math display">\[C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}\]</span></li>
-<li class="fragment"><strong>Example Calculation</strong>:
+<li class="fragment">Tree graphs possess several unique mathematical and structural properties:
+<ol type="1">
+<li class="fragment"><strong>The Single Path Property</strong>:
 <ul>
-<li class="fragment">Sum of ones in our reachability matrix (<span class="math inline">\(D_r\)</span>): <span class="math inline">\(3 + 2 + 2 + 1 = 8\)</span>.</li>
-<li class="fragment">Total possible connections: <span class="math inline">\(n(n-1) = 5(4) = 20\)</span>.</li>
-<li class="fragment">Connectedness: <span class="math inline">\(C = \frac{8}{20} = 0.40 \quad (40\%)\)</span>.</li>
+<li class="fragment"><em>Every</em> pair of nodes in a tree graph is linked by exactly <strong>one unique path</strong>.</li>
+<li class="fragment">There are no redundant or alternative paths between any two actors.</li>
 </ul></li>
+<li class="fragment"><strong>The One-Cycle Property</strong>:
+<ul>
+<li class="fragment">Adding a <em>single</em> new edge connecting any pair of non-adjacent nodes always creates <strong>exactly one cycle</strong>, destroying its tree status.</li>
+</ul></li>
+</ol></li>
 </ul>
-</div><div class="column" style="width:50%;">
-<div id="tbl-reach-slides-conn" class="quarto-float quarto-figure quarto-figure-center">
-<figure class="quarto-float quarto-float-tbl">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-reach-slides-conn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2: Reachability Matrix for our Directed Graph
-</figcaption>
-<div aria-describedby="tbl-reach-slides-conn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>A</strong></td>
-<td>–</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>B</strong></td>
-<td>0</td>
-<td>–</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>C</strong></td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>D</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>–</td>
-<td>0</td>
-</tr>
-<tr class="odd">
-<td><strong>E</strong></td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>–</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-</div></div>
 </section>
-<section id="the-geodesic-distance-matrix-d_g" class="slide level2">
-<h2>The Geodesic Distance Matrix (<span class="math inline">\(D_g\)</span>)</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
+<section id="tree-graph-metrics-vertices-edges" class="slide level2">
+<h2>Tree Graph Metrics: Vertices &amp; Edges</h2>
 <ul>
-<li class="fragment">The <strong>geodesic distance matrix</strong> (<span class="math inline">\(D_g\)</span>) records the length of the <strong>shortest path</strong> (geodesic) connecting each pair of nodes.</li>
-<li class="fragment"><strong>Rules</strong>:
+<li class="fragment">In any tree graph, the number of edges (<span class="math inline">\(m\)</span>) is always exactly equal to the number of nodes (<span class="math inline">\(n\)</span>) minus one: <span class="math display">\[m = n - 1 \qquad \iff \qquad n = m + 1\]</span></li>
+<li class="fragment"><strong>Sum of Degrees Identity</strong>:
 <ul>
-<li class="fragment">Adjacent nodes get a distance of <span class="math inline">\(1\)</span>.</li>
-<li class="fragment">Non-adjacent nodes get the length of their shortest path.</li>
-<li class="fragment">Unconnected nodes (unreachable) get a distance of <strong>infinity</strong> (<span class="math inline">\(\infty\)</span> or <code>Inf</code>).</li>
+<li class="fragment">Recall that the sum of degrees in any undirected graph is <span class="math inline">\(2m\)</span>.</li>
+<li class="fragment">Substituting <span class="math inline">\(m = n - 1\)</span>, the sum of degrees of a tree graph is always: <span class="math display">\[\sum_i k_i = 2(n - 1) = 2n - 2\]</span></li>
+<li class="fragment"><em>In a tree graph, the sum of degrees is always exactly twice the number of nodes minus two!</em></li>
 </ul></li>
-<li class="fragment">In undirected graphs, <span class="math inline">\(D_g\)</span> is symmetric. In directed graphs, <span class="math inline">\(D_g\)</span> is asymmetric.</li>
 </ul>
-</div><div class="column" style="width:40%;">
+</section>
+<section id="tree-graph-density-average-degree" class="slide level2">
+<h2>Tree Graph Density &amp; Average Degree</h2>
+<ul>
+<li class="fragment">Because of the strict <span class="math inline">\(m = n - 1\)</span> edge constraint, tree graph density and average degree simplify beautifully:
+<ul>
+<li class="fragment"><strong>Density of a Tree Graph</strong>: <span class="math display">\[d(T) = rac{2m}{n(n-1)} = rac{2(n-1)}{n(n-1)} = rac{2}{n}\]</span></li>
+<li class="fragment"><strong>Average Degree of a Tree Graph</strong>: <span class="math display">\[ar{k} = rac{\sum k_i}{n} = rac{2n - 2}{n}\]</span></li>
+</ul></li>
+<li class="fragment"><em>For our 5-node tree graph: density is <span class="math inline">\(2/5 = 0.40\)</span> (<span class="math inline">\(40\%\)</span>), and average degree is <span class="math inline">\((10-2)/5 = 1.6\)</span>.</em></li>
+</ul>
+</section>
+<section id="trees-as-minimally-connected-graphs" class="slide level2">
+<h2>Trees as Minimally Connected Graphs</h2>
+<ul>
+<li class="fragment">Trees are <strong>minimally connected</strong> graphs:
+<ul>
+<li class="fragment">They are connected using the <em>smallest possible number of edges</em> needed to connect <span class="math inline">\(n\)</span> vertices.</li>
+</ul></li>
+<li class="fragment"><strong>The Bridges Rule</strong>:
+<ul>
+<li class="fragment">Removing even a <em>single</em> edge from a tree graph completely disconnects the graph.</li>
+<li class="fragment">Thus, <strong>every edge of a tree graph is a bridge</strong> (a minimum edge cutset of size 1)!</li>
+</ul></li>
+<li class="fragment">Disconnecting a tree graph by removing any edge splits it into separate connected components, which are themselves trees.</li>
+</ul>
+</section>
+<section id="forests-visualizing-disconnection" class="slide level2">
+<h2>Forests: Visualizing Disconnection</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:40%;">
+<ul>
+<li class="fragment"><strong>Forest</strong>:
+<ul>
+<li class="fragment">A disconnected graph whose components are all tree graphs.</li>
+</ul></li>
+<li class="fragment"><strong>Before</strong> (Left):
+<ul>
+<li class="fragment">A connected 6-node tree graph.</li>
+</ul></li>
+<li class="fragment"><strong>After</strong> (Right):
+<ul>
+<li class="fragment">Removing edge <strong>D-F</strong> splits the graph into two separate trees (a <strong>forest</strong>).</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:60%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-25-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-25-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </div></div>
 </section>
-<section id="node-eccentricity-diameter-girth" class="slide level2">
-<h2>Node Eccentricity, Diameter &amp; Girth</h2>
+<section id="special-types-of-trees-line-and-star-graphs" class="slide level2">
+<h2>Special Types of Trees: Line and Star Graphs</h2>
 <div class="columns" data-align="center">
-<div class="column" style="width:55%;">
+<div class="column" style="width:30%;">
 <ul>
-<li class="fragment"><strong>Node Eccentricity</strong>: The maximum geodesic distance from a focal node to any other reachable node in the graph (from <span class="math inline">\(D_g\)</span> row).</li>
-<li class="fragment"><strong>Graph Diameter</strong> (<span class="math inline">\(d\)</span>): The <em>maximum</em> geodesic distance across all pairs of connected nodes (longest shortest path).
+<li class="fragment"><strong>The Line Graph (<span class="math inline">\(L_n\)</span>)</strong>:
 <ul>
-<li class="fragment">For our undirected graph, <span class="math inline">\(d = 3\)</span>.</li>
+<li class="fragment">A single straight path connecting <span class="math inline">\(n\)</span> nodes.</li>
+<li class="fragment">Used to model sequential diffusion processes (like the “Telephone Game”).</li>
 </ul></li>
-<li class="fragment"><strong>Graph Girth</strong>: The length of the <em>shortest</em> cycle in a graph (smallest loop).
+<li class="fragment"><strong>The Star Graph (<span class="math inline">\(S_n\)</span>)</strong>:
 <ul>
-<li class="fragment">For our undirected graph, the girth is <span class="math inline">\(3\)</span> (the triangle <span class="math inline">\(\{ED, DC, CE\}\)</span>).</li>
+<li class="fragment">A central hub connected to <span class="math inline">\(n-1\)</span> leaf nodes.</li>
+<li class="fragment">Represents extreme structural centralization.</li>
 </ul></li>
 </ul>
-</div><div class="column" style="width:45%;">
-<div id="tbl-dist-slides-ecc" class="quarto-float quarto-figure quarto-figure-center">
-<figure class="quarto-float quarto-float-tbl">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dist-slides-ecc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3: Geodesic Distance Matrix for our Digraph
-</figcaption>
-<div aria-describedby="tbl-dist-slides-ecc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th></th>
-<th>A</th>
-<th>B</th>
-<th>C</th>
-<th>D</th>
-<th>E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>A</strong></td>
-<td>–</td>
-<td>3</td>
-<td>1</td>
-<td>1</td>
-<td>2</td>
-</tr>
-<tr class="even">
-<td><strong>B</strong></td>
-<td>Inf</td>
-<td>–</td>
-<td>3</td>
-<td>2</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td><strong>C</strong></td>
-<td>Inf</td>
-<td>2</td>
-<td>–</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td><strong>D</strong></td>
-<td>Inf</td>
-<td>3</td>
-<td>1</td>
-<td>–</td>
-<td>2</td>
-</tr>
-<tr class="odd">
-<td><strong>E</strong></td>
-<td>Inf</td>
-<td>1</td>
-<td>2</td>
-<td>1</td>
-<td>–</td>
-</tr>
-</tbody>
-</table>
-</div>
+</div><div class="column" style="width:70%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="graph-connectivity_files/figure-revealjs/unnamed-chunk-26-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
+</div>
+</div>
 </div></div>
-</section>
-<section id="conclusion-core-takeaways" class="slide level2">
-<h2>Conclusion &amp; Core Takeaways</h2>
-<ul>
-<li class="fragment"><strong>Indirect connection is the engine of diffusion</strong>:
-<ul>
-<li class="fragment">Paths trace how resources, information, and influence flow through networks.</li>
-</ul></li>
-<li class="fragment"><strong>Directed path flows are asymmetric</strong>:
-<ul>
-<li class="fragment">Edge directions create unequal access, where some nodes can reach everyone, but are completely unreachable themselves.</li>
-</ul></li>
-<li class="fragment"><strong>Matrices provide global signatures</strong>:
-<ul>
-<li class="fragment">The <strong>reachability matrix</strong> (<span class="math inline">\(D_r\)</span>) and the <strong>distance matrix</strong> (<span class="math inline">\(D_g\)</span>) let us calculate connectedness, diameter, and eccentricity, transforming qualitative network structures into rigorous quantitative indices.</li>
-</ul></li>
-</ul>
 </section>
 <section id="references" class="slide level2 unnumbered">
 <h2>References</h2>
