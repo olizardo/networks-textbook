@@ -399,26 +399,38 @@ ggraph(gr_mult, layout = "manual", x = x, y = y) +
 
 ---
 
-## Network Growth: Two Separate Systems
+## Network Growth: Connecting Systems
+
+::: {.incremental}
+- Social networks are highly dynamic, growing and evolving over time.
+- A classic example of network growth is **connecting separate systems**:
+  - We begin with two completely disconnected, independent family structures.
+  - **Family 1**: Parent 1, You, Sis (linked by parent-child and sibling ties).
+  - **Family 2**: Parent 2, Riley, Bro (linked by parent-child and sibling ties).
+- A romantic tie (an asymmetric, non-kin relation) forms between You and Riley:
+  - *You fall in love with Riley!*
+  - This creates a directed asymmetric bridge between the two families.
+:::
+
+---
+
+## Two Separate Family Systems
 
 :::: {.columns align=center}
 
-::: {.column width="45%"}
+::: {.column width="25%"}
 ::: {.incremental}
-- Networks grow by linking different types of ties across previously disconnected systems.
-- Consider two separate family trees:
-  - **Family 1**: Parent 1, You, Sis (anti-symmetric parent-child ties, symmetric sibling tie).
-  - **Family 2**: Parent 2, Riley, Bro (anti-symmetric parent-child ties, symmetric sibling tie).
-- You and Riley fall in love!
-  - This creates an **asymmetric romantic tie** (red dashed arrow) between the two systems.
+- **Stage 1**:
+  - Two distinct family trees.
+  - Linked only by a directed, asymmetric romantic tie (red dashed arrow).
 :::
 :::
 
-::: {.column width="55%"}
+::: {.column width="75%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 6.5
+#| fig-width: 8
 #| fig-height: 5.5
 nodes_g1 <- data.frame(
   name = c("Parent 1", "You", "Sis", "Parent 2", "Riley", "Bro"),
@@ -435,12 +447,12 @@ gr_g1 <- tbl_graph(nodes = nodes_g1, edges = edges_g1, directed = TRUE)
 ggraph(gr_g1, layout = "manual", x = x, y = y) +
   geom_edge_parallel(aes(color = type, linetype = type),
                      arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     start_cap = circle(10, 'mm'), end_cap = circle(10, 'mm'),
                      sep = unit(4, 'mm'), edge_width = 1.25) +
   scale_edge_color_manual(values = c("parent" = "black", "sibling" = "royalblue", "romantic" = "red")) +
   scale_edge_linetype_manual(values = c("parent" = "solid", "sibling" = "dotted", "romantic" = "dashed")) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  geom_node_point(size = 32, color = "tan2") +
+  geom_node_text(aes(label = name), size = 5.5, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
@@ -451,33 +463,40 @@ ggraph(gr_g1, layout = "manual", x = x, y = y) +
 
 ## Network Growth: The Marriage Cascade
 
-:::: {.columns align=center}
-
-::: {.column width="45%"}
 ::: {.incremental}
 - You and Riley get married!
   - The asymmetric romantic tie becomes a **symmetric marriage tie** (solid red).
-- This single event immediately triggers a cascade of new "in-law" ties:
+- This single structural event immediately triggers a cascade of new "in-law" ties:
   - **Symmetric Sibling-in-Law**: You $\leftrightarrow$ Bro, Riley $\leftrightarrow$ Sis (blue dotted).
-  - **Anti-Symmetric Parent-in-Law**: Parent 1 $
-ightarrow$ Riley, Parent 2 $
-ightarrow$ You (dashed gray).
-- The two families are now merged!
+  - **Anti-Symmetric Parent-in-Law**: Parent 1 $\rightarrow$ Riley, Parent 2 $\rightarrow$ You (dashed gray).
+- The marriage tie bridges the two systems, merging them into a single structure.
+:::
+
+---
+
+## The Merged Family Network
+
+:::: {.columns align=center}
+
+::: {.column width="25%"}
+::: {.incremental}
+- **Stage 2**:
+  - The marriage tie (solid red) bridges the families.
+  - Triggers a cascade of symmetric and anti-symmetric in-law ties (gray).
 :::
 :::
 
-::: {.column width="55%"}
+::: {.column width="75%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 6.5
+#| fig-width: 8
 #| fig-height: 5.5
 nodes_g2 <- data.frame(
   name = c("Parent 1", "You", "Sis", "Parent 2", "Riley", "Bro"),
   x    = c(0, -0.5, 0.5, 3, 2.5, 3.5),
   y    = c(2, 1, 1, 2, 1, 1)
 )
-# Add parent-in-law (1->5, 4->2) and sibling-in-law (2->6, 5->3)
 edges_g2 <- data.frame(
   from = c(1, 1, 2, 3, 4, 4, 5, 6, 2, 5, 1, 4, 2, 6, 5, 3),
   to   = c(2, 3, 3, 2, 5, 6, 6, 5, 5, 2, 5, 2, 6, 2, 3, 5),
@@ -489,12 +508,12 @@ gr_g2 <- tbl_graph(nodes = nodes_g2, edges = edges_g2, directed = TRUE)
 ggraph(gr_g2, layout = "manual", x = x, y = y) +
   geom_edge_parallel(aes(color = type, linetype = type),
                      arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     start_cap = circle(10, 'mm'), end_cap = circle(10, 'mm'),
                      sep = unit(4, 'mm'), edge_width = 1.2) +
   scale_edge_color_manual(values = c("parent" = "black", "sibling" = "royalblue", "marriage" = "red", "inlaw" = "gray60")) +
   scale_edge_linetype_manual(values = c("parent" = "solid", "sibling" = "dotted", "marriage" = "solid", "inlaw" = "dotted")) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  geom_node_point(size = 32, color = "tan2") +
+  geom_node_text(aes(label = name), size = 5.5, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
@@ -505,32 +524,41 @@ ggraph(gr_g2, layout = "manual", x = x, y = y) +
 
 ## Network Growth: Adding a Baby
 
-:::: {.columns align=center}
-
-::: {.column width="45%"}
 ::: {.incremental}
 - You and Riley have a baby!
   - Great news, but even more network complexity!
 - The baby adds a **cascade of new anti-symmetric kinship ties** to everyone in both systems:
-  - Parent-child to You/Riley.
-  - Grandchild to Parent 1/Parent 2.
-  - Niece/Nephew to Sis/Bro.
+  - Parent-child to You/Riley (solid orange).
+  - Grandchild to Parent 1/Parent 2 (dashed orange).
+  - Niece/Nephew to Sis/Bro (dashed orange).
 - This child permanently anchors the two systems into a single, cohesive multiplex network.
+:::
+
+---
+
+## The Consolidated Kinship Network
+
+:::: {.columns align=center}
+
+::: {.column width="25%"}
+::: {.incremental}
+- **Stage 3**:
+  - The baby node permanently consolidates the family structure.
+  - Adds new downward anti-symmetric ties to everyone in both families (orange).
 :::
 :::
 
-::: {.column width="55%"}
+::: {.column width="75%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 6.5
+#| fig-width: 8
 #| fig-height: 5.5
 nodes_g3 <- data.frame(
   name = c("Parent 1", "You", "Sis", "Parent 2", "Riley", "Bro", "Baby"),
   x    = c(0, -0.5, 0.5, 3, 2.5, 3.5, 1.5),
   y    = c(2, 1, 1, 2, 1, 1, 0)
 )
-# Add baby parent-child ties (2->7, 5->7), grandparent ties (1->7, 4->7), aunt/uncle (3->7, 6->7)
 edges_g3 <- data.frame(
   from = c(1, 1, 2, 3, 4, 4, 5, 6, 2, 5, 2, 5, 1, 4, 3, 6),
   to   = c(2, 3, 3, 2, 5, 6, 6, 5, 5, 2, 7, 7, 7, 7, 7, 7),
@@ -542,12 +570,12 @@ gr_g3 <- tbl_graph(nodes = nodes_g3, edges = edges_g3, directed = TRUE)
 ggraph(gr_g3, layout = "manual", x = x, y = y) +
   geom_edge_parallel(aes(color = type, linetype = type),
                      arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
-                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     start_cap = circle(10, 'mm'), end_cap = circle(10, 'mm'),
                      sep = unit(4, 'mm'), edge_width = 1.1) +
   scale_edge_color_manual(values = c("parent" = "black", "sibling" = "royalblue", "marriage" = "red", "baby" = "darkorange2")) +
   scale_edge_linetype_manual(values = c("parent" = "solid", "sibling" = "dotted", "marriage" = "solid", "baby" = "dashed")) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  geom_node_point(size = 32, color = "tan2") +
+  geom_node_text(aes(label = name), size = 5.5, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
