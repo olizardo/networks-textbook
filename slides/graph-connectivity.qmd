@@ -1201,16 +1201,35 @@ ggraph(gr_weak, layout = "manual", x = nodes_5_conn$x, y = nodes_5_conn$y) +
 
 :::: {.columns align=center}
 
-::: {.column width="60%"}
-::: {.incremental}
-- The **reachability matrix** ($D_r$) of a graph records whether each pair of nodes can reach each other:
-  - $D_r(i,j) = 1$ if node $i$ can reach node $j$ via a path of any length.
-  - $D_r(i,j) = 0$ otherwise.
-  - Diagonal cells are ignored (`--`).
-:::
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Directed Graph**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4
+#| fig-height: 4
+edges_reach <- data.frame(
+  from = c("A", "A", "B", "C", "C", "E"),
+  to   = c("C", "D", "E", "D", "E", "D")
+)
+gr_reach_ref <- tbl_graph(nodes = nodes_5, edges = edges_reach, directed = TRUE)
+
+ggraph(gr_reach_ref, layout = "manual", x = x, y = y) +
+  geom_edge_fan(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                start_cap = circle(6, 'mm'), end_cap = circle(7, 'mm'),
+                color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
 :::
 
-::: {.column width="40%"}
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Reachability Matrix ($D_r$)**
+
+::: {.small}
+
 | | A | B | C | D | E |
 |---|---|---|---|---|---|
 | **A** | -- | 0 | 1 | 1 | 1 |
@@ -1219,10 +1238,15 @@ ggraph(gr_weak, layout = "manual", x = nodes_5_conn$x, y = nodes_5_conn$y) +
 | **D** | 0 | 0 | 0 | -- | 0 |
 | **E** | 0 | 0 | 0 | 1 | -- |
 
-: Reachability Matrix for our Directed Graph {#tbl-reach-slides}
+:::
 :::
 
 ::::
+
+- **Definition**: $D_r(i,j) = 1$ if node $i$ can reach node $j$ via a path of any length ($0$ otherwise).
+- **Examples**: 
+  - $A$ can reach $E$ via path $A \rightarrow C \rightarrow E$, so $D_r(A, E) = 1$.
+  - $B$ cannot reach $A$, so $D_r(B, A) = 0$.
 
 ---
 
