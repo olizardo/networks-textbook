@@ -64,6 +64,19 @@ edges_8_weak <- data.frame(
   to   = c("v2", "v3", "v4", "v5", "v6", "v7", "v7")
 )
 gr_weak <- tbl_graph(nodes = nodes_8, edges = edges_8_weak, directed = TRUE)
+
+# Local bridge graph
+nodes_bridge_local <- data.frame(
+  name = c("A", "B", "C", "D", "E", "F", "G", "H", "I"),
+  x    = c(0, 0.5, 1, 2, 2.5, 3, 0.5, 1.5, 2.5),
+  y    = c(0.5, -0.5, 0, 0, -0.5, 0.5, -1.2, -1.5, -1.2)
+)
+edges_bridge_local <- data.frame(
+  from = c(1, 1, 2, 3, 4, 4, 5, 2, 7, 8, 9),
+  to   = c(2, 3, 3, 4, 5, 6, 6, 7, 8, 9, 5)
+)
+gr_bridge_local <- tbl_graph(nodes = nodes_bridge_local, edges = edges_bridge_local, directed = FALSE)
+
 ```
 
 # Part 1: Indirect Connections & Paths
@@ -308,7 +321,7 @@ gr_undir |>
 
 ---
 
-## Cycle Length & Girth
+## Graph Girth: Shortest Cycle
 
 :::: {.columns align=center}
 
@@ -317,10 +330,8 @@ gr_undir |>
 - Cycles are characterized by their length (number of edges).
 - **Graph Girth**:
   - The length of the **shortest** cycle in a graph.
-  - In our undirected house graph, the girth is $3$ (triangle $\{ED, DC, CE\}$).
-- **Graph Circumference**:
-  - The length of the **longest** cycle in a graph.
-  - In our graph, the circumference is $4$ ($\{ED, DA, AC, CE\}$).
+  - In our undirected house graph on the right, the girth is **3**.
+  - This is the triangle $\{ED, DC, CE\}$, highlighted in red.
 :::
 :::
 
@@ -347,6 +358,43 @@ gr_undir |>
 
 ---
 
+## Graph Circumference: Longest Cycle
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Graph Circumference**:
+  - The length of the **longest** cycle in a graph.
+  - In our undirected house graph on the right, the circumference is **4**.
+  - This is the cycle $\{ED, DA, AC, CE\}$, highlighted in red.
+  - *Notice that node $D$ and node $C$ are connected directly, but we bypass that direct edge to form the longest cycle.*
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 2 & to == 3) | (from == 3 & to == 5) | (from == 4 & to == 5) | (from == 2 & to == 4), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
 ## Walks and Trails
 
 ::: {.incremental}
@@ -357,6 +405,81 @@ gr_undir |>
   - *Repeated nodes are allowed*, but every edge in the sequence must be unique.
   - e.g., $\{CA, AD, DC, CE, ED\}$ is a trail (nodes $C$ and $D$ are visited twice, but all edges are unique).
 :::
+
+---
+
+## Walks: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Walk**: $B \rightarrow E \rightarrow C \rightarrow E \rightarrow D$ (length 4)
+- **Characteristics**:
+  - Traverses the highlighted edges in red.
+  - Repeats node **E** (visited twice).
+  - Repeats edge **E-C** (traversed back and forth).
+  - *No restrictions on repetition!*
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 2 & to == 4), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Trails: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Trail**: $A \rightarrow C \rightarrow D \rightarrow E \rightarrow C \rightarrow B$ (length 5)
+- **Characteristics**:
+  - Traverses the highlighted edges in red.
+  - Repeats node **C** (visited twice).
+  - **No edges are repeated**: All five edges ($AC, CD, DE, EC, EB$) are completely unique!
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 4) | (from == 2 & to == 4) | (from == 3 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -741,6 +864,45 @@ ggraph(gr_bridge, layout = 'kk') +
 
 ---
 
+## Local Bridge: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the edge **C-D** highlighted in red:
+  - It connects the left cluster $\{A, B, C\}$ to the right cluster $\{D, E, F\}$.
+- **Is it a bridge?** No. If removed, the graph remains connected via the bottom path ($B-G-H-I-E$).
+- **Is it a local bridge?** Yes! 
+  - Observed distance: $d(C, D) = 1$.
+  - If removed, the distance increases to:
+    $$d(C, D) = 5 \quad (C-B-G-H-I-E-D)$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_bridge_local |>
+  activate(edges) |>
+  mutate(highlight = ifelse(from == 3 & to == 4, "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
 ## Vertex Deletion & Node Connectivity
 
 ::: {.incremental}
@@ -754,6 +916,75 @@ ggraph(gr_bridge, layout = 'kk') +
 
 ---
 
+## Edge Cutset: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- An **edge cutset** is a set of edges whose removal disconnects the graph.
+- In our house graph on the right, the edges **C-A** and **D-A** are highlighted in red.
+- **Removing both edges** completely disconnects node $A$ from the rest of the network.
+- This is a valid edge cutset of size **2**.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 3 & to == 5) | (from == 4 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Node Cutset: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- A **node cutset** is a set of nodes whose removal disconnects the graph.
+- In our house graph on the right, node **E** is highlighted in red.
+- **Removing node E** (which also removes all of its incident edges: $B-E, E-C, E-D$) completely disconnects node $B$ from the rest of the network.
+- This is a minimum node cutset of size **1** (Node $E$ is a **cutpoint** or **articulation point**).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.0) +
+  geom_node_point(aes(color = ifelse(name == "E", "yes", "no")), size = 20) +
+  scale_color_manual(values = c("yes" = "red", "no" = "tan2"), guide = "none") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
 ## K-Connected Graphs
 
 ::: {.incremental}
@@ -763,6 +994,47 @@ ggraph(gr_bridge, layout = 'kk') +
   - **3-Connected**: Requires removing at least 3 nodes to disconnect it.
 - Higher $k$-connectivity indicates a more robust, cohesive, and redundant network.
 :::
+
+---
+
+## Levels of k-Connectivity: Visual Examples
+
+```{r}
+#| label: fig-kconn-slides
+#| fig-cap: "Graphs with different levels of k-connectivity."
+#| fig-cap-location: bottom
+#| fig-height: 4
+#| fig-width: 12
+
+# 1-connected star
+gr_k1 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 1, 1), to = c(2, 3, 4)), directed = FALSE)
+p_k1 <- ggraph(gr_k1, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("1-Connected (Star)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
+
+# 2-connected ring
+gr_k2 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 2, 3, 4), to = c(2, 3, 4, 1)), directed = FALSE)
+p_k2 <- ggraph(gr_k2, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("2-Connected (Ring)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
+
+# 3-connected complete K4
+gr_k3 <- tbl_graph(nodes = data.frame(name = 1:4), edges = data.frame(from = c(1, 1, 1, 2, 2, 3), to = c(2, 3, 4, 3, 4, 4)), directed = FALSE)
+p_k3 <- ggraph(gr_k3, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, color = "white", fontface="bold") +
+  theme_graph() + ggtitle("3-Connected (Complete)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face="bold", hjust = 0.5))
+
+p_k1 + p_k2 + p_k3
+```
 
 ---
 
