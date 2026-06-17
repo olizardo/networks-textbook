@@ -1439,7 +1439,173 @@ ggraph(gr_dir_7, layout = 'kk') +
 
 ::::
 
+---
 
+## The Reachability Matrix ($D_r$)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- The **reachability matrix** ($D_r$) of a graph records whether each pair of nodes can reach each other via a path of any length:
+  - $D_r(i,j) = 1$ if node $i$ can reach node $j$.
+  - $D_r(i,j) = 0$ otherwise.
+  - Diagonal cells are ignored (`--`).
+- **Matrix Row & Column Patterns**:
+  - **Receiver Nodes**: Have all zeros in their corresponding row of $D_r$ (cannot reach anyone, e.g. Node $D$ on the right).
+  - **Transmitter Nodes**: Have all zeros in their corresponding column of $D_r$ (cannot be reached).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm'), color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Reachability & Directed Connectivity
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- The reachability matrix reveals the global connectivity type of the digraph:
+  - **Strongly Connected**: The matrix is the **all-ones matrix** (excluding diagonal).
+  - **Unilaterally Connected**: The matrix contains some zeros, but for any pair, either $D_r(i,j) = 1$ or $D_r(j,i) = 1$.
+  - **Weakly Connected**: Contains at least one pair of nodes that are mutually unreachable ($D_r(i,j) = 0$ AND $D_r(j,i) = 0$).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm'), color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Graph Connectedness ($C$)
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+::: {.incremental}
+- **Graph Connectedness** ($C$) measures the extent to which a network approaches the ideal where *everyone can reach everyone else*.
+- Mathematically, it is the **density of the directed reachability matrix**:
+  $$C = \frac{\sum_{i \neq j} D_r(i,j)}{n(n-1)}$$
+- **Example Calculation**:
+  - Sum of ones in our reachability matrix ($D_r$): $3 + 2 + 2 + 1 = 8$.
+  - Total possible connections: $n(n-1) = 5(4) = 20$.
+  - Connectedness: $C = \frac{8}{20} = 0.40 \quad (40\%)$.
+:::
+:::
+
+::: {.column width="50%"}
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 0 | 1 | 1 | 1 |
+| **B** | 0 | -- | 0 | 1 | 1 |
+| **C** | 0 | 0 | -- | 1 | 1 |
+| **D** | 0 | 0 | 0 | -- | 0 |
+| **E** | 0 | 0 | 0 | 1 | -- |
+
+: Reachability Matrix for our Directed Graph {#tbl-reach-slides-conn}
+:::
+
+::::
+
+---
+
+## The Geodesic Distance Matrix ($D_g$)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- The **geodesic distance matrix** ($D_g$) records the length of the **shortest path** (geodesic) connecting each pair of nodes.
+- **Rules**:
+  - Adjacent nodes get a distance of $1$.
+  - Non-adjacent nodes get the length of their shortest path.
+  - Unconnected nodes (unreachable) get a distance of **infinity** ($\infty$ or `Inf`).
+- In undirected graphs, $D_g$ is symmetric. In directed graphs, $D_g$ is asymmetric.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm'), color = "steelblue", edge_width = 1.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Node Eccentricity, Diameter & Girth
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- **Node Eccentricity**: The maximum geodesic distance from a focal node to any other reachable node in the graph (from $D_g$ row).
+- **Graph Diameter** ($d$): The *maximum* geodesic distance across all pairs of connected nodes (longest shortest path).
+  - For our undirected graph, $d = 3$.
+- **Graph Girth**: The length of the *shortest* cycle in a graph (smallest loop).
+  - For our undirected graph, the girth is $3$ (the triangle $\{ED, DC, CE\}$).
+:::
+:::
+
+::: {.column width="45%"}
+| | A | B | C | D | E |
+|---|---|---|---|---|---|
+| **A** | -- | 3 | 1 | 1 | 2 |
+| **B** | Inf | -- | 3 | 2 | 1 |
+| **C** | Inf | 2 | -- | 1 | 1 |
+| **D** | Inf | 3 | 1 | -- | 2 |
+| **E** | Inf | 1 | 2 | 1 | -- |
+
+: Geodesic Distance Matrix for our Digraph {#tbl-dist-slides-ecc}
+:::
+
+::::
+
+---
 
 # Part 6: Tree Graphs & Forests
 
@@ -1464,11 +1630,9 @@ ggraph(gr_dir_7, layout = 'kk') +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-nodes_prop <- data.frame(name = c("A", "B", "C", "D", "E"), x = c(0, 1, 1, 2, 3), y = c(0, 0, 1, 0, 0))
-edges_prop <- data.frame(from = c(1, 2, 2, 4), to = c(2, 3, 4, 5)) # A-B, B-C, B-D, D-E
-gr_prop <- tbl_graph(nodes = nodes_prop, edges = edges_prop, directed = FALSE)
-
-ggraph(gr_prop, layout = "manual", x = x, y = y) +
+set.seed(123)
+gr_tree_5 <- as_tbl_graph(sample_tree(5, directed = FALSE)) %>% mutate(name = LETTERS[1:5])
+ggraph(gr_tree_5, layout = 'tree') +
   geom_edge_link(color = "steelblue", edge_width = 1.5) +
   geom_node_point(size = 20, color = "tan2") +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
@@ -1482,9 +1646,6 @@ ggraph(gr_prop, layout = "manual", x = x, y = y) +
 
 ## Properties of Tree Graphs
 
-:::: {.columns align=center}
-
-::: {.column width="60%"}
 ::: {.incremental}
 - Tree graphs possess several unique mathematical and structural properties:
   1. **The Single Path Property**:
@@ -1493,40 +1654,11 @@ ggraph(gr_prop, layout = "manual", x = x, y = y) +
   2. **The One-Cycle Property**:
      - Adding a *single* new edge connecting any pair of non-adjacent nodes always creates **exactly one cycle**, destroying its tree status.
 :::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-edges_prop_cycle <- data.frame(from = c(1, 2, 2, 4, 3), to = c(2, 3, 4, 5, 5)) # A-B, B-C, B-D, D-E, C-E (added)
-gr_prop_cycle <- tbl_graph(nodes = nodes_prop, edges = edges_prop_cycle, directed = FALSE)
-
-gr_prop_cycle %>%
-  activate(edges) %>%
-  mutate(type = c("tree", "tree", "tree", "tree", "added")) %>%
-  ggraph(layout = "manual", x = x, y = y) +
-  geom_edge_link(aes(color = type, linetype = type, edge_width = type)) +
-  scale_edge_color_manual(values = c("tree" = "steelblue", "added" = "red"), guide = "none") +
-  scale_edge_linetype_manual(values = c("tree" = "solid", "added" = "dashed"), guide = "none") +
-  scale_edge_width_manual(values = c("tree" = 1.2, "added" = 1.5), guide = "none") +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
-```
-:::
-
-::::
 
 ---
 
 ## Tree Graph Metrics: Vertices & Edges
 
-:::: {.columns align=center}
-
-::: {.column width="60%"}
 ::: {.incremental}
 - In any tree graph, the number of edges ($m$) is always exactly equal to the number of nodes ($n$) minus one:
   $$m = n - 1 \qquad \iff \qquad n = m + 1$$
@@ -1536,75 +1668,29 @@ gr_prop_cycle %>%
     $$\sum_i k_i = 2(n - 1) = 2n - 2$$
   - *In a tree graph, the sum of degrees is always exactly twice the number of nodes minus two!*
 :::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-nodes_metric <- data.frame(
-  name = c("A", "B", "C", "D", "E"), 
-  deg = c("k=1", "k=3", "k=1", "k=2", "k=1"),
-  x = c(0, 1, 1, 2, 3), 
-  y = c(0, 0, 1, 0, 0)
-)
-gr_metric <- tbl_graph(nodes = nodes_metric, edges = edges_prop, directed = FALSE)
-
-ggraph(gr_metric, layout = "manual", x = x, y = y) +
-  geom_edge_link(color = "steelblue", edge_width = 1.2) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white", vjust = 0.3) +
-  geom_node_text(aes(label = deg), size = 5, fontface = "italic", color = "black", vjust = -1.8) +
-  theme_graph() + coord_cartesian(clip = "off")
-```
-:::
-
-::::
 
 ---
 
 ## Tree Graph Density & Average Degree
 
-:::: {.columns align=center}
-
-::: {.column width="60%"}
 ::: {.incremental}
 - Because of the strict $m = n - 1$ edge constraint, tree graph density and average degree simplify beautifully:
   - **Density of a Tree Graph**:
-    $$d(T) = \frac{2m}{n(n-1)} = \frac{2(n-1)}{n(n-1)} = \frac{2}{n}$$
+    $$d(T) = 
+rac{2m}{n(n-1)} = 
+rac{2(n-1)}{n(n-1)} = 
+rac{2}{n}$$
   - **Average Degree of a Tree Graph**:
-    $$\bar{k} = \frac{\sum k_i}{n} = \frac{2n - 2}{n}$$
-- *For our 5-node tree graph:*
-  - Density is $$\frac{2}{5} = 0.40 \quad (40\%)$$
-  - Average degree is $$\frac{2(5) - 2}{5} = 1.6$$
+    $$ar{k} = 
+rac{\sum k_i}{n} = 
+rac{2n - 2}{n}$$
+- *For our 5-node tree graph: density is $2/5 = 0.40$ ($40\%$), and average degree is $(10-2)/5 = 1.6$.*
 :::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_metric, layout = "manual", x = x, y = y) +
-  geom_edge_link(color = "steelblue", edge_width = 1.2) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white", vjust = 0.3) +
-  theme_graph() + coord_cartesian(clip = "off")
-```
-:::
-
-::::
 
 ---
 
 ## Trees as Minimally Connected Graphs
 
-:::: {.columns align=center}
-
-::: {.column width="60%"}
 ::: {.incremental}
 - Trees are **minimally connected** graphs:
   - They are connected using the *smallest possible number of edges* needed to connect $n$ vertices.
@@ -1613,79 +1699,6 @@ ggraph(gr_metric, layout = "manual", x = x, y = y) +
   - Thus, **every edge of a tree graph is a bridge** (a minimum edge cutset of size 1)!
 - Disconnecting a tree graph by removing any edge splits it into separate connected components, which are themselves trees.
 :::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr_bridge_vis <- gr_prop %>%
-  activate(edges) %>%
-  mutate(highlight = ifelse(from == 2 & to == 4, "bridge", "normal"))
-
-ggraph(gr_bridge_vis, layout = "manual", x = x, y = y) +
-  geom_edge_link(aes(color = highlight, edge_width = highlight, linetype = highlight)) +
-  scale_edge_color_manual(values = c("bridge" = "red", "normal" = "steelblue"), guide = "none") +
-  scale_edge_width_manual(values = c("bridge" = 2.0, "normal" = 1.2), guide = "none") +
-  scale_edge_linetype_manual(values = c("bridge" = "dashed", "normal" = "solid"), guide = "none") +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white", vjust = 0.3) +
-  theme_graph() + coord_cartesian(clip = "off")
-```
-:::
-
-::::
-
----
-
-## Numerical Example: 8-Node Tree
-
-:::: {.columns align=center}
-
-::: {.column width="55%"}
-Let's compute the metrics for the 8-node tree shown on the right:
-
-- **1. Nodes and Edges**:
-  - Number of nodes: $n = 8$
-  - Number of edges: $m = n - 1 = 7$
-- **2. Degree of each node**:
-  - $k_A = 2, k_B = 3, k_C = 3, k_D = 1, k_E = 2, k_F = 1, k_G = 1, k_H = 1$
-  - Sum of degrees: $\sum k_i = 14$
-  - Check: $2(n-1) = 2(7) = 14 \quad \checkmark$
-- **3. Network Density**:
-  - $d(T) = \frac{2}{n} = \frac{2}{8} = 0.25 \quad (25\%)$
-- **4. Average Degree**:
-  - $\bar{k} = \frac{2n - 2}{n} = \frac{14}{8} = 1.75$
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-nodes_8 <- data.frame(
-  name = LETTERS[1:8],
-  x = c(0, -1, 1, -2, -0.5, 0.5, 2, -0.5),
-  y = c(1, 0, 0, -1, -1, -1, -1, -2)
-)
-edges_8 <- data.frame(
-  from = c(1, 1, 2, 2, 3, 3, 5),
-  to   = c(2, 3, 4, 5, 6, 7, 8)
-)
-gr_8 <- tbl_graph(nodes = nodes_8, edges = edges_8, directed = FALSE)
-
-ggraph(gr_8, layout = "manual", x = x, y = y) +
-  geom_edge_link(color = "steelblue", edge_width = 1.25) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
-```
-:::
-
-::::
 
 ---
 
