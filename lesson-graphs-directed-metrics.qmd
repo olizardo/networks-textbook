@@ -64,7 +64,7 @@ $$
 $$
 
 ### Advanced topic: Mechanics of the dyad census
-Where the numbers in @tbl-dyad-census) come from? Well, it turns out that they can be readily computed from the **asymmetric adjacency matrix** ($A$)of the corresponding directed graph. The one corresponding to @fig-direx1 is shown as @tbl-adj1.
+Where the numbers in @tbl-dyad-census come from? Well, it turns out that they can be readily computed from the **asymmetric adjacency matrix** ($A$)of the corresponding directed graph. The one corresponding to @fig-direx1 is shown as @tbl-adj1.
 
 ```{r}
 #| label: tbl-adj1
@@ -164,7 +164,7 @@ Note that in a graph in which *all* dyads are mutual ($L^\rightarrow =0$), then 
     kbl(dc, format = "pipe", align = "c") 
 ```
 
-The dyad census corresponding to the directed graph shown in @fig-direx2 is shown in @tbl-dyad-census2). Can you figure out the graph reciprocity?
+The dyad census corresponding to the directed graph shown in @fig-direx2 is shown in @tbl-dyad-census2. Can you figure out the graph reciprocity?
 
 ## Graph Connectedness
 Recall that in our discussion of indirect relationships, we found that paths work differently in undirected versus directed graphs. In an undirected graph, if we know the graph is connected (it is not split into separate components), then we also know that every node can reach every other node via a an undirected path of some length, even if that path is very long. The reason is that undirected paths are *symmetric*: In an undirected graph, if a path exists with node *A* as source and node *B* as destination, then necessarily a path also exists with node *B* as source and node *A* as destination. In an undirected graph that is also connected, all nodes are **mutually reachable** by construction.
@@ -347,41 +347,6 @@ $$   {#eq-unireach}
 Recall that we know that a reachability relation is unilateral, just in case every time a node *A* can reach a node *B* then *B* is unable reach *A* via a directed path in the graph. The tree graph has that property for all pairs of nodes. This implies that tree graphs display maximum graph hierarchy: In a tree graph, $M^r = 0$ and  therefore $H(G) = 1.0$. A completely reciprocal reachability matrix, on the other hand, where every pair of nodes is mutually reachable, implies minimum graph hierarchy, with $H(G) = 0$. 
 
 Applying @eq-hier to the tree graph shown in @fig-treegrgr gives us the expected value of $1.0$, but applying the same equation to the asymmetric graph shown in @fig-rectree gives us the value of $H(G) = 0.77$, which is pretty high, but also shows that this network structure is less hierarchical than the pure anti-symmetric tree. Overall, the closer to zero the $H(G)$ score is, the less hierarchical the structure. For instance, the graph hierarchy score corresponding to the graph shown in @fig-direx1 is $H(G) = 0.47$, showing that this network is even less hierarchical than the one shown in @fig-rectree.
-
-## Graph Efficiency
-Tree graphs like the one shown in @fig-treegrgr have another interesting property. The number of links in a tree is *always* equal to the number of nodes minus one! That is, in a tree graph $E = N - 1$. You can go back to @fig-treegrgr and check for yourself. We have seven nodes $N$ and six links $E$ and $6 = 7 -1$. That's neat!
-
-```{r}
-#| label: fig-treegrmiss
-#| fig-cap: "A tree graph that is missing one link."
-#| fig-cap-location: bottom
-#| fig-height: 6
-#| fig-width: 6
-
-    fr <- c("A", "A", "B", "B", "C", "C")
-    to <- c("B", "C", "D", "E", "F", "G")
-    edge.dat <- data.frame(fr, to)
-    node.dat <- data.frame(name = union(fr, to))
-    gr <- tbl_graph(edges = edge.dat, nodes = node.dat)
-    l <- ggraph(gr, layout = 'tree')
-    l <- as.matrix(l$data[, 1:2])
-    gr <- create_empty(7, directed = TRUE)
-    gr <- gr %>% 
-        bind_edges(data.frame(from = 1, to = 2:3)) %>% 
-        bind_edges(data.frame(from = 2, to = 4)) %>% 
-        bind_edges(data.frame(from = 3, to = 6:7)) %>% 
-        mutate(name = toupper(letters[1:7]))
-    p <- ggraph(gr, layout = l)
-    p <- p + geom_edge_link(color = "steelblue", edge_width = 1.25,
-                            arrow = arrow(length = unit(6, 'mm')),
-                            end_cap = circle(6, 'mm'))
-    p <- p + geom_node_point(aes(x = x, y = y), size = 16, color = "tan2") 
-    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
-    p <- p + theme_graph() 
-    p
-```
-
-This means that trees are networks that have the *minimum* number of links to keep them connected. If you remove even *one* node from a tree you create a connectivity gap in the structure, splitting the graph into separate components. Like the one shown in @fig-treegrmiss. After removing the $BE$ link node $E$ becomes isolated from the rest. The same would happen (creating disconnected clumps) if we were to remove any other link from @fig-treegrmiss.
 
 ## Advanced topic: Reciprocity in directed weighted graphs
 One phenomenon we can better understand using weighted graphs is the idea of reciprocity. Take for instance @fig-dirweighted, which shows a **directed weighted graph**, with the same set of nodes and edges as @fig-directed. Like all directed graphs, we can see that there are three kinds of dyads: **mutual**, **asymmetric** and **null**). This could represent the social network created by the flow of directed communications (e.g., emails or text messages send *from* one person *to* another) in an office or work group.
