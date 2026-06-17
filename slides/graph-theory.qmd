@@ -18,6 +18,7 @@ library(tidygraph)
 library(igraph)
 library(dplyr)
 library(kableExtra)
+library(patchwork)
 
 # Base graph and layout for neighborhood slides
 gr_base <- tbl_graph(
@@ -286,14 +287,48 @@ ggraph(gr, layout = 'manual', x=l[,1], y=l[,2]) +
 
 ## Graph Labeling
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Labeled Graphs**:
   - Distinctions are made between nodes (e.g., A, B, C are different people).
-  - Graph is defined by its specific structural representation (e.g., the last graph in the previous slide).
+  - Swapping node names mathematically changes the graph.
 - **Unlabeled Graphs**:
   - Nodes are interchangeable or anonymous.
-  - The focus is only on the abstract structure of connections.
+  - The focus is strictly on the abstract structure of connections.
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4
+gr_lab <- create_empty(4) %>% 
+    bind_edges(data.frame(from = c(1, 2), to = c(4, 3))) %>% 
+    mutate(name = LETTERS[1:4])
+p1 <- ggraph(gr_lab, layout = 'manual', x=l[,1], y=l[,2]) + 
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, color = "white") +
+  theme_graph() + ggtitle("Labeled") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
+
+gr_unlab <- create_empty(4) %>% 
+    bind_edges(data.frame(from = c(1, 2), to = c(4, 3)))
+p2 <- ggraph(gr_unlab, layout = 'manual', x=l[,1], y=l[,2]) + 
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 12, color = "tan2") +
+  theme_graph() + ggtitle("Unlabeled") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
+
+p1 + p2
+```
+:::
+
+::::
 
 ---
 
