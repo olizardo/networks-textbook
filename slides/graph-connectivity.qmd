@@ -539,37 +539,86 @@ gr_dir |>
 :::: {.columns align=center}
 
 ::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
-**Connected Graph**
+**Connected Graphs**
 
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.5
-#| fig-height: 4.5
-edges_connected <- rbind(edges_disconnected, data.frame(from = 6, to = 7))
-gr_connected <- tbl_graph(nodes = nodes_disconnected, edges = edges_connected, directed = FALSE)
-
-ggraph(gr_connected, layout = "manual", x = x, y = y) +
+#| fig-width: 6
+#| fig-height: 3
+# C1: Ring Graph
+nodes_c1 <- data.frame(name = as.character(1:5))
+edges_c1 <- data.frame(from = c(1, 2, 3, 4, 5), to = c(2, 3, 4, 5, 1))
+g_c1 <- tbl_graph(nodes = nodes_c1, edges = edges_c1, directed = FALSE)
+x_c1 <- sin(2 * pi * (0:4)/5)
+y_c1 <- cos(2 * pi * (0:4)/5)
+p_c1 <- ggraph(g_c1, layout = "manual", x = x_c1, y = y_c1) +
   geom_edge_link(color = "steelblue", edge_width = 1.25) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() +
+  ggtitle("Example A: Cycle") +
+  theme(plot.title = element_text(hjust = 0.5, size = 11, face = "bold")) +
+  coord_cartesian(clip = "off")
+
+# C2: Star Graph
+nodes_c2 <- data.frame(name = as.character(1:6))
+edges_c2 <- data.frame(from = rep(1, 5), to = 2:6)
+g_c2 <- tbl_graph(nodes = nodes_c2, edges = edges_c2, directed = FALSE)
+x_c2 <- c(0, sin(2 * pi * (0:4)/5))
+y_c2 <- c(0, cos(2 * pi * (0:4)/5))
+p_c2 <- ggraph(g_c2, layout = "manual", x = x_c2, y = y_c2) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() +
+  ggtitle("Example B: Star") +
+  theme(plot.title = element_text(hjust = 0.5, size = 11, face = "bold")) +
+  coord_cartesian(clip = "off")
+
+p_c1 + p_c2 + plot_layout(ncol = 2)
 ```
 :::
 
 ::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
-**Disconnected Graph**
+**Disconnected Graphs**
 
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.5
-#| fig-height: 4.5
-ggraph(gr_disconnected, layout = "manual", x = x, y = y) +
+#| fig-width: 6
+#| fig-height: 3
+# D1: Isolated Node
+nodes_d1 <- data.frame(name = as.character(1:5))
+edges_d1 <- data.frame(from = c(1, 2, 3, 4), to = c(2, 3, 4, 1))
+g_d1 <- tbl_graph(nodes = nodes_d1, edges = edges_d1, directed = FALSE)
+x_d1 <- sin(2 * pi * (0:4)/5)
+y_d1 <- cos(2 * pi * (0:4)/5)
+p_d1 <- ggraph(g_d1, layout = "manual", x = x_d1, y = y_d1) +
   geom_edge_link(color = "steelblue", edge_width = 1.25) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() +
+  ggtitle("Example C: Isolated Node") +
+  theme(plot.title = element_text(hjust = 0.5, size = 11, face = "bold")) +
+  coord_cartesian(clip = "off")
+
+# D2: Two Components
+nodes_d2 <- data.frame(name = as.character(1:6))
+edges_d2 <- data.frame(from = c(1, 2, 3, 4, 5, 6), to = c(2, 3, 1, 5, 6, 4))
+g_d2 <- tbl_graph(nodes = nodes_d2, edges = edges_d2, directed = FALSE)
+x_d2 <- c(-1, -0.5, -1.5, 1, 0.5, 1.5)
+y_d2 <- c(0.5, -0.5, -0.5, 0.5, -0.5, -0.5)
+p_d2 <- ggraph(g_d2, layout = "manual", x = x_d2, y = y_d2) +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() +
+  ggtitle("Example D: Two Components") +
+  theme(plot.title = element_text(hjust = 0.5, size = 11, face = "bold")) +
+  coord_cartesian(clip = "off")
+
+p_d1 + p_d2 + plot_layout(ncol = 2)
 ```
 :::
 
