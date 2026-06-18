@@ -150,21 +150,21 @@
 <section id="combining-social-relations" class="slide level2 scrollable">
 <h2>Combining Social Relations</h2>
 <ul>
-<li>In social network analysis, we often record <strong>multiple types of relationships</strong> for the same set of nodes (e.g., <em>Hanging Out</em> vs.&nbsp;<em>Co-working</em>).</li>
+<li>In social network analysis, we often record <strong>multiple types of relationships</strong> for the same set of nodes (e.g., <em>Parties With</em> vs.&nbsp;<em>Plays Games With</em>).</li>
 <li>How do we combine, subtract, or intersect these overlapping structures?</li>
 <li>We use <strong>Basic Matrix Operations</strong> performed cell-by-cell on adjacency matrices of the same dimensions:
 <ol type="1">
-<li><strong>Matrix Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>)</strong>: Measures overall relationship volume.</li>
-<li><strong>Matrix Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>)</strong>: Isolates relational disagreements.</li>
-<li><strong>Hadamard Product (<span class="math inline">\(\mathbf{H} \circ \mathbf{C}\)</span>)</strong>: Extracts multiplex overlap.</li>
+<li><strong>Matrix Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>)</strong>: Measures overall relationship volume (uniplex vs.&nbsp;multiplex).</li>
+<li><strong>Subtracting from a Matrix (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>)</strong>: Flips ties to find the <strong>graph complement</strong> (<em>Does Not Party With</em>).</li>
+<li><strong>Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>)</strong>: Extracts multiplex overlap (<em>Parties and Plays Games With</em>).</li>
 </ol></li>
 </ul>
 </section>
-<section id="adjacency-matrices-mathbfh-and-mathbfc" class="slide level2">
-<h2>Adjacency Matrices: <span class="math inline">\(\mathbf{H}\)</span> and <span class="math inline">\(\mathbf{C}\)</span></h2>
+<section id="adjacency-matrices-mathbfp-and-mathbfg" class="slide level2">
+<h2>Adjacency Matrices: <span class="math inline">\(\mathbf{P}\)</span> and <span class="math inline">\(\mathbf{G}\)</span></h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<h3 id="hanging-out-mathbfh">Hanging Out (<span class="math inline">\(\mathbf{H}\)</span>)</h3>
+<h3 id="parties-with-mathbfp">Parties With (<span class="math inline">\(\mathbf{P}\)</span>)</h3>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
@@ -174,11 +174,17 @@
 <th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
@@ -186,14 +192,47 @@
 <tr class="even">
 <td style="text-align: left; font-weight: bold;">B</td>
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
 <td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
 </tr>
 </tbody>
 </table>
@@ -211,7 +250,7 @@
 </div>
 </center>
 </div><div class="column" style="width:50%;">
-<h3 id="co-working-mathbfc">Co-working (<span class="math inline">\(\mathbf{C}\)</span>)</h3>
+<h3 id="plays-games-with-mathbfg">Plays Games With (<span class="math inline">\(\mathbf{G}\)</span>)</h3>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
@@ -221,26 +260,65 @@
 <th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left; font-weight: bold;">B</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
 </tr>
 </tbody>
 </table>
@@ -259,30 +337,33 @@
 </center>
 </div></div>
 </section>
-<section id="step-by-step-addition-mathbfh-mathbfc" class="slide level2">
-<h2>Step-by-Step Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>)</h2>
+<section id="step-by-step-addition-mathbfp-mathbfg" class="slide level2">
+<h2>Step-by-Step Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>)</h2>
 <ul>
-<li><strong>Addition (<span class="math inline">\(s_{ij} = h_{ij} + c_{ij}\)</span>)</strong> adds corresponding cells:</li>
+<li><strong>Addition (<span class="math inline">\(s_{ij} = p_{ij} + g_{ij}\)</span>)</strong> adds corresponding cells of each matrix:</li>
+<li>Let’s compute two example cells:
+<ul>
+<li><span class="math inline">\(s_{\text{A, B}} = p_{\text{A, B}} + g_{\text{A, B}} = 1 + 1 = \mathbf{2}\)</span> (Multiplex)</li>
+<li><span class="math inline">\(s_{\text{A, C}} = p_{\text{A, C}} + g_{\text{A, C}} = 1 + 0 = \mathbf{1}\)</span> (Uniplex)</li>
+</ul></li>
 </ul>
 <div class="fragment">
-<p><span class="math display">\[\mathbf{H} + \mathbf{C} = \begin{pmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{pmatrix} + \begin{pmatrix} 0 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 \\ 1 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
-</div>
-<div class="fragment">
-<p><span class="math display">\[\mathbf{H} + \mathbf{C} = \begin{pmatrix} 0+0 &amp; 1+0 &amp; 0+1 \\ 1+0 &amp; 0+0 &amp; 1+1 \\ 0+1 &amp; 1+1 &amp; 0+0 \end{pmatrix} = \begin{pmatrix} 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; \mathbf{2} \\ 1 &amp; \mathbf{2} &amp; 0 \end{pmatrix}\]</span></p>
+<p><span class="math inline">\(\begin{pmatrix} 0 &amp; 1 \\ 1 &amp; 0 \end{pmatrix} + \begin{pmatrix} 0 &amp; 1 \\ 1 &amp; 0 \end{pmatrix} = \begin{pmatrix} 0 &amp; 2 \\ 2 &amp; 0 \end{pmatrix}\)</span></p>
 <ul>
-<li><strong>Interpretation</strong>:
+<li><strong>Sociological Interpretation</strong>:
 <ul>
-<li>Value <strong>2</strong> represents a <strong>multiplex tie</strong> (both hang out and work together).</li>
-<li>Value <strong>1</strong> represents a <strong>uniplex tie</strong> (either hang out or work together, but not both).</li>
+<li>Value <strong>2</strong> represents a <strong>multiplex tie</strong> (connected by <em>both</em> relationships).</li>
+<li>Value <strong>1</strong> represents a <strong>uniplex tie</strong> (connected by <em>exactly one</em> relationship).</li>
+<li>Value <strong>0</strong> represents <strong>no relationship</strong>.</li>
 </ul></li>
 </ul>
 </div>
 </section>
-<section id="visualizing-matrix-addition-mathbfh-mathbfc" class="slide level2">
-<h2>Visualizing Matrix Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>)</h2>
+<section id="visualizing-matrix-addition-mathbfp-mathbfg" class="slide level2">
+<h2>Visualizing Matrix Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>)</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<h3 id="resulting-sum-matrix">Resulting Sum Matrix</h3>
+<h3 id="parties-or-plays-games-with-or-both">Parties or Plays Games With or Both</h3>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
@@ -292,34 +373,73 @@
 <th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">A</td>
-<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
 <td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
 <td style="text-align: center;">1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
-<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">C</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 <ul>
-<li><strong>Red/Blue</strong> = Uniplex bonds.</li>
-<li><strong>Purple</strong> = Multiplex bonds.</li>
+<li><strong>1 (Blue)</strong> = Uniplex bond.</li>
+<li><strong>2 (Purple)</strong> = Multiplex bond.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <center>
@@ -335,30 +455,31 @@
 </center>
 </div></div>
 </section>
-<section id="step-by-step-subtraction-mathbfh---mathbfc" class="slide level2">
-<h2>Step-by-Step Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>)</h2>
+<section id="subtracting-a-number-from-a-matrix-mathbf1---mathbfp" class="slide level2">
+<h2>Subtracting a Number From a Matrix (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>)</h2>
 <ul>
-<li><strong>Absolute Subtraction (<span class="math inline">\(d_{ij} = |h_{ij} - c_{ij}|\)</span>)</strong> isolates <strong>relational disagreement</strong>:</li>
+<li>We can subtract an adjacency matrix from 1 (excluding the diagonal) to find the <strong>graph complement</strong>.</li>
+<li>Subtracting from 1 flips 1s into 0s and 0s into 1s:
+<ul>
+<li><span class="math inline">\(c_{ij} = 1 - p_{ij}\)</span></li>
+</ul></li>
 </ul>
 <div class="fragment">
-<p><span class="math display">\[|\mathbf{H} - \mathbf{C}| = \left| \begin{pmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{pmatrix} - \begin{pmatrix} 0 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 \\ 1 &amp; 1 &amp; 0 \end{pmatrix} \right|\]</span></p>
-</div>
-<div class="fragment">
-<p><span class="math display">\[|\mathbf{H} - \mathbf{C}| = \begin{pmatrix} |0-0| &amp; |1-0| &amp; |0-1| \\ |1-0| &amp; |0-0| &amp; |1-1| \\ |0-1| &amp; |1-1| &amp; |0-0| \end{pmatrix} = \begin{pmatrix} 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; \mathbf{0} \\ 1 &amp; \mathbf{0} &amp; 0 \end{pmatrix}\]</span></p>
+<p><span class="math inline">\(\mathbf{1} - \mathbf{P} = 1 - \begin{pmatrix} 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; 1 \\ 1 &amp; 1 &amp; 0 \end{pmatrix} = \begin{pmatrix} 1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{pmatrix}\)</span></p>
 <ul>
-<li><strong>Symmetric Difference</strong>:
+<li><strong>Sociological Meaning</strong>:
 <ul>
-<li>Value <strong>1</strong> = Connected by <em>exactly one</em> relationship.</li>
-<li>Value <strong>0</strong> = Connected by <em>both</em> (multiplex ties cancel out) or <em>neither</em>.</li>
+<li>The resulting matrix records the <strong>absence</strong> of the original relationship.</li>
+<li>The graph corresponding to this matrix is called the <strong>complement</strong> of the original graph (<em>Does Not Party With</em>).</li>
 </ul></li>
 </ul>
 </div>
 </section>
-<section id="visualizing-subtraction-mathbfh---mathbfc" class="slide level2">
-<h2>Visualizing Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>)</h2>
+<section id="visualizing-graph-complement-mathbf1---mathbfp" class="slide level2">
+<h2>Visualizing Graph Complement (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>)</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<h3 id="uniplex-only-matrix">Uniplex-Only Matrix</h3>
+<h3 id="does-not-party-with">Does Not Party With</h3>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
@@ -368,34 +489,73 @@
 <th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 <ul>
-<li>Multiplex tie between <strong>B and C</strong> is erased.</li>
-<li>Only uniplex green edges remain.</li>
+<li>Holds <span class="math inline">\(1\)</span>s where there was no original tie.</li>
+<li>Diagonal remains blocked.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <center>
@@ -411,30 +571,32 @@
 </center>
 </div></div>
 </section>
-<section id="step-by-step-hadamard-product-mathbfh-circ-mathbfc" class="slide level2">
-<h2>Step-by-Step Hadamard Product (<span class="math inline">\(\mathbf{H} \circ \mathbf{C}\)</span>)</h2>
+<section id="step-by-step-hadamard-product-mathbfp-circ-mathbfg" class="slide level2">
+<h2>Step-by-Step Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>)</h2>
 <ul>
-<li><strong>Hadamard / Dot Product (<span class="math inline">\(p_{ij} = h_{ij} \times c_{ij}\)</span>)</strong> represents <strong>relational intersection</strong>:</li>
+<li><strong>Hadamard / Element-Wise Product (<span class="math inline">\(c_{ij} = p_{ij} \times g_{ij}\)</span>)</strong> represents <strong>relational intersection</strong>:</li>
+<li>Let’s compute two example cells:
+<ul>
+<li><span class="math inline">\(c_{\text{A, B}} = p_{\text{A, B}} \times g_{\text{A, B}} = 1 \times 1 = \mathbf{1}\)</span> (Both active)</li>
+<li><span class="math inline">\(c_{\text{A, C}} = p_{\text{A, C}} \times g_{\text{A, C}} = 1 \times 0 = \mathbf{0}\)</span> (Only one active)</li>
+</ul></li>
 </ul>
 <div class="fragment">
-<p><span class="math display">\[\mathbf{H} \circ \mathbf{C} = \begin{pmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{pmatrix} \circ \begin{pmatrix} 0 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 \\ 1 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
-</div>
-<div class="fragment">
-<p><span class="math display">\[\mathbf{H} \circ \mathbf{C} = \begin{pmatrix} 0 \times 0 &amp; 1 \times 0 &amp; 0 \times 1 \\ 1 \times 0 &amp; 0 \times 0 &amp; 1 \times 1 \\ 0 \times 1 &amp; 1 \times 1 &amp; 0 \times 0 \end{pmatrix} = \begin{pmatrix} 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; \mathbf{1} \\ 0 &amp; \mathbf{1} &amp; 0 \end{pmatrix}\]</span></p>
+<p><span class="math inline">\(\begin{pmatrix} 0 &amp; 1 \\ 1 &amp; 0 \end{pmatrix} \circ \begin{pmatrix} 0 &amp; 1 \\ 1 &amp; 0 \end{pmatrix} = \begin{pmatrix} 0 &amp; 1 \\ 1 &amp; 0 \end{pmatrix}\)</span></p>
 <ul>
 <li><strong>Sociological Meaning</strong>:
 <ul>
-<li>Value <strong>1</strong> <em>only if</em> both <span class="math inline">\(h_{ij} = 1\)</span> and <span class="math inline">\(c_{ij} = 1\)</span> (<span class="math inline">\(1 \times 1 = 1\)</span>).</li>
-<li>Overlap is extracted; all uniplex ties are erased.</li>
+<li>Cell value is <strong>1</strong> <em>only if</em> both <span class="math inline">\(p_{ij} = 1\)</span> and <span class="math inline">\(g_{ij} = 1\)</span>.</li>
+<li>It extracts <strong>multiplex ties</strong> (the overlap/intersection) and erases all uniplex ties.</li>
 </ul></li>
 </ul>
 </div>
 </section>
-<section id="visualizing-the-hadamard-product-mathbfh-circ-mathbfc" class="slide level2">
-<h2>Visualizing the Hadamard Product (<span class="math inline">\(\mathbf{H} \circ \mathbf{C}\)</span>)</h2>
+<section id="visualizing-the-hadamard-product-mathbfp-circ-mathbfg" class="slide level2">
+<h2>Visualizing the Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>)</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<h3 id="multiplex-only-adjacency-matrix">Multiplex-Only Adjacency Matrix</h3>
+<h3 id="parties-and-plays-games-with">Parties and Plays Games With</h3>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
@@ -444,34 +606,73 @@
 <th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left; font-weight: bold;">B</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">C</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 <ul>
-<li>Retains <em>only</em> the shared co-working &amp; hangout tie.</li>
-<li>Network density drops, leaving only the purple edge.</li>
+<li>Retains only the shared ties.</li>
+<li>All uniplex ties are erased, leaving a sparse overlap network.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <center>
@@ -491,8 +692,595 @@
 
 </section></section>
 <section>
-<section id="part-2-conformability-rules" class="title-slide slide level1 center">
-<h1>Part 2: Conformability Rules</h1>
+<section id="part-2-the-matrix-transpose-directed-graphs" class="title-slide slide level1 center">
+<h1>Part 2: The Matrix Transpose &amp; Directed Graphs</h1>
+
+</section>
+<section id="the-matrix-transpose-mathbfat" class="slide level2">
+<h2>The Matrix Transpose (<span class="math inline">\(\mathbf{A}^T\)</span>)</h2>
+<ul>
+<li>The <strong>Transpose</strong> of a matrix <span class="math inline">\(\mathbf{A}\)</span> is the same matrix with its rows and columns flipped:
+<ul>
+<li>Written as <span class="math inline">\(\mathbf{A}^T\)</span> or <span class="math inline">\(\mathbf{A}'\)</span>.</li>
+<li><strong>The Rule</strong>: Row <span class="math inline">\(i\)</span> of the original matrix becomes Column <span class="math inline">\(i\)</span> of the transpose.</li>
+<li><strong>Formally</strong>: <span class="math inline">\(a^T_{ij} = a_{ji}\)</span> for all cells.</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Symmetric vs.&nbsp;Asymmetric Adjacency Matrices</strong>:
+<ul>
+<li>For <strong>undirected graphs</strong>, relationships are reciprocal by definition, so the matrix is symmetric (<span class="math inline">\(\mathbf{A}^T = \mathbf{A}\)</span>).</li>
+<li>For <strong>directed graphs (digraphs)</strong>, ties can be one-way, resulting in an asymmetric matrix (<span class="math inline">\(\mathbf{A}^T \neq \mathbf{A}\)</span>).</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="visualizing-the-matrix-transpose" class="slide level2">
+<h2>Visualizing the Matrix Transpose</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="original-adjacency-matrix-mathbfa">Original Adjacency Matrix (<span class="math inline">\(\mathbf{A}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-12-1.png" width="336"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div><div class="column" style="width:50%;">
+<h3 id="transposed-adjacency-matrix-mathbfat">Transposed Adjacency Matrix (<span class="math inline">\(\mathbf{A}^T\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Row 1 of <span class="math inline">\(\mathbf{A}\)</span> <code>(0, 0, 1, 0, 1, 0)</code> is Column 1 of <span class="math inline">\(\mathbf{A}^T\)</span>.</li>
+<li>Note how the direction of every arrow is reversed in the transpose graph!</li>
+</ul>
+</div></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-3-directed-dyads-the-dyad-census" class="title-slide slide level1 center">
+<h1>Part 3: Directed Dyads &amp; The Dyad Census</h1>
+
+</section>
+<section id="dyads-in-directed-graphs" class="slide level2 scrollable">
+<h2>Dyads in Directed Graphs</h2>
+<ul>
+<li>In a directed graph, any pair of nodes (a <strong>dyad</strong>) can have one of three configurations:
+<ol type="1">
+<li><strong>Mutual (M)</strong>: Both directed edges are present (<span class="math inline">\(i \leftrightarrow j\)</span>).</li>
+<li><strong>Asymmetric (A)</strong>: Only one directed edge is present (<span class="math inline">\(i \rightarrow j\)</span> or <span class="math inline">\(j \rightarrow i\)</span>).</li>
+<li><strong>Null (N)</strong>: Neither directed edge is present (disconnected).</li>
+</ol></li>
+<li>An easy way to remember these three types of dyads is the mnemonic <strong>MAN</strong> (Mutual, Asymmetric, Null).</li>
+</ul>
+<div class="fragment">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-14-1.png" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div>
+</section>
+<section id="the-dyad-census" class="slide level2">
+<h2>The Dyad Census</h2>
+<ul>
+<li>The <strong>Dyad Census</strong> is a count of the total number of Mutuals (<span class="math inline">\(N_M\)</span>), Asymmetrics (<span class="math inline">\(N_A\)</span>), and Nulls (<span class="math inline">\(N_N\)</span>) in a directed graph.</li>
+<li>We can compute these counts systematically using cell-by-cell matrix operations (the Hadamard product and matrix subtraction) on the directed adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> and its transpose <span class="math inline">\(\mathbf{A}^T\)</span>!</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>We will perform these calculations on our 6-node directed reference graph <span class="math inline">\(\mathbf{A}\)</span>:
+<ul>
+<li><span class="math inline">\(N_M\)</span> = number of mutual dyads</li>
+<li><span class="math inline">\(N_A\)</span> = number of asymmetric dyads</li>
+<li><span class="math inline">\(N_N\)</span> = number of null dyads</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="mutual-dyads-matrix-mathbfm-mathbfa-circ-mathbfat" class="slide level2">
+<h2>1. Mutual Dyads Matrix (<span class="math inline">\(\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T\)</span>)</h2>
+<ul>
+<li>Multiplying <span class="math inline">\(\mathbf{A}\)</span> by its transpose <span class="math inline">\(\mathbf{A}^T\)</span> element-wise extracts only mutual dyads where <span class="math inline">\(a_{ij}=1\)</span> and <span class="math inline">\(a_{ji}=1\)</span>:</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="mutuals-matrix-mathbfm">Mutuals Matrix (<span class="math inline">\(\mathbf{M}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Only reciprocal ties are kept (A-C and E-F).</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>Since each mutual dyad contains two directed edges (<span class="math inline">\(M_{ij}=1\)</span> and <span class="math inline">\(M_{ji}=1\)</span>), we sum all cells in <span class="math inline">\(\mathbf{M}\)</span> and divide by two: <span class="math inline">\(N_M = \frac{\sum M_{ij}}{2}\)</span></li>
+</ul>
+<p>. . .</p>
+<ul>
+<li><strong>Calculation</strong>:
+<ul>
+<li>Sum of cells in <span class="math inline">\(\mathbf{M}\)</span> is 4.</li>
+<li><span class="math inline">\(N_M = \frac{4}{2} = \mathbf{2} \text{ mutual dyads}\)</span></li>
+</ul></li>
+</ul>
+</div></div>
+</section>
+<section id="asymmetric-dyads-matrix-mathbfs-mathbfa-circ-mathbf1---mathbfat" class="slide level2">
+<h2>2. Asymmetric Dyads Matrix (<span class="math inline">\(\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T)\)</span>)</h2>
+<ul>
+<li>To isolate unreciprocated ties, we multiply <span class="math inline">\(\mathbf{A}\)</span> by the complement of the transpose (<span class="math inline">\(\mathbf{1} - \mathbf{A}^T\)</span>). This keeps <span class="math inline">\(a_{ij}=1\)</span> only if <span class="math inline">\(a_{ji}=0\)</span>:</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="asymmetrics-matrix-mathbfs">Asymmetrics Matrix (<span class="math inline">\(\mathbf{S}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Retains only unreciprocated outgoing ties.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>Since each asymmetric dyad has exactly one directed edge, the total count <span class="math inline">\(N_A\)</span> is simply the sum of all cells in <span class="math inline">\(\mathbf{S}\)</span>: <span class="math inline">\(N_A = \sum S_{ij}\)</span></li>
+</ul>
+<p>. . .</p>
+<ul>
+<li><strong>Calculation</strong>:
+<ul>
+<li>Sum of cells in <span class="math inline">\(\mathbf{S}\)</span> is 8.</li>
+<li><span class="math inline">\(N_A = \mathbf{8} \text{ asymmetric dyads}\)</span></li>
+</ul></li>
+</ul>
+</div></div>
+</section>
+<section id="null-dyads-matrix-mathbfn-mathbf1---mathbfa-circ-mathbf1---mathbfat" class="slide level2">
+<h2>3. Null Dyads Matrix (<span class="math inline">\(\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T)\)</span>)</h2>
+<ul>
+<li>To isolate disconnected dyads, we multiply the complement of <span class="math inline">\(\mathbf{A}\)</span> by the complement of its transpose. This keeps a cell as 1 only if <span class="math inline">\(a_{ij}=0\)</span> and <span class="math inline">\(a_{ji}=0\)</span>:</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="nulls-matrix-mathbfn">Nulls Matrix (<span class="math inline">\(\mathbf{N}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Retains completely disconnected dyads.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>Since each null dyad has 1s in both directions (<span class="math inline">\(N_{ij}=1\)</span> and <span class="math inline">\(N_{ji}=1\)</span>), we sum all cells in <span class="math inline">\(\mathbf{N}\)</span> and divide by two: <span class="math inline">\(N_N = \frac{\sum N_{ij}}{2}\)</span></li>
+</ul>
+<p>. . .</p>
+<ul>
+<li><strong>Calculation</strong>:
+<ul>
+<li>Sum of cells in <span class="math inline">\(\mathbf{N}\)</span> is 10.</li>
+<li><span class="math inline">\(N_N = \frac{10}{2} = \mathbf{5} \text{ null dyads}\)</span></li>
+</ul></li>
+</ul>
+</div></div>
+</section>
+<section id="the-dyad-census-identity-check" class="slide level2">
+<h2>The Dyad Census Identity Check</h2>
+<ul>
+<li>In any directed graph of size <span class="math inline">\(n\)</span>, the total number of dyads (pairs) is <span class="math inline">\(\frac{n(n-1)}{2}\)</span>.</li>
+<li>For our <span class="math inline">\(n=6\)</span> graph, we must have exactly <span class="math inline">\(\frac{6 \times 5}{2} = 15\)</span> dyads.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Check</strong>:
+<ul>
+<li><span class="math inline">\(N_M + N_A + N_N = 2 + 8 + 5 = \mathbf{15}\)</span></li>
+<li>The mathematics accounts for every single pair in the network perfectly!</li>
+</ul></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><strong>The Matrix Identity</strong>:
+<ul>
+<li>The cell-wise sum of our three matrices always equals the complete graph minus the diagonal (<span class="math inline">\(\mathbf{J} - \mathbf{I}\)</span>):</li>
+<li><span class="math inline">\(\mathbf{M} + \mathbf{S} + \mathbf{N} = \mathbf{J} - \mathbf{I}\)</span></li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="graph-reciprocity-r" class="slide level2">
+<h2>Graph Reciprocity (<span class="math inline">\(R\)</span>)</h2>
+<ul>
+<li><strong>Graph Reciprocity (<span class="math inline">\(R\)</span>)</strong> measures the extent to which a directed graph approximates the ideal of complete reciprocity.</li>
+<li>It is defined as the proportion of connected dyads that are mutual: <span class="math inline">\(R = \frac{N_M}{N_M + N_A}\)</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Calculation</strong>:
+<ul>
+<li>We know <span class="math inline">\(N_M = 2\)</span> and <span class="math inline">\(N_A = 8\)</span>.</li>
+<li><span class="math inline">\(R = \frac{2}{2 + 8} = \frac{2}{10} = \mathbf{0.20}\)</span></li>
+</ul></li>
+<li><strong>Sociological Meaning</strong>:
+<ul>
+<li><strong>20%</strong> of the connected dyads in this network are mutual. This represents a relatively low level of reciprocity!</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-4-conformability-rules" class="title-slide slide level1 center">
+<h1>Part 4: Conformability Rules</h1>
 
 </section>
 <section id="standard-matrix-multiplication-mathbfa-times-mathbfb" class="slide level2">
@@ -558,8 +1346,8 @@
 
 </section></section>
 <section>
-<section id="part-3-step-by-step-multiplication-mechanics" class="title-slide slide level1 center">
-<h1>Part 3: Step-by-Step Multiplication Mechanics</h1>
+<section id="part-5-step-by-step-multiplication-mechanics" class="title-slide slide level1 center">
+<h1>Part 5: Step-by-Step Multiplication Mechanics</h1>
 
 </section>
 <section id="row-by-column-vector-multiplication" class="slide level2">
@@ -641,15 +1429,15 @@
 
 </section></section>
 <section>
-<section id="part-4-dynamic-network-applications" class="title-slide slide level1 center">
-<h1>Part 4: Dynamic Network Applications</h1>
+<section id="part-6-dynamic-network-applications" class="title-slide slide level1 center">
+<h1>Part 6: Dynamic Network Applications</h1>
 
 </section>
 <section id="transpose-multiplication-common-neighbors" class="slide level2">
 <h2>Transpose Multiplication: Common Neighbors</h2>
 <ul>
-<li>If we multiply a network’s adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> by its transpose <span class="math inline">\(\mathbf{A}^T\)</span>: <span class="math display">\[\mathbf{A} \times \mathbf{A}^T = \mathbf{B}\]</span></li>
-<li>Why does this matrix operation reveal structural overlaps?</li>
+<li>If we multiply a network’s adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> by its transpose <span class="math inline">\(\mathbf{A}^T\)</span>: <span class="math inline">\(\mathbf{A} \times \mathbf{A}^T = \mathbf{B}\)</span></li>
+<li>Why does this standard matrix multiplication reveal structural overlaps?</li>
 </ul>
 <div class="fragment">
 <ul>
@@ -661,8 +1449,7 @@
 </ul></li>
 <li><strong>The Off-Diagonal Cells (<span class="math inline">\(b_{ij}\)</span>)</strong>:
 <ul>
-<li>Multiplies Row <span class="math inline">\(i\)</span> (node <span class="math inline">\(i\)</span>’s friendships) by Row <span class="math inline">\(j\)</span> (node <span class="math inline">\(j\)</span>’s friendships).</li>
-<li><strong>Result</strong>: Counts exactly how many <strong>common neighbors</strong> node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span> share!</li>
+<li>Multiplies Row <span class="math inline">\(i\)</span> (node $i</li>
 </ul></li>
 </ul>
 </div>
@@ -670,23 +1457,23 @@
 <section id="tracing-common-neighbors-step-by-step" class="slide level2">
 <h2>Tracing Common Neighbors Step-by-Step</h2>
 <ul>
-<li>Let’s look at the adjacency matrix of a simple 4-node graph:</li>
+<li>Let’s use our 6-node symmetric “Parties With” adjacency matrix <span class="math inline">\(\mathbf{P}\)</span> (<span class="math inline">\(\mathbf{P}^T = \mathbf{P}\)</span>):</li>
 </ul>
 <div class="columns">
 <div class="column" style="width:50%;">
-<h3 id="adjacency-matrix-a">Adjacency Matrix A</h3>
-<p><span class="math display">\[\mathbf{A} = \begin{pmatrix} 0 &amp; \mathbf{1} &amp; 0 &amp; 1 \\ 1 &amp; 0 &amp; 1 &amp; 0 \\ 0 &amp; \mathbf{1} &amp; 0 &amp; 0 \\ 1 &amp; 0 &amp; 0 &amp; 0 \end{pmatrix}\]</span> - Let’s check common neighbors between <strong>node 1 and node 3</strong>.</p>
+<h3 id="adjacency-matrix-mathbfp">Adjacency Matrix <span class="math inline">\(\mathbf{P}\)</span></h3>
+<p><span class="math inline">\(\mathbf{P} = \begin{pmatrix} 0 &amp; \mathbf{1} &amp; 1 &amp; 0 &amp; \mathbf{1} &amp; 0 \\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\ 1 &amp; \mathbf{1} &amp; 0 &amp; 1 &amp; \mathbf{1} &amp; 1 \\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix}\)</span> - Let’s check common neighbors between <strong>node A (Row 1)</strong> and <strong>node C (Col 3)</strong>.</p>
 </div><div class="column" style="width:50%;">
-<h3 id="vector-multiplications">Vector Multiplications</h3>
+<h3 id="vector-multiplication">Vector Multiplication</h3>
 <ul>
-<li><strong>Row 1 (Node 1)</strong>: <span class="math inline">\(\color{red}{\{0, 1, 0, 1\}}\)</span></li>
-<li><strong>Col 3 (Node 3)</strong>: <span class="math inline">\(\color{blue}{\{0, 1, 0, 0\}}\)</span></li>
+<li><strong>Row A (Node A)</strong>: <span class="math inline">\(\color{red}{\{0, 1, 1, 0, 1, 0\}}\)</span></li>
+<li><strong>Column C (Node C)</strong>: <span class="math inline">\(\color{blue}{\{1, 1, 0, 1, 1, 1\}}\)</span></li>
 </ul>
 <h3 id="calculation-4">Calculation</h3>
-<p><span class="math display">\[\color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{1} + \color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{0} = \mathbf{1}\]</span></p>
+<p><span class="math inline">\((\color{red}{0}\times\color{blue}{1}) + (\color{red}{1}\times\color{blue}{1}) + (\color{red}{1}\times\color{blue}{0}) + (\color{red}{0}\times\color{blue}{1}) + (\color{red}{1}\times\color{blue}{1}) + (\color{red}{0}\times\color{blue}{1}) = \mathbf{2}\)</span></p>
 <ul>
-<li>Only node 2 (<span class="math inline">\(1 \times 1 = 1\)</span>) is shared.</li>
-<li><strong>Takeaway</strong>: Node 2 is the single common neighbor shared by 1 and 3.</li>
+<li><strong>Result</strong>: Nodes A and C share exactly <strong>2</strong> common neighbors.</li>
+<li>Tracing the 1s, we see the shared neighbors are <strong>B</strong> and <strong>E</strong>!</li>
 </ul>
 </div></div>
 </section>
@@ -700,7 +1487,7 @@
 </ul></li>
 <li>In network science, the entries of the <span class="math inline">\(n^{th}\)</span> power of an adjacency matrix have a precise graph-theoretic meaning:
 <ul>
-<li><strong>Off-Diagonal Cells (<span class="math inline">\(a^{n}_{ij}\)</span>)</strong>: Record the exact number of <strong>indirect connections (walks) of length <span class="math inline">\(n\)</span></strong> connecting node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span>.</li>
+<li><strong>Off-Diagonal Cells (<span class="math inline">\(a^{n}_{ij}\)</span>)</strong>: Record the exact number of <strong>walks of length <span class="math inline">\(n\)</span></strong> connecting node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span>.</li>
 <li><strong>Diagonal Cells (<span class="math inline">\(a^{n}_{ii}\)</span>)</strong>: Record the exact number of <strong>cycles of length <span class="math inline">\(n\)</span></strong> that start and end at node <span class="math inline">\(i\)</span>.</li>
 </ul></li>
 </ul>
@@ -708,50 +1495,245 @@
 <section id="walks-of-length-2-mathbfa2" class="slide level2">
 <h2>Walks of Length 2: <span class="math inline">\(\mathbf{A}^2\)</span></h2>
 <ul>
-<li><strong>The Squared Adjacency Matrix (<span class="math inline">\(\mathbf{A}^2\)</span>)</strong>:
-<ul>
-<li><strong>Off-diagonals</strong> represent the number of <strong>walks of length 2</strong> between nodes.</li>
-<li><strong>Diagonals</strong> represent the number of walks of length 2 starting and ending at the same node.</li>
-<li>This is equal to the <strong>node degree</strong> (edges incident to the node)!</li>
-</ul></li>
+<li>Let’s use our 5-node undirected reference graph (Slides 109-119):</li>
 </ul>
-<div class="fragment">
-<h3 id="simple-trace-example">Simple Trace Example</h3>
-<ul>
-<li>To go from node <span class="math inline">\(i \to k \to j\)</span> of length 2:
-<ul>
-<li>Node <span class="math inline">\(k\)</span> must be connected to <em>both</em> <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</li>
-<li>Thus, walks of length 2 between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is equivalent to counting their <strong>common neighbors</strong>!</li>
-</ul></li>
-</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="adjacency-matrix-mathbfa">Adjacency Matrix (<span class="math inline">\(\mathbf{A}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">a</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">b</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">c</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">d</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">e</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">a</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">b</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">c</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">d</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">e</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
 </div>
+</div>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-19-1.png" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div><div class="column" style="width:50%;">
+<h3 id="squared-matrix-mathbfa2">Squared Matrix (<span class="math inline">\(\mathbf{A}^2\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">a</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">b</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">c</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">d</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">e</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">a</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">b</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">c</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">d</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">e</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li><strong>Diagonals</strong> equal node degrees: a (1), b (2), c (3), d (2), e (2).</li>
+<li><strong>Off-diagonals</strong> count walks of length 2 (common neighbors). For example, <span class="math inline">\(a^2_{a,c} = 1\)</span>, meaning exactly one length 2 walk connects a and c.</li>
+</ul>
+</div></div>
 </section>
 <section id="walks-of-length-3-mathbfa3" class="slide level2">
 <h2>Walks of Length 3: <span class="math inline">\(\mathbf{A}^3\)</span></h2>
 <ul>
-<li><strong>The Cubed Adjacency Matrix (<span class="math inline">\(\mathbf{A}^3\)</span>)</strong>:
+<li>Now, let’s examine the cubed adjacency matrix (<span class="math inline">\(\mathbf{A}^3\)</span>):</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="cubed-matrix-mathbfa3">Cubed Matrix (<span class="math inline">\(\mathbf{A}^3\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">a</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">b</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">c</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">d</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">e</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">a</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">b</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">c</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">d</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">e</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <ul>
-<li><strong>Off-diagonals</strong> represent the number of <strong>walks of length 3</strong> between nodes.</li>
-<li><strong>Diagonals</strong> represent cycles of length 3 (triangles).</li>
-<li>A cycle of length 3 represents a <strong>clique of size 3</strong>.</li>
-<li>Since each triangle can be traversed in two directions (clockwise and counterclockwise), the diagonal cell divided by 2 gives the exact <strong>number of triangles (cliques of size 3)</strong> that node <span class="math inline">\(i\)</span> belongs to!</li>
-<li><span class="math display">\[\text{Triangles}(i) = \frac{a^3_{ii}}{2}\]</span></li>
+<li><strong>Off-diagonals</strong> represent length 3 walks.</li>
+<li><strong>Diagonals</strong> count cycles of length 3 (triangles).</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>A cycle of length 3 is a <strong>triangle</strong>.</li>
+<li>Since each triangle can be traversed in two directions (clockwise &amp; counterclockwise), we can find the exact number of triangles containing node <span class="math inline">\(i\)</span> as: <span class="math inline">\(\text{Triangles}(i) = \frac{a^3_{ii}}{2}\)</span></li>
+</ul>
+<p>. . .</p>
+<ul>
+<li><strong>Calculation</strong>:
+<ul>
+<li>Only c, d, and e have non-zero diagonals (<span class="math inline">\(2\)</span>).</li>
+<li>Each belongs to <span class="math inline">\(\frac{2}{2} = \mathbf{1}\)</span> triangle ({c, d, e}).</li>
+<li>Nodes a and b have diagonal 0 (they form no triangles).</li>
 </ul></li>
 </ul>
+</div></div>
 </section>
 <section id="walks-of-length-3-weighted-graph-representation" class="slide level2">
 <h2>Walks of Length 3: Weighted Graph Representation</h2>
 <ul>
-<li>Plotting the network with edge sizes and color intensities proportional to the entries of <span class="math inline">\(\mathbf{A}^3\)</span> reveals distinct hangout cliques sharing multiple indirect pathways:</li>
+<li>Plotting the network with edge sizes and color intensities proportional to the entries of <span class="math inline">\(\mathbf{A}^3\)</span> reveals distinct clique structures sharing multiple indirect pathways:</li>
 </ul>
 
-<img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-22-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
 <section class="slide level2">
 
 </section></section>
 <section>
-<section id="part-5-summary-conclusion" class="title-slide slide level1 center">
-<h1>Part 5: Summary &amp; Conclusion</h1>
+<section id="part-7-summary-conclusion" class="title-slide slide level1 center">
+<h1>Part 7: Summary &amp; Conclusion</h1>
 
 </section>
 <section id="summary-of-matrix-algebraic-power" class="slide level2">
@@ -759,21 +1741,27 @@
 <ul>
 <li><strong>Basic operations combine relationships</strong>:
 <ul>
-<li>Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>) counts overall tie volume.</li>
-<li>Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>) highlights relational disagreements.</li>
-<li>Hadamard Product (<span class="math inline">\(\mathbf{H} \circ \mathbf{C}\)</span>) extracts multiplex intersections.</li>
+<li>Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>) counts uniplex vs.&nbsp;multiplex relationships.</li>
+<li>Subtraction from 1 (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>) flips relations to yield the graph complement (<em>Does Not Party With</em>).</li>
+<li>Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>) extracts multiplex overlaps.</li>
 </ul></li>
-<li><strong>Conformability dictates multiplication</strong>:
+<li><strong>The Matrix Transpose (<span class="math inline">\(\mathbf{A}^T\)</span>)</strong>:
 <ul>
-<li>Operations are only defined if inner dimensions match.</li>
+<li>Flips rows and columns; essential for analyzing directed relations.</li>
 </ul></li>
-<li><strong>Multiplying by Transpose reveals common friends</strong>:
+<li><strong>The Directed Dyad Census</strong>:
+<ul>
+<li>We use <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{A}^T\)</span> cell-by-cell to compute Mutuals (<span class="math inline">\(M\)</span>), Asymmetrics (<span class="math inline">\(S\)</span>), and Nulls (<span class="math inline">\(N\)</span>), spelling the <strong>MAN</strong> census.</li>
+<li>Graph Reciprocity is computed as <span class="math inline">\(R = \frac{N_M}{N_M + N_A}\)</span>.</li>
+</ul></li>
+<li><strong>Conformability dictates standard multiplication</strong>:
+<ul>
+<li>Inner dimensions must be equal.</li>
+</ul></li>
+<li><strong>Standard multiplication and powers reveal structures</strong>:
 <ul>
 <li><span class="math inline">\(\mathbf{A} \times \mathbf{A}^T\)</span> computes common neighbors (off-diagonals) and degrees (diagonals).</li>
-</ul></li>
-<li><strong>Matrix Powers map indirect paths</strong>:
-<ul>
-<li><span class="math inline">\(\mathbf{A}^n\)</span> enumerates walks of length <span class="math inline">\(n\)</span>. <span class="math inline">\(\mathbf{A}^2\)</span> diagonals are degrees; <span class="math inline">\(\mathbf{A}^3\)</span> diagonals are twice the number of triangles (cliques).</li>
+<li><span class="math inline">\(\mathbf{A}^n\)</span> maps indirect walks of length <span class="math inline">\(n\)</span>. <span class="math inline">\(\mathbf{A}^2\)</span> diagonals are degrees; <span class="math inline">\(\mathbf{A}^3\)</span> diagonals are twice the number of triangles.</li>
 </ul></li>
 </ul>
 

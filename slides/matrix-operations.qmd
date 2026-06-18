@@ -23,43 +23,90 @@ library(kableExtra)
 library(expm)
 library(patchwork)
 
-# Setup simple 3x3 toy networks for step-by-step builds
-# Node set: A, B, C
-# H (Hanging out): A-B, B-C
-# C (Co-working): B-C, A-C
+# Set seed for reproducible layout of 6-node graphs
+set.seed(444)
 
-set.seed(111)
-gr_h <- tbl_graph(
-  nodes = data.frame(name = c("A", "B", "C")),
-  edges = data.frame(from = c(1, 2), to = c(2, 3)),
-  directed = FALSE
-)
+# Define exact 6x6 symmetric adjacency matrices from the Google Slides (Slide 10)
+# Parties With (P)
+P <- matrix(c(
+  0, 1, 1, 0, 1, 0,
+  1, 0, 1, 1, 0, 0,
+  1, 1, 0, 1, 1, 1,
+  0, 1, 1, 0, 1, 0,
+  1, 0, 1, 1, 0, 1,
+  0, 0, 1, 0, 1, 0
+), nrow = 6, byrow = TRUE, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 
-gr_c <- tbl_graph(
-  nodes = data.frame(name = c("A", "B", "C")),
-  edges = data.frame(from = c(2, 1), to = c(3, 3)),
-  directed = FALSE
-)
+# Plays Games With (G)
+G <- matrix(c(
+  0, 1, 0, 0, 1, 1,
+  1, 0, 1, 0, 0, 0,
+  0, 1, 0, 1, 0, 0,
+  0, 0, 1, 0, 1, 1,
+  1, 0, 0, 1, 0, 1,
+  1, 0, 0, 1, 1, 0
+), nrow = 6, byrow = TRUE, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 
-# Adjacency Matrices
-H <- as.matrix(as_adjacency_matrix(gr_h))
-C <- as.matrix(as_adjacency_matrix(gr_c))
+# Create tidygraph objects from these matrices
+gr_p <- as_tbl_graph(graph_from_adjacency_matrix(P, mode = "undirected"))
+gr_g <- as_tbl_graph(graph_from_adjacency_matrix(G, mode = "undirected"))
 
-# Simple coordinates for 3 nodes in a triangle
-l_coords <- matrix(c(0, 1, -1, -1, 1, -1), ncol = 2, byrow = TRUE)
+# Define a directed adjacency matrix A_dir for the Transpose and Dyad Census (Slide 21 / 38)
+A_dir <- matrix(c(
+  0, 0, 1, 0, 1, 0,
+  1, 0, 1, 1, 0, 0,
+  1, 0, 0, 1, 1, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 1, 0, 1,
+  0, 0, 0, 1, 1, 0
+), nrow = 6, byrow = TRUE, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 
-p_h <- ggraph(gr_h, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+gr_adir <- as_tbl_graph(graph_from_adjacency_matrix(A_dir, mode = "directed"))
+
+# Define 5-node undirected matrix for Matrix Powers (Slide 109)
+A_undir_5 <- matrix(c(
+  0, 1, 0, 0, 0,
+  1, 0, 1, 0, 0,
+  0, 1, 0, 1, 1,
+  0, 0, 1, 0, 1,
+  0, 0, 1, 1, 0
+), nrow = 5, byrow = TRUE, dimnames = list(letters[1:5], letters[1:5]))
+
+gr_undir_5 <- as_tbl_graph(graph_from_adjacency_matrix(A_undir_5, mode = "undirected"))
+
+# Circular layout coordinates for 6 nodes
+l_coords_6 <- matrix(c(
+  0, 1,
+  0.866, 0.5,
+  0.866, -0.5,
+  0, -1,
+  -0.866, -0.5,
+  -0.866, 0.5
+), ncol = 2, byrow = TRUE)
+
+# Manual coordinates for 5-node house-kite graph (Slide 109)
+# Node order: a, b, c, d, e
+l_coords_5 <- matrix(c(
+  -1.5, 0,    # a
+  -0.5, 0,    # b
+  0.5, 0,     # c
+  1.5, 0.7,   # d
+  1.5, -0.7   # e
+), ncol = 2, byrow = TRUE)
+
+# Plots for Parties With (P) and Plays Games With (G)
+p_p <- ggraph(gr_p, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(color = "steelblue", width = 2.0) +
   geom_node_point(size = 20, color = "tan2") +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-  labs(title = "Hanging Out (H)") +
+  labs(title = "Parties With (P)") +
   theme_graph() + theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
 
-p_c <- ggraph(gr_c, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+p_g <- ggraph(gr_g, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(color = "firebrick", width = 2.0) +
   geom_node_point(size = 20, color = "tan2") +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
-  labs(title = "Co-working (C)") +
+  labs(title = "Plays Games With (G)") +
   theme_graph() + theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
 ```
 
@@ -69,23 +116,26 @@ p_c <- ggraph(gr_c, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
 
 ## Combining Social Relations
 
-- In social network analysis, we often record **multiple types of relationships** for the same set of nodes (e.g., *Hanging Out* vs. *Co-working*).
+- In social network analysis, we often record **multiple types of relationships** for the same set of nodes (e.g., *Parties With* vs. *Plays Games With*).
 - How do we combine, subtract, or intersect these overlapping structures?
 - We use **Basic Matrix Operations** performed cell-by-cell on adjacency matrices of the same dimensions:
-  1. **Matrix Addition ($\mathbf{H} + \mathbf{C}$)**: Measures overall relationship volume.
-  2. **Matrix Subtraction ($|\mathbf{H} - \mathbf{C}|$)**: Isolates relational disagreements.
-  3. **Hadamard Product ($\mathbf{H} \circ \mathbf{C}$)**: Extracts multiplex overlap.
+  1. **Matrix Addition ($\mathbf{P} + \mathbf{G}$)**: Measures overall relationship volume (uniplex vs. multiplex).
+  2. **Subtracting from a Matrix ($\mathbf{1} - \mathbf{P}$)**: Flips ties to find the **graph complement** (*Does Not Party With*).
+  3. **Hadamard Product ($\mathbf{P} \circ \mathbf{G}$)**: Extracts multiplex overlap (*Parties and Plays Games With*).
 
 ---
 
-## Adjacency Matrices: $\mathbf{H}$ and $\mathbf{C}$
+## Adjacency Matrices: $\mathbf{P}$ and $\mathbf{G}$
 
 ::: {.columns}
 ::: {.column width="50%"}
-### Hanging Out ($\mathbf{H}$)
+### Parties With ($\mathbf{P}$)
 ```{r}
 #| echo: false
-kbl(H, format = "html", align = "c") %>% 
+options(knitr.kable.NA = '--')
+P_display <- P
+diag(P_display) <- NA
+kbl(P_display, format = "html", align = "c") %>% 
   column_spec(1, bold = TRUE) %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
@@ -94,16 +144,18 @@ kbl(H, format = "html", align = "c") %>%
 #| echo: false
 #| fig-height: 3.5
 #| fig-width: 3.5
-p_h
+p_p
 ```
 </center>
 :::
 
 ::: {.column width="50%"}
-### Co-working ($\mathbf{C}$)
+### Plays Games With ($\mathbf{G}$)
 ```{r}
 #| echo: false
-kbl(C, format = "html", align = "c") %>% 
+G_display <- G
+diag(G_display) <- NA
+kbl(G_display, format = "html", align = "c") %>% 
   column_spec(1, bold = TRUE) %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
@@ -112,7 +164,7 @@ kbl(C, format = "html", align = "c") %>%
 #| echo: false
 #| fig-height: 3.5
 #| fig-width: 3.5
-p_c
+p_g
 ```
 </center>
 :::
@@ -120,37 +172,39 @@ p_c
 
 ---
 
-## Step-by-Step Addition ($\mathbf{H} + \mathbf{C}$)
+## Step-by-Step Addition ($\mathbf{P} + \mathbf{G}$)
 
-- **Addition ($s_{ij} = h_{ij} + c_{ij}$)** adds corresponding cells:
+- **Addition ($s_{ij} = p_{ij} + g_{ij}$)** adds corresponding cells of each matrix:
+- Let's compute two example cells:
+  - $s_{\text{A, B}} = p_{\text{A, B}} + g_{\text{A, B}} = 1 + 1 = \mathbf{2}$ (Multiplex)
+  - $s_{\text{A, C}} = p_{\text{A, C}} + g_{\text{A, C}} = 1 + 0 = \mathbf{1}$ (Uniplex)
 
 . . .
 
-$$\mathbf{H} + \mathbf{C} = \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix} + \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 0 \end{pmatrix}$$
+$\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix} + \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix} = \begin{pmatrix} 0 & 2 \\ 2 & 0 \end{pmatrix}$
 
-. . .
-
-$$\mathbf{H} + \mathbf{C} = \begin{pmatrix} 0+0 & 1+0 & 0+1 \\ 1+0 & 0+0 & 1+1 \\ 0+1 & 1+1 & 0+0 \end{pmatrix} = \begin{pmatrix} 0 & 1 & 1 \\ 1 & 0 & \mathbf{2} \\ 1 & \mathbf{2} & 0 \end{pmatrix}$$
-
-- **Interpretation**: 
-  - Value **2** represents a **multiplex tie** (both hang out and work together).
-  - Value **1** represents a **uniplex tie** (either hang out or work together, but not both).
+- **Sociological Interpretation**: 
+  - Value **2** represents a **multiplex tie** (connected by *both* relationships).
+  - Value **1** represents a **uniplex tie** (connected by *exactly one* relationship).
+  - Value **0** represents **no relationship**.
 
 ---
 
-## Visualizing Matrix Addition ($\mathbf{H} + \mathbf{C}$)
+## Visualizing Matrix Addition ($\mathbf{P} + \mathbf{G}$)
 
 ::: {.columns}
 ::: {.column width="50%"}
-### Resulting Sum Matrix
+### Parties or Plays Games With or Both
 ```{r}
 #| echo: false
-kbl(H + C, format = "html", align = "c") %>% 
+P_plus_G <- P + G
+diag(P_plus_G) <- NA
+kbl(P_plus_G, format = "html", align = "c") %>% 
   column_spec(1, bold = TRUE) %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
-- **Red/Blue** = Uniplex bonds.
-- **Purple** = Multiplex bonds.
+- **1 (Blue)** = Uniplex bond.
+- **2 (Purple)** = Multiplex bond.
 :::
 
 ::: {.column width="50%"}
@@ -159,8 +213,8 @@ kbl(H + C, format = "html", align = "c") %>%
 #| echo: false
 #| fig-height: 4.5
 #| fig-width: 4.5
-gr_sum <- graph_from_adjacency_matrix(H + C, mode = "undirected", weighted = TRUE)
-ggraph(gr_sum, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+gr_sum <- graph_from_adjacency_matrix(P + G, mode = "undirected", weighted = TRUE)
+ggraph(gr_sum, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(aes(color = as.factor(weight), edge_width = weight*1.5)) +
   geom_node_point(size = 20, color = "tan2") +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
@@ -173,37 +227,37 @@ ggraph(gr_sum, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
 
 ---
 
-## Step-by-Step Subtraction ($|\mathbf{H} - \mathbf{C}|$)
+## Subtracting a Number From a Matrix ($\mathbf{1} - \mathbf{P}$)
 
-- **Absolute Subtraction ($d_{ij} = |h_{ij} - c_{ij}|$)** isolates **relational disagreement**:
-
-. . .
-
-$$|\mathbf{H} - \mathbf{C}| = \left| \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix} - \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 0 \end{pmatrix} \right|$$
+- We can subtract an adjacency matrix from 1 (excluding the diagonal) to find the **graph complement**.
+- Subtracting from 1 flips 1s into 0s and 0s into 1s:
+  - $c_{ij} = 1 - p_{ij}$
 
 . . .
 
-$$|\mathbf{H} - \mathbf{C}| = \begin{pmatrix} |0-0| & |1-0| & |0-1| \\ |1-0| & |0-0| & |1-1| \\ |0-1| & |1-1| & |0-0| \end{pmatrix} = \begin{pmatrix} 0 & 1 & 1 \\ 1 & 0 & \mathbf{0} \\ 1 & \mathbf{0} & 0 \end{pmatrix}$$
+$\mathbf{1} - \mathbf{P} = 1 - \begin{pmatrix} 0 & 1 & 1 \\ 1 & 0 & 1 \\ 1 & 1 & 0 \end{pmatrix} = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$
 
-- **Symmetric Difference**:
-  - Value **1** = Connected by *exactly one* relationship.
-  - Value **0** = Connected by *both* (multiplex ties cancel out) or *neither*.
+- **Sociological Meaning**:
+  - The resulting matrix records the **absence** of the original relationship.
+  - The graph corresponding to this matrix is called the **complement** of the original graph (*Does Not Party With*).
 
 ---
 
-## Visualizing Subtraction ($|\mathbf{H} - \mathbf{C}|$)
+## Visualizing Graph Complement ($\mathbf{1} - \mathbf{P}$)
 
 ::: {.columns}
 ::: {.column width="50%"}
-### Uniplex-Only Matrix
+### Does Not Party With
 ```{r}
 #| echo: false
-kbl(abs(H - C), format = "html", align = "c") %>% 
+P_comp <- 1 - P
+diag(P_comp) <- NA
+kbl(P_comp, format = "html", align = "c") %>% 
   column_spec(1, bold = TRUE) %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
-- Multiplex tie between **B and C** is erased.
-- Only uniplex green edges remain.
+- Holds $1$s where there was no original tie.
+- Diagonal remains blocked.
 :::
 
 ::: {.column width="50%"}
@@ -212,8 +266,8 @@ kbl(abs(H - C), format = "html", align = "c") %>%
 #| echo: false
 #| fig-height: 4.5
 #| fig-width: 4.5
-gr_sub <- graph_from_adjacency_matrix(abs(H - C), mode = "undirected")
-ggraph(gr_sub, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+gr_comp <- graph_from_adjacency_matrix(1 - P, mode = "undirected", diag = FALSE)
+ggraph(gr_comp, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(color = "forestgreen", width = 2.0) +
   geom_node_point(size = 20, color = "tan2") +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
@@ -225,37 +279,38 @@ ggraph(gr_sub, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
 
 ---
 
-## Step-by-Step Hadamard Product ($\mathbf{H} \circ \mathbf{C}$)
+## Step-by-Step Hadamard Product ($\mathbf{P} \circ \mathbf{G}$)
 
-- **Hadamard / Dot Product ($p_{ij} = h_{ij} \times c_{ij}$)** represents **relational intersection**:
+- **Hadamard / Element-Wise Product ($c_{ij} = p_{ij} \times g_{ij}$)** represents **relational intersection**:
+- Let's compute two example cells:
+  - $c_{\text{A, B}} = p_{\text{A, B}} \times g_{\text{A, B}} = 1 \times 1 = \mathbf{1}$ (Both active)
+  - $c_{\text{A, C}} = p_{\text{A, C}} \times g_{\text{A, C}} = 1 \times 0 = \mathbf{0}$ (Only one active)
 
 . . .
 
-$$\mathbf{H} \circ \mathbf{C} = \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix} \circ \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 0 \end{pmatrix}$$
-
-. . .
-
-$$\mathbf{H} \circ \mathbf{C} = \begin{pmatrix} 0 \times 0 & 1 \times 0 & 0 \times 1 \\ 1 \times 0 & 0 \times 0 & 1 \times 1 \\ 0 \times 1 & 1 \times 1 & 0 \times 0 \end{pmatrix} = \begin{pmatrix} 0 & 0 & 0 \\ 0 & 0 & \mathbf{1} \\ 0 & \mathbf{1} & 0 \end{pmatrix}$$
+$\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix} \circ \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix} = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}$
 
 - **Sociological Meaning**:
-  - Value **1** *only if* both $h_{ij} = 1$ and $c_{ij} = 1$ ($1 \times 1 = 1$).
-  - Overlap is extracted; all uniplex ties are erased.
+  - Cell value is **1** *only if* both $p_{ij} = 1$ and $g_{ij} = 1$.
+  - It extracts **multiplex ties** (the overlap/intersection) and erases all uniplex ties.
 
 ---
 
-## Visualizing the Hadamard Product ($\mathbf{H} \circ \mathbf{C}$)
+## Visualizing the Hadamard Product ($\mathbf{P} \circ \mathbf{G}$)
 
 ::: {.columns}
 ::: {.column width="50%"}
-### Multiplex-Only Adjacency Matrix
+### Parties and Plays Games With
 ```{r}
 #| echo: false
-kbl(H * C, format = "html", align = "c") %>% 
+P_dot_G <- P * G
+diag(P_dot_G) <- NA
+kbl(P_dot_G, format = "html", align = "c") %>% 
   column_spec(1, bold = TRUE) %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
-- Retains *only* the shared co-working & hangout tie.
-- Network density drops, leaving only the purple edge.
+- Retains only the shared ties.
+- All uniplex ties are erased, leaving a sparse overlap network.
 :::
 
 ::: {.column width="50%"}
@@ -264,8 +319,8 @@ kbl(H * C, format = "html", align = "c") %>%
 #| echo: false
 #| fig-height: 4.5
 #| fig-width: 4.5
-gr_dot <- graph_from_adjacency_matrix(H * C, mode = "undirected")
-ggraph(gr_dot, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+gr_dot <- graph_from_adjacency_matrix(P * G, mode = "undirected")
+ggraph(gr_dot, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(color = "purple", width = 2.5) +
   geom_node_point(size = 20, color = "tan2") +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
@@ -277,7 +332,269 @@ ggraph(gr_dot, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
 
 ---
 
-# Part 2: Conformability Rules
+# Part 2: The Matrix Transpose & Directed Graphs
+
+---
+
+## The Matrix Transpose ($\mathbf{A}^T$)
+
+- The **Transpose** of a matrix $\mathbf{A}$ is the same matrix with its rows and columns flipped:
+  - Written as $\mathbf{A}^T$ or $\mathbf{A}'$.
+  - **The Rule**: Row $i$ of the original matrix becomes Column $i$ of the transpose.
+  - **Formally**: $a^T_{ij} = a_{ji}$ for all cells.
+
+. . .
+
+- **Symmetric vs. Asymmetric Adjacency Matrices**:
+  - For **undirected graphs**, relationships are reciprocal by definition, so the matrix is symmetric ($\mathbf{A}^T = \mathbf{A}$).
+  - For **directed graphs (digraphs)**, ties can be one-way, resulting in an asymmetric matrix ($\mathbf{A}^T \neq \mathbf{A}$).
+
+---
+
+## Visualizing the Matrix Transpose
+
+::: {.columns}
+::: {.column width="50%"}
+### Original Adjacency Matrix ($\mathbf{A}$)
+```{r}
+#| echo: false
+A_disp <- A_dir
+diag(A_disp) <- NA
+kbl(A_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.5
+#| fig-width: 3.5
+# Create directed graph layout for A
+p_adir <- ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
+  geom_edge_link(color = "steelblue", width = 1.5,
+                 arrow = arrow(length = unit(4, 'mm')),
+                 end_cap = circle(6, 'mm')) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+p_adir
+```
+</center>
+:::
+
+::: {.column width="50%"}
+### Transposed Adjacency Matrix ($\mathbf{A}^T$)
+```{r}
+#| echo: false
+AT_disp <- t(A_dir)
+diag(AT_disp) <- NA
+kbl(AT_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- Row 1 of $\mathbf{A}$ `(0, 0, 1, 0, 1, 0)` is Column 1 of $\mathbf{A}^T$.
+- Note how the direction of every arrow is reversed in the transpose graph!
+:::
+:::
+
+---
+
+# Part 3: Directed Dyads & The Dyad Census
+
+---
+
+## Dyads in Directed Graphs
+
+- In a directed graph, any pair of nodes (a **dyad**) can have one of three configurations:
+  1. **Mutual (M)**: Both directed edges are present ($i \leftrightarrow j$).
+  2. **Asymmetric (A)**: Only one directed edge is present ($i \rightarrow j$ or $j \rightarrow i$).
+  3. **Null (N)**: Neither directed edge is present (disconnected).
+- An easy way to remember these three types of dyads is the mnemonic **MAN** (Mutual, Asymmetric, Null).
+
+. . .
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 2.2
+#| fig-width: 8
+# Create simple 3 dyads representation
+gr_m <- tbl_graph(nodes = data.frame(name = c("B", "E")), edges = data.frame(from = c(1, 2), to = c(2, 1)), directed = TRUE)
+gr_a <- tbl_graph(nodes = data.frame(name = c("C", "E")), edges = data.frame(from = c(1), to = c(2)), directed = TRUE)
+gr_n <- tbl_graph(nodes = data.frame(name = c("A", "E")), edges = data.frame(from = numeric(0), to = numeric(0)), directed = TRUE)
+
+p1 <- ggraph(gr_m, layout = "linear") +
+  geom_edge_link(color = "steelblue", width = 1.5, arrow = arrow(length = unit(3, 'mm')), end_cap = circle(4, 'mm')) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  labs(title = "Mutual (M)") + theme_graph() + theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+
+p2 <- ggraph(gr_a, layout = "linear") +
+  geom_edge_link(color = "steelblue", width = 1.5, arrow = arrow(length = unit(3, 'mm')), end_cap = circle(4, 'mm')) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  labs(title = "Asymmetric (A)") + theme_graph() + theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+
+p3 <- ggraph(gr_n, layout = "linear") +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  labs(title = "Null (N)") + theme_graph() + theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+
+p1 + p2 + p3
+```
+</center>
+
+---
+
+## The Dyad Census
+
+- The **Dyad Census** is a count of the total number of Mutuals ($N_M$), Asymmetrics ($N_A$), and Nulls ($N_N$) in a directed graph.
+- We can compute these counts systematically using cell-by-cell matrix operations (the Hadamard product and matrix subtraction) on the directed adjacency matrix $\mathbf{A}$ and its transpose $\mathbf{A}^T$!
+
+. . .
+
+- We will perform these calculations on our 6-node directed reference graph $\mathbf{A}$:
+  - $N_M$ = number of mutual dyads
+  - $N_A$ = number of asymmetric dyads
+  - $N_N$ = number of null dyads
+
+---
+
+## 1. Mutual Dyads Matrix ($\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T$)
+
+- Multiplying $\mathbf{A}$ by its transpose $\mathbf{A}^T$ element-wise extracts only mutual dyads where $a_{ij}=1$ and $a_{ji}=1$:
+
+::: {.columns}
+::: {.column width="50%"}
+### Mutuals Matrix ($\mathbf{M}$)
+```{r}
+#| echo: false
+M <- A_dir * t(A_dir)
+M_disp <- M
+diag(M_disp) <- NA
+kbl(M_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- Only reciprocal ties are kept (A-C and E-F).
+:::
+
+::: {.column width="50%"}
+- Since each mutual dyad contains two directed edges ($M_{ij}=1$ and $M_{ji}=1$), we sum all cells in $\mathbf{M}$ and divide by two:
+  $N_M = \frac{\sum M_{ij}}{2}$
+
+. . .
+
+- **Calculation**:
+  - Sum of cells in $\mathbf{M}$ is 4.
+  - $N_M = \frac{4}{2} = \mathbf{2} \text{ mutual dyads}$
+:::
+:::
+
+---
+
+## 2. Asymmetric Dyads Matrix ($\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T)$)
+
+- To isolate unreciprocated ties, we multiply $\mathbf{A}$ by the complement of the transpose ($\mathbf{1} - \mathbf{A}^T$). This keeps $a_{ij}=1$ only if $a_{ji}=0$:
+
+::: {.columns}
+::: {.column width="50%"}
+### Asymmetrics Matrix ($\mathbf{S}$)
+```{r}
+#| echo: false
+S <- A_dir * (1 - t(A_dir))
+S_disp <- S
+diag(S_disp) <- NA
+kbl(S_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- Retains only unreciprocated outgoing ties.
+:::
+
+::: {.column width="50%"}
+- Since each asymmetric dyad has exactly one directed edge, the total count $N_A$ is simply the sum of all cells in $\mathbf{S}$:
+  $N_A = \sum S_{ij}$
+
+. . .
+
+- **Calculation**:
+  - Sum of cells in $\mathbf{S}$ is 8.
+  - $N_A = \mathbf{8} \text{ asymmetric dyads}$
+:::
+:::
+
+---
+
+## 3. Null Dyads Matrix ($\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T)$)
+
+- To isolate disconnected dyads, we multiply the complement of $\mathbf{A}$ by the complement of its transpose. This keeps a cell as 1 only if $a_{ij}=0$ and $a_{ji}=0$:
+
+::: {.columns}
+::: {.column width="50%"}
+### Nulls Matrix ($\mathbf{N}$)
+```{r}
+#| echo: false
+N_mat <- (1 - A_dir) * (1 - t(A_dir))
+N_disp <- N_mat
+diag(N_disp) <- NA
+kbl(N_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- Retains completely disconnected dyads.
+:::
+
+::: {.column width="50%"}
+- Since each null dyad has 1s in both directions ($N_{ij}=1$ and $N_{ji}=1$), we sum all cells in $\mathbf{N}$ and divide by two:
+  $N_N = \frac{\sum N_{ij}}{2}$
+
+. . .
+
+- **Calculation**:
+  - Sum of cells in $\mathbf{N}$ is 10.
+  - $N_N = \frac{10}{2} = \mathbf{5} \text{ null dyads}$
+:::
+:::
+
+---
+
+## The Dyad Census Identity Check
+
+- In any directed graph of size $n$, the total number of dyads (pairs) is $\frac{n(n-1)}{2}$.
+- For our $n=6$ graph, we must have exactly $\frac{6 \times 5}{2} = 15$ dyads.
+
+. . .
+
+- **Check**:
+  - $N_M + N_A + N_N = 2 + 8 + 5 = \mathbf{15}$
+  - The mathematics accounts for every single pair in the network perfectly!
+
+. . .
+
+- **The Matrix Identity**:
+  - The cell-wise sum of our three matrices always equals the complete graph minus the diagonal ($\mathbf{J} - \mathbf{I}$):
+  - $\mathbf{M} + \mathbf{S} + \mathbf{N} = \mathbf{J} - \mathbf{I}$
+
+---
+
+## Graph Reciprocity ($R$)
+
+- **Graph Reciprocity ($R$)** measures the extent to which a directed graph approximates the ideal of complete reciprocity.
+- It is defined as the proportion of connected dyads that are mutual:
+  $R = \frac{N_M}{N_M + N_A}$
+
+. . .
+
+- **Calculation**:
+  - We know $N_M = 2$ and $N_A = 8$.
+  - $R = \frac{2}{2 + 8} = \frac{2}{10} = \mathbf{0.20}$
+- **Sociological Meaning**:
+  - **20%** of the connected dyads in this network are mutual. This represents a relatively low level of reciprocity!
+
+---
+
+# Part 4: Conformability Rules
 
 ---
 
@@ -346,7 +663,7 @@ $$\mathbf{B}_{3 \times \mathbf{2}} \times \mathbf{A}_{\mathbf{2} \times 3} = \ma
 
 ---
 
-# Part 3: Step-by-Step Multiplication Mechanics
+# Part 5: Step-by-Step Multiplication Mechanics
 
 ---
 
@@ -445,15 +762,15 @@ $$\mathbf{C} = \begin{pmatrix} 50 & 72 \\ 60 & \mathbf{112} \end{pmatrix}$$
 
 ---
 
-# Part 4: Dynamic Network Applications
+# Part 6: Dynamic Network Applications
 
 ---
 
 ## Transpose Multiplication: Common Neighbors
 
 - If we multiply a network's adjacency matrix $\mathbf{A}$ by its transpose $\mathbf{A}^T$:
-  $$\mathbf{A} \times \mathbf{A}^T = \mathbf{B}$$
-- Why does this matrix operation reveal structural overlaps?
+  $\mathbf{A} \times \mathbf{A}^T = \mathbf{B}$
+- Why does this standard matrix multiplication reveal structural overlaps?
 
 . . .
 
@@ -462,32 +779,31 @@ $$\mathbf{C} = \begin{pmatrix} 50 & 72 \\ 60 & \mathbf{112} \end{pmatrix}$$
   - It squares each binary entry and sums them up.
   - **Result**: Counts the total number of neighbors of node $i$ (the **node degree**).
 - **The Off-Diagonal Cells ($b_{ij}$)**:
-  - Multiplies Row $i$ (node $i$'s friendships) by Row $j$ (node $j$'s friendships).
-  - **Result**: Counts exactly how many **common neighbors** node $i$ and node $j$ share!
+  - Multiplies Row $i$ (node $i
 
 ---
 
 ## Tracing Common Neighbors Step-by-Step
 
-- Let's look at the adjacency matrix of a simple 4-node graph:
+- Let's use our 6-node symmetric "Parties With" adjacency matrix $\mathbf{P}$ ($\mathbf{P}^T = \mathbf{P}$):
 
 ::: {.columns}
 ::: {.column width="50%"}
-### Adjacency Matrix A
-$$\mathbf{A} = \begin{pmatrix} 0 & \mathbf{1} & 0 & 1 \\ 1 & 0 & 1 & 0 \\ 0 & \mathbf{1} & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix}$$
-- Let's check common neighbors between **node 1 and node 3**.
+### Adjacency Matrix $\mathbf{P}$
+$\mathbf{P} = \begin{pmatrix} 0 & \mathbf{1} & 1 & 0 & \mathbf{1} & 0 \\ 1 & 0 & 1 & 1 & 0 & 0 \\ 1 & \mathbf{1} & 0 & 1 & \mathbf{1} & 1 \\ 0 & 1 & 1 & 0 & 1 & 0 \\ 1 & 0 & 1 & 1 & 0 & 1 \\ 0 & 0 & 1 & 0 & 1 & 0 \end{pmatrix}$
+- Let's check common neighbors between **node A (Row 1)** and **node C (Col 3)**.
 :::
 
 ::: {.column width="50%"}
-### Vector Multiplications
-* **Row 1 (Node 1)**: $\color{red}{\{0, 1, 0, 1\}}$
-* **Col 3 (Node 3)**: $\color{blue}{\{0, 1, 0, 0\}}$
+### Vector Multiplication
+* **Row A (Node A)**: $\color{red}{\{0, 1, 1, 0, 1, 0\}}$
+* **Column C (Node C)**: $\color{blue}{\{1, 1, 0, 1, 1, 1\}}$
 
 ### Calculation
-$$\color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{1} + \color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{0} = \mathbf{1}$$
+$(\color{red}{0}\times\color{blue}{1}) + (\color{red}{1}\times\color{blue}{1}) + (\color{red}{1}\times\color{blue}{0}) + (\color{red}{0}\times\color{blue}{1}) + (\color{red}{1}\times\color{blue}{1}) + (\color{red}{0}\times\color{blue}{1}) = \mathbf{2}$
 
-* Only node 2 ($1 \times 1 = 1$) is shared.
-* **Takeaway**: Node 2 is the single common neighbor shared by 1 and 3.
+- **Result**: Nodes A and C share exactly **2** common neighbors.
+- Tracing the 1s, we see the shared neighbors are **B** and **E**!
 :::
 :::
 
@@ -499,53 +815,104 @@ $$\color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{1} + \col
   - $\mathbf{A}^2 = \mathbf{A} \times \mathbf{A}$
   - $\mathbf{A}^3 = \mathbf{A} \times \mathbf{A} \times \mathbf{A}$
 - In network science, the entries of the $n^{th}$ power of an adjacency matrix have a precise graph-theoretic meaning:
-  - **Off-Diagonal Cells ($a^{n}_{ij}$)**: Record the exact number of **indirect connections (walks) of length $n$** connecting node $i$ and node $j$.
+  - **Off-Diagonal Cells ($a^{n}_{ij}$)**: Record the exact number of **walks of length $n$** connecting node $i$ and node $j$.
   - **Diagonal Cells ($a^{n}_{ii}$)**: Record the exact number of **cycles of length $n$** that start and end at node $i$.
 
 ---
 
 ## Walks of Length 2: $\mathbf{A}^2$
 
-- **The Squared Adjacency Matrix ($\mathbf{A}^2$)**:
-  - **Off-diagonals** represent the number of **walks of length 2** between nodes.
-  - **Diagonals** represent the number of walks of length 2 starting and ending at the same node.
-  - This is equal to the **node degree** (edges incident to the node)!
+- Let's use our 5-node undirected reference graph (Slides 109-119):
 
-. . .
+::: {.columns}
+::: {.column width="50%"}
+### Adjacency Matrix ($\mathbf{A}$)
+```{r}
+#| echo: false
+A_u5_disp <- A_undir_5
+diag(A_u5_disp) <- NA
+kbl(A_u5_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.5
+#| fig-width: 4.5
+ggraph(gr_undir_5, layout = "manual", x = l_coords_5[,1], y = l_coords_5[,2]) +
+  geom_edge_link(color = "steelblue", width = 2.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+</center>
+:::
 
-### Simple Trace Example
-* To go from node $i \to k \to j$ of length 2:
-  * Node $k$ must be connected to *both* $i$ and $j$.
-  * Thus, walks of length 2 between $i$ and $j$ is equivalent to counting their **common neighbors**!
+::: {.column width="50%"}
+### Squared Matrix ($\mathbf{A}^2$)
+```{r}
+#| echo: false
+A2 <- A_undir_5 %*% A_undir_5
+kbl(A2, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- **Diagonals** equal node degrees: a (1), b (2), c (3), d (2), e (2).
+- **Off-diagonals** count walks of length 2 (common neighbors). For example, $a^2_{a,c} = 1$, meaning exactly one length 2 walk connects a and c.
+:::
+:::
 
 ---
 
 ## Walks of Length 3: $\mathbf{A}^3$
 
-- **The Cubed Adjacency Matrix ($\mathbf{A}^3$)**:
-  - **Off-diagonals** represent the number of **walks of length 3** between nodes.
-  - **Diagonals** represent cycles of length 3 (triangles).
-  - A cycle of length 3 represents a **clique of size 3**.
-  - Since each triangle can be traversed in two directions (clockwise and counterclockwise), the diagonal cell divided by 2 gives the exact **number of triangles (cliques of size 3)** that node $i$ belongs to!
-  - $$\text{Triangles}(i) = \frac{a^3_{ii}}{2}$$
+- Now, let's examine the cubed adjacency matrix ($\mathbf{A}^3$):
+
+::: {.columns}
+::: {.column width="50%"}
+### Cubed Matrix ($\mathbf{A}^3$)
+```{r}
+#| echo: false
+A3 <- A_undir_5 %*% A_undir_5 %*% A_undir_5
+kbl(A3, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- **Off-diagonals** represent length 3 walks.
+- **Diagonals** count cycles of length 3 (triangles).
+:::
+
+::: {.column width="50%"}
+- A cycle of length 3 is a **triangle**.
+- Since each triangle can be traversed in two directions (clockwise & counterclockwise), we can find the exact number of triangles containing node $i$ as:
+  $\text{Triangles}(i) = \frac{a^3_{ii}}{2}$
+
+. . .
+
+- **Calculation**:
+  - Only c, d, and e have non-zero diagonals ($2$).
+  - Each belongs to $\frac{2}{2} = \mathbf{1}$ triangle ({c, d, e}).
+  - Nodes a and b have diagonal 0 (they form no triangles).
+:::
+:::
 
 ---
 
 ## Walks of Length 3: Weighted Graph Representation
 
-- Plotting the network with edge sizes and color intensities proportional to the entries of $\mathbf{A}^3$ reveals distinct hangout cliques sharing multiple indirect pathways:
+- Plotting the network with edge sizes and color intensities proportional to the entries of $\mathbf{A}^3$ reveals distinct clique structures sharing multiple indirect pathways:
 
 ```{r}
 #| echo: false
 #| fig-align: "center"
 #| fig-width: 10
 #| fig-height: 5.5
-A3 <- H %^% 3
 m_val <- max(A3)
 gr_pows <- graph.adjacency(A3, mode="undirected", weighted=TRUE) %>% 
   as_tbl_graph() 
 
-p_pows <- ggraph(gr_pows, layout = "manual", x = l_coords[1:3,1], y = l_coords[1:3,2]) +
+p_pows <- ggraph(gr_pows, layout = "manual", x = l_coords_5[,1], y = l_coords_5[,2]) +
   geom_edge_link(aes(color = weight/m_val, width = weight/m_val)) +
   geom_node_point(color = "tan2", size = 20) +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
@@ -557,19 +924,23 @@ p_pows
 
 ---
 
-# Part 5: Summary & Conclusion
+# Part 7: Summary & Conclusion
 
 ---
 
 ## Summary of Matrix Algebraic Power
 
 - **Basic operations combine relationships**:
-  - Addition ($\mathbf{H} + \mathbf{C}$) counts overall tie volume.
-  - Subtraction ($|\mathbf{H} - \mathbf{C}|$) highlights relational disagreements.
-  - Hadamard Product ($\mathbf{H} \circ \mathbf{C}$) extracts multiplex intersections.
-- **Conformability dictates multiplication**:
-  - Operations are only defined if inner dimensions match.
-- **Multiplying by Transpose reveals common friends**:
+  - Addition ($\mathbf{P} + \mathbf{G}$) counts uniplex vs. multiplex relationships.
+  - Subtraction from 1 ($\mathbf{1} - \mathbf{P}$) flips relations to yield the graph complement (*Does Not Party With*).
+  - Hadamard Product ($\mathbf{P} \circ \mathbf{G}$) extracts multiplex overlaps.
+- **The Matrix Transpose ($\mathbf{A}^T$)**:
+  - Flips rows and columns; essential for analyzing directed relations.
+- **The Directed Dyad Census**:
+  - We use $\mathbf{A}$ and $\mathbf{A}^T$ cell-by-cell to compute Mutuals ($M$), Asymmetrics ($S$), and Nulls ($N$), spelling the **MAN** census.
+  - Graph Reciprocity is computed as $R = \frac{N_M}{N_M + N_A}$.
+- **Conformability dictates standard multiplication**:
+  - Inner dimensions must be equal.
+- **Standard multiplication and powers reveal structures**:
   - $\mathbf{A} \times \mathbf{A}^T$ computes common neighbors (off-diagonals) and degrees (diagonals).
-- **Matrix Powers map indirect paths**:
-  - $\mathbf{A}^n$ enumerates walks of length $n$. $\mathbf{A}^2$ diagonals are degrees; $\mathbf{A}^3$ diagonals are twice the number of triangles (cliques).
+  - $\mathbf{A}^n$ maps indirect walks of length $n$. $\mathbf{A}^2$ diagonals are degrees; $\mathbf{A}^3$ diagonals are twice the number of triangles.
