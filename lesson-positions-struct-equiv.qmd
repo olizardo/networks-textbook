@@ -412,4 +412,167 @@ $$
   C_{ij}^{in} = \frac{n_{ij}^{in}}{\sqrt{k_i^{in}k_j^{in}}}
 $$   {#eq-cosin}
 
+## Three Notions of Equivalence: Structural, Automorphic, and Regular {#sec-three-equivalences}
+
+So far in this lesson, we have focused primarily on **structural equivalence** and its relaxation, **structural similarity**. However, structural equivalence—which requires that two nodes connect to the *exact same* set of neighbors—is only one way of defining social positions or roles in a network. In mathematical graph theory and network analysis, there are actually three distinct, nested notions of equivalence: **structural equivalence**, **automorphic equivalence**, and **regular equivalence** [@borgattietal90]. 
+
+To build intuition for the differences between these three concepts, let's explore their definitions and mathematical relationships using a 15-node undirected network. This network represents a classic structural motif: two star-like components centered at central hubs $B$ and $K$ connected symmetrically to a tightly integrated five-node central core $\{F, G, H, I, J\}$.
+
+```{r}
+#| label: fig-three-equiv-base
+#| fig-cap: "A symmetric 15-node undirected graph representing a classic role-structure motif."
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 10
+
+    library(tidygraph)
+    library(ggraph)
+    library(igraph)
+
+    # Build the 15-node adjacency matrix
+    adj <- matrix(0, 15, 15)
+    adj[2, c(1, 3, 4, 5)] <- 1
+    adj[c(1, 3, 4, 5), 2] <- 1
+    adj[2, 7] <- 1
+    adj[7, 2] <- 1
+
+    core_nodes <- 6:10
+    for(i in core_nodes) {
+      for(j in core_nodes) {
+        if(i != j) {
+          adj[i, j] <- 1
+        }
+      }
+    }
+
+    adj[10, 11] <- 1
+    adj[11, 10] <- 1
+    adj[11, 12:15] <- 1
+    adj[12:15, 11] <- 1
+
+    gr_base <- graph_from_adjacency_matrix(adj, mode = "undirected")
+    V(gr_base)$name <- toupper(letters[1:15])
+    
+    # Custom layout to highlight the symmetry of the star hubs and the central core
+    coords <- matrix(0, 15, 2)
+    coords[2, ] <- c(-3, 0) # Hub B
+    coords[1, ] <- c(-4, 1) # Leaves of B
+    coords[3, ] <- c(-4, -1)
+    coords[4, ] <- c(-4.5, 0.5)
+    coords[5, ] <- c(-4.5, -0.5)
+    
+    coords[7, ] <- c(-1, 0) # Bridge G
+    coords[6, ] <- c(0, 1)  # Top F
+    coords[8, ] <- c(-0.5, -0.5) # Core H
+    coords[9, ] <- c(0.5, -0.5)  # Core I
+    coords[10, ] <- c(1, 0)  # Bridge J
+    
+    coords[11, ] <- c(3, 0) # Hub K
+    coords[12, ] <- c(4, 1) # Leaves of K
+    coords[13, ] <- c(4, -1)
+    coords[14, ] <- c(4.5, 0.5)
+    coords[15, ] <- c(4.5, -0.5)
+
+    p_base <- ggraph(gr_base, layout = coords) +
+      geom_edge_link(color = "steelblue", edge_width = 1.1) +
+      geom_node_point(color = "tan2", size = 18) +
+      geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+      theme_graph()
+    p_base
+```
+
+### 1. Structural Equivalence
+As we already know, two nodes are **structurally equivalent** if and only if they are connected to the **same set of neighbors**. In mathematical terms, nodes $u$ and $v$ are structurally equivalent if and only if their neighborhoods are identical: $N(u) = N(v)$. 
+
+Because of this strict "same-neighbor" rule, structural equivalence is a highly restrictive concept. In our 15-node network (@fig-three-equiv-base), only the non-adjacent peripheral leaf nodes can share exactly the same neighborhoods:
+- Leaf nodes $\{A, C, D, E\}$ are structurally equivalent because all of them are connected *only* to hub $B$.
+- Leaf nodes $\{L, M, N, O\}$ are structurally equivalent because all of them are connected *only* to hub $K$.
+
+None of the other nodes are structurally equivalent to any other node. For example, even though $B$ and $K$ play identical "hub" roles, they are connected to different leaves, so they are not structurally equivalent. Even though $H$ and $I$ occupy symmetric positions within the core, they connect to each other, but because they lack self-loops, their neighborhoods differ at their own columns in the adjacency matrix. Under structural equivalence, adjacent nodes can never share identical neighborhoods in simple graphs.
+
+### 2. Automorphic Equivalence
+To relax the restrictiveness of structural equivalence while maintaining a rigorous, symmetry-based definition of position, we use **automorphic equivalence**. 
+
+Two nodes $u$ and $v$ are **automorphically equivalent** if they can be exchanged (swapped) for one another without changing any graph-theoretic properties of the network. Formally, an **automorphism** is a mapping of the vertex set onto itself that preserves adjacency. If there exists an automorphism that maps node $u$ to node $v$, then $u$ and $v$ are automorphically equivalent.
+
+In simple terms, automorphic equivalence groups nodes that are **structurally indistinguishable** in terms of the whole network's shape, even if they are connected to completely different people.
+
+In our 15-node network (@fig-three-equiv-base), we can observe a perfect left-to-right bilateral symmetry. If we fold the network in half across the central vertical axis, hub $B$ aligns with hub $K$, the bridge $G$ aligns with bridge $J$, and the leaves of $B$ align with the leaves of $K$. This symmetry yields **five automorphic equivalence classes**:
+1. **The Hubs**: $\{B, K\}$ (the two central star hubs).
+2. **The Leaves**: $\{A, C, D, E, L, M, N, O\}$ (all peripheral leaf nodes).
+3. **The Core Bridges**: $\{G, J\}$ (the core nodes that act as gates to the hubs).
+4. **The Core Mid-points**: $\{H, I\}$ (the core nodes that represent central symmetric nodes).
+5. **The Core Top**: $\{F\}$ (the central core top node, which is symmetric only to itself).
+
+Automorphic equivalence captures the intuition that hub $B$ and hub $K$ are "structurally identical" in their positions, despite being connected to different sets of leaf nodes.
+
+### 3. Regular Equivalence
+While automorphic equivalence relaxes the neighbor-sharing rule, it still imposes a very strict global symmetry requirement. In many social contexts, we want to group actors into roles even if their local structures are completely asymmetric. For instance, we want to group all "doctors" together because they connect to "patients" and "nurses," even if one doctor's clinic has 3 patients and another's has 50. 
+
+This is the intuition behind **regular equivalence** (White & Reitz, 1983). Two nodes $u$ and $v$ are **regularly equivalent** if they are connected to **equivalent others**. That is, $u$ and $v$ do not need to connect to the same neighbors, nor do they need to connect to structurally indistinguishable symmetric partners; they simply need to connect to neighbors who themselves play equivalent roles.
+
+In our 15-node network, regular equivalence collapses the five automorphic classes into **four regular equivalence classes** (or social roles):
+1. **The Leaves**: $\{A, C, D, E, L, M, N, O\}$. (All are regularly equivalent because they connect *only* to a Hub).
+2. **The Hubs**: $\{B, K\}$. (They connect to Leaves and Core-Bridges).
+3. **The Core-Bridges**: $\{G, J\}$. (They connect to Hubs and Core nodes).
+4. **The Core Nodes**: $\{F, H, I\}$. (They connect only to other Core nodes and Core-bridges).
+
+Notice that node $F$ (which has a unique position under automorphic equivalence) is grouped together with $H$ and $I$ under regular equivalence. This is because $F, H,$ and $I$ all connect exclusively to core-bridges (Class 3) and other core nodes (Class 4), making them role-equivalent!
+
+### The Nested Hierarchy of Equivalence
+
+A fundamental theorem in network science states that these three types of equivalence are hierarchically nested within one another:
+
+$\text{Structural Equivalence} \subseteq \text{Automorphic Equivalence} \subseteq \text{Regular Equivalence}$
+
+This nesting means that:
+- Every pair of nodes that is **structurally equivalent** is also **automorphically equivalent** (if you share neighbors, you can be swapped without changing the graph).
+- Every pair of nodes that is **automorphically equivalent** is also **regularly equivalent** (if you can be globally swapped, you must connect to role-equivalent partners).
+- However, the reverse is not true. Regular equivalence is the most general and flexible, automorphic is intermediate, and structural is the most strict and restrictive.
+
+@fig-equiv-comparison visualizes these three distinct partitions on the same 15-node network, illustrating how network analysts zoom in and out of relational role structures.
+
+```{r}
+#| label: fig-equiv-comparison
+#| fig-cap: "Comparison of the three equivalence partitions on the 15-node network: (a) Structural Equivalence, (b) Automorphic Equivalence, and (c) Regular Equivalence."
+#| fig-subcap:
+#|   - "Structural Equivalence (Identifies leaf sharing, leaving hubs and core in unique positions)"
+#|   - "Automorphic Equivalence (Identifies bilateral symmetry, grouping hubs and symmetric core nodes)"
+#|   - "Regular Equivalence (Identifies four clean social roles based on connection patterns)"
+#| layout-ncol: 1
+#| fig-height: 6
+#| fig-width: 10
+
+    # (a) Structural Equivalence
+    V(gr_base)$structural <- c("1", "unique_b", "1", "1", "1", "unique_f", "unique_g", "unique_h", "unique_i", "unique_j", "unique_k", "2", "2", "2", "2")
+    p_structural <- ggraph(gr_base, layout = coords) +
+      geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 1.0) +
+      geom_node_point(aes(color = structural), size = 18) +
+      geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+      scale_color_brewer(palette = "Set1") +
+      theme_graph() + theme(legend.position = "none")
+    p_structural
+
+    # (b) Automorphic Equivalence
+    V(gr_base)$automorphic <- c("1", "2", "1", "1", "1", "5", "3", "4", "4", "3", "2", "1", "1", "1", "1")
+    p_automorphic <- ggraph(gr_base, layout = coords) +
+      geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 1.0) +
+      geom_node_point(aes(color = automorphic), size = 18) +
+      geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+      scale_color_brewer(palette = "Set2") +
+      theme_graph() + theme(legend.position = "none")
+    p_automorphic
+
+    # (c) Regular Equivalence
+    V(gr_base)$regular <- c("1", "2", "1", "1", "1", "4", "3", "4", "4", "3", "2", "1", "1", "1", "1")
+    p_regular <- ggraph(gr_base, layout = coords) +
+      geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 1.0) +
+      geom_node_point(aes(color = regular), size = 18) +
+      geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+      scale_color_brewer(palette = "Set3") +
+      theme_graph() + theme(legend.position = "none")
+    p_regular
+```
+
+
 ## References {.unnumbered}

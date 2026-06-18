@@ -33,6 +33,45 @@ to <- c("C", "D", "B", "F", "A", "D", "C", "A", "A", "B", "C", "F", "A", "F", "C
 edge_dat <- data.frame(fr, to)
 node_dat <- data.frame(name = union(fr, to))
 gr_dir <- tbl_graph(edges = edge_dat, nodes = node_dat)
+
+# Reusable 15-node undirected graph for structural/automorphic/regular comparison
+adj_15 <- matrix(0, 15, 15)
+adj_15[2, c(1, 3, 4, 5)] <- 1
+adj_15[c(1, 3, 4, 5), 2] <- 1
+adj_15[2, 7] <- 1
+adj_15[7, 2] <- 1
+core_nodes <- 6:10
+for(i in core_nodes) {
+  for(j in core_nodes) {
+    if(i != j) {
+      adj_15[i, j] <- 1
+    }
+  }
+}
+adj_15[10, 11] <- 1
+adj_15[11, 10] <- 1
+adj_15[11, 12:15] <- 1
+adj_15[12:15, 11] <- 1
+gr_base <- graph_from_adjacency_matrix(adj_15, mode = "undirected")
+V(gr_base)$name <- toupper(letters[1:15])
+
+# Shared coordinates for 15-node symmetric layout
+coords_15 <- matrix(0, 15, 2)
+coords_15[2, ] <- c(-3, 0)
+coords_15[1, ] <- c(-4, 1)
+coords_15[3, ] <- c(-4, -1)
+coords_15[4, ] <- c(-4.5, 0.5)
+coords_15[5, ] <- c(-4.5, -0.5)
+coords_15[7, ] <- c(-1, 0)
+coords_15[6, ] <- c(0, 1)
+coords_15[8, ] <- c(-0.5, -0.5)
+coords_15[9, ] <- c(0.5, -0.5)
+coords_15[10, ] <- c(1, 0)
+coords_15[11, ] <- c(3, 0)
+coords_15[12, ] <- c(4, 1)
+coords_15[13, ] <- c(4, -1)
+coords_15[14, ] <- c(4.5, 0.5)
+coords_15[15, ] <- c(4.5, -0.5)
 ```
 
 # Part 1: The Positional Approach & Structural Equivalence
@@ -347,6 +386,168 @@ kbl(C_sim, format = "html", align = "c") %>%
   - $$C_{ij}^{in} = \frac{n_{ij}^{in}}{\sqrt{k_i^{in} k_j^{in}}}$$
 - These directed formulas allow researchers to partition information and communication networks based on highly specific sender and receiver roles.
 :::
+
+---
+
+# Part 4: Structural, Automorphic, and Regular Equivalence
+
+---
+
+## Three Concepts of Equivalence
+
+::: {.incremental}
+- Beyond structural equivalence (sharing the *exact same* neighbors), there are **three nested notions** of relational position:
+  1. **Structural Equivalence**: Identical neighborhoods ($N(u) = N(v)$). Highly strict, same-neighbor rule.
+  2. **Automorphic Equivalence**: Globally symmetrical/interchangeable nodes. Nodes can be swapped without changing the graph structure.
+  3. **Regular Equivalence**: Connection to *equivalent others*. Focuses on general roles (e.g., all doctors connect to patients).
+- **The Nested Hierarchy**:
+  - $\text{Structural} \subseteq \text{Automorphic} \subseteq \text{Regular}$
+- Let's explore these definitions using a symmetrical 15-node network.
+:::
+
+---
+
+## Symmetrical 15-Node Network
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- This 15-node network has:
+  - Two star-like components centered at hubs $B$ and $K$.
+  - Symmetrical leaf sets $\{A,C,D,E\}$ and $\{L,M,N,O\}$.
+  - A tightly integrated central core $\{F,G,H,I,J\}$.
+  - $G$ connects the core to hub $B$; $J$ connects the core to hub $K$.
+  - Let's look at how we partition this network using the three equivalence criteria.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_base, layout = coords_15) +
+  geom_edge_link(color = "steelblue", edge_width = 1.1) +
+  geom_node_point(color = "tan2", size = 12) +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## 1. Structural Equivalence
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- **Structural Equivalence Partition**:
+  - Requires connection to the **exact same** neighbors.
+  - Groups:
+    - **Class 1**: Leaf set $\{A,C,D,E\}$ (connected only to $B$).
+    - **Class 2**: Leaf set $\{L,M,N,O\}$ (connected only to $K$).
+    - **All other nodes** (colored separately) are in **unique single-node classes**.
+  - Note: Symmetrical hubs $B$ and $K$ connect to different leaves, so they are *not* structurally equivalent!
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+V(gr_base)$structural <- c("1", "unique_b", "1", "1", "1", "unique_f", "unique_g", "unique_h", "unique_i", "unique_j", "unique_k", "2", "2", "2", "2")
+ggraph(gr_base, layout = coords_15) +
+  geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 1.0) +
+  geom_node_point(aes(color = structural), size = 12) +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  scale_color_brewer(palette = "Set1") +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## 2. Automorphic Equivalence
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- **Automorphic Equivalence Partition**:
+  - Nodes that are **globally interchangeable** (symmetric swap).
+  - groups nodes into **five classes**:
+    - **Leaves**: $\{A,C,D,E, L,M,N,O\}$
+    - **Hubs**: $\{B,K\}$ (symmetric counterparts)
+    - **Core Bridges**: $\{G,J\}$ (gates to hubs)
+    - **Core Mid-points**: $\{H,I\}$ (internally symmetric)
+    - **Core Top**: $\{F\}$ (symmetric only to itself)
+  - Successfully captures the structural similarity between hubs $B$ and $K$.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+V(gr_base)$automorphic <- c("1", "2", "1", "1", "1", "5", "3", "4", "4", "3", "2", "1", "1", "1", "1")
+ggraph(gr_base, layout = coords_15) +
+  geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 1.0) +
+  geom_node_point(aes(color = automorphic), size = 12) +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  scale_color_brewer(palette = "Set2") +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## 3. Regular Equivalence
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- **Regular Equivalence Partition**:
+  - Connects to **equivalent others** (general roles).
+  - Groups the 15 nodes into **four roles**:
+    - **Class 1 (Leaves)**: $\{A,C,D,E, L,M,N,O\}$ (connect *only* to Hubs)
+    - **Class 2 (Hubs)**: $\{B,K\}$ (connect to Leaves and Core Bridges)
+    - **Class 3 (Core Bridges)**: $\{G,J\}$ (connect to Hubs and Core nodes)
+    - **Class 4 (Core Nodes)**: $\{F,H,I\}$ (connect to Core Bridges and Core nodes)
+  - Elegant and highly flexible role-mapping.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+V(gr_base)$regular <- c("1", "2", "1", "1", "1", "4", "3", "4", "4", "3", "2", "1", "1", "1", "1")
+ggraph(gr_base, layout = coords_15) +
+  geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 1.0) +
+  geom_node_point(aes(color = regular), size = 12) +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  scale_color_brewer(palette = "Set3") +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
