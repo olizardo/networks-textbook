@@ -297,18 +297,23 @@ m_{41} & m_{42} & m_{43}
 
 ## Reference Graph & Empty Matrix
 
+We have 5 nodes: $\{A, B, C, D, E\}$ with no arrowheads. Diagonals are blocked (`--`) because simple graphs have no self-loops.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
 ### Reference Undirected Graph
-- We have 5 nodes: $\{A, B, C, D, E\}$.
-- No arrowheads (undirected).
-- Order: **$5$**.
-- Diagonals are blocked (`--`) because simple graphs have no self-loops.
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.8
+#| fig-height: 4.8
+plot_undir_highlight()
+```
 :::
 
 ::: {.column width="50%"}
-### Empty Matrix Layout
+### Empty Adjacency Matrix progress
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | ? | ? | ? | ? |
@@ -316,14 +321,6 @@ m_{41} & m_{42} & m_{43}
 | **C** | ? | ? | -- | ? | ? |
 | **D** | ? | ? | ? | -- | ? |
 | **E** | ? | ? | ? | ? | -- |
-
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 3.5
-#| fig-height: 3.5
-plot_undir_highlight()
-```
 :::
 
 ::::
@@ -694,13 +691,60 @@ plot_dir_highlight()
 
 ::::
 
-# Part 4: Comparing Undirected & Directed Matrices
+# Part 4: Symmetric vs. Asymmetric Adjacency (Upper & Lower Triangles)
 
 ---
 
-## Undirected Networks: Symmetric Adjacency
+## Anatomy of a Square Matrix
 
-Symmetric matrices feature mirror-image upper and lower triangles ($A_{ij} = A_{ji}$). Only half the matrix is needed.
+:::: {.columns}
+
+::: {.column width="60%"}
+::: {.incremental}
+- In any relationship matrix of order $N$, we can divide the cell entries into three distinct anatomical regions:
+  1. **The Main Diagonal**:
+     - Cells where the row index equals the column index ($i = j$). Blocked with a dash (`--`) for simple graphs.
+  2. **The Upper Triangle**:
+     - All cells located *above* the main diagonal where the row index is less than the column index ($i < j$).
+  3. **The Lower Triangle**:
+     - All cells located *below* the main diagonal where the row index is greater than the column index ($i > j$).
+:::
+:::
+
+::: {.column width="40%"}
+### Matrix Anatomy
+$$\mathbf{A} = egin{pmatrix}
+\color{red}{a_{11}} & \color{blue}{a_{12}} & \color{blue}{a_{13}} \
+\color{green}{a_{21}} & \color{red}{a_{22}} & \color{blue}{a_{23}} \
+\color{green}{a_{31}} & \color{green}{a_{32}} & \color{red}{a_{33}}
+\end{pmatrix}$$
+
+- **Diagonal cells** (Red, $i = j$)
+- **Upper Triangle** (Blue, $i < j$)
+- **Lower Triangle** (Green, $i > j$)
+:::
+
+::::
+
+---
+
+## Symmetric Matrices (Undirected Case)
+
+::: {.incremental}
+- In an **undirected graph**, relationship ties are always reciprocal. If node $i$ is connected to node $j$, then node $j$ is connected to node $i$.
+- This reciprocal structure translates to a **symmetric adjacency matrix**:
+  - The cell value $A_{ij}$ must always equal the cell value $A_{ji}$ for all rows $i$ and columns $j$ ($A_{ij} = A_{ji}$).
+  - As a result, the **Upper Triangle** is a perfect mirror image of the **Lower Triangle** across the main diagonal.
+- **Information Redundancy**:
+  - Because the two triangles are identical, the matrix contains redundant information.
+  - All network data is fully contained in either triangle; we can completely ignore one of them during analysis!
+:::
+
+---
+
+## Visualizing Symmetry (Undirected Graph)
+
+Undirected connections create matching mirror-image entries in both the upper (blue) and lower (green) triangles.
 
 :::: {.columns align=center}
 
@@ -719,20 +763,37 @@ plot_undir_highlight()
 ### Symmetric Matrix ($\mathbf{A}$)
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
-| **A** | -- | **1** | **1** | 0 | 0 |
-| **B** | **1** | -- | **1** | **1** | 0 |
-| **C** | **1** | **1** | -- | 0 | **1** |
-| **D** | 0 | **1** | 0 | -- | **1** |
-| **E** | 0 | 0 | **1** | **1** | -- |
+| **A** | -- | <span style="color: blue; font-weight: bold;">1</span> | <span style="color: blue; font-weight: bold;">1</span> | <span style="color: blue; font-weight: bold;">0</span> | <span style="color: blue; font-weight: bold;">0</span> |
+| **B** | <span style="color: green; font-weight: bold;">1</span> | -- | <span style="color: blue; font-weight: bold;">1</span> | <span style="color: blue; font-weight: bold;">1</span> | <span style="color: blue; font-weight: bold;">0</span> |
+| **C** | <span style="color: green; font-weight: bold;">1</span> | <span style="color: green; font-weight: bold;">1</span> | -- | <span style="color: blue; font-weight: bold;">0</span> | <span style="color: blue; font-weight: bold;">1</span> |
+| **D** | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">1</span> | <span style="color: green; font-weight: bold;">0</span> | -- | <span style="color: blue; font-weight: bold;">1</span> |
+| **E** | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">1</span> | <span style="color: green; font-weight: bold;">1</span> | -- |
+
+- Symmetrical pairs: $a_{AB} = a_{BA} = 1$ (Blue matches Green).
+- Unconnected pairs: $a_{AD} = a_{DA} = 0$.
 :::
 
 ::::
 
 ---
 
-## Directed Networks: Asymmetric Adjacency
+## Asymmetric Matrices (Directed Case)
 
-Asymmetric matrices represent unidirectional links where $A_{ij} \neq A_{ji}$. Diagonals are still blocked.
+::: {.incremental}
+- In a **directed graph**, relationship ties are unidirectional and asymmetric. Just because employee $i$ asks $j$ for advice does not mean $j$ asks $i$ back.
+- This directed structure translates to an **asymmetric adjacency matrix**:
+  - The cell value $A_{ij}$ is not necessarily equal to the cell value $A_{ji}$ ($A_{ij} \neq A_{ji}$).
+  - The **Upper Triangle** represents ties sent from lower-indexed nodes to higher-indexed nodes ($i < j$).
+  - The **Lower Triangle** represents ties sent from higher-indexed nodes to lower-indexed nodes ($i > j$).
+- **No Redundancy**:
+  - Because the triangles represent independent directional paths, we must analyze **both** triangles to capture the complete network structure.
+:::
+
+---
+
+## Visualizing Asymmetry (Directed Graph)
+
+Directed connections break the mirror symmetry. Unreciprocated ties create a $1$ in one triangle and a $0$ in the other.
 
 :::: {.columns align=center}
 
@@ -751,11 +812,15 @@ plot_dir_highlight()
 ### Asymmetric Matrix ($\mathbf{A}$)
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
-| **A** | -- | **1** | **1** | 0 | 0 |
-| **B** | **1** | -- | **1** | **1** | 0 |
-| **C** | 0 | 0 | -- | 0 | **1** |
-| **D** | 0 | 0 | 0 | -- | 0 |
-| **E** | 0 | 0 | 0 | **1** | -- |
+| **A** | -- | <span style="color: blue; font-weight: bold;">1</span> | <span style="color: blue; font-weight: bold;">1</span> | <span style="color: blue; font-weight: bold;">0</span> | <span style="color: blue; font-weight: bold;">0</span> |
+| **B** | <span style="color: green; font-weight: bold;">1</span> | -- | <span style="color: blue; font-weight: bold;">1</span> | <span style="color: blue; font-weight: bold;">1</span> | <span style="color: blue; font-weight: bold;">0</span> |
+| **C** | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">0</span> | -- | <span style="color: blue; font-weight: bold;">0</span> | <span style="color: blue; font-weight: bold;">1</span> |
+| **D** | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">0</span> | -- | <span style="color: blue; font-weight: bold;">0</span> |
+| **E** | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">0</span> | <span style="color: green; font-weight: bold;">1</span> | -- |
+
+- Reciprocal tie $A \leftrightarrow B$: $a_{AB} = 1$ and $a_{BA} = 1$ (Symmetric).
+- Asymmetric tie $C \rightarrow E$: $a_{CE} = 1$ (Blue), but $a_{EC} = 0$ (Green).
+- Asymmetric tie $B \rightarrow D$: $a_{BD} = 1$ (Blue), but $a_{DB} = 0$ (Green).
 :::
 
 ::::
@@ -781,12 +846,14 @@ plot_dir_highlight()
 
 ::: {.column width="40%"}
 ### Matrix Duality
-```mermaid
-graph TD
-  A[Real Network] --> B[Graph Model]
-  B --> C[Matrix Representation]
-  C -->|Calculations| A
-```
+
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;">
+  <div style="background-color: #343a40; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; width: 240px; text-align: center; border: 2px solid #ff7e26;">Real Social Network</div>
+  <div style="font-size: 20px; font-weight: bold; color: #ff7e26;">↓ (Graph Theory)</div>
+  <div style="background-color: #343a40; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; width: 240px; text-align: center; border: 2px solid #ff7e26;">Abstract Graph</div>
+  <div style="font-size: 20px; font-weight: bold; color: #ff7e26;">↓ (Matrix Algebra)</div>
+  <div style="background-color: #ff7e26; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; width: 240px; text-align: center; border: 2px solid #343a40;">Adjacency Matrix</div>
+</div>
 :::
 
 ::::
