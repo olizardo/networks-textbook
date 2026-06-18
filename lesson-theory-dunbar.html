@@ -76,6 +76,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -809,19 +838,29 @@ ul.task-list li input[type="checkbox"] {
 <h2 data-number="40.1" class="anchored" data-anchor-id="core-tenets-of-dunbars-theory"><span class="header-section-number">40.1</span> Core tenets of Dunbar’s Theory</h2>
 <section id="social-brain-hypothesis" class="level3" data-number="40.1.1">
 <h3 data-number="40.1.1" class="anchored" data-anchor-id="social-brain-hypothesis"><span class="header-section-number">40.1.1</span> Social Brain Hypothesis</h3>
-<p>The fundamental premise is that the relatively large size of the human brain, particularly the neocortex, evolved to manage complex social relationships. The size of the neocortex correlates with average group size across primates, with humans having the largest neocortex relative to body size, suggesting a cognitive limit to the number of stable relationships you can maintain. The main conclusion is that the brain is essentially for keeping track of other people, among other things. This is called the <strong>social brain hypothesis</strong>.</p>
+<p>The fundamental premise is that the relatively large size of the human brain, particularly the neocortex, evolved to manage complex social relationships. The size of the neocortex correlates with average group size across primates, with humans having the largest neocortex relative to body size, suggesting a cognitive limit to the number of stable relationships you can maintain. The main conclusion is that the brain is essentially for keeping track of other people, among other things. This is called the <strong>social brain hypothesis</strong> (as shown in <a href="#fig-social-brain" class="quarto-xref">Figure&nbsp;<span>40.1</span></a>).</p>
+<div id="fig-social-brain" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-social-brain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/social-brain.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:75.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-social-brain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;40.1: The Social Brain Hypothesis (based on Dunbar 1992, 2003). There is a strong relationship (<span class="math inline">\(R^2 = 0.84\)</span>) between primate neocortex ratio (neocortex volume relative to the rest of the brain) and average group size. Extrapolating the regression line to the human neocortex ratio of approximately 4.1 predicts a typical human group size of around 150 (Dunbar’s number).
+</figcaption>
+</figure>
+</div>
 </section>
 </section>
 <section id="layered-structure-of-ego-networks-dunbar-circles" class="level2" data-number="40.2">
 <h2 data-number="40.2" class="anchored" data-anchor-id="layered-structure-of-ego-networks-dunbar-circles"><span class="header-section-number">40.2</span> Layered Structure of Ego Networks (Dunbar Circles)</h2>
-<p><strong>Ego networks</strong> (see <a href="lesson-sna-ego-networks.html" class="quarto-xref"><span>Chapter 32</span></a>), which are centered around you (the ego) and your contacts (alters), are organized into concentric layers based on intimacy and closeness (see <a href="lesson-theory-tie-strength.html" class="quarto-xref"><span>Chapter 4</span></a>). Closer layers are smaller and more intimate, while farther layers are larger and less intimate (as shown in <a href="#fig-dunbar-circles" class="quarto-xref">Figure&nbsp;<span>40.1</span></a>). These different relationships incur varying “maintenance costs” in terms of cognitive, emotional, time, and energy investment. These costs help determine the number of persons in each of your layers.</p>
+<p><strong>Ego networks</strong> (see <a href="lesson-sna-ego-networks.html" class="quarto-xref"><span>Chapter 32</span></a>), which are centered around you (the ego) and your contacts (alters), are organized into concentric layers based on intimacy and closeness (see <a href="lesson-theory-tie-strength.html" class="quarto-xref"><span>Chapter 4</span></a>). Closer layers are smaller and more intimate, while farther layers are larger and less intimate (as shown in <a href="#fig-dunbar-circles" class="quarto-xref">Figure&nbsp;<span>40.2</span></a>). These different relationships incur varying “maintenance costs” in terms of cognitive, emotional, time, and energy investment. These costs help determine the number of persons in each of your layers.</p>
 <div id="fig-dunbar-circles" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-dunbar-circles-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="images/dunbar-circles.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dunbar-circles-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;40.1: The concentric layers of a human ego network according to Dunbar’s theory of social circles (centered on an Ego). Closer circles represent smaller groups with higher emotional, cognitive, and time maintenance costs, while outer circles represent larger groups of weaker ties.
+Figure&nbsp;40.2: The concentric layers of a human ego network according to Dunbar’s theory of social circles (centered on an Ego). Closer circles represent smaller groups with higher emotional, cognitive, and time maintenance costs, while outer circles represent larger groups of weaker ties.
 </figcaption>
 </figure>
 </div>
