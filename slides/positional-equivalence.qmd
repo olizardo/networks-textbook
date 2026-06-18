@@ -1,0 +1,364 @@
+---
+title: "Graph Theory: Equivalence & Similarity"
+subtitle: "The Positional Structure of Social Networks"
+format:
+  revealjs:
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+library(lsa)
+
+# Reusable 6-node undirected graph for structural equivalence
+gr_undir <- create_empty(6, directed = FALSE) %>%
+  bind_edges(data.frame(from = c(1, 1, 2, 2, 3, 3, 5, 6), to = c(3, 4, 3, 4, 1, 2, 3, 5))) %>%
+  mutate(name = toupper(letters[1:6]))
+gr_undir <- simplify(gr_undir)
+
+# Reusable 7-node directed graph
+fr <- c("A", "A", "A", "A", "B", "B", "B", "C", "D", "D", "E", "E", "F", "G", "G", "D", "D", "B")
+to <- c("C", "D", "B", "F", "A", "D", "C", "A", "A", "B", "C", "F", "A", "F", "C", "E", "G", "F")
+edge_dat <- data.frame(fr, to)
+node_dat <- data.frame(name = union(fr, to))
+gr_dir <- tbl_graph(edges = edge_dat, nodes = node_dat)
+```
+
+# Part 1: The Positional Approach & Structural Equivalence
+
+---
+
+## The Position Approach
+
+::: {.incremental}
+- In social network analysis, we can partition nodes using two different philosophies:
+  1. **The Group Approach**: Nodes are divided into subsets that are tightly interconnected with one another.
+  2. **The Positional Approach**: Nodes are divided into subsets based on how **similar** they are in their patterns of connectivity with others.
+- Nodes in the same positional class are said to occupy the same **position** or **role** in the social structure.
+- We distinguish between:
+  - **Structural Equivalence**: Nodes are connected to the exact same other nodes.
+  - **Regular Equivalence**: Nodes are connected to equivalent others (e.g., all teachers are connected to students, even if they are different students).
+:::
+
+---
+
+## Defining Structural Equivalence
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Structural Equivalence** (Lorrain & White, 1971):
+  - Two nodes are structurally equivalent if they are connected to the **same other nodes**.
+  - Their patterns of connectivity are mathematically identical.
+  - In the graph on the right:
+    - $\{C, D\}$ are structurally equivalent because both are connected to $\{A, B, E\}$.
+    - $\{A, B\}$ are structurally equivalent because both are connected to $\{C, D\}$.
+    - $\{E\}$ and $\{F\}$ occupy **unique positions** (neighborhoods are not shared).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_undir, layout = 'kk') + 
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(aes(color = c("a", "a", "b", "b", "c", "d")), size = 20) + 
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Adjacency Matrix of Equivalent Positions
+
+```{r}
+#| echo: false
+adj_mat <- matrix(as_adjacency_matrix(gr_undir), nrow = length(V(gr_undir)))
+rownames(adj_mat) <- V(gr_undir)$name
+colnames(adj_mat) <- V(gr_undir)$name
+adj_mat <- adj_mat[order(row.names(adj_mat)), order(row.names(adj_mat))]
+
+kbl(adj_mat, format = "html", align = "c") %>% 
+  row_spec(1:2, background = "salmon", bold = TRUE) %>% 
+  row_spec(3:4, background = "lightgreen", bold = TRUE) %>% 
+  row_spec(5, background = "cyan", bold = TRUE) %>% 
+  row_spec(6, background = "violet", bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"))
+```
+
+::: {.incremental}
+- Structurally equivalent nodes have **identical rows (and columns)** in the adjacency matrix.
+- Notice that Row A is identical to Row B ($0, 0, 1, 1, 0, 0$), and Row C is identical to Row D ($1, 1, 0, 0, 1, 0$).
+- Nodes in unique positions (like $E$ and $F$) have completely unique row patterns.
+:::
+
+---
+
+## Structural Similarity: A Necessary Relaxation
+
+::: {.incremental}
+- In real-world social networks, strict structural equivalence is **extremely rare**.
+  - It only allows a binary "yes" or "no" answer: either nodes connect to the exact same neighbors, or they do not.
+  - If node $A$ and node $B$ share 99 out of 100 neighbors, they are technically *not* structurally equivalent!
+- **Structural Similarity**:
+  - Allows for a "more or less" gradient rather than binary classification.
+  - Measures the extent to which two nodes have **highly overlapping** patterns of connectivity.
+  - Let's look at how we measure this.
+:::
+
+# Part 2: Measuring Structural Similarity
+
+---
+
+## Euclidean Distance ($d^{Euclid}_{k,l}$)
+
+::: {.incremental}
+- Ronald Burt (1976) proposed measuring structural similarity by calculating the **Euclidean Distance** between the row vectors of nodes in the adjacency matrix.
+- For nodes $k$ and $l$, the distance is:
+  - $$d^{Euclid}_{k,l} = \sqrt{\sum_j (a_{(k)j} - a_{(l)j})^2}$$
+- **Key Properties**:
+  - If nodes are structurally equivalent, their Euclidean distance is **exactly zero**.
+  - The larger the distance, the **less structurally similar** the two nodes are.
+:::
+
+---
+
+## Euclidean Distance Calculation: $A$ vs. $C$
+
+- Let's calculate the Euclidean distance between $A$ ($0, 0, 1, 1, 0, 0$) and $C$ ($1, 1, 0, 0, 1, 0$):
+
+```{r}
+#| echo: false
+a_vec <- c(0, 0, 1, 1, 0, 0)
+c_vec <- c(1, 1, 0, 0, 1, 0)
+diff_vec <- a_vec - c_vec
+sq_vec <- diff_vec^2
+c_diff <- c("(0 - 1)", "(0 - 1)", "(1 - 0)", "(1 - 0)", "(0 - 1)", "(0 - 0)")
+calc_mat <- matrix(c(a_vec, c_vec, c_diff, diff_vec, sq_vec), nrow = 5, byrow = TRUE)
+rownames(calc_mat) <- c("Vector A", "Vector C", "A - C", "Difference", "Squared Diff")
+kbl(calc_mat, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+
+- Sum of squared differences: $\sum_j (a_{(A)j} - a_{(C)j})^2 = 1 + 1 + 1 + 1 + 1 + 0 = 5$
+- Euclidean Distance: $d^{Euclid}_{A, C} = \sqrt{5} \approx 2.24$
+
+---
+
+## The Structural Similarity Matrix ($S$)
+
+```{r}
+#| echo: false
+eudist_func <- function(x) {
+  r <- nrow(x)
+  edist <- matrix(0, r, r)
+  for (i in 1:r) {
+    for (j in 1:r) {
+      e <- x[i, ] - x[j, ]
+      e <- e^2
+      e <- round(sqrt(sum(e)), 2)
+      edist[i, j] <- e
+    }
+  }
+  return(edist)
+}
+S_mat <- eudist_func(adj_mat)
+rownames(S_mat) <- rownames(adj_mat)
+colnames(S_mat) <- colnames(adj_mat)
+diag(S_mat) <- "--"
+
+kbl(S_mat, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"))
+```
+
+- Pairs of structurally equivalent nodes ($\{A, B\}$ and $\{C, D\}$) have a distance of **0.00**.
+- Unique positions like $F$ have high distances to almost everyone else (e.g., $d_{A, F} = 2.45$).
+
+---
+
+## Euclidean Distance in Directed Graphs
+
+::: {.incremental}
+- When networks contain **asymmetric (directed) ties**, we must distinguish between two behaviors:
+  1. **Sending Ties**: Do nodes $u$ and $v$ point to the same out-neighbors? (Row similarity)
+  2. **Receiving Ties**: Do nodes $u$ and $v$ receive ties from the same in-neighbors? (Column similarity)
+- Two directed nodes are structurally equivalent if and only if they send ties to the same others **and** receive ties from the same others.
+- The Euclidean distance formula expands to sum both row and column differences:
+  - $$d^{Euclidean}_{k,l} = \sqrt{\sum_j (a_{(k)j}-a_{(l)j})^2 + \sum_i (a_{(k)i}-a_{(l)i})^2}$$
+:::
+
+---
+
+## Directed Similarity Example
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Consider the directed graph on the right.
+- Nodes with the same color are structurally equivalent under directed Euclidean distance:
+  - $\{E, G\}$ are structurally equivalent ($d_{E, G} = 0$). They send ties to $\{C, F\}$ and receive ties from $\{D\}$.
+  - $\{C, F\}$ are structurally equivalent ($d_{C, F} = 0$). They send ties to $\{A\}$ and receive ties from $\{A, B, E, G\}$.
+  - Structural equivalence in directed networks elegantly maps actors into **identical social roles**.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'tree') +
+  geom_edge_parallel(color = "gray", edge_width = 1.2,
+              arrow = arrow(length = unit(4, 'mm')),
+              end_cap = circle(8, 'mm'), 
+              sep = unit(4, 'mm')) +
+  geom_node_point(aes(color = c("a", "b", "c", "d", "e", "c", "e")), size = 18) +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+# Part 3: Measuring Similarity via Neighborhood Overlap
+
+---
+
+## The Intuition of Neighborhood Overlap
+
+::: {.incremental}
+- Recall that the **neighborhood** of a node is the set of all other nodes adjacent to it.
+- **Neighborhood Overlap**:
+  - The more neighbors two nodes have in common, the more structurally similar they are.
+  - If you and your colleague share **100% of your friends**, you are structurally equivalent.
+  - If you share **none of your friends**, you occupy completely different social worlds.
+- We can formalize this overlap using three classical set-theoretic coefficients.
+:::
+
+---
+
+## Three Classical Coefficients
+
+::: {.incremental}
+- Let $n_{ij}$ be the number of common neighbors of nodes $i$ and $j$.
+- Let $k_i$ and $k_j$ be the degrees of nodes $i$ and $j$.
+- **1. Jaccard Similarity**:
+  - $$J_{ij} = \frac{n_{ij}}{k_i + k_j - n_{ij}}$$
+- **2. Dice Similarity**:
+  - $$D_{ij} = \frac{2n_{ij}}{k_i + k_j}$$
+- **3. Cosine Similarity**:
+  - $$C_{ij} = \frac{n_{ij}}{\sqrt{k_i k_j}}$$
+- All three metrics range from **0.0** (no overlap) to **1.0** (structural equivalence).
+:::
+
+---
+
+## Comparing Overlap Matrices
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 4.5
+# Generate an undirected graph deterministically for similarity comparisons
+set.seed(378)
+gr_sim <- play_islands(n_islands = 2, size_islands = 5, p_within = 0.8, m_between = 2)
+V(gr_sim)$name <- toupper(letters[1:10])
+
+# Plot the graph
+p_sim_graph <- ggraph(gr_sim, layout = 'kk') + 
+  geom_edge_link(color = "steelblue", edge_width = 1.25) + 
+  geom_node_point(size = 14, color = "tan2") + 
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph()
+p_sim_graph
+```
+
+---
+
+## Cosine Similarity Matrix Example
+
+```{r}
+#| echo: false
+adj_sim <- as.matrix(as_adjacency_matrix(gr_sim))
+C_sim <- round(cosine(adj_sim), 2)
+rownames(C_sim) <- V(gr_sim)$name
+colnames(C_sim) <- V(gr_sim)$name
+diag(C_sim) <- "--"
+C_sim[lower.tri(C_sim)] <- "--"
+
+kbl(C_sim, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed", "responsive"), font_size = 14)
+```
+
+- Cells record Cosine Similarity between node neighborhoods.
+- If $C_{ij} = 0.00$, $i$ and $j$ share absolutely zero friends.
+- If $C_{ij} = 1.00$, $i$ and $j$ are structurally equivalent.
+
+---
+
+## Neighborhood Overlap in Directed Graphs
+
+::: {.incremental}
+- In directed networks, neighborhood overlap splits into:
+  - **Out-Similarity**: Overlap in outgoing ties (pointing to the same others).
+  - **In-Similarity**: Overlap in incoming ties (receiving nominations from the same others).
+- **In Citation Networks** (where paper $A \rightarrow B$ means $A$ cites $B$):
+  - **Bibliographic Coupling** (Out-Similarity):
+    - The number of references two papers have in common.
+    - Measures similarity in theoretical foundations or sources.
+  - **Co-Citation** (In-Similarity):
+    - The frequency with which two papers are cited together by subsequent papers.
+    - Measures how much the scientific community associates their ideas.
+:::
+
+---
+
+## Directed Cosine Equations
+
+::: {.incremental}
+- Let $n_{ij}^{out}$ be the number of shared out-neighbors, and $n_{ij}^{in}$ be the shared in-neighbors.
+- Let $k_i^{out}$ and $k_i^{in}$ represent out-degrees and in-degrees.
+- **Cosine Out-Similarity**:
+  - $$C_{ij}^{out} = \frac{n_{ij}^{out}}{\sqrt{k_i^{out} k_j^{out}}}$$
+- **Cosine In-Similarity**:
+  - $$C_{ij}^{in} = \frac{n_{ij}^{in}}{\sqrt{k_i^{in} k_j^{in}}}$$
+- These directed formulas allow researchers to partition information and communication networks based on highly specific sender and receiver roles.
+:::
+
+---
+
+## Summary of Positional Concepts
+
+::: {.incremental}
+- **Positions represent roles**:
+  - Unlike cohesive subgroups, actors do not need to connect to each other to be in the same position; they just need to connect to others similarly.
+- **Structural Equivalence is the ideal limit**:
+  - Perfect row/column matching is highly elegant but rare in real social networks.
+- **Structural Similarity relaxes the limit**:
+  - Distance metrics (Euclidean) and Overlap coefficients (Jaccard, Dice, Cosine) allow us to measure degrees of positional equivalence.
+- **Directionality adds analytical depth**:
+  - Directed similarity splits into In-Similarity (Co-citation) and Out-Similarity (Bibliographic coupling), providing robust tools for citation and communication analysis.
+:::

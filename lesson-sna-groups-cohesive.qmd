@@ -321,4 +321,61 @@ Lambda sets are, of course, subgraphs of the original graph, but they have inter
 Second, the pairwise edge connectivity between nodes in the same lambda set is always larger than the pairwise edge connectivity between any other node in the lambda set (including themselves) and a node not in the lambda set. That means that nodes inside a lambda set have stronger indirect connections with one another than they do with outsiders, which is precisely what we would want in a cohesive subset of actors.
 
 
+## K-Core Decomposition and Core-Periphery Structures
+
+So far, we have focused on finding cohesive subgroups that form distinct, often symmetric, and relatively separate clusters of actors (like cliques, $n$-cliques, or lambda sets). However, many social, economic, and organizational networks are organized differently: rather than forming neat, parallel clusters, they feature a highly cohesive, densely interconnected **Core** subgroup surrounded by a sparsely connected **Periphery** whose members link to the core but rarely to each other.
+
+In network analysis, this is called a **core-periphery structure**. Some classic real-world examples include:
+- **Scientific Collaboration**: A core of elite, heavily co-authoring scientists who drive the field, surrounded by a peripheral set of occasional authors who co-author with the core but never with each other.
+- **The Global Economy**: Wealthy core nations exchanging high-value manufactured goods and capital, surrounded by peripheral nations that export raw materials to the core but maintain very few trading relationships with one another.
+- **Office Advice Networks**: A core group of experienced managers who consult each other on decisions, surrounded by peripheral employees who seek advice from the core but rarely consult one another.
+
+### Finding Cores: The $k$-Core Decomposition Algorithm
+
+To identify these hidden cores in a messy, complex network, the sociologist Stephen Seidman [-@seidman83] introduced the concept of the **$k$-core**. A $k$-core is defined as a maximal subgraph in which every vertex is connected to at least $k$ other vertices *within that subgraph*. 
+
+To find the $k$-cores of a network, we use a recursive pruning algorithm known as **$k$-core decomposition** (often called the "onion-peeling" algorithm). The algorithm works as follows:
+1. We start by calculating the degree of all nodes in the network.
+2. We choose a threshold $k = 1$ and recursively prune (remove) all nodes with a degree strictly less than $k$, along with all of their incident edges. 
+3. Because removing these nodes reduces the degree of their remaining neighbors, some of those remaining nodes might now fall below the threshold. We recursively repeat the pruning process until no more nodes can be removed. The remaining subgraph constitutes the $k$-core for that value of $k$.
+4. We then increment the threshold to $k = 2, 3, \dots$ and repeat the recursive pruning. 
+
+This process peels the network layer-by-layer like an onion. The nodes removed at each step are assigned to different **$k$-shells**, and the nodes that survive the deepest levels of pruning represent the highly connected, resilient **core** of the social system.
+
+We can easily perform $k$-core decomposition in R using the `tidygraph` package, which provides a convenient wrapper around `igraph`'s coreness calculations via the `node_coreness()` function. Let's look at an example. In @fig-coreperiph, we generate an 18-node network featuring a clear core-periphery structure and color the nodes by their calculated $k$-shell membership.
+
+```{r}
+#| label: fig-coreperiph
+#| fig-cap: "K-Core decomposition of an 18-node network showing core (red, $k=4$) and peripheral (yellow/green, $k=1,2$) shells."
+#| fig-cap-location: bottom
+#| fig-height: 8
+#| fig-width: 10
+
+    set.seed(329)
+    # Generate a core of 12 highly connected nodes and bind 6 peripheral leaf nodes
+    gr_core <- play_islands(n_islands = 1, size_islands = 12, p_within = 0.8, 0) %>%
+      bind_nodes(data.frame(name = 13:18)) %>%
+      bind_edges(data.frame(from = 1:6, to = 13:18))
+      
+    # Calculate k-coreness for each node
+    V(gr_core)$coreness <- coreness(gr_core)
+    
+    # Plot using ggraph, coloring by coreness
+    p_core <- ggraph(gr_core, layout = 'kk') +
+      geom_edge_link(color = "steelblue", alpha = 0.4, width = 1.0) +
+      geom_node_point(aes(color = as.factor(coreness)), size = 18) +
+      geom_node_text(aes(label = 1:18), size = 8, fontface = "bold", color = "white") +
+      scale_color_brewer(palette = "Set1") +
+      theme_graph() + 
+      labs(color = "K-Core Shell") +
+      theme(legend.position = "right")
+      
+    p_core
+```
+
+As we can see in @fig-coreperiph, the outer, peripheral nodes (nodes 13 to 18) are immediately pruned during the first step because they only have a single tie to the core (degree = 1). They belong to the $k=1$ shell. As we increment $k$, the pruning algorithm continues to shave off layers until only the highly integrated, dense inner core of nodes remains at the highest coreness level ($k=4$). 
+
+Unlike traditional partition methods that divide networks into separate, disjoint subgroups, $k$-core decomposition provides a nested, multi-layered view of social integration, elegantly mapping the gradient from the marginal periphery to the dominant core.
+
+
 ## References {.unnumbered}

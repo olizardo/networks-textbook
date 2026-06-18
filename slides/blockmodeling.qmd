@@ -1,0 +1,432 @@
+---
+title: "Graph Theory: Blockmodeling"
+subtitle: "Role Structure and Block Relations"
+format:
+  revealjs:
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+library(corrplot)
+
+# Custom correlation function from textbook
+corr.dist <- function(x) {
+  r <- nrow(x)
+  c <- ncol(x)
+  r.c <- matrix(0, r, r)
+  r.m <- rowMeans(x)
+  for (i in 1:r) {
+    for (j in 1:r) {
+      r.x <- x[i, ] - r.m[i]
+      r.y <- x[j, ] - r.m[j]
+      r.xy <- r.x * r.y
+      r.xx <- r.x^2
+      r.yy <- r.y^2
+      r.num <- sum(r.xy)
+      r.den <- sqrt(sum(r.xx)) * sqrt(sum(r.yy))
+      r.c[i, j] <- round(r.num / r.den, 2)
+    }
+  }
+  rownames(r.c) <- rownames(x)
+  colnames(r.c) <- rownames(x)
+  return(r.c)
+}
+
+# Standard 6-node undirected graph
+gr_undir <- create_empty(6, directed = FALSE) %>%
+  bind_edges(data.frame(from = c(1, 1, 2, 2, 3, 3, 5, 6), to = c(3, 4, 3, 4, 1, 2, 3, 5))) %>%
+  mutate(name = toupper(letters[1:6]))
+gr_undir <- simplify(gr_undir)
+
+# Big 22-node network for CONCOR demonstration
+fr <- c(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 3), rep(20, 3))
+to <- c(5:9, 10:14, 15:19, 1:3, 5, 21, 22)
+edge_dat <- data.frame(fr, to)
+node_dat <- data.frame(name = toupper(letters[union(fr, to)]))
+gr_big <- tbl_graph(edges = edge_dat, nodes = node_dat, directed = FALSE)
+gr_big <- as_tbl_graph(simplify(gr_big))
+```
+
+# Part 1: The Correlation Distance & CONCOR
+
+---
+
+## The Correlation Distance ($d^{corr}_{k,l}$)
+
+::: {.incremental}
+- Beyond Euclidean distance, we can measure structural similarity using the **Pearson Correlation Coefficient** ($r_{kl}$ or $d^{corr}_{kl}$) between node vectors.
+- Compares row (or column) vectors and returns a value between **$-1.0$ and $+1.0$**:
+  - **$+1.0$**: Nodes are perfectly structurally equivalent.
+  - **Positive ($> 0.0$)**: Nodes are structurally similar.
+  - **Negative ($< 0.0$)**: Nodes are structurally dissimilar.
+  - **$-1.0$**: Nodes are completely different, pointing to completely disjoint sets of neighbors.
+- The formula is:
+  - $$d^{corr}_{k, l} = \frac{\sum_j (a_{(k)j} - \overline{a}_{(k)j}) \times (a_{(l)j} - \overline{a}_{(l)j})}{\sqrt{\sum_j (a_{(k)j} - \overline{a}_{(k)j})^2 \times \sum_j (a_{(l)j} - \overline{a}_{(l)j})^2}}$$
+:::
+
+---
+
+## Meaning of Row Means ($\overline{a}_{(k)j}$)
+
+::: {.incremental}
+- What does $\overline{a}_{(k)j}$ represent?
+  - It is simply the **average of the row elements** for node $k$.
+  - $$\overline{a}_{(k)j} = \frac{\sum_j a_{kj}}{N}$$
+  - Where $N$ is the number of columns (the order of the graph).
+- For a binary adjacency matrix, the row mean is simply the **node degree divided by the number of nodes**:
+  - Node $A$ has ties to $\{C, D\}$ in a 6-node network:
+  - Vector $a_{(A)j} = (0, 0, 1, 1, 0, 0)$.
+  - Average: $\overline{a}_{(A)j} = \frac{2}{6} \approx 0.33$.
+:::
+
+---
+
+## Mean Differences Vector
+
+- Subtracting the row mean $\overline{a}_{(A)j} \approx 0.33$ from each entry of $A$'s row vector $a_{(A)j} = (0, 0, 1, 1, 0, 0)$ gives the Mean Differences vector:
+
+```{r}
+#| echo: false
+A_entries <- c(0, 0, 1, 1, 0, 0)
+diff_lbl <- c("(0 - 0.33)", "(0 - 0.33)", "(1 - 0.33)", "(1 - 0.33)", "(0 - 0.33)", "(0 - 0.33)")
+diff_val <- c(-0.33, -0.33, 0.67, 0.67, -0.33, -0.33)
+mean_diff_mat <- matrix(c(as.character(A_entries), diff_lbl, as.character(diff_val)), nrow = 3, byrow = TRUE)
+rownames(mean_diff_mat) <- c("Row A", "A - Mean", "Difference")
+colnames(mean_diff_mat) <- c("A", "B", "C", "D", "E", "F")
+kbl(mean_diff_mat, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"))
+```
+
+- We compute these difference vectors for all pairs of nodes, multiply them in the numerator, normalize them in the denominator, and obtain the correlation matrix.
+
+---
+
+## Correlation Distance Matrix ($S^{corr}$)
+
+```{r}
+#| echo: false
+adj_mat_6 <- matrix(as_adjacency_matrix(gr_undir), nrow = length(V(gr_undir)))
+rownames(adj_mat_6) <- V(gr_undir)$name
+colnames(adj_mat_6) <- V(gr_undir)$name
+adj_mat_6 <- adj_mat_6[order(row.names(adj_mat_6)), order(row.names(adj_mat_6))]
+cor_mat_6 <- corr.dist(adj_mat_6)
+diag(cor_mat_6) <- "--"
+
+kbl(cor_mat_6, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"))
+```
+
+- Structurally equivalent pairs ($\{A, B\}$ and $\{C, D\}$) have a correlation of **1.00**.
+- Completely disjoint pairs ($\{C, E\}$ and $\{D, E\}$) are perfectly negatively correlated (**-1.00**).
+- Similar but non-equivalent nodes ($C$ and $F$) have a correlation of **0.45**.
+
+---
+
+## Iterated Correlation Distances: CONCOR
+
+::: {.incremental}
+- What happens if we take the correlation distance of a correlation distance matrix?
+- **CONCOR** (Convergence of Iterated Correlations; Breiger, Boorman, & Arabie, 1975):
+  - If we recursively calculate the correlation distance matrix of the previous correlation matrix, the values mathematically **converge to only $+1.0$ and $-1.0$**.
+  - This slices the network into two distinct, highly clear-cut blocks of structurally equivalent or similar nodes.
+- Let's look at this mathematical convergence in action.
+:::
+
+---
+
+## Iterative Convergence (2nd & 3rd Iterations)
+
+:::: {.columns}
+
+::: {.column width="50%"}
+### 2nd Iteration Matrix
+- Values begin polarizing toward $+1$ and $-1$.
+```{r}
+#| echo: false
+diag_clean <- function(mat) {
+  diag(mat) <- "--"
+  return(mat)
+}
+cor_6_2 <- corr.dist(corr.dist(adj_mat_6))
+kbl(diag_clean(cor_6_2), format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"), font_size = 12)
+```
+:::
+
+::: {.column width="50%"}
+### 3rd Iteration Matrix
+- Every cell reaches **exactly $+1.00$ or $-1.00$**!
+```{r}
+#| echo: false
+cor_6_3 <- corr.dist(cor_6_2)
+kbl(diag_clean(cor_6_3), format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"), font_size = 12)
+```
+:::
+
+::::
+
+---
+
+## Structural Positions via CONCOR
+
+```{r}
+#| echo: false
+kbl(cor_6_3, format = "html", align = "c") %>%
+  row_spec(1:2, background = "salmon", bold = TRUE) %>%
+  row_spec(3:4, background = "lightgreen", bold = TRUE) %>%
+  row_spec(5, background = "cyan", bold = TRUE) %>%
+  row_spec(6, background = "violet", bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"))
+```
+
+::: {.incremental}
+- By analyzing the rows of $+1$ and $-1$, we extract perfect structurally equivalent positions:
+  - Position 1 (Salmon): Nodes $\{A, B\}$
+  - Position 2 (Green): Nodes $\{C, D\}$
+  - Position 3 (Blue): Node $\{E\}$
+  - Position 4 (Purple): Node $\{F\}$
+:::
+
+# Part 2: Blockmodeling a 22-Node Network
+
+---
+
+## Uncovering Secret Patterns in Large Networks
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Let's apply CONCOR to a larger, messier 22-node network on the right.
+- It contains:
+  - Three high-degree hub nodes ($A$, $B$, $C$).
+  - Sets of identical peripheral leaf nodes connected to each hub.
+  - A highly central node $D$ bridging hubs.
+  - Two peripheral nodes $U, V$ connected only to $S$.
+- Let's see how CONCOR recursively partitions this graph.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_big, layout = 'kk') + 
+  geom_edge_link(color = "steelblue", edge_width = 1.15) + 
+  geom_node_point(color = "tan2", size = 16) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Step 1: First Split (Two Giant Blocks)
+
+- Running CONCOR on the whole 22-node network splits it into two massive blocks:
+  - **Block 1**: $\{V, U, S, H, G, F, E, T, C, A, B\}$ (Colored Red)
+  - **Block 2**: $\{R, Q, P, O, N, M, L, K, J, D, I\}$ (Colored Blue)
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 4.8
+node_color_split1 <- c(rep("firebrick",3), "darkblue", "firebrick", rep("firebrick", 4), rep("darkblue", 10), "firebrick", rep("firebrick", 2))
+ggraph(gr_big, layout = 'kk') + 
+  geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 1.0) + 
+  geom_node_point(color = node_color_split1, size = 12) +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+---
+
+## Step 2: Going Deeper (The Hierarchical Partition)
+
+::: {.incremental}
+- Running CONCOR recursively on the induced subgraphs of each block yields nested subdivisions:
+  - **Block 1 Splits**:
+    - **Block 1a** (Core hub/bridge): $\{A, B, C, S, U, V\}$
+    - **Block 1b** (A's peripheral leaves): $\{E, F, G, H, T\}$
+  - **Block 2 Splits**:
+    - **Block 2a** (B's peripheral leaves): $\{I, J, K, L, M\}$
+    - **Block 2b** (C's peripheral leaves): $\{N, O, P, Q, R\}$
+    - **Block 2c** (Unique central bridge): $\{D\}$ (Occupies a block entirely by itself!)
+- Further splits on Block 1a isolate $\{U, V\}$, and divide the remaining $\{A, B, C, S\}$ into $\{A, S\}$ and $\{B, C\}$.
+:::
+
+---
+
+## Final Seven-Block Partition
+
+- The final, elegant block partition reveals how role structures are naturally isolated:
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 5.5
+node_color_final <- c("firebrick", rep("darkblue", 2), "purple", rep("tan1", 5), rep("darkgreen", 5), rep("#CC79A7", 5), "firebrick", rep("#56B4E9", 2))
+ggraph(gr_big, layout = 'kk') + 
+  geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 1.0) + 
+  geom_node_point(color = node_color_final, size = 14) +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+---
+
+## The Blocked Adjacency Matrix
+
+```{r}
+#| echo: false
+adj_mat_big <- matrix(as_adjacency_matrix(gr_big), nrow = length(V(gr_big)))
+rownames(adj_mat_big) <- V(gr_big)$name
+colnames(adj_mat_big) <- V(gr_big)$name
+final_blocks_order <- c("I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "T", "E", "F", "G", "H", "B", "C", "A", "S", "U", "V", "D")
+blocked_adj <- adj_mat_big[final_blocks_order, final_blocks_order]
+
+kbl(blocked_adj, align = "c", format = "html") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  row_spec(5, extra_css = "border-bottom: 2px solid black;") %>%  
+  row_spec(10, extra_css = "border-bottom: 2px solid black;") %>%  
+  row_spec(15, extra_css = "border-bottom: 2px solid black;") %>%  
+  row_spec(17, extra_css = "border-bottom: 2px solid black;")  %>% 
+  row_spec(19, extra_css = "border-bottom: 2px solid black;")  %>% 
+  row_spec(21, extra_css = "border-bottom: 2px solid black;") %>% 
+  column_spec(6, extra_css = "border-right: 2px solid black;") %>% 
+  column_spec(11, extra_css = "border-right: 2px solid black;") %>%  
+  column_spec(16, extra_css = "border-right: 2px solid black;") %>%  
+  column_spec(18, extra_css = "border-right: 2px solid black;") %>%  
+  column_spec(20, extra_css = "border-right: 2px solid black;") %>% 
+  column_spec(22, extra_css = "border-right: 2px solid black;")  
+```
+
+::: {.incremental}
+- **Thick black lines** divide the matrix into block submatrices.
+- Diagonal squares represent **within-block** ties; off-diagonal rectangles represent **between-block** ties.
+- We identify **Zero Blocks** (filled only with 0s) and **One Blocks** (containing some 1s).
+:::
+
+# Part 3: Image Matrices & Reduced Graphs
+
+---
+
+## Reducing Complexity to an Image Matrix
+
+::: {.incremental}
+- The blocked adjacency matrix can be simplified to a **reduced image matrix** ($\mathbf{B}$) of dimensions $b \times b$ (where $b = 7$ is the number of blocks).
+- **Rule of Reduction**:
+  - We record a **0** if the relation block is a **Zero Block** (completely disconnected).
+  - We record a **1** if the relation block is a **One Block** (contains ties).
+- This yields a highly simplified map of role interactions:
+  - $$
+    \mathbf{B} = 
+    \begin{pmatrix}
+    \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} \\
+    \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} \\
+    \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} \\
+    \text{One} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} \\
+    \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{One} & \text{One} \\
+    \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} \\
+    \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{One} & \text{Zero} & \text{Zero}
+    \end{pmatrix}
+    $$
+:::
+
+---
+
+## Image Matrix Table
+
+```{r}
+#| echo: false
+image_mat <- matrix(c(
+  0, 0, 0, 1, 0, 0, 0,
+  0, 0, 0, 1, 0, 0, 0,
+  0, 0, 0, 0, 1, 0, 0,
+  1, 1, 0, 0, 0, 0, 1,
+  0, 0, 1, 0, 0, 1, 1,
+  0, 0, 0, 0, 1, 0, 0,
+  0, 0, 0, 1, 1, 0, 0
+), nrow = 7, byrow = TRUE)
+block_names <- c("Leaves_I", "Leaves_N", "Leaves_T", "Hubs_BC", "Hubs_AS", "Leaves_UV", "Bridge_D")
+rownames(image_mat) <- block_names
+colnames(image_mat) <- block_names
+
+kbl(image_mat, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+- High-level representation of block relations.
+- Notice that Leaf blocks do not connect to themselves (0s on diagonal), but connect specifically to their respective Hub blocks.
+
+---
+
+## Reduced Graph Representation
+
+:::: {.columns align=center}
+
+::: {.column width="45%"}
+::: {.incremental}
+- We can plot the image matrix as a **reduced graph**.
+- **The Power of Blockmodeling**:
+  - Distills a sprawling, complex network of 22 nodes down to a highly intuitive role-interaction model of just **7 block-nodes**.
+  - Revealing the structural blueprint of the system: peripheral elements (leaves) feeding into coordinated brokers (hubs), bridged by a highly central node ($D$).
+:::
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6.5
+#| fig-height: 5.5
+gr_image <- graph_from_adjacency_matrix(image_mat) %>% 
+  as_tbl_graph() %>% 
+  activate(nodes) %>% 
+  mutate(names = block_names)
+
+ggraph(gr_image, layout = 'kk') + 
+  geom_edge_link(color = "steelblue", edge_width = 1.15) + 
+  geom_node_label(aes(label = names), size = 4, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Blockmodeling: A Structural Summary
+
+::: {.incremental}
+- **Blockmodeling Distills Structure**:
+  - Slices complex social structures down to high-level system blueprints.
+- **CONCOR algorithm**:
+  - Recursively polarizes Pearson correlations to group similar actors.
+- **Zero vs. One Blocks**:
+  - Blocked adjacency matrices cleanly isolate patterns of connection (One blocks) and absolute separation (Zero blocks).
+- **Reduced Graph Models**:
+  - Image matrices represent relations *between roles*, creating simplified reduced graphs that make networks easy to read, interpret, and model.
+:::
