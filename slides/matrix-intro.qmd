@@ -1,0 +1,384 @@
+---
+title: "Networks, Graphs, and Matrices"
+subtitle: "An Introduction to Relationship Matrices"
+format:
+  revealjs:
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+
+# 1. Undirected 9-node graph for symmetric adjacency matrix
+gr_undir <- create_empty(9, directed = FALSE) %>% 
+  bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+  bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+  bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+  bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+  bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+  bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+  bind_edges(data.frame(from = 8, to = c(9))) %>%
+  mutate(name = toupper(letters[1:9]))
+
+# 2. Directed 7-node graph for asymmetric adjacency matrix
+fr <- c("A", "A", "B", "B", "C", "D", "E", "E", "F", "G", "G")
+to <- c("B", "F", "A", "D", "C", "D", "C", "D", "A", "F", "D")
+edge_dat <- data.frame(fr, to)
+node_dat <- data.frame(name = union(fr, to))
+gr_dir <- tbl_graph(edges = edge_dat, nodes = node_dat)
+```
+
+# Part 1: Social Networks, Graphs, and Matrices
+
+---
+
+## Representing Social Networks
+
+::: {.incremental}
+- How do we describe and analyze social networks? We use three distinct levels of abstraction:
+  1. **Social Networks (Real Life)**: Intuitive, fuzzy concepts based on natural language and daily interactions (e.g., popularity, friendship, reciprocity).
+  2. **Graphs (Mathematical Model)**: Pictorial representation where actors are points (vertices/nodes) and relations are lines (edges/ties/links).
+  3. **Matrices (Quantitative Tool)**: Two-dimensional arrays of numbers used to perform mathematical operations and calculations.
+- While graphs are intuitive for small groups, they quickly become unreadable **"hairballs"** as networks grow. 
+- Matrices give us the **analytical leverage** to calculate precise network metrics.
+:::
+
+---
+
+## The SNA "Three-Step Shuffle"
+
+::: {.incremental}
+- To build rigorous, scientific measures, network analysts perform a **three-step shuffle**:
+- **Step 1: The Social-Theoretic Level**
+  - Grab an "off-the-shelf" fuzzy concept from social science (e.g., *popularity*).
+- **Step 2: The Graph-Theoretic Level**
+  - Translate the concept into formal graph theory (e.g., *indegree*—the number of directed edges pointing to a node).
+- **Step 3: The Matrix-Algebraic Level**
+  - Link the graph concept to matrix algebra to perform mathematical operations (e.g., *column sum* of the adjacency matrix).
+:::
+
+---
+
+## The Shuffle in Action: Popularity
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Step 1 (Theory)**:
+  - Popularity is "being highly liked or nominated by peers."
+- **Step 2 (Graph)**:
+  - We model the students as vertices ($V$) and nominations as directed edges ($E$).
+  - Popularity becomes **indegree centrality** ($d_{in}(v)$).
+- **Step 3 (Matrix)**:
+  - We represent the network as a directed adjacency matrix ($\mathbf{A}$).
+  - The indegree of node 3 is obtained by **summing the elements in the 3rd column**:
+  - $$d_{in}(v_j) = \sum_{i} A_{ij}$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25,
+                 arrow = arrow(length = unit(4, 'mm')),
+                 end_cap = circle(6, 'mm')) +
+  geom_node_point(color = "tan2", size = 18) +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Don't Confuse Them!
+
+| Social-Theoretic Concept | Graph-Theoretic Analogue | Matrix-Algebraic Representation |
+| :--- | :--- | :--- |
+| **Reciprocity** (Mutual friendship) | A pair of symmetric directed edges pointing in opposite directions. | The cell product $A_{ij} \times A_{ji} = 1$ in a binary adjacency matrix. |
+| **Popularity** (Being highly liked) | The cardinality of incoming edges terminating at a node (**indegree**). | The column sum: $\sum_i A_{ij}$ in the adjacency matrix. |
+| **Expansiveness** (Outgoing nominations) | The cardinality of outgoing edges originating from a node (**outdegree**). | The row sum: $\sum_j A_{ij}$ in the adjacency matrix. |
+| **Symmetric Relation** (e.g., co-workers) | An undirected graph containing simple undirected edges. | A symmetric relationship matrix where $A_{ij} = A_{ji}$ for all cells. |
+
+: The Duality of Network Concepts. {#tbl-duality}
+
+# Part 2: Introduction to Matrices
+
+---
+
+## What is a Matrix?
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Invented for social networks by Elaine Forsyth and Leo Katz in the mid-1940s.
+- A **matrix** is a two-dimensional array of numbers organized into **rows** ($R$) and **columns** ($C$).
+- **Dimensions**:
+  - Described as $R \times C$ (rows always come first, columns second).
+  - e.g., a $5 \times 3$ matrix has 5 rows and 3 columns.
+- **Rectangular Matrices**:
+  - $R \neq C$ (e.g., attribute-value matrices, spreadsheet data, or actor-by-event affiliation networks).
+:::
+:::
+
+::: {.column width="40%"}
+### General Matrix Example
+| | Att. 1 | Att. 2 | Att. 3 |
+| :--- | :---: | :---: | :---: |
+| **Case 1** | $V_1$ | $V_4$ | $V_7$ |
+| **Case 2** | $V_2$ | $V_5$ | $V_8$ |
+| **Case 3** | $V_3$ | $V_6$ | $V_9$ |
+
+: Dimensions: $3 \times 3$.
+:::
+
+::::
+
+---
+
+## Matrix Indexing and Cells
+
+::: {.incremental}
+- The intersection of row $i$ and column $j$ defines a **cell** in the matrix.
+- **Notation**:
+  - We use boldfaced capital letters to name matrices (e.g., matrix $\mathbf{A}$).
+  - We use lowercase, indexed letters to refer to individual cell values: $a_{ij}$ (Value in Row $i$, Column $j$).
+  - Row index is $i$; column index is $j$.
+- For example, if $\mathbf{B}$ is a survey matrix:
+  - Cell $b_{32}$ refers to Row 3 (Case 3, a person) and Column 2 (Attribute 2, e.g., Age).
+  - If that person is 54 years old, then $b_{32} = 54$.
+:::
+
+---
+
+## Relationship Matrices
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Social network analysis rarely uses general attribute-value matrices.
+- Instead, we use **Relationship Matrices**:
+  - The same list of cases (actors) is listed on **both rows and columns**.
+  - Cell $a_{ij}$ records the value of the relationship from row actor $i$ to column actor $j$.
+  - All relationship matrices are **Square Matrices**:
+    - The number of rows equals the number of columns ($R = C$).
+    - A square matrix of size $N$ is said to be of **order $N$**.
+:::
+:::
+
+::: {.column width="40%"}
+### Relationship Matrix
+| | Case 1 | Case 2 | Case 3 |
+| :--- | :---: | :---: | :---: |
+| **Case 1** | $V_1$ | $V_2$ | $V_3$ |
+| **Case 2** | $V_4$ | $V_5$ | $V_6$ |
+| **Case 3** | $V_7$ | $V_8$ | $V_9$ |
+
+: Order $N = 3$.
+:::
+
+::::
+
+---
+
+## Diagonal vs. Off-Diagonal Cells
+
+:::: {.columns}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **The Main Diagonal**:
+  - The diagonal line running from the top-left to the bottom-right corner.
+  - Composed of cells where **row index equals column index** ($i = j$).
+  - Represents the relationship of actors with themselves ($a_{ii}$), which we typically ignore by **blocking the diagonals** with a dash (`--`).
+- **Off-Diagonal Cells ($i \neq j$)**:
+  - **Upper Triangle ($i < j$)**: Cells above the main diagonal (e.g., $a_{12}, a_{13}$).
+  - **Lower Triangle ($i > j$)**: Cells below the main diagonal (e.g., $a_{21}, a_{31}$).
+:::
+:::
+
+::: {.column width="40%"}
+### Blocked Diagonals
+| | C1 | C2 | C3 |
+| :--- | :---: | :---: | :---: |
+| **C1** | *--* | $V_1$ | $V_2$ |
+| **C2** | $V_3$ | *--* | $V_4$ |
+| **C3** | $V_5$ | $V_6$ | *--* |
+
+- Symmetric ties (undirected graphs) mean the upper and lower triangles are identical ($V_1 = V_3$, $V_2 = V_5$).
+- Asymmetric ties (directed graphs) do not require symmetry.
+:::
+
+::::
+
+# Part 3: The Adjacency Matrix
+
+---
+
+## Defining Adjacency in Matrices
+
+::: {.incremental}
+- The **Adjacency Matrix** is the most important representation of a network.
+- It is a binary relationship matrix of order $N$ indicating whether pairs of nodes are directly connected (**adjacent**) in the graph.
+- Formal Definition:
+  - $$A_{ij} = 1 \quad \text{if edge } \{v_i, v_j\} \text{ exists in } E$$
+  - $$A_{ij} = 0 \quad \text{if edge } \{v_i, v_j\} \text{ does not exist in } E$$
+- In simple graphs, we always set $A_{ii} = 0$ (or `--`) to block self-loops.
+:::
+
+---
+
+## Symmetric Adjacency Matrices (Undirected Graphs)
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+- Undirected graphs feature symmetric ties (e.g., co-workers).
+- Resulting adjacency matrix is **symmetric**:
+  - Flipped along the diagonal, the upper and lower triangles are mirror images.
+  - $$A_{ij} = A_{ji} \quad \text{for all } i, j$$
+```{r}
+#| echo: false
+A_symm <- as.matrix(as_adjacency_matrix(gr_undir))
+diag(A_symm) <- "--"
+kbl(A_symm, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"), font_size = 14)
+```
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_undir, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(color = "tan2", size = 16) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Asymmetric Adjacency Matrices (Directed Graphs)
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+- Directed graphs feature asymmetric ties (e.g., advice, liking).
+- Resulting adjacency matrix is **asymmetric**:
+  - The upper and lower triangles do not mirror each other.
+  - $A_{ij} \neq A_{ji}$ is common (unreciprocated ties).
+```{r}
+#| echo: false
+A_asymm <- as.matrix(as_adjacency_matrix(gr_dir))
+diag(A_asymm) <- "--"
+kbl(A_asymm, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"), font_size = 14)
+```
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25,
+                 arrow = arrow(length = unit(4, 'mm')),
+                 end_cap = circle(6, 'mm')) +
+  geom_node_point(color = "tan2", size = 16) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+# Part 4: Advanced Adjacency Matrices
+
+---
+
+## Weighted Adjacency Matrices
+
+::: {.incremental}
+- In real-world social life, ties are rarely just binary ($0$ or $1$); they have varying degrees of **strength** or **intensity**.
+- **Weighted Graphs**:
+  - Associate numerical values with edges (e.g., emails sent per day, dollars traded, papers co-authored).
+  - Cell entries represent real numbers: $W_{ij} = w$ (where $w$ is the tie weight).
+- **Binarization**:
+  - To simplify a dense weighted matrix ($\mathbf{W}$), we apply a threshold cutoff $\Theta$:
+  - $$A_{ij} = 1 \quad \text{if } W_{ij} > \Theta$$
+  - $$A_{ij} = 0 \quad \text{if } W_{ij} \le \Theta$$
+:::
+
+---
+
+## Multiplexity and Multigraphs
+
+::: {.incremental}
+- In social networks, actors often share multiple types of relationships (e.g., being co-workers, friends, and neighbors simultaneously). This is called **multiplexity**.
+- A network with multiple distinct types of edges between nodes is a **multigraph**.
+- **Matrix Representation**:
+  - A single cell can only hold one value, so we cannot represent a multigraph in a single standard 2D matrix.
+  - Instead, we represent it as a set of **stacked adjacency matrices**:
+    - Matrix $\mathbf{A}^{(1)}$ (Kinship), Matrix $\mathbf{A}^{(2)}$ (Advice), Matrix $\mathbf{A}^{(3)}$ (Friendship).
+  - This stacked array forms a **three-dimensional matrix** (or **tensor**) of dimensions $N \times N \times K$.
+:::
+
+---
+
+## Bipartite Matrices (Two-Mode Networks)
+
+::: {.incremental}
+- **Two-Mode Networks**:
+  - Map connections between **actors** and **groups/events/organizations** (e.g., executives sitting on boards of directors, activists co-attending protests).
+- **Bipartite Graphs**:
+  - Feature two disjoint sets of vertices ($N$ actors and $M$ events). Edges only link actors to events, never actors to actors or events to events.
+- **Affiliation Matrix** ($\mathbf{C}$):
+  - Because the vertex sets are disjoint, this is represented as a **rectangular matrix** of dimensions $N \times M$.
+  - $C_{ij} = 1$ if actor $i$ is affiliated with event $j$, else $0$.
+:::
+
+# Part 5: Summary & Key Takeaways
+
+---
+
+## Summary of Key Concepts
+
+::: {.incremental}
+- **Matrices provide analytical power**:
+  - Eyeballing "hairball" graphs gets impossible as networks scale. Matrices allow computer systems to easily run computations.
+- **Adjacency Matrix**:
+  - Stores direct connections. Symmetric ($A_{ij} = A_{ji}$) for undirected graphs; asymmetric ($A_{ij} \neq A_{ji}$) for directed graphs.
+- **Main Diagonal**:
+  - Represents self-loops ($i = j$), which we block (`--`) in simple graphs.
+- **Weighted & Multigraph Matrices**:
+  - Weighted matrices record tie strengths (which can be binarized using $\Theta$). Multigraphs represent multiplex ties using stacked 3D matrices (tensors).
+- **Affiliation Matrices**:
+  - Bipartite graphs represent two-mode networks using rectangular $N \times M$ matrices.
+:::

@@ -823,6 +823,11 @@ window.Quarto = {
   <li><a href="#relationship-matrices" id="toc-relationship-matrices" class="nav-link" data-scroll-target="#relationship-matrices"><span class="header-section-number">17.1.1</span> Relationship Matrices</a></li>
   <li><a href="#diagonal-versus-off-diagonal-cells" id="toc-diagonal-versus-off-diagonal-cells" class="nav-link" data-scroll-target="#diagonal-versus-off-diagonal-cells"><span class="header-section-number">17.1.2</span> Diagonal versus off-diagonal cells</a></li>
   </ul></li>
+  <li><a href="#the-social-network-analysis-three-step-shuffle" id="toc-the-social-network-analysis-three-step-shuffle" class="nav-link" data-scroll-target="#the-social-network-analysis-three-step-shuffle"><span class="header-section-number">17.2</span> The Social Network Analysis Three-Step Shuffle</a>
+  <ul class="collapse">
+  <li><a href="#a-detailed-example-popularity" id="toc-a-detailed-example-popularity" class="nav-link" data-scroll-target="#a-detailed-example-popularity"><span class="header-section-number">17.2.1</span> A Detailed Example: Popularity</a></li>
+  <li><a href="#dont-confuse-them" id="toc-dont-confuse-them" class="nav-link" data-scroll-target="#dont-confuse-them"><span class="header-section-number">17.2.2</span> Don’t Confuse Them!</a></li>
+  </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -1006,7 +1011,7 @@ Table&nbsp;17.3: Example of a relationship matrix with blocked diagonals.
 </div>
 <p>This means that most of the time, we can ignore the diagonal cells in relationship matrices and rewrite them as in <a href="#tbl-relmatrixnd" class="quarto-xref">Table&nbsp;<span>17.3</span></a>, where values appear only in the off-diagonal cells. So here we can see the relationship between Case 1 and Case 2 is Value 1, and the relationship between Case 2 and Case 1 is Value 3. Wait, would that mean Values 2 and 4 are the same? The answer is maybe. Depends on which <em>type of network tie</em> is being captured, as discussed in the lesson on graph theory. If the tie is <strong>symmetric</strong> (and thus represented in an <strong>undirected graph</strong>), then the values will have to be the same. But if the <strong>asymmetric</strong> (and thus represented in a <strong>directed graph</strong>), then they don’t have to be.</p>
 <p>By convention, in a relationship matrix, we say that the case located in row <em>i</em> <strong>sends</strong> (a tie) to the case located in column <em>j</em>, so if the relationship matrix was capturing friendship, we might say that <em>i</em> considers <em>j</em> to be a friend (sends the consideration) and so if <em>i</em> is Case 1 (row 1) and <em>j</em> is Case 2 (column 2), that would be Value 1 (e.g., “Are we friends?” Value 1 = Yes/No). But when <em>i</em> is now Case 2 (row 2) and <em>j</em> is Case 1 (column 1), we are now asking if Case 2 considers Case 1 to be a friend (e.g., “Are we friends?” Value 3 = Yes/No). If friendship is considered an asymmetric tie in this case, then that could be true, or it could not be. For instance, Case 2 can rebuff Case 1’s friendship offer.</p>
-<p>Note that if the tie we recorded in a relationship matrix is symmetric, we can simplify the presentation even further. The reason is that, as already noted, if a relationship is symmetric, then the value of the tie that <em>i</em> sends to <em>j</em> is necessarily the same as the value of the tie that <em>j</em> sends to <em>i</em>. This means that, in the relationship matrix, the <em>value</em> of cell <strong>a</strong><span class="math inline">\(_{ij}\)</span> <em>has</em> to be the same as the value of the cell <strong>a</strong><span class="math inline">\(_{ji}\)</span> for all rows <em>i</em> and columns <em>j</em> in the matrix. This yields a <strong>symmetric relationship matrix</strong>, like that shown in <a href="#tbl-relmatrixndsymm" class="quarto-xref">Table&nbsp;<span>17.4</span></a>.</p>
+<p>Note that if the tie we recorded in a relationship matrix is symmetric, we can simplify the presentation even further. The reason is that, as already noted, if a relationship is symmetric, then the value of the tie that <em>i</em> sends to <em>j</em> is necessarily the same as the value of the tie that <em>j</em> sends to <em>i</em>. This means that, in the relationship matrix, the <em>value</em> of cell <strong>a</strong><span class="math inline">\(_{ij}\)</span> <em>has</em> to be the same as the value of the cell <strong>a</strong><span class="math inline">\(_{ji}\)</span> for all rows <em>i</em> and columns <em>j</em> in the matrix. This yields a <strong>symmetric relationship matrix</strong>, like that shown in <a href="#tbl-relmatrixndsymm" class="quarto-xref">Table&nbsp;<span>17.5</span></a>.</p>
 <div id="tbl-relmatrixndsymm" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-relmatrixndsymm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1048,6 +1053,116 @@ Table&nbsp;17.4: Example of a symmetric relationship matrix with blocked diagona
 </div>
 <p>Note that a symmetric relationship matrix is simpler than its asymmetric counterpart, because now we only have to worry about <em>half</em> of the values. So before, in <a href="#tbl-relmatrixnd" class="quarto-xref">Table&nbsp;<span>17.3</span></a>, we had to worry about six distinct relationship values, but now we only have to worry about three. This means that in a symmetric matrix, all the network information we need is contained in either the lower or upper triangle. As we will see, in many applications, we can ignore one of the triangles altogether!</p>
 <p>There are many types of relationship and attribute-value matrices, as the basic principles just stated can be varied to capture different underlying facets of relationships. Subsequent lessons will cover various ways to best capture different aspects of networks in matrix form and then manipulate them to produce sociologically meaningful results.</p>
+<p>By convention, in a relationship matrix, we say that the case located in row <em>i</em> <strong>sends</strong> (a tie) to the case located in column <em>j</em>, so if the relationship matrix was capturing friendship, we might say that <em>i</em> considers <em>j</em> to be a friend (sends the consideration) and so if <em>i</em> is Case 1 (row 1) and <em>j</em> is Case 2 (column 2), that would be Value 1 (e.g., “Are we friends?” Value 1 = Yes/No). But when <em>i</em> is now Case 2 (row 2) and <em>j</em> is Case 1 (column 1), we are now asking if Case 2 considers Case 1 to be a friend (e.g., “Are we friends?” Value 3 = Yes/No). If friendship is considered an asymmetric tie in this case, then that could be true, or it could not be. For instance, Case 2 can rebuff Case 1’s friendship offer.</p>
+<p>Note that if the tie we recorded in a relationship matrix is symmetric, we can simplify the presentation even further. The reason is that, as already noted, if a relationship is symmetric, then the value of the tie that <em>i</em> sends to <em>j</em> is necessarily the same as the value of the tie that <em>j</em> sends to <em>i</em>. This means that, in the relationship matrix, the <em>value</em> of cell <strong>a</strong><span class="math inline">\(_{ij}\)</span> <em>has</em> to be the same as the value of the cell <strong>a</strong><span class="math inline">\(_{ji}\)</span> for all rows <em>i</em> and columns <em>j</em> in the matrix. This yields a <strong>symmetric relationship matrix</strong>, like that shown in <a href="#tbl-relmatrixndsymm" class="quarto-xref">Table&nbsp;<span>17.5</span></a>.</p>
+<div id="tbl-relmatrixndsymm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-relmatrixndsymm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.5: Example of a symmetric relationship matrix with blocked diagonals.
+</figcaption>
+<div aria-describedby="tbl-relmatrixndsymm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;">Case 1</th>
+<th style="text-align: center;">Case 2</th>
+<th style="text-align: center;">Case 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Case 1</strong></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;">Value 1</td>
+<td style="text-align: center;">Value 2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Case 2</strong></td>
+<td style="text-align: center;">Value 1</td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;">Value 3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Case 3</strong></td>
+<td style="text-align: center;">Value 2</td>
+<td style="text-align: center;">Value 3</td>
+<td style="text-align: center;"><em>–</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Note that a symmetric relationship matrix is simpler than its asymmetric counterpart, because now we only have to worry about <em>half</em> of the values. So before, in <a href="#tbl-relmatrixnd" class="quarto-xref">Table&nbsp;<span>17.3</span></a>, we had to worry about six distinct relationship values, but now we only have to worry about three. This means that in a symmetric matrix, all the network information we need is contained in either the lower or upper triangle. As we will see, in many applications, we can ignore one of the triangles altogether!</p>
+<p>There are many types of relationship and attribute-value matrices, as the basic principles just stated can be varied to capture different underlying facets of relationships. Subsequent lessons will cover various ways to best capture different aspects of networks in matrix form and then manipulate them to produce sociologically meaningful results.</p>
+</section>
+</section>
+<section id="the-social-network-analysis-three-step-shuffle" class="level2" data-number="17.2">
+<h2 data-number="17.2" class="anchored" data-anchor-id="the-social-network-analysis-three-step-shuffle"><span class="header-section-number">17.2</span> The Social Network Analysis Three-Step Shuffle</h2>
+<p>As we introduced at the very beginning of our journey in network analysis, a primary goal of network science is to take “fuzzy” or intuitive concepts from social science and turn them into precise, measurable, and mathematically tractable quantities. This process is known as the <strong>social network analysis three-step shuffle</strong>. This three-step translation is what allows us to bridge the gap between everyday social observations and rigorous quantitative models. Let’s break this shuffle down into its three constituent steps:</p>
+<ol type="1">
+<li><strong>Step 1 (The Social-Theoretic Level)</strong>: We start with an intuitive, natural language concept from social science or everyday life. Examples include ideas like <em>popularity</em>, <em>influence</em>, <em>reciprocity</em>, <em>social roles</em>, or <em>brokerage</em>. While we have a strong intuitive grasp of what these terms mean, they are initially too vague to be measured directly in a rigorous way.</li>
+<li><strong>Step 2 (The Graph-Theoretic Level)</strong>: We translate our natural language concept into the formal language of graph theory. Graphs provide the structural models of our social system. For instance, we might translate “having many friends” into a node’s <em>degree</em> (the number of incident edges on a vertex), or “acting as a gatekeeper” into a node’s <em>betweenness</em> (lying on the shortest paths between others).</li>
+<li><strong>Step 3 (The Matrix-Algebraic Level)</strong>: Finally, we link our graph-theoretic concept to matrix representations and perform mathematical operations on those matrices. This is where the actual measurement happens. For example, to calculate a node’s degree, we don’t eyeball a picture of the graph; we perform a summation of the row or column entries in our relationship matrix.</li>
+</ol>
+<section id="a-detailed-example-popularity" class="level3" data-number="17.2.1">
+<h3 data-number="17.2.1" class="anchored" data-anchor-id="a-detailed-example-popularity"><span class="header-section-number">17.2.1</span> A Detailed Example: Popularity</h3>
+<p>To see how this three-step shuffle works in practice, let’s walk through how we might measure the common social concept of <strong>popularity</strong> within a group of high school students:</p>
+<ul>
+<li><strong>Step 1 (Social Theory)</strong>: In natural language, we might define popularity as “being highly liked, recognized, or sought-after by one’s peers.” In a directed friendship network, a popular person is someone whom many other people nominate as a friend.</li>
+<li><strong>Step 2 (Graph Theory)</strong>: To translate this into graph theory, we model the students as vertices (<span class="math inline">\(V\)</span>) and their directed friendship nominations as directed edges (or arcs, <span class="math inline">\(E\)</span>). We then define the graph-theoretic analogue of popularity as <strong>indegree centrality</strong> (<span class="math inline">\(d_{in}(v)\)</span>)—the number of directed edges that terminate on a given vertex <span class="math inline">\(v\)</span> in a directed graph.</li>
+<li><strong>Step 3 (Matrix Algebra)</strong>: To compute this indegree, we construct a directed relationship matrix (an adjacency matrix <span class="math inline">\(\mathbf{A}\)</span>). The indegree of student <span class="math inline">\(j\)</span> is then obtained by <strong>summing the elements in the <span class="math inline">\(j^{th}\)</span> column</strong> of the matrix: <span class="math inline">\(d_{in}(v_j) = \sum_{i} A_{ij}\)</span> This column sum counts the number of non-zero entries (representing incoming nominations) pointing to student <span class="math inline">\(j\)</span>, giving us a precise, numerical measure of their popularity.</li>
+</ul>
+</section>
+<section id="dont-confuse-them" class="level3" data-number="17.2.2">
+<h3 data-number="17.2.2" class="anchored" data-anchor-id="dont-confuse-them"><span class="header-section-number">17.2.2</span> Don’t Confuse Them!</h3>
+<p>Because network analysis operates across these three distinct levels, it is incredibly easy for beginners to confuse social processes, graph concepts, and matrix calculations. To help keep these levels separate in your mind, study <a href="#tbl-three-step-summary" class="quarto-xref">Table&nbsp;<span>17.6</span></a>, which contrasts how key network states and processes are described at each of the three steps.</p>
+<div id="tbl-three-step-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-three-step-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.6: Summary of the Social Network Analysis Three-Step Shuffle.
+</figcaption>
+<div aria-describedby="tbl-three-step-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Social-Theoretic Concept (Real Life)</th>
+<th style="text-align: left;">Graph-Theoretic Analogue (Graph)</th>
+<th style="text-align: left;">Matrix-Algebraic Representation (Matrix)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Reciprocity</strong> (Mutual exchange or double friendship)</td>
+<td style="text-align: left;">A pair of symmetric directed edges (arcs) pointing in opposite directions between two vertices.</td>
+<td style="text-align: left;">The cell product <span class="math inline">\(A_{ij} \times A_{ji} = 1\)</span> in a binary adjacency matrix.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Popularity</strong> (Being heavily nominated by others)</td>
+<td style="text-align: left;">The cardinality of the set of incoming edges terminating at a given vertex (<strong>indegree</strong>).</td>
+<td style="text-align: left;">The column sum: <span class="math inline">\(\sum_i A_{ij}\)</span> in the adjacency matrix.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Expansiveness</strong> (Nomining many others as friends)</td>
+<td style="text-align: left;">The cardinality of the set of outgoing edges originating from a given vertex (<strong>outdegree</strong>).</td>
+<td style="text-align: left;">The row sum: <span class="math inline">\(\sum_j A_{ij}\)</span> in the adjacency matrix.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Symmetric Relationship</strong> (e.g., being spouses or co-workers)</td>
+<td style="text-align: left;">An undirected graph containing simple undirected edges.</td>
+<td style="text-align: left;">A symmetric relationship matrix where <span class="math inline">\(A_{ij} = A_{ji}\)</span> for all cells.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 </section>
 </section>
 <section id="references" class="level2 unnumbered">
