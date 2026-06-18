@@ -125,10 +125,6 @@
       margin-right: 0; 
     }
   </style>
-  <script src="matrix-advanced_files/libs/kePrint-0.0.1/kePrint.js"></script>
-
-  <link href="matrix-advanced_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
-
 </head>
 <body class="quarto-light">
   <div class="reveal">
@@ -143,184 +139,721 @@
 
 </section>
 <section>
-<section id="part-1-the-reachability-matrix-connectedness" class="title-slide slide level1 center">
-<h1>Part 1: The Reachability Matrix &amp; Connectedness</h1>
+<section id="part-1-the-reachability-matrix-step-by-step" class="title-slide slide level1 center">
+<h1>Part 1: The Reachability Matrix Step-by-Step</h1>
 
 </section>
 <section id="what-is-reachability" class="slide level2">
 <h2>What is Reachability?</h2>
 <ul>
-<li class="fragment">In directed graphs, adjacency relations (direct ties) only capture paths of <strong>length 1</strong>.</li>
-<li class="fragment"><strong>Reachability</strong> captures both direct and indirect paths:
+<li class="fragment">In a directed graph, the adjacency matrix only records paths of <strong>length 1</strong> (direct arrows).</li>
+<li class="fragment"><strong>Reachability</strong> expands our view to indirect paths of <strong>any length</strong>:
 <ul>
-<li class="fragment">Node <span class="math inline">\(j\)</span> is <strong>reachable</strong> by node <span class="math inline">\(i\)</span> if there exists a directed path of any length starting at origin <span class="math inline">\(i\)</span> and terminating at destination <span class="math inline">\(j\)</span>.</li>
-<li class="fragment">In a directed graph, if <span class="math inline">\(i \rightarrow k \rightarrow j\)</span>, then <span class="math inline">\(i\)</span> can reach <span class="math inline">\(j\)</span> via a path of length 2, even if no direct tie <span class="math inline">\(i \rightarrow j\)</span> exists.</li>
+<li class="fragment">Node <span class="math inline">\(j\)</span> is <strong>reachable</strong> from node <span class="math inline">\(i\)</span> if there exists a directed path starting at <span class="math inline">\(i\)</span> and terminating at <span class="math inline">\(j\)</span>.</li>
+<li class="fragment">Example: If we have <span class="math inline">\(A \rightarrow C \rightarrow E \rightarrow D\)</span>, then <span class="math inline">\(A\)</span> can reach <span class="math inline">\(D\)</span> via a path of length 3, even if no direct arrow <span class="math inline">\(A \rightarrow D\)</span> exists.</li>
 </ul></li>
-<li class="fragment">Representing reachability systematically yields the <strong>Reachability Matrix</strong> (<span class="math inline">\(\mathbf{D^r}\)</span>).</li>
+<li class="fragment">Representing these reachability relations systematically yields the <strong>Reachability Matrix (<span class="math inline">\(\mathbf{D^r}\)</span>)</strong>:
+<ul>
+<li class="fragment">Binary matrix where <span class="math inline">\(D^r_{ij} = 1\)</span> if <span class="math inline">\(i\)</span> can reach <span class="math inline">\(j\)</span> via a path of any length, else <span class="math inline">\(0\)</span>.</li>
+</ul></li>
 </ul>
 </section>
-<section id="defining-the-reachability-matrix-mathbfdr" class="slide level2">
-<h2>Defining the Reachability Matrix (<span class="math inline">\(\mathbf{D^r}\)</span>)</h2>
+<section id="reference-graph-empty-matrix" class="slide level2">
+<h2>Reference Graph &amp; Empty Matrix</h2>
+<p>We have 5 nodes <span class="math inline">\(\{A, B, C, D, E\}\)</span>. Let’s build the <span class="math inline">\(5 \times 5\)</span> reachability matrix. Diagonals are blocked (<code>--</code>).</p>
 <div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><strong>Formal Definition</strong>:
-<ul>
-<li class="fragment"><span class="math display">\[D^r_{ij} = 1 \quad \text{if node } i \text{ can reach node } j \text{ via a path of any length}\]</span></li>
-<li class="fragment"><span class="math display">\[D^r_{ij} = 0 \quad \text{otherwise}\]</span></li>
-</ul></li>
-<li class="fragment">Diagonals are blocked (<code>--</code>).</li>
-<li class="fragment"><strong>In the directed graph on the right</strong>:
-<ul>
-<li class="fragment"><span class="math inline">\(A \rightarrow C\)</span> is a direct link (<span class="math inline">\(D^r_{AC} = 1\)</span>).</li>
-<li class="fragment"><span class="math inline">\(A\)</span> can reach <span class="math inline">\(D\)</span> indirectly via <span class="math inline">\(A \rightarrow C \rightarrow E \rightarrow D\)</span> (<span class="math inline">\(D^r_{AD} = 1\)</span>).</li>
-<li class="fragment"><span class="math inline">\(A\)</span> cannot reach <span class="math inline">\(B\)</span> because no path goes against the arrow <span class="math inline">\(B \rightarrow A\)</span> (<span class="math inline">\(D^r_{AB} = 0\)</span>).</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
+<div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
-</section>
-<section id="step-by-step-reachability-matrix-construction" class="slide level2">
-<h2>Step-by-Step Reachability Matrix construction</h2>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-hover table-condensed caption-top" style="margin-left: auto; margin-right: auto;">
+</div><div class="column" style="width:50%;">
+<table class="caption-top">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left; font-weight: bold;">A</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; font-weight: bold;">B</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; font-weight: bold;">C</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; font-weight: bold;">D</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; font-weight: bold;">E</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">F</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
 </tr>
 </tbody>
 </table>
+</div></div>
+</section>
+<section id="step-1-filling-row-a-actor-as-reachability" class="slide level2">
+<h2>Step 1: Filling Row A (Actor A’s Reachability)</h2>
+<p>Let’s trace which nodes can be reached by starting a directed walk at node <strong>A</strong>.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
 </div>
 </div>
+</div>
+</div><div class="column" style="width:50%;">
 <ul>
-<li class="fragment"><strong>Transmitter Nodes</strong> (e.g., <span class="math inline">\(B\)</span>): Can reach others but cannot be reached. Their column is full of <span class="math inline">\(0\)</span>s.</li>
-<li class="fragment"><strong>Receiver Nodes</strong> (e.g., <span class="math inline">\(D\)</span>): Can be reached by others but cannot reach anyone. Their row is full of <span class="math inline">\(0\)</span>s.</li>
+<li><strong>Can A reach B?</strong>
+<ul>
+<li><strong>No</strong> (<span class="math inline">\(d^r_{AB} = 0\)</span>). No directed path goes against <span class="math inline">\(B \rightarrow E\)</span>.</li>
+</ul></li>
+<li><strong>Can A reach C?</strong>
+<ul>
+<li><strong>Yes</strong> (<span class="math inline">\(d^r_{AC} = 1\)</span>). Direct link <span class="math inline">\(A \rightarrow C\)</span>.</li>
+</ul></li>
+<li><strong>Can A reach D?</strong>
+<ul>
+<li><strong>Yes</strong> (<span class="math inline">\(d^r_{AD} = 1\)</span>). Direct link <span class="math inline">\(A \rightarrow D\)</span>.</li>
+</ul></li>
+<li><strong>Can A reach E?</strong>
+<ul>
+<li><strong>Yes</strong> (<span class="math inline">\(d^r_{AE} = 1\)</span>). Path <span class="math inline">\(A \rightarrow C \rightarrow E\)</span> exists.</li>
+</ul></li>
+<li><strong>Row A</strong>: <code>(--,  0,  1,  1,  1)</code></li>
+</ul>
+</div></div>
+</section>
+<section id="step-2-filling-row-b-actor-bs-reachability" class="slide level2">
+<h2>Step 2: Filling Row B (Actor B’s Reachability)</h2>
+<p>Let’s trace which nodes can be reached by starting a directed walk at node <strong>B</strong>.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<ul>
+<li><strong>Can B reach A or C?</strong>
+<ul>
+<li><strong>No</strong> (<span class="math inline">\(d^r_{BA} = 0\)</span>, <span class="math inline">\(d^r_{BC} = 0\)</span>). No paths go left from E.</li>
+</ul></li>
+<li><strong>Can B reach D?</strong>
+<ul>
+<li><strong>Yes</strong> (<span class="math inline">\(d^r_{BD} = 1\)</span>). Path <span class="math inline">\(B \rightarrow E \rightarrow D\)</span> of length 2.</li>
+</ul></li>
+<li><strong>Can B reach E?</strong>
+<ul>
+<li><strong>Yes</strong> (<span class="math inline">\(d^r_{BE} = 1\)</span>). Direct link <span class="math inline">\(B \rightarrow E\)</span>.</li>
+</ul></li>
+<li><strong>Row B</strong>: <code>(0,  --,  0,  1,  1)</code></li>
+</ul>
+</div></div>
+</section>
+<section id="step-3-completed-reachability-matrix" class="slide level2">
+<h2>Step 3: Completed Reachability Matrix</h2>
+<p>Repeating this row-by-row analysis yields the completed reachability matrix.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="reachability-matrix-mathbfdr">Reachability Matrix (<span class="math inline">\(\mathbf{D^r}\)</span>)</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Receiver Node (D)</strong>: Row D is all <span class="math inline">\(0\)</span>s (D can’t reach anyone).</li>
+<li><strong>Transmitter Node (B)</strong>: Column B is all <span class="math inline">\(0\)</span>s (B can’t be reached by anyone).</li>
+</ul>
+</div></div>
+</section></section>
+<section>
+<section id="part-2-directed-graphs-flavors-of-connectivity" class="title-slide slide level1 center">
+<h1>Part 2: Directed Graphs: Flavors of Connectivity</h1>
+
+</section>
+<section id="directed-graph-connectivity" class="slide level2 scrollable">
+<h2>Directed Graph Connectivity</h2>
+<ul>
+<li class="fragment">In undirected graphs, connectivity is simple: either there is a path between every pair (connected) or there is not (disconnected).</li>
+<li class="fragment">In directed graphs, edge directionality creates <strong>three distinct major levels of connectivity</strong>:
+<ol type="1">
+<li class="fragment"><strong>Strongly Connected</strong>: Every node can reach every other node.</li>
+<li class="fragment"><strong>Unilaterally Connected</strong>: For every pair <span class="math inline">\(\{u, v\}\)</span>, at least one node can reach the other (<span class="math inline">\(u \rightarrow v\)</span> OR <span class="math inline">\(v \rightarrow u\)</span>).</li>
+<li class="fragment"><strong>Weakly Connected</strong>: Nodes are connected only if we ignore the directions of the arrows (connected via semipaths).</li>
+</ol></li>
+<li class="fragment">Let’s see how these levels map directly to <strong>zeros and ones in the reachability matrix</strong>.</li>
 </ul>
 </section>
-<section id="reachability-directed-connectedness" class="slide level2 scrollable">
-<h2>Reachability &amp; Directed Connectedness</h2>
+<section id="case-1-strongly-connected-graphs" class="slide level2">
+<h2>Case 1: Strongly Connected Graphs</h2>
+<p>Every pair of nodes is mutually reachable.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="strongly-connected-graph">Strongly Connected Graph</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="reachability-matrix-mathbfdr-1">Reachability Matrix (<span class="math inline">\(\mathbf{D^r}\)</span>)</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+<th style="text-align: center;">7</th>
+<th style="text-align: center;">8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>4</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>5</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>6</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>7</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>8</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li class="fragment">The reachability matrix allows us to distinguish the <strong>three flavors of connectedness</strong> in directed graphs:
-<ol type="1">
-<li class="fragment"><strong>Strongly Connected</strong>: Every node can reach every other node.
-<ul>
-<li class="fragment">The reachability matrix is the <strong>all-ones matrix</strong> (excluding the diagonal).</li>
-</ul></li>
-<li class="fragment"><strong>Unilaterally Connected</strong>: For every pair of nodes, at least one can reach the other.
-<ul>
-<li class="fragment">There are some <span class="math inline">\(0\)</span>s in the matrix, but no mutually disconnected pairs.</li>
-</ul></li>
-<li class="fragment"><strong>Weakly Connected</strong>: Nodes are connected only when ignoring the directions of the arrows (via semipaths).
-<ul>
-<li class="fragment">The matrix contains several <span class="math inline">\(0\)</span>s representing mutually unreachable pairs.</li>
-</ul></li>
-</ol></li>
+<li><strong>No Zeros</strong>: Since everyone can reach everyone, the reachability matrix is the <strong>all-ones</strong> matrix!</li>
 </ul>
+</div></div>
+</section>
+<section id="case-2-unilaterally-connected-graphs" class="slide level2">
+<h2>Case 2: Unilaterally Connected Graphs</h2>
+<p>At least one directed path exists between every pair, but not necessarily in both directions.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="unilaterally-connected-graph">Unilaterally Connected Graph</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="reachability-matrix-mathbfdr-2">Reachability Matrix (<span class="math inline">\(\mathbf{D^r}\)</span>)</h3>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+<th style="text-align: center;">7</th>
+<th style="text-align: center;">8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>4</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>5</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>6</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>7</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>8</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Some Zeros</strong>: Matrix contains some <span class="math inline">\(0\)</span>s (specifically Column 2, node 2 is a transmitter).</li>
+<li><strong>No Symmetric Zeros</strong>: For any pair <span class="math inline">\(\{u, v\}\)</span>, we never have <em>both</em> <span class="math inline">\(D^r_{uv}=0\)</span> and <span class="math inline">\(D^r_{vu}=0\)</span>. At least one direction is always <span class="math inline">\(1\)</span>.</li>
+</ul>
+</div></div>
+</section>
+<section id="case-3-weakly-connected-graphs" class="slide level2">
+<h2>Case 3: Weakly Connected Graphs</h2>
+<p>At least one pair of nodes is completely mutually unreachable via directed paths.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="weakly-connected-graph">Weakly Connected Graph</h3>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="reachability-matrix-mathbfdr-3">Reachability Matrix (<span class="math inline">\(\mathbf{D^r}\)</span>)</h3>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">1</th>
+<th style="text-align: center;">2</th>
+<th style="text-align: center;">3</th>
+<th style="text-align: center;">4</th>
+<th style="text-align: center;">5</th>
+<th style="text-align: center;">6</th>
+<th style="text-align: center;">7</th>
+<th style="text-align: center;">8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>4</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>5</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>6</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>7</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>8</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0</span></td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Mutually Unreachable Pair</strong>:
+<ul>
+<li>Node 2 can’t reach 7 (<span class="math inline">\(D^r_{27}=0\)</span>), and Node 7 can’t reach 2 (<span class="math inline">\(D^r_{72}=0\)</span>).</li>
+<li>This <strong>symmetric zero</strong> (<span class="math inline">\(D^r_{27} = D^r_{72} = 0\)</span>) proves they are mutually unreachable, making the graph <strong>weakly connected</strong>.</li>
+</ul></li>
+</ul>
+</div></div>
+</section></section>
+<section>
+<section id="part-3-graph-connectedness-geodesic-distances" class="title-slide slide level1 center">
+<h1>Part 3: Graph Connectedness &amp; Geodesic Distances</h1>
+
 </section>
 <section id="measuring-graph-connectedness-c" class="slide level2">
 <h2>Measuring Graph Connectedness (<span class="math inline">\(C\)</span>)</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:60%;">
 <ul>
-<li class="fragment"><strong>Graph Connectedness (<span class="math inline">\(C\)</span>)</strong> measures the proportion of node pairs that can reach one another directly or indirectly.</li>
-<li class="fragment">It is defined as the <strong>density of the reachability matrix</strong>:
+<li class="fragment"><strong>Graph Connectedness (<span class="math inline">\(C\)</span>)</strong> measures the overall capacity of a network to facilitate connections.</li>
+<li class="fragment">It is defined as the <strong>density of the reachability matrix</strong> (excluding diagonal cells):
 <ul>
-<li class="fragment"><span class="math display">\[C = \frac{\sum_{i, j} D^r_{ij}}{N(N-1)}\]</span></li>
+<li class="fragment"><span class="math display">\[C = \frac{\sum_{i \neq j} D^r_{ij}}{N(N-1)}\]</span></li>
 </ul></li>
-<li class="fragment"><strong>Calculation on our 6-node graph</strong>:
+<li class="fragment"><strong>For our weakly connected 8-node graph</strong>:
 <ul>
-<li class="fragment">Sum of all cells containing a <span class="math inline">\(1\)</span> is <strong>17</strong>.</li>
-<li class="fragment">Total possible cells: <span class="math inline">\(N(N-1) = 6(5) = 30\)</span>.</li>
-<li class="fragment"><span class="math display">\[C = \frac{17}{30} \approx 0.57\]</span></li>
+<li class="fragment">Sum of all cells containing a <span class="math inline">\(1\)</span> is <strong>48</strong>.</li>
+<li class="fragment">Total possible off-diagonal cells: <span class="math inline">\(8(7) = 56\)</span>.</li>
+<li class="fragment"><span class="math display">\[C = \frac{48}{56} \approx 0.86\]</span></li>
 </ul></li>
 </ul>
 </div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
+<h3 id="reachability-density">Reachability Density</h3>
+<table class="caption-top">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Value</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong><span class="math inline">\(C = 1.0\)</span></strong></td>
+<td style="text-align: left;"><strong>Strongly connected</strong> network (perfect reachability, all-ones matrix).</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong><span class="math inline">\(C &lt; 1.0\)</span></strong></td>
+<td style="text-align: left;">Unilaterally or weakly connected network (contains zeros).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong><span class="math inline">\(C = 0.0\)</span></strong></td>
+<td style="text-align: left;">Completely disconnected network (all zeros).</td>
+</tr>
+</tbody>
+</table>
 </div></div>
 </section></section>
 <section>
-<section id="part-2-the-geodesic-distance-matrix-eccentricity-diameter" class="title-slide slide level1 center">
-<h1>Part 2: The Geodesic Distance Matrix, Eccentricity, &amp; Diameter</h1>
+<section id="part-4-the-geodesic-distance-matrix-step-by-step" class="title-slide slide level1 center">
+<h1>Part 4: The Geodesic Distance Matrix Step-by-Step</h1>
 
 </section>
 <section id="what-is-geodesic-distance" class="slide level2">
@@ -339,137 +872,145 @@
 </ul></li>
 </ul>
 </section>
-<section id="geodesic-distance-matrix-undirected-graph" class="slide level2">
-<h2>Geodesic Distance Matrix: Undirected Graph</h2>
+<section id="step-1-distance-matrix-undirected---adjacencies" class="slide level2">
+<h2>Step 1: Distance Matrix (Undirected) - Adjacencies</h2>
+<p>We start with our undirected reference graph. Nodes with direct connections get a geodesic distance of <strong>1.0</strong>.</p>
 <div class="columns" data-align="center">
-<div class="column" style="width:55%;">
-<ul>
-<li>For undirected graphs, the distance matrix is <strong>symmetric</strong>:
-<ul>
-<li><span class="math display">\[D^g_{ij} = D^g_{ji} \quad \text{for all } i, j\]</span></li>
-</ul></li>
-</ul>
-<div class="cell">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<table class="table table-hover table-condensed caption-top" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="matrix-progress">Matrix Progress</h3>
+<table class="caption-top">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;"><strong>A</strong></td>
 <td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">?</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; font-weight: bold;">B</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">?</td>
 <td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><strong>1</strong></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; font-weight: bold;">C</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">?</td>
 <td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
 </tr>
 <tr class="even">
-<td style="text-align: left; font-weight: bold;">D</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><strong>1</strong></td>
 <td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
+<td style="text-align: center;"><strong>1</strong></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; font-weight: bold;">E</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
 <td style="text-align: center;">0</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
 </tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">F</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
+</tbody>
+</table>
+<ul>
+<li>Symmetrical connections <span class="math inline">\(a_{AC} = a_{CA} = 1.0\)</span>, etc.</li>
+<li>Diagonals are initialized to <strong>0</strong> because <span class="math inline">\(d(v, v) = 0\)</span>.</li>
+</ul>
+</div></div>
+</section>
+<section id="step-2-distance-matrix-undirected---paths-of-length-2" class="slide level2">
+<h2>Step 2: Distance Matrix (Undirected) - Paths of Length 2</h2>
+<p>For non-adjacent nodes, we calculate the length of the shortest path connecting them.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="matrix-progress-1">Matrix Progress</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
 </tr>
+</thead>
+<tbody>
 <tr class="odd">
-<td style="text-align: left; font-weight: bold;">G</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>A</strong></td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;">?</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>2</strong></td>
 </tr>
 <tr class="even">
-<td style="text-align: left; font-weight: bold;">H</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">?</td>
 <td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;"><strong>2</strong></td>
 <td style="text-align: center;">1</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; font-weight: bold;">I</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;"><strong>2</strong></td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
@@ -477,137 +1018,365 @@
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
+<ul>
+<li><strong>B to C</strong>: Shortest path is <span class="math inline">\(B \rightarrow E \rightarrow C\)</span> (length <strong>2</strong>).</li>
+<li><strong>B to D</strong>: Shortest path is <span class="math inline">\(B \rightarrow E \rightarrow D\)</span> (length <strong>2</strong>).</li>
+<li><strong>A to E</strong>: Shortest path is <span class="math inline">\(A \rightarrow C \rightarrow E\)</span> (length <strong>2</strong>).</li>
+</ul>
+</div></div>
+</section>
+<section id="step-3-distance-matrix-undirected---paths-of-length-3" class="slide level2">
+<h2>Step 3: Distance Matrix (Undirected) - Paths of Length 3</h2>
+<p>We compute the remaining non-adjacent pair, representing the maximum distance in the graph.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
 </figure>
 </div>
 </div>
 </div>
+</div><div class="column" style="width:50%;">
+<h3 id="symmetric-distance-matrix-mathbfdg">Symmetric Distance Matrix (<span class="math inline">\(\mathbf{D^g}\)</span>)</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>A to B</strong>: Shortest path is <span class="math inline">\(A \rightarrow C \rightarrow E \rightarrow B\)</span> (length <strong>3</strong>).</li>
+<li>This completed matrix is perfectly symmetric!</li>
+</ul>
 </div></div>
+</section>
+<section id="step-4-distance-matrix-directed---paths-connections" class="slide level2">
+<h2>Step 4: Distance Matrix (Directed) - Paths &amp; Connections</h2>
+<p>For directed graphs, we follow the same process but respect the arrows (Sender <span class="math inline">\(\rightarrow\)</span> Receiver).</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="matrix-progress-2">Matrix Progress</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>2</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Direct links</strong>: <span class="math inline">\(A \rightarrow C = 1, A \rightarrow D = 1, B \rightarrow E = 1, C \rightarrow E = 1, E \rightarrow D = 1\)</span>.</li>
+<li><strong>Path of length 2</strong>: <span class="math inline">\(A \rightarrow C \rightarrow E\)</span> (length 2), <span class="math inline">\(B \rightarrow E \rightarrow D\)</span> (length 2), <span class="math inline">\(C \rightarrow E \rightarrow D\)</span> (length 2).</li>
+</ul>
+</div></div>
+</section>
+<section id="step-5-distance-matrix-directed---unreachable-pairs" class="slide level2">
+<h2>Step 5: Distance Matrix (Directed) - Unreachable Pairs</h2>
+<p>If a node <span class="math inline">\(i\)</span> <strong>cannot</strong> reach node <span class="math inline">\(j\)</span> via any directed path, their geodesic distance is <strong>Infinity (<span class="math inline">\(\infty\)</span>)</strong>.</p>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="asymmetric-distance-matrix-mathbfdg">Asymmetric Distance Matrix (<span class="math inline">\(\mathbf{D^g}\)</span>)</h3>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;"><strong><span class="math inline">\(\infty\)</span></strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Unreachable</strong>: e.g., <span class="math inline">\(B\)</span> can’t reach <span class="math inline">\(A \rightarrow d_{BA} = \infty\)</span>.</li>
+<li><strong>Pure Sink (D)</strong>: Row D is full of <span class="math inline">\(\infty\)</span> cells since node D can’t reach anyone.</li>
+</ul>
+</div></div>
+</section></section>
+<section>
+<section id="part-5-node-eccentricity-and-graph-diameter" class="title-slide slide level1 center">
+<h1>Part 5: Node Eccentricity and Graph Diameter</h1>
+
 </section>
 <section id="node-eccentricity-and-graph-diameter" class="slide level2">
 <h2>Node Eccentricity and Graph Diameter</h2>
 <ul>
-<li class="fragment">Sourcing metrics directly from the Geodesic Distance Matrix:</li>
+<li class="fragment">We can extract key distance-based centralities directly from our completed Geodesic Distance Matrix:</li>
 <li class="fragment"><strong>Node Eccentricity (<span class="math inline">\(e(v)\)</span>)</strong>:
 <ul>
 <li class="fragment">The <strong>maximum geodesic distance</strong> between node <span class="math inline">\(v\)</span> and any other node in the graph:</li>
-<li class="fragment"><span class="math display">\[e(v) = \max_j D^g_{vj}\]</span></li>
-<li class="fragment">Measures the “worst-case” distance for information to reach or leave node <span class="math inline">\(v\)</span>.</li>
+<li class="fragment"><span class="math display">\[e(v) = \max_{j \neq v} D^g_{vj}\]</span></li>
+<li class="fragment">Measures the “worst-case” distance for information to reach or leave node <span class="math inline">\(v\)</span>. Nodes with low eccentricity are highly central.</li>
 </ul></li>
 <li class="fragment"><strong>Graph Diameter (<span class="math inline">\(d\)</span>)</strong>:
 <ul>
 <li class="fragment">The <strong>maximum eccentricity</strong> among all nodes in the graph (the longest shortest path):</li>
-<li class="fragment"><span class="math display">\[d = \max_v e(v)\]</span></li>
-<li class="fragment">In our 9-node graph, the maximum cell entry is <strong>3.0</strong> (e.g., <span class="math inline">\(d_{A, G} = 3\)</span>), which represents the network’s diameter.</li>
+<li class="fragment"><span class="math display">\[d = \max_v e(v) = \max_{i, j} D^g_{ij}\]</span></li>
 </ul></li>
 </ul>
 </section>
-<section id="geodesic-distance-matrix-directed-graph" class="slide level2">
-<h2>Geodesic Distance Matrix: Directed Graph</h2>
+<section id="visualizing-node-eccentricity" class="slide level2">
+<h2>Visualizing Node Eccentricity</h2>
+<p>Eccentricity is calculated as the maximum value in each row of the Geodesic Distance Matrix (excluding diagonal 0s).</p>
 <div class="columns" data-align="center">
-<div class="column" style="width:55%;">
-<ul>
-<li>For directed graphs, the distance matrix is <strong>asymmetric</strong>:
-<ul>
-<li><span class="math inline">\(D^g_{ij} \neq D^g_{ji}\)</span></li>
-<li>Disconnected pairs receive <strong><em>Inf</em></strong>.</li>
-</ul></li>
-</ul>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-hover table-condensed caption-top" style="font-size: 14px; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">A</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">B</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">C</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">D</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">Inf</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">E</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">F</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">Inf</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
+<div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
 </figure>
 </div>
 </div>
 </div>
+</div><div class="column" style="width:50%;">
+<h3 id="distance-matrix-with-eccentricity-e">Distance Matrix with Eccentricity (<span class="math inline">\(e\)</span>)</h3>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+<th style="text-align: center;"><strong>Row Max (<span class="math inline">\(e\)</span>)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">3</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;"><strong><span class="math inline">\(e(A) = 3\)</span></strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">3</span></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong><span class="math inline">\(e(B) = 3\)</span></strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:orange; font-weight:bold;">2</span></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong><span class="math inline">\(e(C) = 2\)</span></strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="color:orange; font-weight:bold;">2</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong><span class="math inline">\(e(D) = 2\)</span></strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;"><span style="color:orange; font-weight:bold;">2</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong><span class="math inline">\(e(E) = 2\)</span></strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Graph Diameter (<span class="math inline">\(d\)</span>)</strong>: The maximum eccentricity value in the column is <strong>3</strong> (<span class="math inline">\(d = 3\)</span>).</li>
+<li>Nodes C, D, E are the most central (closest “worst-case” distance of 2).</li>
+</ul>
 </div></div>
 </section></section>
 <section>
-<section id="part-3-the-common-neighbors-neighborhood-overlap-matrix" class="title-slide slide level1 center">
-<h1>Part 3: The Common-Neighbors (Neighborhood Overlap) Matrix</h1>
+<section id="part-6-the-common-neighbors-neighborhood-overlap-matrix" class="title-slide slide level1 center">
+<h1>Part 6: The Common-Neighbors (Neighborhood Overlap) Matrix</h1>
 
 </section>
 <section id="what-is-neighborhood-overlap" class="slide level2">
@@ -626,177 +1395,112 @@
 <li class="fragment">Placing these pairwise overlap scores into a matrix yields the <strong>Neighborhood Overlap Matrix (<span class="math inline">\(\mathbf{O}\)</span>)</strong>.</li>
 </ul>
 </section>
-<section id="neighborhood-overlap-matrix-construction" class="slide level2">
-<h2>Neighborhood Overlap Matrix Construction</h2>
+<section id="visualizing-neighborhood-overlap" class="slide level2">
+<h2>Visualizing Neighborhood Overlap</h2>
+<p>Overlap measures the proportion of shared neighbors (Green node) relative to unique neighbors.</p>
 <div class="columns" data-align="center">
-<div class="column" style="width:55%;">
-<ul>
-<li>Always symmetric (<span class="math inline">\(O_{ij} = O_{ji}\)</span>).</li>
-<li>Ranges from <strong>0.00</strong> (no shared neighbors) to <strong>1.00</strong> (structural equivalence).</li>
-</ul>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-hover table-condensed caption-top" style="font-size: 14px; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">A</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.60</td>
-<td style="text-align: center;">0.50</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">B</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.33</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.17</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">C</td>
-<td style="text-align: center;">0.60</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.50</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">D</td>
-<td style="text-align: center;">0.50</td>
-<td style="text-align: center;">0.33</td>
-<td style="text-align: center;">0.50</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.33</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.14</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">E</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.33</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.17</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">F</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.17</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.17</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.40</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">G</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.50</td>
-<td style="text-align: center;">0.50</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">H</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.50</td>
-<td style="text-align: center;">1.00</td>
-<td style="text-align: center;">0.50</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">I</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.14</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">0.40</td>
-<td style="text-align: center;">0.50</td>
-<td style="text-align: center;">0.50</td>
-<td style="text-align: center;">1.00</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-overlap-a-c">Highlighted Overlap <span class="math inline">\(\{A, C\}\)</span></h3>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="460"></p>
 </figure>
 </div>
 </div>
 </div>
+</div><div class="column" style="width:50%;">
+<h3 id="neighborhood-overlap-matrix-mathbfo">Neighborhood Overlap Matrix (<span class="math inline">\(\mathbf{O}\)</span>)</h3>
+<table class="caption-top" style="width:100%;">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0.00</td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0.25</span></td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">0.40</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">0.00</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0.33</td>
+<td style="text-align: center;">0.33</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;"><span style="color:red; font-weight:bold;">0.25</span></td>
+<td style="text-align: center;">0.33</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">0.50</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">0.33</td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">0.40</td>
+<td style="text-align: center;">0.33</td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">0.50</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Cell <span class="math inline">\(O_{AC} = 0.25\)</span> represents the overlap between A (red) and C (red).</li>
+<li>Their sole common neighbor is node D (green).</li>
+</ul>
 </div></div>
 </section>
 <section id="step-by-step-calculation-node-a-and-c" class="slide level2">
 <h2>Step-by-Step Calculation: Node <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span></h2>
+<p>Let’s compute the neighborhood overlap <span class="math inline">\(O_{AC}\)</span> for nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span> using our highlighted graph:</p>
 <ul>
-<li>Let’s compute the neighborhood overlap <span class="math inline">\(O_{AC}\)</span> for nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span>:
+<li><strong><span class="math inline">\(A\)</span>’s Neighborhood</strong>: <span class="math inline">\(\mathcal{N}(A) = \{C, D\}\)</span> (degree <span class="math inline">\(k_A = 2\)</span>)</li>
+<li><strong><span class="math inline">\(C\)</span>’s Neighborhood</strong>: <span class="math inline">\(\mathcal{N}(C) = \{A, D, E\}\)</span> (degree <span class="math inline">\(k_C = 3\)</span>)</li>
+</ul>
 <ul>
-<li><strong><span class="math inline">\(A\)</span>’s Neighborhood</strong>: <span class="math inline">\(\mathcal{N}(A) = \{B, C, D, E\}\)</span> (degree <span class="math inline">\(k_A = 4\)</span>)</li>
-<li><strong><span class="math inline">\(C\)</span>’s Neighborhood</strong>: <span class="math inline">\(\mathcal{N}(C) = \{A, B, D, E\}\)</span> (degree <span class="math inline">\(k_C = 4\)</span>)</li>
+<li class="fragment"><strong>Intersection (Common Neighbors)</strong>:
+<ul>
+<li class="fragment"><span class="math inline">\(\mathcal{N}(A) \cap \mathcal{N}(C) = \{D\}\)</span> (Cardinality = <strong>1</strong>)</li>
+<li class="fragment">Node <span class="math inline">\(D\)</span> is connected to both <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span> (shown in green).</li>
 </ul></li>
-<li><strong>Intersection (Common Neighbors)</strong>:
+<li class="fragment"><strong>Union (Total Unique Neighbors)</strong>:
 <ul>
-<li><span class="math inline">\(\mathcal{N}(A) \cap \mathcal{N}(C) = \{B, D, E\}\)</span> (Cardinality = <strong>3</strong>)</li>
+<li class="fragment"><span class="math inline">\(\mathcal{N}(A) \cup \mathcal{N}(C) = \{A, C, D, E\}\)</span> (Cardinality = <strong>4</strong>)</li>
 </ul></li>
-<li><strong>Union (Total Unique Neighbors)</strong>:
+<li class="fragment"><strong>Jaccard Overlap</strong>:
 <ul>
-<li><span class="math inline">\(\mathcal{N}(A) \cup \mathcal{N}(C) = \{A, B, C, D, E\}\)</span> (Cardinality = <strong>5</strong>)</li>
+<li class="fragment"><span class="math display">\[O_{AC} = \frac{|\{D\}|}{|\{A, C, D, E\}|} = \frac{1}{4} = 0.25\]</span></li>
 </ul></li>
-<li><strong>Jaccard Overlap</strong>:
-<ul>
-<li><span class="math display">\[O_{AC} = \frac{3}{5} = 0.60\]</span></li>
-</ul></li>
-<li>This high score proves that <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span> are highly structurally similar.</li>
 </ul>
 </section>
 <section id="summary-of-advanced-matrices" class="slide level2">
@@ -809,6 +1513,7 @@
 <li class="fragment"><strong>Geodesic Distance Matrix (<span class="math inline">\(\mathbf{D^g}\)</span>)</strong>:
 <ul>
 <li class="fragment">Records shortest path lengths. Provides the basis for measuring <strong>Node Eccentricity</strong> (row max) and <strong>Graph Diameter</strong> (global max).</li>
+<li class="fragment">Unreachable pairs are recorded as <strong>Infinity (<span class="math inline">\(\infty\)</span>)</strong> or <em>Inf</em>.</li>
 </ul></li>
 <li class="fragment"><strong>Neighborhood Overlap Matrix (<span class="math inline">\(\mathbf{O}\)</span>)</strong>:
 <ul>
