@@ -100,6 +100,11 @@ gr_bridge_local <- tbl_graph(nodes = nodes_bridge_local, edges = edges_bridge_lo
 gr_bridge <- create_empty(5, directed = FALSE) %>% 
   bind_edges(data.frame(from = c(1, 1, 2, 3, 4), to = c(2, 3, 3, 4, 5))) %>% 
   mutate(name = LETTERS[1:5])
+
+# Symmetrical 5-node undirected graph for Hamiltonian Path & Cycle comparisons
+nodes_ham <- data.frame(name = c("A", "B", "C", "D", "E"), x = c(0, -1, -0.6, 0.6, 1), y = c(1, 0.2, -1, -1, 0.2))
+edges_ham <- data.frame(from = c(1, 2, 3, 4, 5, 2), to = c(2, 3, 4, 5, 1, 5))
+gr_ham <- tbl_graph(nodes = nodes_ham, edges = edges_ham, directed = FALSE)
 ```
 
 # Part 1: Indirect Connections & Paths
@@ -225,26 +230,23 @@ gr_undir |>
 
 :::: {.columns align=center}
 
-::: {.column width="50%"}
+::: {.column width="60%"}
 ::: {.incremental}
 - In real networks, **geodesic distances are often tied**:
   - There can be multiple distinct shortest paths of equal minimum length connecting the exact same pair of nodes.
 - **Example**: Shortest paths from $B$ to $A$ in our undirected graph:
   - Both paths have a geodesic distance of $d(B, A) = 3$.
-  - **Path 1**: $B \rightarrow E \rightarrow D \rightarrow A$ (Top)
-  - **Path 2**: $B \rightarrow E \rightarrow C \rightarrow A$ (Bottom)
-- **Redundancy and Reliability**:
-  - Having multiple geodesics provides alternative routes of maximum efficiency.
-  - If a node or edge on one path fails (e.g. node $D$), communication is unaffected because Path 2 is still open!
+  - **Geodesic Path 1**: $B \rightarrow E \rightarrow D \rightarrow A$ (Top)
+  - Let's visualize this path highlighted in red on the right.
 :::
 :::
 
-::: {.column width="50%"}
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5
-#| fig-height: 8.5
+#| fig-width: 5.5
+#| fig-height: 5.5
 p1 <- gr_undir |>
   activate(edges) |>
   mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 4) | (from == 4 & to == 5), "yes", "no")) |>
@@ -256,7 +258,35 @@ p1 <- gr_undir |>
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
   theme_graph() + ggtitle("Geodesic 1 (B-E-D-A)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
+p1
+```
+:::
 
+::::
+
+---
+
+## Geodesic Ties: Redundancy & Reliability
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the second geodesic path from $B$ to $A$:
+  - **Geodesic Path 2**: $B \rightarrow E \rightarrow C \rightarrow A$ (Bottom)
+  - Let's visualize this path highlighted in red on the right.
+- **Redundancy and Reliability**:
+  - Having multiple geodesics of equal minimum length provides alternative routes of maximum efficiency.
+  - **Structural Robustness**: If a node or edge on one path fails (e.g. node $D$), communication is completely unaffected because Path 2 remains open!
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
 p2 <- gr_undir |>
   activate(edges) |>
   mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 5), "yes", "no")) |>
@@ -268,12 +298,13 @@ p2 <- gr_undir |>
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
   theme_graph() + ggtitle("Geodesic 2 (B-E-C-A)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
-
-p1 + p2 + plot_layout(ncol = 1)
+p2
 ```
 :::
 
 ::::
+
+---
 
 ## Sociological Significance of Geodesics
 
@@ -362,6 +393,46 @@ ggraph(gr_undir, layout = "manual", x = x, y = y) +
 
 ---
 
+## Visualizing a Simple Cycle
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at a simple **cycle** highlighted in our graph:
+  - **Cycle**: $C \rightarrow D \rightarrow A \rightarrow C$.
+  - It has a length of **3** (consisting of 3 edges).
+- **Verification of Properties**:
+  - Origin and destination are identical (both are node $C$).
+  - All intermediate nodes ($D$, $A$) are unique.
+  - All traversed edges are unique.
+  - This closed loop creates a fundamental feedback pathway.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 3 & to == 5) | (from == 4 & to == 5) | (from == 3 & to == 4), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
 ## Graph Girth
 
 :::: {.columns align=center}
@@ -438,18 +509,18 @@ gr_undir |>
 
 ---
 
-## Special Paths: Hamiltonian Paths & Cycles
+## Special Paths: Hamiltonian Paths
 
 :::: {.columns align=center}
 
 ::: {.column width="60%"}
 ::: {.incremental}
 - **Hamiltonian Path**: A path that visits **every single node** in the graph exactly once.
-  - *Example*: The red path on the right:
-    $$B \rightarrow E \rightarrow C \rightarrow A \rightarrow D$$
-- **Hamiltonian Cycle**: A cycle that visits **every single node** in the graph exactly once and returns to the origin.
-  - *Question*: Is there a Hamiltonian cycle in this graph?
-  - **No!** Since node $B$ is a "leaf node" ($k_B = 1$), any cycle must enter and leave $B$ via different edges, requiring $k_B \ge 2$.
+- **Our Example Graph**: Shown on the right, it has 5 nodes $\{A, B, C, D, E\}$.
+- **A Hamiltonian Path**: Let's trace one in red:
+  $$A \rightarrow B \rightarrow C \rightarrow D \rightarrow E$$
+  - Every node is visited exactly once.
+  - The diagonal edge $B-E$ remains untraversed.
 :::
 :::
 
@@ -459,9 +530,47 @@ gr_undir |>
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_undir |>
+gr_ham |>
   activate(edges) |>
-  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 5) | (from == 4 & to == 5), "yes", "no")) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 4) | (from == 4 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Special Paths: Hamiltonian Cycles
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Hamiltonian Cycle**: A cycle that visits **every single node** in the graph exactly once and returns to the origin.
+- **Our Hamiltonian Cycle**: Let's trace it in red on the right:
+  $$A \rightarrow B \rightarrow C \rightarrow D \rightarrow E \rightarrow A$$
+  - This cycle forms the complete outer pentagonal ring.
+  - Visits all 5 nodes exactly once and closes the loop!
+  - **Degree Condition**: Since every node has degree $\ge 2$, a Hamiltonian cycle is successfully enabled.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_ham |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 4) | (from == 4 & to == 5) | (from == 1 & to == 5) | (from == 5 & to == 1), "yes", "no")) |>
   ggraph(layout = "manual", x = x, y = y) +
   geom_edge_link(aes(color = highlight, edge_width = highlight)) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
@@ -492,14 +601,27 @@ gr_undir |>
 
 ---
 
-## Walks & Trails: Visual Examples
+## Walks: A Visual Example
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Walk (B-E-C-E-D)**:
+  - We start at node $B$, walk to $E$, then $C$, then *back* to $E$, and finally to $D$.
+  - **Repeated Node**: Node $E$ is visited twice in this sequence.
+  - **Repeated Edge**: Edge $E-C$ (and $C-E$) is traversed twice.
+  - Highlighted in red on the right.
+:::
+:::
+
+::: {.column width="40%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 12
+#| fig-width: 5.5
 #| fig-height: 5.5
-p1 <- gr_undir |>
+gr_undir |>
   activate(edges) |>
   mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 2 & to == 4), "yes", "no")) |>
   ggraph(layout = "manual", x = x, y = y) +
@@ -510,8 +632,34 @@ p1 <- gr_undir |>
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
   theme_graph() + ggtitle("Walk (Repeats Node E and Edge E-C)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
+```
+:::
 
-p2 <- gr_undir |>
+::::
+
+---
+
+## Trails: A Visual Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Trail (B-E-C-D-E-A)**:
+  - We start at $B \rightarrow E \rightarrow C \rightarrow D \rightarrow E \rightarrow A$.
+  - **Repeated Node**: Node $E$ is visited twice.
+  - **Repeated Edges**: **None!** Every edge in the sequence is completely unique.
+  - Highlighted in red on the right.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
   activate(edges) |>
   mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 4) | (from == 2 & to == 4) | (from == 3 & to == 5), "yes", "no")) |>
   ggraph(layout = "manual", x = x, y = y) +
@@ -520,13 +668,12 @@ p2 <- gr_undir |>
   scale_edge_width_manual(values = c("yes" = 2.2, "no" = 1.0), guide = "none") +
   geom_node_point(size = 18, color = "tan2") +
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("Trail (Repeats Node C, Edges Unique)") + coord_cartesian(clip = "off") +
+  theme_graph() + ggtitle("Trail (Repeats Node E, Edges Unique)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 12, face="bold", hjust=0.5))
-
-p1 + p2
 ```
+:::
 
-# Part 2: Directed Paths & Reachability
+::::
 
 ---
 
@@ -1441,11 +1588,11 @@ ggraph(gr_ineq, layout = "manual", x = x, y = y) +
 ## Flavors of Connectivity in Directed Graphs
 
 ::: {.incremental}
-- Because of edge directionality, directed graphs have four levels of connectivity:
+- Because of edge directionality, directed graphs have **three major levels** of connectivity:
 1. **Strongly Connected**: Every pair of nodes is **mutually reachable** via directed paths.
-2. **Recursively Connected**: Strongly connected, AND the directed paths in both directions share the exact same set of intermediate nodes (like $B$ and $C$ sharing $\{C, D, E\}$).
-3. **Unilaterally Connected**: Every pair is connected by **at least one directed path** (from $u \rightarrow v$ OR $v \rightarrow u$, but not necessarily both).
-4. **Weakly Connected**: Every pair of nodes is connected by at least a **semipath** (connected if we ignore arrow directions).
+   - **Recursively Connected** (Subtype): Strongly connected, AND the directed paths in both directions share the exact same set of intermediate nodes (sharing both vertices and edges).
+2. **Unilaterally Connected**: Every pair is connected by **at least one directed path** (from $u \rightarrow v$ OR $v \rightarrow u$, but not necessarily both).
+3. **Weakly Connected**: Every pair of nodes is connected by at least a **semipath** (connected if we ignore arrow directions).
 :::
 
 ---
@@ -2003,13 +2150,16 @@ p_line + p_star + p_cat
   - Measures how **economical** the connectivity of a graph is.
   - A graph is efficiently connected if it uses the *minimum* possible number of edges to remain connected.
 - **Formula**:
-  $$F(G) = 1 - \left[rac{2(m - n + 1)}{(n-1)(n-2)}ight]$$
+  $$F(G) = 1 - \left[rac{2(m - n + 1)}{(n-1)(n-2)}
+ight]$$
   - Where $m$ is the number of edges and $n$ is the number of nodes.
 - **Numerical Proof (The Tree on the Right)**:
   - Pictured on the right is a tree of $n = 5$ nodes and $m = 4$ edges.
   - Substituting $n = 5$ and $m = 4$ into the formula:
-    $$F(G) = 1 - \left[rac{2(4 - 5 + 1)}{(5-1)(5-2)}ight]$$
-    $$F(G) = 1 - \left[rac{2(0)}{4 	imes 3}ight] = 1 - 0 = 1.0$$
+    $$F(G) = 1 - \left[rac{2(4 - 5 + 1)}{(5-1)(5-2)}
+ight]$$
+    $$F(G) = 1 - \left[rac{2(0)}{4 	imes 3}
+ight] = 1 - 0 = 1.0$$
 - **Beyond Trees (Decreasing Efficiency)**:
   - As edges are added beyond $m = n - 1$, the numerator $(m - n + 1) > 0$, causing $F(G)$ to decrease toward $0.0$.
 :::
@@ -2050,8 +2200,10 @@ ggraph(gr_tree_eff, layout = 'nicely') +
   - Contains $n = 5$ nodes and $m = 7$ edges.
 - **Efficiency Calculation**:
   - We substitute $n=5$ and $m=7$ into the formula:
-    $$F(G) = 1 - \left[rac{2(7 - 5 + 1)}{(5-1)(5-2)}ight]$$
-    $$F(G) = 1 - \left[rac{2(3)}{4 	imes 3}ight] = 1 - rac{6}{12} = 0.50$$
+    $$F(G) = 1 - \left[rac{2(7 - 5 + 1)}{(5-1)(5-2)}
+ight]$$
+    $$F(G) = 1 - \left[rac{2(3)}{4 	imes 3}
+ight] = 1 - rac{6}{12} = 0.50$$
 - **Interpretation**:
   - With 5 nodes, a connected tree needs only 4 edges. 
   - This graph has 3 redundant edges ($7 - 5 + 1 = 3$), resulting in a low efficiency score of **$0.50$**.
@@ -2092,8 +2244,10 @@ ggraph(gr1, layout = 'nicely') +
   - Contains $n = 7$ nodes and $m = 10$ edges.
 - **Efficiency Calculation**:
   - We substitute $n=7$ and $m=10$ into the formula:
-    $$F(G) = 1 - \left[rac{2(10 - 7 + 1)}{(7-1)(7-2)}ight]$$
-    $$F(G) = 1 - \left[rac{2(4)}{6 	imes 5}ight] = 1 - rac{8}{30} pprox 0.73$$
+    $$F(G) = 1 - \left[rac{2(10 - 7 + 1)}{(7-1)(7-2)}
+ight]$$
+    $$F(G) = 1 - \left[rac{2(4)}{6 	imes 5}
+ight] = 1 - rac{8}{30} pprox 0.73$$
 - **Conclusion**:
   - Despite having more edges ($10$ vs $7$), Graph 2 is larger. Its redundancy is distributed over more nodes, yielding a higher efficiency of **$0.73$**.
   - **Graph 2 is more efficient than Graph 1 ($0.73 > 0.50$)**.
