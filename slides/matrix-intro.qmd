@@ -90,7 +90,7 @@ plot_dir_highlight <- function(active_edges = NULL, active_nodes = NULL) {
   
   gr <- tbl_graph(nodes = nodes_mod, edges = edges_mod, directed = TRUE)
   
-  p = ggraph(gr, layout = layout_coords) +
+  p <- ggraph(gr, layout = layout_coords) +
     geom_edge_link(aes(color = highlight, edge_width = highlight),
                    arrow = arrow(length = unit(4, 'mm')),
                    end_cap = circle(6, 'mm')) +
@@ -110,6 +110,9 @@ plot_dir_highlight <- function(active_edges = NULL, active_nodes = NULL) {
 
 ## Defining a Matrix
 
+:::: {.columns}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - A **matrix** is a two-dimensional rectangular array of numbers organized into:
   - **Rows** (horizontal lines)
@@ -121,52 +124,90 @@ plot_dir_highlight <- function(active_edges = NULL, active_nodes = NULL) {
   - Matrices where the number of rows does not equal the number of columns ($R \neq C$).
   - This is the standard shape for dataset tables and surveys.
 :::
+:::
+
+::: {.column width="40%"}
+### Visual Blueprint
+$$\mathbf{M} = \begin{pmatrix}
+m_{11} & m_{12} & m_{13} \\
+m_{21} & m_{22} & m_{23} \\
+m_{31} & m_{32} & m_{33} \\
+m_{41} & m_{42} & m_{43}
+\end{pmatrix}$$
+
+- Dimensions: **$4 \times 3$**
+- 4 Rows ($i = 1, \dots, 4$)
+- 3 Columns ($j = 1, \dots, 3$)
+:::
+
+::::
 
 ---
 
 ## An Intuitive Example: Survey Data Matrix
 
-Let's look at an intuitive rectangular matrix ($4 \times 3$) containing survey data:
+:::: {.columns}
 
-| | Age | Education (Years) | Annual Income ($) |
+::: {.column width="50%"}
+### Rectangular Matrix Example
+- Here is an intuitive $4 \times 3$ matrix containing survey data:
+
+| | Age | Education | Income |
 | :--- | :---: | :---: | :---: |
 | **Alice** | 25 | 16 | 55,000 |
 | **Bob** | 42 | 12 | 48,000 |
 | **Charlie** | 31 | 18 | 95,000 |
 | **David** | 54 | 14 | 62,000 |
+:::
 
+::: {.column width="50%"}
 ::: {.incremental}
-- **Rows** represent **cases** (the people we surveyed: Alice, Bob, Charlie, David).
-- **Columns** represent **attributes** (Age, Education, Income).
+- **Rows** represent **cases** (the people surveyed: Alice, Bob, Charlie, David).
+- **Columns** represent **attributes** (Age, Years of Education, Annual Income).
 - Each cell contains a meaningful numerical value representing a specific person's attribute.
 :::
+:::
+
+::::
 
 ---
 
 ## Matrix Notation & Indexing
 
-- By convention, we name matrices using **boldfaced capital letters** (e.g., Matrix $\mathbf{B}$).
-- We refer to a specific cell in the matrix using a lowercase letter with row and column indices:
+:::: {.columns}
+
+::: {.column width="50%"}
+### Indexing Matrix ($\mathbf{B}$)
+
+| | Col 1 (Age) | Col 2 (Edu) | Col 3 (Inc) |
+| :--- | :---: | :---: | :---: |
+| **Row 1 (Alice)** | $b_{11} = 25$ | $b_{12} = 16$ | $b_{13} = 55\text{k}$ |
+| **Row 2 (Bob)** | $b_{21} = 42$ | $b_{22} = 12$ | $b_{23} = 48\text{k}$ |
+| **Row 3 (Charlie)** | $b_{31} = 31$ | **$b_{32} = 18$** | $b_{33} = 95\text{k}$ |
+| **Row 4 (David)** | $b_{41} = 54$ | $b_{42} = 14$ | $b_{43} = 62\text{k}$ |
+:::
+
+::: {.column width="50%"}
+::: {.incremental}
+- We name matrices using **boldfaced capital letters** (e.g., Matrix $\mathbf{B}$).
+- We refer to a specific cell using a lowercase letter with row and column indices:
   - $$b_{ij}$$
   - Where $i$ is the **row index** and $j$ is the **column index**.
-
-| | Col 1 (Age) | Col 2 (Edu) | Col 3 (Income) |
-| :--- | :---: | :---: | :---: |
-| **Row 1 (Alice)** | $b_{11} = 25$ | $b_{12} = 16$ | $b_{13} = 55,000$ |
-| **Row 2 (Bob)** | $b_{21} = 42$ | $b_{22} = 12$ | $b_{23} = 48,000$ |
-| **Row 3 (Charlie)** | $b_{31} = 31$ | **$b_{32} = 18$** | $b_{33} = 95,000$ |
-| **Row 4 (David)** | $b_{41} = 54$ | $b_{42} = 14$ | $b_{43} = 62,000$ |
-
-::: {.incremental}
 - Cell **$b_{32}$** represents Row 3 (Charlie) and Column 2 (Education), which holds **18**.
 :::
+:::
+
+::::
 
 ---
 
 ## Transitioning to Relationship Matrices
 
+:::: {.columns}
+
+::: {.column width="60%"}
 ::: {.incremental}
-- Survey data matrices relate cases to attributes. They do **not** represent networks.
+- Survey matrices relate cases to attributes. They do **not** represent networks.
 - To represent a network, we use a **Relationship Matrix**:
   - We put the **exact same set of actors** on *both* the rows and the columns.
   - Cell $a_{ij}$ records how Row Actor $i$ relates to Column Actor $j$.
@@ -174,6 +215,21 @@ Let's look at an intuitive rectangular matrix ($4 \times 3$) containing survey d
   - All relationship matrices are **square matrices** ($R = C$).
   - A square matrix of size $N$ is said to be of **order $N$**.
 :::
+:::
+
+::: {.column width="40%"}
+### Relationship Layout
+| | Actor A | Actor B | Actor C |
+| :--- | :---: | :---: | :---: |
+| **Actor A** | $a_{11}$ | $a_{12}$ | $a_{13}$ |
+| **Actor B** | $a_{21}$ | $a_{22}$ | $a_{23}$ |
+| **Actor C** | $a_{31}$ | $a_{32}$ | $a_{33}$ |
+
+- Dimensions: **$3 \times 3$**
+- Order: **$N = 3$**
+:::
+
+::::
 
 ---
 
@@ -184,7 +240,7 @@ Let's look at an intuitive rectangular matrix ($4 \times 3$) containing survey d
 ::: {.column width="60%"}
 ::: {.incremental}
 - **The Main Diagonal**:
-  - The diagonal cells running from top-left to bottom-right, where **row index equals column index** ($i = j$).
+  - The diagonal cells where **row index equals column index** ($i = j$).
   - Represents the relationship of actors with themselves ($a_{ii}$), which we typically ignore by **blocking the diagonals** with a dash (`--`).
 - **Off-Diagonal Cells ($i \neq j$)**:
   - **Upper Triangle ($i < j$)**: Cells above the main diagonal (e.g., $a_{12}, a_{13}$).
@@ -193,15 +249,15 @@ Let's look at an intuitive rectangular matrix ($4 \times 3$) containing survey d
 :::
 
 ::: {.column width="40%"}
-### Square Relationship Matrix
+### Blocked Diagonals
 | | Actor A | Actor B | Actor C |
 | :--- | :---: | :---: | :---: |
 | **Actor A** | *--* | $a_{12}$ | $a_{13}$ |
 | **Actor B** | $a_{21}$ | *--* | $a_{23}$ |
 | **Actor C** | $a_{31}$ | $a_{32}$ | *--* |
 
-- If the relationship is symmetric (e.g., spouses), then $a_{ij} = a_{ji}$ (symmetric matrix).
-- If asymmetric (e.g., advice), then $a_{ij} \neq a_{ji}$ (asymmetric matrix).
+- **Symmetric**: $a_{ij} = a_{ji}$ (undirected).
+- **Asymmetric**: $a_{ij} \neq a_{ji}$ (directed).
 :::
 
 ::::
@@ -212,35 +268,60 @@ Let's look at an intuitive rectangular matrix ($4 \times 3$) containing survey d
 
 ## What is an Adjacency Matrix?
 
+:::: {.columns}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - An **Adjacency Matrix** is a binary relationship matrix indicating whether pairs of nodes are directly connected (**adjacent**) in the graph.
 - **Binary Rules**:
   - $$A_{ij} = 1 \quad \text{if a tie exists between } i \text{ and } j$$
   - $$A_{ij} = 0 \quad \text{if no tie exists}$$
 - If the graph is **undirected**, the relation is reciprocal. This always yields a **symmetric matrix** where the upper and lower triangles are mirror images across the main diagonal ($A_{ij} = A_{ji}$).
-- Let's construct one step-by-step from a 5-node reference graph.
 :::
+:::
+
+::: {.column width="40%"}
+### Symmetrical Setup
+| | A | B | C | D | E |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| **A** | -- | $a_{12}$ | $a_{13}$ | $a_{14}$ | $a_{15}$ |
+| **B** | $a_{21}$ | -- | $a_{23}$ | $a_{24}$ | $a_{25}$ |
+| **C** | $a_{31}$ | $a_{32}$ | -- | $a_{34}$ | $a_{35}$ |
+| **D** | $a_{41}$ | $a_{42}$ | $a_{43}$ | -- | $a_{45}$ |
+| **E** | $a_{51}$ | $a_{52}$ | $a_{53}$ | $a_{54}$ | -- |
+:::
+
+::::
 
 ---
 
-## The Reference Graph & Empty Matrix
+## Reference Graph & Empty Matrix
 
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
 ### Reference Undirected Graph
 - We have 5 nodes: $\{A, B, C, D, E\}$.
-- Since it is an undirected graph, lines do not have arrowheads.
-- Let's build the $5 \times 5$ matrix of **order 5**.
+- No arrowheads (undirected).
+- Order: **$5$**.
 - Diagonals are blocked (`--`) because simple graphs have no self-loops.
 :::
 
 ::: {.column width="50%"}
+### Empty Matrix Layout
+| | A | B | C | D | E |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| **A** | -- | ? | ? | ? | ? |
+| **B** | ? | -- | ? | ? | ? |
+| **C** | ? | ? | -- | ? | ? |
+| **D** | ? | ? | ? | -- | ? |
+| **E** | ? | ? | ? | ? | -- |
+
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
+#| fig-width: 3.5
+#| fig-height: 3.5
 plot_undir_highlight()
 ```
 :::
@@ -251,35 +332,30 @@ plot_undir_highlight()
 
 ## Step 1: Filling Row A (Actor A's Ties)
 
+Row **A** (sender) connects directly to **B** and **C**. Cells $a_{AB}$ and $a_{AC}$ are marked $1$; others are $0$.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Left: A's connections highlighted
-- Node **A** is connected directly to **B** and **C**.
-- Node **A** has no connections to $D$ or $E$.
-- **Adjacency Rule**:
-  - Set cells $a_{AB} = 1$ and $a_{AC} = 1$.
-  - Set cells $a_{AD} = 0$ and $a_{AE} = 0$.
-- **Row A**: `(--,  1,  1,  0,  0)`
-:::
-
-::: {.column width="50%"}
+### Highlighted Graph
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
+#| fig-width: 4.8
+#| fig-height: 4.8
 plot_undir_highlight(active_edges = c("A-B", "A-C"), active_nodes = "A")
 ```
+:::
 
-### Adjacency Matrix progress
+::: {.column width="50%"}
+### Adjacency Matrix Progress
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | **--** | **1** | **1** | **0** | **0** |
-| **B** |  ?   |  *--*   |  ?   |  ?   |  ?   |
-| **C** |  ?   |  ?   |  *--*   |  ?   |  ?   |
-| **D** |  *--*  |  *--*   |  *--*  |  *--*   |  *--*   |
-| **E** |  *--*  |  *--*   |  *--*  |  *--*   |  *--*   |
+| **B** | ? | -- | ? | ? | ? |
+| **C** | ? | ? | -- | ? | ? |
+| **D** | ? | ? | ? | -- | ? |
+| **E** | ? | ? | ? | ? | -- |
 :::
 
 ::::
@@ -288,58 +364,54 @@ plot_undir_highlight(active_edges = c("A-B", "A-C"), active_nodes = "A")
 
 ## Step-by-Step Cell Correspondence
 
+Each undirected edge $\{i, j\}$ maps directly to **two symmetrical cell values** in the matrix.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-- Let's look at how specific edges map to cell values:
-  - **Edge A-C exists**: 
-    - This fills two cells: $a_{13} = 1$ (Row A, Column C) and $a_{31} = 1$ (Row C, Column A).
-  - **No Edge A-D exists**:
-    - This fills cells $a_{14} = 0$ (Row A, Column D) and $a_{41} = 0$ (Row D, Column A).
-- In an undirected graph, every single edge $\{i, j\}$ corresponds to **two symmetrical cell entries** in the matrix!
-:::
-
-::: {.column width="50%"}
+### Highlighted Edge $\{A, C\}$
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
+#| fig-width: 4.8
+#| fig-height: 4.8
 plot_undir_highlight(active_edges = c("A-C"), active_nodes = c("A", "C"))
 ```
+:::
 
+::: {.column width="50%"}
 ### Edge to Cell Mapping
-- Edge $\{A, C\} \Longrightarrow a_{AC} = 1$ and $a_{CA} = 1$
-- No Edge $\{A, D\} \Longrightarrow a_{AD} = 0$ and $a_{DA} = 0$
+- **Edge A-C exists**:
+  - Cell $a_{13} = 1$ (Row A, Col C)
+  - Cell $a_{31} = 1$ (Row C, Col A)
+- **No Edge A-D exists**:
+  - Cell $a_{14} = 0$ (Row A, Col D)
+  - Cell $a_{41} = 0$ (Row D, Col A)
 :::
 
 ::::
 
 ---
 
-## Step 2: Symmetrical Filling (Symmetry across Diagonal)
+## Step 2: Symmetrical Filling (Column A)
+
+Since undirected ties are reciprocal, **Column A** must mirror **Row A**.
 
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Left: Undirected lines are reciprocal
-- Because the graph is undirected, if A is connected to B and C, then **B and C must also be connected to A**.
-- **Symmetric Rule ($A_{ij} = A_{ji}$)**:
-  - Since Row A columns B/C are $1$, then **Column A rows B/C must be $1$**.
-  - Since Row A columns D/E are $0$, then **Column A rows D/E must be $0$**.
-- **Column A**: `(--,  1,  1,  0,  0)`
-:::
-
-::: {.column width="50%"}
+### Highlighted Graph
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
+#| fig-width: 4.8
+#| fig-height: 4.8
 plot_undir_highlight(active_edges = c("A-B", "A-C"), active_nodes = "A")
 ```
+:::
 
-### Adjacency Matrix progress
+::: {.column width="50%"}
+### Adjacency Matrix Progress
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | **--** | **1** | **1** | **0** | **0** |
@@ -355,30 +427,23 @@ plot_undir_highlight(active_edges = c("A-B", "A-C"), active_nodes = "A")
 
 ## Step 3: Filling Row B (Actor B's Ties)
 
+Row **B** connects to **A**, **C**, and **D**. $a_{BA} = 1$ (filled!), $a_{BC} = 1$, $a_{BD} = 1$, $a_{BE} = 0$.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Left: B's connections highlighted
-- Node **B** connects to **A**, **C**, and **D**.
-- Node **B** has no connections to $E$.
-- **Adjacency Rule**:
-  - $a_{BA} = 1$ (already filled!)
-  - Set $a_{BC} = 1$ and $a_{BD} = 1$.
-  - Set $a_{BE} = 0$.
-- **Row B**: `(1,  --,  1,  1,  0)`
-- **Column B**: `(1,  --,  1,  1,  0)`
-:::
-
-::: {.column width="50%"}
+### Highlighted Graph
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
+#| fig-width: 4.8
+#| fig-height: 4.8
 plot_undir_highlight(active_edges = c("A-B", "B-C", "B-D"), active_nodes = "B")
 ```
+:::
 
-### Adjacency Matrix progress
+::: {.column width="50%"}
+### Adjacency Matrix Progress
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | **1** | 1 | 0 | 0 |
@@ -394,26 +459,22 @@ plot_undir_highlight(active_edges = c("A-B", "B-C", "B-D"), active_nodes = "B")
 
 ## Step 4: The Final Undirected Adjacency Matrix
 
+Repeating for rows C, D, and E completes the matrix. Note the perfect bilateral mirror symmetry!
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Left: Completed Undirected Graph
-- We repeat this process for rows C, D, and E:
-  - **C** connects to $\{A, B, E\} \rightarrow$ `(1, 1, --, 0, 1)`.
-  - **D** connects to $\{B, E\} \rightarrow$ `(0, 1, 0, --, 1)`.
-  - **E** connects to $\{C, D\} \rightarrow$ `(0, 0, 1, 1, --)`.
-- Notice the **perfect mirror symmetry** of the upper and lower triangles!
-:::
-
-::: {.column width="50%"}
+### Reference Graph
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
+#| fig-width: 4.8
+#| fig-height: 4.8
 plot_undir_highlight()
 ```
+:::
 
+::: {.column width="50%"}
 ### Symmetric Adjacency Matrix ($\mathbf{A}$)
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
@@ -447,25 +508,30 @@ plot_undir_highlight()
 
 ## The Directed Reference Graph & Empty Matrix
 
+The same 5 nodes $\{A, B, C, D, E\}$ are used, but we now introduce directed arrows.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
 ### Reference Directed Graph
-- We use the exact same 5-node nodes $\{A, B, C, D, E\}$ with the same spatial layout.
-- However, we now introduce directed arrows.
-- Observe:
-  - Some ties are **reciprocal** (e.g., $A \leftrightarrow B$).
-  - Some ties are **unidirectional** (e.g., $A \rightarrow C$ but $C \not\rightarrow A$).
-:::
-
-::: {.column width="50%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
+#| fig-width: 4.8
+#| fig-height: 4.8
 plot_dir_highlight()
 ```
+:::
+
+::: {.column width="50%"}
+### Empty Matrix Layout
+| | A | B | C | D | E |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| **A** | -- | ? | ? | ? | ? |
+| **B** | ? | -- | ? | ? | ? |
+| **C** | ? | ? | -- | ? | ? |
+| **D** | ? | ? | ? | -- | ? |
+| **E** | ? | ? | ? | ? | -- |
 :::
 
 ::::
@@ -474,30 +540,23 @@ plot_dir_highlight()
 
 ## Step 1: Filling Row A (A as Sender)
 
+Node **A** sends arrows to **B** and **C**, but none to $D$ or $E$.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Left: Outgoing arrows from A highlighted
-- Look only at arrows **originating** at node **A**:
-  - $A$ sends an arrow to $B$ ($A \rightarrow B$).
-  - $A$ sends an arrow to $C$ ($A \rightarrow C$).
-  - $A$ sends no arrows to $D$ or $E$.
-- **Adjacency Rule**:
-  - Set cells $a_{AB} = 1$ and $a_{AC} = 1$.
-  - Set cells $a_{AD} = 0$ and $a_{AE} = 0$.
-- **Row A**: `(--,  1,  1,  0,  0)`
-:::
-
-::: {.column width="50%"}
+### Highlighted Graph
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
-plot_dir_highlight(active_edges = c("A-B", "A-C"), active_nodes = "A")
+#| fig-width: 4.8
+#| fig-height: 4.8
+plot_dir_highlight(active_edges = c("1-2", "1-3"), active_nodes = "A")
 ```
+:::
 
-### Directed Matrix progress
+::: {.column width="50%"}
+### Adjacency Matrix Progress
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | **--** | **1** | **1** | **0** | **0** |
@@ -513,30 +572,28 @@ plot_dir_highlight(active_edges = c("A-B", "A-C"), active_nodes = "A")
 
 ## Step-by-Step Directed Cell Correspondence
 
+In a directed graph, each cell corresponds to a **unique directional relationship** (Sender $\rightarrow$ Receiver).
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-- Let's look at how unreciprocated arrows map to cell asymmetry:
-  - **Arrow $A \rightarrow C$ exists**:
-    - This is cell $a_{13} = 1$ (Row A, Column C).
-  - **No Arrow $C \rightarrow A$ exists**:
-    - This is cell $a_{31} = 0$ (Row C, Column A).
-- In a directed graph, each cell corresponds to a **unique directional relationship**.
-- Contrast this with the undirected case, where cells $a_{AC}$ and $a_{CA}$ were forced to be identical!
-:::
-
-::: {.column width="50%"}
+### Highlighted Arrow $A \rightarrow C$
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
-plot_dir_highlight(active_edges = c("A-C"), active_nodes = c("A", "C"))
+#| fig-width: 4.8
+#| fig-height: 4.8
+plot_dir_highlight(active_edges = c("1-3"), active_nodes = c("A", "C"))
 ```
+:::
 
+::: {.column width="50%"}
 ### Arrow to Cell Mapping
-- Arrow $A \rightarrow C \Longrightarrow a_{AC} = 1$
-- No Arrow $C \rightarrow A \Longrightarrow a_{CA} = 0$
+- **Arrow $A \rightarrow C$ exists**:
+  - Cell $a_{13} = 1$ (Row A, Col C)
+- **No Arrow $C \rightarrow A$ exists**:
+  - Cell $a_{31} = 0$ (Row C, Col A)
+- *The asymmetric relationship breaks the mirror symmetry across the diagonal.*
 :::
 
 ::::
@@ -545,31 +602,23 @@ plot_dir_highlight(active_edges = c("A-C"), active_nodes = c("A", "C"))
 
 ## Step 2: Filling Row B (B as Sender)
 
+Node **B** sends arrows to **A**, **C**, and **D**, but none to $E$.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Left: Outgoing arrows from B highlighted
-- Look only at arrows **originating** at node **B**:
-  - $B$ sends an arrow to $A$ ($B \rightarrow A$).
-  - $B$ sends an arrow to $C$ ($B \rightarrow C$).
-  - $B$ sends an arrow to $D$ ($B \rightarrow D$).
-  - $B$ sends no arrow to $E$.
-- **Adjacency Rule**:
-  - Set cells $a_{BA} = 1, a_{BC} = 1, a_{BD} = 1$.
-  - Set cell $a_{BE} = 0$.
-- **Row B**: `(1,  --,  1,  1,  0)`
-:::
-
-::: {.column width="50%"}
+### Highlighted Graph
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
-plot_dir_highlight(active_edges = c("B-A", "B-C", "B-D"), active_nodes = "B")
+#| fig-width: 4.8
+#| fig-height: 4.8
+plot_dir_highlight(active_edges = c("2-1", "2-3", "2-4"), active_nodes = "B")
 ```
+:::
 
-### Directed Matrix progress
+::: {.column width="50%"}
+### Adjacency Matrix Progress
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | 1 | 1 | 0 | 0 |
@@ -585,30 +634,23 @@ plot_dir_highlight(active_edges = c("B-A", "B-C", "B-D"), active_nodes = "B")
 
 ## Step 3: Filling Row C (C as Sender)
 
+Node **C** sends an arrow only to **E** ($C \rightarrow E$). It has no arrows pointing to $A, B,$ or $D$.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Left: Outgoing arrows from C highlighted
-- Look only at arrows **originating** at node **C**:
-  - $C$ sends an arrow to $E$ ($C \rightarrow E$).
-  - $C$ sends no arrows to $A, B,$ or $D$.
-- **Adjacency Rule**:
-  - Set cell $a_{CE} = 1$.
-  - Set cells $a_{CA} = 0, a_{CB} = 0, a_{CD} = 0$.
-- **Row C**: `(0,  0,  --,  0,  1)`
-- *Notice that even though A and B point to C, C does not point back to them!*
-:::
-
-::: {.column width="50%"}
+### Highlighted Graph
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.2
-#| fig-height: 5.2
-plot_dir_highlight(active_edges = "C-E", active_nodes = "C")
+#| fig-width: 4.8
+#| fig-height: 4.8
+plot_dir_highlight(active_edges = "3-5", active_nodes = "C")
 ```
+:::
 
-### Directed Matrix progress
+::: {.column width="50%"}
+### Adjacency Matrix Progress
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | 1 | 1 | 0 | 0 |
@@ -624,31 +666,22 @@ plot_dir_highlight(active_edges = "C-E", active_nodes = "C")
 
 ## Step 4: The Completed Directed Adjacency Matrix
 
+Row D sends no arrows (sink node) $\rightarrow$ `(0, 0, 0, --, 0)`. Row E sends only one arrow to D ($E \rightarrow D$) $\rightarrow$ `(0, 0, 0, 1, --)`.
+
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Left: Completed Directed Graph
-- We repeat for the remaining rows D and E:
-  - **Row D**: Node D sends **no arrows** at all! It is a pure receiver (sink node) $\rightarrow$ `(0, 0, 0, --, 0)`.
-  - **Row E**: Node E sends only one arrow to D ($E \rightarrow D$) $\rightarrow$ `(0, 0, 0, 1, --)`.
-- Notice the clear asymmetry (e.g. $A_{CB} = 0$ but $A_{BC} = 1$).
-:::
-
-::: {.column width="50%"}
+### Reference Graph
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_dir, layout = layout_coords) +
-  geom_edge_link(color = "steelblue", edge_width = 1.25,
-                 arrow = arrow(length = unit(4, 'mm')),
-                 end_cap = circle(6, 'mm')) +
-  geom_node_point(color = "tan2", size = 16) +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+#| fig-width: 4.8
+#| fig-height: 4.8
+plot_dir_highlight()
 ```
+:::
 
+::: {.column width="50%"}
 ### Asymmetric Adjacency Matrix ($\mathbf{A}$)
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
@@ -665,14 +698,25 @@ ggraph(gr_dir, layout = layout_coords) +
 
 ---
 
-## Symmetric vs. Asymmetric Structure
+## Undirected Networks: Symmetric Adjacency
+
+Symmetric matrices feature mirror-image upper and lower triangles ($A_{ij} = A_{ji}$). Only half the matrix is needed.
 
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Undirected Symmetric Matrix
-- **Mirror Images**: Cells across the main diagonal are identical ($A_{ij} = A_{ji}$).
-- **Lower Density**: Information is duplicated (only upper or lower triangle is needed).
+### Undirected Graph
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.8
+#| fig-height: 4.8
+plot_undir_highlight()
+```
+:::
+
+::: {.column width="50%"}
+### Symmetric Matrix ($\mathbf{A}$)
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | **1** | **1** | 0 | 0 |
@@ -682,10 +726,29 @@ ggraph(gr_dir, layout = layout_coords) +
 | **E** | 0 | 0 | **1** | **1** | -- |
 :::
 
+::::
+
+---
+
+## Directed Networks: Asymmetric Adjacency
+
+Asymmetric matrices represent unidirectional links where $A_{ij} \neq A_{ji}$. Diagonals are still blocked.
+
+:::: {.columns align=center}
+
 ::: {.column width="50%"}
-### Directed Asymmetric Matrix
-- **No Mirror Images**: Cells across the diagonal represent independent relations.
-- **Asymmetric Ties**: e.g., B sends to D ($a_{BD}=1$), but D does not send to B ($a_{DB}=0$).
+### Directed Graph
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.8
+#| fig-height: 4.8
+plot_dir_highlight()
+```
+:::
+
+::: {.column width="50%"}
+### Asymmetric Matrix ($\mathbf{A}$)
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | **1** | **1** | 0 | 0 |
