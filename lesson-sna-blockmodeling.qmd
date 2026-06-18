@@ -484,4 +484,87 @@ So the big blocked adjacency matrix in @tbl-blocks-3 can be reduced to the **ima
 
 This is how **blockmodeling** works!
 
+## The Core-Periphery Blockmodel {#sec-cpblockmodel}
+
+While blockmodeling can reveal many different role structures, one of the most famous and widely used structures in social network analysis is the **Core-Periphery blockmodel** (Borgatti & Everett, 1999). 
+
+As we saw when looking at cohesive subsets, a core-periphery structure consists of a highly cohesive, tightly integrated **core** of actors and a sparsely connected **periphery** of actors. In a blockmodeling framework, we can represent this structure as an **ideal image matrix** of relationship patterns between the core block and the periphery block. 
+
+### The Ideal Core-Periphery Structure
+
+If we partition a network into two blocks—the Core ($C$) and the Periphery ($P$)—the **ideal core-periphery model** is defined by a block image matrix featuring a specific pattern of **one-blocks** and **zero-blocks**. 
+
+Specifically, in an ideal core-periphery structure:
+- **Within-Core Block ($Core \rightarrow Core$)**: This is a **one-block**. Core members are densely connected to one another, reflecting high internal cohesion (density $\approx 1.0$).
+- **Core-to-Periphery Block ($Core \rightarrow Periph$) & Periphery-to-Core Block ($Periph \rightarrow Core$)**: These are **one-blocks**. Core members are connected to peripheral members, and peripheral members are connected back to the core.
+- **Within-Periphery Block ($Periph \rightarrow Periph$)**: This is a **zero-block**. Peripheral members are completely disconnected from one another; they are only integrated into the network through their ties to the core.
+
+Thus, the ideal core-periphery image matrix ($\mathbf{B}$) is written as:
+
+$
+\mathbf{B} = 
+\begin{pmatrix}
+\mathbf{Core} & \mathbf{Core/Periph} \\
+\mathbf{Periph/Core} & \mathbf{Periphery}
+\end{pmatrix}
+=
+\begin{pmatrix}
+1 & 1 \\
+1 & 0
+\end{pmatrix}
+$
+
+### Blocked Adjacency Matrix Comparison
+
+In empirical research, we rarely observe perfect, noise-free zero-blocks and one-blocks. Instead, we use blockmodeling optimization algorithms to find a partition of actors into Core and Periphery blocks that minimizes the **deviation** between the observed blocked adjacency matrix and the ideal core-periphery matrix shown above.
+
+To illustrate, consider @fig-cpblockmodel-fig, which shows a network of 10 actors containing a core of 4 highly connected nodes $\{A, B, C, D\}$ and a periphery of 6 marginal nodes $\{E, F, G, H, I, J\}$.
+
+```{r}
+#| label: fig-cpblockmodel-fig
+#| fig-cap: "An undirected network exhibiting a core-periphery block structure. The core nodes (red) are densely interconnected, while the peripheral nodes (blue) only connect to the core."
+#| fig-cap-location: bottom
+#| fig-height: 6
+#| fig-width: 8
+
+    set.seed(123)
+    # Create an ideal core-periphery network
+    gr_cp <- play_islands(n_islands = 1, size_islands = 4, p_within = 1.0, 0) %>%
+      bind_nodes(data.frame(name = 5:10)) %>%
+      bind_edges(data.frame(from = c(1, 1, 2, 2, 3, 4), to = 5:10))
+    V(gr_cp)$name <- LETTERS[1:10]
+    V(gr_cp)$block <- c(rep("Core", 4), rep("Periphery", 6))
+    
+    ggraph(gr_cp, layout = 'kk') +
+      geom_edge_link(color = "steelblue", alpha = 0.5, width = 1.1) +
+      geom_node_point(aes(color = block), size = 16) +
+      geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+      scale_color_manual(values = c("Core" = "firebrick", "Periphery" = "dodgerblue")) +
+      theme_graph() +
+      theme(legend.position = "right")
+```
+
+If we reshuffle the adjacency matrix of this network to group the Core members $\{A, B, C, D\}$ first and the Periphery members $\{E, F, G, H, I, J\}$ second, we obtain the **blocked adjacency matrix** shown in @tbl-cpblockmodel-tbl.
+
+```{r}
+#| label: tbl-cpblockmodel-tbl
+#| tbl-cap: "Blocked adjacency matrix of a core-periphery network. The top-left represents the Core-Core one-block, the off-diagonals represent the Core-Periphery one-blocks, and the bottom-right represents the Periphery-Periphery zero-block."
+#| tbl-cap-location: bottom
+
+    a_cp <- matrix(as_adjacency_matrix(gr_cp), nrow = length(V(gr_cp)))
+    rownames(a_cp) <- V(gr_cp)$name
+    colnames(a_cp) <- V(gr_cp)$name
+    
+    kbl(a_cp, align = "c", format = "html") %>%
+      column_spec(1, bold = TRUE) %>%
+      kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+      row_spec(4, extra_css = "border-bottom: 2px solid black;") %>%
+      column_spec(5, extra_css = "border-right: 2px solid black;")
+```
+
+As @tbl-cpblockmodel-tbl clearly illustrates, this blocked adjacency matrix corresponds perfectly to our ideal core-periphery model. The **Core-Core block** (top-left $4 \times 4$ submatrix) is completely filled with ones, reflecting the complete, clique-like density of the core. The **Core-Periphery blocks** (top-right and bottom-left) contain several ones, representing the integration of peripheral actors. Meanwhile, the **Periphery-Periphery block** (bottom-right $6 \times 6$ submatrix) is a perfect **zero-block**, showing that peripheral members have absolutely no ties to one another.
+
+This blockmodeling approach allows researchers to test whether a network features a core-periphery structure as an organizational principle, providing a clean mathematical representation of asymmetric power and integration in social systems.
+
+
 ## References {.unnumbered}
