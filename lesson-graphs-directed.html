@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>12&nbsp; Directed Graphs – Social Networks</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-graphs-paths.html" rel="next">
+<link href="./lesson-graphs-degree-metrics.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-22da7ca13c457c7eea04566a7beed6cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3e5f2ac0a8fb60c30c27cad0f1e5dbc7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-22da7ca13c457c7eea04566a7beed6cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-graphs-intro.html">Networks, Graphs, and Matrices</a></li><li class="breadcrumb-item"><a href="./lesson-graphs-directed.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Directed Graphs</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Social Networks</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction to Networks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-what-are-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What Are Networks?</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-what-are-social-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">What is A <em>Social</em> Network?</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-ties-bound.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Social Ties and Network Boundaries</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-tie-strength.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Tie Strength</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Networks, Graphs, and Matrices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introduction to Graphs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-ties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-dyads-and-triads.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Dyads and Triads</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-neighborhoods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-degree-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-directed.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Directed Graphs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-paths.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Indirect Connections</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-directed-paths.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-connectivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Tree Graphs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-network.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Social Network Matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-operations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Basic Matrix Operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-multiplication.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Matrix Multiplication and its Applications</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Analyzing Networks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-closeness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-betweenness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-bigthree.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">The “Big Three” Centrality Metrics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Status</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-hubs-and-authorities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Hubs and Authorities</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Two-Mode &amp; Ego Networks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-affiliation-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-ego-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-ego-collect.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Collecting Ego-Network Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-ego-homo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Theories of Ego Network Homogeneity and Diversity</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Subgroups and Blocks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-groups-cliques.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Clique Analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-groups-cohesive.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Cohesive Subsets</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-positions-struct-equiv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Equivalence and Similarity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-local-similarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Local Node Similarities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-blockmodeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Blockmodeling</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Network Theory</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-dunbar.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Dunbar’s Theory of Social Circles</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-swt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">The Strength of Weak Ties</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-sht.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Structural Holes and Brokerage</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-smt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Simmelian Tie Theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-dyadic-balance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Dyadic Balance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-triadic-balance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Triadic Balance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-structural-balance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Structural Balance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-valenced-interactions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Theories of Valenced Interactions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-hierarchies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Dominance Hierarchies</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-diffusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">The Diffusion of Innovations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-small-world.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">The Small World Phenomenon</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework I: Graph Theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework II: Directed Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework III: Indirect Connections and Matrices</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework IV: Matrix Operations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework V: Affiliation Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework VI: Centrality</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework VII: Ego-Network Metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework VIII: Balance and Signed Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework IX: Subgroups, Graph Connectivity, and Structural Similarity</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction-to-directed-graphs-digraphs" id="toc-introduction-to-directed-graphs-digraphs" class="nav-link active" data-scroll-target="#introduction-to-directed-graphs-digraphs"><span class="header-section-number">12.1</span> Introduction to Directed Graphs (Digraphs)</a></li>
+  <li><a href="#subgraphs-in-directed-graphs" id="toc-subgraphs-in-directed-graphs" class="nav-link" data-scroll-target="#subgraphs-in-directed-graphs"><span class="header-section-number">12.2</span> Subgraphs in Directed Graphs</a>
+  <ul class="collapse">
+  <li><a href="#induced-subgraphs-in-directed-graphs" id="toc-induced-subgraphs-in-directed-graphs" class="nav-link" data-scroll-target="#induced-subgraphs-in-directed-graphs"><span class="header-section-number">12.2.1</span> Induced Subgraphs in Directed Graphs</a></li>
+  </ul></li>
+  <li><a href="#node-neighborhoods-in-directed-graphs" id="toc-node-neighborhoods-in-directed-graphs" class="nav-link" data-scroll-target="#node-neighborhoods-in-directed-graphs"><span class="header-section-number">12.3</span> Node Neighborhoods in Directed Graphs</a>
+  <ul class="collapse">
+  <li><a href="#neighborhood-intersections" id="toc-neighborhood-intersections" class="nav-link" data-scroll-target="#neighborhood-intersections"><span class="header-section-number">12.3.1</span> Neighborhood Intersections</a></li>
+  <li><a href="#neighborhood-unions" id="toc-neighborhood-unions" class="nav-link" data-scroll-target="#neighborhood-unions"><span class="header-section-number">12.3.2</span> Neighborhood Unions</a></li>
+  </ul></li>
+  <li><a href="#node-degree-in-directed-graphs" id="toc-node-degree-in-directed-graphs" class="nav-link" data-scroll-target="#node-degree-in-directed-graphs"><span class="header-section-number">12.4</span> Node Degree in Directed Graphs</a>
+  <ul class="collapse">
+  <li><a href="#walkthrough-of-individual-node-degrees" id="toc-walkthrough-of-individual-node-degrees" class="nav-link" data-scroll-target="#walkthrough-of-individual-node-degrees"><span class="header-section-number">12.4.1</span> Walkthrough of Individual Node Degrees</a></li>
+  <li><a href="#social-roles-receivers-carriers-and-transmitters" id="toc-social-roles-receivers-carriers-and-transmitters" class="nav-link" data-scroll-target="#social-roles-receivers-carriers-and-transmitters"><span class="header-section-number">12.4.2</span> Social Roles: Receivers, Carriers, and Transmitters</a></li>
+  <li><a href="#degree-sets-sequences-and-ranges" id="toc-degree-sets-sequences-and-ranges" class="nav-link" data-scroll-target="#degree-sets-sequences-and-ranges"><span class="header-section-number">12.4.3</span> Degree Sets, Sequences, and Ranges</a></li>
+  </ul></li>
+  <li><a href="#directed-graph-metrics" id="toc-directed-graph-metrics" class="nav-link" data-scroll-target="#directed-graph-metrics"><span class="header-section-number">12.5</span> Directed Graph Metrics</a></li>
+  <li><a href="#degree-variance-in-directed-graphs" id="toc-degree-variance-in-directed-graphs" class="nav-link" data-scroll-target="#degree-variance-in-directed-graphs"><span class="header-section-number">12.6</span> Degree Variance in Directed Graphs</a></li>
+  <li><a href="#special-classes-of-directed-graphs" id="toc-special-classes-of-directed-graphs" class="nav-link" data-scroll-target="#special-classes-of-directed-graphs"><span class="header-section-number">12.7</span> Special Classes of Directed Graphs</a>
+  <ul class="collapse">
+  <li><a href="#symmetric-directed-graphs" id="toc-symmetric-directed-graphs" class="nav-link" data-scroll-target="#symmetric-directed-graphs"><span class="header-section-number">12.7.1</span> Symmetric Directed Graphs</a></li>
+  <li><a href="#functional-graphs" id="toc-functional-graphs" class="nav-link" data-scroll-target="#functional-graphs"><span class="header-section-number">12.7.2</span> Functional Graphs</a></li>
+  <li><a href="#sec-oriented" id="toc-sec-oriented" class="nav-link" data-scroll-target="#sec-oriented"><span class="header-section-number">12.7.3</span> Oriented Graphs</a></li>
+  <li><a href="#anti-symmetric-ties-and-directed-tree-graphs" id="toc-anti-symmetric-ties-and-directed-tree-graphs" class="nav-link" data-scroll-target="#anti-symmetric-ties-and-directed-tree-graphs"><span class="header-section-number">12.7.4</span> Anti-Symmetric Ties and Directed Tree Graphs</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-graphs-intro.html">Networks, Graphs, and Matrices</a></li><li class="breadcrumb-item"><a href="./lesson-graphs-directed.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Directed Graphs</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-directedgraphs" class="quarto-section-identifier"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Directed Graphs</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction-to-directed-graphs-digraphs" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="introduction-to-directed-graphs-digraphs"><span class="header-section-number">12.1</span> Introduction to Directed Graphs (Digraphs)</h2>
+<p>In our everyday social lives, many relationships do not flow symmetrically. While a business partnership or a co-authorship on a paper is naturally mutual, other interactions are inherently directional. Consider giving advice, sending an email, lending money, or nominating a colleague as a close friend. In all these cases, one person initiates the connection, but the recipient may or may not return the favor. To represent these directional ties, we use <strong>directed graphs</strong> (also commonly referred to as <strong>digraphs</strong>).</p>
+<p>Unlike undirected graphs where edges are simple lines connecting two vertices, a directed graph uses arrows (often called <strong>arcs</strong> or <strong>directed edges</strong>) that point from a <strong>source node</strong> (the sender of the tie) to a <strong>destination node</strong> (the receiver). This means that the order of the nodes matters: a directed edge from <span class="math inline">\(A\)</span> to <span class="math inline">\(B\)</span> (written as the ordered pair <span class="math inline">\((A, B)\)</span>) is a completely different relationship from a directed edge from <span class="math inline">\(B\)</span> to <span class="math inline">\(A\)</span> (written as <span class="math inline">\((B, A)\)</span>). If a digraph contains no loops (where a node connects to itself) and has at most one directed edge from any sender to any receiver, we refer to it as a <strong>simple directed graph</strong>.</p>
+<p><a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a> shows a point-and-line diagram of a digraph representing a simple directed social network.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-directed" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-directed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-directed_files/figure-html/fig-directed-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-directed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.1: A simple directed graph.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>If we view this network as an <strong>advice network</strong> within an organization <span class="citation" data-cites="cross01">(<a href="#ref-cross01" role="doc-biblioref">Cross et al. 2001</a>)</span>, directionality immediately reveals the social dynamics at play. For instance, we can see that node <span class="math inline">\(E\)</span> sends an arrow to node <span class="math inline">\(D\)</span> (meaning <span class="math inline">\(E\)</span> seeks advice from <span class="math inline">\(D\)</span>), but <span class="math inline">\(D\)</span> does not send an arrow back to <span class="math inline">\(E\)</span>. This lack of reciprocity is common in formal hierarchies, where advice-seeking typically flows upward to more experienced or authoritative actors, reflecting status and power differentials. On the other hand, the mutual arrows between <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> represent a reciprocal advising relationship, suggesting a balanced peer-to-peer exchange where both parties value each other’s expertise.</p>
+<hr>
+</section>
+<section id="subgraphs-in-directed-graphs" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="subgraphs-in-directed-graphs"><span class="header-section-number">12.2</span> Subgraphs in Directed Graphs</h2>
+<p>Before diving into how individual nodes navigate directed networks, let’s explore how we can examine smaller portions of a directed graph. In many real-world applications, we are not interested in the entire network, but rather in a specific subset of actors or a particular set of relationships. In graph theory, we analyze these sub-structures using the concept of <strong>subgraphs</strong>.</p>
+<p>A <strong>directed subgraph</strong> <span class="math inline">\(H = (V_H, E_H)\)</span> of a directed graph <span class="math inline">\(G = (V, E)\)</span> is simply a network formed by choosing a subset of nodes <span class="math inline">\(V_H\)</span> from the original network (<span class="math inline">\(V_H \subseteq V\)</span>) and a subset of directed edges <span class="math inline">\(E_H\)</span> (<span class="math inline">\(E_H \subseteq E\)</span>). The only rule is that any edge we include in our subgraph must connect nodes that are also included in the subgraph.</p>
+<p>For example, let’s say we are studying the communication network of a large corporation (<span class="math inline">\(G\)</span>), but we want to focus specifically on the mentoring relationships within the management team. If we select a subset of managers (<span class="math inline">\(V_H\)</span>) and only look at the directed mentoring links between them (<span class="math inline">\(E_H\)</span>), we have constructed a directed subgraph.</p>
+<section id="induced-subgraphs-in-directed-graphs" class="level3" data-number="12.2.1">
+<h3 data-number="12.2.1" class="anchored" data-anchor-id="induced-subgraphs-in-directed-graphs"><span class="header-section-number">12.2.1</span> Induced Subgraphs in Directed Graphs</h3>
+<p>A particularly important type of subgraph is the <strong>induced directed subgraph</strong>. To create an induced subgraph, we select a subset of nodes <span class="math inline">\(V_H\)</span> from the main graph, and then we must include <em>every single directed edge</em> from the original graph that connects those chosen nodes. In other words, we do not filter or select edges; if an arrow exists between two of our chosen nodes in the main network, it must be present in the induced subgraph.</p>
+<p>Sociologically, an induced subgraph represents the <em>complete local network</em> of a sub-group. For instance, if we want to understand the informal advice dynamics within the marketing department of a firm, we would select the marketing staff as our node subset. The induced subgraph on this group will show all advising ties that occur strictly among the marketing team members, ignoring any ties that go to other departments.</p>
+<p>Let’s look at a concrete example using our reference network in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>.</p>
+<p>Suppose we choose a subset of nodes <span class="math inline">\(V_H = \{A, B, D, E\}\)</span>.</p>
+<p>If we construct a simple subgraph <span class="math inline">\(H_1\)</span> by selecting these nodes and only including the directed edges <span class="math inline">\(A \rightarrow B\)</span>, <span class="math inline">\(B \rightarrow A\)</span>, and <span class="math inline">\(B \rightarrow D\)</span>, we have a valid directed subgraph. We have chosen a subset of nodes and a subset of edges, and all edges connect nodes in our set.</p>
+<p>However, if we want to find the <strong>induced directed subgraph</strong> on the set <span class="math inline">\(\{A, B, D, E\}\)</span>, we must go back to the original network in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a> and pull <em>all</em> arrows that run between these four nodes. Looking at the main graph, we find: 1. <span class="math inline">\(A \rightarrow B\)</span> and <span class="math inline">\(B \rightarrow A\)</span> (the reciprocal pair between <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>) 2. <span class="math inline">\(B \rightarrow D\)</span> and <span class="math inline">\(D \rightarrow B\)</span> (the reciprocal pair between <span class="math inline">\(B\)</span> and <span class="math inline">\(D\)</span>) 3. <span class="math inline">\(E \rightarrow D\)</span> (the one-way tie from <span class="math inline">\(E\)</span> to <span class="math inline">\(D\)</span>)</p>
+<p>Thus, the induced directed subgraph <span class="math inline">\(H_2\)</span> on the node set <span class="math inline">\(\{A, B, D, E\}\)</span> must contain all five of these directed edges. Notice that we exclude the edges involving <span class="math inline">\(C\)</span>, <span class="math inline">\(F\)</span>, and <span class="math inline">\(G\)</span> (such as <span class="math inline">\(B \rightarrow C\)</span>, <span class="math inline">\(A \rightarrow F\)</span>, or <span class="math inline">\(G \rightarrow D\)</span>), because those nodes are not members of our subset.</p>
+<hr>
+</section>
+</section>
+<section id="node-neighborhoods-in-directed-graphs" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="node-neighborhoods-in-directed-graphs"><span class="header-section-number">12.3</span> Node Neighborhoods in Directed Graphs</h2>
+<p>In an undirected graph, a node’s neighborhood is simply the set of other nodes it is connected to. However, in a directed network, directionality splits this concept in two. We must distinguish between the people who send ties to a node and the people who receive ties from that node. Think of a Twitter account: your followers (who receive your updates) form a very different group from the people you follow (whose updates you receive). In graph theory, we capture this distinction through <strong>in-neighborhoods</strong> and <strong>out-neighborhoods</strong>.</p>
+<p>The <strong>in-neighborhood</strong> of a node <span class="math inline">\(v\)</span>, written as <span class="math inline">\(N^{in}(v)\)</span>, consists of all the nodes that send a directed edge toward it. Sociologically, in an office advice network, a person’s in-neighborhood represents their “advice-seekers”—the group of people who come to them for help. For example, looking at our reference network in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, we can see that node <span class="math inline">\(D\)</span> receives arrows from nodes <span class="math inline">\(B\)</span>, <span class="math inline">\(E\)</span>, and <span class="math inline">\(G\)</span>. Therefore, its in-neighborhood is <span class="math inline">\(N^{in}(D) = \{B, E, G\}\)</span>.</p>
+<p>Conversely, the <strong>out-neighborhood</strong> of a node <span class="math inline">\(v\)</span>, written as <span class="math inline">\(N^{out}(v)\)</span>, consists of all the nodes to which <span class="math inline">\(v\)</span> sends a directed edge. In our office context, this represents a person’s “advice-givers”—the group of people they go to when they need help. In <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, node <span class="math inline">\(B\)</span> sends arrows to <span class="math inline">\(A\)</span>, <span class="math inline">\(C\)</span>, and <span class="math inline">\(D\)</span>, which gives us the out-neighborhood set <span class="math inline">\(N^{out}(B) = \{A, C, D\}\)</span>.</p>
+<p>Notice that a node will only appear in both neighborhoods of another node if there is a mutual, reciprocal relationship between them. For instance, if we look at node <span class="math inline">\(F\)</span> in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, its out-neighborhood is <span class="math inline">\(\{A\}\)</span> and its in-neighborhood is <span class="math inline">\(\{A, G\}\)</span>. Node <span class="math inline">\(A\)</span> is the only node that appears in both sets, which directly reflects the reciprocal advising partnership between <span class="math inline">\(A\)</span> and <span class="math inline">\(F\)</span>.</p>
+<section id="neighborhood-intersections" class="level3" data-number="12.3.1">
+<h3 data-number="12.3.1" class="anchored" data-anchor-id="neighborhood-intersections"><span class="header-section-number">12.3.1</span> Neighborhood Intersections</h3>
+<p>Just as we do with undirected networks, we can analyze the structural overlap between different actors by intersecting their neighborhoods. Because directed graphs have two types of neighborhoods, we can look at two distinct kinds of overlap, each carrying a different social meaning.</p>
+<p>First, the <strong>in-neighborhood intersection</strong> (<span class="math inline">\(N^{in}(u) \cap N^{in}(v)\)</span>) finds the common senders who target both <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span>. In a social setting, if two individuals share many of the same senders, it suggests they occupy a similar role or share a common audience. For instance, let’s look at nodes <span class="math inline">\(C\)</span> and <span class="math inline">\(D\)</span> in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>. Node <span class="math inline">\(C\)</span> receives ties from <span class="math inline">\(B\)</span> and <span class="math inline">\(E\)</span>, so <span class="math inline">\(N^{in}(C) = \{B, E\}\)</span>. Since <span class="math inline">\(N^{in}(D) = \{B, E, G\}\)</span>, their in-neighborhood intersection is:</p>
+<p><span class="math display">\[
+  N^{in}(C) \cap N^{in}(D) = \{B, E\}
+\]</span></p>
+<p>This tells us that both <span class="math inline">\(C\)</span> and <span class="math inline">\(D\)</span> are sought out by the exact same advisors, <span class="math inline">\(B\)</span> and <span class="math inline">\(E\)</span>.</p>
+<p>Second, the <strong>out-neighborhood intersection</strong> (<span class="math inline">\(N^{out}(u) \cap N^{out}(v)\)</span>) identifies the common targets to which both <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> send ties. Sociologically, this indicates shared outreach or common sources of advice. If we intersect the out-neighborhoods of <span class="math inline">\(C\)</span> and <span class="math inline">\(D\)</span> in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, we find:</p>
+<p><span class="math display">\[
+  N^{out}(C) \cap N^{out}(D) = \emptyset
+\]</span></p>
+<p>Because node <span class="math inline">\(C\)</span> is a “sink” that sends no outgoing ties (<span class="math inline">\(N^{out}(C) = \emptyset\)</span>), there is no overlap. However, if we look at nodes <span class="math inline">\(E\)</span> and <span class="math inline">\(G\)</span> (where <span class="math inline">\(N^{out}(E) = \{C, D\}\)</span> and <span class="math inline">\(N^{out}(G) = \{F, D\}\)</span>), their out-neighborhood intersection is:</p>
+<p><span class="math display">\[
+  N^{out}(E) \cap N^{out}(G) = \{D\}
+\]</span></p>
+<p>This shows that both <span class="math inline">\(E\)</span> and <span class="math inline">\(G\)</span> turn to node <span class="math inline">\(D\)</span> for advice, making <span class="math inline">\(D\)</span> a shared resource for them.</p>
+</section>
+<section id="neighborhood-unions" class="level3" data-number="12.3.2">
+<h3 data-number="12.3.2" class="anchored" data-anchor-id="neighborhood-unions"><span class="header-section-number">12.3.2</span> Neighborhood Unions</h3>
+<p>We can also look at the union of neighborhoods to find the total reach or combined coverage of two nodes. The <strong>in-neighborhood union</strong> (<span class="math inline">\(N^{in}(u) \cup N^{in}(v)\)</span>) combines all unique nodes that send ties to either <span class="math inline">\(u\)</span> or <span class="math inline">\(v\)</span> (or both). For nodes <span class="math inline">\(C\)</span> and <span class="math inline">\(D\)</span> in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, this union is:</p>
+<p><span class="math display">\[
+  N^{in}(C) \cup N^{in}(D) = \{B, E, G\}
+\]</span></p>
+<p>This represents the entire collective audience of both nodes. Similarly, the <strong>out-neighborhood union</strong> (<span class="math inline">\(N^{out}(u) \cup N^{out}(v)\)</span>) combines all unique nodes that receive ties from either <span class="math inline">\(u\)</span> or <span class="math inline">\(v\)</span>. For nodes <span class="math inline">\(E\)</span> and <span class="math inline">\(G\)</span>, this is:</p>
+<p><span class="math display">\[
+  N^{out}(E) \cup N^{out}(G) = \{C, D, F\}
+\]</span></p>
+<p>This represents the total combined set of people from whom <span class="math inline">\(E\)</span> and <span class="math inline">\(G\)</span> seek advice.</p>
+<hr>
+</section>
+</section>
+<section id="node-degree-in-directed-graphs" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="node-degree-in-directed-graphs"><span class="header-section-number">12.4</span> Node Degree in Directed Graphs</h2>
+<p>Because each node in a directed graph is associated with two different sets of neighbors, we can calculate two distinct measures of degree for every actor. These measures correspond directly to the sizes of their in-neighborhood and out-neighborhood sets.</p>
+<p>The first measure is <strong>indegree</strong> (<span class="math inline">\(k^{in}_i\)</span>), which counts the number of directed edges pointing to node <span class="math inline">\(i\)</span> as their destination. In a social network, indegree is often interpreted as a measure of popularity, prestige, or authority; it shows how many people nominate or seek out that individual. Mathematically, it is the size of the node’s in-neighborhood:</p>
+<p><span id="eq-indegree-card"><span class="math display">\[
+  k^{in}_i = |N^{in}(i)|
+\tag{12.1}\]</span></span></p>
+<p>The second measure is <strong>outdegree</strong> (<span class="math inline">\(k^{out}_i\)</span>), which counts the number of directed edges originating from node <span class="math inline">\(i\)</span> as their source. Sociologically, outdegree reflects an actor’s activity, sociability, or expansiveness; it indicates how many ties they actively initiate. Mathematically, it is the size of the node’s out-neighborhood:</p>
+<p><span id="eq-outdegree-card"><span class="math display">\[
+  k^{out}_i = |N^{out}(i)|
+\tag{12.2}\]</span></span></p>
+<section id="walkthrough-of-individual-node-degrees" class="level3" data-number="12.4.1">
+<h3 data-number="12.4.1" class="anchored" data-anchor-id="walkthrough-of-individual-node-degrees"><span class="header-section-number">12.4.1</span> Walkthrough of Individual Node Degrees</h3>
+<p>To see how these play out, let’s calculate the degrees for a few key nodes in our reference network (<a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>).</p>
+<p>Let’s start with node <span class="math inline">\(B\)</span>. Looking at the arrows, node <span class="math inline">\(B\)</span> receives incoming ties from <span class="math inline">\(A\)</span> and <span class="math inline">\(D\)</span>, so its in-neighborhood is <span class="math inline">\(N^{in}(B) = \{A, D\}\)</span>, giving it an indegree of <span class="math inline">\(k^{in}_B = 2\)</span>. At the same time, <span class="math inline">\(B\)</span> sends outgoing ties to <span class="math inline">\(A\)</span>, <span class="math inline">\(C\)</span>, and <span class="math inline">\(D\)</span>, so its out-neighborhood is <span class="math inline">\(N^{out}(B) = \{A, C, D\}\)</span>, giving it an outdegree of <span class="math inline">\(k^{out}_B = 3\)</span>. This means <span class="math inline">\(B\)</span> is highly active in both sending and receiving connections.</p>
+<p>Now consider node <span class="math inline">\(D\)</span>. It receives ties from <span class="math inline">\(B\)</span>, <span class="math inline">\(E\)</span>, and <span class="math inline">\(G\)</span>, so its in-neighborhood is <span class="math inline">\(N^{in}(D) = \{B, E, G\}\)</span>, yielding an indegree of <span class="math inline">\(k^{in}_D = 3\)</span>. However, <span class="math inline">\(D\)</span> only sends a single tie back to <span class="math inline">\(B\)</span>, so its out-neighborhood is <span class="math inline">\(N^{out}(D) = \{B\}\)</span>, giving it an outdegree of <span class="math inline">\(k^{out}_D = 1\)</span>. Node <span class="math inline">\(D\)</span> is the most sought-after advisor in this small group, despite being relatively quiet in sending out ties.</p>
+<p>Finally, let’s look at node <span class="math inline">\(C\)</span>. It receives arrows from <span class="math inline">\(B\)</span> and <span class="math inline">\(E\)</span>, meaning its in-neighborhood is <span class="math inline">\(N^{in}(C) = \{B, E\}\)</span>, which gives it an indegree of <span class="math inline">\(k^{in}_C = 2\)</span>. On the other hand, <span class="math inline">\(C\)</span> sends no outgoing arrows whatsoever, so its out-neighborhood is empty (<span class="math inline">\(N^{out}(C) = \emptyset\)</span>), which gives it an outdegree of <span class="math inline">\(k^{out}_C = 0\)</span>. Node <span class="math inline">\(C\)</span> acts purely as a consumer of advice without offering advice to anyone else.</p>
+</section>
+<section id="social-roles-receivers-carriers-and-transmitters" class="level3" data-number="12.4.2">
+<h3 data-number="12.4.2" class="anchored" data-anchor-id="social-roles-receivers-carriers-and-transmitters"><span class="header-section-number">12.4.2</span> Social Roles: Receivers, Carriers, and Transmitters</h3>
+<p>By comparing these two degrees, we can classify actors into distinct social roles <span class="citation" data-cites="Harary65">(<a href="#ref-Harary65" role="doc-biblioref">Harary et al. 1965</a>)</span> based on how they process flows in the network.</p>
+<p><strong>Transmitters</strong> are actors who send ties but do not receive any. They have an outdegree greater than zero, but an indegree of zero (<span class="math inline">\(k^{in} = 0, k^{out} &gt; 0\)</span>). In <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, nodes <span class="math inline">\(E\)</span> and <span class="math inline">\(G\)</span> are transmitters. Both send out advice queries (node <span class="math inline">\(E\)</span> has <span class="math inline">\(k^{out}_E = 2\)</span> and node <span class="math inline">\(G\)</span> has <span class="math inline">\(k^{out}_G = 2\)</span>), but neither is consulted by anyone else (<span class="math inline">\(k^{in}_E = 0\)</span> and <span class="math inline">\(k^{in}_G = 0\)</span>). In an information network, transmitters act as pure source nodes or broadcasters.</p>
+<p><strong>Receivers</strong> are actors who receive ties but do not send them. They have an indegree greater than zero, but an outdegree of zero (<span class="math inline">\(k^{in} &gt; 0, k^{out} = 0\)</span>). Node <span class="math inline">\(C\)</span> is a receiver (<span class="math inline">\(k^{in}_C = 2, k^{out}_C = 0\)</span>). In a team setting, a receiver acts as an information “sink”—someone who consumes resources but does not pass them along.</p>
+<p><strong>Carriers</strong> are the intermediaries who both receive and send ties (<span class="math inline">\(k^{in} &gt; 0, k^{out} &gt; 0\)</span>). In our graph, nodes <span class="math inline">\(A\)</span>, <span class="math inline">\(B\)</span>, <span class="math inline">\(D\)</span>, and <span class="math inline">\(F\)</span> are all carriers. For example, node <span class="math inline">\(A\)</span> has an indegree of 2 and an outdegree of 2, while node <span class="math inline">\(F\)</span> has an indegree of 2 and an outdegree of 1. These nodes act as brokers or relays, facilitating the flow of advice or information through the network.</p>
+</section>
+<section id="degree-sets-sequences-and-ranges" class="level3" data-number="12.4.3">
+<h3 data-number="12.4.3" class="anchored" data-anchor-id="degree-sets-sequences-and-ranges"><span class="header-section-number">12.4.3</span> Degree Sets, Sequences, and Ranges</h3>
+<p>If we calculate the degrees of all nodes in a directed network, we get two separate vectors of length <span class="math inline">\(n\)</span>: the <strong>indegree set</strong> (<span class="math inline">\(\mathbf{k}^{in}\)</span>) and the <strong>outdegree set</strong> (<span class="math inline">\(\mathbf{k}^{out}\)</span>). For the directed graph in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, these sets are:</p>
+<p><span class="math display">\[
+  \mathbf{k}^{in} = (k^{in}_A, k^{in}_B, k^{in}_C, k^{in}_D, k^{in}_E, k^{in}_F, k^{in}_G) = (2, 2, 2, 3, 0, 2, 0)
+\]</span></p>
+<p><span class="math display">\[
+  \mathbf{k}^{out} = (k^{out}_A, k^{out}_B, k^{out}_C, k^{out}_D, k^{out}_E, k^{out}_F, k^{out}_G) = (2, 3, 0, 1, 2, 1, 2)
+\]</span></p>
+<p>To get a clearer picture of the overall network structure, we can sort these sets in descending order to create <strong>degree sequences</strong>. Sorting the indegree set gives us the indegree sequence <span class="math inline">\(\mathbf{d}^{in} = (3, 2, 2, 2, 2, 0, 0)\)</span>, which ranks actors by their popularity. Sorting the outdegree set gives us the outdegree sequence <span class="math inline">\(\mathbf{d}^{out} = (3, 2, 2, 2, 1, 1, 0)\)</span>, which ranks them by their activity.</p>
+<p>We can also look at the extreme points of these sequences. In our network, the <strong>maximum indegree</strong> is <span class="math inline">\(k^{in}_{max} = 3\)</span> (held by the popular node <span class="math inline">\(D\)</span>), while the <strong>minimum indegree</strong> is <span class="math inline">\(k^{in}_{min} = 0\)</span> (held by the quiet nodes <span class="math inline">\(E\)</span> and <span class="math inline">\(G\)</span>). The <strong>maximum outdegree</strong> is <span class="math inline">\(k^{out}_{max} = 3\)</span> (held by node <span class="math inline">\(B\)</span>), and the <strong>minimum outdegree</strong> is <span class="math inline">\(k^{out}_{min} = 0\)</span> (held by node <span class="math inline">\(C\)</span>).</p>
+<p>Subtracting the minimum from the maximum gives us the range, which measures the gap between the most connected and least connected actors. For our network, both the <strong>indegree range</strong> (<span class="math inline">\(k^{in}_r = 3 - 0 = 3\)</span>) and the <strong>outdegree range</strong> (<span class="math inline">\(k^{out}_r = 3 - 0 = 3\)</span>) indicate a moderate spread between the star players and the peripheral members of the group.</p>
+<hr>
+</section>
+</section>
+<section id="directed-graph-metrics" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="directed-graph-metrics"><span class="header-section-number">12.5</span> Directed Graph Metrics</h2>
+<p>When we shift from undirected to directed graphs, basic network-wide metrics like size, density, and average degree take on new mathematical and conceptual meanings.</p>
+<p>First, consider the <strong>maximum size</strong> (<span class="math inline">\(m_{max}\)</span>) of a directed network. In an undirected graph of order <span class="math inline">\(n\)</span>, the maximum number of edges is <span class="math inline">\(\frac{n(n - 1)}{2}\)</span> because edges are symmetric. In a directed graph, however, connections can run in both directions (e.g., <span class="math inline">\(u \rightarrow v\)</span> and <span class="math inline">\(v \rightarrow u\)</span> are distinct edges). This means that a directed graph has exactly double the capacity of an undirected graph of the same size, which is expressed as:</p>
+<p><span id="eq-dirmaxsize"><span class="math display">\[
+  m_{max} = n(n - 1)
+\tag{12.3}\]</span></span></p>
+<p>For our reference network in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a>, which has <span class="math inline">\(n = 7\)</span> nodes, the maximum size is <span class="math inline">\(7(7 - 1) = 42\)</span> possible directed edges.</p>
+<p>Using this maximum size, we can calculate the <strong>directed graph density</strong> (<span class="math inline">\(d(G)^d\)</span>), which is the proportion of potential directed ties that are actually observed in the network:</p>
+<p><span id="eq-dirgraphedens"><span class="math display">\[
+  d(G)^d = \frac{m}{n(n-1)}
+\tag{12.4}\]</span></span></p>
+<p>In our reference network, we observe <span class="math inline">\(m = 11\)</span> directed edges out of the 42 possible, resulting in a density of:</p>
+<p><span class="math display">\[
+  d(G)^d = \frac{11}{42} \approx 0.262 \quad (26.2\%)
+\]</span></p>
+<p>From a sociological perspective, this tells us that 26.2% of all possible advising relationships in this office have been realized. If we were to randomly select two employees, <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span>, there is a 26.2% chance that <span class="math inline">\(u\)</span> goes to <span class="math inline">\(v\)</span> for advice.</p>
+<p>We can also look at the <strong>average degree</strong> of the network. Because each node has both an indegree and an outdegree, we might expect to calculate two different averages: an average indegree (<span class="math inline">\(\bar{k}^{in}\)</span>) and an average outdegree (<span class="math inline">\(\bar{k}^{out}\)</span>). However, one of the most fundamental rules of graph theory is that these two averages are always mathematically identical:</p>
+<p><span id="eq-diravgdeg"><span class="math display">\[
+  \bar{k}^{in} = \bar{k}^{out} = \bar{k} = \frac{m}{n}
+\tag{12.5}\]</span></span></p>
+<p>This identity must hold because every directed arrow in a graph has exactly one starting point (adding 1 to the network’s total outdegree) and exactly one ending point (adding 1 to the network’s total indegree). Consequently, the sum of all indegrees in the network must equal the sum of all outdegrees, and both sums must equal the total number of edges <span class="math inline">\(m\)</span>. For our reference network of 7 nodes and 11 edges, the average degree is:</p>
+<p><span class="math display">\[
+  \bar{k} = \frac{11}{7} \approx 1.57
+\]</span></p>
+<p>This means that, on average, a member of this network seeks advice from 1.57 colleagues, and is also sought out for advice by 1.57 colleagues.</p>
+<hr>
+</section>
+<section id="degree-variance-in-directed-graphs" class="level2" data-number="12.6">
+<h2 data-number="12.6" class="anchored" data-anchor-id="degree-variance-in-directed-graphs"><span class="header-section-number">12.6</span> Degree Variance in Directed Graphs</h2>
+<p>Measuring the average degree of a network gives us a general sense of how active its members are, but it does not tell us how that activity is distributed. For example, is everyone equally active, or do a few dominant players hold all the ties? To capture this inequality, we compute the degree variance, which measures how much individual node degrees deviate from the network average. In a directed graph, because nodes have two distinct degrees, we must calculate two separate measures: <strong>indegree variance</strong> (<span class="math inline">\(\mathcal{v}^{in}(G)\)</span>) and <strong>outdegree variance</strong> (<span class="math inline">\(\mathcal{v}^{out}(G)\)</span>).</p>
+<p>The <strong>indegree variance</strong> measures the inequality in incoming ties—sociologically, the concentration of popularity or prestige across nodes. It is calculated by taking the average of the squared deviations of each node’s indegree from the average degree:</p>
+<p><span id="eq-dirindegvar"><span class="math display">\[
+  \mathcal{v}^{in}(G) = \frac{\sum_i (k^{in}_i - \bar{k})^2}{n}
+\tag{12.6}\]</span></span></p>
+<p>Similarly, the <strong>outdegree variance</strong> measures the inequality in outgoing ties—the concentration of sociability or outreach:</p>
+<p><span id="eq-diroutdegvar"><span class="math display">\[
+  \mathcal{v}^{out}(G) = \frac{\sum_i (k^{out}_i - \bar{k})^2}{n}
+\tag{12.7}\]</span></span></p>
+<p>Note that because the average indegree and outdegree are always equal (<span class="math inline">\(\bar{k}^{in} = \bar{k}^{out} = \bar{k}\)</span>), both formulas use the same benchmark average, but the actual node values (<span class="math inline">\(k^{in}_i\)</span> and <span class="math inline">\(k^{out}_i\)</span>) vary independently, resulting in two distinct variances.</p>
+<p>Let’s compute both variances for our reference network in <a href="#fig-directed" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-directed</span></a> (where <span class="math inline">\(n = 7\)</span>, <span class="math inline">\(m = 11\)</span>, and <span class="math inline">\(\bar{k} \approx 1.57\)</span>). <a href="#tbl-dirdegvar" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-dirdegvar</span></a> lists each node’s indegree, outdegree, and squared deviations from this average.</p>
+<div id="tbl-dirdegvar" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dirdegvar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12.1: Squared deviations of indegree and outdegree from the average degree
+</figcaption>
+<div aria-describedby="tbl-dirdegvar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Node</th>
+<th style="text-align: center;">Indegree (<span class="math inline">\(k^{in}\)</span>)</th>
+<th style="text-align: center;">Squared Deviation <span class="math inline">\((k^{in} - 1.57)^2\)</span></th>
+<th style="text-align: center;">Outdegree (<span class="math inline">\(k^{out}\)</span>)</th>
+<th style="text-align: center;">Squared Deviation <span class="math inline">\((k^{out} - 1.57)^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2.04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.47</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2.04</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.47</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>F</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>G</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.47</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.18</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>Sum</strong></td>
+<td style="text-align: center;"><strong>11</strong></td>
+<td style="text-align: center;"><strong>7.71</strong></td>
+<td style="text-align: center;"><strong>11</strong></td>
+<td style="text-align: center;"><strong>5.71</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Using the sums of the squared deviations from the table, we find the following variances:</p>
+<p><span class="math display">\[
+  \mathcal{v}^{in}(G) = \frac{7.71}{7} \approx 1.10
+\]</span></p>
+<p><span class="math display">\[
+  \mathcal{v}^{out}(G) = \frac{5.71}{7} \approx 0.82
+\]</span></p>
+<p>Comparing these two results reveals an interesting sociological insight: the indegree variance (<span class="math inline">\(1.10\)</span>) is higher than the outdegree variance (<span class="math inline">\(0.82\)</span>). This indicates that popularity and prestige are more heavily concentrated in this network than sociability. In other words, while employees are relatively similar in how often they seek out advice (with most sending 1 to 3 ties), they are highly unequal in how often they are sought out. A single “expert” (node <span class="math inline">\(D\)</span>) receives the lion’s share of nominations, while others (like <span class="math inline">\(E\)</span> and <span class="math inline">\(G\)</span>) receive none.</p>
+<hr>
+</section>
+<section id="special-classes-of-directed-graphs" class="level2" data-number="12.7">
+<h2 data-number="12.7" class="anchored" data-anchor-id="special-classes-of-directed-graphs"><span class="header-section-number">12.7</span> Special Classes of Directed Graphs</h2>
+<p>In the same way that games are defined by their rules, we can define special classes of directed graphs by placing specific constraints on their structure. These constraints might limit who can send a tie, force relationships to be reciprocal, or forbid reciprocity entirely. Each set of rules produces a unique network structure that mirrors a specific type of social system.</p>
+<section id="symmetric-directed-graphs" class="level3" data-number="12.7.1">
+<h3 data-number="12.7.1" class="anchored" data-anchor-id="symmetric-directed-graphs"><span class="header-section-number">12.7.1</span> Symmetric Directed Graphs</h3>
+<p>A <strong>symmetric directed graph</strong> is built under the rule of mandatory reciprocity: if an edge exists from node <span class="math inline">\(u\)</span> to node <span class="math inline">\(v\)</span>, then an edge must also exist from <span class="math inline">\(v\)</span> to <span class="math inline">\(u\)</span>. This is the digraph equivalent of a standard undirected graph. We often see this structure in surveys that measure strong social ties like “close friendship.” If a researcher only counts a friendship if <em>both</em> parties nominate each other, the resulting network is forced to be symmetric.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-symm" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-symm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-directed_files/figure-html/fig-symm-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-symm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.2: A symmetric directed graph
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-symm" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-symm</span></a> shows a symmetric directed graph containing eight nodes and sixteen bi-directional edges (which represent thirty-two individual directed arcs). Because every connection is mutual, the graph-wide flow of information is highly fluid, and there are no structural bottlenecks or one-way dead ends.</p>
+</section>
+<section id="functional-graphs" class="level3" data-number="12.7.2">
+<h3 data-number="12.7.2" class="anchored" data-anchor-id="functional-graphs"><span class="header-section-number">12.7.2</span> Functional Graphs</h3>
+<p>A <strong>functional graph</strong> is created by imposing a strict constraint on activity: every single node in the network must have an outdegree of exactly one (<span class="math inline">\(k^{out} = 1\)</span>). This means that every actor is required to direct exactly one tie to one specific target.</p>
+<p>This type of graph has important applications in anthropology, particularly in the study of kinship exchange systems in traditional societies where strict marriage rules dictate which clan a family must marry into <span class="citation" data-cites="hageharary96">(<a href="#ref-hageharary96" role="doc-biblioref">Hage and Harary 1996</a>)</span>. It also describes systems where every employee reports to exactly one supervisor, or where every computer terminal is routed to a single gateway server.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-func" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-func-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-directed_files/figure-html/fig-func-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-func-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.3: A functional directed graph
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-func" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-func</span></a> shows a functional graph with eight nodes. An interesting mathematical consequence of this structure is that the number of nodes (<span class="math inline">\(n\)</span>) is always exactly equal to the number of directed edges (<span class="math inline">\(m\)</span>). In this case, <span class="math inline">\(n = m = 8\)</span>. Because everyone has exactly one outgoing tie, the edges cannot exceed the number of nodes, leading to a network of chains and cycles where information or resources flow in a single, predictable loop.</p>
+</section>
+<section id="sec-oriented" class="level3" data-number="12.7.3">
+<h3 data-number="12.7.3" class="anchored" data-anchor-id="sec-oriented"><span class="header-section-number">12.7.3</span> Oriented Graphs</h3>
+<p>An <strong>oriented graph</strong> is the structural opposite of a symmetric graph: it strictly forbids reciprocity. If there is a directed edge from <span class="math inline">\(u\)</span> to <span class="math inline">\(v\)</span>, there cannot be a directed edge from <span class="math inline">\(v\)</span> to <span class="math inline">\(u\)</span>.</p>
+<p>This structure represents relationships that are inherently unequal or competitive. For example, in a sports tournament where nodes represent teams and directed arrows point from the winner to the loser, reciprocity is physically impossible (a team cannot both beat and lose to another in the same match). Similarly, strict status hierarchies (like pecking orders in animal groups or seniority ladders in military organizations) are oriented graphs.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-oriented" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-oriented-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-directed_files/figure-html/fig-oriented-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-oriented-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.4: An oriented directed graph
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>As shown in <a href="#fig-oriented" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-oriented</span></a>, every connected pair in an oriented graph is linked by a one-way street. Information or authority flows strictly in one direction, creating clear hierarchies and preventing mutual exchanges.</p>
+</section>
+<section id="anti-symmetric-ties-and-directed-tree-graphs" class="level3" data-number="12.7.4">
+<h3 data-number="12.7.4" class="anchored" data-anchor-id="anti-symmetric-ties-and-directed-tree-graphs"><span class="header-section-number">12.7.4</span> Anti-Symmetric Ties and Directed Tree Graphs</h3>
+<p>A relation is <strong>anti-symmetric</strong> if reciprocity is strictly forbidden by the very definition of the tie. Consider the relationship “being the parent of” or “being the father of.” If person <span class="math inline">\(A\)</span> is the father of person <span class="math inline">\(B\)</span>, it is biologically impossible for <span class="math inline">\(B\)</span> to be the father of <span class="math inline">\(A\)</span>. When we trace these anti-symmetric ties across generations or levels of authority, they naturally form a <strong>directed tree graph</strong> (which we explore in more detail in <a href="#sec-trees" class="quarto-xref"><span class="quarto-unresolved-ref">sec-trees</span></a>).</p>
+<p>We see directed trees in family genealogies, but also in corporate organizational charts where subordinates take orders from a single supervisor.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-tree" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-graphs-directed_files/figure-html/fig-tree-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12.5: A tree graph with thirteen nodes
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>In the tree graph shown in <a href="#fig-tree" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-tree</span></a>, node <span class="math inline">\(A\)</span> sits at the top as the root (the earliest ancestor or CEO). A defining structural property of a directed tree is that every node except the root has an indegree of exactly one (<span class="math inline">\(k^{in} = 1\)</span>), representing a single father or a single direct manager. However, nodes are free to have multiple out-neighbors (representing multiple children or multiple direct reports). This structure ensures a clean, hierarchical cascade of authority or inheritance without any cross-cutting or conflicting paths.</p>
+<hr>
+</section>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-cross01" class="csl-entry" role="listitem">
+Cross, Rob, Stephen P Borgatti, and Andrew Parker. 2001. <span>“Beyond Answers: Dimensions of the Advice Network.”</span> <em>Social Networks</em> 23 (3): 215–35.
+</div>
+<div id="ref-hageharary96" class="csl-entry" role="listitem">
+Hage, Per, and Frank Harary. 1996. <em>Island Networks: Communication, Kinship, and Classification Structures in Oceania</em>. Cambridge University Press.
+</div>
+<div id="ref-Harary65" class="csl-entry" role="listitem">
+Harary, Frank, Robert Z Norman, and Dorwin Cartwright. 1965. <em>Structural Models: An Introduction to the Theory of Directed Graphs</em>. Wiley.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-graphs-degree-metrics.html" class="pagination-link" aria-label="Degree-Based Graph Metrics">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-graphs-paths.html" class="pagination-link" aria-label="Indirect Connections">
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Indirect Connections</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Copyright 2023, Omar Lizardo &amp; Isaac Jilbert</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
