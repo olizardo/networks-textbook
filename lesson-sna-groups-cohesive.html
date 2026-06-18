@@ -830,6 +830,10 @@ window.Quarto = {
   <li><a href="#sec-pairnodecon" id="toc-sec-pairnodecon" class="nav-link" data-scroll-target="#sec-pairnodecon"><span class="header-section-number">36.2</span> Pairwise Node Connectivity</a></li>
   <li><a href="#the-node-connectivity-matrix" id="toc-the-node-connectivity-matrix" class="nav-link" data-scroll-target="#the-node-connectivity-matrix"><span class="header-section-number">36.3</span> The Node Connectivity Matrix</a></li>
   <li><a href="#using-edge-connectivity-to-find-cohesive-subsets" id="toc-using-edge-connectivity-to-find-cohesive-subsets" class="nav-link" data-scroll-target="#using-edge-connectivity-to-find-cohesive-subsets"><span class="header-section-number">36.4</span> Using Edge Connectivity to Find Cohesive Subsets</a></li>
+  <li><a href="#k-core-decomposition-and-core-periphery-structures" id="toc-k-core-decomposition-and-core-periphery-structures" class="nav-link" data-scroll-target="#k-core-decomposition-and-core-periphery-structures"><span class="header-section-number">36.5</span> K-Core Decomposition and Core-Periphery Structures</a>
+  <ul class="collapse">
+  <li><a href="#finding-cores-the-k-core-decomposition-algorithm" id="toc-finding-cores-the-k-core-decomposition-algorithm" class="nav-link" data-scroll-target="#finding-cores-the-k-core-decomposition-algorithm"><span class="header-section-number">36.5.1</span> Finding Cores: The <span class="math inline">\(k\)</span>-Core Decomposition Algorithm</a></li>
+  </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -1275,6 +1279,34 @@ Figure&nbsp;36.4: Dendrogram showing the nested structure of Lambda sets in a gr
 <p>Lambda sets are, of course, subgraphs of the original graph, but they have interesting properties. First, at any stage of the graph partition process, each node belongs to only one lambda set. Smaller lambda sets, such as <span class="math inline">\(\{M, N, O, P\}\)</span>, are nested within larger ones, such as <span class="math inline">\(\{I, J, K, L, M, N, O, P\}\)</span>.</p>
 <p>Second, the pairwise edge connectivity between nodes in the same lambda set is always larger than the pairwise edge connectivity between any other node in the lambda set (including themselves) and a node not in the lambda set. That means that nodes inside a lambda set have stronger indirect connections with one another than they do with outsiders, which is precisely what we would want in a cohesive subset of actors.</p>
 </section>
+<section id="k-core-decomposition-and-core-periphery-structures" class="level2" data-number="36.5">
+<h2 data-number="36.5" class="anchored" data-anchor-id="k-core-decomposition-and-core-periphery-structures"><span class="header-section-number">36.5</span> K-Core Decomposition and Core-Periphery Structures</h2>
+<p>So far, we have focused on finding cohesive subgroups that form distinct, often symmetric, and relatively separate clusters of actors (like cliques, <span class="math inline">\(n\)</span>-cliques, or lambda sets). However, many social, economic, and organizational networks are organized differently: rather than forming neat, parallel clusters, they feature a highly cohesive, densely interconnected <strong>Core</strong> subgroup surrounded by a sparsely connected <strong>Periphery</strong> whose members link to the core but rarely to each other.</p>
+<p>In network analysis, this is called a <strong>core-periphery structure</strong>. Some classic real-world examples include: - <strong>Scientific Collaboration</strong>: A core of elite, heavily co-authoring scientists who drive the field, surrounded by a peripheral set of occasional authors who co-author with the core but never with each other. - <strong>The Global Economy</strong>: Wealthy core nations exchanging high-value manufactured goods and capital, surrounded by peripheral nations that export raw materials to the core but maintain very few trading relationships with one another. - <strong>Office Advice Networks</strong>: A core group of experienced managers who consult each other on decisions, surrounded by peripheral employees who seek advice from the core but rarely consult one another.</p>
+<section id="finding-cores-the-k-core-decomposition-algorithm" class="level3" data-number="36.5.1">
+<h3 data-number="36.5.1" class="anchored" data-anchor-id="finding-cores-the-k-core-decomposition-algorithm"><span class="header-section-number">36.5.1</span> Finding Cores: The <span class="math inline">\(k\)</span>-Core Decomposition Algorithm</h3>
+<p>To identify these hidden cores in a messy, complex network, the sociologist Stephen Seidman <span class="citation" data-cites="seidman83">(<a href="#ref-seidman83" role="doc-biblioref">1983</a>)</span> introduced the concept of the <strong><span class="math inline">\(k\)</span>-core</strong>. A <span class="math inline">\(k\)</span>-core is defined as a maximal subgraph in which every vertex is connected to at least <span class="math inline">\(k\)</span> other vertices <em>within that subgraph</em>.</p>
+<p>To find the <span class="math inline">\(k\)</span>-cores of a network, we use a recursive pruning algorithm known as <strong><span class="math inline">\(k\)</span>-core decomposition</strong> (often called the “onion-peeling” algorithm). The algorithm works as follows: 1. We start by calculating the degree of all nodes in the network. 2. We choose a threshold <span class="math inline">\(k = 1\)</span> and recursively prune (remove) all nodes with a degree strictly less than <span class="math inline">\(k\)</span>, along with all of their incident edges. 3. Because removing these nodes reduces the degree of their remaining neighbors, some of those remaining nodes might now fall below the threshold. We recursively repeat the pruning process until no more nodes can be removed. The remaining subgraph constitutes the <span class="math inline">\(k\)</span>-core for that value of <span class="math inline">\(k\)</span>. 4. We then increment the threshold to <span class="math inline">\(k = 2, 3, \dots\)</span> and repeat the recursive pruning.</p>
+<p>This process peels the network layer-by-layer like an onion. The nodes removed at each step are assigned to different <strong><span class="math inline">\(k\)</span>-shells</strong>, and the nodes that survive the deepest levels of pruning represent the highly connected, resilient <strong>core</strong> of the social system.</p>
+<p>We can easily perform <span class="math inline">\(k\)</span>-core decomposition in R using the <code>tidygraph</code> package, which provides a convenient wrapper around <code>igraph</code>’s coreness calculations via the <code>node_coreness()</code> function. Let’s look at an example. In <a href="#fig-coreperiph" class="quarto-xref">Figure&nbsp;<span>36.5</span></a>, we generate an 18-node network featuring a clear core-periphery structure and color the nodes by their calculated <span class="math inline">\(k\)</span>-shell membership.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-coreperiph" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-coreperiph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-sna-groups-cohesive_files/figure-html/fig-coreperiph-1.png" class="img-fluid figure-img" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-coreperiph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;36.5: K-Core decomposition of an 18-node network showing core (red, <span class="math inline">\(k=4\)</span>) and peripheral (yellow/green, <span class="math inline">\(k=1,2\)</span>) shells.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>As we can see in <a href="#fig-coreperiph" class="quarto-xref">Figure&nbsp;<span>36.5</span></a>, the outer, peripheral nodes (nodes 13 to 18) are immediately pruned during the first step because they only have a single tie to the core (degree = 1). They belong to the <span class="math inline">\(k=1\)</span> shell. As we increment <span class="math inline">\(k\)</span>, the pruning algorithm continues to shave off layers until only the highly integrated, dense inner core of nodes remains at the highest coreness level (<span class="math inline">\(k=4\)</span>).</p>
+<p>Unlike traditional partition methods that divide networks into separate, disjoint subgroups, <span class="math inline">\(k\)</span>-core decomposition provides a nested, multi-layered view of social integration, elegantly mapping the gradient from the marginal periphery to the dominant core.</p>
+</section>
+</section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 
@@ -1282,6 +1314,9 @@ Figure&nbsp;36.4: Dendrogram showing the nested structure of Lambda sets in a gr
 <div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-borgattietal90" class="csl-entry" role="listitem">
 Borgatti, Stephen P, Martin G Everett, and Paul R Shirey. 1990. <span>“LS Sets, Lambda Sets and Other Cohesive Subsets.”</span> <em>Social Networks</em> 12 (4): 337–57.
+</div>
+<div id="ref-seidman83" class="csl-entry" role="listitem">
+Seidman, Stephen B. 1983. <span>“Network Structure and Minimum Degree.”</span> <em>Social Networks</em> 5 (3): 269–87.
 </div>
 <div id="ref-seidmanfoster78" class="csl-entry" role="listitem">
 Seidman, Stephen B, and Brian L Foster. 1978. <span>“A Graph-Theoretic Generalization of the Clique Concept.”</span> <em>Journal of Mathematical Sociology</em> 6 (1): 139–54.
