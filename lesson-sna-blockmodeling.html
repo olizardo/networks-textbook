@@ -833,6 +833,11 @@ window.Quarto = {
   <li><a href="#the-blocked-adjancency-matrix" id="toc-the-blocked-adjancency-matrix" class="nav-link" data-scroll-target="#the-blocked-adjancency-matrix"><span class="header-section-number">39.3.2</span> The Blocked Adjancency Matrix</a></li>
   <li><a href="#the-image-matrix" id="toc-the-image-matrix" class="nav-link" data-scroll-target="#the-image-matrix"><span class="header-section-number">39.3.3</span> The Image Matrix</a></li>
   </ul></li>
+  <li><a href="#sec-cpblockmodel" id="toc-sec-cpblockmodel" class="nav-link" data-scroll-target="#sec-cpblockmodel"><span class="header-section-number">39.4</span> The Core-Periphery Blockmodel</a>
+  <ul class="collapse">
+  <li><a href="#the-ideal-core-periphery-structure" id="toc-the-ideal-core-periphery-structure" class="nav-link" data-scroll-target="#the-ideal-core-periphery-structure"><span class="header-section-number">39.4.1</span> The Ideal Core-Periphery Structure</a></li>
+  <li><a href="#blocked-adjacency-matrix-comparison" id="toc-blocked-adjacency-matrix-comparison" class="nav-link" data-scroll-target="#blocked-adjacency-matrix-comparison"><span class="header-section-number">39.4.2</span> Blocked Adjacency Matrix Comparison</a></li>
+  </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -4553,6 +4558,212 @@ Figure&nbsp;39.4: Graph representation of reduced image matrix from a blockmodel
 </div>
 </div>
 <p>This is how <strong>blockmodeling</strong> works!</p>
+</section>
+</section>
+<section id="sec-cpblockmodel" class="level2" data-number="39.4">
+<h2 data-number="39.4" class="anchored" data-anchor-id="sec-cpblockmodel"><span class="header-section-number">39.4</span> The Core-Periphery Blockmodel</h2>
+<p>While blockmodeling can reveal many different role structures, one of the most famous and widely used structures in social network analysis is the <strong>Core-Periphery blockmodel</strong> (Borgatti &amp; Everett, 1999).</p>
+<p>As we saw when looking at cohesive subsets, a core-periphery structure consists of a highly cohesive, tightly integrated <strong>core</strong> of actors and a sparsely connected <strong>periphery</strong> of actors. In a blockmodeling framework, we can represent this structure as an <strong>ideal image matrix</strong> of relationship patterns between the core block and the periphery block.</p>
+<section id="the-ideal-core-periphery-structure" class="level3" data-number="39.4.1">
+<h3 data-number="39.4.1" class="anchored" data-anchor-id="the-ideal-core-periphery-structure"><span class="header-section-number">39.4.1</span> The Ideal Core-Periphery Structure</h3>
+<p>If we partition a network into two blocks—the Core (<span class="math inline">\(C\)</span>) and the Periphery (<span class="math inline">\(P\)</span>)—the <strong>ideal core-periphery model</strong> is defined by a block image matrix featuring a specific pattern of <strong>one-blocks</strong> and <strong>zero-blocks</strong>.</p>
+<p>Specifically, in an ideal core-periphery structure: - <strong>Within-Core Block (<span class="math inline">\(Core \rightarrow Core\)</span>)</strong>: This is a <strong>one-block</strong>. Core members are densely connected to one another, reflecting high internal cohesion (density <span class="math inline">\(\approx 1.0\)</span>). - <strong>Core-to-Periphery Block (<span class="math inline">\(Core \rightarrow Periph\)</span>) &amp; Periphery-to-Core Block (<span class="math inline">\(Periph \rightarrow Core\)</span>)</strong>: These are <strong>one-blocks</strong>. Core members are connected to peripheral members, and peripheral members are connected back to the core. - <strong>Within-Periphery Block (<span class="math inline">\(Periph \rightarrow Periph\)</span>)</strong>: This is a <strong>zero-block</strong>. Peripheral members are completely disconnected from one another; they are only integrated into the network through their ties to the core.</p>
+<p>Thus, the ideal core-periphery image matrix (<span class="math inline">\(\mathbf{B}\)</span>) is written as:</p>
+$ =
+<span class="math display">\[\begin{pmatrix}
+\mathbf{Core} &amp; \mathbf{Core/Periph} \\
+\mathbf{Periph/Core} &amp; \mathbf{Periphery}
+\end{pmatrix}\]</span>
+=
+<span class="math display">\[\begin{pmatrix}
+1 &amp; 1 \\
+1 &amp; 0
+\end{pmatrix}\]</span>
+<p>$</p>
+</section>
+<section id="blocked-adjacency-matrix-comparison" class="level3" data-number="39.4.2">
+<h3 data-number="39.4.2" class="anchored" data-anchor-id="blocked-adjacency-matrix-comparison"><span class="header-section-number">39.4.2</span> Blocked Adjacency Matrix Comparison</h3>
+<p>In empirical research, we rarely observe perfect, noise-free zero-blocks and one-blocks. Instead, we use blockmodeling optimization algorithms to find a partition of actors into Core and Periphery blocks that minimizes the <strong>deviation</strong> between the observed blocked adjacency matrix and the ideal core-periphery matrix shown above.</p>
+<p>To illustrate, consider <a href="#fig-cpblockmodel-fig" class="quarto-xref">Figure&nbsp;<span>39.5</span></a>, which shows a network of 10 actors containing a core of 4 highly connected nodes <span class="math inline">\(\{A, B, C, D\}\)</span> and a periphery of 6 marginal nodes <span class="math inline">\(\{E, F, G, H, I, J\}\)</span>.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-cpblockmodel-fig" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cpblockmodel-fig-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-sna-blockmodeling_files/figure-html/fig-cpblockmodel-fig-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cpblockmodel-fig-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;39.5: An undirected network exhibiting a core-periphery block structure. The core nodes (red) are densely interconnected, while the peripheral nodes (blue) only connect to the core.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>If we reshuffle the adjacency matrix of this network to group the Core members <span class="math inline">\(\{A, B, C, D\}\)</span> first and the Periphery members <span class="math inline">\(\{E, F, G, H, I, J\}\)</span> second, we obtain the <strong>blocked adjacency matrix</strong> shown in <a href="#tbl-cpblockmodel-tbl" class="quarto-xref">Table&nbsp;<span>39.11</span></a>.</p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-cpblockmodel-tbl" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-cpblockmodel-tbl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed cell caption-top table-sm small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; border-right: 2px solid black;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; border-right: 2px solid black;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; border-right: 2px solid black;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold; border-bottom: 2px solid black;">D</td>
+<td style="text-align: center; border-bottom: 2px solid black;">1</td>
+<td style="text-align: center; border-bottom: 2px solid black;">1</td>
+<td style="text-align: center; border-bottom: 2px solid black;">1</td>
+<td style="text-align: center; border-bottom: 2px solid black; border-right: 2px solid black;">0</td>
+<td style="text-align: center; border-bottom: 2px solid black;">0</td>
+<td style="text-align: center; border-bottom: 2px solid black;">0</td>
+<td style="text-align: center; border-bottom: 2px solid black;">0</td>
+<td style="text-align: center; border-bottom: 2px solid black;">0</td>
+<td style="text-align: center; border-bottom: 2px solid black;">0</td>
+<td style="text-align: center; border-bottom: 2px solid black;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; border-right: 2px solid black;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; border-right: 2px solid black;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">G</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; border-right: 2px solid black;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">H</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; border-right: 2px solid black;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">I</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; border-right: 2px solid black;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">J</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; border-right: 2px solid black;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-cpblockmodel-tbl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;39.11: Blocked adjacency matrix of a core-periphery network. The top-left represents the Core-Core one-block, the off-diagonals represent the Core-Periphery one-blocks, and the bottom-right represents the Periphery-Periphery zero-block.
+</figcaption>
+</figure>
+</div>
+</div>
+<p>As <a href="#tbl-cpblockmodel-tbl" class="quarto-xref">Table&nbsp;<span>39.11</span></a> clearly illustrates, this blocked adjacency matrix corresponds perfectly to our ideal core-periphery model. The <strong>Core-Core block</strong> (top-left <span class="math inline">\(4 \times 4\)</span> submatrix) is completely filled with ones, reflecting the complete, clique-like density of the core. The <strong>Core-Periphery blocks</strong> (top-right and bottom-left) contain several ones, representing the integration of peripheral actors. Meanwhile, the <strong>Periphery-Periphery block</strong> (bottom-right <span class="math inline">\(6 \times 6\)</span> submatrix) is a perfect <strong>zero-block</strong>, showing that peripheral members have absolutely no ties to one another.</p>
+<p>This blockmodeling approach allows researchers to test whether a network features a core-periphery structure as an organizational principle, providing a clean mathematical representation of asymmetric power and integration in social systems.</p>
 </section>
 </section>
 <section id="references" class="level2 unnumbered">
