@@ -95,6 +95,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -799,7 +828,13 @@ div.csl-indent {
   <li><a href="#the-weak-tie-principle" id="toc-the-weak-tie-principle" class="nav-link" data-scroll-target="#the-weak-tie-principle"><span class="header-section-number">41.4</span> The Weak Tie Principle</a></li>
   <li><a href="#weak-ties-as-bridges" id="toc-weak-ties-as-bridges" class="nav-link" data-scroll-target="#weak-ties-as-bridges"><span class="header-section-number">41.5</span> Weak Ties as Bridges</a></li>
   <li><a href="#applications-and-examples" id="toc-applications-and-examples" class="nav-link" data-scroll-target="#applications-and-examples"><span class="header-section-number">41.6</span> Applications and Examples</a></li>
-  <li><a href="#the-diversity-bandwidth-tradeoff-theory" id="toc-the-diversity-bandwidth-tradeoff-theory" class="nav-link" data-scroll-target="#the-diversity-bandwidth-tradeoff-theory"><span class="header-section-number">41.7</span> The Diversity-Bandwidth Tradeoff Theory</a></li>
+  <li><a href="#sec-linkedin-causal" id="toc-sec-linkedin-causal" class="nav-link" data-scroll-target="#sec-linkedin-causal"><span class="header-section-number">41.7</span> A Modern Causal Test: The LinkedIn Experiment</a>
+  <ul class="collapse">
+  <li><a href="#experimental-design-causal-method" id="toc-experimental-design-causal-method" class="nav-link" data-scroll-target="#experimental-design-causal-method"><span class="header-section-number">41.7.1</span> Experimental Design &amp; Causal Method</a></li>
+  <li><a href="#operationalizing-digital-tie-strength" id="toc-operationalizing-digital-tie-strength" class="nav-link" data-scroll-target="#operationalizing-digital-tie-strength"><span class="header-section-number">41.7.2</span> Operationalizing Digital Tie Strength</a></li>
+  <li><a href="#core-findings-theoretical-revisions" id="toc-core-findings-theoretical-revisions" class="nav-link" data-scroll-target="#core-findings-theoretical-revisions"><span class="header-section-number">41.7.3</span> Core Findings &amp; Theoretical Revisions</a></li>
+  </ul></li>
+  <li><a href="#the-diversity-bandwidth-tradeoff-theory" id="toc-the-diversity-bandwidth-tradeoff-theory" class="nav-link" data-scroll-target="#the-diversity-bandwidth-tradeoff-theory"><span class="header-section-number">41.8</span> The Diversity-Bandwidth Tradeoff Theory</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -904,8 +939,34 @@ Figure&nbsp;41.1: The system-level consequences of bridges (weak ties). In a fra
 <li><em>Diffusion of Innovations</em>: Weak ties are crucial for the rapid diffusion of certain types of information, such as gossip or disease (mainly via <strong>simplex contagion</strong>; see <a href="lesson-theory-diffusion.html" class="quarto-xref"><span>Chapter 49</span></a>), across networks because they reduce average path lengths between disparate groups. Early adopters of innovations often acquire new ideas from media or weak ties, reflecting a “Local/Cosmopolitan split”. Cosmopolitan innovators, in particular, are early adopters relative to the system and have very low adoption thresholds due to their diverse weak ties.</li>
 </ul>
 </section>
-<section id="the-diversity-bandwidth-tradeoff-theory" class="level2" data-number="41.7">
-<h2 data-number="41.7" class="anchored" data-anchor-id="the-diversity-bandwidth-tradeoff-theory"><span class="header-section-number">41.7</span> The Diversity-Bandwidth Tradeoff Theory</h2>
+<section id="sec-linkedin-causal" class="level2" data-number="41.7">
+<h2 data-number="41.7" class="anchored" data-anchor-id="sec-linkedin-causal"><span class="header-section-number">41.7</span> A Modern Causal Test: The LinkedIn Experiment</h2>
+<p>Despite fifty years of empirical influence, classical tests of the Strength of Weak Ties theory were historically correlational. Correlational studies are subject to <strong>selection bias</strong> (e.g., highly skilled individuals naturally possess more weak ties, confounding the link between tie weakness and job placement).</p>
+<p>To address these challenges, <span class="citation" data-cites="rajkumar2022causal">Rajkumar et al. (<a href="#ref-rajkumar2022causal" role="doc-biblioref">2022</a>)</span> conducted a massive, five-year randomized experiment (2015–2019) on LinkedIn, the world’s largest professional network, spanning over <strong>20 million members</strong>, creating <strong>2 billion new connections</strong>, and recording <strong>600,000 job transitions</strong>.</p>
+<section id="experimental-design-causal-method" class="level3" data-number="41.7.1">
+<h3 data-number="41.7.1" class="anchored" data-anchor-id="experimental-design-causal-method"><span class="header-section-number">41.7.1</span> Experimental Design &amp; Causal Method</h3>
+<p>The study exogenously randomized the connection recommendations that users saw in their “People You May Know” (PYMK) feed. Some users were algorithmically recommended <strong>weak ties</strong> (alters with whom they shared very few mutual connections), while others were recommended <strong>strong ties</strong> (alters with many mutual connections). By tracking these randomized groups over time, the researchers could measure the true causal impact of weak vs.&nbsp;strong ties on subsequent job transmissions.</p>
+</section>
+<section id="operationalizing-digital-tie-strength" class="level3" data-number="41.7.2">
+<h3 data-number="41.7.2" class="anchored" data-anchor-id="operationalizing-digital-tie-strength"><span class="header-section-number">41.7.2</span> Operationalizing Digital Tie Strength</h3>
+<p>The study measured tie strength using two distinct digital dimensions, each revealing essential nuances and revising classical theory:</p>
+<ol type="1">
+<li><p><strong>Structural Tie Strength (Neighborhood Overlap)</strong>: This represents the proportion of mutual connections between two users. It was mathematically defined bidirectionally as: <span class="math inline">\(\text{StructuralTieStrength}_{ij} = \frac{M_{ij}}{D_i + D_j - M_{ij} - 2}\)</span> where <span class="math inline">\(M_{ij}\)</span> is the number of mutual connections between users <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and <span class="math inline">\(D_i\)</span>, <span class="math inline">\(D_j\)</span> are the total connections of members <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> respectively.</p></li>
+<li><p><strong>Interactional Tie Strength (Message Intensity)</strong>: This represents the behavioral intensity of communication, measured by the volume of bilateral direct messages exchanged between two members.</p></li>
+</ol>
+</section>
+<section id="core-findings-theoretical-revisions" class="level3" data-number="41.7.3">
+<h3 data-number="41.7.3" class="anchored" data-anchor-id="core-findings-theoretical-revisions"><span class="header-section-number">41.7.3</span> Core Findings &amp; Theoretical Revisions</h3>
+<p>The experimental results resolved the “paradox of weak ties” (where simple correlations mistakenly suggested strong ties were more helpful due to selection bias) and offered three key revisions to Granovetter’s theory:</p>
+<ul>
+<li><strong>Nonlinear Structural Effects (Inverted U-Shape)</strong>: Causal analysis found an inverted U-shaped relationship between structural tie strength (mutual connections) and job transmission. At low levels, adding ties with more mutual connections <em>increased</em> the probability of job transmission up to a point, after which there were diminishing marginal returns. The most effective structural ties are <strong>moderately weak</strong> (~10 mutual connections). True strangers (0–1 mutuals) lack the trust or motivation to assist in the hiring process, while very close ties (many mutuals) possess redundant information.</li>
+<li><strong>Linear Interactional Effects</strong>: When measuring tie strength via <em>messaging intensity</em>, the causal test yielded a linear negative relationship. The ties with the absolute <em>lowest</em> messaging frequency (the weakest active ties) delivered the highest number of job transmissions.</li>
+<li><strong>Industry Heterogeneity (Digital vs.&nbsp;Traditional)</strong>: The causal power of weak ties is highly contingent on the industry’s level of digitization. In <strong>high-tech, digitally intense sectors</strong> (such as IT, software, AI/ML, and remote work), <strong>weak ties significantly outperform strong ties</strong> due to the rapid rate of sector change and the value of highly dispersed, diverse global information. Conversely, in <strong>traditional, less-digital sectors</strong> (such as construction, agriculture, and hospitality), <strong>strong ties outperform weak ties</strong>, as hiring and mobility in these industries rely heavily on local, high-trust referral networks and offline relationships.</li>
+</ul>
+</section>
+</section>
+<section id="the-diversity-bandwidth-tradeoff-theory" class="level2" data-number="41.8">
+<h2 data-number="41.8" class="anchored" data-anchor-id="the-diversity-bandwidth-tradeoff-theory"><span class="header-section-number">41.8</span> The Diversity-Bandwidth Tradeoff Theory</h2>
 <p>Aral and Van Alstyne’s Diversity-Bandwidth Tradeoff Theory <span class="citation" data-cites="aral11">(<a href="#ref-aral11" role="doc-biblioref">Aral and Van Alstyne 2011</a>)</span> extends Granovetter’s original argument by incorporating the temporal flow of information. While Granovetter’s initial conception viewed tie properties in static terms, information transmission and access are dynamic processes.</p>
 <p>The <strong>bandwidth</strong> of a tie refers to the rate at which information is transmitted. Weak ties typically transmit information at slower rates (less frequency), while strong ties transmit at higher rates (more frequency). The Diversity-Bandwidth Tradeoff Theory posits a fundamental tradeoff between the novelty/diversity of the information obtained and the “bandwidth” of the tie.</p>
 <ul>
@@ -935,6 +996,9 @@ Marsden, Peter V, and Karen E Campbell. 1984. <span>“Measuring Tie Strength.�
 </div>
 <div id="ref-mcpherson01" class="csl-entry" role="listitem">
 McPherson, Miller, Lynn Smith-Lovin, and James M Cook. 2001. <span>“Birds of a Feather: Homophily in Social Networks.”</span> <em>Annual Review of Sociology</em> 27 (1): 415–44.
+</div>
+<div id="ref-rajkumar2022causal" class="csl-entry" role="listitem">
+Rajkumar, Karthik, Guillaume Saint-Jacques, Iavor Bojinov, Erik Brynjolfsson, and Sinan Aral. 2022. <span>“A Causal Test of the Strength of Weak Ties.”</span> <em>Science</em> 377 (6612): 1304–10.
 </div>
 </div>
 </section>
