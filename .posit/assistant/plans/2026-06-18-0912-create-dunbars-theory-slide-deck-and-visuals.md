@@ -1,53 +1,30 @@
-# Plan: Create Dunbar's Theory Slide Deck and Visuals
+# Plan: Create Strength of Weak Ties Slide Deck and Visuals
 
-This plan outlines the steps to create a new Quarto slide deck introducing students to Dunbar's theory of social circles and the social brain, generate a beautiful concentric circles visualization of Dunbar's circles, and integrate this visualization into the textbook chapter.
+This plan outlines the steps to create a new Quarto slide deck introducing students to Granovetter's Theory of the Strength of Weak Ties (SWT), generate beautiful and educational network visualizations demonstrating g-transitivity and local bridges, and compile the results.
 
 ## Proposed Changes
 
-### 1. Create a Concentric Circles Visualization (`images/dunbar-circles.png`)
-We will write and execute an R script to generate a high-quality visualization of Dunbar's circles centered on an Ego. 
-- **Concentric Circles**: Four concentric boundary circles corresponding to the four primary Dunbar layers:
-  1. Support Clique (radius 1, limit ~5)
-  2. Sympathy Group (radius 2, limit ~15)
-  3. Affinity Group (radius 3, limit ~50)
-  4. Active Network (radius 4, limit ~150)
-- **Visual Elements**:
-  - Central **Ego** node.
-  - Simulated nodes (dots) randomly distributed within each layer:
-    - Inner circle: ~5 dense, warm-colored nodes (high intimacy/strong ties).
-    - Second ring: ~10 nodes.
-    - Third ring: ~35 nodes.
-    - Fourth ring: ~100 smaller, lighter nodes (low intimacy/weak ties).
-  - Clear label annotations for each layer (Name, size, role) placed cleanly on the diagram.
-  - A beautiful, clean color palette matching the UCLA theme or textbook style (clean background, minimalist, sans-serif typography).
-- **Save Path**: `images/dunbar-circles.png`
+### 1. Create Network Visualizations
+We will write and execute an R script using `ggplot2`, `ggraph`, and `tidygraph` (or base R/igraph if preferred) to generate three high-quality network visuals:
+- **`images/swt-transitivity-strong.png`**: A triad representing Granovetter's g-transitivity (Rule 2). Node B has strong ties (thick lines) to both A and C, resulting in a dashed/dotted "likely tie" between A and C.
+- **`images/swt-transitivity-weak.png`**: A triad representing the weak tie principle. Node B has a weak tie (thin line) to A and a strong tie (thick line) to C, resulting in a high probability of "no tie" between A and C.
+- **`images/swt-bridge.png`**: A network of two distinct, dense social clusters connected only by a single weak tie (the local bridge or broker), illustrating how weak ties span structural holes.
 
-### 2. Create the Quarto RevealJS Slide Deck (`slides/dunbar-theory.qmd`)
-A professional slide deck following the template of other textbook slides.
-- **Title**: Dunbar's Theory of the Social Brain and Social Circles
-- **Subtitle**: Cognitive Limits and the Layered Structure of Ego Networks
-- **Content Outline**:
-  - **Slide 1**: Title slide (using UCLA CSS themes).
-  - **Slide 2**: Introduction to the Social Brain Hypothesis (brain size evolution, primate group size correlation, neocortex constraints).
-  - **Slide 3**: The Concept of Ego Network Layers (concentric organization, cognitive/emotional/time maintenance costs).
-  - **Slide 4**: Visualizing Dunbar Circles (incorporating the new visual).
-  - **Slide 5**: The Support Clique (~5 people) and Sympathy Group (~15 people) - Inner layers, strong ties, high intimacy, emergency support.
-  - **Slide 6**: The Affinity Group (~50 people) and Active Network (~150 people) - Outer layers, weak ties, low maintenance, face/name recognition.
-  - **Slide 7**: Tie Strength and Network Structure (relationship between Dunbar layers and Granovetter's Weak Tie Theory, g-transitivity in inner layers, bridging in outer layers).
-  - **Slide 8**: Implications and Modern Challenges (social media, cognitive bandwidth, summary of core takeaways).
-
-### 3. Update the Textbook Chapter (`lesson-theory-dunbar.qmd`)
-- Insert the new concentric circles visual (`images/dunbar-circles.png`) inside the section `## Layered Structure of Ego Networks (Dunbar Circles)` as a Quarto figure with label `@fig-dunbar-circles`.
-- Reference `@fig-dunbar-circles` in the text to guide students.
-- Refine existing text to ensure seamless reading flow with the new figure.
+### 2. Create Quarto RevealJS Slide Deck (`slides/strength-weak-ties.qmd`)
+We will create a structured presentation following the ucla-theme RevealJS style:
+- **Slide 1**: Title (The Strength of Weak Ties: Form, Transitivity, and Bridging)
+- **Slide 2**: Form vs. Content in Social Ties (definitions and the distinction)
+- **Slide 3**: Defining Tie Strength (Granovetter's 4 pillars + Marsden & Campbell's indicator/predictor model)
+- **Slide 4**: The Stage Model of Tie Strengthening (Friedkin's 3-stage model)
+- **Slide 5**: The Concept of g-Transitivity (Rule 1 & Rule 2, with g-transitivity visual side-by-side)
+- **Slide 6**: The Weak Tie Principle (violations of transitivity, with weak tie visual side-by-side)
+- **Slide 7**: Weak Ties as Bridges (local bridges and structural brokerage, with bridge visual side-by-side)
+- **Slide 8**: Applications: Finding a Job & Social Mobility
+- **Slide 9**: System-Level Consequences: Diffusion & Social Cohesion (the global effects of weak ties)
+- **Slide 10**: The Diversity-Bandwidth Tradeoff Theory (Aral & Van Alstyne revision)
+- **Slide 11**: Summary of Key Takeaways
 
 ## Verification Plan
-
-### Automated Checks
-- Run R script to generate and save `images/dunbar-circles.png`.
-- Inspect the saved image using `getPlot` or checking file details.
-- Render the slide deck and textbook chapter using Quarto CLI (via `executeCode` or `bash`) to verify that there are no syntax or formatting errors.
-
-### Visual Checks
-- Verify node density and placement in the concentric circles.
-- Verify text alignment and legibility in the PNG file.
+- Run R script to generate and save the three PNG files.
+- Render the slide deck to HTML using `quarto render slides/strength-weak-ties.qmd` via `bash` to verify compilation.
+- Inspect the generated plots in Positron to verify high quality and visual alignment.
