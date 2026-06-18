@@ -839,6 +839,13 @@ window.Quarto = {
   <li><a href="#cosine-similarity" id="toc-cosine-similarity" class="nav-link" data-scroll-target="#cosine-similarity"><span class="header-section-number">37.4.3</span> Cosine Similarity</a></li>
   <li><a href="#neighborhood-overlap-in-directed-graphs" id="toc-neighborhood-overlap-in-directed-graphs" class="nav-link" data-scroll-target="#neighborhood-overlap-in-directed-graphs"><span class="header-section-number">37.4.4</span> Neighborhood Overlap in Directed Graphs</a></li>
   </ul></li>
+  <li><a href="#sec-three-equivalences" id="toc-sec-three-equivalences" class="nav-link" data-scroll-target="#sec-three-equivalences"><span class="header-section-number">37.5</span> Three Notions of Equivalence: Structural, Automorphic, and Regular</a>
+  <ul class="collapse">
+  <li><a href="#structural-equivalence" id="toc-structural-equivalence" class="nav-link" data-scroll-target="#structural-equivalence"><span class="header-section-number">37.5.1</span> 1. Structural Equivalence</a></li>
+  <li><a href="#automorphic-equivalence" id="toc-automorphic-equivalence" class="nav-link" data-scroll-target="#automorphic-equivalence"><span class="header-section-number">37.5.2</span> 2. Automorphic Equivalence</a></li>
+  <li><a href="#regular-equivalence" id="toc-regular-equivalence" class="nav-link" data-scroll-target="#regular-equivalence"><span class="header-section-number">37.5.3</span> 3. Regular Equivalence</a></li>
+  <li><a href="#the-nested-hierarchy-of-equivalence" id="toc-the-nested-hierarchy-of-equivalence" class="nav-link" data-scroll-target="#the-nested-hierarchy-of-equivalence"><span class="header-section-number">37.5.4</span> The Nested Hierarchy of Equivalence</a></li>
+  </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -2251,11 +2258,112 @@ Table&nbsp;37.11: Structural similarity matrix based on the cosine distance.
 \tag{37.7}\]</span></span></p>
 </section>
 </section>
+<section id="sec-three-equivalences" class="level2" data-number="37.5">
+<h2 data-number="37.5" class="anchored" data-anchor-id="sec-three-equivalences"><span class="header-section-number">37.5</span> Three Notions of Equivalence: Structural, Automorphic, and Regular</h2>
+<p>So far in this lesson, we have focused primarily on <strong>structural equivalence</strong> and its relaxation, <strong>structural similarity</strong>. However, structural equivalence—which requires that two nodes connect to the <em>exact same</em> set of neighbors—is only one way of defining social positions or roles in a network. In mathematical graph theory and network analysis, there are actually three distinct, nested notions of equivalence: <strong>structural equivalence</strong>, <strong>automorphic equivalence</strong>, and <strong>regular equivalence</strong> <span class="citation" data-cites="borgattietal90">(<a href="#ref-borgattietal90" role="doc-biblioref">Borgatti et al. 1990</a>)</span>.</p>
+<p>To build intuition for the differences between these three concepts, let’s explore their definitions and mathematical relationships using a 15-node undirected network. This network represents a classic structural motif: two star-like components centered at central hubs <span class="math inline">\(B\)</span> and <span class="math inline">\(K\)</span> connected symmetrically to a tightly integrated five-node central core <span class="math inline">\(\{F, G, H, I, J\}\)</span>.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-three-equiv-base" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-three-equiv-base-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-positions-struct-equiv_files/figure-html/fig-three-equiv-base-1.png" class="img-fluid figure-img" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-three-equiv-base-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;37.4: A symmetric 15-node undirected graph representing a classic role-structure motif.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="structural-equivalence" class="level3" data-number="37.5.1">
+<h3 data-number="37.5.1" class="anchored" data-anchor-id="structural-equivalence"><span class="header-section-number">37.5.1</span> 1. Structural Equivalence</h3>
+<p>As we already know, two nodes are <strong>structurally equivalent</strong> if and only if they are connected to the <strong>same set of neighbors</strong>. In mathematical terms, nodes <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are structurally equivalent if and only if their neighborhoods are identical: <span class="math inline">\(N(u) = N(v)\)</span>.</p>
+<p>Because of this strict “same-neighbor” rule, structural equivalence is a highly restrictive concept. In our 15-node network (<a href="#fig-three-equiv-base" class="quarto-xref">Figure&nbsp;<span>37.4</span></a>), only the non-adjacent peripheral leaf nodes can share exactly the same neighborhoods: - Leaf nodes <span class="math inline">\(\{A, C, D, E\}\)</span> are structurally equivalent because all of them are connected <em>only</em> to hub <span class="math inline">\(B\)</span>. - Leaf nodes <span class="math inline">\(\{L, M, N, O\}\)</span> are structurally equivalent because all of them are connected <em>only</em> to hub <span class="math inline">\(K\)</span>.</p>
+<p>None of the other nodes are structurally equivalent to any other node. For example, even though <span class="math inline">\(B\)</span> and <span class="math inline">\(K\)</span> play identical “hub” roles, they are connected to different leaves, so they are not structurally equivalent. Even though <span class="math inline">\(H\)</span> and <span class="math inline">\(I\)</span> occupy symmetric positions within the core, they connect to each other, but because they lack self-loops, their neighborhoods differ at their own columns in the adjacency matrix. Under structural equivalence, adjacent nodes can never share identical neighborhoods in simple graphs.</p>
+</section>
+<section id="automorphic-equivalence" class="level3" data-number="37.5.2">
+<h3 data-number="37.5.2" class="anchored" data-anchor-id="automorphic-equivalence"><span class="header-section-number">37.5.2</span> 2. Automorphic Equivalence</h3>
+<p>To relax the restrictiveness of structural equivalence while maintaining a rigorous, symmetry-based definition of position, we use <strong>automorphic equivalence</strong>.</p>
+<p>Two nodes <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are <strong>automorphically equivalent</strong> if they can be exchanged (swapped) for one another without changing any graph-theoretic properties of the network. Formally, an <strong>automorphism</strong> is a mapping of the vertex set onto itself that preserves adjacency. If there exists an automorphism that maps node <span class="math inline">\(u\)</span> to node <span class="math inline">\(v\)</span>, then <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are automorphically equivalent.</p>
+<p>In simple terms, automorphic equivalence groups nodes that are <strong>structurally indistinguishable</strong> in terms of the whole network’s shape, even if they are connected to completely different people.</p>
+<p>In our 15-node network (<a href="#fig-three-equiv-base" class="quarto-xref">Figure&nbsp;<span>37.4</span></a>), we can observe a perfect left-to-right bilateral symmetry. If we fold the network in half across the central vertical axis, hub <span class="math inline">\(B\)</span> aligns with hub <span class="math inline">\(K\)</span>, the bridge <span class="math inline">\(G\)</span> aligns with bridge <span class="math inline">\(J\)</span>, and the leaves of <span class="math inline">\(B\)</span> align with the leaves of <span class="math inline">\(K\)</span>. This symmetry yields <strong>five automorphic equivalence classes</strong>: 1. <strong>The Hubs</strong>: <span class="math inline">\(\{B, K\}\)</span> (the two central star hubs). 2. <strong>The Leaves</strong>: <span class="math inline">\(\{A, C, D, E, L, M, N, O\}\)</span> (all peripheral leaf nodes). 3. <strong>The Core Bridges</strong>: <span class="math inline">\(\{G, J\}\)</span> (the core nodes that act as gates to the hubs). 4. <strong>The Core Mid-points</strong>: <span class="math inline">\(\{H, I\}\)</span> (the core nodes that represent central symmetric nodes). 5. <strong>The Core Top</strong>: <span class="math inline">\(\{F\}\)</span> (the central core top node, which is symmetric only to itself).</p>
+<p>Automorphic equivalence captures the intuition that hub <span class="math inline">\(B\)</span> and hub <span class="math inline">\(K\)</span> are “structurally identical” in their positions, despite being connected to different sets of leaf nodes.</p>
+</section>
+<section id="regular-equivalence" class="level3" data-number="37.5.3">
+<h3 data-number="37.5.3" class="anchored" data-anchor-id="regular-equivalence"><span class="header-section-number">37.5.3</span> 3. Regular Equivalence</h3>
+<p>While automorphic equivalence relaxes the neighbor-sharing rule, it still imposes a very strict global symmetry requirement. In many social contexts, we want to group actors into roles even if their local structures are completely asymmetric. For instance, we want to group all “doctors” together because they connect to “patients” and “nurses,” even if one doctor’s clinic has 3 patients and another’s has 50.</p>
+<p>This is the intuition behind <strong>regular equivalence</strong> (White &amp; Reitz, 1983). Two nodes <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are <strong>regularly equivalent</strong> if they are connected to <strong>equivalent others</strong>. That is, <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> do not need to connect to the same neighbors, nor do they need to connect to structurally indistinguishable symmetric partners; they simply need to connect to neighbors who themselves play equivalent roles.</p>
+<p>In our 15-node network, regular equivalence collapses the five automorphic classes into <strong>four regular equivalence classes</strong> (or social roles): 1. <strong>The Leaves</strong>: <span class="math inline">\(\{A, C, D, E, L, M, N, O\}\)</span>. (All are regularly equivalent because they connect <em>only</em> to a Hub). 2. <strong>The Hubs</strong>: <span class="math inline">\(\{B, K\}\)</span>. (They connect to Leaves and Core-Bridges). 3. <strong>The Core-Bridges</strong>: <span class="math inline">\(\{G, J\}\)</span>. (They connect to Hubs and Core nodes). 4. <strong>The Core Nodes</strong>: <span class="math inline">\(\{F, H, I\}\)</span>. (They connect only to other Core nodes and Core-bridges).</p>
+<p>Notice that node <span class="math inline">\(F\)</span> (which has a unique position under automorphic equivalence) is grouped together with <span class="math inline">\(H\)</span> and <span class="math inline">\(I\)</span> under regular equivalence. This is because <span class="math inline">\(F, H,\)</span> and <span class="math inline">\(I\)</span> all connect exclusively to core-bridges (Class 3) and other core nodes (Class 4), making them role-equivalent!</p>
+</section>
+<section id="the-nested-hierarchy-of-equivalence" class="level3" data-number="37.5.4">
+<h3 data-number="37.5.4" class="anchored" data-anchor-id="the-nested-hierarchy-of-equivalence"><span class="header-section-number">37.5.4</span> The Nested Hierarchy of Equivalence</h3>
+<p>A fundamental theorem in network science states that these three types of equivalence are hierarchically nested within one another:</p>
+<p><span class="math inline">\(\text{Structural Equivalence} \subseteq \text{Automorphic Equivalence} \subseteq \text{Regular Equivalence}\)</span></p>
+<p>This nesting means that: - Every pair of nodes that is <strong>structurally equivalent</strong> is also <strong>automorphically equivalent</strong> (if you share neighbors, you can be swapped without changing the graph). - Every pair of nodes that is <strong>automorphically equivalent</strong> is also <strong>regularly equivalent</strong> (if you can be globally swapped, you must connect to role-equivalent partners). - However, the reverse is not true. Regular equivalence is the most general and flexible, automorphic is intermediate, and structural is the most strict and restrictive.</p>
+<p><a href="#fig-equiv-comparison" class="quarto-xref">Figure&nbsp;<span>37.5</span></a> visualizes these three distinct partitions on the same 15-node network, illustrating how network analysts zoom in and out of relational role structures.</p>
+<div id="fig-equiv-comparison" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-equiv-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-equiv-comparison" style="flex-basis: 100.0%;justify-content: flex-start;">
+<div id="fig-equiv-comparison-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-equiv-comparison-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-positions-struct-equiv_files/figure-html/fig-equiv-comparison-1.png" class="img-fluid figure-img" data-ref-parent="fig-equiv-comparison" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-equiv-comparison-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Structural Equivalence (Identifies leaf sharing, leaving hubs and core in unique positions)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-equiv-comparison" style="flex-basis: 100.0%;justify-content: flex-start;">
+<div id="fig-equiv-comparison-2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-equiv-comparison-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-positions-struct-equiv_files/figure-html/fig-equiv-comparison-2.png" class="img-fluid figure-img" data-ref-parent="fig-equiv-comparison" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-equiv-comparison-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Automorphic Equivalence (Identifies bilateral symmetry, grouping hubs and symmetric core nodes)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-equiv-comparison" style="flex-basis: 100.0%;justify-content: flex-start;">
+<div id="fig-equiv-comparison-3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-equiv-comparison-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-positions-struct-equiv_files/figure-html/fig-equiv-comparison-3.png" class="img-fluid figure-img" data-ref-parent="fig-equiv-comparison" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-equiv-comparison-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) Regular Equivalence (Identifies four clean social roles based on connection patterns)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-equiv-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;37.5: Comparison of the three equivalence partitions on the 15-node network: (a) Structural Equivalence, (b) Automorphic Equivalence, and (c) Regular Equivalence.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-borgattietal90" class="csl-entry" role="listitem">
+Borgatti, Stephen P, Martin G Everett, and Paul R Shirey. 1990. <span>“LS Sets, Lambda Sets and Other Cohesive Subsets.”</span> <em>Social Networks</em> 12 (4): 337–57.
+</div>
 <div id="ref-burt76" class="csl-entry" role="listitem">
 Burt, Ronald S. 1976. <span>“Positions in Networks.”</span> <em>Social Forces</em> 55 (1): 93–122.
 </div>
