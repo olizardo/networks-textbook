@@ -30,6 +30,72 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="matrix-intro_files/libs/revealjs/dist/theme/quarto-2740581606dc327e82f18f789b69d8a0.css">
   <link rel="stylesheet" href="ucla-theme.css">
@@ -125,10 +191,6 @@
       margin-right: 0; 
     }
   </style>
-  <script src="matrix-intro_files/libs/kePrint-0.0.1/kePrint.js"></script>
-
-  <link href="matrix-intro_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
-
 </head>
 <body class="quarto-light">
   <div class="reveal">
@@ -143,257 +205,155 @@
 
 </section>
 <section>
-<section id="part-1-social-networks-graphs-and-matrices" class="title-slide slide level1 center">
-<h1>Part 1: Social Networks, Graphs, and Matrices</h1>
+<section id="part-1-what-is-a-matrix-basics-notation" class="title-slide slide level1 center">
+<h1>Part 1: What is a Matrix? Basics &amp; Notation</h1>
 
 </section>
-<section id="representing-social-networks" class="slide level2 scrollable">
-<h2>Representing Social Networks</h2>
+<section id="defining-a-matrix" class="slide level2">
+<h2>Defining a Matrix</h2>
 <ul>
-<li class="fragment">How do we describe and analyze social networks? We use three distinct levels of abstraction:
-<ol type="1">
-<li class="fragment"><strong>Social Networks (Real Life)</strong>: Intuitive, fuzzy concepts based on natural language and daily interactions (e.g., popularity, friendship, reciprocity).</li>
-<li class="fragment"><strong>Graphs (Mathematical Model)</strong>: Pictorial representation where actors are points (vertices/nodes) and relations are lines (edges/ties/links).</li>
-<li class="fragment"><strong>Matrices (Quantitative Tool)</strong>: Two-dimensional arrays of numbers used to perform mathematical operations and calculations.</li>
-</ol></li>
-<li class="fragment">While graphs are intuitive for small groups, they quickly become unreadable <strong>“hairballs”</strong> as networks grow.</li>
-<li class="fragment">Matrices give us the <strong>analytical leverage</strong> to calculate precise network metrics.</li>
-</ul>
-</section>
-<section id="the-sna-three-step-shuffle" class="slide level2">
-<h2>The SNA “Three-Step Shuffle”</h2>
+<li class="fragment">A <strong>matrix</strong> is a two-dimensional rectangular array of numbers organized into:
 <ul>
-<li class="fragment">To build rigorous, scientific measures, network analysts perform a <strong>three-step shuffle</strong>:</li>
-<li class="fragment"><strong>Step 1: The Social-Theoretic Level</strong>
-<ul>
-<li class="fragment">Grab an “off-the-shelf” fuzzy concept from social science (e.g., <em>popularity</em>).</li>
+<li class="fragment"><strong>Rows</strong> (horizontal lines)</li>
+<li class="fragment"><strong>Columns</strong> (vertical lines)</li>
 </ul></li>
-<li class="fragment"><strong>Step 2: The Graph-Theoretic Level</strong>
-<ul>
-<li class="fragment">Translate the concept into formal graph theory (e.g., <em>indegree</em>—the number of directed edges pointing to a node).</li>
-</ul></li>
-<li class="fragment"><strong>Step 3: The Matrix-Algebraic Level</strong>
-<ul>
-<li class="fragment">Link the graph concept to matrix algebra to perform mathematical operations (e.g., <em>column sum</em> of the adjacency matrix).</li>
-</ul></li>
-</ul>
-</section>
-<section id="the-shuffle-in-action-popularity" class="slide level2">
-<h2>The Shuffle in Action: Popularity</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><strong>Step 1 (Theory)</strong>:
-<ul>
-<li class="fragment">Popularity is “being highly liked or nominated by peers.”</li>
-</ul></li>
-<li class="fragment"><strong>Step 2 (Graph)</strong>:
-<ul>
-<li class="fragment">We model the students as vertices (<span class="math inline">\(V\)</span>) and nominations as directed edges (<span class="math inline">\(E\)</span>).</li>
-<li class="fragment">Popularity becomes <strong>indegree centrality</strong> (<span class="math inline">\(d_{in}(v)\)</span>).</li>
-</ul></li>
-<li class="fragment"><strong>Step 3 (Matrix)</strong>:
-<ul>
-<li class="fragment">We represent the network as a directed adjacency matrix (<span class="math inline">\(\mathbf{A}\)</span>).</li>
-<li class="fragment">The indegree of node 3 is obtained by <strong>summing the elements in the 3rd column</strong>:</li>
-<li class="fragment"><span class="math display">\[d_{in}(v_j) = \sum_{i} A_{ij}\]</span></li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="dont-confuse-them" class="slide level2">
-<h2>Don’t Confuse Them!</h2>
-<div id="tbl-duality" class="quarto-float quarto-figure quarto-figure-center">
-<figure class="quarto-float quarto-float-tbl">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-duality-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: The Duality of Network Concepts.
-</figcaption>
-<div aria-describedby="tbl-duality-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Social-Theoretic Concept</th>
-<th style="text-align: left;">Graph-Theoretic Analogue</th>
-<th style="text-align: left;">Matrix-Algebraic Representation</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><strong>Reciprocity</strong> (Mutual friendship)</td>
-<td style="text-align: left;">A pair of symmetric directed edges pointing in opposite directions.</td>
-<td style="text-align: left;">The cell product <span class="math inline">\(A_{ij} \times A_{ji} = 1\)</span> in a binary adjacency matrix.</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><strong>Popularity</strong> (Being highly liked)</td>
-<td style="text-align: left;">The cardinality of incoming edges terminating at a node (<strong>indegree</strong>).</td>
-<td style="text-align: left;">The column sum: <span class="math inline">\(\sum_i A_{ij}\)</span> in the adjacency matrix.</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><strong>Expansiveness</strong> (Outgoing nominations)</td>
-<td style="text-align: left;">The cardinality of outgoing edges originating from a node (<strong>outdegree</strong>).</td>
-<td style="text-align: left;">The row sum: <span class="math inline">\(\sum_j A_{ij}\)</span> in the adjacency matrix.</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><strong>Symmetric Relation</strong> (e.g., co-workers)</td>
-<td style="text-align: left;">An undirected graph containing simple undirected edges.</td>
-<td style="text-align: left;">A symmetric relationship matrix where <span class="math inline">\(A_{ij} = A_{ji}\)</span> for all cells.</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-</section></section>
-<section>
-<section id="part-2-introduction-to-matrices" class="title-slide slide level1 center">
-<h1>Part 2: Introduction to Matrices</h1>
-
-</section>
-<section id="what-is-a-matrix" class="slide level2">
-<h2>What is a Matrix?</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment">Invented for social networks by Elaine Forsyth and Leo Katz in the mid-1940s.</li>
-<li class="fragment">A <strong>matrix</strong> is a two-dimensional array of numbers organized into <strong>rows</strong> (<span class="math inline">\(R\)</span>) and <strong>columns</strong> (<span class="math inline">\(C\)</span>).</li>
 <li class="fragment"><strong>Dimensions</strong>:
 <ul>
-<li class="fragment">Described as <span class="math inline">\(R \times C\)</span> (rows always come first, columns second).</li>
-<li class="fragment">e.g., a <span class="math inline">\(5 \times 3\)</span> matrix has 5 rows and 3 columns.</li>
+<li class="fragment">Described as <strong>Rows <span class="math inline">\(\times\)</span> Columns</strong> (<span class="math inline">\(R \times C\)</span>).</li>
+<li class="fragment"><em>Rows always come first, columns second.</em></li>
 </ul></li>
 <li class="fragment"><strong>Rectangular Matrices</strong>:
 <ul>
-<li class="fragment"><span class="math inline">\(R \neq C\)</span> (e.g., attribute-value matrices, spreadsheet data, or actor-by-event affiliation networks).</li>
+<li class="fragment">Matrices where the number of rows does not equal the number of columns (<span class="math inline">\(R \neq C\)</span>).</li>
+<li class="fragment">This is the standard shape for dataset tables and surveys.</li>
 </ul></li>
 </ul>
-</div><div class="column" style="width:40%;">
-<h3 id="general-matrix-example">General Matrix Example</h3>
+</section>
+<section id="an-intuitive-example-survey-data-matrix" class="slide level2">
+<h2>An Intuitive Example: Survey Data Matrix</h2>
+<p>Let’s look at an intuitive rectangular matrix (<span class="math inline">\(4 \times 3\)</span>) containing survey data:</p>
 <table class="caption-top">
-<caption>Dimensions: <span class="math inline">\(3 \times 3\)</span>.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
-<th style="text-align: center;">Att. 1</th>
-<th style="text-align: center;">Att. 2</th>
-<th style="text-align: center;">Att. 3</th>
+<th style="text-align: center;">Age</th>
+<th style="text-align: center;">Education (Years)</th>
+<th style="text-align: center;">Annual Income ($)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><strong>Case 1</strong></td>
-<td style="text-align: center;"><span class="math inline">\(V_1\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_4\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_7\)</span></td>
+<td style="text-align: left;"><strong>Alice</strong></td>
+<td style="text-align: center;">25</td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">55,000</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><strong>Case 2</strong></td>
-<td style="text-align: center;"><span class="math inline">\(V_2\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_5\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_8\)</span></td>
+<td style="text-align: left;"><strong>Bob</strong></td>
+<td style="text-align: center;">42</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">48,000</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><strong>Case 3</strong></td>
-<td style="text-align: center;"><span class="math inline">\(V_3\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_6\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_9\)</span></td>
+<td style="text-align: left;"><strong>Charlie</strong></td>
+<td style="text-align: center;">31</td>
+<td style="text-align: center;">18</td>
+<td style="text-align: center;">95,000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>David</strong></td>
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">62,000</td>
 </tr>
 </tbody>
 </table>
-</div></div>
-</section>
-<section id="matrix-indexing-and-cells" class="slide level2">
-<h2>Matrix Indexing and Cells</h2>
 <ul>
-<li class="fragment">The intersection of row <span class="math inline">\(i\)</span> and column <span class="math inline">\(j\)</span> defines a <strong>cell</strong> in the matrix.</li>
-<li class="fragment"><strong>Notation</strong>:
-<ul>
-<li class="fragment">We use boldfaced capital letters to name matrices (e.g., matrix <span class="math inline">\(\mathbf{A}\)</span>).</li>
-<li class="fragment">We use lowercase, indexed letters to refer to individual cell values: <span class="math inline">\(a_{ij}\)</span> (Value in Row <span class="math inline">\(i\)</span>, Column <span class="math inline">\(j\)</span>).</li>
-<li class="fragment">Row index is <span class="math inline">\(i\)</span>; column index is <span class="math inline">\(j\)</span>.</li>
-</ul></li>
-<li class="fragment">For example, if <span class="math inline">\(\mathbf{B}\)</span> is a survey matrix:
-<ul>
-<li class="fragment">Cell <span class="math inline">\(b_{32}\)</span> refers to Row 3 (Case 3, a person) and Column 2 (Attribute 2, e.g., Age).</li>
-<li class="fragment">If that person is 54 years old, then <span class="math inline">\(b_{32} = 54\)</span>.</li>
-</ul></li>
+<li class="fragment"><strong>Rows</strong> represent <strong>cases</strong> (the people we surveyed: Alice, Bob, Charlie, David).</li>
+<li class="fragment"><strong>Columns</strong> represent <strong>attributes</strong> (Age, Education, Income).</li>
+<li class="fragment">Each cell contains a meaningful numerical value representing a specific person’s attribute.</li>
 </ul>
 </section>
-<section id="relationship-matrices" class="slide level2">
-<h2>Relationship Matrices</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
+<section id="matrix-notation-indexing" class="slide level2">
+<h2>Matrix Notation &amp; Indexing</h2>
 <ul>
-<li class="fragment">Social network analysis rarely uses general attribute-value matrices.</li>
-<li class="fragment">Instead, we use <strong>Relationship Matrices</strong>:
+<li>By convention, we name matrices using <strong>boldfaced capital letters</strong> (e.g., Matrix <span class="math inline">\(\mathbf{B}\)</span>).</li>
+<li>We refer to a specific cell in the matrix using a lowercase letter with row and column indices:
 <ul>
-<li class="fragment">The same list of cases (actors) is listed on <strong>both rows and columns</strong>.</li>
-<li class="fragment">Cell <span class="math inline">\(a_{ij}\)</span> records the value of the relationship from row actor <span class="math inline">\(i\)</span> to column actor <span class="math inline">\(j\)</span>.</li>
-<li class="fragment">All relationship matrices are <strong>Square Matrices</strong>:
+<li><span class="math display">\[b_{ij}\]</span></li>
+<li>Where <span class="math inline">\(i\)</span> is the <strong>row index</strong> and <span class="math inline">\(j\)</span> is the <strong>column index</strong>.</li>
+</ul></li>
+</ul>
+<table class="caption-top">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: center;">Col 1 (Age)</th>
+<th style="text-align: center;">Col 2 (Edu)</th>
+<th style="text-align: center;">Col 3 (Income)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Row 1 (Alice)</strong></td>
+<td style="text-align: center;"><span class="math inline">\(b_{11} = 25\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b_{12} = 16\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b_{13} = 55,000\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Row 2 (Bob)</strong></td>
+<td style="text-align: center;"><span class="math inline">\(b_{21} = 42\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b_{22} = 12\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b_{23} = 48,000\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Row 3 (Charlie)</strong></td>
+<td style="text-align: center;"><span class="math inline">\(b_{31} = 31\)</span></td>
+<td style="text-align: center;"><strong><span class="math inline">\(b_{32} = 18\)</span></strong></td>
+<td style="text-align: center;"><span class="math inline">\(b_{33} = 95,000\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Row 4 (David)</strong></td>
+<td style="text-align: center;"><span class="math inline">\(b_{41} = 54\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b_{42} = 14\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b_{43} = 62,000\)</span></td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li class="fragment">The number of rows equals the number of columns (<span class="math inline">\(R = C\)</span>).</li>
+<li class="fragment">Cell <strong><span class="math inline">\(b_{32}\)</span></strong> represents Row 3 (Charlie) and Column 2 (Education), which holds <strong>18</strong>.</li>
+</ul>
+</section>
+<section id="transitioning-to-relationship-matrices" class="slide level2">
+<h2>Transitioning to Relationship Matrices</h2>
+<ul>
+<li class="fragment">Survey data matrices relate cases to attributes. They do <strong>not</strong> represent networks.</li>
+<li class="fragment">To represent a network, we use a <strong>Relationship Matrix</strong>:
+<ul>
+<li class="fragment">We put the <strong>exact same set of actors</strong> on <em>both</em> the rows and the columns.</li>
+<li class="fragment">Cell <span class="math inline">\(a_{ij}\)</span> records how Row Actor <span class="math inline">\(i\)</span> relates to Column Actor <span class="math inline">\(j\)</span>.</li>
+</ul></li>
+<li class="fragment"><strong>Square Matrices</strong>:
+<ul>
+<li class="fragment">All relationship matrices are <strong>square matrices</strong> (<span class="math inline">\(R = C\)</span>).</li>
 <li class="fragment">A square matrix of size <span class="math inline">\(N\)</span> is said to be of <strong>order <span class="math inline">\(N\)</span></strong>.</li>
 </ul></li>
-</ul></li>
 </ul>
-</div><div class="column" style="width:40%;">
-<h3 id="relationship-matrix">Relationship Matrix</h3>
-<table class="caption-top">
-<caption>Order <span class="math inline">\(N = 3\)</span>.</caption>
-<thead>
-<tr class="header">
-<th style="text-align: left;"></th>
-<th style="text-align: center;">Case 1</th>
-<th style="text-align: center;">Case 2</th>
-<th style="text-align: center;">Case 3</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;"><strong>Case 1</strong></td>
-<td style="text-align: center;"><span class="math inline">\(V_1\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_2\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_3\)</span></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"><strong>Case 2</strong></td>
-<td style="text-align: center;"><span class="math inline">\(V_4\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_5\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_6\)</span></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"><strong>Case 3</strong></td>
-<td style="text-align: center;"><span class="math inline">\(V_7\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_8\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_9\)</span></td>
-</tr>
-</tbody>
-</table>
-</div></div>
 </section>
 <section id="diagonal-vs.-off-diagonal-cells" class="slide level2">
 <h2>Diagonal vs.&nbsp;Off-Diagonal Cells</h2>
-<div class="columns">
+<div class="columns" data-align="center">
 <div class="column" style="width:60%;">
 <ul>
 <li class="fragment"><strong>The Main Diagonal</strong>:
 <ul>
-<li class="fragment">The diagonal line running from the top-left to the bottom-right corner.</li>
-<li class="fragment">Composed of cells where <strong>row index equals column index</strong> (<span class="math inline">\(i = j\)</span>).</li>
+<li class="fragment">The diagonal cells running from top-left to bottom-right, where <strong>row index equals column index</strong> (<span class="math inline">\(i = j\)</span>).</li>
 <li class="fragment">Represents the relationship of actors with themselves (<span class="math inline">\(a_{ii}\)</span>), which we typically ignore by <strong>blocking the diagonals</strong> with a dash (<code>--</code>).</li>
 </ul></li>
 <li class="fragment"><strong>Off-Diagonal Cells (<span class="math inline">\(i \neq j\)</span>)</strong>:
@@ -403,414 +363,919 @@ Table&nbsp;1: The Duality of Network Concepts.
 </ul></li>
 </ul>
 </div><div class="column" style="width:40%;">
-<h3 id="blocked-diagonals">Blocked Diagonals</h3>
+<h3 id="square-relationship-matrix">Square Relationship Matrix</h3>
 <table class="caption-top">
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
-<th style="text-align: center;">C1</th>
-<th style="text-align: center;">C2</th>
-<th style="text-align: center;">C3</th>
+<th style="text-align: center;">Actor A</th>
+<th style="text-align: center;">Actor B</th>
+<th style="text-align: center;">Actor C</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><strong>C1</strong></td>
+<td style="text-align: left;"><strong>Actor A</strong></td>
 <td style="text-align: center;"><em>–</em></td>
-<td style="text-align: center;"><span class="math inline">\(V_1\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_2\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a_{12}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a_{13}\)</span></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><strong>C2</strong></td>
-<td style="text-align: center;"><span class="math inline">\(V_3\)</span></td>
+<td style="text-align: left;"><strong>Actor B</strong></td>
+<td style="text-align: center;"><span class="math inline">\(a_{21}\)</span></td>
 <td style="text-align: center;"><em>–</em></td>
-<td style="text-align: center;"><span class="math inline">\(V_4\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a_{23}\)</span></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><strong>C3</strong></td>
-<td style="text-align: center;"><span class="math inline">\(V_5\)</span></td>
-<td style="text-align: center;"><span class="math inline">\(V_6\)</span></td>
+<td style="text-align: left;"><strong>Actor C</strong></td>
+<td style="text-align: center;"><span class="math inline">\(a_{31}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a_{32}\)</span></td>
 <td style="text-align: center;"><em>–</em></td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li>Symmetric ties (undirected graphs) mean the upper and lower triangles are identical (<span class="math inline">\(V_1 = V_3\)</span>, <span class="math inline">\(V_2 = V_5\)</span>).</li>
-<li>Asymmetric ties (directed graphs) do not require symmetry.</li>
+<li>If the relationship is symmetric (e.g., spouses), then <span class="math inline">\(a_{ij} = a_{ji}\)</span> (symmetric matrix).</li>
+<li>If asymmetric (e.g., advice), then <span class="math inline">\(a_{ij} \neq a_{ji}\)</span> (asymmetric matrix).</li>
 </ul>
 </div></div>
 </section></section>
 <section>
-<section id="part-3-the-adjacency-matrix" class="title-slide slide level1 center">
-<h1>Part 3: The Adjacency Matrix</h1>
+<section id="part-2-the-undirected-adjacency-matrix-step-by-step" class="title-slide slide level1 center">
+<h1>Part 2: The Undirected Adjacency Matrix Step-by-Step</h1>
 
 </section>
-<section id="defining-adjacency-in-matrices" class="slide level2">
-<h2>Defining Adjacency in Matrices</h2>
+<section id="what-is-an-adjacency-matrix" class="slide level2">
+<h2>What is an Adjacency Matrix?</h2>
 <ul>
-<li class="fragment">The <strong>Adjacency Matrix</strong> is the most important representation of a network.</li>
-<li class="fragment">It is a binary relationship matrix of order <span class="math inline">\(N\)</span> indicating whether pairs of nodes are directly connected (<strong>adjacent</strong>) in the graph.</li>
-<li class="fragment">Formal Definition:
+<li class="fragment">An <strong>Adjacency Matrix</strong> is a binary relationship matrix indicating whether pairs of nodes are directly connected (<strong>adjacent</strong>) in the graph.</li>
+<li class="fragment"><strong>Binary Rules</strong>:
 <ul>
-<li class="fragment"><span class="math display">\[A_{ij} = 1 \quad \text{if edge } \{v_i, v_j\} \text{ exists in } E\]</span></li>
-<li class="fragment"><span class="math display">\[A_{ij} = 0 \quad \text{if edge } \{v_i, v_j\} \text{ does not exist in } E\]</span></li>
+<li class="fragment"><span class="math display">\[A_{ij} = 1 \quad \text{if a tie exists between } i \text{ and } j\]</span></li>
+<li class="fragment"><span class="math display">\[A_{ij} = 0 \quad \text{if no tie exists}\]</span></li>
 </ul></li>
-<li class="fragment">In simple graphs, we always set <span class="math inline">\(A_{ii} = 0\)</span> (or <code>--</code>) to block self-loops.</li>
+<li class="fragment">If the graph is <strong>undirected</strong>, the relation is reciprocal. This always yields a <strong>symmetric matrix</strong> where the upper and lower triangles are mirror images across the main diagonal (<span class="math inline">\(A_{ij} = A_{ji}\)</span>).</li>
+<li class="fragment">Let’s construct one step-by-step from a 5-node reference graph.</li>
 </ul>
 </section>
-<section id="symmetric-adjacency-matrices-undirected-graphs" class="slide level2">
-<h2>Symmetric Adjacency Matrices (Undirected Graphs)</h2>
+<section id="the-reference-graph-empty-matrix" class="slide level2">
+<h2>The Reference Graph &amp; Empty Matrix</h2>
 <div class="columns" data-align="center">
-<div class="column" style="width:55%;">
+<div class="column" style="width:50%;">
+<h3 id="reference-undirected-graph">Reference Undirected Graph</h3>
 <ul>
-<li>Undirected graphs feature symmetric ties (e.g., co-workers).</li>
-<li>Resulting adjacency matrix is <strong>symmetric</strong>:
-<ul>
-<li>Flipped along the diagonal, the upper and lower triangles are mirror images.</li>
-<li><span class="math display">\[A_{ij} = A_{ji} \quad \text{for all } i, j\]</span></li>
-</ul></li>
+<li>We have 5 nodes: <span class="math inline">\(\{A, B, C, D, E\}\)</span>.</li>
+<li>Since it is an undirected graph, lines do not have arrowheads.</li>
+<li>Let’s build the <span class="math inline">\(5 \times 5\)</span> matrix of <strong>order 5</strong>.</li>
+<li>Diagonals are blocked (<code>--</code>) because simple graphs have no self-loops.</li>
 </ul>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-hover table-condensed caption-top" style="font-size: 14px; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">A</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">B</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">C</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">D</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">E</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">F</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">G</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">H</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">I</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
+</div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
 </figure>
 </div>
 </div>
 </div>
 </div></div>
 </section>
-<section id="asymmetric-adjacency-matrices-directed-graphs" class="slide level2">
-<h2>Asymmetric Adjacency Matrices (Directed Graphs)</h2>
+<section id="step-1-filling-row-a-actor-as-ties" class="slide level2">
+<h2>Step 1: Filling Row A (Actor A’s Ties)</h2>
 <div class="columns" data-align="center">
-<div class="column" style="width:55%;">
+<div class="column" style="width:50%;">
+<h3 id="left-as-connections-highlighted">Left: A’s connections highlighted</h3>
 <ul>
-<li>Directed graphs feature asymmetric ties (e.g., advice, liking).</li>
-<li>Resulting adjacency matrix is <strong>asymmetric</strong>:
+<li>Node <strong>A</strong> is connected directly to <strong>B</strong> and <strong>C</strong>.</li>
+<li>Node <strong>A</strong> has no connections to <span class="math inline">\(D\)</span> or <span class="math inline">\(E\)</span>.</li>
+<li><strong>Adjacency Rule</strong>:
 <ul>
-<li>The upper and lower triangles do not mirror each other.</li>
-<li><span class="math inline">\(A_{ij} \neq A_{ji}\)</span> is common (unreciprocated ties).</li>
+<li>Set cells <span class="math inline">\(a_{AB} = 1\)</span> and <span class="math inline">\(a_{AC} = 1\)</span>.</li>
+<li>Set cells <span class="math inline">\(a_{AD} = 0\)</span> and <span class="math inline">\(a_{AE} = 0\)</span>.</li>
 </ul></li>
+<li><strong>Row A</strong>: <code>(--,  1,  1,  0,  0)</code></li>
 </ul>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-hover table-condensed caption-top" style="font-size: 14px; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">A</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">B</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">C</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">D</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">E</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">F</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">G</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">--</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
+</div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="adjacency-matrix-progress">Adjacency Matrix progress</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;"><strong>–</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;"><em>–</em></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;"><em>–</em></td>
+<td style="text-align: center;"><em>–</em></td>
+</tr>
+</tbody>
+</table>
+</div></div>
+</section>
+<section id="step-by-step-cell-correspondence" class="slide level2">
+<h2>Step-by-Step Cell Correspondence</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<ul>
+<li>Let’s look at how specific edges map to cell values:
+<ul>
+<li><strong>Edge A-C exists</strong>:
+<ul>
+<li>This fills two cells: <span class="math inline">\(a_{13} = 1\)</span> (Row A, Column C) and <span class="math inline">\(a_{31} = 1\)</span> (Row C, Column A).</li>
+</ul></li>
+<li><strong>No Edge A-D exists</strong>:
+<ul>
+<li>This fills cells <span class="math inline">\(a_{14} = 0\)</span> (Row A, Column D) and <span class="math inline">\(a_{41} = 0\)</span> (Row D, Column A).</li>
+</ul></li>
+</ul></li>
+<li>In an undirected graph, every single edge <span class="math inline">\(\{i, j\}\)</span> corresponds to <strong>two symmetrical cell entries</strong> in the matrix!</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="edge-to-cell-mapping">Edge to Cell Mapping</h3>
+<ul>
+<li>Edge <span class="math inline">\(\{A, C\} \Longrightarrow a_{AC} = 1\)</span> and <span class="math inline">\(a_{CA} = 1\)</span></li>
+<li>No Edge <span class="math inline">\(\{A, D\} \Longrightarrow a_{AD} = 0\)</span> and <span class="math inline">\(a_{DA} = 0\)</span></li>
+</ul>
+</div></div>
+</section>
+<section id="step-2-symmetrical-filling-symmetry-across-diagonal" class="slide level2">
+<h2>Step 2: Symmetrical Filling (Symmetry across Diagonal)</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="left-undirected-lines-are-reciprocal">Left: Undirected lines are reciprocal</h3>
+<ul>
+<li>Because the graph is undirected, if A is connected to B and C, then <strong>B and C must also be connected to A</strong>.</li>
+<li><strong>Symmetric Rule (<span class="math inline">\(A_{ij} = A_{ji}\)</span>)</strong>:
+<ul>
+<li>Since Row A columns B/C are <span class="math inline">\(1\)</span>, then <strong>Column A rows B/C must be <span class="math inline">\(1\)</span></strong>.</li>
+<li>Since Row A columns D/E are <span class="math inline">\(0\)</span>, then <strong>Column A rows D/E must be <span class="math inline">\(0\)</span></strong>.</li>
+</ul></li>
+<li><strong>Column A</strong>: <code>(--,  1,  1,  0,  0)</code></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="adjacency-matrix-progress-1">Adjacency Matrix progress</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;"><strong>–</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+</div></div>
+</section>
+<section id="step-3-filling-row-b-actor-bs-ties" class="slide level2">
+<h2>Step 3: Filling Row B (Actor B’s Ties)</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="left-bs-connections-highlighted">Left: B’s connections highlighted</h3>
+<ul>
+<li>Node <strong>B</strong> connects to <strong>A</strong>, <strong>C</strong>, and <strong>D</strong>.</li>
+<li>Node <strong>B</strong> has no connections to <span class="math inline">\(E\)</span>.</li>
+<li><strong>Adjacency Rule</strong>:
+<ul>
+<li><span class="math inline">\(a_{BA} = 1\)</span> (already filled!)</li>
+<li>Set <span class="math inline">\(a_{BC} = 1\)</span> and <span class="math inline">\(a_{BD} = 1\)</span>.</li>
+<li>Set <span class="math inline">\(a_{BE} = 0\)</span>.</li>
+</ul></li>
+<li><strong>Row B</strong>: <code>(1,  --,  1,  1,  0)</code></li>
+<li><strong>Column B</strong>: <code>(1,  --,  1,  1,  0)</code></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="adjacency-matrix-progress-2">Adjacency Matrix progress</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>–</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+</div></div>
+</section>
+<section id="step-4-the-final-undirected-adjacency-matrix" class="slide level2">
+<h2>Step 4: The Final Undirected Adjacency Matrix</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="left-completed-undirected-graph">Left: Completed Undirected Graph</h3>
+<ul>
+<li>We repeat this process for rows C, D, and E:
+<ul>
+<li><strong>C</strong> connects to <span class="math inline">\(\{A, B, E\} \rightarrow\)</span> <code>(1, 1, --, 0, 1)</code>.</li>
+<li><strong>D</strong> connects to <span class="math inline">\(\{B, E\} \rightarrow\)</span> <code>(0, 1, 0, --, 1)</code>.</li>
+<li><strong>E</strong> connects to <span class="math inline">\(\{C, D\} \rightarrow\)</span> <code>(0, 0, 1, 1, --)</code>.</li>
+</ul></li>
+<li>Notice the <strong>perfect mirror symmetry</strong> of the upper and lower triangles!</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="symmetric-adjacency-matrix-mathbfa">Symmetric Adjacency Matrix (<span class="math inline">\(\mathbf{A}\)</span>)</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+</div></div>
+</section></section>
+<section>
+<section id="part-3-the-directed-adjacency-matrix-step-by-step" class="title-slide slide level1 center">
+<h1>Part 3: The Directed Adjacency Matrix Step-by-Step</h1>
+
+</section>
+<section id="directed-graphs-asymmetry" class="slide level2">
+<h2>Directed Graphs &amp; Asymmetry</h2>
+<ul>
+<li class="fragment">In a <strong>directed graph</strong> (digraph), relationships are asymmetric and have a specific <strong>direction</strong> (represented by arrowheads).</li>
+<li class="fragment"><strong>Matrix Convention (Sender to Receiver)</strong>:
+<ul>
+<li class="fragment">Row = <strong>Sender</strong> of the tie (origin).</li>
+<li class="fragment">Column = <strong>Receiver</strong> of the tie (destination).</li>
+<li class="fragment"><span class="math display">\[A_{ij} = 1 \quad \text{if there is an arrow from Row } i \rightarrow \text{ Column } j\]</span></li>
+<li class="fragment"><span class="math display">\[A_{ij} = 0 \quad \text{otherwise}\]</span></li>
+</ul></li>
+<li class="fragment">Because ties are directed, <span class="math inline">\(A_{ij}\)</span> is not necessarily equal to <span class="math inline">\(A_{ji}\)</span>, yielding an <strong>asymmetric adjacency matrix</strong>.</li>
+<li class="fragment">Let’s construct one step-by-step.</li>
+</ul>
+</section>
+<section id="the-directed-reference-graph-empty-matrix" class="slide level2">
+<h2>The Directed Reference Graph &amp; Empty Matrix</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="reference-directed-graph">Reference Directed Graph</h3>
+<ul>
+<li>We use the exact same 5-node nodes <span class="math inline">\(\{A, B, C, D, E\}\)</span> with the same spatial layout.</li>
+<li>However, we now introduce directed arrows.</li>
+<li>Observe:
+<ul>
+<li>Some ties are <strong>reciprocal</strong> (e.g., <span class="math inline">\(A \leftrightarrow B\)</span>).</li>
+<li>Some ties are <strong>unidirectional</strong> (e.g., <span class="math inline">\(A \rightarrow C\)</span> but <span class="math inline">\(C \not\rightarrow A\)</span>).</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
 </figure>
 </div>
 </div>
 </div>
 </div></div>
+</section>
+<section id="step-1-filling-row-a-a-as-sender" class="slide level2">
+<h2>Step 1: Filling Row A (A as Sender)</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="left-outgoing-arrows-from-a-highlighted">Left: Outgoing arrows from A highlighted</h3>
+<ul>
+<li>Look only at arrows <strong>originating</strong> at node <strong>A</strong>:
+<ul>
+<li><span class="math inline">\(A\)</span> sends an arrow to <span class="math inline">\(B\)</span> (<span class="math inline">\(A \rightarrow B\)</span>).</li>
+<li><span class="math inline">\(A\)</span> sends an arrow to <span class="math inline">\(C\)</span> (<span class="math inline">\(A \rightarrow C\)</span>).</li>
+<li><span class="math inline">\(A\)</span> sends no arrows to <span class="math inline">\(D\)</span> or <span class="math inline">\(E\)</span>.</li>
+</ul></li>
+<li><strong>Adjacency Rule</strong>:
+<ul>
+<li>Set cells <span class="math inline">\(a_{AB} = 1\)</span> and <span class="math inline">\(a_{AC} = 1\)</span>.</li>
+<li>Set cells <span class="math inline">\(a_{AD} = 0\)</span> and <span class="math inline">\(a_{AE} = 0\)</span>.</li>
+</ul></li>
+<li><strong>Row A</strong>: <code>(--,  1,  1,  0,  0)</code></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="directed-matrix-progress">Directed Matrix progress</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;"><strong>–</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+</div></div>
+</section>
+<section id="step-by-step-directed-cell-correspondence" class="slide level2">
+<h2>Step-by-Step Directed Cell Correspondence</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<ul>
+<li>Let’s look at how unreciprocated arrows map to cell asymmetry:
+<ul>
+<li><strong>Arrow <span class="math inline">\(A \rightarrow C\)</span> exists</strong>:
+<ul>
+<li>This is cell <span class="math inline">\(a_{13} = 1\)</span> (Row A, Column C).</li>
+</ul></li>
+<li><strong>No Arrow <span class="math inline">\(C \rightarrow A\)</span> exists</strong>:
+<ul>
+<li>This is cell <span class="math inline">\(a_{31} = 0\)</span> (Row C, Column A).</li>
+</ul></li>
+</ul></li>
+<li>In a directed graph, each cell corresponds to a <strong>unique directional relationship</strong>.</li>
+<li>Contrast this with the undirected case, where cells <span class="math inline">\(a_{AC}\)</span> and <span class="math inline">\(a_{CA}\)</span> were forced to be identical!</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="arrow-to-cell-mapping">Arrow to Cell Mapping</h3>
+<ul>
+<li>Arrow <span class="math inline">\(A \rightarrow C \Longrightarrow a_{AC} = 1\)</span></li>
+<li>No Arrow <span class="math inline">\(C \rightarrow A \Longrightarrow a_{CA} = 0\)</span></li>
+</ul>
+</div></div>
+</section>
+<section id="step-2-filling-row-b-b-as-sender" class="slide level2">
+<h2>Step 2: Filling Row B (B as Sender)</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="left-outgoing-arrows-from-b-highlighted">Left: Outgoing arrows from B highlighted</h3>
+<ul>
+<li>Look only at arrows <strong>originating</strong> at node <strong>B</strong>:
+<ul>
+<li><span class="math inline">\(B\)</span> sends an arrow to <span class="math inline">\(A\)</span> (<span class="math inline">\(B \rightarrow A\)</span>).</li>
+<li><span class="math inline">\(B\)</span> sends an arrow to <span class="math inline">\(C\)</span> (<span class="math inline">\(B \rightarrow C\)</span>).</li>
+<li><span class="math inline">\(B\)</span> sends an arrow to <span class="math inline">\(D\)</span> (<span class="math inline">\(B \rightarrow D\)</span>).</li>
+<li><span class="math inline">\(B\)</span> sends no arrow to <span class="math inline">\(E\)</span>.</li>
+</ul></li>
+<li><strong>Adjacency Rule</strong>:
+<ul>
+<li>Set cells <span class="math inline">\(a_{BA} = 1, a_{BC} = 1, a_{BD} = 1\)</span>.</li>
+<li>Set cell <span class="math inline">\(a_{BE} = 0\)</span>.</li>
+</ul></li>
+<li><strong>Row B</strong>: <code>(1,  --,  1,  1,  0)</code></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="directed-matrix-progress-1">Directed Matrix progress</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>–</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+</div></div>
+</section>
+<section id="step-3-filling-row-c-c-as-sender" class="slide level2">
+<h2>Step 3: Filling Row C (C as Sender)</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="left-outgoing-arrows-from-c-highlighted">Left: Outgoing arrows from C highlighted</h3>
+<ul>
+<li>Look only at arrows <strong>originating</strong> at node <strong>C</strong>:
+<ul>
+<li><span class="math inline">\(C\)</span> sends an arrow to <span class="math inline">\(E\)</span> (<span class="math inline">\(C \rightarrow E\)</span>).</li>
+<li><span class="math inline">\(C\)</span> sends no arrows to <span class="math inline">\(A, B,\)</span> or <span class="math inline">\(D\)</span>.</li>
+</ul></li>
+<li><strong>Adjacency Rule</strong>:
+<ul>
+<li>Set cell <span class="math inline">\(a_{CE} = 1\)</span>.</li>
+<li>Set cells <span class="math inline">\(a_{CA} = 0, a_{CB} = 0, a_{CD} = 0\)</span>.</li>
+</ul></li>
+<li><strong>Row C</strong>: <code>(0,  0,  --,  0,  1)</code></li>
+<li><em>Notice that even though A and B point to C, C does not point back to them!</em></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="499"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="directed-matrix-progress-2">Directed Matrix progress</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;"><strong>–</strong></td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+</div></div>
+</section>
+<section id="step-4-the-completed-directed-adjacency-matrix" class="slide level2">
+<h2>Step 4: The Completed Directed Adjacency Matrix</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="left-completed-directed-graph">Left: Completed Directed Graph</h3>
+<ul>
+<li>We repeat for the remaining rows D and E:
+<ul>
+<li><strong>Row D</strong>: Node D sends <strong>no arrows</strong> at all! It is a pure receiver (sink node) <span class="math inline">\(\rightarrow\)</span> <code>(0, 0, 0, --, 0)</code>.</li>
+<li><strong>Row E</strong>: Node E sends only one arrow to D (<span class="math inline">\(E \rightarrow D\)</span>) <span class="math inline">\(\rightarrow\)</span> <code>(0, 0, 0, 1, --)</code>.</li>
+</ul></li>
+<li>Notice the clear asymmetry (e.g.&nbsp;<span class="math inline">\(A_{CB} = 0\)</span> but <span class="math inline">\(A_{BC} = 1\)</span>).</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-intro_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+</figure>
+</div>
+</div>
+</div>
+<h3 id="asymmetric-adjacency-matrix-mathbfa">Asymmetric Adjacency Matrix (<span class="math inline">\(\mathbf{A}\)</span>)</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">A</th>
+<th style="text-align: center;">B</th>
+<th style="text-align: center;">C</th>
+<th style="text-align: center;">D</th>
+<th style="text-align: center;">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">–</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>E</strong></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">–</td>
+</tr>
+</tbody>
+</table>
+</div></div>
 </section></section>
 <section>
-<section id="part-4-advanced-adjacency-matrices" class="title-slide slide level1 center">
-<h1>Part 4: Advanced Adjacency Matrices</h1>
+<section id="part-4-comparing-undirected-directed-matrices" class="title-slide slide level1 center">
+<h1>Part 4: Comparing Undirected &amp; Directed Matrices</h1>
 
 </section>
-<section id="weighted-adjacency-matrices" class="slide level2">
-<h2>Weighted Adjacency Matrices</h2>
+<section id="symmetric-vs.-asymmetric-structure" class="slide level2">
+<h2>Symmetric vs.&nbsp;Asymmetric Structure</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<h3 id="undirected-symmetric-matrix">Undirected Symmetric Matrix</h3>
 <ul>
-<li class="fragment">In real-world social life, ties are rarely just binary (<span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>); they have varying degrees of <strong>strength</strong> or <strong>intensity</strong>.</li>
-<li class="fragment"><strong>Weighted Graphs</strong>:
-<ul>
-<li class="fragment">Associate numerical values with edges (e.g., emails sent per day, dollars traded, papers co-authored).</li>
-<li class="fragment">Cell entries represent real numbers: <span class="math inline">\(W_{ij} = w\)</span> (where <span class="math inline">\(w\)</span> is the tie weight).</li>
-</ul></li>
-<li class="fragment"><strong>Binarization</strong>:
-<ul>
-<li class="fragment">To simplify a dense weighted matrix (<span class="math inline">\(\mathbf{W}\)</span>), we apply a threshold cutoff <span class="math inline">\(\Theta\)</span>:</li>
-<li class="fragment"><span class="math display">\[A_{ij} = 1 \quad \text{if } W_{ij} &gt; \Theta\]</span></li>
-<li class="fragment"><span class="math display">\[A_{ij} = 0 \quad \text{if } W_{ij} \le \Theta\]</span></li>
-</ul></li>
+<li><strong>Mirror Images</strong>: Cells across the main diagonal are identical (<span class="math inline">\(A_{ij} = A_{ji}\)</span>).</li>
+<li><strong>Lower Density</strong>: Information is duplicated (only upper or lower triangle is needed). | | A | B | C | D | E | |:—:|:—:|:—:|:—:|:—:|:—:| | <strong>A</strong> | – | <strong>1</strong> | <strong>1</strong> | 0 | 0 | | <strong>B</strong> | <strong>1</strong> | – | <strong>1</strong> | <strong>1</strong> | 0 | | <strong>C</strong> | <strong>1</strong> | <strong>1</strong> | – | 0 | <strong>1</strong> | | <strong>D</strong> | 0 | <strong>1</strong> | 0 | – | <strong>1</strong> | | <strong>E</strong> | 0 | 0 | <strong>1</strong> | <strong>1</strong> | – |</li>
 </ul>
+</div><div class="column" style="width:50%;">
+<h3 id="directed-asymmetric-matrix">Directed Asymmetric Matrix</h3>
+<ul>
+<li><strong>No Mirror Images</strong>: Cells across the diagonal represent independent relations.</li>
+<li><strong>Asymmetric Ties</strong>: e.g., B sends to D (<span class="math inline">\(a_{BD}=1\)</span>), but D does not send to B (<span class="math inline">\(a_{DB}=0\)</span>). | | A | B | C | D | E | |:—:|:—:|:—:|:—:|:—:|:—:| | <strong>A</strong> | – | <strong>1</strong> | <strong>1</strong> | 0 | 0 | | <strong>B</strong> | <strong>1</strong> | – | <strong>1</strong> | <strong>1</strong> | 0 | | <strong>C</strong> | 0 | 0 | – | 0 | <strong>1</strong> | | <strong>D</strong> | 0 | 0 | 0 | – | 0 | | <strong>E</strong> | 0 | 0 | 0 | <strong>1</strong> | – |</li>
+</ul>
+</div></div>
 </section>
-<section id="multiplexity-and-multigraphs" class="slide level2">
-<h2>Multiplexity and Multigraphs</h2>
+<section id="summary-of-adjacency-principles" class="slide level2">
+<h2>Summary of Adjacency Principles</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
 <ul>
-<li class="fragment">In social networks, actors often share multiple types of relationships (e.g., being co-workers, friends, and neighbors simultaneously). This is called <strong>multiplexity</strong>.</li>
-<li class="fragment">A network with multiple distinct types of edges between nodes is a <strong>multigraph</strong>.</li>
-<li class="fragment"><strong>Matrix Representation</strong>:
+<li class="fragment"><strong>Adjacency is binary</strong>:
 <ul>
-<li class="fragment">A single cell can only hold one value, so we cannot represent a multigraph in a single standard 2D matrix.</li>
-<li class="fragment">Instead, we represent it as a set of <strong>stacked adjacency matrices</strong>:
-<ul>
-<li class="fragment">Matrix <span class="math inline">\(\mathbf{A}^{(1)}\)</span> (Kinship), Matrix <span class="math inline">\(\mathbf{A}^{(2)}\)</span> (Advice), Matrix <span class="math inline">\(\mathbf{A}^{(3)}\)</span> (Friendship).</li>
+<li class="fragment">Cell value <span class="math inline">\(1\)</span> indicates connection; <span class="math inline">\(0\)</span> indicates separation.</li>
 </ul></li>
-<li class="fragment">This stacked array forms a <strong>three-dimensional matrix</strong> (or <strong>tensor</strong>) of dimensions <span class="math inline">\(N \times N \times K\)</span>.</li>
+<li class="fragment"><strong>Diagonal blocks self-loops</strong>:
+<ul>
+<li class="fragment">Simple graphs have no ties with oneself (<code>--</code>).</li>
 </ul></li>
-</ul>
-</section>
-<section id="bipartite-matrices-two-mode-networks" class="slide level2">
-<h2>Bipartite Matrices (Two-Mode Networks)</h2>
+<li class="fragment"><strong>Undirected Graphs <span class="math inline">\(\rightarrow\)</span> Symmetric Matrices</strong>:
 <ul>
-<li class="fragment"><strong>Two-Mode Networks</strong>:
-<ul>
-<li class="fragment">Map connections between <strong>actors</strong> and <strong>groups/events/organizations</strong> (e.g., executives sitting on boards of directors, activists co-attending protests).</li>
+<li class="fragment">Bidirectional relations mean the matrix is its own transpose (<span class="math inline">\(A = A^T\)</span>).</li>
 </ul></li>
-<li class="fragment"><strong>Bipartite Graphs</strong>:
+<li class="fragment"><strong>Directed Graphs <span class="math inline">\(\rightarrow\)</span> Asymmetric Matrices</strong>:
 <ul>
-<li class="fragment">Feature two disjoint sets of vertices (<span class="math inline">\(N\)</span> actors and <span class="math inline">\(M\)</span> events). Edges only link actors to events, never actors to actors or events to events.</li>
-</ul></li>
-<li class="fragment"><strong>Affiliation Matrix</strong> (<span class="math inline">\(\mathbf{C}\)</span>):
-<ul>
-<li class="fragment">Because the vertex sets are disjoint, this is represented as a <strong>rectangular matrix</strong> of dimensions <span class="math inline">\(N \times M\)</span>.</li>
-<li class="fragment"><span class="math inline">\(C_{ij} = 1\)</span> if actor <span class="math inline">\(i\)</span> is affiliated with event <span class="math inline">\(j\)</span>, else <span class="math inline">\(0\)</span>.</li>
+<li class="fragment">Row = Sender, Column = Receiver. Allows us to identify <strong>sinks</strong> (D, row of all 0s) and <strong>asymmetries</strong> (C to E but not E to C).</li>
 </ul></li>
 </ul>
-</section></section>
-<section>
-<section id="part-5-summary-key-takeaways" class="title-slide slide level1 center">
-<h1>Part 5: Summary &amp; Key Takeaways</h1>
-
-</section>
-<section id="summary-of-key-concepts" class="slide level2">
-<h2>Summary of Key Concepts</h2>
-<ul>
-<li class="fragment"><strong>Matrices provide analytical power</strong>:
-<ul>
-<li class="fragment">Eyeballing “hairball” graphs gets impossible as networks scale. Matrices allow computer systems to easily run computations.</li>
-</ul></li>
-<li class="fragment"><strong>Adjacency Matrix</strong>:
-<ul>
-<li class="fragment">Stores direct connections. Symmetric (<span class="math inline">\(A_{ij} = A_{ji}\)</span>) for undirected graphs; asymmetric (<span class="math inline">\(A_{ij} \neq A_{ji}\)</span>) for directed graphs.</li>
-</ul></li>
-<li class="fragment"><strong>Main Diagonal</strong>:
-<ul>
-<li class="fragment">Represents self-loops (<span class="math inline">\(i = j\)</span>), which we block (<code>--</code>) in simple graphs.</li>
-</ul></li>
-<li class="fragment"><strong>Weighted &amp; Multigraph Matrices</strong>:
-<ul>
-<li class="fragment">Weighted matrices record tie strengths (which can be binarized using <span class="math inline">\(\Theta\)</span>). Multigraphs represent multiplex ties using stacked 3D matrices (tensors).</li>
-</ul></li>
-<li class="fragment"><strong>Affiliation Matrices</strong>:
-<ul>
-<li class="fragment">Bipartite graphs represent two-mode networks using rectangular <span class="math inline">\(N \times M\)</span> matrices.</li>
-</ul></li>
-</ul>
+</div><div class="column" style="width:40%;">
+<h3 id="matrix-duality">Matrix Duality</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource mermaid number-lines code-with-copy"><code class="sourceCode"><span id="cb1-1"><a href=""></a>graph TD</span>
+<span id="cb1-2"><a href=""></a>  A[Real Network] --&gt; B[Graph Model]</span>
+<span id="cb1-3"><a href=""></a>  B --&gt; C[Matrix Representation]</span>
+<span id="cb1-4"><a href=""></a>  C --&gt;|Calculations| A</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></div>
 
 </section></section>
     </div>
