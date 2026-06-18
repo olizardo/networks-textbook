@@ -1,4 +1,5 @@
-# Matrix Multiplication {#sec-matmult}
+# Matrix Multiplication and its Applications {#sec-matmult}
+
 ```{r setup, include=FALSE}
     require(ggraph)
     require(tidygraph)
@@ -7,98 +8,105 @@
     require(expm)
 ```
 
-**Matrix multiplication** (symbol: $\times$) is perhaps the more complex of the matrix algebra operations we will cover. It is a bit involved, but relatively easy once you get the hang of it. We will begin with a simple example before moving on to more complicated stuff. 
+**Matrix multiplication** (symbol: $\times$ or $\cdot$ or `%*%` in R) is perhaps the most mathematically complex of the basic matrix algebra operations we will cover. While its mechanics are slightly involved, its applications in social network analysis are profound. It allows us to calculate indirect connections (walks), identify cohesive subgroups (cliques), and find the number of common neighbors shared by pairs of nodes.
+
+We will begin by laying out the mathematical rules of matrix multiplication before exploring its extensive applications in network science.
+
+---
 
 ## Matrix Multiplication Rules {#sec-multrules}
 
-First, we will lay out the basic rules of matrix multiplication:
+First, we must understand the conditions under which two matrices can be multiplied:
 
-- You can always multiply two matrices *as long as the number of columns of the first matrix equals the rows of the second matrix*. To check whether this is the case, all you have to do is put the two matrices side by side and list their dimensions. 
+* **Conformability**: You can always multiply two matrices *as long as the number of columns of the first matrix equals the number of rows of the second matrix*. To check this, line up their dimensions side-by-side:
 
 $$
 \mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}
 $$
-- The two little "fives" in bold are called the **inner dimensions** of the two matrices. The little "three" on the left and the little "six" on the right are called the **outer dimensions**. So another way of stating the first rule of matrix multiplication is that the product of two matrices is defined *as long as their inner dimensions are equal* when you line them up from left to right.
 
-- When the number of columns of a matrix equals the number of rows of another matrix so that their inner dimensions match, we say that the two matrices are **conformable**. When this is not the case, we say the matrices are **non-conformable**.
-
-- Thus, another way of stating the first rule is that *only the product of conformable matrices is defined*. If the matrices are not conformable, then their product is not defined (e.g., there is no answer to the question of what we get if we multiply them!).
-
-- This means that, unlike numbers or the matrix dot product, where the order of the two things you are multiplying doesn't matter ($4 \times 3 = 3 \times 4$ or $\mathbf{A} \cdot \mathbf{B} = \mathbf{B} \cdot \mathbf{A}$), in matrix multiplication it *does* matter. Alas, for any two matrices $\mathbf{A}$ and $\mathbf{B}$,
+* **Inner Dimensions**: The two "fives" in bold are called the **inner dimensions**. The "three" on the left and the "six" on the right are called the **outer dimensions**. Matrix multiplication is defined *only if their inner dimensions are equal*. When they match, the matrices are **conformable**; otherwise, they are **non-conformable** and cannot be multiplied.
+* **Order Matters**: Unlike numbers, where the order of multiplication does not matter ($4 \times 3 = 3 \times 4$), matrix multiplication is **non-commutative**. For almost all matrices $\mathbf{A}$ and $\mathbf{B}$:
 
 $$
 \mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}
 $$
 
-- When you multiply a matrix times another matrix, the *resulting matrix will have the number of rows equal to the number of rows of the first matrix and the number of columns equal to the number of columns of the second matrix*. Thus:
+* **Resulting Dimensions**: The resulting product matrix will always have dimensions equal to the **outer dimensions** of the two multipliers:
 
 $$
 \mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}
-$$  {#eq-matmult0}
+$$ {#eq-matmult0}
 
-- @eq-matmult0 says that the product of a three-by-five matrix $\mathbf{A}$ (three rows and five columns) times a five-by-six matrix $\mathbf{B}$ (five rows and six columns) is a third matrix $\mathbf{C}$ with three rows and six columns. Another way to say this last rule is that the product of two conformable matrices has dimensions equal to their **outer dimensions**. 
+---
 
 ## Multiplying a Matrix Times its Transpose {#sec-mattrans}
-- By definition, the rows of a matrix are equal to the columns of its transpose, and vice versa. The product of a matrix times its transpose and the transpose times the original matrix is always defined, no matter what the dimensions of the original matrix are. Thus,
+
+By definition, the rows of a matrix are equal to the columns of its transpose, and vice-versa. Therefore, the product of a matrix times its transpose, and the transpose times the original matrix, is always defined, regardless of the original matrix's dimensions. Thus:
 
 $$
-\mathbf{A} \times \mathbf{A}^T = defined! 
+\mathbf{A} \times \mathbf{A}^T = \text{Always Defined!}
 $$
 
 $$
-\mathbf{A}^T \times \mathbf{A} = defined!
+\mathbf{A}^T \times \mathbf{A} = \text{Always Defined!}
 $$
 
-- When you multiply a matrix times its transpose, the *resulting matrix will be a square matrix with the number of rows and columns equal to the number of rows of the original matrix*. For instance, say matrix  $\mathbf{A}_{5 \times 3}$ is of dimensions $5 \times 3$ (like the matrix shown in @tbl-trans-1). Then its transpose $A^T_{3 \times 5}$ will be of dimensions $3 \times 5$ (like the matrix shown in @tbl-trans-2). That means the product of the matrix times its transpose will be:
+When you multiply a matrix of dimensions $m \times n$ by its transpose ($n \times m$), the resulting matrix will always be a **square matrix** of dimensions $m \times m$:
 
 $$
 \mathbf{A}_{5 \times 3} \times \mathbf{A}_{3 \times 5}^T = \mathbf{B}_{5 \times 5}
 $$ {#eq-matmult1}
 
-- @eq-matmult1 says that a five-by-three matrix multiplied by its transposed yields a square matrix $\mathbf{B}$ of dimensions five by five (a square matrix with five rows and five columns). In the same way,
+Conversely, reversing the order yields a square matrix of dimensions $n \times n$:
 
 $$
 \mathbf{A}_{3 \times 5}^T \times \mathbf{A}_{5 \times 3} = \mathbf{B}_{3 \times 3}
 $$ {#eq-matmult2}
 
-- @eq-matmult2 says that the transpose of a five-by-three matrix multiplied by the original yields a product matrix $\mathbf{B}$ of dimensions three by three (a square matrix with three rows and three columns).
+---
 
 ## Matrix Powers {#sec-pows}
-- You can multiply a matrix times itself to get **matrix powers** but only if the matrix is a **square matrix** (has the same number of rows and columns). Thus,
+
+You can multiply a matrix times itself to calculate **matrix powers** ($A^n$), but *only if* the matrix is a **square matrix** (having the same number of rows and columns). Thus:
 
 $$
-\mathbf{A}^2 = \mathbf{A} \times \mathbf{A} 
-$$
-$$
-\mathbf{A}^3 = \mathbf{A} \times \mathbf{A} \times \mathbf{A} 
-$$
-$$
-\mathbf{A}^4 = \mathbf{A} \times \mathbf{A} \times \mathbf{A} \times \mathbf{A}
-$$
-$$
-\mathbf{A}^n = \mathbf{A} \times \mathbf{A} \times \mathbf{A} \times \mathbf{A} \ldots 
+\mathbf{A}^2 = \mathbf{A} \times \mathbf{A}
 $$
 
-- For all square matrices $\mathbf{A}$ of any dimension. Since matrices used to represent social networks, like the **adjacency matrix**, are square matrices, that means that you can always find the **powers of an adjacency matrix**.
+$$
+\mathbf{A}^3 = \mathbf{A} \times \mathbf{A} \times \mathbf{A}
+$$
 
-- *When you multiply a square matrix times another square matrix of the same dimensions, the resulting matrix is of the same dimensions as the original two matrices*. Thus,
+$$
+\mathbf{A}^n = \mathbf{A} \times \mathbf{A} \times \dots \times \mathbf{A}
+$$
+
+Since the adjacency matrices used to represent social networks are always square matrices, we can always find the **powers of an adjacency matrix**.
+
+When you multiply a square matrix by another square matrix of the same dimensions, the resulting matrix is always of the same dimensions:
 
 $$
 \mathbf{A}_{5 \times 5} \times \mathbf{A}_{5 \times 5} = \mathbf{A}^2_{5 \times 5}
 $$
 
+---
+
+## Numerical Multiplication Examples {#sec-matmultex}
+
+Let's see some numeric examples of how matrix multiplication works. @tbl-trans displays an original matrix $\mathbf{A}$ and its transpose $\mathbf{A}^T$.
+
 ```{r}
 #| label: tbl-trans 
 #| tbl-cap: A matrix and its transpose
 #| tbl-subcap: 
-#|   - "Original Matrix."
-#|   - "Transposed Matrix."
+#|   - "Original Matrix (A)."
+#|   - "Transposed Matrix (A^T)."
 #| layout-ncol: 2
 
-A <- matrix(c(3, 7, 4, 5, 2, 4, 9, 6, 3, 5, 5, 3, 2, 4, 4), nrow = 5)
-B <- t(A)
+A_mat <- matrix(c(3, 7, 4, 5, 2, 4, 9, 6, 3, 5, 5, 3, 2, 4, 4), nrow = 5)
+B_mat <- t(A_mat)
 
-kbl(A, align = "c", format = "html") %>%
+kbl(A_mat, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
     column_spec(1:3, extra_css = "border-right: 0.75px solid;") %>% 
@@ -106,7 +114,7 @@ kbl(A, align = "c", format = "html") %>%
     column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
     row_spec(1, extra_css = "border-top: 0.75px solid;") 
 
-kbl(B, align = "c", format = "html") %>%
+kbl(B_mat, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
     column_spec(1:5, extra_css = "border-right: 0.75px solid;") %>% 
@@ -115,16 +123,15 @@ kbl(B, align = "c", format = "html") %>%
     row_spec(1, extra_css = "border-top: 0.75px solid;")
 ```
 
-## Matrix Multiplication Examples {#sec-matmultex}
-Now let's see some examples of how matrix multiplication works. @tbl-prod shows the result of multiplying the matrix shown in @tbl-trans-1 times its transpose, shown in @tbl-trans-2.
+@tbl-prod shows the result of multiplying the $5 \times 3$ matrix $\mathbf{A}$ times its $3 \times 5$ transpose $\mathbf{A}^T$:
 
 ```{r}
 #| label: tbl-prod 
-#| tbl-cap: Matrix resulting from multiplying a matrix times its transpose
+#| tbl-cap: Square matrix resulting from multiplying a matrix by its transpose (A x A^T).
 #| tbl-cap-location: bottom
 
-    B <- A %*% t(A)
-    kbl(B, align = "c", format = "html") %>%
+    B_prod <- A_mat %*% t(A_mat)
+    kbl(B_prod, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
     column_spec(1:5, extra_css = "border-right: 0.75px solid;") %>% 
@@ -133,31 +140,32 @@ Now let's see some examples of how matrix multiplication works. @tbl-prod shows 
     row_spec(1, extra_css = "border-top: 0.75px solid;") 
 ```
 
-Now, where the heck did these numbers come from? Don't panic. We'll break it down. First, let's begin with the number $50$ in cell corresponding to the *first row* and *first column* of @tbl-prod. To find out where this number came from, let's look at the *first row* of @tbl-trans-1, composed of the vector $\{3, 4, 5\}$, and the *first-column* of @tbl-trans-2, composed of the same vector $\{3, 4, 5\}$. Now, the number $50$ comes from the fact that we multiply each of the corresponding entries of the two vectors, and then add them up, as follows:
+Where do these numbers come from? Let's trace a couple of cells:
+1. **Cell (Row 1, Column 1) = 50**:
+   We multiply the elements of the *first row* of $\mathbf{A}$ ($\{3, 4, 5\}$) by the corresponding elements of the *first column* of $\mathbf{A}^T$ ($\{3, 4, 5\}$), and sum them up:
+   
+   $$
+   (3 \times 3) + (4 \times 4) + (5 \times 5) = 9 + 16 + 25 = 50
+   $$
 
-$$
-(3 \times 3) + (4 \times 4) + (5 \times 5) = `r 3*3` + `r 4*4` + `r 5*5` = `r 3*3 + 4*4 + 5*5`
-$$
+2. **Cell (Row 4, Column 2) = 74**:
+   We multiply the elements of the *fourth row* of $\mathbf{A}$ ($\{5, 3, 4\}$) by the corresponding elements of the *second column* of $\mathbf{A}^T$ ($\{7, 9, 3\}$), and sum them:
+   
+   $$
+   (5 \times 7) + (3 \times 9) + (4 \times 3) = 35 + 27 + 12 = 74
+   $$
 
-Neat! Now let's see where the number $74$ in the *fourth row* and *second column* of @tbl-prod came from. For that we look at the entries in the *fourth row* of @tbl-trans-1, composed of the vector $\{5, 3, 4\}$ and the *second column* of @tbl-trans-2 composed of the vector $\{7, 9, 3\}$. Like before, we take the first number of the first vector and multiply it by the first number of the second vector, the second number of the first vector and multiply it by the second number of the second vector, and the third number of the first vector and multiply it by the third number of the second vector, and add up the results:
+We repeat this process for all 25 cells to obtain the complete product matrix. Note that the resulting product matrix $\mathbf{B}$ is **symmetric** ($b_{ij} = b_{ji}$).
 
-
-$$
-(5 \times 7) + (3 \times 9) + (4 \times 3) = `r 5*7` + `r 3*9` + `r 4*3` = `r 5*7 + 3*9 + 4*3`
-$$
-And we keep on going like this to get each of the twenty-five numbers in @tbl-prod (there are twenty-five numbers because @tbl-prod has five rows and five columns, and five times five equals twenty-five). In general terms, the number in the $i^{th}$ row and $j^{th}$ column of @tbl-prod is equal to the sum of the products of the numbers in the $i^{th}$ row of the @tbl-trans-1 and the $j^{th}$ column of @tbl-trans-2. 
-
-Note that the resulting product matrix shown in @tbl-prod is **symmetric**. The same numbers that appear in the upper-triangle also appear in the lower triangle, such that $b_{ij} = b_{ji}$. So once you know the numbers in one of the triangles, you can fill up the numbers in the other one without having to do all the multiplying and adding up!
-
-Now, let's multiply the matrix in @tbl-trans-2 times the matrix in @tbl-trans-1. As the rules of matrix multiplication show, this yields a $3 \times 3$ matrix because @tbl-trans-2 has three rows and @tbl-trans-1 has three columns. This is shown in @tbl-prod2.
+Reversing the order and multiplying $\mathbf{A}^T \times \mathbf{A}$ yields a smaller $3 \times 3$ square matrix, as shown in @tbl-prod2:
 
 ```{r}
 #| label: tbl-prod2
-#| tbl-cap: Matrix resulting from multiplying a matrix times its transpose
+#| tbl-cap: Square matrix resulting from multiplying the transpose by the original matrix (A^T x A).
 #| tbl-cap-location: bottom
 
-    B <- t(A) %*% A
-    kbl(B, align = "c", format = "html") %>%
+    B_prod2 <- t(A_mat) %*% A_mat
+    kbl(B_prod2, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
     column_spec(1:3, extra_css = "border-right: 0.75px solid;") %>% 
@@ -166,365 +174,363 @@ Now, let's multiply the matrix in @tbl-trans-2 times the matrix in @tbl-trans-1.
     row_spec(1, extra_css = "border-top: 0.75px solid;") 
 ```
 
-Like before, if we want to figure out where the number $72$ in the third row and first column of @tbl-prod2 came from, we go to the first row of @tbl-trans-2 composed of the vector $\{5, 3, 2, 4, 4\}$ and the first column of @tbl-trans-1, composed of the vector $\{3, 7, 4, 5, 2\}$ match up each number in terms of order, multiplying them and add up the result:
+To find the cell at (Row 3, Column 1) = 72, we multiply the *third row* of $\mathbf{A}^T$ ($\{5, 3, 2, 4, 4\}$) by the *first column* of $\mathbf{A}$ ($\{3, 7, 4, 5, 2\}$):
 
 $$
-(5 \times 3) + (3 \times 7) + (2 \times 4) + (4 \times 5) + (4 \times 2) = 
+(5 \times 3) + (3 \times 7) + (2 \times 4) + (4 \times 5) + (4 \times 2) = 15 + 21 + 8 + 20 + 8 = 72
 $$
 
-$$
-`r 5*3` + `r 3*7` + `r 2*4` + `r 4*5` + `r 4*2` = `r 5*3 + 3*7 + 2*4 + 4*5 + 4*2`
-$$
+---
+
+## Matrix Powers and Indirect Connections in Social Networks
+
+Taking the powers of an adjacency matrix was one of the earliest applications of formal social network analysis, co-discovered by Duncan Luce and Albert Perry [-@luce49] and Leon Festinger [-@festinger49]. 
+
+When we calculate the **powers of an adjacency matrix**, the resulting entries have an intuitive and powerful interpretation: they count the exact number of **indirect connections (walks)** of a given length between each pair of people.
+
+Let's explore this using the 12-person "hanging out" network shown in @fig-rel-1. @tbl-pows shows the original binary adjacency matrix $\mathbf{A}$, its square $\mathbf{A}^2$, and its cube $\mathbf{A}^3$.
 
 ```{r}
-#| label: tbl-pow
-#| tbl-cap: Powers of a matrix. 
+#| label: tbl-pows 
+#| tbl-cap: An adjacency matrix and its powers.
 #| tbl-subcap: 
-#|   - "A matrix."
-#|   - "Matrix squared."
-#|   - "Matrix cubed."
+#|   - Original adjacency matrix (A).
+#|   - Adjacency matrix squared (A^2).
+#|   - Adjacency matrix cubed (A^3).
+#| layout-ncol: 1
 #| tbl-cap-location: bottom
-#| layout-ncol: 3
 
-    A <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0), nrow = 4, byrow = TRUE)
-    A2 <- A %*% A
-    A3 <- A2 %*% A
-    
-    kbl(A, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
-    column_spec(1:4, extra_css = "border-right: 0.75px solid;") %>% 
-    row_spec(1:4, extra_css = "border-bottom: 0.75px solid;") %>%
-    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
-    row_spec(1, extra_css = "border-top: 0.75px solid;") 
-    
-    kbl(A2, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
-    column_spec(1:4, extra_css = "border-right: 0.75px solid;") %>% 
-    row_spec(1:4, extra_css = "border-bottom: 0.75px solid;") %>%
-    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
-    row_spec(1, extra_css = "border-top: 0.75px solid;") 
-        
-    kbl(A3, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>% 
-    column_spec(1:4, extra_css = "border-right: 0.75px solid;") %>% 
-    row_spec(1:4, extra_css = "border-bottom: 0.75px solid;") %>%
-    column_spec(1, extra_css = "border-left: 0.75px solid;") %>% 
-    row_spec(1, extra_css = "border-top: 0.75px solid;") 
+    set.seed(859)
+
+    gr1 <- play_islands(3, 4, m = 1, p_within = 0.8) %>% 
+     activate(nodes) %>% 
+     mutate(name = toupper(letters[1:12]))
+     l <- ggraph(gr1, layout = 'tree')
+     l <- as.matrix(l$data[, 1:2])
+
+    A1 <- as.matrix(as_adjacency_matrix(gr1))
+    A2 <- A1 %*% A1
+    A3 <- A2 %*% A1
+
+     kbl(A1, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     
+     kbl(A2, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     
+     kbl(A3, format = "html", align = "c")  %>% 
+     column_spec(1, bold = TRUE) %>% 
+     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-Matrix powers work the same as regular matrix multiplication, except that we are working on just one matrix not two. So for instance, the number $2$ in the first row and third column of @tbl-pow-2 comes from the numbers in the first row of @tbl-pow-1 ($\{0, 1, 0, 1\}$) and the numbers in the third column of @tbl-pow-1 ($\{0, 1, 1, 1\}$). We line them up, multiplying them, and add them:
+### The Squared Adjacency Matrix ($\mathbf{A}^2$)
+What do the entries in @tbl-pows-2 mean?
 
-$$
-(0 \times 1) + (1 \times 1) + (0 \times 1) + (1 \times 1) = 0 + 1 + 0 + 1 = 2
-$$
-Since we are working with a binary matrix, the product of each of the cell entries will be either a zero (when at least one of the entries is zero) or a one (when both entries are one). 
+* **Off-Diagonal Entries**: The value in cell $a^2_{ij}$ tells us the exact number of **walks of length 2** between node $i$ and node $j$ (see @sec-indirect).
+  For example, $a^2_{AB} = 2$. Looking at @fig-rel-1, we see that $A$ can reach $B$ via exactly two walks of length 2: $\{AC, CB\}$ and $\{AD, DB\}$. Similarly, $a^2_{AC} = 1$, representing the walk $\{AD, DC\}$.
+* **Diagonal Entries**: The diagonal entry $a^2_{ii}$ counts the number of walks of length 2 that begin and end with node $i$. Since a walk of length 2 that goes from $i \to j \to i$ in an undirected graph simply represents traversing an edge and returning, the diagonal of $\mathbf{A}^2$ is equal to the **degree** of each node!
 
-To get the cubed entries in @tbl-pow-3, we take @tbl-pow-2 as the first matrix and @tbl-pow-1 as the second, then do matrix multiplication. Thus, to get the number $4$ in the third row and fourth column of @tbl-pow-3, we take the numbers in the third row of @tbl-pow-2 $\{2, 1, 2, 2\}$ and the numbers in the fourth column of @tbl-pow-1 $\{1, 0, 1, 0\}$, line them up, multiply them, and add them:
+### The Cubed Adjacency Matrix ($\mathbf{A}^3$)
+What do the entries in @tbl-pows-3 mean?
 
-$$
-(2 \times 1) + (1 \times 0) + (2 \times 1) + (1 \times 0) = 2 + 0 + 2 + 0 = 4
-$$
+* **Off-Diagonal Entries**: Tell us the exact number of **walks of length 3** linking each pair of nodes. For instance, $a^3_{HF} = 1$. Looking at the graph, this corresponds to the walk $\{HG, GE, EF\}$.
+* **Diagonal Entries**: Count the number of walks of length 3 that begin and end at the same node (which is a **cycle of length 3**). 
+  A cycle of length 3 is structurally equivalent to a **clique of size 3 (a triangle)**! The diagonal entry $a^3_{ii}$ counts exactly *twice* the number of triangles node $i$ belongs to (once going clockwise, and once counterclockwise).
+  Thus, dividing the diagonal entries of $\mathbf{A}^3$ by two tells us exactly **how many triangles (cliques of size 3) each node belongs to**. For instance, node $K$ belongs to no triangles, so $a^3_{KK} = 0$.
 
-Pretty easy!
+```{r}
+#| label: fig-pows
+#| fig-cap: Graph with weighted edges representing the number of indirect connections of length three (walks) between nodes.
+#| fig-cap-location: bottom
+#| fig-width: 10
+#| fig-height: 10
+
+    m <- max(A3)
+   gr_weighted <- graph.adjacency(A3, mode="undirected", weighted=TRUE) %>% 
+    as_tbl_graph() 
+  
+     p_weighted <- ggraph(gr_weighted, layout = l) +
+       geom_edge_link(aes(color = weight/m, width = weight/m)) +
+       geom_node_point(color = "tan2", size = 28) +
+       geom_node_text(aes(label = name), size = 14, color = "white") +
+       scale_edge_color_steps(low = "grey95", high = "steelblue4") +
+       theme_graph() +
+       theme(legend.position = "none")
+     p_weighted
+```
+
+@fig-pows redraws our hangout network, but scales the edge widths and color intensity based on the entries in $\mathbf{A}^3$. This immediately highlights cohesive **cliques** (like the subgroups $\{A, B, C, D\}$ and $\{E, F, G, H\}$) which are densely bound together by extensive indirect connections.
+
+---
 
 ## Matrix Multiplication of Vectors {#sec-matvecs}
-Recall from @sec-degset that a **vector** is a sequence of numbers of a given length. So, for instance, the vector $\mathbf{a} = \{2, 4, 7, 2, 4\}$ is a vector of length five. 
 
-Well, and here comes the big reveal, it turns out that another way to think of a vector is as a special case of a matrix. That is, a matrix with *one row*, and as *many columns as the length* of the vector! This is called a **row vector**. So the row vector $\mathbf{a}$ can be thought of as a matrix of dimensions $1 \times 5$ (one row and five columns) or $\mathbf{a}_{1 \times 5}$. 
+Recall that a **vector** is a sequence of numbers of a given length. A vector is actually just a special case of a matrix:
+* **Row Vector**: A matrix with *one row* and as many columns as the vector's length ($\mathbf{a}_{1 \times n}$).
+* **Column Vector**: A matrix with *one column* and as many rows as the vector's length ($\mathbf{a}^T_{n \times 1}$).
 
-In matrix form:
+An example of a row vector $\mathbf{a} = \{2, 4, 7, 2, 4\}$ of dimensions $1 \times 5$ is shown in @tbl-vecmat, and its $5 \times 1$ transpose column vector $\mathbf{a}^T$ is shown in @tbl-transvec.
 
 ```{r}
 #| label: tbl-vecmat
-#| tbl-cap: Matrix resulting from multiplying a matrix times its transpose
+#| tbl-cap: A row vector represented as a 1 X 5 matrix.
 #| tbl-cap-location: bottom
 
-    a <- matrix(c(2, 4, 7, 2, 4), nrow = 1)
-    kbl(a, align = "c", format = "html") %>%
+    a_row <- matrix(c(2, 4, 7, 2, 4), nrow = 1)
+    kbl(a_row, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-Since vectors are matrices, we can perform the same type of matrix operations on them as we did with matrices. For instance, we can compute the *transpose of a vector*. In the case of $\mathbf{a}$, the transpose $\mathbf{a}^T$ is:
-
 ```{r}
 #| label: tbl-transvec
-#| tbl-cap: Matrix resulting from multiplying a matrix times its transpose
+#| tbl-cap: A column vector represented as a 5 X 1 matrix (the transpose of the row vector).
 #| tbl-cap-location: bottom
 
-    a <- matrix(c(2, 4, 7, 2, 4), nrow = 5)
-    kbl(a, align = "c", format = "html") %>%
+    a_col <- matrix(c(2, 4, 7, 2, 4), nrow = 5)
+    kbl(a_col, align = "c", format = "html") %>%
     kable_styling(full_width = FALSE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-The transpose of a row vector is called (you may have guessed) a **column vector**. The column vector in @tbl-transvec is a matrix with five rows and one column. 
-
-This also means that the same rules of matrix multiplication apply. For instance, we can always multiply a row vector times a column vector, because it is the equivalent of multiplying a matrix times its transpose, and we have already seen in @sec-mattrans that this can always be done:
+### Vector Multiplication Rules
+* **Row Vector times Column Vector**: Since this matches a matrix times its transpose, the product is always defined. The output is always a $1 \times 1$ "matrix," which is a single number (a **scalar**):
 
 $$
 \mathbf{a}_{1 \times 5} \times \mathbf{a}^T_{5 \times 1} = b_{1 \times 1}
 $$ {#eq-vecmult1}
 
-@eq-vecmult1 says that the product of the $1 \times 5$ row vector $\mathbf{a}$ times a $5 \times 1$ column vector $\mathbf{a}^T$ is a $1 \times 1$ "matrix" otherwise known as a **scalar** (that is, a regular old number). We've already seen examples of this, because in regular matrix multiplication, each cell of the product matrix is a scalar obtained from multiplying the corresponding terms taken from a row of the first matrix (which is a row vector) times those of the column of the second matrix (which is a column vector). 
-
-So in this case, this would be:
-
 $$
-(2 \times 2) + (4 \times 4) + (7 \times 7) + (2 \times 2) + (4 \times 4) = 
+(2 \times 2) + (4 \times 4) + (7 \times 7) + (2 \times 2) + (4 \times 4) = 4 + 16 + 49 + 4 + 16 = 89
 $$
 
-$$
-4 + 16 + 49 + 4 + 16 = `r 4 + 16 + 49 + 4 + 16`
-$$
-
-- The first rule of vector matrix multiplication is that you can always multiply a row vector times a column vector (even when their entries are not the same) as long as they are the same length (e.g., the number of columns of the row vector equals the number of rows of the column vector). 
-
-- The second rule of vector matrix multiplication is that when you multiply a row vector times another column vector, the result is always a scalar (a single number).
-
-Now, notice that if we change the order and multiply the transpose of a vector times the original? This should be allowed because it conforms to the rules that we have already discussed:
+* **Column Vector times Row Vector**: Reversing the order multiplies a $5 \times 1$ column vector by a $1 \times 5$ row vector, yielding a $5 \times 5$ square matrix (shown in @tbl-transvec2):
 
 $$
-\mathbf{a}^T_{5 \times 1} \times \mathbf{a}_{1 \times 5} = B_{5 \times 5}
-$$ {#eq-vecmult1}
-
-This matrix multiplication is defined because the inner dimensions of the two matrices (the column and row vectors) are the same (one). But note that, according to the rules of matrix multiplication, when you multiply the transpose of a vector times the original, the result is a **square matrix**, with dimensions $n \times n$ where $n$ is the length of the original row vector (the number of columns). In our example if the original vector is $\mathbf{a} = \{2, 4, 7, 2, 4\}$, then $\mathbf{a}^T \times \mathbf{a}$ is equal to the matrix shown in @tbl-transvec2.
+\mathbf{a}^T_{5 \times 1} \times \mathbf{a}_{1 \times 5} = \mathbf{B}_{5 \times 5}
+$$ {#eq-vecmult2}
 
 ```{r}
 #| label: tbl-transvec2
-#| tbl-cap: Matrix resulting from multiplying a matrix times its transpose
+#| tbl-cap: Square matrix resulting from multiplying a column vector by a row vector (a^T x a).
 #| tbl-cap-location: bottom
 
-    a <- matrix(c(2, 4, 7, 2, 4), ncol = 5)
-    B <- t(a) %*% a
-    kbl(B, align = "c", format = "html") %>%
+    a_vec <- matrix(c(2, 4, 7, 2, 4), ncol = 5)
+    B_vec_prod <- t(a_vec) %*% a_vec
+    kbl(B_vec_prod, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-- So, the third and final rule of vector matrix multiplication is that when you multiply a column vector times a row vector of the same length, the result is a square matrix of row and column dimensions equal to the length of the original vectors. 
+---
 
-## Multiplying a Vector Times A Matrix (and Vice Versa)
-Since vectors are just matrices, it means that we can always multiply a vector times a matrix (and a matrix times a vector), as long as we follow the matrix multiplication rules laid out in @sec-multrules. 
+## Multiplying a Vector Times a Matrix (and Vice Versa)
 
-### Row Vector Times Matrix
-For instance, take the row vector $\mathbf{b} = \{4, 9, 3, 5\}$ and the binary matrix $\mathbf{A}$ shown in @tbl-pow-1. Because the row vector $\mathbf{b}$ is of dimensions $1 \times 4$ and the matrix $\mathbf{A}$ is of dimensions $4 \times 4$, it is possible to multiply the vector times the matrix as follows:
+We can multiply a vector times a matrix (and a matrix times a vector) following the standard rules of conformability:
+
+### 1. Row Vector Times Matrix
+Multiplying a $1 \times n$ row vector by an $n \times m$ matrix yields another **row vector** of dimensions $1 \times m$:
 
 $$
 \mathbf{b}_{1 \times 4} \times \mathbf{A}_{4 \times 4} = \mathbf{c}_{1 \times 4}
 $$ {#eq-matvec}
 
-@eq-matvec says that the product of a $1 \times 4$ row vector times a $4 \times 4$ square matrix is another **row vector** of dimensions equal to the original row vector. The result for this example is shown in @tbl-vecmat1.
-
 ```{r}
 #| label: tbl-vecmat1
-#| tbl-cap: Row vector resulting from multiplying a row vector times a square matrix
+#| tbl-cap: Row vector resulting from multiplying a row vector by a square matrix
 #| tbl-cap-location: bottom
 #| tbl-subcap: 
-#|   - 1 X 4 row vector
-#|   - 4 X 4 square binary matrix
-#|   - 1 X 4 product vector
+#|   - 1 X 4 row vector (b)
+#|   - 4 X 4 square matrix (A)
+#|   - 1 X 4 product row vector (c)
 
-    a <- matrix(c(4, 9, 3, 5), ncol = 4)
-    A <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0), nrow = 4, byrow = TRUE)
-    c <- a %*% A
+    a_b <- matrix(c(4, 9, 3, 5), ncol = 4)
+    A_sq <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0), nrow = 4, byrow = TRUE)
+    c_prod <- a_b %*% A_sq
     
-    kbl(a, align = "c", format = "html") %>%
+    kbl(a_b, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
     
-    kbl(A, align = "c", format = "html") %>%
+    kbl(A_sq, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 
-    kbl(c, align = "c", format = "html") %>%
+    kbl(c_prod, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-Of course, it is also possible to multiply a row vector times a **rectangular** matrix (where the number of rows is not necessarily equal to the number of columns), as long as the number of rows of the rectangular matrix equals the length of the original row vector. For instance, take a row vector $\mathbf{a}_{1 \times 5}$ shown in @tbl-vecmat2-1 and a matrix $B_{5 \times 3}$. Its product would be given by:
-
-$$
-\mathbf{a}_{1 \times 5} \times \mathbf{B}_{5 \times 3} = \mathbf{c}_{1 \times 3}
-$$ {#eq-matvec2}
-
-@eq-matvec2 says that the product of a row vector of dimensions $1 \times 5$ and a matrix of dimensions $5 \times 3$ is another row vector $\mathbf{c}$ of dimensions ($1 \times 3$). A numerical example corresponding to this situation is shown in @tbl-vecmat2.
-
-```{r}
-#| label: tbl-vecmat2
-#| tbl-cap: Row vector resulting from multiplying a row vector times a rectangular matrix.
-#| tbl-cap-location: bottom
-#| tbl-subcap: 
-#|   - 1 X 5 row vector
-#|   - 5 x 3 matrix
-#|   - 1 X 3 product vector
-
-    a <- matrix(c(2, 4, 7, 2, 4), ncol = 5)
-    B <- matrix(round(runif(15) * 20, 0), nrow = 5)
-    c <- a %*% B
-    kbl(a, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-    
-    kbl(B, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-
-    kbl(c, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
-
-To get the "179" entry in row one and column one of @tbl-vecmat2, we take the entries of the row vector shown in @tbl-vecmat2-1 and multiply them by the corresponding entries in the first column of the matrix shown in @tbl-vecmat2-2 and add up the results:
-
-$$
-(2 \times 2) + (4 \times 5) + (7 \times 11) + (2 \times 15) + (4 \times 12) =
-$$
-
-$$
-4 + 20 + 77 + 30 + 48 = `r 4 + 20 + 77 + 30 + 48`
-$$
-
-And so on for the other two entries in @tbl-vecmat2-3. So the main rule of multiplying a row vector times a matrix with a number of rows equal to the length of the row vector is that *the result will always be another row vector of length equal to the number of columns of the matrix*. 
-
-### Matrix Times Column Vector
-In the same way, we can always multiply a matrix times a column vector, as long as the number of *columns* of the matrix is equal to the length of the column vector. For instance, take the binary square matrix $A_{5 \times 5}$ shown in @tbl-vecmat3-1 and the column vector $\mathbf{b}_{5 \times 1}$ shown in @tbl-vecmat2-2. Their product $\mathbf{c}$ would be given by:
+### 2. Matrix Times Column Vector
+Multiplying an $m \times n$ matrix by an $n \times 1$ column vector yields another **column vector** of dimensions $m \times 1$:
 
 $$
 \mathbf{A}_{5 \times 5} \times \mathbf{b}_{5 \times 1} = \mathbf{c}_{5 \times 1}
 $$ {#eq-matvec3}
 
-@eq-matvec3 says that the product of a matrix of dimensions $5 \times 5$ and a column vector of dimensions $5 \times 1$ is another column vector $\mathbf{c}$ of dimensions equal to the original column vector ($5 \times 1$). A numerical example of this situation is shown in @tbl-vecmat3.
+---
 
+## Matrix Times the "All Ones" Vector: Summing Row and Columns {#sec-allones}
 
-```{r}
-#| label: tbl-vecmat3
-#| tbl-cap: Column vector resulting from multiplying a square matrix times a column vector
-#| tbl-cap-location: bottom
-#| tbl-subcap: 
-#|   - 5 x 5 square matrix
-#|   - 5 x 1 column vector
-#|   - 5 X 1 product vector
-#| layout-ncol: 3
+In matrix algebra, the **all ones vector** (symbol: $\mathbf{1}$) is a special vector consisting entirely of ones. It has an incredibly useful property in social network analysis: **it acts as a summation tool**.
 
-    a <- matrix(c(2, 4, 7, 2, 4), nrow = 5)
-    B <- matrix(round(runif(25) * 20, 0), nrow = 5)
-    c <- B %*% a
-    
-    kbl(B, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-    
-    kbl(a, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-
-    kbl(c, align = "c", format = "html") %>%
-    kable_styling(full_width = TRUE,
-                  bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-```
-
-### Matrix Times the All Ones Vector {#sec-allones}
-In matrix multiplication, there is a special row and column vector called the **all ones vector**. As you may have guessed, this is a vector of *all ones*, of some length $n$. For instance and all ones row vector of length five is $\mathbf{1}_{1 \times 5} = \{1, 1, 1, 1, 1\}$ (the symbol for the all ones vector is a boldface "1"). We can also get the transpose of this all ones row vector to get the all ones column vector $\mathbf{1}^T$. 
-
-Why do we care about vectors full of ones? Well, it turns out that all one-row and column vectors have a neat property when we multiply by matrices. We already know, from the rules of vector matrix multiplication reviewed earlier, that the product of a row vector times a square matrix is always a row vector of the same length as the original, and the product of a square matrix times a column vector is always a column vector of the same length as the original. 
-
-Let's say we a matrix $\mathbf{A}$ of dimensions $5 \times 5$, and we multiplied the all ones row vector of length five times this matrix, which would result in the row vector $\mathbf{b}$. This would be given by the formula:
+### 1. Row Vector of All Ones ($\mathbf{1}_{1 \times n}$)
+If you multiply the $1 \times n$ row vector of all ones by any square adjacency matrix $\mathbf{A}$, the product is a row vector containing the **column sums** of the matrix (equivalent to the **indegrees** of each node in a directed graph!):
 
 $$
-\mathbf{1}_{1 \times 5} \times \mathbf{A}_{5 \times 5} = b_{1 \times 5}
+\mathbf{1}_{1 \times 5} \times \mathbf{A}_{5 \times 5} = \mathbf{b}_{1 \times 5}
 $$ {#eq-allones1}
-
-A numerical example of the situation depicted in @eq-allones1 is shown in @tbl-allones1. 
 
 ```{r}
 #| label: tbl-allones1
-#| tbl-cap: Row vector resulting from multiplying the all ones row vector times a square binary matrix
+#| tbl-cap: Row vector resulting from multiplying the all ones row vector by a square adjacency matrix.
 #| tbl-cap-location: bottom
 #| tbl-subcap: 
 #|   - 1 X 5 all ones row vector
 #|   - 5 X 5 square binary matrix
-#|   - 1 X 5 product row vector
+#|   - 1 X 5 product row vector (Column Sums / Indegrees)
 
-    a <- matrix(c(1, 1, 1, 1, 1), ncol = 5)
-    A <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1), nrow = 5, byrow = TRUE)
-    c <- a %*% A
+    a_ones_row <- matrix(c(1, 1, 1, 1, 1), ncol = 5)
+    A_ones <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0), nrow = 5, byrow = TRUE)
+    c_ones_colsums <- a_ones_row %*% A_ones
     
-    kbl(a, align = "c", format = "html") %>%
+    kbl(a_ones_row, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
     
-    kbl(A, align = "c", format = "html") %>%
+    kbl(A_ones, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 
-    kbl(c, align = "c", format = "html") %>%
+    kbl(c_ones_colsums, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-If you look at the resulting row vector in @tbl-allones1-3, we can see that the result of multiplying the all ones row vector times a matrix is a vector that contains the **column sums** of the matrix entries! So the "2" in position 1 of @tbl-allones1-3 comes from adding up the numbers in the first column of the matrix, the "1" in position 2 of @tbl-allones1-3 comes from adding the numbers in the second column, and so forth. 
+### 2. Column Vector of All Ones ($\mathbf{1}^T_{n \times 1}$)
+If you multiply a square adjacency matrix $\mathbf{A}$ by the $n \times 1$ column vector of all ones, the product is a column vector containing the **row sums** of the matrix (equivalent to the **outdegrees** of each node!):
+
+$$
+\mathbf{A}_{5 \times 5} \times \mathbf{1}^T_{5 \times 1} = \mathbf{b}_{5 \times 1}
+$$ {#eq-allones2}
 
 ```{r}
 #| label: tbl-allones2
-#| tbl-cap: Row vector resulting from multiplying the all ones row vector times a square binary matrix
+#| tbl-cap: Column vector resulting from multiplying a square matrix by the all ones column vector.
 #| tbl-cap-location: bottom
 #| tbl-subcap: 
 #|   - 5 X 5 square binary matrix
 #|   - 5 X 1 all ones column vector 
-#|   - 5 X 1 product column vector
+#|   - 5 X 1 product column vector (Row Sums / Outdegrees)
 #| layout-ncol: 3
 
-    a <- matrix(c(1, 1, 1, 1, 1), nrow = 5)
-    A <- matrix(c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1), nrow = 5, byrow = TRUE)
-    c <- A %*% a
+    a_ones_col <- matrix(c(1, 1, 1, 1, 1), nrow = 5)
+    c_ones_rowsums <- A_ones %*% a_ones_col
     
-    kbl(A, align = "c", format = "html") %>%
+    kbl(A_ones, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
     
-    kbl(a, align = "c", format = "html") %>%
+    kbl(a_ones_col, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 
-    kbl(c, align = "c", format = "html") %>%
+    kbl(c_ones_rowsums, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-In the same way, if we multiply the same matrix by the all-ones column vector, we get the results shown in @tbl-allones2. We can see that the result of multiplying a matrix times the all ones column vector is another column vector that contains the **row sums** of the original matrix! So, the "2" in the first position of the column vector comes from adding the numbers in the first row of the matrix, the "3" comes from adding the numbers in the second row, and so forth. 
+Thus, multiplying by the all-ones vector is the formal algebraic way to sum rows and columns!
 
+---
 
 ## The Identity Matrix {#sec-identitymat}
-The last "interesting" matrix we will cover is called the **identity** matrix. This is a square matrix, usually written using the symbol $\mathbf{I}$ of dimensions $n \times n$. This matrix will have "1" in *every diagonal cell*, and "0" in *every off-diagonal cell*. For instance, a $5 \times 5$ identity matrix is shown in @tbl-idmat. 
+
+The **identity matrix** (symbol: $\mathbf{I}$) is a square matrix of dimensions $n \times n$ with "1" in *every diagonal cell*, and "0" in *every off-diagonal cell*.
 
 ```{r}
 #| label: tbl-idmat
-#| tbl-cap: A 5 X 5 Identity Matrix. 
+#| tbl-cap: A 5 X 5 Identity Matrix (I). 
 #| tbl-cap-location: bottom
 
-    A <- diag(5)
-    kbl(A, align = "c", format = "html") %>%
+    A_id <- diag(5)
+    kbl(A_id, align = "c", format = "html") %>%
     kable_styling(full_width = TRUE,
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-The interesting thing about this matrix is that when you multiply it by another square matrix of the same dimensions, the result is always the original matrix! So it plays the role that the number "1" plays in regular multiplication in number theory, in matrix algebra. This means that, for any square matrix $\mathbf{A}$:
+In matrix algebra, $\mathbf{I}$ serves as the multiplicative identity (equivalent to the number "1" in regular arithmetic). Multiplying any conformable square matrix $\mathbf{A}$ by the identity matrix yields the original matrix unchanged:
 
 $$
 \mathbf{A} \times \mathbf{I} = \mathbf{A}
 $$ {#eq-idmat1}
 
-And also, 
-
 $$
 \mathbf{I} \times \mathbf{A} = \mathbf{A}
-$$  {#eq-idmat2}
+$$ {#eq-idmat2}
 
-Neat!
+---
+
+## Matrix Multiplication and Common Neighbors {#sec-commonneighbors}
+
+What happens when we multiply a network's adjacency matrix ($\mathbf{A}$) by its transpose ($\mathbf{A}^T$)?
+
+$$
+\mathbf{A} \times \mathbf{A}^T = \mathbf{B}
+$$
+
+Let's calculate this product for our running 12-person hangout network. The resulting matrix $\mathbf{B}$ is shown in @tbl-comm:
+
+```{r}
+#| label: tbl-comm 
+#| tbl-cap: Adjacency matrix multiplied by its transpose (A x A^T).
+#| tbl-cap-location: bottom
+
+    A_orig <- as.matrix(as_adjacency_matrix(gr1))
+    A_comm_prod <- A_orig %*% t(A_orig)
+    kbl(A_comm_prod, format = "html", align = "c")  %>% 
+    column_spec(1, bold = TRUE) %>% 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+This resulting matrix $\mathbf{B}$ contains two incredibly valuable pieces of network information:
+
+1. **Diagonal Entries ($b_{ii}$)**: The diagonal entries count the **degree** of each node. This is because multiplying row $i$ by column $i$ (which is identical in a symmetric matrix) squares each binary entry and sums them, giving the total number of neighbors node $i$ has.
+2. **Off-Diagonal Entries ($b_{ij}$)**: The off-diagonal entries count **the exact number of common neighbors shared by node $i$ and node $j$**!
+
+Let's trace why this happens. Look at $b_{AC} = 1$ (Row A, Column C). This entry is obtained by multiplying the first row of the adjacency matrix (representing $A$'s connections) by the third column of the adjacency matrix (representing $C$'s connections), as shown in @tbl-commex:
+
+```{r}
+#| label: tbl-commex 
+#| tbl-cap: Adjacency vector multiplication tracing common neighbors
+#| tbl-subcap: 
+#|   - Node A's connection vector (row 1)
+#|   - Node C's connection vector (column 3)
+#|   - Cell-by-cell product (A x C)
+#| tbl-cap-location: bottom
+
+    vec_a <- t(A_orig[1, ])
+    vec_c <- t(A_orig[, 3])
+    vec_prod <- vec_a * vec_c
+
+     kbl(vec_a, format = "html", align = "c")  %>% 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+     
+    kbl(vec_c, format = "html", align = "c")  %>% 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+    
+    kbl(vec_prod, format = "html", align = "c")  %>% 
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+The cell-by-cell product vector shown in @tbl-commex-3 contains a "1" *only* in the position corresponding to node $D$. Because both $A$ and $C$ are connected to $D$, the product of their ties to $D$ is $1 \times 1 = 1$. For any node they do not both share as a neighbor, the product is 0.
+
+Summing up this product vector yields $1$, confirming that **node $D$ is the single, shared common neighbor between $A$ and $C$**. 
+
+Thus, multiplying an adjacency matrix by its transpose is the formal algebraic way to map out all **common neighbors** in a network!
+
+---
 
 ## References {.unnumbered}
-
