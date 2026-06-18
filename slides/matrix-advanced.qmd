@@ -1,0 +1,354 @@
+---
+title: "Advanced Network Matrices"
+subtitle: "Beyond the Adjacency Matrix"
+format:
+  revealjs:
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+
+# 1. 6-node directed graph for reachability / connectedness
+gr_reach <- make_graph(c("B","A", "A","C", "C","A", "C","E", "E","F", "F","E", "E","D", "F","D"), directed=TRUE) %>%
+  as_tbl_graph() %>%
+  mutate(name = toupper(name))
+
+# 2. 9-node undirected graph for geodesic distance and neighborhood overlap
+gr_undir <- create_empty(9, directed = FALSE) %>% 
+  bind_edges(data.frame(from = 1, to = 2:5)) %>% 
+  bind_edges(data.frame(from = 2, to = 3:4)) %>% 
+  bind_edges(data.frame(from = 3, to = 4:5)) %>% 
+  bind_edges(data.frame(from = 4, to = 5:6)) %>% 
+  bind_edges(data.frame(from = 6, to = c(7:9))) %>%
+  bind_edges(data.frame(from = 7, to = c(8:9))) %>%
+  bind_edges(data.frame(from = 8, to = c(9))) %>%
+  mutate(name = toupper(letters[1:9]))
+```
+
+# Part 1: The Reachability Matrix & Connectedness
+
+---
+
+## What is Reachability?
+
+::: {.incremental}
+- In directed graphs, adjacency relations (direct ties) only capture paths of **length 1**.
+- **Reachability** captures both direct and indirect paths:
+  - Node $j$ is **reachable** by node $i$ if there exists a directed path of any length starting at origin $i$ and terminating at destination $j$.
+  - In a directed graph, if $i \rightarrow k \rightarrow j$, then $i$ can reach $j$ via a path of length 2, even if no direct tie $i \rightarrow j$ exists.
+- Representing reachability systematically yields the **Reachability Matrix** ($\mathbf{D^r}$).
+:::
+
+---
+
+## Defining the Reachability Matrix ($\mathbf{D^r}$)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Formal Definition**:
+  - $$D^r_{ij} = 1 \quad \text{if node } i \text{ can reach node } j \text{ via a path of any length}$$
+  - $$D^r_{ij} = 0 \quad \text{otherwise}$$
+- Diagonals are blocked (`--`).
+- **In the directed graph on the right**:
+  - $A \rightarrow C$ is a direct link ($D^r_{AC} = 1$).
+  - $A$ can reach $D$ indirectly via $A \rightarrow C \rightarrow E \rightarrow D$ ($D^r_{AD} = 1$).
+  - $A$ cannot reach $B$ because no path goes against the arrow $B \rightarrow A$ ($D^r_{AB} = 0$).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_reach, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25,
+                 arrow = arrow(length = unit(4, 'mm')),
+                 end_cap = circle(6, 'mm')) +
+  geom_node_point(color = "tan2", size = 18) +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Step-by-Step Reachability Matrix construction
+
+```{r}
+#| echo: false
+d_mat <- distances(gr_reach, mode = "out")
+r_mat <- ifelse(d_mat < Inf & d_mat > 0, 1, 0)
+rownames(r_mat) <- V(gr_reach)$name
+colnames(r_mat) <- V(gr_reach)$name
+r_mat <- r_mat[order(row.names(r_mat)), order(row.names(r_mat))]
+diag(r_mat) <- "--"
+
+kbl(r_mat, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"))
+```
+
+::: {.incremental}
+- **Transmitter Nodes** (e.g., $B$): Can reach others but cannot be reached. Their column is full of $0$s.
+- **Receiver Nodes** (e.g., $D$): Can be reached by others but cannot reach anyone. Their row is full of $0$s.
+:::
+
+---
+
+## Reachability & Directed Connectedness
+
+::: {.incremental}
+- The reachability matrix allows us to distinguish the **three flavors of connectedness** in directed graphs:
+  1. **Strongly Connected**: Every node can reach every other node.
+     - The reachability matrix is the **all-ones matrix** (excluding the diagonal).
+  2. **Unilaterally Connected**: For every pair of nodes, at least one can reach the other.
+     - There are some $0$s in the matrix, but no mutually disconnected pairs.
+  3. **Weakly Connected**: Nodes are connected only when ignoring the directions of the arrows (via semipaths).
+     - The matrix contains several $0$s representing mutually unreachable pairs.
+:::
+
+---
+
+## Measuring Graph Connectedness ($C$)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Graph Connectedness ($C$)** measures the proportion of node pairs that can reach one another directly or indirectly.
+- It is defined as the **density of the reachability matrix**:
+  - $$C = \frac{\sum_{i, j} D^r_{ij}}{N(N-1)}$$
+- **Calculation on our 6-node graph**:
+  - Sum of all cells containing a $1$ is **17**.
+  - Total possible cells: $N(N-1) = 6(5) = 30$.
+  - $$C = \frac{17}{30} \approx 0.57$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_reach, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25,
+                 arrow = arrow(length = unit(4, 'mm')),
+                 end_cap = circle(6, 'mm')) +
+  geom_node_point(color = "tan2", size = 18) +
+  geom_node_text(aes(label = name), size = 9, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+# Part 2: The Geodesic Distance Matrix, Eccentricity, & Diameter
+
+---
+
+## What is Geodesic Distance?
+
+::: {.incremental}
+- While reachability tells us *if* node $i$ can reach node $j$, the **Geodesic Distance Matrix ($\mathbf{D^g}$)** tells us **how far** apart they are.
+- **Geodesic Distance**:
+  - The length of the shortest path (in number of edges) connecting two vertices.
+- **Matrix Rules**:
+  - Adjacent nodes get a geodesic distance of **1.0**.
+  - Nodes are at distance **0.0** from themselves: $D^g_{ii} = 0$ for all diagonal cells.
+  - If no directed or indirect path connects them, their geodesic distance is **Infinity ($\infty$)** or *Inf*.
+:::
+
+---
+
+## Geodesic Distance Matrix: Undirected Graph
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+- For undirected graphs, the distance matrix is **symmetric**:
+  - $$D^g_{ij} = D^g_{ji} \quad \text{for all } i, j$$
+```{r}
+#| echo: false
+d_undir <- distances(gr_undir)
+rownames(d_undir) <- V(gr_undir)$name
+colnames(d_undir) <- V(gr_undir)$name
+
+kbl(d_undir, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"), font_size = 14)
+```
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_undir, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(color = "tan2", size = 16) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Node Eccentricity and Graph Diameter
+
+::: {.incremental}
+- Sourcing metrics directly from the Geodesic Distance Matrix:
+- **Node Eccentricity ($e(v)$)**:
+  - The **maximum geodesic distance** between node $v$ and any other node in the graph:
+  - $$e(v) = \max_j D^g_{vj}$$
+  - Measures the "worst-case" distance for information to reach or leave node $v$.
+- **Graph Diameter ($d$)**:
+  - The **maximum eccentricity** among all nodes in the graph (the longest shortest path):
+  - $$d = \max_v e(v)$$
+  - In our 9-node graph, the maximum cell entry is **3.0** (e.g., $d_{A, G} = 3$), which represents the network's diameter.
+:::
+
+---
+
+## Geodesic Distance Matrix: Directed Graph
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+- For directed graphs, the distance matrix is **asymmetric**:
+  - $D^g_{ij} \neq D^g_{ji}$
+  - Disconnected pairs receive **_Inf_**.
+```{r}
+#| echo: false
+d_reach_dist <- distances(gr_reach, mode = "out")
+rownames(d_reach_dist) <- V(gr_reach)$name
+colnames(d_reach_dist) <- V(gr_reach)$name
+d_reach_dist <- d_reach_dist[order(row.names(d_reach_dist)), order(row.names(d_reach_dist))]
+
+kbl(d_reach_dist, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"), font_size = 14)
+```
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_reach, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25,
+                 arrow = arrow(length = unit(4, 'mm')),
+                 end_cap = circle(6, 'mm')) +
+  geom_node_point(color = "tan2", size = 16) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+# Part 3: The Common-Neighbors (Neighborhood Overlap) Matrix
+
+---
+
+## What is Neighborhood Overlap?
+
+::: {.incremental}
+- Recall that the **neighborhood** $\mathcal{N}(i)$ is the set of vertices adjacent to node $i$.
+- **Neighborhood Overlap**:
+  - The number of common neighbors shared by two nodes, relative to their total number of distinct neighbors.
+- **Jaccard Similarity Coefficient ($J_{ij}$)**:
+  - Formally, the overlap between node $i$ and node $j$ is:
+  - $$J_{ij} = \frac{|\mathcal{N}(i) \cap \mathcal{N}(j)|}{|\mathcal{N}(i) \cup \mathcal{N}(j)|} = \frac{\text{Common Neighbors}}{\text{Total Unique Neighbors}}$$
+- Placing these pairwise overlap scores into a matrix yields the **Neighborhood Overlap Matrix ($\mathbf{O}$)**.
+:::
+
+---
+
+## Neighborhood Overlap Matrix Construction
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+- Always symmetric ($O_{ij} = O_{ji}$).
+- Ranges from **0.00** (no shared neighbors) to **1.00** (structural equivalence).
+```{r}
+#| echo: false
+o_mat <- similarity(gr_undir, method = "jaccard")
+o_mat <- round(o_mat, 2)
+rownames(o_mat) <- V(gr_undir)$name
+colnames(o_mat) <- V(gr_undir)$name
+
+kbl(o_mat, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"), font_size = 14)
+```
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_undir, layout = 'kk') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(color = "tan2", size = 16) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Step-by-Step Calculation: Node $A$ and $C$
+
+- Let's compute the neighborhood overlap $O_{AC}$ for nodes $A$ and $C$:
+  - **$A$'s Neighborhood**: $\mathcal{N}(A) = \{B, C, D, E\}$ (degree $k_A = 4$)
+  - **$C$'s Neighborhood**: $\mathcal{N}(C) = \{A, B, D, E\}$ (degree $k_C = 4$)
+- **Intersection (Common Neighbors)**:
+  - $\mathcal{N}(A) \cap \mathcal{N}(C) = \{B, D, E\}$ (Cardinality = **3**)
+- **Union (Total Unique Neighbors)**:
+  - $\mathcal{N}(A) \cup \mathcal{N}(C) = \{A, B, C, D, E\}$ (Cardinality = **5**)
+- **Jaccard Overlap**:
+  - $$O_{AC} = \frac{3}{5} = 0.60$$
+- This high score proves that $A$ and $C$ are highly structurally similar.
+
+---
+
+## Summary of Advanced Matrices
+
+::: {.incremental}
+- **Reachability Matrix ($\mathbf{D^r}$)**:
+  - Records whether node $i$ can reach $j$ via any path. Enables calculation of **Graph Connectedness ($C$)** as matrix density.
+- **Geodesic Distance Matrix ($\mathbf{D^g}$)**:
+  - Records shortest path lengths. Provides the basis for measuring **Node Eccentricity** (row max) and **Graph Diameter** (global max).
+- **Neighborhood Overlap Matrix ($\mathbf{O}$)**:
+  - Records the Jaccard overlap coefficient ($\frac{\text{intersection}}{\text{union}}$) of neighbors, capturing structural similarity.
+:::

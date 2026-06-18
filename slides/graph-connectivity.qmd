@@ -1985,5 +1985,140 @@ p_line + p_star + p_cat
 
 ---
 
+## The Graph Efficiency
 
+:::: {.columns align=center}
 
+::: {.column width="60%"}
+::: {.incremental}
+- **Concept** (Krackhardt, 1994):
+  - Measures how **economical** the connectivity of a graph is.
+  - A graph is efficiently connected if it uses the *minimum* possible number of edges to remain connected.
+- **Formula**:
+  $$F(G) = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]$$
+  - Where $m$ is the number of edges and $n$ is the number of nodes.
+- **Key Properties**:
+  - A **tree** graph is maximally efficient: $F(G) = 1.0$ (since $m = n - 1$).
+  - As a graph adds more edges beyond a tree, the efficiency decreases towards $0.0$.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+nodes_tree <- data.frame(name = LETTERS[1:5])
+edges_tree <- data.frame(from = c(1, 2, 2, 3), to = c(2, 3, 4, 5))
+gr_tree_eff <- tbl_graph(nodes = nodes_tree, edges = edges_tree, directed = FALSE)
+ggraph(gr_tree_eff, layout = 'nicely') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() + coord_cartesian(clip = "off") +
+  ggtitle("Maximally Efficient (Tree: F(G) = 1.0)") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+
+::::
+
+---
+
+## Detailed Example: Two Simple Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+::: {.incremental}
+- **Graph 1** ($n = 5$ nodes, $m = 7$ edges):
+  $$F(G) = 1 - \left[\frac{2(7 - 5 + 1)}{(5-1)(5-2)}\right]$$
+  $$= 1 - \left[\frac{2(3)}{4 \times 3}\right] = 1 - \frac{6}{12} = 0.50$$
+- **Graph 2** ($n = 7$ nodes, $m = 10$ edges):
+  $$F(G) = 1 - \left[\frac{2(10 - 7 + 1)}{(7-1)(7-2)}\right]$$
+  $$= 1 - \left[\frac{2(4)}{6 \times 5}\right] = 1 - \frac{8}{30} \approx 0.73$$
+- **Conclusion**:
+  - Graph 2 is more efficiently connected than Graph 1 ($0.73 > 0.50$).
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 8
+#| fig-height: 4.5
+set.seed(123)
+gr1 <- play_gnm(n = 5, m = 7, directed = FALSE, loops = FALSE) %>% mutate(name = LETTERS[1:5])
+gr2 <- play_gnm(n = 7, m = 10, directed = FALSE, loops = FALSE) %>% mutate(name = LETTERS[1:7])
+
+p1 <- ggraph(gr1, layout = 'nicely') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() + coord_cartesian(clip = "off") +
+  ggtitle("Graph 1\n(n = 5, m = 7, F = 0.50)") +
+  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5))
+
+p2 <- ggraph(gr2, layout = 'nicely') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 14, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() + coord_cartesian(clip = "off") +
+  ggtitle("Graph 2\n(n = 7, m = 10, F = 0.73)") +
+  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5))
+
+p1 + p2
+```
+:::
+
+::::
+
+---
+
+## Graph Efficiency: Complete Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Maximally Inefficient**:
+  - The complete graph ($K_n$) is minimally efficient because it has the maximum possible number of edges.
+  - Number of edges: $m = \frac{n(n-1)}{2}$
+- **Example ($n=5$ Complete Graph)**:
+  - Edges: $m = \frac{5 \times 4}{2} = 10$
+  - Calculation:
+    $$F(G) = 1 - \left[\frac{2(10 - 5 + 1)}{(5-1)(5-2)}\right]$$
+    $$= 1 - \left[\frac{2(6)}{4 \times 3}\right] = 1 - \frac{12}{12} = 0.0$$
+  - Thus, any complete graph yields $F(G) = 0.0$.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_complete <- play_gnm(n = 5, m = 10, directed = FALSE, loops = FALSE) %>%
+  mutate(name = LETTERS[1:5])
+ggraph(gr_complete, layout = 'circle') +
+  geom_edge_link(color = "steelblue", edge_width = 1.25) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() + coord_cartesian(clip = "off") +
+  ggtitle("Complete Graph (F(G) = 0.0)") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+
+::::
