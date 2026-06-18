@@ -77,3 +77,51 @@ Why are the ties not reciprocated? You might remember from our lessons on types 
 Not everyone would agree that they like having one another as teammates, and the matrix and graph in @fig-directed would represent that. 
 
 In this case, a node like G or E looks really lonely since no one wants to play with them. However, if the tie were to be about advice, such that actually G gives advice to D and F, but does not take their advice back, G (and E) now look like respected figures in the network.
+
+
+## Weighted Adjacency Matrices and Binarization
+
+In our discussion of adjacency matrices so far, we have assumed that ties are **binary**—meaning they are either present ($1$) or absent ($0$). While binary representations are mathematically simple and clean, they fail to capture the nuanced realities of social life, where relationships have varying degrees of **strength**, **intensity**, or **volume**. 
+
+To represent relationships with non-binary values, we use **weighted (or valued) graphs**, which are stored in **weighted adjacency matrices**. In a weighted adjacency matrix, each cell $W_{ij}$ contains a real number representing the magnitude or value of the tie between node $i$ and node $j$, rather than a simple $0$ or $1$. Some classic examples of weighted ties include:
+- **Communication Volume**: The number of emails, text messages, or phone calls exchanged between two individuals in a week.
+- **Economic Flow**: The dollar value of goods exported from country $i$ to country $j$ in a year.
+- **Co-authorship Strength**: The number of scientific papers co-authored by researcher $i$ and researcher $j$.
+
+In a weighted adjacency matrix, a cell value of $0$ still represents the absence of a tie, but any non-zero value represents the presence of a tie with its corresponding weight. Binary graphs can be thought of as a special, constrained case of weighted graphs where all non-zero weights are equal to $1$.
+
+### The Technique of Binarization
+
+Sometimes, a weighted network can become so densely interconnected that it becomes difficult to analyze or visualize (resembling a chaotic "hairball" of ties of varying strengths). To manage this complexity, network analysts often **binarize** a weighted matrix. 
+
+Binarization is the process of converting a weighted adjacency matrix ($\mathbf{W}$) into a binary adjacency matrix ($\mathbf{A}$) by applying a threshold cutoff, which we denote as $\Theta$ (the Greek letter Theta). Under a threshold binarization rule:
+- We set $A_{ij} = 1$ if the tie weight $W_{ij}$ is strictly greater than our threshold: $W_{ij} > \Theta$.
+- We set $A_{ij} = 0$ otherwise: $W_{ij} \le \Theta$.
+
+For example, in a network of corporate advice, we might ask employees how often they seek help from one another on a scale of 1 (rarely) to 5 (multiple times a day). To isolate only the most significant, high-volume advice channels, we might choose a threshold of $\Theta = 3$. This binarizes our matrix so that cell entries are only marked $1$ if employees seek help from one another at least several times a week, effectively pruning out weak, casual, or occasional interactions.
+
+## Multiplexity and Multigraph Adjacency Matrices
+
+In the real world, people rarely interact through just a single, isolated relationship. Your co-worker might also be your close friend, your workout partner, and your neighbor. In sociology, when two actors share multiple, distinct types of social ties, we say that their relationship exhibits **multiplexity**. 
+
+In graph theory, a network containing multiple distinct types of edges between the same set of vertices is called a **multigraph**. To represent multiplexity and multigraphs in matrix form, we cannot simply use a single, two-dimensional square matrix, because a single cell can only hold one number at a time! 
+
+Instead, network analysts typically represent a multigraph as a set of **stacked adjacency matrices**. If we are studying a group of actors with $K$ different relation types (e.g., friendship, advice, and kinship), we construct $K$ separate, parallel adjacency matrices ($\mathbf{A}^{(1)}, \mathbf{A}^{(2)}, \ldots, \mathbf{A}^{(K)}$), each of dimensions $N \times N$. 
+
+In computer science and data science, this stacked arrangement is represented as a **three-dimensional matrix** (or a **tensor**) of dimensions $N \times N \times K$. This multi-layered matrix structure allows us to perform advanced operations, such as checking whether having an advice tie (Matrix 1) predicts subsequently forming a friendship tie (Matrix 2), providing a robust mathematical foundation for analyzing multiplex social systems.
+
+## Bipartite Adjacency Matrices (Two-Mode Networks)
+
+Finally, there is a class of social networks in which ties do not connect actors to other actors, but rather connect actors to **groups, events, or organizations**. For example, we might study which corporate executives sit on which boards of directors, which authors co-attend which conferences, or which political activists participate in which social movements. In sociology, these are known as **affiliation networks** or **two-mode networks**.
+
+In graph theory, these networks are modeled using **bipartite graphs**, which consist of two completely disjoint sets of vertices (e.g., a set of $N$ actors and a set of $M$ events). Edges in a bipartite graph can only connect a vertex in the first set to a vertex in the second set; there are no within-set edges (actors cannot directly connect to other actors, and events cannot directly connect to other events).
+
+Because the two sets of vertices are disjoint and of different sizes, a bipartite graph is represented mathematically not by a square matrix, but by a **rectangular matrix** of dimensions $N \times M$. This is known as a **bipartite adjacency matrix** (or an **affiliation matrix**, $\mathbf{C}$):
+- Each row represents a specific actor $i$ (from the set of size $N$).
+- Each column represents a specific event or group $j$ (from the set of size $M$).
+- Cell $C_{ij} = 1$ if actor $i$ is affiliated with event $j$, else $0$.
+
+As we will see in our dedicated lesson on affiliation networks, we can multiply this rectangular bipartite matrix by its transpose to project the two-mode data into two separate, one-mode square matrices, allowing us to see how actors are linked via shared events, and how events are linked via shared actors.
+
+
+## References {.unnumbered}
