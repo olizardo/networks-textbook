@@ -1,8 +1,9 @@
 ---
 title: "Matrix Algebra in Social Networks"
-subtitle: "Basic and Advanced Matrix Operations"
+subtitle: "Basic Operations, Conformability, and Matrix Multiplication"
 format:
   revealjs:
+    incremental: false
     scrollable: true
     theme: default
     css: ucla-theme.css
@@ -22,336 +23,511 @@ library(kableExtra)
 library(expm)
 library(patchwork)
 
-# Set seed for reproducibility
-set.seed(859)
+# Setup simple 3x3 toy networks for step-by-step builds
+# Node set: A, B, C
+# H (Hanging out): A-B, B-C
+# C (Co-working): B-C, A-C
 
-# 1. 12-node company network (Hanging out vs Co-working)
-gr1 <- play_islands(3, 4, m = 1, p_within = 0.8) %>% 
-  activate(nodes) %>% 
-  mutate(name = toupper(letters[1:12]))
+set.seed(111)
+gr_h <- tbl_graph(
+  nodes = data.frame(name = c("A", "B", "C")),
+  edges = data.frame(from = c(1, 2), to = c(2, 3)),
+  directed = FALSE
+)
 
-# Get stable layout coordinates
-l_tree <- ggraph(gr1, layout = 'tree')
-l_coords <- as.matrix(l_tree$data[, 1:2])
+gr_c <- tbl_graph(
+  nodes = data.frame(name = c("A", "B", "C")),
+  edges = data.frame(from = c(2, 1), to = c(3, 3)),
+  directed = FALSE
+)
 
-# Hanging out graph
-p_hang <- ggraph(gr1, layout = l_coords) +
-  geom_edge_link(color = "steelblue", edge_width = 1.3) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph()
+# Adjacency Matrices
+H <- as.matrix(as_adjacency_matrix(gr_h))
+C <- as.matrix(as_adjacency_matrix(gr_c))
 
-# Co-working graph
-gr2 <- play_islands(4, 3, m = 1, p_within = 1) %>% 
-  activate(nodes) %>% 
-  mutate(name = toupper(letters[1:12]))
+# Simple coordinates for 3 nodes in a triangle
+l_coords <- matrix(c(0, 1, -1, -1, 1, -1), ncol = 2, byrow = TRUE)
 
-p_work <- ggraph(gr2, layout = l_coords) +
-  geom_edge_link(color = "firebrick", edge_width = 1.3) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph()
+p_h <- ggraph(gr_h, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+  geom_edge_link(color = "steelblue", width = 2.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  labs(title = "Hanging Out (H)") +
+  theme_graph() + theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
 
-A1 <- as.matrix(as_adjacency_matrix(gr1))
-A2 <- as.matrix(as_adjacency_matrix(gr2))
+p_c <- ggraph(gr_c, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+  geom_edge_link(color = "firebrick", width = 2.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  labs(title = "Co-working (C)") +
+  theme_graph() + theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
 ```
 
-# Part 1: Basic Matrix Operations
+# Part 1: Basic Operations & Network Overlap
 
 ---
 
-## The Company Social System
+## Combining Social Relations
 
-:::: {.columns align=center}
+- In social network analysis, we often record **multiple types of relationships** for the same set of nodes (e.g., *Hanging Out* vs. *Co-working*).
+- How do we combine, subtract, or intersect these overlapping structures?
+- We use **Basic Matrix Operations** performed cell-by-cell on adjacency matrices of the same dimensions:
+  1. **Matrix Addition ($\mathbf{H} + \mathbf{C}$)**: Measures overall relationship volume.
+  2. **Matrix Subtraction ($|\mathbf{H} - \mathbf{C}|$)**: Isolates relational disagreements.
+  3. **Hadamard Product ($\mathbf{H} \circ \mathbf{C}$)**: Extracts multiplex overlap.
 
-::: {.column width="60%"}
-::: {.incremental}
-- Suppose we study 12 employees at a small company and record two separate relationships:
-  1. **Hanging Out ($\mathbf{H}$)**: Whether they hang out together after work (Blue edges).
-  2. **Co-working ($\mathbf{C}$)**: Whether they are assigned to work together in team projects (Red edges).
-- How do we combine, compare, or intersect these overlapping structures?
-- We use **Basic Matrix Operations**: addition, subtraction, and the dot (element-wise) product.
-:::
-:::
+---
 
-::: {.column width="40%"}
+## Adjacency Matrices: $\mathbf{H}$ and $\mathbf{C}$
+
+::: {.columns}
+::: {.column width="50%"}
 ### Hanging Out ($\mathbf{H}$)
 ```{r}
 #| echo: false
-#| fig-height: 2.8
-#| fig-width: 3.5
-#| fig-align: "center"
-p_hang
+kbl(H, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.5
+#| fig-width: 3.5
+p_h
+```
+</center>
+:::
 
+::: {.column width="50%"}
 ### Co-working ($\mathbf{C}$)
 ```{r}
 #| echo: false
-#| fig-height: 2.8
-#| fig-width: 3.5
-#| fig-align: "center"
-p_work
+kbl(C, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.5
+#| fig-width: 3.5
+p_c
+```
+</center>
 :::
-
-::::
+:::
 
 ---
 
-## Matrix Addition ($\mathbf{H} + \mathbf{C}$)
+## Step-by-Step Addition ($\mathbf{H} + \mathbf{C}$)
 
-:::: {.columns align=center}
+- **Addition ($s_{ij} = h_{ij} + c_{ij}$)** adds corresponding cells:
 
-::: {.column width="55%"}
-::: {.incremental}
-- **Matrix Addition**:
-  - Done element-by-element: $S_{ij} = H_{ij} + C_{ij}$.
-  - Requires **identical dimensions** ($12 \times 12$).
-- **Sociological Meaning**:
-  - Cell value $2$: Share **both** hangout and co-working ties.
-  - Cell value $1$: Share **either** hangout or co-working ties, but not both.
-  - Cell value $0$: Share no ties.
-  - Represents a weighted network of **overall relationship volume**.
-:::
-:::
+. . .
 
-::: {.column width="45%"}
+$$\mathbf{H} + \mathbf{C} = \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix} + \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 0 \end{pmatrix}$$
+
+. . .
+
+$$\mathbf{H} + \mathbf{C} = \begin{pmatrix} 0+0 & 1+0 & 0+1 \\ 1+0 & 0+0 & 1+1 \\ 0+1 & 1+1 & 0+0 \end{pmatrix} = \begin{pmatrix} 0 & 1 & 1 \\ 1 & 0 & \mathbf{2} \\ 1 & \mathbf{2} & 0 \end{pmatrix}$$
+
+- **Interpretation**: 
+  - Value **2** represents a **multiplex tie** (both hang out and work together).
+  - Value **1** represents a **uniplex tie** (either hang out or work together, but not both).
+
+---
+
+## Visualizing Matrix Addition ($\mathbf{H} + \mathbf{C}$)
+
+::: {.columns}
+::: {.column width="50%"}
+### Resulting Sum Matrix
 ```{r}
 #| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr_sum <- graph_from_adjacency_matrix(A1 + A2, mode = "undirected", weighted = TRUE)
-ggraph(gr_sum, layout = l_coords) +
-  geom_edge_link(aes(color = as.factor(weight), edge_width = weight*1.2)) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+kbl(H + C, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- **Red/Blue** = Uniplex bonds.
+- **Purple** = Multiplex bonds.
+:::
+
+::: {.column width="50%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+gr_sum <- graph_from_adjacency_matrix(H + C, mode = "undirected", weighted = TRUE)
+ggraph(gr_sum, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+  geom_edge_link(aes(color = as.factor(weight), edge_width = weight*1.5)) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
   scale_edge_color_manual(values = c("1" = "steelblue", "2" = "purple")) +
   theme_graph() + theme(legend.position = "none") + coord_cartesian(clip = "off")
 ```
+</center>
 :::
-
-::::
+:::
 
 ---
 
-## Matrix Subtraction & Absolute Value ($|\mathbf{H} - \mathbf{C}|$)
+## Step-by-Step Subtraction ($|\mathbf{H} - \mathbf{C}|$)
 
-:::: {.columns align=center}
+- **Absolute Subtraction ($d_{ij} = |h_{ij} - c_{ij}|$)** isolates **relational disagreement**:
 
-::: {.column width="55%"}
-::: {.incremental}
-- **Matrix Subtraction**:
-  - Done element-by-element: $D_{ij} = |H_{ij} - C_{ij}|$.
-  - Isolates cases where the two relations **disagree**.
-- **Sociological Meaning**:
-  - Cell value $1$: Share **exactly one** of the ties (hangout or co-working), but **not both**.
-  - Cell value $0$: Share either both ties ($1-1=0$), or neither ($0-0=0$).
-  - Represents the **symmetric difference** (green edges).
-:::
-:::
+. . .
 
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr_sub <- graph_from_adjacency_matrix(abs(A1 - A2), mode = "undirected")
-ggraph(gr_sub, layout = l_coords) +
-  geom_edge_link(color = "forestgreen", edge_width = 1.3) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
-```
-:::
+$$|\mathbf{H} - \mathbf{C}| = \left| \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix} - \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 0 \end{pmatrix} \right|$$
 
-::::
+. . .
+
+$$|\mathbf{H} - \mathbf{C}| = \begin{pmatrix} |0-0| & |1-0| & |0-1| \\ |1-0| & |0-0| & |1-1| \\ |0-1| & |1-1| & |0-0| \end{pmatrix} = \begin{pmatrix} 0 & 1 & 1 \\ 1 & 0 & \mathbf{0} \\ 1 & \mathbf{0} & 0 \end{pmatrix}$$
+
+- **Symmetric Difference**:
+  - Value **1** = Connected by *exactly one* relationship.
+  - Value **0** = Connected by *both* (multiplex ties cancel out) or *neither*.
 
 ---
 
-## Matrix Dot (Hadamard) Product ($\mathbf{H} \cdot \mathbf{C}$)
+## Visualizing Subtraction ($|\mathbf{H} - \mathbf{C}|$)
 
-:::: {.columns align=center}
-
-::: {.column width="55%"}
-::: {.incremental}
-- **Element-wise Multiplication**:
-  - Cell product: $P_{ij} = H_{ij} \times C_{ij}$.
-  - Requires identical dimensions.
-  - Also called the **Hadamard product** (distinct from standard matrix multiplication).
-- **Sociological Meaning**:
-  - Cell value $1$ only if **both** $H_{ij} = 1$ and $C_{ij} = 1$ ($1 \times 1 = 1$).
-  - Cell value $0$ otherwise.
-  - Represents the **overlap / intersection** of networks (purple edges).
-:::
-:::
-
-::: {.column width="45%"}
+::: {.columns}
+::: {.column width="50%"}
+### Uniplex-Only Matrix
 ```{r}
 #| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr_dot <- graph_from_adjacency_matrix(A1 * A2, mode = "undirected")
-ggraph(gr_dot, layout = l_coords) +
-  geom_edge_link(color = "purple", edge_width = 2.0) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+kbl(abs(H - C), format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
+- Multiplex tie between **B and C** is erased.
+- Only uniplex green edges remain.
 :::
 
-::::
+::: {.column width="50%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+gr_sub <- graph_from_adjacency_matrix(abs(H - C), mode = "undirected")
+ggraph(gr_sub, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+  geom_edge_link(color = "forestgreen", width = 2.0) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+</center>
+:::
+:::
 
-# Part 2: Matrix Multiplication
+---
+
+## Step-by-Step Hadamard Product ($\mathbf{H} \circ \mathbf{C}$)
+
+- **Hadamard / Dot Product ($p_{ij} = h_{ij} \times c_{ij}$)** represents **relational intersection**:
+
+. . .
+
+$$\mathbf{H} \circ \mathbf{C} = \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix} \circ \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 1 \\ 1 & 1 & 0 \end{pmatrix}$$
+
+. . .
+
+$$\mathbf{H} \circ \mathbf{C} = \begin{pmatrix} 0 \times 0 & 1 \times 0 & 0 \times 1 \\ 1 \times 0 & 0 \times 0 & 1 \times 1 \\ 0 \times 1 & 1 \times 1 & 0 \times 0 \end{pmatrix} = \begin{pmatrix} 0 & 0 & 0 \\ 0 & 0 & \mathbf{1} \\ 0 & \mathbf{1} & 0 \end{pmatrix}$$
+
+- **Sociological Meaning**:
+  - Value **1** *only if* both $h_{ij} = 1$ and $c_{ij} = 1$ ($1 \times 1 = 1$).
+  - Overlap is extracted; all uniplex ties are erased.
+
+---
+
+## Visualizing the Hadamard Product ($\mathbf{H} \circ \mathbf{C}$)
+
+::: {.columns}
+::: {.column width="50%"}
+### Multiplex-Only Adjacency Matrix
+```{r}
+#| echo: false
+kbl(H * C, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- Retains *only* the shared co-working & hangout tie.
+- Network density drops, leaving only the purple edge.
+:::
+
+::: {.column width="50%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+gr_dot <- graph_from_adjacency_matrix(H * C, mode = "undirected")
+ggraph(gr_dot, layout = "manual", x = l_coords[,1], y = l_coords[,2]) +
+  geom_edge_link(color = "purple", width = 2.5) +
+  geom_node_point(size = 20, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+</center>
+:::
+:::
+
+---
+
+# Part 2: Conformability Rules
 
 ---
 
 ## Standard Matrix Multiplication ($\mathbf{A} \times \mathbf{B}$)
 
-::: {.incremental}
-- Unlike the dot product, standard matrix multiplication is **not element-wise**; it involves multiplying rows of the left matrix by columns of the right matrix.
-- **The Conformability Rule**:
-  - You can only multiply two matrices if the **inner dimensions match**.
-  - In other words, the number of columns in the first matrix ($\mathbf{A}$) must equal the number of rows in the second matrix ($\mathbf{B}$).
-  - $$\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}$$
-- **The Product Dimensions**:
-  - The resulting matrix has dimensions equal to the **outer dimensions** (Rows of left, Columns of right).
-- **Non-Commutative**:
-  - Matrix multiplication is order-dependent: $\mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}$.
+- Unlike the element-wise Hadamard product, standard matrix multiplication is **non-elementary**.
+- It involves multiplying the **rows of the left matrix** by the **columns of the right matrix**.
+- Because rows and columns are matched, the sizes of the two multiplier matrices must follow a strict structural rule.
+- This rule is called **Conformability**.
+
+---
+
+## The Conformability Rule
+
+- *You can only multiply two matrices if the number of columns of the first matrix equals the number of rows of the second matrix.*
+- Put their dimensions side-by-side:
+
+$$\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}$$
+
+- **Inner Dimensions**: The bold "fives" are the inner dimensions. They **must be identical** for the multiplication to be defined (**conformable**).
+- **Outer Dimensions**: The "three" and "six" are the outer dimensions. They dictate the size of the resulting product matrix:
+
+$$\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}$$
+
+---
+
+## Conformable vs. Non-Conformable
+
+::: {.columns}
+::: {.column width="50%"}
+### Conformable Example
+- Line up dimensions:
+  $$\mathbf{A}_{4 \times \mathbf{2}} \times \mathbf{B}_{\mathbf{2} \times 3}$$
+- **Inner dimensions match** (2 = 2).
+- The multiplication is fully defined.
+- **Product Matrix size**:
+  $$\mathbf{C}_{4 \times 3}$$
+:::
+
+::: {.column width="50%"}
+### Non-Conformable Example
+- Line up dimensions:
+  $$\mathbf{A}_{3 \times \mathbf{4}} \times \mathbf{B}_{\mathbf{2} \times 3}$$
+- **Inner dimensions clash** (4 $\neq$ 2).
+- This operation is **mathematically impossible**.
+- **The Visual Reason**: When you try to dot-multiply a row of 4 by a column of 2, you "run out of numbers" on the right, making the sum undefined.
+:::
 :::
 
 ---
 
-## Step-by-Step Multiplication
+## Matrix Multiplication is Non-Commutative
 
-:::: {.columns}
+- In scalar math, order doesn't matter: $4 \times 3 = 3 \times 4$.
+- In matrix algebra, order **completely changes the structure**:
 
-::: {.column width="55%"}
-- To compute cell $c_{ij}$ in the product matrix $\mathbf{C}$:
-  - Take row $i$ of left matrix $\mathbf{A}$ and column $j$ of right matrix $\mathbf{B}$.
-  - Multiply corresponding elements and **sum the products** (calculating their dot product).
-- **Example**: Cell $c_{11}$ of $\mathbf{A}_{5 \times 3} \times \mathbf{B}_{3 \times 5}$
-  - Row 1 of $\mathbf{A}$: $\{3, 4, 5\}$
-  - Column 1 of $\mathbf{B}$: $\{3, 4, 5\}$
-  - $$c_{11} = (3 \times 3) + (4 \times 4) + (5 \times 5) = 9 + 16 + 25 = 50$$
-:::
+. . .
 
-::: {.column width="45%"}
-### Matrix A ($5 \times 3$)
-```{r}
-#| echo: false
-A_prod <- matrix(c(3, 7, 4, 5, 2, 4, 9, 6, 3, 5, 5, 3, 2, 4, 4), nrow = 5)
-kbl(A_prod, align = "c", format = "html") %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"))
-```
+$$\mathbf{A}_{2 \times \mathbf{3}} \times \mathbf{B}_{\mathbf{3} \times 2} = \mathbf{C}_{2 \times 2} \quad \text{(Square 2x2 Matrix)}$$
 
-### Matrix B ($3 \times 5$)
-```{r}
-#| echo: false
-B_prod <- t(A_prod)
-kbl(B_prod, align = "c", format = "html") %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"))
-```
-:::
+. . .
 
-::::
+$$\mathbf{B}_{3 \times \mathbf{2}} \times \mathbf{A}_{\mathbf{2} \times 3} = \mathbf{D}_{3 \times 3} \quad \text{(Square 3x3 Matrix)}$$
+
+- Changing the multiplication order changes both the conformability checks and the resulting network's dimensions!
 
 ---
 
-## The Identity Matrix ($\mathbf{I}$)
-
-::: {.incremental}
-- The **Identity Matrix ($\mathbf{I}$)** is a special square matrix of order $N$ with $1$s on the main diagonal and $0$s on the off-diagonal cells.
-- e.g., a $4 \times 4$ Identity Matrix:
-  - $$
-    \mathbf{I} = 
-    \begin{pmatrix}
-    1 & 0 & 0 & 0 \\
-    0 & 1 & 0 & 0 \\
-    0 & 0 & 1 & 0 \\
-    0 & 0 & 0 & 1
-    \end{pmatrix}
-    $$
-- It acts as the **multiplicative identity** in matrix algebra (equivalent to the number $1$ in standard math):
-  - $$\mathbf{A} \times \mathbf{I} = \mathbf{A}$$
-  - $$\mathbf{I} \times \mathbf{A} = \mathbf{A}$$
-:::
-
-# Part 3: Advanced Matrix Operations
+# Part 3: Step-by-Step Multiplication Mechanics
 
 ---
 
-## The Transpose of a Matrix ($\mathbf{A}^T$)
+## Row-by-Column Vector Multiplication
 
-::: {.incremental}
-- **The Transpose Operation**:
-  - Reverses the row and column dimensions of a matrix.
-  - Rows of the original matrix $\mathbf{A}$ become columns of its transpose $\mathbf{A}^T$, and columns of $\mathbf{A}$ become rows of $\mathbf{A}^T$.
-  - If $\mathbf{A}$ is of dimensions $R \times C$, then $\mathbf{A}^T$ is of dimensions $C \times R$.
-- **Crucial Property**:
-  - The product of any matrix multiplied by its transpose is **always defined and conformable**:
-    - $\mathbf{A}_{R \times C} \times \mathbf{A}^T_{C \times R} = \mathbf{B}_{R \times R}$ (Symmetric Square Matrix).
-    - $\mathbf{A}^T_{C \times R} \times \mathbf{A}_{R \times C} = \mathbf{D}_{C \times C}$ (Symmetric Square Matrix).
+- Let's multiply a $2 \times 3$ matrix $\mathbf{A}$ by a $3 \times 2$ matrix $\mathbf{B}$ to produce a $2 \times 2$ matrix $\mathbf{C}$:
+
+$$\mathbf{A} = \begin{pmatrix} \mathbf{3} & \mathbf{4} & \mathbf{5} \\ 7 & 6 & 3 \end{pmatrix} \quad \mathbf{B} = \begin{pmatrix} \mathbf{3} & 7 \\ \mathbf{4} & 9 \\ \mathbf{5} & 3 \end{pmatrix}$$
+
+- To compute cell $c_{ij}$ in the target matrix, we multiply row $i$ of the left matrix by column $j$ of the right matrix, then sum the products.
+- Let's trace each of the 4 cells in the target matrix $\mathbf{C}_{2 \times 2}$ progressively.
+
+---
+
+## Target Cell $c_{11}$ (Row 1, Column 1)
+
+::: {.columns}
+::: {.column width="50%"}
+### Highlighted Vectors
+* **Row 1 of A**: $\color{red}{\{3, 4, 5\}}$
+* **Column 1 of B**: $\color{blue}{\{3, 4, 5\}}$
+
+### Calculation
+$$c_{11} = (\color{red}{3} \times \color{blue}{3}) + (\color{red}{4} \times \color{blue}{4}) + (\color{red}{5} \times \color{blue}{5})$$
+$$c_{11} = 9 + 16 + 25 = \mathbf{50}$$
+:::
+
+::: {.column width="50%"}
+### Target Matrix C
+$$\mathbf{C} = \begin{pmatrix} \mathbf{50} & ? \\ ? & ? \end{pmatrix}$$
+:::
 :::
 
 ---
 
-## Matrix Transpose Multiplication: Common Neighbors
+## Target Cell $c_{12}$ (Row 1, Column 2)
 
-:::: {.columns}
+::: {.columns}
+::: {.column width="50%"}
+### Highlighted Vectors
+* **Row 1 of A**: $\color{red}{\{3, 4, 5\}}$
+* **Column 2 of B**: $\color{blue}{\{7, 9, 3\}}$
 
-::: {.column width="60%"}
-::: {.incremental}
-- In social network analysis, multiplying an adjacency matrix $\mathbf{A}$ by its transpose $\mathbf{A}^T$ yields an incredibly intuitive result:
-  - **The Diagonal Cells** ($b_{ii}$): Count the total number of neighbors of node $i$ (the **node degree**).
-  - **The Off-Diagonal Cells** ($b_{ij}$): Count the exact **number of common neighbors** shared by row node $i$ and column node $j$.
-  - $$\mathbf{A} \times \mathbf{A}^T = \mathbf{O}^{Common}$$
-- Essential for identifying structural similarity and cliques!
-:::
-:::
-
-::: {.column width="40%"}
-### Common Neighbors ($\mathbf{A} \times \mathbf{A}^T$)
-```{r}
-#| echo: false
-A_mat <- as.matrix(as_adjacency_matrix(gr1))
-A_tA <- A_mat %*% t(A_mat)
-kbl(A_tA, format = "html", align = "c") %>%
-  column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 14)
-```
+### Calculation
+$$c_{12} = (\color{red}{3} \times \color{blue}{7}) + (\color{red}{4} \times \color{blue}{9}) + (\color{red}{5} \times \color{blue}{3})$$
+$$c_{12} = 21 + 36 + 15 = \mathbf{72}$$
 :::
 
-::::
+::: {.column width="50%"}
+### Target Matrix C
+$$\mathbf{C} = \begin{pmatrix} 50 & \mathbf{72} \\ ? & ? \end{pmatrix}$$
+:::
+:::
 
 ---
 
-## Matrix Powers ($\mathbf{A}^n$)
+## Target Cell $c_{21}$ (Row 2, Column 1)
 
-::: {.incremental}
-- You can multiply a square matrix by itself recursively to get **matrix powers**:
+::: {.columns}
+::: {.column width="50%"}
+### Highlighted Vectors
+* **Row 2 of A**: $\color{red}{\{7, 6, 3\}}$
+* **Column 1 of B**: $\color{blue}{\{3, 4, 5\}}$
+
+### Calculation
+$$c_{21} = (\color{red}{7} \times \color{blue}{3}) + (\color{red}{6} \times \color{blue}{4}) + (\color{red}{3} \times \color{blue}{5})$$
+$$c_{21} = 21 + 24 + 15 = \mathbf{60}$$
+:::
+
+::: {.column width="50%"}
+### Target Matrix C
+$$\mathbf{C} = \begin{pmatrix} 50 & 72 \\ \mathbf{60} & ? \end{pmatrix}$$
+:::
+:::
+
+---
+
+## Target Cell $c_{22}$ (Row 2, Column 2)
+
+::: {.columns}
+::: {.column width="50%"}
+### Highlighted Vectors
+* **Row 2 of A**: $\color{red}{\{7, 6, 3\}}$
+* **Column 2 of B**: $\color{blue}{\{7, 9, 3\}}$
+
+### Calculation
+$$c_{22} = (\color{red}{7} \times \color{blue}{7}) + (\color{red}{6} \times \color{blue}{9}) + (\color{red}{3} \times \color{blue}{3})$$
+$$c_{22} = 49 + 54 + 9 = \mathbf{112}$$
+:::
+
+::: {.column width="50%"}
+### Finished Target Matrix C
+$$\mathbf{C} = \begin{pmatrix} 50 & 72 \\ 60 & \mathbf{112} \end{pmatrix}$$
+:::
+:::
+
+---
+
+# Part 4: Dynamic Network Applications
+
+---
+
+## Transpose Multiplication: Common Neighbors
+
+- If we multiply a network's adjacency matrix $\mathbf{A}$ by its transpose $\mathbf{A}^T$:
+  $$\mathbf{A} \times \mathbf{A}^T = \mathbf{B}$$
+- Why does this matrix operation reveal structural overlaps?
+
+. . .
+
+- **The Diagonal Cells ($b_{ii}$)**: 
+  - Corresponds to multiplying Row $i$ of $\mathbf{A}$ by Column $i$ of $\mathbf{A}^T$ (which is identical to Row $i$).
+  - It squares each binary entry and sums them up.
+  - **Result**: Counts the total number of neighbors of node $i$ (the **node degree**).
+- **The Off-Diagonal Cells ($b_{ij}$)**:
+  - Multiplies Row $i$ (node $i$'s friendships) by Row $j$ (node $j$'s friendships).
+  - **Result**: Counts exactly how many **common neighbors** node $i$ and node $j$ share!
+
+---
+
+## Tracing Common Neighbors Step-by-Step
+
+- Let's look at the adjacency matrix of a simple 4-node graph:
+
+::: {.columns}
+::: {.column width="50%"}
+### Adjacency Matrix A
+$$\mathbf{A} = \begin{pmatrix} 0 & \mathbf{1} & 0 & 1 \\ 1 & 0 & 1 & 0 \\ 0 & \mathbf{1} & 0 & 0 \\ 1 & 0 & 0 & 0 \end{pmatrix}$$
+- Let's check common neighbors between **node 1 and node 3**.
+:::
+
+::: {.column width="50%"}
+### Vector Multiplications
+* **Row 1 (Node 1)**: $\color{red}{\{0, 1, 0, 1\}}$
+* **Col 3 (Node 3)**: $\color{blue}{\{0, 1, 0, 0\}}$
+
+### Calculation
+$$\color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{1} + \color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{0} = \mathbf{1}$$
+
+* Only node 2 ($1 \times 1 = 1$) is shared.
+* **Takeaway**: Node 2 is the single common neighbor shared by 1 and 3.
+:::
+:::
+
+---
+
+## Matrix Powers ($\mathbf{A}^n$) & Paths in Networks
+
+- Multiplying a square adjacency matrix by itself recursively reveals **indirect connections**:
   - $\mathbf{A}^2 = \mathbf{A} \times \mathbf{A}$
   - $\mathbf{A}^3 = \mathbf{A} \times \mathbf{A} \times \mathbf{A}$
-- In network science, the entries of the $n^{th}$ power of an adjacency matrix have a brilliant graph-theoretic meaning:
+- In network science, the entries of the $n^{th}$ power of an adjacency matrix have a precise graph-theoretic meaning:
   - **Off-Diagonal Cells ($a^{n}_{ij}$)**: Record the exact number of **indirect connections (walks) of length $n$** connecting node $i$ and node $j$.
   - **Diagonal Cells ($a^{n}_{ii}$)**: Record the exact number of **cycles of length $n$** that start and end at node $i$.
-:::
 
 ---
 
-## Walks and Cycles: $\mathbf{A}^2$ & $\mathbf{A}^3$
+## Walks of Length 2: $\mathbf{A}^2$
 
-::: {.incremental}
-- **Adjacency Matrix Squared ($\mathbf{A}^2$)**:
+- **The Squared Adjacency Matrix ($\mathbf{A}^2$)**:
   - **Off-diagonals** represent the number of **walks of length 2** between nodes.
-  - **Diagonals** represent the number of walks of length 2 starting and ending at the same node. This is equal to the **node degree**!
-- **Adjacency Matrix Cubed ($\mathbf{A}^3$)**:
+  - **Diagonals** represent the number of walks of length 2 starting and ending at the same node.
+  - This is equal to the **node degree** (edges incident to the node)!
+
+. . .
+
+### Simple Trace Example
+* To go from node $i \to k \to j$ of length 2:
+  * Node $k$ must be connected to *both* $i$ and $j$.
+  * Thus, walks of length 2 between $i$ and $j$ is equivalent to counting their **common neighbors**!
+
+---
+
+## Walks of Length 3: $\mathbf{A}^3$
+
+- **The Cubed Adjacency Matrix ($\mathbf{A}^3$)**:
   - **Off-diagonals** represent the number of **walks of length 3** between nodes.
   - **Diagonals** represent cycles of length 3 (triangles).
-  - Since each triangle can be traversed in two directions, the diagonal cell divided by 2 ($\frac{a^3_{ii}}{2}$) gives the exact **number of triangles (cliques of size 3)** that node $i$ belongs to!
-:::
+  - A cycle of length 3 represents a **clique of size 3**.
+  - Since each triangle can be traversed in two directions (clockwise and counterclockwise), the diagonal cell divided by 2 gives the exact **number of triangles (cliques of size 3)** that node $i$ belongs to!
+  - $$\text{Triangles}(i) = \frac{a^3_{ii}}{2}$$
 
 ---
 
@@ -364,32 +540,36 @@ kbl(A_tA, format = "html", align = "c") %>%
 #| fig-align: "center"
 #| fig-width: 10
 #| fig-height: 5.5
-A3 <- A_mat %^% 3
+A3 <- H %^% 3
 m_val <- max(A3)
 gr_pows <- graph.adjacency(A3, mode="undirected", weighted=TRUE) %>% 
   as_tbl_graph() 
-ggraph(gr_pows, layout = l_coords) +
+
+p_pows <- ggraph(gr_pows, layout = "manual", x = l_coords[1:3,1], y = l_coords[1:3,2]) +
   geom_edge_link(aes(color = weight/m_val, width = weight/m_val)) +
   geom_node_point(color = "tan2", size = 20) +
   geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
   theme_graph() + 
   scale_edge_color_steps(low = "grey90", high = "steelblue4") +
   theme(legend.position = "none") + coord_cartesian(clip = "off")
+p_pows
 ```
 
-# Part 4: Conclusion & Summary
+---
+
+# Part 5: Summary & Conclusion
 
 ---
 
 ## Summary of Matrix Algebraic Power
 
-::: {.incremental}
 - **Basic operations combine relationships**:
-  - Addition ($\mathbf{H} + \mathbf{C}$) counts tie volume; Subtraction ($|\mathbf{H} - \mathbf{C}|$) highlights relational disagreements; Dot product ($\mathbf{H} \cdot \mathbf{C}$) extracts overlap.
+  - Addition ($\mathbf{H} + \mathbf{C}$) counts overall tie volume.
+  - Subtraction ($|\mathbf{H} - \mathbf{C}|$) highlights relational disagreements.
+  - Hadamard Product ($\mathbf{H} \circ \mathbf{C}$) extracts multiplex intersections.
 - **Conformability dictates multiplication**:
-  - Multiplications are only defined if inner dimensions match.
-- **Multiplying by Transpose reveals overlaps**:
+  - Operations are only defined if inner dimensions match.
+- **Multiplying by Transpose reveals common friends**:
   - $\mathbf{A} \times \mathbf{A}^T$ computes common neighbors (off-diagonals) and degrees (diagonals).
-- **Matrix Powers map paths**:
-  - $\mathbf{A}^n$ enumerates walks of length $n$. $\mathbf{A}^2$ diagonals are degrees; $\mathbf{A}^3$ diagonals are twice the number of triangles.
-:::
+- **Matrix Powers map indirect paths**:
+  - $\mathbf{A}^n$ enumerates walks of length $n$. $\mathbf{A}^2$ diagonals are degrees; $\mathbf{A}^3$ diagonals are twice the number of triangles (cliques).

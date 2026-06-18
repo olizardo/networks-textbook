@@ -136,360 +136,102 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Matrix Algebra in Social Networks</h1>
-  <p class="subtitle">Basic and Advanced Matrix Operations</p>
+  <p class="subtitle">Basic Operations, Conformability, and Matrix Multiplication</p>
 
 <div class="quarto-title-authors">
 </div>
 
 </section>
 <section>
-<section id="part-1-basic-matrix-operations" class="title-slide slide level1 center">
-<h1>Part 1: Basic Matrix Operations</h1>
+<section id="part-1-basic-operations-network-overlap" class="title-slide slide level1 center">
+<h1>Part 1: Basic Operations &amp; Network Overlap</h1>
 
 </section>
-<section id="the-company-social-system" class="slide level2 scrollable">
-<h2>The Company Social System</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:60%;">
+<section id="combining-social-relations" class="slide level2 scrollable">
+<h2>Combining Social Relations</h2>
 <ul>
-<li class="fragment">Suppose we study 12 employees at a small company and record two separate relationships:
+<li>In social network analysis, we often record <strong>multiple types of relationships</strong> for the same set of nodes (e.g., <em>Hanging Out</em> vs.&nbsp;<em>Co-working</em>).</li>
+<li>How do we combine, subtract, or intersect these overlapping structures?</li>
+<li>We use <strong>Basic Matrix Operations</strong> performed cell-by-cell on adjacency matrices of the same dimensions:
 <ol type="1">
-<li class="fragment"><strong>Hanging Out (<span class="math inline">\(\mathbf{H}\)</span>)</strong>: Whether they hang out together after work (Blue edges).</li>
-<li class="fragment"><strong>Co-working (<span class="math inline">\(\mathbf{C}\)</span>)</strong>: Whether they are assigned to work together in team projects (Red edges).</li>
+<li><strong>Matrix Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>)</strong>: Measures overall relationship volume.</li>
+<li><strong>Matrix Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>)</strong>: Isolates relational disagreements.</li>
+<li><strong>Hadamard Product (<span class="math inline">\(\mathbf{H} \circ \mathbf{C}\)</span>)</strong>: Extracts multiplex overlap.</li>
 </ol></li>
-<li class="fragment">How do we combine, compare, or intersect these overlapping structures?</li>
-<li class="fragment">We use <strong>Basic Matrix Operations</strong>: addition, subtraction, and the dot (element-wise) product.</li>
 </ul>
-</div><div class="column" style="width:40%;">
+</section>
+<section id="adjacency-matrices-mathbfh-and-mathbfc" class="slide level2">
+<h2>Adjacency Matrices: <span class="math inline">\(\mathbf{H}\)</span> and <span class="math inline">\(\mathbf{C}\)</span></h2>
+<div class="columns">
+<div class="column" style="width:50%;">
 <h3 id="hanging-out-mathbfh">Hanging Out (<span class="math inline">\(\mathbf{H}\)</span>)</h3>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center" width="336"></p>
-</figure>
-</div>
-</div>
-</div>
-<h3 id="co-working-mathbfc">Co-working (<span class="math inline">\(\mathbf{C}\)</span>)</h3>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="336"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="matrix-addition-mathbfh-mathbfc" class="slide level2">
-<h2>Matrix Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>)</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:55%;">
-<ul>
-<li class="fragment"><strong>Matrix Addition</strong>:
-<ul>
-<li class="fragment">Done element-by-element: <span class="math inline">\(S_{ij} = H_{ij} + C_{ij}\)</span>.</li>
-<li class="fragment">Requires <strong>identical dimensions</strong> (<span class="math inline">\(12 \times 12\)</span>).</li>
-</ul></li>
-<li class="fragment"><strong>Sociological Meaning</strong>:
-<ul>
-<li class="fragment">Cell value <span class="math inline">\(2\)</span>: Share <strong>both</strong> hangout and co-working ties.</li>
-<li class="fragment">Cell value <span class="math inline">\(1\)</span>: Share <strong>either</strong> hangout or co-working ties, but not both.</li>
-<li class="fragment">Cell value <span class="math inline">\(0\)</span>: Share no ties.</li>
-<li class="fragment">Represents a weighted network of <strong>overall relationship volume</strong>.</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:45%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="matrix-subtraction-absolute-value-mathbfh---mathbfc" class="slide level2">
-<h2>Matrix Subtraction &amp; Absolute Value (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>)</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:55%;">
-<ul>
-<li class="fragment"><strong>Matrix Subtraction</strong>:
-<ul>
-<li class="fragment">Done element-by-element: <span class="math inline">\(D_{ij} = |H_{ij} - C_{ij}|\)</span>.</li>
-<li class="fragment">Isolates cases where the two relations <strong>disagree</strong>.</li>
-</ul></li>
-<li class="fragment"><strong>Sociological Meaning</strong>:
-<ul>
-<li class="fragment">Cell value <span class="math inline">\(1\)</span>: Share <strong>exactly one</strong> of the ties (hangout or co-working), but <strong>not both</strong>.</li>
-<li class="fragment">Cell value <span class="math inline">\(0\)</span>: Share either both ties (<span class="math inline">\(1-1=0\)</span>), or neither (<span class="math inline">\(0-0=0\)</span>).</li>
-<li class="fragment">Represents the <strong>symmetric difference</strong> (green edges).</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:45%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="matrix-dot-hadamard-product-mathbfh-cdot-mathbfc" class="slide level2">
-<h2>Matrix Dot (Hadamard) Product (<span class="math inline">\(\mathbf{H} \cdot \mathbf{C}\)</span>)</h2>
-<div class="columns" data-align="center">
-<div class="column" style="width:55%;">
-<ul>
-<li class="fragment"><strong>Element-wise Multiplication</strong>:
-<ul>
-<li class="fragment">Cell product: <span class="math inline">\(P_{ij} = H_{ij} \times C_{ij}\)</span>.</li>
-<li class="fragment">Requires identical dimensions.</li>
-<li class="fragment">Also called the <strong>Hadamard product</strong> (distinct from standard matrix multiplication).</li>
-</ul></li>
-<li class="fragment"><strong>Sociological Meaning</strong>:
-<ul>
-<li class="fragment">Cell value <span class="math inline">\(1\)</span> only if <strong>both</strong> <span class="math inline">\(H_{ij} = 1\)</span> and <span class="math inline">\(C_{ij} = 1\)</span> (<span class="math inline">\(1 \times 1 = 1\)</span>).</li>
-<li class="fragment">Cell value <span class="math inline">\(0\)</span> otherwise.</li>
-<li class="fragment">Represents the <strong>overlap / intersection</strong> of networks (purple edges).</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:45%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section></section>
-<section>
-<section id="part-2-matrix-multiplication" class="title-slide slide level1 center">
-<h1>Part 2: Matrix Multiplication</h1>
-
-</section>
-<section id="standard-matrix-multiplication-mathbfa-times-mathbfb" class="slide level2">
-<h2>Standard Matrix Multiplication (<span class="math inline">\(\mathbf{A} \times \mathbf{B}\)</span>)</h2>
-<ul>
-<li class="fragment">Unlike the dot product, standard matrix multiplication is <strong>not element-wise</strong>; it involves multiplying rows of the left matrix by columns of the right matrix.</li>
-<li class="fragment"><strong>The Conformability Rule</strong>:
-<ul>
-<li class="fragment">You can only multiply two matrices if the <strong>inner dimensions match</strong>.</li>
-<li class="fragment">In other words, the number of columns in the first matrix (<span class="math inline">\(\mathbf{A}\)</span>) must equal the number of rows in the second matrix (<span class="math inline">\(\mathbf{B}\)</span>).</li>
-<li class="fragment"><span class="math display">\[\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}\]</span></li>
-</ul></li>
-<li class="fragment"><strong>The Product Dimensions</strong>:
-<ul>
-<li class="fragment">The resulting matrix has dimensions equal to the <strong>outer dimensions</strong> (Rows of left, Columns of right).</li>
-</ul></li>
-<li class="fragment"><strong>Non-Commutative</strong>:
-<ul>
-<li class="fragment">Matrix multiplication is order-dependent: <span class="math inline">\(\mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}\)</span>.</li>
-</ul></li>
-</ul>
-</section>
-<section id="step-by-step-multiplication" class="slide level2">
-<h2>Step-by-Step Multiplication</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<ul>
-<li>To compute cell <span class="math inline">\(c_{ij}\)</span> in the product matrix <span class="math inline">\(\mathbf{C}\)</span>:
-<ul>
-<li>Take row <span class="math inline">\(i\)</span> of left matrix <span class="math inline">\(\mathbf{A}\)</span> and column <span class="math inline">\(j\)</span> of right matrix <span class="math inline">\(\mathbf{B}\)</span>.</li>
-<li>Multiply corresponding elements and <strong>sum the products</strong> (calculating their dot product).</li>
-</ul></li>
-<li><strong>Example</strong>: Cell <span class="math inline">\(c_{11}\)</span> of <span class="math inline">\(\mathbf{A}_{5 \times 3} \times \mathbf{B}_{3 \times 5}\)</span>
-<ul>
-<li>Row 1 of <span class="math inline">\(\mathbf{A}\)</span>: <span class="math inline">\(\{3, 4, 5\}\)</span></li>
-<li>Column 1 of <span class="math inline">\(\mathbf{B}\)</span>: <span class="math inline">\(\{3, 4, 5\}\)</span></li>
-<li><span class="math display">\[c_{11} = (3 \times 3) + (4 \times 4) + (5 \times 5) = 9 + 16 + 25 = 50\]</span></li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:45%;">
-<h3 id="matrix-a-5-times-3">Matrix A (<span class="math inline">\(5 \times 3\)</span>)</h3>
 <div class="cell">
 <div class="cell-output-display">
-<table class="table table-striped table-condensed caption-top" style="margin-left: auto; margin-right: auto;">
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">5</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">7</td>
-<td style="text-align: center;">9</td>
-<td style="text-align: center;">3</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">6</td>
-<td style="text-align: center;">2</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">5</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">5</td>
-<td style="text-align: center;">4</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<h3 id="matrix-b-3-times-5">Matrix B (<span class="math inline">\(3 \times 5\)</span>)</h3>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-striped table-condensed caption-top" style="margin-left: auto; margin-right: auto;">
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">7</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">5</td>
-<td style="text-align: center;">2</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">9</td>
-<td style="text-align: center;">6</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">5</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">5</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">4</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div></div>
-</section>
-<section id="the-identity-matrix-mathbfi" class="slide level2">
-<h2>The Identity Matrix (<span class="math inline">\(\mathbf{I}\)</span>)</h2>
-<ul>
-<li class="fragment">The <strong>Identity Matrix (<span class="math inline">\(\mathbf{I}\)</span>)</strong> is a special square matrix of order <span class="math inline">\(N\)</span> with <span class="math inline">\(1\)</span>s on the main diagonal and <span class="math inline">\(0\)</span>s on the off-diagonal cells.</li>
-<li class="fragment">e.g., a <span class="math inline">\(4 \times 4\)</span> Identity Matrix:
-<ul>
-<li class="fragment"><span class="math display">\[
-\mathbf{I} =
-\begin{pmatrix}
-1 &amp; 0 &amp; 0 &amp; 0 \\
-0 &amp; 1 &amp; 0 &amp; 0 \\
-0 &amp; 0 &amp; 1 &amp; 0 \\
-0 &amp; 0 &amp; 0 &amp; 1
-\end{pmatrix}
-\]</span></li>
-</ul></li>
-<li class="fragment">It acts as the <strong>multiplicative identity</strong> in matrix algebra (equivalent to the number <span class="math inline">\(1\)</span> in standard math):
-<ul>
-<li class="fragment"><span class="math display">\[\mathbf{A} \times \mathbf{I} = \mathbf{A}\]</span></li>
-<li class="fragment"><span class="math display">\[\mathbf{I} \times \mathbf{A} = \mathbf{A}\]</span></li>
-</ul></li>
-</ul>
-</section></section>
-<section>
-<section id="part-3-advanced-matrix-operations" class="title-slide slide level1 center">
-<h1>Part 3: Advanced Matrix Operations</h1>
-
-</section>
-<section id="the-transpose-of-a-matrix-mathbfat" class="slide level2">
-<h2>The Transpose of a Matrix (<span class="math inline">\(\mathbf{A}^T\)</span>)</h2>
-<ul>
-<li class="fragment"><strong>The Transpose Operation</strong>:
-<ul>
-<li class="fragment">Reverses the row and column dimensions of a matrix.</li>
-<li class="fragment">Rows of the original matrix <span class="math inline">\(\mathbf{A}\)</span> become columns of its transpose <span class="math inline">\(\mathbf{A}^T\)</span>, and columns of <span class="math inline">\(\mathbf{A}\)</span> become rows of <span class="math inline">\(\mathbf{A}^T\)</span>.</li>
-<li class="fragment">If <span class="math inline">\(\mathbf{A}\)</span> is of dimensions <span class="math inline">\(R \times C\)</span>, then <span class="math inline">\(\mathbf{A}^T\)</span> is of dimensions <span class="math inline">\(C \times R\)</span>.</li>
-</ul></li>
-<li class="fragment"><strong>Crucial Property</strong>:
-<ul>
-<li class="fragment">The product of any matrix multiplied by its transpose is <strong>always defined and conformable</strong>:
-<ul>
-<li class="fragment"><span class="math inline">\(\mathbf{A}_{R \times C} \times \mathbf{A}^T_{C \times R} = \mathbf{B}_{R \times R}\)</span> (Symmetric Square Matrix).</li>
-<li class="fragment"><span class="math inline">\(\mathbf{A}^T_{C \times R} \times \mathbf{A}_{R \times C} = \mathbf{D}_{C \times C}\)</span> (Symmetric Square Matrix).</li>
-</ul></li>
-</ul></li>
-</ul>
-</section>
-<section id="matrix-transpose-multiplication-common-neighbors" class="slide level2">
-<h2>Matrix Transpose Multiplication: Common Neighbors</h2>
-<div class="columns">
-<div class="column" style="width:60%;">
-<ul>
-<li class="fragment">In social network analysis, multiplying an adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> by its transpose <span class="math inline">\(\mathbf{A}^T\)</span> yields an incredibly intuitive result:
-<ul>
-<li class="fragment"><strong>The Diagonal Cells</strong> (<span class="math inline">\(b_{ii}\)</span>): Count the total number of neighbors of node <span class="math inline">\(i\)</span> (the <strong>node degree</strong>).</li>
-<li class="fragment"><strong>The Off-Diagonal Cells</strong> (<span class="math inline">\(b_{ij}\)</span>): Count the exact <strong>number of common neighbors</strong> shared by row node <span class="math inline">\(i\)</span> and column node <span class="math inline">\(j\)</span>.</li>
-<li class="fragment"><span class="math display">\[\mathbf{A} \times \mathbf{A}^T = \mathbf{O}^{Common}\]</span></li>
-</ul></li>
-<li class="fragment">Essential for identifying structural similarity and cliques!</li>
-</ul>
-</div><div class="column" style="width:40%;">
-<h3 id="common-neighbors-mathbfa-times-mathbfat">Common Neighbors (<span class="math inline">\(\mathbf{A} \times \mathbf{A}^T\)</span>)</h3>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-striped table-condensed caption-top" style="font-size: 14px; margin-left: auto; margin-right: auto;">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
 <thead>
 <tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th"></th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
 <th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">K</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">L</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: left; font-weight: bold;">A</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-2-1.png" width="336"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div><div class="column" style="width:50%;">
+<h3 id="co-working-mathbfc">Co-working (<span class="math inline">\(\mathbf{C}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left; font-weight: bold;">B</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
@@ -498,186 +240,502 @@
 <td style="text-align: left; font-weight: bold;">C</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">D</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">E</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">F</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">G</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">H</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">I</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">J</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; font-weight: bold;">K</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; font-weight: bold;">L</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">3</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-4-1.png" width="336"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
 </div></div>
 </section>
-<section id="matrix-powers-mathbfan" class="slide level2">
-<h2>Matrix Powers (<span class="math inline">\(\mathbf{A}^n\)</span>)</h2>
+<section id="step-by-step-addition-mathbfh-mathbfc" class="slide level2">
+<h2>Step-by-Step Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>)</h2>
 <ul>
-<li class="fragment">You can multiply a square matrix by itself recursively to get <strong>matrix powers</strong>:
+<li><strong>Addition (<span class="math inline">\(s_{ij} = h_{ij} + c_{ij}\)</span>)</strong> adds corresponding cells:</li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{H} + \mathbf{C} = \begin{pmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{pmatrix} + \begin{pmatrix} 0 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 \\ 1 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
+</div>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{H} + \mathbf{C} = \begin{pmatrix} 0+0 &amp; 1+0 &amp; 0+1 \\ 1+0 &amp; 0+0 &amp; 1+1 \\ 0+1 &amp; 1+1 &amp; 0+0 \end{pmatrix} = \begin{pmatrix} 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; \mathbf{2} \\ 1 &amp; \mathbf{2} &amp; 0 \end{pmatrix}\]</span></p>
 <ul>
-<li class="fragment"><span class="math inline">\(\mathbf{A}^2 = \mathbf{A} \times \mathbf{A}\)</span></li>
-<li class="fragment"><span class="math inline">\(\mathbf{A}^3 = \mathbf{A} \times \mathbf{A} \times \mathbf{A}\)</span></li>
+<li><strong>Interpretation</strong>:
+<ul>
+<li>Value <strong>2</strong> represents a <strong>multiplex tie</strong> (both hang out and work together).</li>
+<li>Value <strong>1</strong> represents a <strong>uniplex tie</strong> (either hang out or work together, but not both).</li>
 </ul></li>
-<li class="fragment">In network science, the entries of the <span class="math inline">\(n^{th}\)</span> power of an adjacency matrix have a brilliant graph-theoretic meaning:
+</ul>
+</div>
+</section>
+<section id="visualizing-matrix-addition-mathbfh-mathbfc" class="slide level2">
+<h2>Visualizing Matrix Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="resulting-sum-matrix">Resulting Sum Matrix</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <ul>
-<li class="fragment"><strong>Off-Diagonal Cells (<span class="math inline">\(a^{n}_{ij}\)</span>)</strong>: Record the exact number of <strong>indirect connections (walks) of length <span class="math inline">\(n\)</span></strong> connecting node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span>.</li>
-<li class="fragment"><strong>Diagonal Cells (<span class="math inline">\(a^{n}_{ii}\)</span>)</strong>: Record the exact number of <strong>cycles of length <span class="math inline">\(n\)</span></strong> that start and end at node <span class="math inline">\(i\)</span>.</li>
+<li><strong>Red/Blue</strong> = Uniplex bonds.</li>
+<li><strong>Purple</strong> = Multiplex bonds.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-6-1.png" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="step-by-step-subtraction-mathbfh---mathbfc" class="slide level2">
+<h2>Step-by-Step Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>)</h2>
+<ul>
+<li><strong>Absolute Subtraction (<span class="math inline">\(d_{ij} = |h_{ij} - c_{ij}|\)</span>)</strong> isolates <strong>relational disagreement</strong>:</li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[|\mathbf{H} - \mathbf{C}| = \left| \begin{pmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{pmatrix} - \begin{pmatrix} 0 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 \\ 1 &amp; 1 &amp; 0 \end{pmatrix} \right|\]</span></p>
+</div>
+<div class="fragment">
+<p><span class="math display">\[|\mathbf{H} - \mathbf{C}| = \begin{pmatrix} |0-0| &amp; |1-0| &amp; |0-1| \\ |1-0| &amp; |0-0| &amp; |1-1| \\ |0-1| &amp; |1-1| &amp; |0-0| \end{pmatrix} = \begin{pmatrix} 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; \mathbf{0} \\ 1 &amp; \mathbf{0} &amp; 0 \end{pmatrix}\]</span></p>
+<ul>
+<li><strong>Symmetric Difference</strong>:
+<ul>
+<li>Value <strong>1</strong> = Connected by <em>exactly one</em> relationship.</li>
+<li>Value <strong>0</strong> = Connected by <em>both</em> (multiplex ties cancel out) or <em>neither</em>.</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="visualizing-subtraction-mathbfh---mathbfc" class="slide level2">
+<h2>Visualizing Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="uniplex-only-matrix">Uniplex-Only Matrix</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Multiplex tie between <strong>B and C</strong> is erased.</li>
+<li>Only uniplex green edges remain.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-8-1.png" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="step-by-step-hadamard-product-mathbfh-circ-mathbfc" class="slide level2">
+<h2>Step-by-Step Hadamard Product (<span class="math inline">\(\mathbf{H} \circ \mathbf{C}\)</span>)</h2>
+<ul>
+<li><strong>Hadamard / Dot Product (<span class="math inline">\(p_{ij} = h_{ij} \times c_{ij}\)</span>)</strong> represents <strong>relational intersection</strong>:</li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{H} \circ \mathbf{C} = \begin{pmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{pmatrix} \circ \begin{pmatrix} 0 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 \\ 1 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
+</div>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{H} \circ \mathbf{C} = \begin{pmatrix} 0 \times 0 &amp; 1 \times 0 &amp; 0 \times 1 \\ 1 \times 0 &amp; 0 \times 0 &amp; 1 \times 1 \\ 0 \times 1 &amp; 1 \times 1 &amp; 0 \times 0 \end{pmatrix} = \begin{pmatrix} 0 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; \mathbf{1} \\ 0 &amp; \mathbf{1} &amp; 0 \end{pmatrix}\]</span></p>
+<ul>
+<li><strong>Sociological Meaning</strong>:
+<ul>
+<li>Value <strong>1</strong> <em>only if</em> both <span class="math inline">\(h_{ij} = 1\)</span> and <span class="math inline">\(c_{ij} = 1\)</span> (<span class="math inline">\(1 \times 1 = 1\)</span>).</li>
+<li>Overlap is extracted; all uniplex ties are erased.</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="visualizing-the-hadamard-product-mathbfh-circ-mathbfc" class="slide level2">
+<h2>Visualizing the Hadamard Product (<span class="math inline">\(\mathbf{H} \circ \mathbf{C}\)</span>)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="multiplex-only-adjacency-matrix">Multiplex-Only Adjacency Matrix</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Retains <em>only</em> the shared co-working &amp; hangout tie.</li>
+<li>Network density drops, leaving only the purple edge.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-10-1.png" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-2-conformability-rules" class="title-slide slide level1 center">
+<h1>Part 2: Conformability Rules</h1>
+
+</section>
+<section id="standard-matrix-multiplication-mathbfa-times-mathbfb" class="slide level2">
+<h2>Standard Matrix Multiplication (<span class="math inline">\(\mathbf{A} \times \mathbf{B}\)</span>)</h2>
+<ul>
+<li>Unlike the element-wise Hadamard product, standard matrix multiplication is <strong>non-elementary</strong>.</li>
+<li>It involves multiplying the <strong>rows of the left matrix</strong> by the <strong>columns of the right matrix</strong>.</li>
+<li>Because rows and columns are matched, the sizes of the two multiplier matrices must follow a strict structural rule.</li>
+<li>This rule is called <strong>Conformability</strong>.</li>
+</ul>
+</section>
+<section id="the-conformability-rule" class="slide level2">
+<h2>The Conformability Rule</h2>
+<ul>
+<li><em>You can only multiply two matrices if the number of columns of the first matrix equals the number of rows of the second matrix.</em></li>
+<li>Put their dimensions side-by-side:</li>
+</ul>
+<p><span class="math display">\[\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}\]</span></p>
+<ul>
+<li><strong>Inner Dimensions</strong>: The bold “fives” are the inner dimensions. They <strong>must be identical</strong> for the multiplication to be defined (<strong>conformable</strong>).</li>
+<li><strong>Outer Dimensions</strong>: The “three” and “six” are the outer dimensions. They dictate the size of the resulting product matrix:</li>
+</ul>
+<p><span class="math display">\[\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}\]</span></p>
+</section>
+<section id="conformable-vs.-non-conformable" class="slide level2">
+<h2>Conformable vs.&nbsp;Non-Conformable</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="conformable-example">Conformable Example</h3>
+<ul>
+<li>Line up dimensions: <span class="math display">\[\mathbf{A}_{4 \times \mathbf{2}} \times \mathbf{B}_{\mathbf{2} \times 3}\]</span></li>
+<li><strong>Inner dimensions match</strong> (2 = 2).</li>
+<li>The multiplication is fully defined.</li>
+<li><strong>Product Matrix size</strong>: <span class="math display">\[\mathbf{C}_{4 \times 3}\]</span></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<h3 id="non-conformable-example">Non-Conformable Example</h3>
+<ul>
+<li>Line up dimensions: <span class="math display">\[\mathbf{A}_{3 \times \mathbf{4}} \times \mathbf{B}_{\mathbf{2} \times 3}\]</span></li>
+<li><strong>Inner dimensions clash</strong> (4 <span class="math inline">\(\neq\)</span> 2).</li>
+<li>This operation is <strong>mathematically impossible</strong>.</li>
+<li><strong>The Visual Reason</strong>: When you try to dot-multiply a row of 4 by a column of 2, you “run out of numbers” on the right, making the sum undefined.</li>
+</ul>
+</div></div>
+</section>
+<section id="matrix-multiplication-is-non-commutative" class="slide level2">
+<h2>Matrix Multiplication is Non-Commutative</h2>
+<ul>
+<li>In scalar math, order doesn’t matter: <span class="math inline">\(4 \times 3 = 3 \times 4\)</span>.</li>
+<li>In matrix algebra, order <strong>completely changes the structure</strong>:</li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{A}_{2 \times \mathbf{3}} \times \mathbf{B}_{\mathbf{3} \times 2} = \mathbf{C}_{2 \times 2} \quad \text{(Square 2x2 Matrix)}\]</span></p>
+</div>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{B}_{3 \times \mathbf{2}} \times \mathbf{A}_{\mathbf{2} \times 3} = \mathbf{D}_{3 \times 3} \quad \text{(Square 3x3 Matrix)}\]</span></p>
+<ul>
+<li>Changing the multiplication order changes both the conformability checks and the resulting network’s dimensions!</li>
+</ul>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-3-step-by-step-multiplication-mechanics" class="title-slide slide level1 center">
+<h1>Part 3: Step-by-Step Multiplication Mechanics</h1>
+
+</section>
+<section id="row-by-column-vector-multiplication" class="slide level2">
+<h2>Row-by-Column Vector Multiplication</h2>
+<ul>
+<li>Let’s multiply a <span class="math inline">\(2 \times 3\)</span> matrix <span class="math inline">\(\mathbf{A}\)</span> by a <span class="math inline">\(3 \times 2\)</span> matrix <span class="math inline">\(\mathbf{B}\)</span> to produce a <span class="math inline">\(2 \times 2\)</span> matrix <span class="math inline">\(\mathbf{C}\)</span>:</li>
+</ul>
+<p><span class="math display">\[\mathbf{A} = \begin{pmatrix} \mathbf{3} &amp; \mathbf{4} &amp; \mathbf{5} \\ 7 &amp; 6 &amp; 3 \end{pmatrix} \quad \mathbf{B} = \begin{pmatrix} \mathbf{3} &amp; 7 \\ \mathbf{4} &amp; 9 \\ \mathbf{5} &amp; 3 \end{pmatrix}\]</span></p>
+<ul>
+<li>To compute cell <span class="math inline">\(c_{ij}\)</span> in the target matrix, we multiply row <span class="math inline">\(i\)</span> of the left matrix by column <span class="math inline">\(j\)</span> of the right matrix, then sum the products.</li>
+<li>Let’s trace each of the 4 cells in the target matrix <span class="math inline">\(\mathbf{C}_{2 \times 2}\)</span> progressively.</li>
+</ul>
+</section>
+<section id="target-cell-c_11-row-1-column-1" class="slide level2">
+<h2>Target Cell <span class="math inline">\(c_{11}\)</span> (Row 1, Column 1)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-vectors">Highlighted Vectors</h3>
+<ul>
+<li><strong>Row 1 of A</strong>: <span class="math inline">\(\color{red}{\{3, 4, 5\}}\)</span></li>
+<li><strong>Column 1 of B</strong>: <span class="math inline">\(\color{blue}{\{3, 4, 5\}}\)</span></li>
+</ul>
+<h3 id="calculation">Calculation</h3>
+<p><span class="math display">\[c_{11} = (\color{red}{3} \times \color{blue}{3}) + (\color{red}{4} \times \color{blue}{4}) + (\color{red}{5} \times \color{blue}{5})\]</span> <span class="math display">\[c_{11} = 9 + 16 + 25 = \mathbf{50}\]</span></p>
+</div><div class="column" style="width:50%;">
+<h3 id="target-matrix-c">Target Matrix C</h3>
+<p><span class="math display">\[\mathbf{C} = \begin{pmatrix} \mathbf{50} &amp; ? \\ ? &amp; ? \end{pmatrix}\]</span></p>
+</div></div>
+</section>
+<section id="target-cell-c_12-row-1-column-2" class="slide level2">
+<h2>Target Cell <span class="math inline">\(c_{12}\)</span> (Row 1, Column 2)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-vectors-1">Highlighted Vectors</h3>
+<ul>
+<li><strong>Row 1 of A</strong>: <span class="math inline">\(\color{red}{\{3, 4, 5\}}\)</span></li>
+<li><strong>Column 2 of B</strong>: <span class="math inline">\(\color{blue}{\{7, 9, 3\}}\)</span></li>
+</ul>
+<h3 id="calculation-1">Calculation</h3>
+<p><span class="math display">\[c_{12} = (\color{red}{3} \times \color{blue}{7}) + (\color{red}{4} \times \color{blue}{9}) + (\color{red}{5} \times \color{blue}{3})\]</span> <span class="math display">\[c_{12} = 21 + 36 + 15 = \mathbf{72}\]</span></p>
+</div><div class="column" style="width:50%;">
+<h3 id="target-matrix-c-1">Target Matrix C</h3>
+<p><span class="math display">\[\mathbf{C} = \begin{pmatrix} 50 &amp; \mathbf{72} \\ ? &amp; ? \end{pmatrix}\]</span></p>
+</div></div>
+</section>
+<section id="target-cell-c_21-row-2-column-1" class="slide level2">
+<h2>Target Cell <span class="math inline">\(c_{21}\)</span> (Row 2, Column 1)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-vectors-2">Highlighted Vectors</h3>
+<ul>
+<li><strong>Row 2 of A</strong>: <span class="math inline">\(\color{red}{\{7, 6, 3\}}\)</span></li>
+<li><strong>Column 1 of B</strong>: <span class="math inline">\(\color{blue}{\{3, 4, 5\}}\)</span></li>
+</ul>
+<h3 id="calculation-2">Calculation</h3>
+<p><span class="math display">\[c_{21} = (\color{red}{7} \times \color{blue}{3}) + (\color{red}{6} \times \color{blue}{4}) + (\color{red}{3} \times \color{blue}{5})\]</span> <span class="math display">\[c_{21} = 21 + 24 + 15 = \mathbf{60}\]</span></p>
+</div><div class="column" style="width:50%;">
+<h3 id="target-matrix-c-2">Target Matrix C</h3>
+<p><span class="math display">\[\mathbf{C} = \begin{pmatrix} 50 &amp; 72 \\ \mathbf{60} &amp; ? \end{pmatrix}\]</span></p>
+</div></div>
+</section>
+<section id="target-cell-c_22-row-2-column-2" class="slide level2">
+<h2>Target Cell <span class="math inline">\(c_{22}\)</span> (Row 2, Column 2)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-vectors-3">Highlighted Vectors</h3>
+<ul>
+<li><strong>Row 2 of A</strong>: <span class="math inline">\(\color{red}{\{7, 6, 3\}}\)</span></li>
+<li><strong>Column 2 of B</strong>: <span class="math inline">\(\color{blue}{\{7, 9, 3\}}\)</span></li>
+</ul>
+<h3 id="calculation-3">Calculation</h3>
+<p><span class="math display">\[c_{22} = (\color{red}{7} \times \color{blue}{7}) + (\color{red}{6} \times \color{blue}{9}) + (\color{red}{3} \times \color{blue}{3})\]</span> <span class="math display">\[c_{22} = 49 + 54 + 9 = \mathbf{112}\]</span></p>
+</div><div class="column" style="width:50%;">
+<h3 id="finished-target-matrix-c">Finished Target Matrix C</h3>
+<p><span class="math display">\[\mathbf{C} = \begin{pmatrix} 50 &amp; 72 \\ 60 &amp; \mathbf{112} \end{pmatrix}\]</span></p>
+</div></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-4-dynamic-network-applications" class="title-slide slide level1 center">
+<h1>Part 4: Dynamic Network Applications</h1>
+
+</section>
+<section id="transpose-multiplication-common-neighbors" class="slide level2">
+<h2>Transpose Multiplication: Common Neighbors</h2>
+<ul>
+<li>If we multiply a network’s adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> by its transpose <span class="math inline">\(\mathbf{A}^T\)</span>: <span class="math display">\[\mathbf{A} \times \mathbf{A}^T = \mathbf{B}\]</span></li>
+<li>Why does this matrix operation reveal structural overlaps?</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>The Diagonal Cells (<span class="math inline">\(b_{ii}\)</span>)</strong>:
+<ul>
+<li>Corresponds to multiplying Row <span class="math inline">\(i\)</span> of <span class="math inline">\(\mathbf{A}\)</span> by Column <span class="math inline">\(i\)</span> of <span class="math inline">\(\mathbf{A}^T\)</span> (which is identical to Row <span class="math inline">\(i\)</span>).</li>
+<li>It squares each binary entry and sums them up.</li>
+<li><strong>Result</strong>: Counts the total number of neighbors of node <span class="math inline">\(i\)</span> (the <strong>node degree</strong>).</li>
+</ul></li>
+<li><strong>The Off-Diagonal Cells (<span class="math inline">\(b_{ij}\)</span>)</strong>:
+<ul>
+<li>Multiplies Row <span class="math inline">\(i\)</span> (node <span class="math inline">\(i\)</span>’s friendships) by Row <span class="math inline">\(j\)</span> (node <span class="math inline">\(j\)</span>’s friendships).</li>
+<li><strong>Result</strong>: Counts exactly how many <strong>common neighbors</strong> node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span> share!</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="tracing-common-neighbors-step-by-step" class="slide level2">
+<h2>Tracing Common Neighbors Step-by-Step</h2>
+<ul>
+<li>Let’s look at the adjacency matrix of a simple 4-node graph:</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="adjacency-matrix-a">Adjacency Matrix A</h3>
+<p><span class="math display">\[\mathbf{A} = \begin{pmatrix} 0 &amp; \mathbf{1} &amp; 0 &amp; 1 \\ 1 &amp; 0 &amp; 1 &amp; 0 \\ 0 &amp; \mathbf{1} &amp; 0 &amp; 0 \\ 1 &amp; 0 &amp; 0 &amp; 0 \end{pmatrix}\]</span> - Let’s check common neighbors between <strong>node 1 and node 3</strong>.</p>
+</div><div class="column" style="width:50%;">
+<h3 id="vector-multiplications">Vector Multiplications</h3>
+<ul>
+<li><strong>Row 1 (Node 1)</strong>: <span class="math inline">\(\color{red}{\{0, 1, 0, 1\}}\)</span></li>
+<li><strong>Col 3 (Node 3)</strong>: <span class="math inline">\(\color{blue}{\{0, 1, 0, 0\}}\)</span></li>
+</ul>
+<h3 id="calculation-4">Calculation</h3>
+<p><span class="math display">\[\color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{1} + \color{red}{0}\cdot\color{blue}{0} + \color{red}{1}\cdot\color{blue}{0} = \mathbf{1}\]</span></p>
+<ul>
+<li>Only node 2 (<span class="math inline">\(1 \times 1 = 1\)</span>) is shared.</li>
+<li><strong>Takeaway</strong>: Node 2 is the single common neighbor shared by 1 and 3.</li>
+</ul>
+</div></div>
+</section>
+<section id="matrix-powers-mathbfan-paths-in-networks" class="slide level2">
+<h2>Matrix Powers (<span class="math inline">\(\mathbf{A}^n\)</span>) &amp; Paths in Networks</h2>
+<ul>
+<li>Multiplying a square adjacency matrix by itself recursively reveals <strong>indirect connections</strong>:
+<ul>
+<li><span class="math inline">\(\mathbf{A}^2 = \mathbf{A} \times \mathbf{A}\)</span></li>
+<li><span class="math inline">\(\mathbf{A}^3 = \mathbf{A} \times \mathbf{A} \times \mathbf{A}\)</span></li>
+</ul></li>
+<li>In network science, the entries of the <span class="math inline">\(n^{th}\)</span> power of an adjacency matrix have a precise graph-theoretic meaning:
+<ul>
+<li><strong>Off-Diagonal Cells (<span class="math inline">\(a^{n}_{ij}\)</span>)</strong>: Record the exact number of <strong>indirect connections (walks) of length <span class="math inline">\(n\)</span></strong> connecting node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span>.</li>
+<li><strong>Diagonal Cells (<span class="math inline">\(a^{n}_{ii}\)</span>)</strong>: Record the exact number of <strong>cycles of length <span class="math inline">\(n\)</span></strong> that start and end at node <span class="math inline">\(i\)</span>.</li>
 </ul></li>
 </ul>
 </section>
-<section id="walks-and-cycles-mathbfa2-mathbfa3" class="slide level2">
-<h2>Walks and Cycles: <span class="math inline">\(\mathbf{A}^2\)</span> &amp; <span class="math inline">\(\mathbf{A}^3\)</span></h2>
+<section id="walks-of-length-2-mathbfa2" class="slide level2">
+<h2>Walks of Length 2: <span class="math inline">\(\mathbf{A}^2\)</span></h2>
 <ul>
-<li class="fragment"><strong>Adjacency Matrix Squared (<span class="math inline">\(\mathbf{A}^2\)</span>)</strong>:
+<li><strong>The Squared Adjacency Matrix (<span class="math inline">\(\mathbf{A}^2\)</span>)</strong>:
 <ul>
-<li class="fragment"><strong>Off-diagonals</strong> represent the number of <strong>walks of length 2</strong> between nodes.</li>
-<li class="fragment"><strong>Diagonals</strong> represent the number of walks of length 2 starting and ending at the same node. This is equal to the <strong>node degree</strong>!</li>
+<li><strong>Off-diagonals</strong> represent the number of <strong>walks of length 2</strong> between nodes.</li>
+<li><strong>Diagonals</strong> represent the number of walks of length 2 starting and ending at the same node.</li>
+<li>This is equal to the <strong>node degree</strong> (edges incident to the node)!</li>
 </ul></li>
-<li class="fragment"><strong>Adjacency Matrix Cubed (<span class="math inline">\(\mathbf{A}^3\)</span>)</strong>:
+</ul>
+<div class="fragment">
+<h3 id="simple-trace-example">Simple Trace Example</h3>
 <ul>
-<li class="fragment"><strong>Off-diagonals</strong> represent the number of <strong>walks of length 3</strong> between nodes.</li>
-<li class="fragment"><strong>Diagonals</strong> represent cycles of length 3 (triangles).</li>
-<li class="fragment">Since each triangle can be traversed in two directions, the diagonal cell divided by 2 (<span class="math inline">\(\frac{a^3_{ii}}{2}\)</span>) gives the exact <strong>number of triangles (cliques of size 3)</strong> that node <span class="math inline">\(i\)</span> belongs to!</li>
+<li>To go from node <span class="math inline">\(i \to k \to j\)</span> of length 2:
+<ul>
+<li>Node <span class="math inline">\(k\)</span> must be connected to <em>both</em> <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</li>
+<li>Thus, walks of length 2 between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is equivalent to counting their <strong>common neighbors</strong>!</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="walks-of-length-3-mathbfa3" class="slide level2">
+<h2>Walks of Length 3: <span class="math inline">\(\mathbf{A}^3\)</span></h2>
+<ul>
+<li><strong>The Cubed Adjacency Matrix (<span class="math inline">\(\mathbf{A}^3\)</span>)</strong>:
+<ul>
+<li><strong>Off-diagonals</strong> represent the number of <strong>walks of length 3</strong> between nodes.</li>
+<li><strong>Diagonals</strong> represent cycles of length 3 (triangles).</li>
+<li>A cycle of length 3 represents a <strong>clique of size 3</strong>.</li>
+<li>Since each triangle can be traversed in two directions (clockwise and counterclockwise), the diagonal cell divided by 2 gives the exact <strong>number of triangles (cliques of size 3)</strong> that node <span class="math inline">\(i\)</span> belongs to!</li>
+<li><span class="math display">\[\text{Triangles}(i) = \frac{a^3_{ii}}{2}\]</span></li>
 </ul></li>
 </ul>
 </section>
@@ -687,30 +745,35 @@
 <li>Plotting the network with edge sizes and color intensities proportional to the entries of <span class="math inline">\(\mathbf{A}^3\)</span> reveals distinct hangout cliques sharing multiple indirect pathways:</li>
 </ul>
 
-<img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section></section>
+<img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section class="slide level2">
+
+</section></section>
 <section>
-<section id="part-4-conclusion-summary" class="title-slide slide level1 center">
-<h1>Part 4: Conclusion &amp; Summary</h1>
+<section id="part-5-summary-conclusion" class="title-slide slide level1 center">
+<h1>Part 5: Summary &amp; Conclusion</h1>
 
 </section>
 <section id="summary-of-matrix-algebraic-power" class="slide level2">
 <h2>Summary of Matrix Algebraic Power</h2>
 <ul>
-<li class="fragment"><strong>Basic operations combine relationships</strong>:
+<li><strong>Basic operations combine relationships</strong>:
 <ul>
-<li class="fragment">Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>) counts tie volume; Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>) highlights relational disagreements; Dot product (<span class="math inline">\(\mathbf{H} \cdot \mathbf{C}\)</span>) extracts overlap.</li>
+<li>Addition (<span class="math inline">\(\mathbf{H} + \mathbf{C}\)</span>) counts overall tie volume.</li>
+<li>Subtraction (<span class="math inline">\(|\mathbf{H} - \mathbf{C}|\)</span>) highlights relational disagreements.</li>
+<li>Hadamard Product (<span class="math inline">\(\mathbf{H} \circ \mathbf{C}\)</span>) extracts multiplex intersections.</li>
 </ul></li>
-<li class="fragment"><strong>Conformability dictates multiplication</strong>:
+<li><strong>Conformability dictates multiplication</strong>:
 <ul>
-<li class="fragment">Multiplications are only defined if inner dimensions match.</li>
+<li>Operations are only defined if inner dimensions match.</li>
 </ul></li>
-<li class="fragment"><strong>Multiplying by Transpose reveals overlaps</strong>:
+<li><strong>Multiplying by Transpose reveals common friends</strong>:
 <ul>
-<li class="fragment"><span class="math inline">\(\mathbf{A} \times \mathbf{A}^T\)</span> computes common neighbors (off-diagonals) and degrees (diagonals).</li>
+<li><span class="math inline">\(\mathbf{A} \times \mathbf{A}^T\)</span> computes common neighbors (off-diagonals) and degrees (diagonals).</li>
 </ul></li>
-<li class="fragment"><strong>Matrix Powers map paths</strong>:
+<li><strong>Matrix Powers map indirect paths</strong>:
 <ul>
-<li class="fragment"><span class="math inline">\(\mathbf{A}^n\)</span> enumerates walks of length <span class="math inline">\(n\)</span>. <span class="math inline">\(\mathbf{A}^2\)</span> diagonals are degrees; <span class="math inline">\(\mathbf{A}^3\)</span> diagonals are twice the number of triangles.</li>
+<li><span class="math inline">\(\mathbf{A}^n\)</span> enumerates walks of length <span class="math inline">\(n\)</span>. <span class="math inline">\(\mathbf{A}^2\)</span> diagonals are degrees; <span class="math inline">\(\mathbf{A}^3\)</span> diagonals are twice the number of triangles (cliques).</li>
 </ul></li>
 </ul>
 
