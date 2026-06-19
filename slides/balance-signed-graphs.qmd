@@ -1,0 +1,884 @@
+---
+title: "Balance Theory and Signed Graphs"
+subtitle: "The Structure and Dynamics of Valenced Networks"
+format:
+  revealjs:
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+# Part 1: The Relational Basis of Valenced Networks & Dyadic Balance
+
+---
+
+## Slide 1: Balance Theory and Signed Graphs
+### The Local and Global Dynamics of Sentiment Networks
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- In social life, relationships are not just present or absent; they are also **emotional** and **evaluative**.
+- We study these using **sentiment networks**, which model liking, disliking, conflict, and cooperation.
+- **Balance Theory** is the foundational framework linking:
+  - Local, psychological micro-motives.
+  - Global, macro-structural network patterns (like polarization).
+- Today we will cover: Dyadic Balance, Triadic Balance, Structural Balance, Clusterability, and Modern Extensions.
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  A((A)) -- "+" --> B((B))
+  B -- "+" --> C((C))
+  C -- "-" --> A
+  
+  style A fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style B fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style C fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 2: The Anatomy of Sentiment Networks
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- **Valenced ties** are links representing positive ($+$) or negative ($-$) feelings, evaluations, or behaviors.
+  - *Positive valence*: Liking, helping, admiring, loving.
+  - *Negative valence*: Hating, bullying, fighting, distrusting.
+- A **signed graph** features a set of vertices $V$ and two disjoint sets of edges:
+  - Positive links ($E^+$) and negative links ($E^-$).
+- These networks represent stable social attitudes rather than fleeting events.
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  Ego((Ego)) -- "+ (Liking/Helping)" --> B((Alter 1))
+  Ego -- "- (Disliking/Conflict)" --> C((Alter 2))
+  
+  style Ego fill:#fff,stroke:#2c3e50,stroke-width:2px
+  style B fill:#d4edda,stroke:#28a745,stroke-width:2px
+  style C fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 3: Fritz Heider's Dyadic Balance
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Developed by social psychologist **Fritz Heider** (1946) to examine how ties cohere within a single pair.
+- Distinction between:
+  - **Symmetric ties**: Relations implied by similarity or co-membership (e.g., sharing a workspace).
+  - **Asymmetric ties**: Directional sentiments (e.g., liking).
+- **First Proposition**: Similarity breeds liking. Sharing co-membership or space breeds positive asymmetric ties ($aSb \implies aLb$).
+- Forms a **positive feedback loop**: We spend more time with those we like ($aLb \implies aSb$).
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  subgraph Similarity [Symmetric Similarity]
+    A1((a)) ---|Same Group| B1((b))
+  end
+  subgraph Sentiment [Asymmetric Sentiment]
+    A2((a)) -- "Liking (+)" --> B2((b))
+  end
+  Similarity --> Sentiment
+  
+  style A1 fill:#ecf0f1,stroke:#2c3e50
+  style B1 fill:#ecf0f1,stroke:#2c3e50
+  style A2 fill:#ecf0f1,stroke:#2c3e50
+  style B2 fill:#ecf0f1,stroke:#2c3e50
+```
+:::
+:::
+
+---
+
+## Slide 4: Proximity, Similarity, and Multiplexity
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Over time, people accumulate multiple types of ties, leading to **multiplex ties** ("multistranded" connections).
+- **Principle of Propinquity** (Newcomb 1956): Sharing physical space or social contexts automatically facilitates acquaintance and liking.
+  - Proximity breeds interaction, which breeds similarity, which in turn breeds liking, support, and advice.
+- Relationships transition from uniplex (single-stranded) to multiplex.
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  A((A)) ===|Symmetric (Co-workers)| B((B))
+  A -.->|Asymmetric Liking| B
+  B -.->|Asymmetric Liking| A
+  A ==>|Symmetric (Lunch Partner)| B
+  
+  style A fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style B fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 5: Dyadic Balance and Cognitive Tension
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- **Second Proposition**: We strive to maintain positive asymmetric ties with those we are similar to.
+- Situations where similarity is paired with dislike ($aSb \land aDb$) are **unbalanced**.
+  - Creates **cognitive inconsistency** and an unpleasant state of **affective tension** (e.g., hating a forced co-worker).
+- **Resolution of Imbalance**:
+  - Break the similarity tie (e.g., quit the job).
+  - Transform the dislike into liking (e.g., adapt to like the co-worker).
+- Represented in a **signed adjacency matrix** using $\{+1, -1, 0\}$.
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  A((a)) ---|Symmetric S| B((b))
+  A -- "Dislike (-)" --> B
+  
+  style A fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
+  style B fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
+  linkStyle 1 stroke:#dc3545,stroke-width:2px,stroke-dasharray: 5, 5;
+```
+:::
+:::
+
+---
+
+# Part 2: Triadic Balance Theory
+
+---
+
+## Slide 6: Fritz Heider’s P-O-Q Triad
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- To analyze triads, Heider extended dyadic balance to three distinct elements: the **P-O-Q Triad**.
+- **Person (P)**: The focal individual from whose cognitive perspective the triad is analyzed.
+- **Other (O)**: Towards whom P holds a directed sentiment.
+- **Third Party / Object (Q)**: Another actor, group, organization, or abstract cultural idea.
+- Sentiments are modeled via **directed, signed edges** ($+$ or $-$) going from P to O, P to Q, and O to Q.
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  P((P <br> Focal)) -- "+ / -" --> O((O <br> Other))
+  P -- "+ / -" --> Q((Q <br> Object))
+  O -- "+ / -" --> Q
+  
+  style P fill:#d4edda,stroke:#28a745,stroke-width:2px
+  style O fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style Q fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 7: The Mathematics of Triadic Balance
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- A triad is **balanced** if the product of its three edge signs is positive:
+  $$\text{Sign}(P, O) \times \text{Sign}(O, Q) \times \text{Sign}(P, Q) = +1$$
+- **Simplified Identification Rule**: A triad is balanced if it has an **even number of negative links** (exactly zero or two).
+- Balanced configurations are stable and represent **harmonious sentiments**, creating no cognitive tension.
+:::
+:::
+
+::: {.column width="50%"}
+| Edge P-O | Edge O-Q | Edge P-Q | Product | State |
+| :---: | :---: | :---: | :---: | :---: |
+| $+$ | $+$ | $+$ | $+1$ | **Balanced** |
+| $-$ | $-$ | $+$ | $+1$ | **Balanced** |
+| $+$ | $-$ | $-$ | $+1$ | **Balanced** |
+| $-$ | $+$ | $-$ | $+1$ | **Balanced** |
+| $+$ | $+$ | $-$ | $-1$ | **Unbalanced** |
+| $-$ | $+$ | $+$ | $-1$ | **Unbalanced** |
+| $+$ | $-$ | $+$ | $-1$ | **Unbalanced** |
+| $-$ | $-$ | $-$ | $-1$ | **Unbalanced** |
+:::
+:::
+
+---
+
+## Slide 8: Balanced Triads: The 4 Stable Configurations
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+1. **"A friend of a friend is a friend"** ($+ \times + \times + = +1$)
+   - *Example*: You (P) and friend (O) both like the same classmate (Q).
+2. **"An enemy of an enemy is a friend"** ($- \times - \times + = +1$)
+   - *Example*: You (P) and ally (Q) form a bond against a mutual rival (O).
+3. **"A friend of an enemy is an enemy"** ($- \times + \times - = +1$)
+   - *Example*: Your rival (O) has a close friend (Q); you start to dislike Q.
+4. **"An enemy of a friend is an enemy"** ($+ \times - \times - = +1$)
+   - *Example*: Your country ally (O) declares war on country (Q); you also oppose Q.
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  subgraph Triad 1 [Friend of Friend]
+    P1((P)) -- "+" --> O1((O))
+    O1 -- "+" --> Q1((Q))
+    P1 -- "+" --> Q1
+  end
+  subgraph Triad 2 [Enemy of Enemy]
+    P2((P)) -- "-" --> O2((O))
+    O2 -- "-" --> Q2((Q))
+    P2 -- "+" --> Q2
+  end
+  
+  style P1 fill:#d4edda,stroke:#28a745,stroke-width:2px
+  style O1 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style Q1 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style P2 fill:#d4edda,stroke:#28a745,stroke-width:2px
+  style O2 fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+  style Q2 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 9: Unbalanced Triads: The 4 Unstable Configurations
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+1. **"A friend of my friend is my enemy"** ($+ \times + \times - = -1$)
+   - *Example*: Friend (O) likes (Q), whom you (P) dislike.
+2. **"An enemy of a friend is a friend"** ($+ \times - \times + = -1$)
+   - *Example*: Partner (O) hates Marvel movies (Q), which you (P) love.
+3. **"A friend of an enemy is a friend"** ($- \times + \times + = -1$)
+   - *Example*: You (P) and your rival (O) are both attracted to the same person (Q).
+4. **"An enemy of my enemy is also my enemy"** ($- \times - \times - = -1$)
+   - *Example*: You (P) dislike both the Yankees (O) and Red Sox (Q).
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  subgraph Triad 3 [Friend is Enemy]
+    P3((P)) -- "+" --> O3((O))
+    O3 -- "+" --> Q3((Q))
+    P3 -- "-" --> Q3
+  end
+  subgraph Triad 4 [All Enemies]
+    P4((P)) -- "-" --> O4((O))
+    O4 -- "-" --> Q4((Q))
+    P4 -- "-" --> Q4
+  end
+  
+  style P3 fill:#fff,stroke:#2c3e50,stroke-width:2px
+  style O3 fill:#fff,stroke:#2c3e50,stroke-width:2px
+  style Q3 fill:#fff,stroke:#2c3e50,stroke-width:2px
+  style P4 fill:#fff,stroke:#2c3e50,stroke-width:2px
+  style O4 fill:#fff,stroke:#2c3e50,stroke-width:2px
+  style Q4 fill:#fff,stroke:#2c3e50,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 10: Tension and Change
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Unbalanced configurations produce psychological discomfort, making them **socially unstable**.
+- This discomfort acts as an **engine of change**, driving social networks to transition toward balanced configurations.
+- Transition occurs when the focal actor (P) changes the **sign/valence** of their ties to resolve tension.
+- Balanced configurations, having no tension, are stable **equilibrium states**.
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  A["Unbalanced Triad <br> (P+O, O+Q, P-Q) <br> [TENSION]"]
+  B["Balanced Triad <br> (P-O, O+Q, P-Q)"]
+  C["Balanced Triad <br> (P+O, O+Q, P+Q)"]
+  
+  A -->|End friendship with O| B
+  A -->|Make peace with Q| C
+  
+  style A fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+  style B fill:#d4edda,stroke:#28a745,stroke-width:1px
+  style C fill:#d4edda,stroke:#28a745,stroke-width:1px
+```
+:::
+:::
+
+---
+
+## Slide 11: Cross-Pressure
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- **Cross-pressure** (Davis 1963) occurs when an individual experiences conflicting social relations, leaving them caught between opposing forces.
+- When P is positively tied to O1 and O2 ($+$, $+$), but O1 likes Q and O2 dislikes Q.
+- According to balance theory, P is forced to develop an **ambivalent attitude** ($+/-$) toward Q.
+- To resolve this tension, P must either distance themselves from one friend or convince them to reconcile.
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  P((P <br> Torn)) -- "+" --> O1((O1))
+  P -- "+" --> O2((O2))
+  O1 -- "Likes (+)" --> Q((Q))
+  O2 -- "Dislikes (-)" --> Q
+  P -.->|Ambivalent ?| Q
+  
+  style P fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
+  style O1 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style O2 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style Q fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 12: Cross-Pressure in Real-Life: Politics
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Political preferences provide a classic illustration of cross-pressure.
+- Imagine you (P) have a brother (O1) who is a passionate Democrat ($+$) and a sister (O2) who strongly opposes them ($-$).
+- Because you have positive bonds with both, you find yourself cross-pressured regarding the Democrats (Q).
+- This pressure produces **social ambivalence**, often leading individuals to identify as moderates or **independents** with no strong partisan affiliation.
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  P((You)) -- "+" --> B((Brother))
+  P -- "+" --> S((Sister))
+  B -- "Support (+)" --> D{Democrats}
+  S -- "Oppose (-)" --> D
+  P -.->|Ambivalence| D
+  
+  style P fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
+  style B fill:#ecf0f1,stroke:#2c3e50,stroke-width:1px
+  style S fill:#ecf0f1,stroke:#2c3e50,stroke-width:1px
+  style D fill:#e2e8f0,stroke:#64748b,stroke-width:2px
+```
+:::
+:::
+
+---
+
+# Part 3: Structural Balance Theory & Whole-Network Polarization
+
+---
+
+## Slide 13: Structural Balance at the Network Level
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Balance theory can be scaled up from individual cognitive triads to the **whole network** level.
+- This extension is known as **Structural Balance Theory**.
+- In its original formulation, it applies to **complete signed graphs**, where every pair of actors is connected by either a positive or negative link.
+- In a **signed adjacency matrix** representation of a signed graph:
+  - Positive links are represented by $+1$.
+  - Negative links are represented by $-1$.
+  - Non-adjacent nodes are represented by $0$.
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  A((A)) -- "+" --> B((B))
+  B -- "+" --> C((C))
+  C -- "-" --> D((D))
+  D -- "+" --> E((E))
+  A -- "-" --> E
+  
+  style A fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style B fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style C fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style D fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+  style E fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 14: The Fundamental Theorem of Structural Balance
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Discovered by mathematicians Dorwin **Cartwright** and Frank **Harary** in 1956.
+- **Theorem**: If a complete signed graph contains *only* balanced triads, then the entire graph is balanced.
+- **The Partition Rule**: Any completely balanced signed graph can be divided into exactly **two polarized factions** such that:
+  1. Only positive links exist *within* each faction.
+  2. Only negative links exist *between* the two factions.
+- Shows that structural balance is equivalent to perfect **group polarization**.
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  subgraph Faction 1
+    A((A)) -- "+" --- B((B))
+    B -- "+" --- C((C))
+    C -- "+" --- A
+  end
+  subgraph Faction 2
+    D((D)) -- "+" --- E((E))
+    E -- "+" --- F((F))
+    F -- "+" --- D
+  end
+  
+  Faction 1 ---|All Negative Links (-)| Faction 2
+  
+  style A fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+  style B fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+  style C fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+  style D fill:#c084fc,stroke:#a855f7,stroke-width:2px
+  style E fill:#c084fc,stroke:#a855f7,stroke-width:2px
+  style F fill:#c084fc,stroke:#a855f7,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 15: Signed Matrices & Faction Detection
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- How can we mathematically recover and identify factions in a balanced network?
+- Rearrange the rows and columns of the **signed adjacency matrix** such that nodes in the same faction are adjacent.
+- This permutation yields a **block-diagonal signed matrix**.
+- Inside the diagonal blocks, cells are $+1$ (internal cohesion), whereas off-diagonal blocks are entirely $-1$ (external conflict).
+:::
+:::
+
+::: {.column width="50%"}
+### Faction Block-Diagonal Matrix
+$$M = \begin{pmatrix}
+  \begin{array}{ccc|ccc}
+    \mathbf{+} & \mathbf{+} & \mathbf{+} & - & - & - \\
+    \mathbf{+} & \mathbf{+} & \mathbf{+} & - & - & - \\
+    \mathbf{+} & \mathbf{+} & \mathbf{+} & - & - & - \\ \hline
+    - & - & - & \mathbf{+} & \mathbf{+} & \mathbf{+} \\
+    - & - & - & \mathbf{+} & \mathbf{+} & \mathbf{+} \\
+    - & - & - & \mathbf{+} & \mathbf{+} & \mathbf{+}
+  \end{array}
+\end{pmatrix}$$
+:::
+:::
+
+---
+
+## Slide 16: Cycles and Paths in Balanced Graphs
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Partitioning has direct, rigid consequences for paths and cycles in complete graphs:
+- **Cycles**: *All cycles in a balanced signed graph must have a positive sign product.*
+  - Staying inside a group utilizes only positive links.
+  - Spanning across groups requires crossing the boundary an *even* number of times, multiplying an even number of negative signs to yield a positive product.
+- **Paths**:
+  - Paths ending in the *same* group have a **positive product**.
+  - Paths ending in *different* groups have a **negative product** (due to odd boundary crossings).
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  subgraph Group 1 [Group 1]
+    A((Start)) -- "+" --> B((Node B))
+  end
+  subgraph Group 2 [Group 2]
+    C((Node C)) -- "+" --> D((End))
+  end
+  B -- "-" --> C
+  D -- "-" --> A
+  
+  style A fill:#3b82f6,color:#fff
+  style B fill:#ecf0f1,stroke:#2c3e50
+  style C fill:#ecf0f1,stroke:#2c3e50
+  style D fill:#a855f7,color:#fff
+```
+:::
+:::
+
+---
+
+## Slide 17: Empirical Case Study: Political Blogs
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Balanced states are **not** inherently "harmonious" or socially desirable.
+- They describe stable **polarization and conflict**.
+- **Adamic & Glance (2005)** examined the hyperlinking network of political bloggers during the 2004 election.
+- Discovered two massive, highly connected factions (Liberals and Conservatives).
+- Bloggers linked supportive-positive links inside their group, but hostile-negative links across the political divide, establishing an **echo chamber** structure.
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  subgraph Liberal [Liberal Faction]
+    L1((L1)) --- L2((L2))
+    L2 --- L3((L3))
+  end
+  subgraph Conservative [Conservative Faction]
+    C1((C1)) --- C2((C2))
+    C2 --- C3((C3))
+  end
+  
+  L2 -.->|Conflict link| C1
+  L3 -.->|Conflict link| C3
+  
+  style L1 fill:#3b82f6,color:#fff
+  style L2 fill:#3b82f6,color:#fff
+  style L3 fill:#3b82f6,color:#fff
+  style C1 fill:#ef4444,color:#fff
+  style C2 fill:#ef4444,color:#fff
+  style C3 fill:#ef4444,color:#fff
+```
+:::
+:::
+
+---
+
+# Part 4: Clusterability and Multi-Group Partitioning
+
+---
+
+## Slide 18: Beyond Two Factions: Davis's Theorem
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Cartwright & Harary's model splits networks into exactly *two* opposing factions.
+- This is too restrictive for many real-world networks, such as school cliques, gangs, or multi-party politics.
+- In 1967, sociologist **James Davis** introduced his **Clusterability Theorem**.
+- He generalized structural balance so that a network could fragment into **any number of distinct clusters** ($k \ge 1$), rather than just two.
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  subgraph Cluster 1
+    A((A)) --- B((B))
+  end
+  subgraph Cluster 2
+    C((C)) --- D((D))
+  end
+  subgraph Cluster 3
+    E((E)) --- F((F))
+  end
+  
+  Cluster 1 -.->|Negative| Cluster 2
+  Cluster 2 -.->|Negative| Cluster 3
+  Cluster 3 -.->|Negative| Cluster 1
+  
+  style A fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+  style B fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+  style C fill:#c084fc,stroke:#a855f7,stroke-width:2px
+  style D fill:#c084fc,stroke:#a855f7,stroke-width:2px
+  style E fill:#fde047,stroke:#ca8a04,stroke-width:2px
+  style F fill:#fde047,stroke:#ca8a04,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 19: The All-Negative Triad Rule
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Classical balance considers a triad with three negative ties (everyone hating everyone else) to be *unbalanced*.
+- Davis argued that in highly factionalized contexts, it is perfectly stable for three individuals from completely different, competing groups to dislike one another.
+- **The Clustering Criterion**: A graph is **clusterable** if and only if it contains **no triads with exactly one negative tie**.
+- Permitted triads under Davis: all-positive ($+1$), two-negatives ($+1$), or all-negatives ($-1$).
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  subgraph Clusterable Triads [Permitted under Davis]
+    T1((+)) -- "+" --> T2((+))
+    T2 -- "+" --> T3((+))
+    T3 -- "+" --> T1
+    
+    U1((+)) -- "-" --> U2((+))
+    U2 -- "-" --> U3((+))
+    U3 -- "+" --> U1
+    
+    V1((+)) -- "-" --> V2((+))
+    V2 -- "-" --> V3((+))
+    V3 -- "-" --> V1
+  end
+  
+  style T1 fill:#d4edda,stroke:#28a745
+  style T2 fill:#d4edda,stroke:#28a745
+  style T3 fill:#d4edda,stroke:#28a745
+  style U1 fill:#f8d7da,stroke:#dc3545
+  style U2 fill:#f8d7da,stroke:#dc3545
+  style U3 fill:#d4edda,stroke:#28a745
+  style V1 fill:#f8d7da,stroke:#dc3545
+  style V2 fill:#f8d7da,stroke:#dc3545
+  style V3 fill:#f8d7da,stroke:#dc3545
+```
+:::
+:::
+
+---
+
+## Slide 20: Structural Comparison: Balance vs. Clusterability
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Compare how local triadic configurations determine global network partitions.
+- Allowing the all-negative triad shifts the global topology from:
+  - Strict **bipartite polarization** to **k-partite fragmentation**.
+- Both theories show that local psychological rules predict macro structures.
+:::
+:::
+
+::: {.column width="50%"}
+| Property | Cartwright-Harary Balance | James Davis Clusterability |
+| :--- | :---: | :---: |
+| **Permitted Triads** | 0 or 2 negative links | 0, 2, or 3 negative links |
+| **Forbidden Triads** | 1 or 3 negative links | Exactly 1 negative link |
+| **Global Topology** | Exactly **two factions** ($k=2$) | Any number of **clusters** ($k \ge 1$) |
+| **Within-Cluster Ties** | Entirely positive ($+$) | Entirely positive ($+$) |
+| **Between-Cluster Ties** | Entirely negative ($-$) | Entirely negative ($-$) |
+:::
+:::
+
+---
+
+# Part 5: Theoretical Extensions of Balance: Valenced Interaction Theories
+
+---
+
+## Slide 21: Karma Theory
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- A modern social psychological theory predicting ties based on generalized feedback.
+- Core Principle: "You get what you spread out!"
+- Proposes that individuals tend to receive the sentiments they broadcast to the network.
+- Predicts **valenced indegree** (received sentiments) based on **valenced outdegree** (expressed sentiments).
+- Captures direct reciprocity: "bullies get bullied" and "likers get liked".
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  subgraph Positive Sphere
+    A((Positive Spreader)) -- "Positive (+)" --> B((Receiver))
+    C((Sender)) -- "Positive (+)" --> A
+  end
+  subgraph Negative Sphere
+    X((Negative Spreader)) -- "Negative (-)" --> Y((Receiver))
+    Z((Sender)) -- "Negative (-)" --> X
+  end
+  
+  style A fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+  style B fill:#ecf0f1,stroke:#2c3e50
+  style C fill:#ecf0f1,stroke:#2c3e50
+  style X fill:#fca5a5,stroke:#ef4444,stroke-width:2px
+  style Y fill:#ecf0f1,stroke:#2c3e50
+  style Z fill:#ecf0f1,stroke:#2c3e50
+```
+:::
+:::
+
+---
+
+## Slide 22: Status Theory
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Proposes that sentiments towards an alter are driven by how *others* feel about them (**prestige alignment**).
+- Status in valenced networks is defined as:
+  - High status = receiving positive links.
+  - Low status = receiving negative links.
+  - Positive tie from Ego $\implies$ Alter is higher status.
+  - Negative tie from Ego $\implies$ Alter is lower status.
+- Promotes structural effects: **"rich-get-richer"** (high status accumulate positives) and **"gang-up"** (low status accumulate negatives).
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  A((A <br> High Status))
+  B((B <br> Low Status))
+  C((Ego)) -- "Deference (+)" --> A
+  C -- "Dominance (-)" --> B
+  
+  style A fill:#fdfd96,stroke:#f8e71c,stroke-width:3px
+  style B fill:#e2e8f0,stroke:#64748b,stroke-width:1px
+  style C fill:#fff,stroke:#2c3e50,stroke-width:1px
+```
+:::
+:::
+
+---
+
+## Slide 23: Solidarity Theory
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Posits that individuals feel positively towards others who occupy **similar structural positions** (structural equivalence).
+- Focuses on status alignment:
+  - Standard popular actors form horizontal positive ties with other popular actors ("cool kids stick together").
+  - Disliked or subordinate actors form horizontal positive ties with other subordinate actors ("downtrodden stick together").
+- Vertical sentiments between different tiers are predicted to be negative.
+:::
+:::
+
+::: {.column width="45%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph TD
+  subgraph Elite [Popular Tier]
+    A((A)) -- "Solidarity (+)" --> B((B))
+  end
+  subgraph Subordinate [Subordinate Tier]
+    C((C)) -- "Solidarity (+)" --> D((D))
+  end
+  C -- "Deference (+)" --> A
+  A -- "Dominance (-)" --> C
+  
+  style A fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
+  style B fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
+  style C fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+  style D fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+```
+:::
+:::
+
+---
+
+## Slide 24: Summary and Future Directions
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Signed network analysis helps capture the nuance of real, emotional social ties.
+- Local psychological motives (Heider) generate macro structures (Cartwright-Harary, Davis).
+- Modern extensions (Karma, Status, Solidarity) provide the micro-foundations for dynamic realignments.
+- Applications: tracking online echo chambers, algorithmic polarization, international alliances, and corporate factions.
+:::
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%| fig-width: 5
+%%| fig-height: 5
+graph LR
+  A["Micro-motives <br> (Cognitive Balance)"] -->|Triadic Aggregation| B["Meso-structures <br> (Factions/Cliques)"]
+  B -->|Network-wide Convergence| C["Macro-patterns <br> (Structural Balance / Davis Clustering)"]
+  
+  style A fill:#d4edda,stroke:#28a745,stroke-width:1px
+  style B fill:#fdfd96,stroke:#f8e71c,stroke-width:1px
+  style C fill:#f8d7da,stroke:#dc3545,stroke-width:1px
+```
+:::
+:::
