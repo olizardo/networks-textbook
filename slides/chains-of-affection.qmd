@@ -25,119 +25,160 @@ library(kableExtra)
 set.seed(333)
 
 # 1. Bearman's Jefferson High Spanning Tree (Chain-like)
-# Generate a beautiful spanning tree-like random tree of 20 nodes
-g_tree <- tbl_graph(nodes = data.frame(name = as.character(1:20)),
+# Bipartite gender coloring: alternating genders along all edges (no same-gender ties!)
+gender_list <- c('Male', 'Female', 'Female', 'Male', 'Male', 'Male', 'Female', 'Female', 'Female', 'Female', 'Male', 'Male', 'Male', 'Male', 'Male', 'Female', 'Female', 'Female', 'Female', 'Female')
+
+g_tree <- tbl_graph(nodes = data.frame(name = as.character(1:20), 
+                                       gender = gender_list),
                     edges = data.frame(from = c(1,1,2,2,3,4,4,5,6,7,7,8,9,10,11,12,12,13,14),
                                        to   = c(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)),
                     directed = FALSE)
 
 p_jefferson_spanning <- ggraph(g_tree, layout = "tree") +
   geom_edge_link(color = "steelblue", width = 1.5) +
-  geom_node_point(size = 8, color = "tan2") +
-  geom_node_text(aes(label = name), size = 4, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+  geom_node_point(aes(color = gender), size = 6) +
+  scale_color_manual(values = c("Male" = "dodgerblue2", "Female" = "hotpink")) +
+  geom_node_text(aes(label = name), nudge_y = 0.18, size = 4, fontface = "bold", color = "grey20") +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(clip = "off")
 
-# 2. Bearman's 4-cycle loop (A-B-C-D) vs Spanning Tree
-# Left: A-B-C-D-A (4-cycle loop, the taboo!)
-g_cycle <- tbl_graph(nodes = data.frame(name = c("Bob", "Carol", "Ted", "Alice")),
-                     edges = data.frame(from = c(1,2,3,4), to = c(2,3,4,1)), directed = FALSE)
-p_cycle_loop <- ggraph(g_cycle, layout = "circle") +
-  geom_edge_link(color = "firebrick", width = 2) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
-  labs(title = "The Tabooed 4-Cycle") + theme_graph() + 
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12)) +
-  coord_cartesian(xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), clip = "off")
+# 2. Bearman's Temporally Ordered Micro-Level Proscription (The 4-Cycle Avoidance)
+nodes_temp <- data.frame(name = c("Bob", "Carol", "Ted", "Alice"), 
+                         gender = c("Male", "Female", "Male", "Female"))
+l_temp <- matrix(c(-0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5), ncol = 2, byrow = TRUE)
 
-# Right: Bob-Carol-Ted (spanning chain, no Bob-Alice tie)
-g_chain <- tbl_graph(nodes = data.frame(name = c("Bob", "Carol", "Ted", "Alice")),
-                     edges = data.frame(from = c(1,2,3), to = c(2,3,4)), directed = FALSE)
-p_chain_spanning <- ggraph(g_chain, layout = "circle") +
+# Plot 1: Time 1 (Bob & Carol date, Ted & Alice date)
+g_temp1 <- tbl_graph(nodes = nodes_temp, 
+                     edges = data.frame(from = c("Bob", "Ted"), to = c("Carol", "Alice")), 
+                     directed = FALSE)
+p_temp1 <- ggraph(g_temp1, layout = "manual", x = l_temp[,1], y = l_temp[,2]) +
   geom_edge_link(color = "steelblue", width = 2) +
-  geom_node_point(size = 18, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
-  labs(title = "The Permitted Spanning Chain") + theme_graph() + 
-  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12)) +
-  coord_cartesian(xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), clip = "off")
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "dodgerblue2", "Female" = "hotpink")) +
+  labs(title = "Time 1: Two Couples\n(Bob-Carol & Ted-Alice)") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
+# Plot 2: Time 2 (After breakups, Carol & Ted date)
+g_temp2 <- tbl_graph(nodes = nodes_temp, 
+                     edges = data.frame(from = c("Carol"), to = c("Ted")), 
+                     directed = FALSE)
+p_temp2 <- ggraph(g_temp2, layout = "manual", x = l_temp[,1], y = l_temp[,2]) +
+  geom_edge_link(color = "steelblue", width = 2) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "dodgerblue2", "Female" = "hotpink")) +
+  labs(title = "Time 2: New Couple\n(Carol & Ted date)") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
+# Plot 3: Time 3 (The Avoided Tie completing the 4-cycle loop)
+edges_temp3 <- data.frame(from = c("Carol", "Bob"), to = c("Ted", "Alice"), type = c("Time 2", "Avoided"))
+g_temp3 <- tbl_graph(nodes = nodes_temp, edges = edges_temp3, directed = FALSE)
+p_temp3 <- ggraph(g_temp3, layout = "manual", x = l_temp[,1], y = l_temp[,2]) +
+  geom_edge_link(aes(color = type, linetype = type), width = 2) +
+  scale_edge_color_manual(values = c("Time 2" = "steelblue", "Avoided" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Time 2" = "solid", "Avoided" = "dashed")) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "dodgerblue2", "Female" = "hotpink")) +
+  labs(title = "Time 3: The Avoided Tie\n(Bob-Alice: leftover taboo)") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
 
 # 3. McMillan's same-sex friendship code (Girl Code / Bro Code)
-# Left: Mixed-sex romantic relationship between i and j, same-sex friendships i-k and j-l
-edges_peer1 <- data.frame(from = c("i", "i", "j"), to = c("j", "k", "l"), type = c("Romantic", "Friend", "Friend"))
-g_peer1 <- tbl_graph(nodes = data.frame(name = c("i", "j", "k", "l")), edges = edges_peer1, directed = FALSE)
+nodes_peer <- data.frame(name = c("Luke", "Emma", "Mark", "Chloe"), 
+                         gender = c("Boy", "Girl", "Boy", "Girl"))
 l_peer <- matrix(c(-0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5), ncol = 2, byrow = TRUE)
+
+# Left: Mixed-sex romantic relationship Luke-Emma, same-sex friendships Luke-Mark and Emma-Chloe
+edges_peer1 <- data.frame(from = c("Luke", "Luke", "Emma"), to = c("Emma", "Mark", "Chloe"), type = c("Romantic", "Friend", "Friend"))
+g_peer1 <- tbl_graph(nodes = nodes_peer, edges = edges_peer1, directed = FALSE)
 p_peer1 <- ggraph(g_peer1, layout = "manual", x = l_peer[,1], y = l_peer[,2]) +
   geom_edge_link(aes(color = type, linetype = type), width = 1.8) +
   scale_edge_color_manual(values = c("Romantic" = "firebrick", "Friend" = "steelblue")) +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 6, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Boy" = "dodgerblue2", "Girl" = "hotpink")) +
   labs(title = "Phase 1: Dating & Friendships") + theme_graph() + 
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
   coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
 
-# Middle: Closure: j befriends k, i befriends l (double-dating)
-edges_peer2 <- data.frame(from = c("i", "i", "j", "j", "i"), to = c("j", "k", "l", "k", "l"), type = c("Romantic", "Friend", "Friend", "Friend", "Friend"))
-g_peer2 <- tbl_graph(nodes = data.frame(name = c("i", "j", "k", "l")), edges = edges_peer2, directed = FALSE)
+# Middle: Closure: Emma befriends Mark, Luke befriends Chloe (double-dating)
+edges_peer2 <- data.frame(from = c("Luke", "Luke", "Emma", "Emma", "Luke"), to = c("Emma", "Mark", "Chloe", "Mark", "Chloe"), type = c("Romantic", "Friend", "Friend", "Friend", "Friend"))
+g_peer2 <- tbl_graph(nodes = nodes_peer, edges = edges_peer2, directed = FALSE)
 p_peer2 <- ggraph(g_peer2, layout = "manual", x = l_peer[,1], y = l_peer[,2]) +
   geom_edge_link(aes(color = type, linetype = type), width = 1.8) +
   scale_edge_color_manual(values = c("Romantic" = "firebrick", "Friend" = "steelblue")) +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
-  labs(title = "Phase 2: Triadic Closure") + theme_graph() + 
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 6, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Boy" = "dodgerblue2", "Girl" = "hotpink")) +
+  labs(title = "Phase 2: Double Dating") + theme_graph() + 
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
   coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
 
-# Right: Breakup: i and j break up. j cannot date k (friend's ex). i cannot date l (friend's ex).
+# Right: Breakup: Luke and Emma break up. Emma cannot date Mark (friend's ex). Luke cannot date Chloe (friend's ex).
 # Results in two disjoint chains, preventing 4-cycle!
-edges_peer3 <- data.frame(from = c("i", "j"), to = c("k", "l"), type = c("Friend", "Friend"))
-g_peer3 <- tbl_graph(nodes = data.frame(name = c("i", "j", "k", "l")), edges = edges_peer3, directed = FALSE)
+edges_peer3 <- data.frame(from = c("Luke", "Emma"), to = c("Mark", "Chloe"), type = c("Friend", "Friend"))
+g_peer3 <- tbl_graph(nodes = nodes_peer, edges = edges_peer3, directed = FALSE)
 p_peer3 <- ggraph(g_peer3, layout = "manual", x = l_peer[,1], y = l_peer[,2]) +
   geom_edge_link(aes(color = type, linetype = type), width = 1.8) +
   scale_edge_color_manual(values = c("Friend" = "steelblue")) +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 6, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Boy" = "dodgerblue2", "Girl" = "hotpink")) +
   labs(title = "Phase 3: Friend-Loyalty Split") + theme_graph() + 
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
   coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
 
+
 # 4. Fictional Networks Glee & Grey's Anatomy (Highly clustered 4-cycles)
 # Small highly dense cluster with multiple overlapping 4-cycles (e.g. A-B-C-D, B-C-E-F etc.)
-g_glee <- tbl_graph(nodes = data.frame(name = c("Finn", "Rachel", "Quinn", "Puck", "Santana", "Brittany")),
+g_glee <- tbl_graph(nodes = data.frame(name = c("Finn", "Rachel", "Quinn", "Puck", "Santana", "Brittany"),
+                                        gender = c("Male", "Female", "Female", "Male", "Female", "Female")),
                     edges = data.frame(from = c(1,1,2,3,4,4,5,5),
                                        to   = c(2,3,4,4,5,6,6,1)),
                     directed = FALSE)
 p_glee <- ggraph(g_glee, layout = "circle") +
   geom_edge_link(color = "purple", width = 1.8) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), clip = "off")
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.25, size = 5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "dodgerblue2", "Female" = "hotpink")) +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
+
 
 # 5. Stoddard's Rumor Networks
 # Left: Confirmed network (clean tree, acyclic)
-g_conf <- tbl_graph(nodes = data.frame(name = LETTERS[1:5]),
+g_conf <- tbl_graph(nodes = data.frame(name = LETTERS[1:5],
+                                       gender = c("Male", "Female", "Male", "Female", "Male")),
                     edges = data.frame(from = c(1,1,2,3), to = c(2,3,4,5)),
                     directed = FALSE)
 p_conf <- ggraph(g_conf, layout = "circle") +
   geom_edge_link(color = "steelblue", width = 1.8) +
-  geom_node_point(size = 15, color = "tan2") +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.25, size = 6, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "dodgerblue2", "Female" = "hotpink")) +
   labs(title = "Confirmed Relationships (Acyclic Tree)") + theme_graph() +
-  theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold")) +
-  coord_cartesian(xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), clip = "off")
+  theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold"), legend.position = "none") +
+  coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
+
 
 # Right: Rumored network (dense with short cycles added by gossip)
-g_rumor <- tbl_graph(nodes = data.frame(name = LETTERS[1:5]),
+g_rumor <- tbl_graph(nodes = data.frame(name = LETTERS[1:5],
+                                        gender = c("Male", "Female", "Male", "Female", "Male")),
                      edges = data.frame(from = c(1,1,2,3,2,4), to = c(2,3,4,5,3,5)),
                      directed = FALSE)
 p_rumor <- ggraph(g_rumor, layout = "circle") +
   geom_edge_link(aes(color = (from == 2 & to == 3) | (from == 4 & to == 5)), width = 1.8) +
   scale_edge_color_manual(values = c("TRUE" = "firebrick", "FALSE" = "steelblue")) +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.25, size = 6, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "dodgerblue2", "Female" = "hotpink")) +
   labs(title = "With Rumored Ties (Cycles Formed)") + theme_graph() +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14), legend.position = "none") +
-  coord_cartesian(xlim = c(-1.2, 1.2), ylim = c(-1.2, 1.2), clip = "off")
+  coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 ```
-
 # Part 1: The Macro-Micro Mystery
 
 ---
@@ -200,31 +241,24 @@ p_jefferson_spanning
 
 ## The 4-Cycle Proscription: The Tabooed Loop
 
-::: {.columns}
-::: {.column width="50%"}
-- **What is a 4-Cycle?**
-  - A closed four-node loop where Bob dates Carol, Carol dates Ted, Ted dates Alice, and Alice dates Bob.
-- **The Jefferson High Taboo**:
-  - Bearman et al. found only **two 4-cycles** in the entire high school, vastly fewer than expected by random chance.
 - **The Micro-Level Proscription**:
-  - *"You do not date your ex's current partner's ex."*
-  - Complete aversion to **seconds partnerships**.
-- **Sociological Explanation**:
+  - *"You do not date your ex's current partner's ex"* (avoiding **seconds partnerships**).
   - Completing this loop results in a public **loss of status**. Adolescents avoid taking "seconds" to protect their prestige in the peer group.
-:::
+  - Bearman et al. found only **two 4-cycles** in the entire school, vastly fewer than expected by random chance.
 
-::: {.column width="50%"}
+. . .
+
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 4.2
-#| fig-width: 4.2
-p_cycle_loop
+#| fig-height: 3.2
+#| fig-width: 9.6
+p_temp1 + p_temp2 + p_temp3
 ```
-- Closing this loop violates local status rules!
+- **Time 1**: Bob dates Carol, while Ted dates Alice.
+- **Time 2**: After breakups, Carol and Ted start dating.
+- **Time 3**: Should Bob and Alice date? If they do, they complete the forbidden **4-cycle loop** and both take "leftovers." So they avoid each other!
 </center>
-:::
-:::
 
 ---
 
@@ -246,9 +280,9 @@ p_cycle_loop
 #| echo: false
 #| fig-height: 4.2
 #| fig-width: 4.2
-p_chain_spanning
+p_jefferson_spanning
 ```
-- ForcingBob and Alice to look outward stretches the tree!
+- Forcing Bob and Alice to look outward stretches the tree!
 </center>
 :::
 :::
@@ -297,9 +331,9 @@ p_peer1_fixed + p_peer2 + p_peer3
 ```
 </center>
 
-1. **Phase 1**: i and j date (dotted), k is i's same-sex friend, l is j's same-sex friend.
-2. **Phase 2**: Through double-dating (triadic closure), j befriends k, and i befriends l.
-3. **Phase 3 (Breakup)**: i and j split. Friendship loyalty prevails. Friend k will **never** date j (their friend i's ex), and l will **never** date i (their friend j's ex). The 4-cycle is blocked, fracturing the group into two open chains!
+1. **Phase 1**: **Luke** (Boy) and **Emma** (Girl) are dating (dotted), while Luke is same-sex friends with **Mark** (Boy), and Emma is same-sex friends with **Chloe** (Girl).
+2. **Phase 2**: Through double-dating (triadic closure), Luke spends time with Chloe, and Emma spends time with Mark, establishing friendly ties across the group.
+3. **Phase 3 (Breakup)**: Luke and Emma split. Same-sex **friendship loyalty** prevails. Mark will **never** date Emma (his friend Luke's ex), and Chloe will **never** date Luke (her friend Emma's ex). The 4-cycle is blocked, fracturing the group into two open chains!
 
 ---
 
@@ -308,9 +342,10 @@ p_peer1_fixed + p_peer2 + p_peer3
 - **Testing the PEAR Study Network**:
   - McMillan et al. studied a Dutch high school romantic network (607 students).
   - Adhered to Bearman's spanning tree characteristics: exceptionally sparse (density = 0.005), low cycles (only 8 four-cycles total).
-- **TERGM Statistical Analysis**:
-  - Adhering to the **"no seconds" Girl/Bro Code** yields **74% lower odds** of dating at Time 2 ($b = -1.347, p < 0.05$).
-  - Once friendship loyalty is accounted for, there is **no remaining tendency** to avoid 4-cycles on the dating-only side ($b = 0.949, p = 0.21$, non-significant).
+- **Statistical Network Analysis**:
+  - Using advanced statistical models to control for other factors (like popularity, school size, and opportunities), researchers found that the **"no seconds" Girl/Bro Code** is a powerful social rule.
+  - Adolescents are **significantly less likely** to date their friend's ex-partner.
+  - In fact, once this friendship loyalty rule is accounted for, there is **no other special dating rule** needed to explain why 4-cycles are so rare!
 - **Takeaway**:
   - The global spanning tree is not born of a dating-only taboo, but of **peer friendship loyalty** blocking cycle closure!
 
@@ -343,9 +378,10 @@ p_peer1_fixed + p_peer2 + p_peer3
 - **High-Clustering Drama**:
   - Glee's network is incredibly small, highly dense, and saturated with loops.
   - Screenwriters use cycle completions (e.g., dating a friend's ex or partner's ex) to drive dramatic friction.
-- **The ERGM Reveal**:
-  - When we control for lower-order structural constraints (small cast size, high activity) via ERGMs:
-  - Fictional characters *still* exhibit a **statistically significant aversion to 4-cycles** ($b = -0.40, p < 0.05$).
+- **Statistical Network Models**:
+  - When researchers used statistical models to control for basic features (like how small and active the cast is), the patterns showed a very interesting result.
+  - Fictional characters *still* exhibit a **strong, significant aversion to 4-cycles**.
+  - Even under dramatic television pressures, scriptwriters implicitly follow real-world sexual taboos to keep plots recognizable!
 - **Takeaway**:
   - Art imitates reality! Even under extreme dramatic pressures, writers implicitly follow real-world sexual taboos to keep plots recognizable.
 :::
@@ -378,8 +414,8 @@ p_glee
 . . .
 
 - **The Structural Findings**:
-  - Heterosexual networks (GAN, and the real-world Colorado Springs gonorrhea network) show a **strong, significant aversion to 4-cycles** ($b = -0.23, p < 0.05$).
-  - Homosexual networks (LWN) show **no significant aversion** to 4-cycles ($b = -0.03, p > 0.10$).
+  - Heterosexual networks (Grey's Anatomy, and the real-world Colorado Springs gonorrhea network) show a **strong, significant aversion to 4-cycles** (they are heavily avoided).
+  - Homosexual networks (The L Word) show **no such aversion** to 4-cycles (they occur at normal, expected rates).
   - Love triangles and cycles of length 4 are structurally unconstrained and socially permitted in the lesbian network.
 
 ---
