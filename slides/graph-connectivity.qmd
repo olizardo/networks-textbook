@@ -1585,15 +1585,53 @@ ggraph(gr_ineq, layout = "manual", x = x, y = y) +
 
 ---
 
-## Flavors of Connectivity in Directed Graphs
+## Pairwise Connectivity in Directed Graphs
 
-::: {.incremental}
-- Because of edge directionality, directed graphs have **three major levels** of connectivity:
-1. **Strongly Connected**: Every pair of nodes is **mutually reachable** via directed paths.
-   - **Recursively Connected** (Subtype): Strongly connected, AND the directed paths in both directions share the exact same set of intermediate nodes (sharing both vertices and edges).
-2. **Unilaterally Connected**: Every pair is connected by **at least one directed path** (from $u \rightarrow v$ OR $v \rightarrow u$, but not necessarily both).
-3. **Weakly Connected**: Every pair of nodes is connected by at least a **semipath** (connected if we ignore arrow directions).
-:::
+- Before we can define whether a **whole graph** has a certain flavor of connectivity, we must define the connectivity state of **individual pairs of nodes (pairwise connectivity)**.
+- Two nodes $u$ and $v$ can be connected in four distinct pairwise flavors depending on the directed pathways between them:
+  1. **Pairwise Weakly Connected**
+  2. **Pairwise Unilaterally Connected**
+  3. **Pairwise Strongly Connected**
+  4. **Pairwise Recursively Connected**
+- Let's examine these four pairwise states step-by-step.
+
+---
+
+## 1. Pairwise Weak & Unilateral Connectivity
+
+- **Pairwise Weakly Connected**:
+  - Node $u$ and $v$ are connected by at least one **semipath** (connected if we ignore the arrow directions).
+  - **Sociological Meaning**: They are part of the same general network, but there is no directed path starting from either node that can reach the other.
+- **Pairwise Unilaterally Connected**:
+  - A directed path exists from $u \rightarrow v$ **OR** from $v \rightarrow u$ (one-way reachability).
+  - **Sociological Meaning**: Information or influence can flow from one person to the other, but not in both directions (no mutual exchange).
+
+---
+
+## 2. Pairwise Strong & Recursive Connectivity
+
+- **Pairwise Strongly Connected**:
+  - A directed path exists from $u \rightarrow v$ **AND** from $v \rightarrow u$ (mutual reachability).
+  - **Sociological Meaning**: Both nodes can reach each other, but the paths in each direction may use completely different intermediate nodes or channels.
+- **Pairwise Recursively Connected**:
+  - A directed path exists from $u \rightarrow v$ and $v \rightarrow u$, **AND** the directed path in both directions shares the exact same set of intermediate nodes (sharing both vertices and edges).
+  - **Sociological Meaning**: The relationship can be traversed back-and-forth along the same closed, mutually symmetric cycle.
+
+---
+
+## Node-Level Pairwise vs. Graph-Level Connectivity
+
+- A **whole graph**'s flavor of connectivity is defined by the **weakest pairwise connectivity state** present in the network:
+
+| Whole Graph State | Defining Pairwise Condition |
+|:---|:---|
+| **Strongly Connected** | **every** pair of nodes in the graph is *pairwise strongly connected*. |
+| **Unilaterally Connected** | **at least one** pair of nodes in the graph is *pairwise unilaterally connected*. |
+| **Weakly Connected** | **at least one** pair of nodes in the graph is *pairwise weakly connected*. |
+
+. . .
+
+- **Takeaway**: Global graph connectivity is built on top of these individual node-to-node pairwise states. If even a single pair drops to a lower state, the entire graph's connectivity level drops!
 
 ---
 

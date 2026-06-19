@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>23&nbsp; Centralities based on Shortest Paths – Social Networks</title>
+<title>lesson-sna-betweenness</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -46,14 +46,11 @@ div.csl-indent {
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./lesson-sna-bigthree.html" rel="next">
-<link href="./lesson-sna-closeness.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -65,9 +62,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-22da7ca13c457c7eea04566a7beed6cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-3e5f2ac0a8fb60c30c27cad0f1e5dbc7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-22da7ca13c457c7eea04566a7beed6cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-ff0ccb7d4eb037a8a36c8a521491e6d6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-e05e2933af3979f1b577a1e58c7f9e9c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-ff0ccb7d4eb037a8a36c8a521491e6d6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -80,6 +77,7 @@ div.csl-indent {
     "/",
     "s"
   ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -132,7 +130,7 @@ window.Quarto = {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -297,503 +295,38 @@ window.Quarto = {
   </script>
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-sna-degree-centrality.html">Analyzing Networks</a></li><li class="breadcrumb-item"><a href="./lesson-sna-betweenness.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
-</header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
-    <div class="sidebar-title mb-0 py-0">
-      <a href="./">Social Networks</a> 
-        <div class="sidebar-tools-main">
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
-</div>
-    </div>
-      </div>
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Welcome</span></a>
-  </div>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Introduction to Networks</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-what-are-networks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What Are Networks?</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-what-are-social-networks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">What is A <em>Social</em> Network?</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-ties-bound.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Social Ties and Network Boundaries</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-tie-strength.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Tie Strength</span></span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Networks, Graphs, and Matrices</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-intro.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introduction to Graphs</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-ties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-dyads-and-triads.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Dyads and Triads</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-subgraphs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Graphs and their Subgraphs</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-neighborhoods.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Nodes and their Neighborhoods</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-degree-metrics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Degree-Based Graph Metrics</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-directed.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Directed Graphs</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-paths.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Indirect Connections</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-directed-paths.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Directed Indirect Connections</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-connectivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-graphs-trees.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Tree Graphs</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-matrix-intro.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-matrix-network.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Social Network Matrices</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-matrix-operations.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Basic Matrix Operations</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-matrix-multiplication.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Matrix Multiplication and its Applications</span></span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Analyzing Networks</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-closeness.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-betweenness.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-bigthree.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">The “Big Three” Centrality Metrics</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Status</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-hubs-and-authorities.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Hubs and Authorities</span></span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Two-Mode &amp; Ego Networks</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-affiliation-networks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-ego-networks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-ego-collect.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Collecting Ego-Network Data</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-ego-homo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Theories of Ego Network Homogeneity and Diversity</span></span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Subgroups and Blocks</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-groups-cliques.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Clique Analysis</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-groups-cohesive.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Cohesive Subsets</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-positions-struct-equiv.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Equivalence and Similarity</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-local-similarity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Local Node Similarities</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-sna-blockmodeling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Blockmodeling</span></span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Network Theory</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-dunbar.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Dunbar’s Theory of Social Circles</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-swt.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">The Strength of Weak Ties</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-sht.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Structural Holes and Brokerage</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-smt.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Simmelian Tie Theory</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-dyadic-balance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Dyadic Balance</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-triadic-balance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Triadic Balance</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-structural-balance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Structural Balance</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-valenced-interactions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Theories of Valenced Interactions</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-hierarchies.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Dominance Hierarchies</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-diffusion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">The Diffusion of Innovations</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-small-world.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">The Small World Phenomenon</span></span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
- <span class="menu-text">Exercises</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework1.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework I: Graph Theory</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework II: Directed Graphs</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework3.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework III: Indirect Connections and Matrices</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework4.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework IV: Matrix Operations</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework5.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework V: Affiliation Networks</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework6.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework VI: Centrality</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework7.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework VII: Ego-Network Metrics</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework8.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework VIII: Balance and Signed Graphs</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./homework9.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Homework IX: Subgroups, Graph Connectivity, and Structural Similarity</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+    <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#stress-centrality" id="toc-stress-centrality" class="nav-link active" data-scroll-target="#stress-centrality"><span class="header-section-number">23.1</span> Stress Centrality</a></li>
-  <li><a href="#betweenness-centrality" id="toc-betweenness-centrality" class="nav-link" data-scroll-target="#betweenness-centrality"><span class="header-section-number">23.2</span> Betweenness Centrality</a></li>
+  <li><a href="#sec-betcent" id="toc-sec-betcent" class="nav-link active" data-scroll-target="#sec-betcent">Centralities based on Shortest Paths</a>
+  <ul class="collapse">
+  <li><a href="#stress-centrality" id="toc-stress-centrality" class="nav-link" data-scroll-target="#stress-centrality">Stress Centrality</a></li>
+  <li><a href="#betweenness-centrality" id="toc-betweenness-centrality" class="nav-link" data-scroll-target="#betweenness-centrality">Betweenness Centrality</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-sna-degree-centrality.html">Analyzing Networks</a></li><li class="breadcrumb-item"><a href="./lesson-sna-betweenness.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></a></li></ol></nav>
-<div class="quarto-title">
-<h1 class="title"><span id="sec-betcent" class="quarto-section-identifier"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></span></h1>
-</div>
+<main class="content column-page-left" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta column-body">
-
-    
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<p>Recall that in our discussion of shortest paths between pairs of nodes in <a href="lesson-graphs-paths.html" class="quarto-xref"><span>Chapter 13</span></a>, we noted the importance of the <strong>inner nodes</strong> that <em>intervene</em> or <em>mediate</em> between any one node in the graph that wants to reach another one. Nodes that stand in these <strong>brokerage</strong> or <strong>gatekeeper</strong> slots in the network <span class="citation" data-cites="gould_fernandez89">(<a href="#ref-gould_fernandez89" role="doc-biblioref">Gould and Fernandez 1989</a>)</span>, occupy an important position <span class="citation" data-cites="marsden83">(<a href="#ref-marsden83" role="doc-biblioref">Marsden 1983</a>)</span>, and this is different from having a lot of contacts (like degree centrality; see <a href="lesson-sna-degree-centrality.html" class="quarto-xref"><span>Chapter 21</span></a>), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality; see <a href="lesson-sna-closeness.html" class="quarto-xref"><span>Chapter 22</span></a>).</p>
+<section id="sec-betcent" class="level1">
+<h1>Centralities based on Shortest Paths</h1>
+<p>Recall that in our discussion of shortest paths between pairs of nodes in <strong>?@sec-indirect</strong>, we noted the importance of the <strong>inner nodes</strong> that <em>intervene</em> or <em>mediate</em> between any one node in the graph that wants to reach another one. Nodes that stand in these <strong>brokerage</strong> or <strong>gatekeeper</strong> slots in the network <span class="citation" data-cites="gould_fernandez89">(<a href="#ref-gould_fernandez89" role="doc-biblioref">Gould and Fernandez 1989</a>)</span>, occupy an important position <span class="citation" data-cites="marsden83">(<a href="#ref-marsden83" role="doc-biblioref">Marsden 1983</a>)</span>, and this is different from having a lot of contacts (like degree centrality; see <strong>?@sec-degcent</strong>), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality; see <strong>?@sec-closcent</strong>).</p>
 <p>Instead, the kind of centrality we are talking about is about being <em>in-between</em> the indirect communications of other nodes in the graph. In this chapter, we discuss some centrality metrics designed to capture the extent to which nodes serve as <em>intermediaries</em> between other nodes in a social network.</p>
-<section id="stress-centrality" class="level2" data-number="23.1">
-<h2 data-number="23.1" class="anchored" data-anchor-id="stress-centrality"><span class="header-section-number">23.1</span> Stress Centrality</h2>
-<p>For instance, let’s say you were actor <span class="math inline">\(K\)</span> in the network shown in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>, and you wanted to know who you depend on most to communicate with actor <span class="math inline">\(J\)</span>. Here, dependence means that you are forced to “go through them.” One way <span class="math inline">\(K\)</span> could figure this out is by listing every shortest path, using each as the <strong>origin node</strong> and <span class="math inline">\(J\)</span> as the <strong>destination node</strong>.</p>
+<section id="stress-centrality" class="level2">
+<h2 class="anchored" data-anchor-id="stress-centrality">Stress Centrality</h2>
+<p>For instance, let’s say you were actor <span class="math inline">\(K\)</span> in the network shown in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;1</a>, and you wanted to know who you depend on most to communicate with actor <span class="math inline">\(J\)</span>. Here, dependence means that you are forced to “go through them.” One way <span class="math inline">\(K\)</span> could figure this out is by listing every shortest path, using each as the <strong>origin node</strong> and <span class="math inline">\(J\)</span> as the <strong>destination node</strong>.</p>
 <p>After you have this list, you can see which of the other nodes shows up as an <strong>inner node</strong>—an intermediary or gatekeeper—in those paths the most times. Remember that two actors can be indirectly linked by <em>multiple shortest paths of the same length</em>.</p>
 <div class="cell fig-cap-location-bottom">
 <div class="cell-output-display">
@@ -803,7 +336,7 @@ window.Quarto = {
 <img src="lesson-sna-betweenness_files/figure-html/fig-bet-1.png" class="img-fluid figure-img" width="1152">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;23.1: An undirected graph showing the node with the maximum betweenness centrality (in red)
+Figure&nbsp;1: An undirected graph showing the node with the maximum betweenness centrality (in red)
 </figcaption>
 </figure>
 </div>
@@ -818,9 +351,9 @@ Figure&nbsp;23.1: An undirected graph showing the node with the maximum betweenn
 <li><p><span class="math inline">\(\{KA, AE, EJ\}\)</span></p></li>
 <li><p><span class="math inline">\(\{KH, HE, EJ\}\)</span></p></li>
 </ol>
-<p>As the list shows, there are six shortest paths (in this case of length <span class="math inline">\(l = 3\)</span>) indirectly connecting actors <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>, with nodes <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> showing up as an inner node in at least one of those paths.</p>
+<p>As the list shows, there are six shortest paths (in this case of length <span class="math inline">\(l = 3\)</span>) indirectly connecting actors <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;1</a>, with nodes <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> showing up as an inner node in at least one of those paths.</p>
 <p>To see which other actor in the network is the most <em>frequent intermediary</em> between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>, we can create a list of the number of times each of these nodes appears as an inner node in the shortest-path list shown earlier. We will call each of these numbers <span class="math inline">\(n_{K(x)J}\)</span>, where the little <span class="math inline">\(x\)</span> in parentheses in-between the little <span class="math inline">\(K\)</span> and the little <span class="math inline">\(J\)</span> indicates the inner node we are talking about. For instance, <span class="math inline">\(n_{K(A)J}\)</span> refers to the number of times node <span class="math inline">\(A\)</span> stands on a shortest path linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>, and so forth for each of the nodes in the inner node set <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span>.</p>
-<p>Using the shortest-path list mentioned earlier, the table containing this information would look like the one shown in <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;<span>23.1</span></a>.</p>
+<p>Using the shortest-path list mentioned earlier, the table containing this information would look like the one shown in <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;1</a>.</p>
 <div class="cell" data-tbl-cap-location="bottom">
 <div id="tbl-pairdep" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -877,23 +410,23 @@ Figure&nbsp;23.1: An undirected graph showing the node with the maximum betweenn
 </div>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-pairdep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;23.1: Intermediaries between nodes J and K
+Table&nbsp;1: Intermediaries between nodes J and K
 </figcaption>
 </figure>
 </div>
 </div>
-<p>So it looks like, looking at the second column of <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;<span>23.1</span></a>, that <span class="math inline">\(H\)</span> is the other actor that <span class="math inline">\(J\)</span> depends on the most to reach <span class="math inline">\(K\)</span>, since they show up three times in the paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> (<span class="math inline">\(n_{K(H)J} = 3\)</span>), beating out all the other nodes.</p>
+<p>So it looks like, looking at the second column of <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;1</a>, that <span class="math inline">\(H\)</span> is the other actor that <span class="math inline">\(J\)</span> depends on the most to reach <span class="math inline">\(K\)</span>, since they show up three times in the paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> (<span class="math inline">\(n_{K(H)J} = 3\)</span>), beating out all the other nodes.</p>
 <p>We can use this information—aggregated across all pairs of nodes in the graph for every other node—to construct a centrality metric. That is, for each node in the graph <span class="math inline">\(k\)</span>, we can ask how often they show up as an intermediary between every other pair of nodes in the graph <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and then we sum up this quantity across all pairs. This centrality index was first proposed by Alfonso <span class="citation" data-cites="shimbel53">Shimbel (<a href="#ref-shimbel53" role="doc-biblioref">1953</a>)</span> and is called <strong>stress centrality</strong>.</p>
 <p>In equation form, you write the stress centrality index like this:</p>
 <p><span id="eq-stress"><span class="math display">\[
 C^{STRESS}_k = \sum_{i \neq k} \sum_{j \neq k} n_{i(k)j}
-\tag{23.1}\]</span></span></p>
+\tag{1}\]</span></span></p>
 <p>Which says that the stress centrality of node <span class="math inline">\(k\)</span> is the sum of the number of times they stand in a shortest path between each pair of nodes in the graph, excluding the pairs that include <span class="math inline">\(k\)</span> as either a starting or ending node in the path connecting them (recall that <span class="math inline">\(i \neq k\)</span> means “<span class="math inline">\(i\)</span> does not equal <span class="math inline">\(k\)</span>” in English).</p>
 <div class="cell">
 <div id="tbl-stress" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stress-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;23.2: Stress centrality scores.
+Table&nbsp;2: Stress centrality scores.
 </figcaption>
 <div aria-describedby="tbl-stress-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -942,33 +475,33 @@ Table&nbsp;23.2: Stress centrality scores.
 </figure>
 </div>
 </div>
-<p><a href="#tbl-stress" class="quarto-xref">Table&nbsp;<span>23.2</span></a> shows the results of computing the stress centralities for all the nodes in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>. It is clear that, according to this metric, nodes <span class="math inline">\(E\)</span> and <span class="math inline">\(J\)</span> win out, standing at the center of a whopping <span class="math inline">\(n_{i(E)j} = n_{i(J)j} = 48\)</span> shortest paths among other nodes in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>. Node <span class="math inline">\(I\)</span> receives a stress centrality score of <span class="math inline">\(n_{i(I)j} = 0\)</span> because it is not an inner node between any other pair of nodes.</p>
+<p><a href="#tbl-stress" class="quarto-xref">Table&nbsp;2</a> shows the results of computing the stress centralities for all the nodes in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;1</a>. It is clear that, according to this metric, nodes <span class="math inline">\(E\)</span> and <span class="math inline">\(J\)</span> win out, standing at the center of a whopping <span class="math inline">\(n_{i(E)j} = n_{i(J)j} = 48\)</span> shortest paths among other nodes in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;1</a>. Node <span class="math inline">\(I\)</span> receives a stress centrality score of <span class="math inline">\(n_{i(I)j} = 0\)</span> because it is not an inner node between any other pair of nodes.</p>
 </section>
-<section id="betweenness-centrality" class="level2" data-number="23.2">
-<h2 data-number="23.2" class="anchored" data-anchor-id="betweenness-centrality"><span class="header-section-number">23.2</span> Betweenness Centrality</h2>
+<section id="betweenness-centrality" class="level2">
+<h2 class="anchored" data-anchor-id="betweenness-centrality">Betweenness Centrality</h2>
 <p>While Shimbel’s Stress Centrality idea goes a long way toward capturing which nodes are most intermediary, it can be improved upon. This is what was noted by Anthonisse and later Linton Freeman in a landmark series of papers, where they developed a centrality metric aimed to measure node intermediation called <strong>betweenness centrality</strong> <span class="citation" data-cites="anthonisse71 freeman77 freeman80">(<a href="#ref-anthonisse71" role="doc-biblioref">Anthonisse 1971</a>; <a href="#ref-freeman77" role="doc-biblioref">Freeman 1977</a>, <a href="#ref-freeman80" role="doc-biblioref">1980</a>)</span></p>
 <p>The basic observation behind betweenness centrality is pretty simple. It rests on the idea that, rather than <em>counting</em> the raw number of shortest paths a particular node sits on as an inner node, it is better to look at the <em>percentage</em> (or proportion) of such paths.</p>
 <p>Let us return to our earlier example, in which nodes <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> serve as the end nodes. To measure the proportion of shortest paths featuring nodes in the inner node set <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> standing between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>, we simply take <span class="math inline">\(n_{K(x)J}\)</span> and divide it by the <em>total</em> number of shortest paths between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. We will call this quantity <span class="math inline">\(n_{KJ}\)</span>, and we already noted from the list we constructed before that <span class="math inline">\(n_{KJ} = 6\)</span>. The new quantity that results from dividing up <span class="math inline">\(n_{K(x)J}\)</span> (for any <span class="math inline">\(x\)</span>) by <span class="math inline">\(n_{KJ}\)</span> we will call <span class="math inline">\(p_{K(x)J}\)</span> where the <span class="math inline">\(p\)</span> is a shorthand for the <em>proportion</em> of paths between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> featuring node <span class="math inline">\(x\)</span> as an inner node.</p>
 <p>For instance, let’s say we wanted to calculate <span class="math inline">\(p_{K(x)J}\)</span> for node <span class="math inline">\(H\)</span>, written <span class="math inline">\(p_{K(H)J}\)</span>. We can write this in equation form like this:</p>
 <p><span id="eq-pairdep"><span class="math display">\[
   p_{K(H)J} = \frac{n_{K(H)J}}{n_{KJ}} = \frac{3}{6} = 0.5
-\tag{23.2}\]</span></span></p>
-<p>Just as before, in <a href="#eq-pairdep" class="quarto-xref">Equation&nbsp;<span>23.2</span></a>, <span class="math inline">\(n_{K(H)J}\)</span> is the number of shortest paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> featuring <span class="math inline">\(H\)</span> as an inner node, and <span class="math inline">\(n_{KJ}\)</span> is the <em>total</em> number of shortest paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. In this case, <span class="math inline">\(n_{K(H)J} = 3\)</span> and <span class="math inline">\(n_{KJ} = 6\)</span>, which means that actor <span class="math inline">\(K\)</span> depends on actor <span class="math inline">\(H\)</span> for <em>fifty percent</em> of their shortest path access to <span class="math inline">\(J\)</span>. Making <span class="math inline">\(H\)</span> the actor in the network <span class="math inline">\(K\)</span> depends most on being able to reach <span class="math inline">\(J\)</span>. The third column of <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;<span>23.1</span></a> shows the <span class="math inline">\(p_{K(x)J}\)</span> scores for all the nodes in the inner node set <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> standing between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. <span class="citation" data-cites="freeman80">Freeman (<a href="#ref-freeman80" role="doc-biblioref">1980</a>)</span> calls the measure in <a href="#eq-pairdep" class="quarto-xref">Equation&nbsp;<span>23.2</span></a> the <strong>pair-dependency</strong> of actor <span class="math inline">\(K\)</span> on actor <span class="math inline">\(H\)</span> to reach a given node <span class="math inline">\(J\)</span>.</p>
-<p>Generalizing this approach, we can do the same for each triplet of actors <span class="math inline">\(i\)</span>, <span class="math inline">\(j\)</span>, and <span class="math inline">\(k\)</span> in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>23.1</span></a> This is the basis for calculating <strong>betweenness centrality</strong>. That is, we can count the number of times <span class="math inline">\(K\)</span> stands on the shortest path between two other actors <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and we can then divide it by the total number of shortest paths linking actors <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> in the network. As noted, this ratio gives us the <em>proportion</em> of shortest paths in the network that have <span class="math inline">\(i\)</span> and <span class="math inline">\(J\)</span> as the end nodes and feature <span class="math inline">\(K\)</span> as an intermediate node, which we denote by <span class="math inline">\(p_{i(k)j}\)</span>. In equation form:</p>
+\tag{2}\]</span></span></p>
+<p>Just as before, in <a href="#eq-pairdep" class="quarto-xref">Equation&nbsp;2</a>, <span class="math inline">\(n_{K(H)J}\)</span> is the number of shortest paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> featuring <span class="math inline">\(H\)</span> as an inner node, and <span class="math inline">\(n_{KJ}\)</span> is the <em>total</em> number of shortest paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. In this case, <span class="math inline">\(n_{K(H)J} = 3\)</span> and <span class="math inline">\(n_{KJ} = 6\)</span>, which means that actor <span class="math inline">\(K\)</span> depends on actor <span class="math inline">\(H\)</span> for <em>fifty percent</em> of their shortest path access to <span class="math inline">\(J\)</span>. Making <span class="math inline">\(H\)</span> the actor in the network <span class="math inline">\(K\)</span> depends most on being able to reach <span class="math inline">\(J\)</span>. The third column of <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;1</a> shows the <span class="math inline">\(p_{K(x)J}\)</span> scores for all the nodes in the inner node set <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> standing between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. <span class="citation" data-cites="freeman80">Freeman (<a href="#ref-freeman80" role="doc-biblioref">1980</a>)</span> calls the measure in <a href="#eq-pairdep" class="quarto-xref">Equation&nbsp;2</a> the <strong>pair-dependency</strong> of actor <span class="math inline">\(K\)</span> on actor <span class="math inline">\(H\)</span> to reach a given node <span class="math inline">\(J\)</span>.</p>
+<p>Generalizing this approach, we can do the same for each triplet of actors <span class="math inline">\(i\)</span>, <span class="math inline">\(j\)</span>, and <span class="math inline">\(k\)</span> in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;1</a> This is the basis for calculating <strong>betweenness centrality</strong>. That is, we can count the number of times <span class="math inline">\(K\)</span> stands on the shortest path between two other actors <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and we can then divide it by the total number of shortest paths linking actors <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> in the network. As noted, this ratio gives us the <em>proportion</em> of shortest paths in the network that have <span class="math inline">\(i\)</span> and <span class="math inline">\(J\)</span> as the end nodes and feature <span class="math inline">\(K\)</span> as an intermediate node, which we denote by <span class="math inline">\(p_{i(k)j}\)</span>. In equation form:</p>
 <p><span id="eq-pk"><span class="math display">\[
 p_{i(k)j} = \frac{n_{i(k)j}}{n_{ij}}
-\tag{23.3}\]</span></span></p>
-<p>For each node triple in the graph, <span class="math inline">\(p_{i(k)j}\)</span> can range from zero (no shortest paths between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> feature node <span class="math inline">\(k\)</span> as an intermediary) to one (all the shortest paths between <span class="math inline">\(i\)</span> and <span class="math inline">\(J\)</span> feature node <span class="math inline">\(k\)</span> as an intermediary). <a href="#eq-pk" class="quarto-xref">Equation&nbsp;<span>23.3</span></a> can also be interpreted as giving us the <em>probability</em> that, if we were to select a random shortest path between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, we would find <span class="math inline">\(k\)</span> in the middle of it.</p>
+\tag{3}\]</span></span></p>
+<p>For each node triple in the graph, <span class="math inline">\(p_{i(k)j}\)</span> can range from zero (no shortest paths between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> feature node <span class="math inline">\(k\)</span> as an intermediary) to one (all the shortest paths between <span class="math inline">\(i\)</span> and <span class="math inline">\(J\)</span> feature node <span class="math inline">\(k\)</span> as an intermediary). <a href="#eq-pk" class="quarto-xref">Equation&nbsp;3</a> can also be interpreted as giving us the <em>probability</em> that, if we were to select a random shortest path between nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, we would find <span class="math inline">\(k\)</span> in the middle of it.</p>
 <p>We can then use the following equation to compute the sum of these proportions for each node <span class="math inline">\(k\)</span> across each pair of actors in the network <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>. This gives us the total <strong>betweenness centrality</strong> of any node <span class="math inline">\(k\)</span> in the graph:</p>
 <p><span id="eq-betcen"><span class="math display">\[
   C_k^{BET} = \sum_{i \neq k} \sum_{j \neq k} p_{i(k)j}
-\tag{23.4}\]</span></span></p>
-<p>Computing this sum for each node in the graph shown in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>23.1</span></a> yields the betweenness centrality scores shown in <a href="#tbl-bet" class="quarto-xref">Table&nbsp;<span>23.3</span></a>.</p>
+\tag{4}\]</span></span></p>
+<p>Computing this sum for each node in the graph shown in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;1</a> yields the betweenness centrality scores shown in <a href="#tbl-bet" class="quarto-xref">Table&nbsp;3</a>.</p>
 <div class="cell">
 <div id="tbl-bet" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-bet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;23.3: Betweenness centrality scores.
+Table&nbsp;3: Betweenness centrality scores.
 </figcaption>
 <div aria-describedby="tbl-bet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -1017,9 +550,9 @@ Table&nbsp;23.3: Betweenness centrality scores.
 </figure>
 </div>
 </div>
-<p>In <a href="#eq-betcen" class="quarto-xref">Equation&nbsp;<span>23.4</span></a>, the betweenness centrality of a node <span class="math inline">\(k\)</span> goes up by one whole point if they are they can be found as an inner node in <em>all</em> the shortest paths indirectly linking <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, otherwise the sum goes up by a quantity (larger than zero but less than one) that is equal to the <em>proportion</em> of the paths between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> that <span class="math inline">\(k\)</span> stands on.</p>
-<p>Interestingly, as shown in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>, the node with the highest betweenness score is <span class="math inline">\(L\)</span> (<span class="math inline">\(C_L^{BET} = 16.4\)</span>), which differs from the result we obtained using the stress centralities in <a href="#tbl-stress" class="quarto-xref">Table&nbsp;<span>23.2</span></a>. This is mostly because node <span class="math inline">\(i\)</span>, which has the lowest possible betweenness score of zero, depends on this node to access every other actor in the network.</p>
-<p>Note also that two <em>different</em> nodes end up being ranked first on closeness—as we saw in <a href="lesson-sna-closeness.html" class="quarto-xref"><span>Chapter 22</span></a> — and betweenness centrality in the same network (compare the red nodes in <a href="lesson-sna-closeness.html#fig-clos" class="quarto-xref">Figure&nbsp;<span>22.1</span></a> and <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>). This tells us that closeness and betweenness are analytically distinct measures of node position. One (closeness) captures reachability, and the other (betweenness) captures intermediation potential.</p>
+<p>In <a href="#eq-betcen" class="quarto-xref">Equation&nbsp;4</a>, the betweenness centrality of a node <span class="math inline">\(k\)</span> goes up by one whole point if they are they can be found as an inner node in <em>all</em> the shortest paths indirectly linking <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, otherwise the sum goes up by a quantity (larger than zero but less than one) that is equal to the <em>proportion</em> of the paths between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> that <span class="math inline">\(k\)</span> stands on.</p>
+<p>Interestingly, as shown in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;1</a>, the node with the highest betweenness score is <span class="math inline">\(L\)</span> (<span class="math inline">\(C_L^{BET} = 16.4\)</span>), which differs from the result we obtained using the stress centralities in <a href="#tbl-stress" class="quarto-xref">Table&nbsp;2</a>. This is mostly because node <span class="math inline">\(i\)</span>, which has the lowest possible betweenness score of zero, depends on this node to access every other actor in the network.</p>
+<p>Note also that two <em>different</em> nodes end up being ranked first on closeness—as we saw in <strong>?@sec-closcent</strong> — and betweenness centrality in the same network (compare the red nodes in <strong>?@fig-clos</strong> and <a href="#fig-bet" class="quarto-xref">Figure&nbsp;1</a>). This tells us that closeness and betweenness are analytically distinct measures of node position. One (closeness) captures reachability, and the other (betweenness) captures intermediation potential.</p>
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
@@ -1045,6 +578,7 @@ Marsden, Peter V. 1983. <span>“Restricted Access in Networks and Models of Pow
 Shimbel, Alfonso. 1953. <span>“Structural Parameters of Communication Networks.”</span> <em>The Bulletin of Mathematical Biophysics</em> 15: 501–7.
 </div>
 </div>
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -1461,32 +995,7 @@ Shimbel, Alfonso. 1953. <span>“Structural Parameters of Communication Networks
     }
   });
   </script>
-<nav class="page-navigation column-body">
-  <div class="nav-page nav-page-previous">
-      <a href="./lesson-sna-closeness.html" class="pagination-link" aria-label="Centralities based on the Geodesic Distance">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></span>
-      </a>          
-  </div>
-  <div class="nav-page nav-page-next">
-      <a href="./lesson-sna-bigthree.html" class="pagination-link" aria-label="The &quot;Big Three&quot; Centrality Metrics">
-        <span class="nav-page-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">The “Big Three” Centrality Metrics</span></span> <i class="bi bi-arrow-right-short"></i>
-      </a>
-  </div>
-</nav>
 </div> <!-- /content -->
-<footer class="footer">
-  <div class="nav-footer">
-    <div class="nav-footer-left">
-      &nbsp;
-    </div>   
-    <div class="nav-footer-center">
-<p>Copyright 2023, Omar Lizardo &amp; Isaac Jilbert</p>
-</div>
-    <div class="nav-footer-right">
-      &nbsp;
-    </div>
-  </div>
-</footer>
 
 
 

@@ -1,0 +1,637 @@
+---
+title: "Chains of Affection"
+subtitle: "How Local Norms Shape Romantic and Sexual Networks"
+format:
+  revealjs:
+    incremental: true
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(patchwork)
+library(kableExtra)
+
+set.seed(333)
+
+# 1. Bearman's Jefferson High Spanning Tree (Chain-like)
+# Bipartite gender coloring: alternating genders along all edges (no same-gender ties!)
+gender_list <- c('Male', 'Female', 'Female', 'Male', 'Male', 'Male', 'Female', 'Female', 'Female', 'Female', 'Male', 'Male', 'Male', 'Male', 'Male', 'Female', 'Female', 'Female', 'Female', 'Female')
+
+# We include a 20th edge connecting node 3 (Female) and node 4 (Male) to represent the potential cycle completing tie
+g_tree <- tbl_graph(nodes = data.frame(name = as.character(1:20), 
+                                       gender = gender_list),
+                    edges = data.frame(from = c(1,1,2,2,3,4,4,5,6,7,7,8,9,10,11,12,12,13,14, 3),
+                                       to   = c(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20, 4),
+                                       edge_type = c(rep("Tree", 19), "Potential Cycle")),
+                    directed = FALSE)
+
+p_jefferson_spanning <- ggraph(g_tree, layout = "tree") +
+  geom_edge_link(aes(color = edge_type, linetype = edge_type, edge_width = edge_type)) +
+  scale_edge_color_manual(values = c("Tree" = "steelblue", "Potential Cycle" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Tree" = "solid", "Potential Cycle" = "dashed")) +
+  scale_edge_width_manual(values = c("Tree" = 1.2, "Potential Cycle" = 1.8)) +
+  geom_node_point(aes(color = gender), size = 6) +
+  scale_color_manual(values = c("Male" = "#2A9D8F", "Female" = "#E76F51")) +
+  geom_node_text(aes(label = name), nudge_y = 0.18, size = 4, fontface = "bold", color = "grey20") +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(clip = "off")
+
+# 2. Bearman's Temporally Ordered Micro-Level Proscription (The 4-Cycle Avoidance)
+nodes_temp <- data.frame(name = c("Mateo", "Priya", "Devin", "Mei"), 
+                         gender = c("Male", "Female", "Male", "Female"))
+l_temp <- matrix(c(-0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5), ncol = 2, byrow = TRUE)
+
+# Plot 1: Time 1 (Mateo & Priya date, Devin & Mei date)
+g_temp1 <- tbl_graph(nodes = nodes_temp, 
+                     edges = data.frame(from = c("Mateo", "Devin"), to = c("Priya", "Mei")), 
+                     directed = FALSE)
+p_temp1 <- ggraph(g_temp1, layout = "manual", x = l_temp[,1], y = l_temp[,2]) +
+  geom_edge_link(color = "steelblue", width = 2) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "#2A9D8F", "Female" = "#E76F51")) +
+  labs(title = "Time 1: Two Couples\n(Mateo-Priya & Devin-Mei)") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
+# Plot 2: Time 2 (After breakups, Priya & Devin date, former ties shown as faded dashed)
+edges_temp2 <- data.frame(
+  from = c("Mateo", "Devin", "Priya"),
+  to   = c("Priya", "Mei", "Devin"),
+  type = c("Former", "Former", "Active")
+)
+g_temp2 <- tbl_graph(nodes = nodes_temp, edges = edges_temp2, directed = FALSE)
+p_temp2 <- ggraph(g_temp2, layout = "manual", x = l_temp[,1], y = l_temp[,2]) +
+  geom_edge_link(aes(color = type, linetype = type, edge_width = type)) +
+  scale_edge_color_manual(values = c("Former" = "grey55", "Active" = "steelblue")) +
+  scale_edge_linetype_manual(values = c("Former" = "dashed", "Active" = "solid")) +
+  scale_edge_width_manual(values = c("Former" = 1.0, "Active" = 1.8)) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "#2A9D8F", "Female" = "#E76F51")) +
+  labs(title = "Time 2: New Couple\n(Priya & Devin date)") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
+# Plot 3: Time 3 (The Avoided Tie completing the full 4-cycle square motif)
+edges_temp3 <- data.frame(
+  from = c("Mateo", "Devin", "Priya", "Mateo"),
+  to   = c("Priya", "Mei", "Devin", "Mei"),
+  type = c("Former", "Former", "Active", "Avoided")
+)
+g_temp3 <- tbl_graph(nodes = nodes_temp, edges = edges_temp3, directed = FALSE)
+p_temp3 <- ggraph(g_temp3, layout = "manual", x = l_temp[,1], y = l_temp[,2]) +
+  geom_edge_link(aes(color = type, linetype = type, edge_width = type)) +
+  scale_edge_color_manual(values = c("Former" = "grey55", "Active" = "steelblue", "Avoided" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Former" = "dashed", "Active" = "solid", "Avoided" = "dashed")) +
+  scale_edge_width_manual(values = c("Former" = 1.0, "Active" = 1.8, "Avoided" = 1.8)) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "#2A9D8F", "Female" = "#E76F51")) +
+  labs(title = "Time 3: Avoided Loop\n(Mateo-Mei leftover taboo)") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
+
+# 3. McMillan's same-sex friendship code (Girl Code / Bro Code)
+nodes_peer <- data.frame(name = c("Marcus", "Sofia", "Kenji", "Maya"), 
+                         gender = c("Boy", "Girl", "Boy", "Girl"))
+l_peer <- matrix(c(-0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5), ncol = 2, byrow = TRUE)
+
+# Left: Mixed-sex romantic relationship Marcus-Sofia, same-sex friendships Marcus-Kenji and Sofia-Maya
+edges_peer1 <- data.frame(from = c("Marcus", "Marcus", "Sofia"), to = c("Sofia", "Kenji", "Maya"), type = c("Romantic", "Friend", "Friend"))
+g_peer1 <- tbl_graph(nodes = nodes_peer, edges = edges_peer1, directed = FALSE)
+p_peer1 <- ggraph(g_peer1, layout = "manual", x = l_peer[,1], y = l_peer[,2]) +
+  geom_edge_link(aes(color = type, linetype = type), width = 1.8) +
+  scale_edge_color_manual(values = c("Romantic" = "firebrick", "Friend" = "steelblue")) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 6, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Boy" = "#2A9D8F", "Girl" = "#E76F51")) +
+  labs(title = "Phase 1: Dating & Friendships") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
+# Middle: Closure: Sofia befriends Kenji, Marcus befriends Maya (double-dating)
+edges_peer2 <- data.frame(from = c("Marcus", "Marcus", "Sofia", "Sofia", "Marcus"), to = c("Sofia", "Kenji", "Maya", "Kenji", "Maya"), type = c("Romantic", "Friend", "Friend", "Friend", "Friend"))
+g_peer2 <- tbl_graph(nodes = nodes_peer, edges = edges_peer2, directed = FALSE)
+p_peer2 <- ggraph(g_peer2, layout = "manual", x = l_peer[,1], y = l_peer[,2]) +
+  geom_edge_link(aes(color = type, linetype = type), width = 1.8) +
+  scale_edge_color_manual(values = c("Romantic" = "firebrick", "Friend" = "steelblue")) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 6, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Boy" = "#2A9D8F", "Girl" = "#E76F51")) +
+  labs(title = "Phase 2: Double Dating") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
+# Right: Breakup: Marcus and Sofia break up. Sofia cannot date Kenji (friend's ex). Marcus cannot date Maya (friend's ex).
+# Shows the full square motif with the forbidden/avoided diagonal links highlighted
+edges_peer3 <- data.frame(
+  from = c("Marcus", "Sofia", "Marcus", "Marcus", "Sofia"),
+  to   = c("Kenji", "Maya", "Sofia", "Maya", "Kenji"),
+  type = c("Friend", "Friend", "Former", "Forbidden", "Forbidden")
+)
+g_peer3 <- tbl_graph(nodes = nodes_peer, edges = edges_peer3, directed = FALSE)
+p_peer3 <- ggraph(g_peer3, layout = "manual", x = l_peer[,1], y = l_peer[,2]) +
+  geom_edge_link(aes(color = type, linetype = type, edge_width = type)) +
+  scale_edge_color_manual(values = c("Friend" = "steelblue", "Former" = "grey55", "Forbidden" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Friend" = "solid", "Former" = "dashed", "Forbidden" = "dashed")) +
+  scale_edge_width_manual(values = c("Friend" = 1.8, "Former" = 1.0, "Forbidden" = 1.8)) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 6, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Boy" = "#2A9D8F", "Girl" = "#E76F51")) +
+  labs(title = "Phase 3: Friend-Loyalty Split") + theme_graph() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.8, 0.8), ylim = c(-0.8, 0.8), clip = "off")
+
+
+# 4. Fictional Networks Glee & Grey's Anatomy (Highly clustered 4-cycles)
+# Small highly dense cluster with multiple overlapping 4-cycles (e.g. A-B-C-D, B-C-E-F etc.)
+g_glee <- tbl_graph(nodes = data.frame(name = c("Finn", "Rachel", "Quinn", "Puck", "Santana", "Brittany"),
+                                        gender = c("Male", "Female", "Female", "Male", "Female", "Female")),
+                    edges = data.frame(from = c(1,1,2,3,4,4,5,5),
+                                       to   = c(2,3,4,4,5,6,6,1)),
+                    directed = FALSE)
+p_glee <- ggraph(g_glee, layout = "circle") +
+  geom_edge_link(color = "purple", width = 1.8) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.25, size = 5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "#2A9D8F", "Female" = "#E76F51")) +
+  theme_graph() + theme(legend.position = "none") + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
+
+
+# 5. Stoddard's Celebrity Rumor Networks
+nodes_cel <- data.frame(
+  name = c("Tom Holland", "Zendaya", "Timothée", "Kylie Jenner"),
+  gender = c("Male", "Female", "Male", "Female")
+)
+l_cel <- matrix(c(
+  -0.5,  0.5,  # Tom Holland (top-left)
+   0.5,  0.5,  # Zendaya (top-right)
+   0.5, -0.5,  # Timothée (bottom-right)
+  -0.5, -0.5   # Kylie Jenner (bottom-left)
+), ncol = 2, byrow = TRUE)
+
+# Confirmed: A clean opposite-sex tree structure (Acyclic)
+edges_conf <- data.frame(
+  from = c("Tom Holland", "Zendaya", "Timothée"),
+  to   = c("Zendaya", "Timothée", "Kylie Jenner")
+)
+g_conf <- tbl_graph(nodes = nodes_cel, edges = edges_conf, directed = FALSE)
+
+p_conf <- ggraph(g_conf, layout = "manual", x = l_cel[,1], y = l_cel[,2]) +
+  geom_edge_link(color = "steelblue", width = 2.0) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "#2A9D8F", "Female" = "#E76F51")) +
+  labs(title = "Confirmed Network (Clean Tree)") + theme_graph() +
+  theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold"), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.9, 0.9), ylim = c(-0.9, 0.9), clip = "off")
+
+# Rumored: Adding rumored ties which create 4-cycles and imply bisexuality!
+edges_rumor <- data.frame(
+  from = c("Tom Holland", "Zendaya", "Timothée", "Kylie Jenner", "Zendaya"),
+  to   = c("Zendaya", "Timothée", "Kylie Jenner", "Tom Holland", "Kylie Jenner"),
+  type = c("Confirmed", "Confirmed", "Confirmed", "4-Cycle Rumor", "Bisexual Rumor")
+)
+g_rumor <- tbl_graph(nodes = nodes_cel, edges = edges_rumor, directed = FALSE)
+
+p_rumor <- ggraph(g_rumor, layout = "manual", x = l_cel[,1], y = l_cel[,2]) +
+  geom_edge_link(aes(color = type, linetype = type, edge_width = type)) +
+  scale_edge_color_manual(values = c("Confirmed" = "steelblue", "4-Cycle Rumor" = "firebrick", "Bisexual Rumor" = "purple")) +
+  scale_edge_linetype_manual(values = c("Confirmed" = "solid", "4-Cycle Rumor" = "dashed", "Bisexual Rumor" = "dashed")) +
+  scale_edge_width_manual(values = c("Confirmed" = 1.8, "4-Cycle Rumor" = 1.8, "Bisexual Rumor" = 1.8)) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.24, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Male" = "#2A9D8F", "Female" = "#E76F51")) +
+  labs(title = "With Rumored Ties (Gossip)") + theme_graph() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12), legend.position = "none") +
+  coord_cartesian(xlim = c(-0.9, 0.9), ylim = c(-0.9, 0.9), clip = "off")
+
+
+# 6. Romantic 3-Cycle (The Heterosexual Impossibility)
+# Left: Heterosexual 3-Cycle Attempt (Failed)
+edges_het3 <- data.frame(
+  from = c("Marcus", "Sofia", "Kenji"),
+  to   = c("Sofia", "Kenji", "Marcus"),
+  type = c("Dating", "Dating", "Impossible")
+)
+nodes_het3 <- data.frame(name = c("Marcus", "Sofia", "Kenji"), gender = c("Boy", "Girl", "Boy"))
+g_het3 <- tbl_graph(nodes = nodes_het3, edges = edges_het3, directed = FALSE)
+l_het3 <- matrix(c(-0.8, 0.0, 0.0, 0.7, 0.8, 0.0), ncol = 2, byrow = TRUE)
+
+p_het_3cycle <- ggraph(g_het3, layout = "manual", x = l_het3[,1], y = l_het3[,2]) +
+  geom_edge_link(aes(color = type, linetype = type), width = 1.8) +
+  scale_edge_color_manual(values = c("Dating" = "steelblue", "Impossible" = "grey55")) +
+  scale_edge_linetype_manual(values = c("Dating" = "solid", "Impossible" = "dotted")) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.22, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Boy" = "#2A9D8F", "Girl" = "#E76F51")) +
+  labs(title = "Heterosexual Triad: Banned 3-Cycle\n(Kenji & Marcus are both Boys)") + theme_graph() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-1.0, 1.0), ylim = c(-0.2, 1.0), clip = "off")
+
+# Right: Homosexual/Bisexual 3-Cycle (Possible)
+edges_hom3 <- data.frame(
+  from = c("Marcus", "Sofia", "Kenji"),
+  to   = c("Sofia", "Kenji", "Marcus"),
+  type = c("Dating", "Dating", "Same-Sex")
+)
+g_hom3 <- tbl_graph(nodes = nodes_het3, edges = edges_hom3, directed = FALSE)
+p_hom_3cycle <- ggraph(g_hom3, layout = "manual", x = l_het3[,1], y = l_het3[,2]) +
+  geom_edge_link(aes(color = type, linetype = type), width = 1.8) +
+  scale_edge_color_manual(values = c("Dating" = "steelblue", "Same-Sex" = "purple")) +
+  scale_edge_linetype_manual(values = c("Dating" = "solid", "Same-Sex" = "dashed")) +
+  geom_node_point(aes(color = gender), size = 12) +
+  geom_node_text(aes(label = name), nudge_y = 0.22, size = 5.5, fontface = "bold", color = "grey20") +
+  scale_color_manual(values = c("Boy" = "#2A9D8F", "Girl" = "#E76F51")) +
+  labs(title = "Bisexual/Same-Sex Triad: Closed 3-Cycle\n(Marcus & Kenji date, closing triangle)") + theme_graph() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 11), legend.position = "none") +
+  coord_cartesian(xlim = c(-1.0, 1.0), ylim = c(-0.2, 1.0), clip = "off")
+```
+# Part 1: The Macro-Micro Mystery
+
+---
+
+## Why Study Romantic & Sexual Networks?
+
+- **The Closed Laboratory**:
+  - Unlike abstract communities, school-based dating and sexual networks are **bounded settings** with high social visibility.
+  - Individual relationship preferences are intimate, dyadic choices, but when aggregated, they form a **global network structure**.
+- **The Core Paradox**:
+  - Individual actors have **zero awareness of the global structure**.
+  - No adolescent says: *"I will date this person to maximize network centralization."*
+  - Yet, by following simple, local **micro-level rules**, individuals generate elegant, system-wide **macro-level patterns**.
+
+---
+
+## Macro-Structures & Disease Diffusion
+
+- **The Stakes of Topology**:
+  - The path layout of a network determines how rapidly **pathogens (like STIs/HIV)** can travel.
+  - **The Core Model**: Densely connected clusters or pockets of high-risk actors. Highly resilient to intervention.
+  - **The Spanning Tree**: Long, thin, fragile chains with very few shortcuts (cycles). Extremely vulnerable to random interventions.
+- **The Micro-Macro Link**:
+  - By understanding the **unwritten local rules** of adolescent society, we can predict—and break—the path of disease transmission.
+
+---
+
+# Part 2: Bearman's Landmark Study (Jefferson High)
+
+---
+
+## The "Chains of Affection" Discovery
+
+::: {.columns}
+::: {.column width="55%"}
+- **Peter Bearman, James Moody, and Katherine Stovel (2004)**:
+  - Conducted a landmark study of "Jefferson High" (832 students).
+- **The Global Finding**:
+  - Found a massive **spanning tree** structure!
+  - Over **52%** of active students were linked in a single giant, chain-like component.
+  - It had **almost zero cycles** (redundant loops), resembling rural telephone wires stretching from a single main trunk.
+- **Why is this a puzzle?**
+  - Standard social preferences like homophily (dating similar people) predict highly clustered, dense, closed pockets—not long, fragile chains!
+:::
+
+::: {.column width="40%"}
+### Spanning Tree Chain
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.8
+#| fig-width: 4.8
+p_jefferson_spanning
+```
+</center>
+:::
+:::
+
+---
+
+## The 4-Cycle Proscription: The Tabooed Loop
+
+- **The Micro-Level Proscription**:
+  - *"You do not date your ex's current partner's ex"* (avoiding **seconds partnerships**).
+  - Completing this loop results in a public **loss of status**. Adolescents avoid taking "seconds" to protect their prestige in the peer group.
+  - Bearman et al. found only **two 4-cycles** in the entire school, vastly fewer than expected by random chance.
+
+. . .
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.2
+#| fig-width: 9.6
+p_temp1 + p_temp2 + p_temp3
+```
+- **Time 1**: Mateo dates Priya, while Devin dates Mei.
+- **Time 2**: After breakups, Priya and Devin start dating.
+- **Time 3**: Should Mateo and Mei date? If they do, they complete the forbidden **4-cycle loop** and both take "leftovers." So they avoid each other!
+</center>
+
+---
+
+## The Power of a Negative Rule
+
+::: {.columns}
+::: {.column width="55%"}
+- **Spanning Trees are Born from Proscriptions**:
+  - Spanning trees (chain-like structures) are not generated by positive choices, but by **negative rules** (what you *cannot* do).
+  - Like incest taboos in kinship networks, the prohibition against completing short cycles forces individuals to look outward.
+- **The Spanning Result**:
+  - By refusing to close the loop, Mateo and Mei must find partners outside their immediate circle.
+  - This simple choice **stretches the network out** into long, fragile chains.
+:::
+
+::: {.column width="45%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.2
+#| fig-width: 4.2
+p_jefferson_spanning
+```
+- Forcing Mateo and Mei to look outward stretches the tree!
+</center>
+:::
+:::
+
+---
+
+# Part 3: Peer Context & The Friendship-Dating Code
+
+---
+
+## "Keeping to the Code" (McMillan et al., 2022)
+
+- **The Critique of the Classic Taboo**:
+  - McMillan, Kreager, and Veenstra (2022) argue that Bearman's norm lacks **face validity**.
+  - No high schooler actually thinks in terms of: *"Is this my ex-partner's current partner's ex-partner?"*
+  - It is too abstract and unarticulated.
+- **The Alternative Multi-Relational Norm**:
+  - Romantic relationships are embedded in a dense **peer friendship network**.
+  - The actual micro-level rule is: **The "No Seconds" Friendship Code** (colloquially, **"Girl Code"** or **"Bro Code"**).
+  - *"Do not date your friend's previous romantic partner."*
+
+---
+
+## Visualizing the Friendship Code Process
+
+- **How same-sex loyalty blocks the 4-cycle loop step-by-step**:
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.2
+#| fig-width: 9.6
+p_peer1 + p_peer2 + p_peer3
+```
+</center>
+
+1. **Phase 1**: **Marcus** (Boy) and **Sofia** (Girl) are dating (dotted), while Marcus is same-sex friends with **Kenji** (Boy), and Sofia is same-sex friends with **Maya** (Girl).
+2. **Phase 2**: Through double-dating (triadic closure), Marcus spends time with Maya, and Sofia spends time with Kenji, establishing friendly ties across the group.
+3. **Phase 3 (Breakup)**: Marcus and Sofia split. Same-sex **friendship loyalty** prevails. Kenji will **never** date Sofia (his friend Marcus's ex), and Maya will **never** date Marcus (her friend Sofia's ex). The 4-cycle is blocked, fracturing the group into two open chains!
+
+---
+
+## Empirical Evidence of the Code
+
+- **Testing the PEAR Study Network**:
+  - McMillan et al. studied a Dutch high school romantic network (607 students).
+  - Adhered to Bearman's spanning tree characteristics: exceptionally sparse (density = 0.005), low cycles (only 8 four-cycles total).
+- **Statistical Network Analysis**:
+  - Using advanced statistical models to control for other factors (like popularity, school size, and opportunities), researchers found that the **"no seconds" Girl/Bro Code** is a powerful social rule.
+  - Adolescents are **significantly less likely** to date their friend's ex-partner.
+  - In fact, once this friendship loyalty rule is accounted for, there is **no other special dating rule** needed to explain why 4-cycles are so rare!
+- **Takeaway**:
+  - The global spanning tree is not born of a dating-only taboo, but of **peer friendship loyalty** blocking cycle closure!
+
+---
+
+# Part 4: Reality vs. Fiction (The TV Cases of Glee and Grey's Anatomy)
+
+---
+
+## Do Fictional Networks Follow the Rules?
+
+- Writers of popular television dramas (sitcoms, prime-time soap operas) rely heavily on romantic networks to build storylines.
+- Let's examine two famous fictional cases:
+  - **Glee's McKinley High** (Seasons 1-2, studied by Jimi Adams, 2015).
+  - **Grey's Anatomy** (GAN, Seasons 1-6, studied by Marcum et al., 2016).
+
+. . .
+
+- **The Macro-Observation**:
+  - In Glee, a whopping **42%** of observed romantic ties are part of a 4-cycle loop (e.g., Quinn-Finn-Rachel-Puckerman).
+  - In Grey's Anatomy, 4-cycles, love triangles, and overlapping loops are rampant.
+  - **Why?** Drama needs conflict! Writers actively violate local cycle-avoidance taboos to generate plot tension.
+
+---
+
+## Glee's McKinley High Network
+
+::: {.columns}
+::: {.column width="55%"}
+- **High-Clustering Drama**:
+  - Glee's network is incredibly small, highly dense, and saturated with loops.
+  - Screenwriters use cycle completions (e.g., dating a friend's ex or partner's ex) to drive dramatic friction.
+- **Statistical Network Models**:
+  - When researchers used statistical models to control for basic features (like how small and active the cast is), the patterns showed a very interesting result.
+  - Fictional characters *still* exhibit a **strong, significant aversion to 4-cycles**.
+  - Even under dramatic television pressures, scriptwriters implicitly follow real-world sexual taboos to keep plots recognizable!
+- **Takeaway**:
+  - Art imitates reality! Even under extreme dramatic pressures, writers implicitly follow real-world sexual taboos to keep plots recognizable.
+:::
+
+::: {.column width="45%"}
+### Glee's Saturated Loops
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+p_glee
+```
+</center>
+:::
+:::
+
+---
+
+# Part 5: Same-Sex Constraints (The L Word Case)
+
+---
+
+## Heteronormativity vs. Homosexual Markets
+
+- Marcum, Lin, and Koehly (2016) extended the study of 4-cycles to homosexual networks, comparing:
+  - **Grey's Anatomy (GAN)**: Predominantly heterosexual adult network.
+  - **Showtime's The L Word (LWN)**: Predominantly lesbian same-sex network in Los Angeles.
+
+. . .
+
+- **The Structural Findings**:
+  - Heterosexual networks (Grey's Anatomy, and the real-world Colorado Springs gonorrhea network) show a **strong, significant aversion to 4-cycles** (they are heavily avoided).
+  - Homosexual networks (The L Word) show **no such aversion** to 4-cycles (they occur at normal, expected rates).
+  - Love triangles and cycles of length 4 are structurally unconstrained and socially permitted in the lesbian network.
+
+---
+
+## Market Size and Structural Necessity
+
+::: {.columns}
+::: {.column width="55%"}
+- **Why are same-sex cycles different?**
+- **1. Structural Constraint**:
+  - Same-sex dating markets are significantly smaller and more constrained than heterosexual markets.
+  - Due to limited partner availability, strict cycle avoidance (the "no seconds" code) would result in a massive proportion of the population being locked out of dating entirely.
+- **2. Normative Shift**:
+  - In lesbian same-sex networks, "love triangles" and cycle-closures are normalized. 
+  - Gaps are closed out of structural necessity, making cycle-taboos a luxury of large, heteronormative dating pools.
+:::
+
+::: {.column width="45%"}
+### Fictional Adult Networks
+
+```{r}
+#| echo: false
+market_data <- data.frame(
+  Metric = c("Size (Nodes)", "Edges", "Same-Gender Ties", "4-Cycles", "Cycle Aversion?"),
+  GAN = c("44", "46", "2", "7", "Significant"),
+  LWN = c("91", "105", "86", "12", "None")
+)
+colnames(market_data) <- c("Network Metric", "Grey's Anatomy (GAN)", "The L Word (LWN)")
+
+kbl(market_data, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+:::
+:::
+
+---
+
+## The Structural Impossibility of Heterosexual 3-Cycles
+
+- **What is a 3-Cycle?**
+  - A closed loop of length 3 where person A dates B, B dates C, and C dates A (the classic **"love triangle"**).
+- **The Bipartite Rule**:
+  - In a strictly heterosexual network, ties only occur between opposite sexes (Boy $\leftrightarrow$ Girl).
+  - Therefore, heterosexual networks are **bipartite graphs**, which mathematically **can only have even-length cycles** (4, 6, 8, etc.). 
+- **The Catch**:
+  - A romantic 3-cycle is **structurally impossible** in a strictly heterosexual market!
+  - To close a 3-cycle, at least one **same-sex (homosexual or bisexual)** relationship is mathematically required.
+
+. . .
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.2
+#| fig-width: 9.6
+p_het_3cycle + p_hom_3cycle
+```
+- **Left**: Heterosexual triad. Closing the triangle would require Kenji and Marcus to date, which is impossible under strictly heterosexual rules.
+- **Right**: Bisexual/same-sex triad. A same-sex tie (Marcus-Kenji, shown in purple) closes the triangle, creating a 3-cycle.
+</center>
+
+---
+
+# Part 6: Rumors vs. Reality (whosdatedwho.com Gossip Analysis)
+
+---
+
+## Allegations of Affection
+
+- Carmella Nicole Stoddard's (2024) UCLA dissertation looked at a massive celebrity dating network scraped from **whosdatedwho.com (WDW)**:
+  - **109,626 nodes** and **88,746 edges** across celebrity histories.
+- **The Core Distinction**:
+  - **Confirmed Ties**: Fully established, mutually acknowledged relationships.
+  - **Rumored Ties**: Unconfirmed allegations, gossip, and media speculations (3,848 ties).
+- **The Question**:
+  - How do rumored ties differ from confirmed ties structurally, and what do they tell us about social norms?
+
+---
+
+## Visualizing Rumors vs. Reality
+
+::: {.columns}
+::: {.column width="38%"}
+- **Confirmed Structure**:
+  - Only opposite-sex confirmed ties exist (Tom Holland $\leftrightarrow$ Zendaya $\leftrightarrow$ Timothée $\leftrightarrow$ Kylie Jenner).
+  - Forms a clean, acyclic tree with **zero cycles** and **strictly heterosexual** behavior.
+- **Rumored Structure**:
+  - **4-Cycle Closure**: A rumor that Kylie Jenner dated Tom Holland (red dashed line) closes a 4-cycle loop.
+  - **Discordant Sexuality**: A rumor that Zendaya dated Kylie Jenner (purple dashed line) is a same-sex tie, suggesting **bisexual behavior** for both.
+:::
+
+::: {.column width="31%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.5
+#| fig-width: 3.5
+p_conf
+```
+</center>
+:::
+
+::: {.column width="31%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.5
+#| fig-width: 3.5
+p_rumor
+```
+- Gossip highlights norm violations by closing cycles (red) and implying bisexuality (purple)!
+</center>
+:::
+:::
+
+---
+
+## Gossip as a Norm-Enforcement Tool
+
+- **The Tradeoff of Gossip & Rumor**:
+  - Gossip is attracted to **salaciousness** (violations of cycle avoidance, sexuality discordant pairings, extreme age-gaps).
+  - By rumor-mongering these violations (completing 3-cycles and 4-cycles), the community publicly **highlights and sanctions deviant behaviors**.
+- **The WDW Findings**:
+  - Rumored ties are heavily overrepresented in short cycles and age-gapped ties.
+  - Rather than being random noise, rumors are a **multiplex tool** used to enforce local monogamy and age-homophily norms by shining a spotlight on those who break them.
+
+---
+
+# Part 7: Summary & Class Discussion
+
+---
+
+## Summary of the Micro-Macro Romantic Link
+
+- **1. Structure Emerges from Gaps**:
+  - Spanning tree networks are not created by positive choices, but by **negative proscriptions** (avoiding short cycles).
+- **2. Friendship Drives Romantic Structures**:
+  - The "Bro/Girl Code" (avoiding dating a friend's ex) is the true local engine that shapes adolescent spanning trees.
+- **3. Market Size Decouples Norms**:
+  - Smaller same-sex dating markets cannot afford cycle-avoidance taboos, showing how **structural constraints** alter social codes.
+- **4. Gossip Maps Deviance**:
+  - Celebrity rumor networks demonstrate that gossip serves to **identify, broadcast, and sanction** those who violate local network taboos.
+
+---
+
+## Discussion Questions
+
+1. Why do you think friendship-loyalty norms ("Bro Code" / "Girl Code") have higher face validity for teenagers than dating-only cycle-avoidance rules?
+2. If same-sex markets must relax cycle-avoidance taboos due to structural constraint, how might this impact the spread of infectious pathogens (STIs) within gay/lesbian communities compared to heterosexual ones?
+3. How does celebrity gossip on sites like whosdatedwho.com act as a "surveillant filter" for norm violations, and what other online communities use rumor as a tool for social control?

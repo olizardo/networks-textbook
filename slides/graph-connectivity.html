@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="graph-connectivity_files/libs/clipboard/clipboard.min.js"></script>
-<script src="graph-connectivity_files/libs/quarto-html/tabby.min.js"></script>
-<script src="graph-connectivity_files/libs/quarto-html/popper.min.js"></script>
-<script src="graph-connectivity_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="graph-connectivity_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="graph-connectivity_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="graph-connectivity_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.9.38">
 
   <title>Graph Theory: Paths &amp; Connectivity</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="graph-connectivity_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="graph-connectivity_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -31,12 +31,12 @@
       vertical-align: middle;
     }
   </style>
-  <link rel="stylesheet" href="graph-connectivity_files/libs/revealjs/dist/theme/quarto-2740581606dc327e82f18f789b69d8a0.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto-2740581606dc327e82f18f789b69d8a0.css">
   <link rel="stylesheet" href="ucla-theme.css">
-  <link href="graph-connectivity_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="graph-connectivity_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="graph-connectivity_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="graph-connectivity_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -1148,19 +1148,86 @@
 <h1>Part 5: Directed Connectivity &amp; Components</h1>
 
 </section>
-<section id="flavors-of-connectivity-in-directed-graphs" class="slide level2 scrollable">
-<h2>Flavors of Connectivity in Directed Graphs</h2>
+<section id="pairwise-connectivity-in-directed-graphs" class="slide level2 scrollable">
+<h2>Pairwise Connectivity in Directed Graphs</h2>
 <ul>
-<li class="fragment">Because of edge directionality, directed graphs have <strong>three major levels</strong> of connectivity:</li>
-</ul>
+<li>Before we can define whether a <strong>whole graph</strong> has a certain flavor of connectivity, we must define the connectivity state of <strong>individual pairs of nodes (pairwise connectivity)</strong>.</li>
+<li>Two nodes <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> can be connected in four distinct pairwise flavors depending on the directed pathways between them:
 <ol type="1">
-<li class="fragment"><strong>Strongly Connected</strong>: Every pair of nodes is <strong>mutually reachable</strong> via directed paths.
+<li><strong>Pairwise Weakly Connected</strong></li>
+<li><strong>Pairwise Unilaterally Connected</strong></li>
+<li><strong>Pairwise Strongly Connected</strong></li>
+<li><strong>Pairwise Recursively Connected</strong></li>
+</ol></li>
+<li>Let’s examine these four pairwise states step-by-step.</li>
+</ul>
+</section>
+<section id="pairwise-weak-unilateral-connectivity" class="slide level2">
+<h2>1. Pairwise Weak &amp; Unilateral Connectivity</h2>
 <ul>
-<li class="fragment"><strong>Recursively Connected</strong> (Subtype): Strongly connected, AND the directed paths in both directions share the exact same set of intermediate nodes (sharing both vertices and edges).</li>
+<li><strong>Pairwise Weakly Connected</strong>:
+<ul>
+<li>Node <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are connected by at least one <strong>semipath</strong> (connected if we ignore the arrow directions).</li>
+<li><strong>Sociological Meaning</strong>: They are part of the same general network, but there is no directed path starting from either node that can reach the other.</li>
 </ul></li>
-<li class="fragment"><strong>Unilaterally Connected</strong>: Every pair is connected by <strong>at least one directed path</strong> (from <span class="math inline">\(u \rightarrow v\)</span> OR <span class="math inline">\(v \rightarrow u\)</span>, but not necessarily both).</li>
-<li class="fragment"><strong>Weakly Connected</strong>: Every pair of nodes is connected by at least a <strong>semipath</strong> (connected if we ignore arrow directions).</li>
-</ol>
+<li><strong>Pairwise Unilaterally Connected</strong>:
+<ul>
+<li>A directed path exists from <span class="math inline">\(u \rightarrow v\)</span> <strong>OR</strong> from <span class="math inline">\(v \rightarrow u\)</span> (one-way reachability).</li>
+<li><strong>Sociological Meaning</strong>: Information or influence can flow from one person to the other, but not in both directions (no mutual exchange).</li>
+</ul></li>
+</ul>
+</section>
+<section id="pairwise-strong-recursive-connectivity" class="slide level2">
+<h2>2. Pairwise Strong &amp; Recursive Connectivity</h2>
+<ul>
+<li><strong>Pairwise Strongly Connected</strong>:
+<ul>
+<li>A directed path exists from <span class="math inline">\(u \rightarrow v\)</span> <strong>AND</strong> from <span class="math inline">\(v \rightarrow u\)</span> (mutual reachability).</li>
+<li><strong>Sociological Meaning</strong>: Both nodes can reach each other, but the paths in each direction may use completely different intermediate nodes or channels.</li>
+</ul></li>
+<li><strong>Pairwise Recursively Connected</strong>:
+<ul>
+<li>A directed path exists from <span class="math inline">\(u \rightarrow v\)</span> and <span class="math inline">\(v \rightarrow u\)</span>, <strong>AND</strong> the directed path in both directions shares the exact same set of intermediate nodes (sharing both vertices and edges).</li>
+<li><strong>Sociological Meaning</strong>: The relationship can be traversed back-and-forth along the same closed, mutually symmetric cycle.</li>
+</ul></li>
+</ul>
+</section>
+<section id="node-level-pairwise-vs.-graph-level-connectivity" class="slide level2">
+<h2>Node-Level Pairwise vs.&nbsp;Graph-Level Connectivity</h2>
+<ul>
+<li>A <strong>whole graph</strong>’s flavor of connectivity is defined by the <strong>weakest pairwise connectivity state</strong> present in the network:</li>
+</ul>
+<table class="caption-top">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Whole Graph State</th>
+<th style="text-align: left;">Defining Pairwise Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Strongly Connected</strong></td>
+<td style="text-align: left;"><strong>every</strong> pair of nodes in the graph is <em>pairwise strongly connected</em>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Unilaterally Connected</strong></td>
+<td style="text-align: left;"><strong>at least one</strong> pair of nodes in the graph is <em>pairwise unilaterally connected</em>.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Weakly Connected</strong></td>
+<td style="text-align: left;"><strong>at least one</strong> pair of nodes in the graph is <em>pairwise weakly connected</em>.</td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<ul>
+<li><strong>Takeaway</strong>: Global graph connectivity is built on top of these individual node-to-node pairwise states. If even a single pair drops to a lower state, the entire graph’s connectivity level drops!</li>
+</ul>
+</div>
 </section>
 <section id="strongly-connected-a-visual-example" class="slide level2">
 <h2>Strongly Connected: A Visual Example</h2>
@@ -1669,6 +1736,7 @@
 </div>
 </div></div>
 
+
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
@@ -1678,19 +1746,19 @@
 </div></div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="graph-connectivity_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="../site_libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="graph-connectivity_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="graph-connectivity_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="graph-connectivity_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="graph-connectivity_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="graph-connectivity_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="graph-connectivity_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="graph-connectivity_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="graph-connectivity_files/libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="graph-connectivity_files/libs/revealjs/plugin/math/math.js"></script>
+  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../site_libs/revealjs/plugin/math/math.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
