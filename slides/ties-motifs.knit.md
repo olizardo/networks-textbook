@@ -12,97 +12,7 @@ format:
     min-scale: 0.2
 ---
 
-```{r setup, include=FALSE}
-library(ggplot2)
-library(ggraph)
-library(tidygraph)
-library(igraph)
-library(dplyr)
-library(kableExtra)
-library(patchwork)
 
-# Perfect triangle coordinates for 3-node triad drawings
-x_triad <- c(0, 2, 1)
-y_triad <- c(0, 0, 1.2)
-
-# Helper function to plot individual directed triads
-gr_c <- create_empty(3, directed = TRUE)
-plot_tr <- function(edges, title) {
-  g <- gr_c %>% mutate(name = toupper(letters[1:3]))
-  if (nrow(edges) > 0) {
-    g <- g %>% bind_edges(edges)
-  }
-  p <- ggraph(g, layout = "manual", x = x_triad, y = y_triad) +
-    geom_edge_link(color = "#2c3e50", edge_width = 1.1,
-                   arrow = arrow(length = unit(3, 'mm'), type = "closed"),
-                   end_cap = circle(6, 'mm'), start_cap = circle(6, 'mm')) +
-    geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-    geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50") +
-    theme_graph() + ggtitle(title) + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-    theme(
-      plot.title = element_text(size = 10, face="bold", hjust=0.5, color = "#2c3e50"),
-      plot.margin = margin(5, 5, 5, 5)
-    )
-  return(p)
-}
-
-# Function to create a clean, minimalist 2-node graph plot from the book chapter
-plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cross = FALSE) {
-  g <- tbl_graph(nodes = nodes, edges = edges)
-  p <- ggraph(g, layout = "manual", x = x, y = y)
-  
-  if (directed) {
-    p <- p + geom_edge_arc(aes(strength = strength, color = color, linetype = linetype),
-                           arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-                           end_cap = circle(8, 'mm'),
-                           start_cap = circle(8, 'mm'),
-                           width = 1.1,
-                           show.legend = FALSE) +
-             scale_edge_color_identity() +
-             scale_edge_linetype_identity()
-  } else {
-    p <- p + geom_edge_link(color = "#2c3e50",
-                            width = 1.1,
-                            end_cap = circle(8, 'mm'),
-                            start_cap = circle(8, 'mm'),
-                            show.legend = FALSE)
-  }
-  
-  pBase <- p + geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-    geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50")
-  
-  if (has_cross) {
-    pBase <- pBase + annotate("text", x = 1.5, y = 0.90, label = "✕", color = "#e74c3c", size = 8, fontface = "bold")
-  }
-  
-  pBase <- pBase + 
-    labs(title = title, subtitle = subtitle) +
-    theme_graph() +
-    theme(
-      plot.title = element_text(size = 12, face = "bold", color = "#2c3e50", hjust = 0.5),
-      plot.subtitle = element_text(size = 9.5, color = "#7f8c8d", hjust = 0.5, lineheight = 1.1),
-      plot.margin = margin(10, 10, 10, 10)
-    ) +
-    coord_fixed(ratio = 1, xlim = c(0.6, 2.4), ylim = c(0.65, 1.35), clip = "off")
-  
-  return(pBase)
-}
-
-# Define Nodes
-nodes_2 <- data.frame(name = c("A", "B"), x = c(1, 2), y = c(1, 1))
-
-# Define Edges for symmetric, reciprocal, non-reciprocal, and anti-symmetric
-edges_sym <- data.frame(from = 1, to = 2)
-edges_rec <- data.frame(from = c(1, 2), to = c(2, 1), strength = c(0.1, 0.1), color = c("#2c3e50", "#2c3e50"), linetype = c("solid", "solid"))
-edges_nonrec <- data.frame(from = 1, to = 2, strength = 0, color = "#2c3e50", linetype = "solid")
-edges_anti <- data.frame(
-  from = c(1, 2), 
-  to = c(2, 1), 
-  strength = c(0.1, 0.1), 
-  color = c("#2c3e50", "#e74c3c"), 
-  linetype = c("solid", "dashed")
-)
-```
 
 # Part 1: The Taxonomy of Ties
 
@@ -181,13 +91,13 @@ edges_anti <- data.frame(
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-plot_tie_type(nodes_2, edges_sym, "Symmetric Tie", "e.g., 'is sibling of'", directed = FALSE)
-```
+
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-1-1.png){fig-align='center' width=528}
+:::
+:::
+
 :::
 
 ::::
@@ -213,15 +123,13 @@ plot_tie_type(nodes_2, edges_sym, "Symmetric Tie", "e.g., 'is sibling of'", dire
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 6.5
-#| fig-height: 5.5
-p1 <- plot_tie_type(nodes_2, edges_rec, "Asymmetric: Reciprocal Dyad", "e.g., 'A likes B' & 'B likes A'", directed = TRUE)
-p2 <- plot_tie_type(nodes_2, edges_nonrec, "Asymmetric: Non-Reciprocal Dyad", "e.g., 'A sends email to B'", directed = TRUE)
-p1 + p2
-```
+
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-2-1.png){fig-align='center' width=624}
+:::
+:::
+
 :::
 
 ::::
@@ -246,13 +154,13 @@ p1 + p2
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-plot_tie_type(nodes_2, edges_anti, "Anti-Symmetric Tie", "e.g., 'A is boss of B'", directed = TRUE, has_cross = TRUE)
-```
+
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-3-1.png){fig-align='center' width=528}
+:::
+:::
+
 :::
 
 ::::
@@ -296,51 +204,13 @@ plot_tie_type(nodes_2, edges_anti, "Anti-Symmetric Tie", "e.g., 'A is boss of B'
 :::
 
 ::: {.column width="60%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 6.5
-#| fig-height: 5.5
-nodes_mult <- data.frame(
-  name = c("A", "B", "C", "D"),
-  x = c(1, 0, 2, 1),
-  y = c(2, 1, 1, 0)
-)
-edges_mult <- data.frame(
-  from = c(1, 1, 2,  1,  3,  2, 3, 2,  2, 4,  4,  3, 4,  1, 4, 4),
-  to   = c(2, 2, 1,  3,  1,  3, 2, 3,  4, 2,  3,  4, 3,  4, 1, 1),
-  type = c(
-    "Supervisor-of", "Friendship", "Friendship",
-    "Supervisor-of", "Advice",
-    "Coworker", "Coworker", "Advice",
-    "Friendship", "Friendship",
-    "Supervisor-of", "Coworker", "Coworker",
-    "Coworker", "Coworker", "Advice"
-  )
-)
-gr_mult <- tbl_graph(nodes = nodes_mult, edges = edges_mult, directed = TRUE)
-ggraph(gr_mult, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(aes(color = type, linetype = type),
-                     arrow = arrow(length = unit(2.5, 'mm'), type = "closed"),
-                     start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm'),
-                     sep = unit(3.0, 'mm'), edge_width = 1.0) +
-  scale_edge_color_manual(values = c(
-    "Coworker" = "#7f8c8d",
-    "Supervisor-of" = "#c0392b",
-    "Friendship" = "#27ae60",
-    "Advice" = "#8e44ad"
-  )) +
-  scale_edge_linetype_manual(values = c(
-    "Coworker" = "dotted",
-    "Supervisor-of" = "solid",
-    "Friendship" = "dotdash",
-    "Advice" = "dashed"
-  )) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + 
-  coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.5, 2.5), clip = "off")
-```
+
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-4-1.png){fig-align='center' width=624}
+:::
+:::
+
 :::
 
 ::::
@@ -381,17 +251,13 @@ ggraph(gr_mult, layout = "manual", x = x, y = y) +
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr_dyad_base <- create_empty(2, directed = FALSE) %>% mutate(name = toupper(letters[1:2]))
-ggraph(gr_dyad_base, layout = 'linear') +
-  geom_node_point(size = 25, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + coord_cartesian(clip = "off")
-```
+
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-5-1.png){fig-align='center' width=528}
+:::
+:::
+
 :::
 
 ::::
@@ -412,29 +278,13 @@ ggraph(gr_dyad_base, layout = 'linear') +
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 6
-#| fig-height: 5.5
-gr1 <- create_empty(2, directed = FALSE) %>% mutate(name = c("A", "B"))
-gr2 <- create_empty(2, directed = FALSE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
 
-p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Disconnected (Size Zero)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-6-1.png){fig-align='center' width=576}
+:::
+:::
 
-p2 <- ggraph(gr2, layout = 'linear') +
-  geom_edge_link(color = "#2c3e50", width = 1.25, start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm')) +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Connected (Size One)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p1 / p2
-```
 :::
 
 ::::
@@ -456,41 +306,13 @@ p1 / p2
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 6
-#| fig-height: 5.5
-gr1 <- create_empty(2, directed = TRUE) %>% mutate(name = c("A", "B"))
-gr2 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
-gr3 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = c(1, 2), to = c(2, 1))) %>% mutate(name = c("E", "F"))
 
-p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Null (Disconnected)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-7-1.png){fig-align='center' width=576}
+:::
+:::
 
-p2 <- ggraph(gr2, layout = 'linear') +
-  geom_edge_link(color = "#2c3e50", edge_width = 1,
-                  arrow = arrow(length = unit(3, 'mm'), type = "closed"), 
-                  start_cap = circle(5, 'mm'), end_cap = circle(5, 'mm')) +
-  geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Asymmetric (Non-reciprocal)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p3 <- ggraph(gr3, layout = 'linear') +
-  geom_edge_parallel(color = "#2c3e50", edge_width = 1,
-                  arrow = arrow(length = unit(3, 'mm'), type = "closed"), 
-                  start_cap = circle(5, 'mm'), end_cap = circle(5, 'mm'), sep = unit(4, 'mm')) +
-  geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Mutual (Reciprocal)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p1 / p2 / p3
-```
 :::
 
 ::::
@@ -524,31 +346,13 @@ p1 / p2 / p3
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 6
-#| fig-height: 5.5
-gr1 <- create_empty(2, directed = TRUE) %>% mutate(name = c("A", "B"))
-gr2 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
 
-p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Disconnected") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-8-1.png){fig-align='center' width=576}
+:::
+:::
 
-p2 <- ggraph(gr2, layout = 'linear') +
-  geom_edge_link(color = "#2c3e50", edge_width = 1.25,
-                  arrow = arrow(length = unit(4, 'mm'), type = "closed"), 
-                  start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm')) +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Non-Reciprocal") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p1 / p2
-```
 :::
 
 ::::
@@ -585,18 +389,13 @@ p1 / p2
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr <- create_empty(3, directed = FALSE) %>% mutate(name = toupper(letters[1:3]))
-p3_ex <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-    geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-    geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
-    theme_graph() + coord_cartesian(clip = "off")
-p3_ex
-```
+
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-9-1.png){fig-align='center' width=528}
+:::
+:::
+
 :::
 
 ::::
@@ -605,55 +404,13 @@ p3_ex
 
 ## The Four Undirected Triads
 
-```{r}
-#| label: fig-undir-triads
-#| fig-cap: "The four types of undirected triads."
-#| fig-cap-location: bottom
-#| fig-height: 5.5
-#| fig-width: 11
 
-    gr <- create_empty(3, directed = FALSE) %>% mutate(name = toupper(letters[1:3]))
-    p1 <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-        theme_graph() + ggtitle("Null") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
-    
-    gr <- create_empty(3, directed = FALSE) %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        mutate(name = toupper(letters[1:3]))
-    p2 <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-        geom_edge_link(color = "#2c3e50", width = 1.1, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
-        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-        theme_graph() + ggtitle("Disconnected") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
+::: {.cell .fig-cap-location-bottom}
+::: {.cell-output-display}
+![The four types of undirected triads.](ties-motifs_files/figure-revealjs/fig-undir-triads-1.png){#fig-undir-triads width=1056}
+:::
+:::
 
-    gr <- create_empty(3, directed = FALSE) %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 3)) %>%
-        mutate(name = toupper(letters[1:3]))
-    p3 <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-        geom_edge_link(color = "#2c3e50", width = 1.1, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
-        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-        theme_graph() + ggtitle("Open") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
-    
-    gr <- create_empty(3, directed = FALSE) %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 3)) %>%
-        bind_edges(data.frame(from = 3, to = 1)) %>%
-        mutate(name = toupper(letters[1:3]))
-    p4 <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-        geom_edge_link(color = "#2c3e50", width = 1.1, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
-        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-        theme_graph() + ggtitle("Closed") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
-    
-    p1 + p2 + p3 + p4 + plot_layout(nrow = 1)
-```
 
 ---
 
@@ -691,36 +448,25 @@ p3_ex
 
 ## Anti-Symmetric Triads (Part 1)
 
-```{r}
-#| label: fig-antisym-triads-slides-1
-#| fig-align: "center"
-#| fig-height: 5.5
-#| fig-width: 11
 
-    p1 <- plot_tr(data.frame(), "1. 003")
-    p2 <- plot_tr(data.frame(from=1, to=2), "2. 012")
-    p3 <- plot_tr(data.frame(from=c(1,2), to=c(2,3)), "3. 021C")
-    p4 <- plot_tr(data.frame(from=c(1,1), to=c(2,3)), "4. 021D")
-    
-    p1 + p2 + p3 + p4 + plot_layout(nrow = 1)
-```
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/fig-antisym-triads-slides-1-1.png){#fig-antisym-triads-slides-1 fig-align='center' width=1056}
+:::
+:::
+
 
 ---
 
 ## Anti-Symmetric Triads (Part 2)
 
-```{r}
-#| label: fig-antisym-triads-slides-2
-#| fig-align: "center"
-#| fig-height: 5.5
-#| fig-width: 11
 
-    p5 <- plot_tr(data.frame(from=c(2,3), to=c(1,1)), "5. 021U")
-    p6 <- plot_tr(data.frame(from=c(1,2,3), to=c(2,3,1)), "6. 030C")
-    p7 <- plot_tr(data.frame(from=c(1,1,2), to=c(2,3,3)), "7. 030T")
-    
-    p5 + p6 + p7 + plot_spacer() + plot_layout(nrow = 1)
-```
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/fig-antisym-triads-slides-2-1.png){#fig-antisym-triads-slides-2 fig-align='center' width=1056}
+:::
+:::
+
 
 ---
 
@@ -750,24 +496,13 @@ p3_ex
 :::
 
 ::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-gr_hierarchy <- tbl_graph(
-  nodes = data.frame(name = c("Pres", "VP 1", "VP 2", "Staff 1", "Staff 2")),
-  edges = data.frame(from = c(1, 1, 2, 3), to = c(2, 3, 4, 5)),
-  directed = TRUE
-)
-ggraph(gr_hierarchy, layout = "tree") +
-  geom_edge_link(color = "#2c3e50", edge_width = 1.5,
-                 arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-                 end_cap = circle(13, 'mm'), start_cap = circle(13, 'mm')) +
-  geom_node_point(size = 38, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 5.0, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + coord_cartesian(clip = "off")
-```
+
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/unnamed-chunk-10-1.png){fig-align='center' width=528}
+:::
+:::
+
 :::
 
 ::::
@@ -790,52 +525,37 @@ ggraph(gr_hierarchy, layout = "tree") +
 
 ## Reciprocal Triads (Part 1: Single Mutual)
 
-```{r}
-#| label: fig-recip-triads-slides-1
-#| fig-align: "center"
-#| fig-height: 5.5
-#| fig-width: 11
 
-    p1 <- plot_tr(data.frame(from=c(1,2), to=c(2,1)), "1. 102")
-    p2 <- plot_tr(data.frame(from=c(2,1,3), to=c(1,2,1)), "2. 111D")
-    p3 <- plot_tr(data.frame(from=c(2,1,1), to=c(1,2,3)), "3. 111U")
-    
-    p1 + p2 + p3 + plot_spacer() + plot_layout(nrow = 1)
-```
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/fig-recip-triads-slides-1-1.png){#fig-recip-triads-slides-1 fig-align='center' width=1056}
+:::
+:::
+
 
 ---
 
 ## Reciprocal Triads (Part 2: Double Mutual & Mixed Closed)
 
-```{r}
-#| label: fig-recip-triads-slides-2
-#| fig-align: "center"
-#| fig-height: 5.5
-#| fig-width: 11
 
-    p4 <- plot_tr(data.frame(from=c(2,1,3,2), to=c(1,2,2,3)), "4. 201")
-    p5 <- plot_tr(data.frame(from=c(1,2,2,3), to=c(2,1,3,1)), "5. 120C")
-    p6 <- plot_tr(data.frame(from=c(1,2,3,3), to=c(2,1,1,2)), "6. 120D")
-    
-    p4 + p5 + p6 + plot_spacer() + plot_layout(nrow = 1)
-```
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/fig-recip-triads-slides-2-1.png){#fig-recip-triads-slides-2 fig-align='center' width=1056}
+:::
+:::
+
 
 ---
 
 ## Reciprocal Triads (Part 3: In-Star Closed & Cohesive)
 
-```{r}
-#| label: fig-recip-triads-slides-3
-#| fig-align: "center"
-#| fig-height: 5.5
-#| fig-width: 11
 
-    p7 <- plot_tr(data.frame(from=c(1,2,1,2), to=c(2,1,3,3)), "7. 120U")
-    p8 <- plot_tr(data.frame(from=c(2,1,3,2,1), to=c(1,2,2,3,3)), "8. 210")
-    p9 <- plot_tr(data.frame(from=c(2,1,3,2,1,3), to=c(1,2,2,3,3,1)), "9. 300")
-    
-    p7 + p8 + p9 + plot_spacer() + plot_layout(nrow = 1)
-```
+::: {.cell layout-align="center"}
+::: {.cell-output-display}
+![](ties-motifs_files/figure-revealjs/fig-recip-triads-slides-3-1.png){#fig-recip-triads-slides-3 fig-align='center' width=1056}
+:::
+:::
+
 
 ---
 
@@ -887,3 +607,4 @@ These 9 configurations contain **at least one reciprocal (mutual) tie** (referen
 ---
 
 ## References {.unnumbered}
+
