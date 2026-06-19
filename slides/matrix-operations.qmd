@@ -394,8 +394,8 @@ ggraph(gr_dot, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
 ## Visualizing the Matrix Transpose
 
 ::: {.columns}
-::: {.column width="50%"}
-### Original Adjacency Matrix ($\mathbf{A}$)
+::: {.column width="32%"}
+### Matrix $\mathbf{A}$
 ```{r}
 #| echo: false
 A_disp <- A_dir
@@ -404,12 +404,31 @@ kbl(A_disp, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
+- Row 1 of $\mathbf{A}$ `(0, 0, 1, 0, 1, 0)` is Column 1 of $\mathbf{A}^T$.
+- **Rule**: Row $i$ of $\mathbf{A}$ becomes Column $i$ of $\mathbf{A}^T$.
+:::
+
+::: {.column width="32%"}
+### Transpose $\mathbf{A}^T$
+```{r}
+#| echo: false
+AT_disp <- t(A_dir)
+diag(AT_disp) <- NA
+kbl(AT_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- Flipped horizontally: rows become columns.
+- Reverses the direction of every single arrow in the network.
+:::
+
+::: {.column width="36%"}
+### Directed Graph ($\mathbf{A}$)
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 3.5
-#| fig-width: 3.5
-# Create directed graph layout for A
+#| fig-height: 4.2
+#| fig-width: 4.2
 p_adir <- ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(color = "steelblue", width = 1.5,
                  arrow = arrow(length = unit(3, 'mm')),
@@ -420,20 +439,6 @@ p_adir <- ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[
 p_adir
 ```
 </center>
-:::
-
-::: {.column width="50%"}
-### Transposed Adjacency Matrix ($\mathbf{A}^T$)
-```{r}
-#| echo: false
-AT_disp <- t(A_dir)
-diag(AT_disp) <- NA
-kbl(AT_disp, format = "html", align = "c") %>% 
-  column_spec(1, bold = TRUE) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
-```
-- Row 1 of $\mathbf{A}$ `(0, 0, 1, 0, 1, 0)` is Column 1 of $\mathbf{A}^T$.
-- Note how the direction of every arrow is reversed in the transpose graph!
 :::
 :::
 
@@ -516,11 +521,17 @@ $$\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T = \begin{pmatrix} 0 & 0 & 1 & 0 & 1
 
 ## 1. Mutual Dyads Matrix ($\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T$): Calculation
 
+- We multiply the corresponding cells of $\mathbf{A}$ and $\mathbf{A}^T$ element-wise:
+
+<div style="font-size: 72%;">
+$$\mathbf{M} = \begin{pmatrix} 0\times0 & 0\times1 & 1\times1 & 0\times0 & 1\times0 & 0\times0 \\\\ 1\times0 & 0\times0 & 1\times0 & 1\times0 & 0\times0 & 0\times0 \\\\ 1\times1 & 0\times1 & 0\times0 & 1\times0 & 1\times0 & 0\times0 \\\\ 0\times0 & 0\times1 & 0\times1 & 0\times0 & 0\times1 & 0\times1 \\\\ 0\times1 & 0\times0 & 0\times1 & 1\times0 & 0\times0 & 1\times1 \\\\ 0\times0 & 0\times0 & 0\times0 & 1\times0 & 1\times1 & 0\times0 \end{pmatrix} = \begin{pmatrix} - & 0 & \mathbf{1} & 0 & 0 & 0 \\\\ 0 & - & 0 & 0 & 0 & 0 \\\\ \mathbf{1} & 0 & - & 0 & 0 & 0 \\\\ 0 & 0 & 0 & - & 0 & 0 \\\\ 0 & 0 & 0 & 0 & - & \mathbf{1} \\\\ 0 & 0 & 0 & 0 & \mathbf{1} & - \end{pmatrix}$$
+</div>
+
 ::: {.columns}
 ::: {.column width="38%"}
-- We multiply the corresponding cells of $\mathbf{A}$ and $\mathbf{A}^T$:
-$$\mathbf{M} = \begin{pmatrix} 0\times0 & 0\times1 & 1\times1 & 0\times0 & 1\times0 & 0\times0 \\\\ 1\times0 & 0\times0 & 1\times0 & 1\times0 & 0\times0 & 0\times0 \\\\ 1\times1 & 0\times1 & 0\times0 & 1\times0 & 1\times0 & 0\times0 \\\\ 0\times0 & 0\times1 & 0\times1 & 0\times0 & 0\times1 & 0\times1 \\\\ 0\times1 & 0\times0 & 0\times1 & 1\times0 & 0\times0 & 1\times1 \\\\ 0\times0 & 0\times0 & 0\times0 & 1\times0 & 1\times1 & 0\times0 \end{pmatrix}$$
-- Resulting cell sum: 4.
+### Census Count ($N_M$)
+- Only reciprocal ties are kept (A-C and E-F).
+- Sum of cells in $\mathbf{M}$ is 4.
 - $$N_M = \frac{\sum M_{ij}}{2} = \frac{4}{2} = \mathbf{2} \text{ mutual dyads}$$
 :::
 
@@ -567,11 +578,17 @@ $$\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T) = \begin{pmatrix} 0 
 
 ## 2. Asymmetric Dyads Matrix ($\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T)$): Calculation
 
+- We multiply the corresponding cells of $\mathbf{A}$ and $(\mathbf{1} - \mathbf{A}^T)$ element-wise:
+
+<div style="font-size: 72%;">
+$$\mathbf{S} = \begin{pmatrix} 0\times- & 0\times0 & 1\times0 & 0\times1 & 1\times0 & 0\times1 \\\\ 1\times1 & 0\times- & 1\times1 & 1\times1 & 0\times1 & 0\times1 \\\\ 1\times0 & 0\times0 & 0\times- & 1\times1 & 1\times1 & 0\times1 \\\\ 0\times1 & 0\times0 & 0\times0 & 0\times- & 0\times0 & 0\times0 \\\\ 0\times0 & 0\times1 & 0\times0 & 1\times1 & 0\times- & 1\times0 \\\\ 0\times1 & 0\times1 & 0\times1 & 1\times1 & 1\times0 & 0\times- \end{pmatrix} = \begin{pmatrix} - & 0 & 0 & 0 & \mathbf{1} & 0 \\\\ \mathbf{1} & - & \mathbf{1} & \mathbf{1} & 0 & 0 \\\\ 0 & 0 & - & \mathbf{1} & \mathbf{1} & 0 \\\\ 0 & 0 & 0 & - & 0 & 0 \\\\ 0 & 0 & 0 & \mathbf{1} & - & 0 \\\\ 0 & 0 & 0 & \mathbf{1} & 0 & - \end{pmatrix}$$
+</div>
+
 ::: {.columns}
 ::: {.column width="38%"}
-- We multiply the corresponding cells of $\mathbf{A}$ and $(\mathbf{1} - \mathbf{A}^T)$:
-$$\mathbf{S} = \begin{pmatrix} 0\times- & 0\times0 & 1\times0 & 0\times1 & 1\times0 & 0\times1 \\\\ 1\times1 & 0\times- & 1\times1 & 1\times1 & 0\times1 & 0\times1 \\\\ 1\times0 & 0\times0 & 0\times- & 1\times1 & 1\times1 & 0\times1 \\\\ 0\times1 & 0\times0 & 0\times0 & 0\times- & 0\times0 & 0\times0 \\\\ 0\times0 & 0\times1 & 0\times0 & 1\times1 & 0\times- & 1\times0 \\\\ 0\times1 & 0\times1 & 0\times1 & 1\times1 & 1\times0 & 0\times- \end{pmatrix}$$
-- Resulting cell sum: 8.
+### Census Count ($N_A$)
+- Retains only unreciprocated outgoing ties.
+- Sum of cells in $\mathbf{S}$ is 8.
 - $$N_S = \sum S_{ij} = \mathbf{8} \text{ asymmetric dyads}$$
 :::
 
@@ -618,11 +635,17 @@ $$\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T) = \be
 
 ## 3. Null Dyads Matrix ($\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T)$): Calculation
 
+- We multiply the corresponding cells of $(\mathbf{1} - \mathbf{A})$ and $(\mathbf{1} - \mathbf{A}^T)$ element-wise:
+
+<div style="font-size: 72%;">
+$$\mathbf{N} = \begin{pmatrix} -\times- & 1\times0 & 0\times0 & 1\times1 & 0\times0 & 1\times1 \\\\ 0\times1 & -\times- & 0\times1 & 0\times1 & 1\times1 & 1\times1 \\\\ 0\times0 & 1\times0 & -\times- & 0\times1 & 0\times1 & 1\times1 \\\\ 1\times1 & 1\times0 & 1\times0 & -\times- & 1\times0 & 1\times0 \\\\ 1\times0 & 1\times1 & 1\times0 & 0\times1 & -\times- & 0\times0 \\\\ 1\times1 & 1\times1 & 1\times1 & 0\times1 & 0\times0 & -\times- \end{pmatrix} = \begin{pmatrix} - & 0 & 0 & \mathbf{1} & 0 & \mathbf{1} \\\\ 0 & - & 0 & 0 & \mathbf{1} & \mathbf{1} \\\\ 0 & 0 & - & 0 & 0 & \mathbf{1} \\\\ \mathbf{1} & 0 & 0 & - & 0 & 0 \\\\ 0 & \mathbf{1} & 0 & 0 & - & 0 \\\\ \mathbf{1} & \mathbf{1} & \mathbf{1} & 0 & 0 & - \end{pmatrix}$$
+</div>
+
 ::: {.columns}
 ::: {.column width="38%"}
-- We multiply the corresponding cells of $(\mathbf{1} - \mathbf{A})$ and $(\mathbf{1} - \mathbf{A}^T)$:
-$$\mathbf{N} = \begin{pmatrix} -\times- & 1\times0 & 0\times0 & 1\times1 & 0\times0 & 1\times1 \\\\ 0\times1 & -\times- & 0\times1 & 0\times1 & 1\times1 & 1\times1 \\\\ 0\times0 & 1\times0 & -\times- & 0\times1 & 0\times1 & 1\times1 \\\\ 1\times1 & 1\times0 & 1\times0 & -\times- & 1\times0 & 1\times0 \\\\ 1\times0 & 1\times1 & 1\times0 & 0\times1 & -\times- & 0\times0 \\\\ 1\times1 & 1\times1 & 1\times1 & 0\times1 & 0\times0 & -\times- \end{pmatrix}$$
-- Resulting cell sum: 10.
+### Census Count ($N_N$)
+- Retains completely disconnected dyads.
+- Sum of cells in $\mathbf{N}$ is 10.
 - $$N_N = \frac{\sum N_{ij}}{2} = \frac{10}{2} = \mathbf{5} \text{ null dyads}$$
 :::
 
