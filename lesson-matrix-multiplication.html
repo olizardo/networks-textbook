@@ -1,0 +1,3208 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>16&nbsp; Matrix Multiplication and its Applications – Social Networks</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-sna-degree-centrality.html" rel="next">
+<link href="./lesson-matrix-operations.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-22da7ca13c457c7eea04566a7beed6cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3e5f2ac0a8fb60c30c27cad0f1e5dbc7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-22da7ca13c457c7eea04566a7beed6cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-matrix-intro.html">Networks and Matrices</a></li><li class="breadcrumb-item"><a href="./lesson-matrix-multiplication.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Matrix Multiplication and its Applications</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Social Networks</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Introduction to Networks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-what-are-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What Are Networks?</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-what-are-social-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">What is A <em>Social</em> Network?</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-ties-bound.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Social Ties and Network Boundaries</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-tie-strength.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Tie Strength</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Networks and Graphs</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Introduction to Graphs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-ties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Types of Ties and Their Graphs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-dyads-triads.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Dyads and Triads</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Basic Graph Metrics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-directed.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Directed Graphs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-paths.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Indirect Connections</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-connectivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Graph Connectivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-graphs-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Tree Graphs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Networks and Matrices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Introduction to Matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-network.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The Social Network Matrices</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-operations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Basic Matrix Operations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-matrix-multiplication.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Matrix Multiplication and its Applications</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Centrality and Status</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-degree-centrality.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-closeness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Centralities based on the Geodesic Distance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-betweenness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-bigthree.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The “Big Three” Centrality Metrics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-eigenvector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Getting Centrality from Others</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-status.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Status</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-hubs-and-authorities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Hubs and Authorities</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Two-Mode &amp; Ego Networks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-affiliation-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Affiliation Networks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-ego-networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Ego Network Metrics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-ego-collect.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Collecting Ego-Network Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-ego-homo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Theories of Ego Network Homogeneity and Diversity</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Subgroups and Blocks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-groups-cliques.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Clique Analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-groups-cohesive.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Cohesive Subsets</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-positions-struct-equiv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Equivalence and Similarity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-local-similarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Local Node Similarities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-sna-blockmodeling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Blockmodeling</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Network Theory: Ties and Circles</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-dunbar.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Dunbar’s Theory of Social Circles</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-swt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">The Strength of Weak Ties</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-sht.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Structural Holes and Brokerage</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-smt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Simmelian Tie Theory</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">Network Theory: Balance and Hierarchy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-dyadic-balance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Dyadic Balance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-triadic-balance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Triadic Balance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-structural-balance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Structural Balance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-valenced-interactions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Theories of Valenced Interactions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-hierarchies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Dominance Hierarchies</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">Network Theory: Dynamics and Diffusion</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-diffusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">The Diffusion of Innovations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-theory-small-world.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">The Small World Phenomenon</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Exercises</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework I: Graph Theory</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework II: Directed Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework III: Indirect Connections and Matrices</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework IV: Matrix Operations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework V: Affiliation Networks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework VI: Centrality</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework VII: Ego-Network Metrics</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework VIII: Balance and Signed Graphs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./homework9.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework IX: Subgroups, Graph Connectivity, and Structural Similarity</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-multrules" id="toc-sec-multrules" class="nav-link active" data-scroll-target="#sec-multrules"><span class="header-section-number">16.1</span> Matrix Multiplication Rules</a></li>
+  <li><a href="#sec-mattrans" id="toc-sec-mattrans" class="nav-link" data-scroll-target="#sec-mattrans"><span class="header-section-number">16.2</span> Multiplying a Matrix Times its Transpose</a></li>
+  <li><a href="#sec-pows" id="toc-sec-pows" class="nav-link" data-scroll-target="#sec-pows"><span class="header-section-number">16.3</span> Matrix Powers</a></li>
+  <li><a href="#sec-matmultex" id="toc-sec-matmultex" class="nav-link" data-scroll-target="#sec-matmultex"><span class="header-section-number">16.4</span> Numerical Multiplication Examples</a></li>
+  <li><a href="#matrix-powers-and-indirect-connections-in-social-networks" id="toc-matrix-powers-and-indirect-connections-in-social-networks" class="nav-link" data-scroll-target="#matrix-powers-and-indirect-connections-in-social-networks"><span class="header-section-number">16.5</span> Matrix Powers and Indirect Connections in Social Networks</a>
+  <ul class="collapse">
+  <li><a href="#the-squared-adjacency-matrix-mathbfa2" id="toc-the-squared-adjacency-matrix-mathbfa2" class="nav-link" data-scroll-target="#the-squared-adjacency-matrix-mathbfa2"><span class="header-section-number">16.5.1</span> The Squared Adjacency Matrix (<span class="math inline">\(\mathbf{A}^2\)</span>)</a></li>
+  <li><a href="#the-cubed-adjacency-matrix-mathbfa3" id="toc-the-cubed-adjacency-matrix-mathbfa3" class="nav-link" data-scroll-target="#the-cubed-adjacency-matrix-mathbfa3"><span class="header-section-number">16.5.2</span> The Cubed Adjacency Matrix (<span class="math inline">\(\mathbf{A}^3\)</span>)</a></li>
+  </ul></li>
+  <li><a href="#sec-matvecs" id="toc-sec-matvecs" class="nav-link" data-scroll-target="#sec-matvecs"><span class="header-section-number">16.6</span> Matrix Multiplication of Vectors</a>
+  <ul class="collapse">
+  <li><a href="#vector-multiplication-rules" id="toc-vector-multiplication-rules" class="nav-link" data-scroll-target="#vector-multiplication-rules"><span class="header-section-number">16.6.1</span> Vector Multiplication Rules</a></li>
+  </ul></li>
+  <li><a href="#multiplying-a-vector-times-a-matrix-and-vice-versa" id="toc-multiplying-a-vector-times-a-matrix-and-vice-versa" class="nav-link" data-scroll-target="#multiplying-a-vector-times-a-matrix-and-vice-versa"><span class="header-section-number">16.7</span> Multiplying a Vector Times a Matrix (and Vice Versa)</a>
+  <ul class="collapse">
+  <li><a href="#row-vector-times-matrix" id="toc-row-vector-times-matrix" class="nav-link" data-scroll-target="#row-vector-times-matrix"><span class="header-section-number">16.7.1</span> 1. Row Vector Times Matrix</a></li>
+  <li><a href="#matrix-times-column-vector" id="toc-matrix-times-column-vector" class="nav-link" data-scroll-target="#matrix-times-column-vector"><span class="header-section-number">16.7.2</span> 2. Matrix Times Column Vector</a></li>
+  </ul></li>
+  <li><a href="#sec-allones" id="toc-sec-allones" class="nav-link" data-scroll-target="#sec-allones"><span class="header-section-number">16.8</span> Matrix Times the “All Ones” Vector: Summing Row and Columns</a>
+  <ul class="collapse">
+  <li><a href="#row-vector-of-all-ones-mathbf1_1-times-n" id="toc-row-vector-of-all-ones-mathbf1_1-times-n" class="nav-link" data-scroll-target="#row-vector-of-all-ones-mathbf1_1-times-n"><span class="header-section-number">16.8.1</span> 1. Row Vector of All Ones (<span class="math inline">\(\mathbf{1}_{1 \times n}\)</span>)</a></li>
+  <li><a href="#column-vector-of-all-ones-mathbf1t_n-times-1" id="toc-column-vector-of-all-ones-mathbf1t_n-times-1" class="nav-link" data-scroll-target="#column-vector-of-all-ones-mathbf1t_n-times-1"><span class="header-section-number">16.8.2</span> 2. Column Vector of All Ones (<span class="math inline">\(\mathbf{1}^T_{n \times 1}\)</span>)</a></li>
+  </ul></li>
+  <li><a href="#sec-identitymat" id="toc-sec-identitymat" class="nav-link" data-scroll-target="#sec-identitymat"><span class="header-section-number">16.9</span> The Identity Matrix</a></li>
+  <li><a href="#sec-commonneighbors" id="toc-sec-commonneighbors" class="nav-link" data-scroll-target="#sec-commonneighbors"><span class="header-section-number">16.10</span> Matrix Multiplication and Common Neighbors</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-matrix-intro.html">Networks and Matrices</a></li><li class="breadcrumb-item"><a href="./lesson-matrix-multiplication.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Matrix Multiplication and its Applications</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-matmult" class="quarto-section-identifier"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Matrix Multiplication and its Applications</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><strong>Matrix multiplication</strong> (symbol: <span class="math inline">\(\times\)</span> or <span class="math inline">\(\cdot\)</span> or <code>%*%</code> in R) is perhaps the most mathematically complex of the basic matrix algebra operations we will cover. While its mechanics are slightly involved, its applications in social network analysis are profound. It allows us to calculate indirect connections (walks), identify cohesive subgroups (cliques), and find the number of common neighbors shared by pairs of nodes.</p>
+<p>We will begin by laying out the mathematical rules of matrix multiplication before exploring its extensive applications in network science.</p>
+<hr>
+<section id="sec-multrules" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="sec-multrules"><span class="header-section-number">16.1</span> Matrix Multiplication Rules</h2>
+<p>First, we must understand the conditions under which two matrices can be multiplied:</p>
+<ul>
+<li><strong>Conformability</strong>: You can always multiply two matrices <em>as long as the number of columns of the first matrix equals the number of rows of the second matrix</em>. To check this, line up their dimensions side-by-side:</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}
+\]</span></p>
+<ul>
+<li><strong>Inner Dimensions</strong>: The two “fives” in bold are called the <strong>inner dimensions</strong>. The “three” on the left and the “six” on the right are called the <strong>outer dimensions</strong>. Matrix multiplication is defined <em>only if their inner dimensions are equal</em>. When they match, the matrices are <strong>conformable</strong>; otherwise, they are <strong>non-conformable</strong> and cannot be multiplied.</li>
+<li><strong>Order Matters</strong>: Unlike numbers, where the order of multiplication does not matter (<span class="math inline">\(4 \times 3 = 3 \times 4\)</span>), matrix multiplication is <strong>non-commutative</strong>. For almost all matrices <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{B}\)</span>:</li>
+</ul>
+<p><span class="math display">\[
+\mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}
+\]</span></p>
+<ul>
+<li><strong>Resulting Dimensions</strong>: The resulting product matrix will always have dimensions equal to the <strong>outer dimensions</strong> of the two multipliers:</li>
+</ul>
+<p><span id="eq-matmult0"><span class="math display">\[
+\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}
+\tag{16.1}\]</span></span></p>
+<hr>
+</section>
+<section id="sec-mattrans" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="sec-mattrans"><span class="header-section-number">16.2</span> Multiplying a Matrix Times its Transpose</h2>
+<p>By definition, the rows of a matrix are equal to the columns of its transpose, and vice-versa. Therefore, the product of a matrix times its transpose, and the transpose times the original matrix, is always defined, regardless of the original matrix’s dimensions. Thus:</p>
+<p><span class="math display">\[
+\mathbf{A} \times \mathbf{A}^T = \text{Always Defined!}
+\]</span></p>
+<p><span class="math display">\[
+\mathbf{A}^T \times \mathbf{A} = \text{Always Defined!}
+\]</span></p>
+<p>When you multiply a matrix of dimensions <span class="math inline">\(m \times n\)</span> by its transpose (<span class="math inline">\(n \times m\)</span>), the resulting matrix will always be a <strong>square matrix</strong> of dimensions <span class="math inline">\(m \times m\)</span>:</p>
+<p><span id="eq-matmult1"><span class="math display">\[
+\mathbf{A}_{5 \times 3} \times \mathbf{A}_{3 \times 5}^T = \mathbf{B}_{5 \times 5}
+\tag{16.2}\]</span></span></p>
+<p>Conversely, reversing the order yields a square matrix of dimensions <span class="math inline">\(n \times n\)</span>:</p>
+<p><span id="eq-matmult2"><span class="math display">\[
+\mathbf{A}_{3 \times 5}^T \times \mathbf{A}_{5 \times 3} = \mathbf{B}_{3 \times 3}
+\tag{16.3}\]</span></span></p>
+<hr>
+</section>
+<section id="sec-pows" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="sec-pows"><span class="header-section-number">16.3</span> Matrix Powers</h2>
+<p>You can multiply a matrix times itself to calculate <strong>matrix powers</strong> (<span class="math inline">\(A^n\)</span>), but <em>only if</em> the matrix is a <strong>square matrix</strong> (having the same number of rows and columns). Thus:</p>
+<p><span class="math display">\[
+\mathbf{A}^2 = \mathbf{A} \times \mathbf{A}
+\]</span></p>
+<p><span class="math display">\[
+\mathbf{A}^3 = \mathbf{A} \times \mathbf{A} \times \mathbf{A}
+\]</span></p>
+<p><span class="math display">\[
+\mathbf{A}^n = \mathbf{A} \times \mathbf{A} \times \dots \times \mathbf{A}
+\]</span></p>
+<p>Since the adjacency matrices used to represent social networks are always square matrices, we can always find the <strong>powers of an adjacency matrix</strong>.</p>
+<p>When you multiply a square matrix by another square matrix of the same dimensions, the resulting matrix is always of the same dimensions:</p>
+<p><span class="math display">\[
+\mathbf{A}_{5 \times 5} \times \mathbf{A}_{5 \times 5} = \mathbf{A}^2_{5 \times 5}
+\]</span></p>
+<hr>
+</section>
+<section id="sec-matmultex" class="level2" data-number="16.4">
+<h2 data-number="16.4" class="anchored" data-anchor-id="sec-matmultex"><span class="header-section-number">16.4</span> Numerical Multiplication Examples</h2>
+<p>Let’s see some numeric examples of how matrix multiplication works. <a href="#tbl-trans" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-trans</span></a> displays an original matrix <span class="math inline">\(\mathbf{A}\)</span> and its transpose <span class="math inline">\(\mathbf{A}^T\)</span>.</p>
+<div id="tbl-trans" class="quarto-layout-panel anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-trans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.1: A matrix and its transpose
+</figcaption>
+<div aria-describedby="tbl-trans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-trans" style="flex-basis: 50.0%;justify-content: center;">
+<div id="tbl-trans-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-trans-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Original Matrix (A).
+</figcaption>
+<div aria-describedby="tbl-trans-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-trans-1" class="table table-striped table-hover table-condensed caption-top">
+<tbody>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid; border-top: 0.75px solid;">3</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">4</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">7</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">9</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">4</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">6</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">5</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">3</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">2</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">5</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-trans" style="flex-basis: 50.0%;justify-content: center;">
+<div id="tbl-trans-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-trans-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Transposed Matrix (A^T).
+</figcaption>
+<div aria-describedby="tbl-trans-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-trans-2" class="table table-striped table-hover table-condensed caption-top">
+<tbody>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid; border-top: 0.75px solid;">3</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">7</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">4</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">5</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">4</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">9</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">6</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">3</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">5</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">3</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">2</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">4</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p><a href="#tbl-prod" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-prod</span></a> shows the result of multiplying the <span class="math inline">\(5 \times 3\)</span> matrix <span class="math inline">\(\mathbf{A}\)</span> times its <span class="math inline">\(3 \times 5\)</span> transpose <span class="math inline">\(\mathbf{A}^T\)</span>:</p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-prod" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-prod-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed cell caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid; border-top: 0.75px solid;">50</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">72</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">46</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">47</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">46</td>
+</tr>
+<tr class="even">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">72</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">139</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">88</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">74</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">71</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">46</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">88</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">56</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">46</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">46</td>
+</tr>
+<tr class="even">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">47</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">74</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">46</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">50</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">41</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">46</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">71</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">46</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">41</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">45</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-prod-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.2: Square matrix resulting from multiplying a matrix by its transpose (A x A^T).
+</figcaption>
+</figure>
+</div>
+</div>
+<p>Where do these numbers come from? Let’s trace a couple of cells: 1. <strong>Cell (Row 1, Column 1) = 50</strong>: We multiply the elements of the <em>first row</em> of <span class="math inline">\(\mathbf{A}\)</span> (<span class="math inline">\(\{3, 4, 5\}\)</span>) by the corresponding elements of the <em>first column</em> of <span class="math inline">\(\mathbf{A}^T\)</span> (<span class="math inline">\(\{3, 4, 5\}\)</span>), and sum them up:</p>
+<p><span class="math display">\[
+   (3 \times 3) + (4 \times 4) + (5 \times 5) = 9 + 16 + 25 = 50
+   \]</span></p>
+<ol start="2" type="1">
+<li><p><strong>Cell (Row 4, Column 2) = 74</strong>: We multiply the elements of the <em>fourth row</em> of <span class="math inline">\(\mathbf{A}\)</span> (<span class="math inline">\(\{5, 3, 4\}\)</span>) by the corresponding elements of the <em>second column</em> of <span class="math inline">\(\mathbf{A}^T\)</span> (<span class="math inline">\(\{7, 9, 3\}\)</span>), and sum them:</p>
+<p><span class="math display">\[
+(5 \times 7) + (3 \times 9) + (4 \times 3) = 35 + 27 + 12 = 74
+\]</span></p></li>
+</ol>
+<p>We repeat this process for all 25 cells to obtain the complete product matrix. Note that the resulting product matrix <span class="math inline">\(\mathbf{B}\)</span> is <strong>symmetric</strong> (<span class="math inline">\(b_{ij} = b_{ji}\)</span>).</p>
+<p>Reversing the order and multiplying <span class="math inline">\(\mathbf{A}^T \times \mathbf{A}\)</span> yields a smaller <span class="math inline">\(3 \times 3\)</span> square matrix, as shown in <a href="#tbl-prod2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-prod2</span></a>:</p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-prod2" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-prod2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed cell caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid; border-top: 0.75px solid;">103</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">124</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-top: 0.75px solid;">72</td>
+</tr>
+<tr class="even">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">124</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">167</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">91</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid; border-left: 0.75px solid;">72</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">91</td>
+<td style="text-align: center; border-right: 0.75px solid; border-bottom: 0.75px solid;">70</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-prod2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.3: Square matrix resulting from multiplying the transpose by the original matrix (A^T x A).
+</figcaption>
+</figure>
+</div>
+</div>
+<p>To find the cell at (Row 3, Column 1) = 72, we multiply the <em>third row</em> of <span class="math inline">\(\mathbf{A}^T\)</span> (<span class="math inline">\(\{5, 3, 2, 4, 4\}\)</span>) by the <em>first column</em> of <span class="math inline">\(\mathbf{A}\)</span> (<span class="math inline">\(\{3, 7, 4, 5, 2\}\)</span>):</p>
+<p><span class="math display">\[
+(5 \times 3) + (3 \times 7) + (2 \times 4) + (4 \times 5) + (4 \times 2) = 15 + 21 + 8 + 20 + 8 = 72
+\]</span></p>
+<hr>
+</section>
+<section id="matrix-powers-and-indirect-connections-in-social-networks" class="level2" data-number="16.5">
+<h2 data-number="16.5" class="anchored" data-anchor-id="matrix-powers-and-indirect-connections-in-social-networks"><span class="header-section-number">16.5</span> Matrix Powers and Indirect Connections in Social Networks</h2>
+<p>Taking the powers of an adjacency matrix was one of the earliest applications of formal social network analysis, co-discovered by Duncan Luce and Albert Perry <span class="citation" data-cites="luce49">(<a href="#ref-luce49" role="doc-biblioref">1949</a>)</span> and Leon Festinger <span class="citation" data-cites="festinger49">(<a href="#ref-festinger49" role="doc-biblioref">1949</a>)</span>.</p>
+<p>When we calculate the <strong>powers of an adjacency matrix</strong>, the resulting entries have an intuitive and powerful interpretation: they count the exact number of <strong>indirect connections (walks)</strong> of a given length between each pair of people.</p>
+<p>Let’s explore this using the 12-person “hanging out” network shown in <a href="#fig-rel-1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-rel-1</span></a>. <a href="#tbl-pows" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-pows</span></a> shows the original binary adjacency matrix <span class="math inline">\(\mathbf{A}\)</span>, its square <span class="math inline">\(\mathbf{A}^2\)</span>, and its cube <span class="math inline">\(\mathbf{A}^3\)</span>.</p>
+<div id="tbl-pows" class="quarto-layout-panel anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-pows-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-pows" style="flex-basis: 100.0%;justify-content: center;">
+<div id="tbl-pows-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-pows-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Original adjacency matrix (A).
+</figcaption>
+<div aria-describedby="tbl-pows-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-pows-1" class="table table-striped table-hover table-condensed caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">K</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">L</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">G</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">H</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">I</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">J</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">K</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">L</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-pows" style="flex-basis: 100.0%;justify-content: center;">
+<div id="tbl-pows-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-pows-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Adjacency matrix squared (A^2).
+</figcaption>
+<div aria-describedby="tbl-pows-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-pows-2" class="table table-striped table-hover table-condensed caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">K</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">L</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">G</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">H</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">I</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">J</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">K</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">L</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-pows" style="flex-basis: 100.0%;justify-content: center;">
+<div id="tbl-pows-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-pows-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) Adjacency matrix cubed (A^3).
+</figcaption>
+<div aria-describedby="tbl-pows-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-pows-3" class="table table-striped table-hover table-condensed caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">K</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">L</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">G</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">H</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">I</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">J</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">K</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">L</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-pows-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.4: An adjacency matrix and its powers.
+</figcaption>
+</figure>
+</div>
+<section id="the-squared-adjacency-matrix-mathbfa2" class="level3" data-number="16.5.1">
+<h3 data-number="16.5.1" class="anchored" data-anchor-id="the-squared-adjacency-matrix-mathbfa2"><span class="header-section-number">16.5.1</span> The Squared Adjacency Matrix (<span class="math inline">\(\mathbf{A}^2\)</span>)</h3>
+<p>What do the entries in <a href="#tbl-pows-2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-pows-2</span></a> mean?</p>
+<ul>
+<li><strong>Off-Diagonal Entries</strong>: The value in cell <span class="math inline">\(a^2_{ij}\)</span> tells us the exact number of <strong>walks of length 2</strong> between node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span> (see <a href="#sec-indirect" class="quarto-xref"><span class="quarto-unresolved-ref">sec-indirect</span></a>). For example, <span class="math inline">\(a^2_{AB} = 2\)</span>. Looking at <a href="#fig-rel-1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-rel-1</span></a>, we see that <span class="math inline">\(A\)</span> can reach <span class="math inline">\(B\)</span> via exactly two walks of length 2: <span class="math inline">\(\{AC, CB\}\)</span> and <span class="math inline">\(\{AD, DB\}\)</span>. Similarly, <span class="math inline">\(a^2_{AC} = 1\)</span>, representing the walk <span class="math inline">\(\{AD, DC\}\)</span>.</li>
+<li><strong>Diagonal Entries</strong>: The diagonal entry <span class="math inline">\(a^2_{ii}\)</span> counts the number of walks of length 2 that begin and end with node <span class="math inline">\(i\)</span>. Since a walk of length 2 that goes from <span class="math inline">\(i \to j \to i\)</span> in an undirected graph simply represents traversing an edge and returning, the diagonal of <span class="math inline">\(\mathbf{A}^2\)</span> is equal to the <strong>degree</strong> of each node!</li>
+</ul>
+</section>
+<section id="the-cubed-adjacency-matrix-mathbfa3" class="level3" data-number="16.5.2">
+<h3 data-number="16.5.2" class="anchored" data-anchor-id="the-cubed-adjacency-matrix-mathbfa3"><span class="header-section-number">16.5.2</span> The Cubed Adjacency Matrix (<span class="math inline">\(\mathbf{A}^3\)</span>)</h3>
+<p>What do the entries in <a href="#tbl-pows-3" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-pows-3</span></a> mean?</p>
+<ul>
+<li><strong>Off-Diagonal Entries</strong>: Tell us the exact number of <strong>walks of length 3</strong> linking each pair of nodes. For instance, <span class="math inline">\(a^3_{HF} = 1\)</span>. Looking at the graph, this corresponds to the walk <span class="math inline">\(\{HG, GE, EF\}\)</span>.</li>
+<li><strong>Diagonal Entries</strong>: Count the number of walks of length 3 that begin and end at the same node (which is a <strong>cycle of length 3</strong>). A cycle of length 3 is structurally equivalent to a <strong>clique of size 3 (a triangle)</strong>! The diagonal entry <span class="math inline">\(a^3_{ii}\)</span> counts exactly <em>twice</em> the number of triangles node <span class="math inline">\(i\)</span> belongs to (once going clockwise, and once counterclockwise). Thus, dividing the diagonal entries of <span class="math inline">\(\mathbf{A}^3\)</span> by two tells us exactly <strong>how many triangles (cliques of size 3) each node belongs to</strong>. For instance, node <span class="math inline">\(K\)</span> belongs to no triangles, so <span class="math inline">\(a^3_{KK} = 0\)</span>.</li>
+</ul>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-pows" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pows-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-matrix-multiplication_files/figure-html/fig-pows-1.png" class="img-fluid figure-img" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pows-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.1: Graph with weighted edges representing the number of indirect connections of length three (walks) between nodes.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-pows" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-pows</span></a> redraws our hangout network, but scales the edge widths and color intensity based on the entries in <span class="math inline">\(\mathbf{A}^3\)</span>. This immediately highlights cohesive <strong>cliques</strong> (like the subgroups <span class="math inline">\(\{A, B, C, D\}\)</span> and <span class="math inline">\(\{E, F, G, H\}\)</span>) which are densely bound together by extensive indirect connections.</p>
+<hr>
+</section>
+</section>
+<section id="sec-matvecs" class="level2" data-number="16.6">
+<h2 data-number="16.6" class="anchored" data-anchor-id="sec-matvecs"><span class="header-section-number">16.6</span> Matrix Multiplication of Vectors</h2>
+<p>Recall that a <strong>vector</strong> is a sequence of numbers of a given length. A vector is actually just a special case of a matrix: * <strong>Row Vector</strong>: A matrix with <em>one row</em> and as many columns as the vector’s length (<span class="math inline">\(\mathbf{a}_{1 \times n}\)</span>). * <strong>Column Vector</strong>: A matrix with <em>one column</em> and as many rows as the vector’s length (<span class="math inline">\(\mathbf{a}^T_{n \times 1}\)</span>).</p>
+<p>An example of a row vector <span class="math inline">\(\mathbf{a} = \{2, 4, 7, 2, 4\}\)</span> of dimensions <span class="math inline">\(1 \times 5\)</span> is shown in <a href="#tbl-vecmat" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-vecmat</span></a>, and its <span class="math inline">\(5 \times 1\)</span> transpose column vector <span class="math inline">\(\mathbf{a}^T\)</span> is shown in <a href="#tbl-transvec" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-transvec</span></a>.</p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-vecmat" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-vecmat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed cell caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-vecmat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.5: A row vector represented as a 1 X 5 matrix.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-transvec" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-transvec-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed cell caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-transvec-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.6: A column vector represented as a 5 X 1 matrix (the transpose of the row vector).
+</figcaption>
+</figure>
+</div>
+</div>
+<section id="vector-multiplication-rules" class="level3" data-number="16.6.1">
+<h3 data-number="16.6.1" class="anchored" data-anchor-id="vector-multiplication-rules"><span class="header-section-number">16.6.1</span> Vector Multiplication Rules</h3>
+<ul>
+<li><strong>Row Vector times Column Vector</strong>: Since this matches a matrix times its transpose, the product is always defined. The output is always a <span class="math inline">\(1 \times 1\)</span> “matrix,” which is a single number (a <strong>scalar</strong>):</li>
+</ul>
+<p><span id="eq-vecmult1"><span class="math display">\[
+\mathbf{a}_{1 \times 5} \times \mathbf{a}^T_{5 \times 1} = b_{1 \times 1}
+\tag{16.4}\]</span></span></p>
+<p><span class="math display">\[
+(2 \times 2) + (4 \times 4) + (7 \times 7) + (2 \times 2) + (4 \times 4) = 4 + 16 + 49 + 4 + 16 = 89
+\]</span></p>
+<ul>
+<li><strong>Column Vector times Row Vector</strong>: Reversing the order multiplies a <span class="math inline">\(5 \times 1\)</span> column vector by a <span class="math inline">\(1 \times 5\)</span> row vector, yielding a <span class="math inline">\(5 \times 5\)</span> square matrix (shown in <a href="#tbl-transvec2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-transvec2</span></a>):</li>
+</ul>
+<p><span id="eq-vecmult2"><span class="math display">\[
+\mathbf{a}^T_{5 \times 1} \times \mathbf{a}_{1 \times 5} = \mathbf{B}_{5 \times 5}
+\tag{16.5}\]</span></span></p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-transvec2" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-transvec2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed cell caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">28</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">28</td>
+<td style="text-align: center;">49</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">28</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">14</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">28</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">16</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-transvec2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.7: Square matrix resulting from multiplying a column vector by a row vector (a^T x a).
+</figcaption>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="multiplying-a-vector-times-a-matrix-and-vice-versa" class="level2" data-number="16.7">
+<h2 data-number="16.7" class="anchored" data-anchor-id="multiplying-a-vector-times-a-matrix-and-vice-versa"><span class="header-section-number">16.7</span> Multiplying a Vector Times a Matrix (and Vice Versa)</h2>
+<p>We can multiply a vector times a matrix (and a matrix times a vector) following the standard rules of conformability:</p>
+<section id="row-vector-times-matrix" class="level3" data-number="16.7.1">
+<h3 data-number="16.7.1" class="anchored" data-anchor-id="row-vector-times-matrix"><span class="header-section-number">16.7.1</span> 1. Row Vector Times Matrix</h3>
+<p>Multiplying a <span class="math inline">\(1 \times n\)</span> row vector by an <span class="math inline">\(n \times m\)</span> matrix yields another <strong>row vector</strong> of dimensions <span class="math inline">\(1 \times m\)</span>:</p>
+<p><span id="eq-matvec"><span class="math display">\[
+\mathbf{b}_{1 \times 4} \times \mathbf{A}_{4 \times 4} = \mathbf{c}_{1 \times 4}
+\tag{16.6}\]</span></span></p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-vecmat1" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-vecmat1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div id="tbl-vecmat1-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-vecmat1-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) 1 X 4 row vector (b)
+</figcaption>
+<div aria-describedby="tbl-vecmat1-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-vecmat1-1" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">5</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="tbl-vecmat1-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-vecmat1-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) 4 X 4 square matrix (A)
+</figcaption>
+<div aria-describedby="tbl-vecmat1-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-vecmat1-2" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="tbl-vecmat1-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-vecmat1-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) 1 X 4 product row vector (c)
+</figcaption>
+<div aria-describedby="tbl-vecmat1-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-vecmat1-3" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">17</td>
+<td style="text-align: center;">7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-vecmat1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.8: Row vector resulting from multiplying a row vector by a square matrix
+</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="matrix-times-column-vector" class="level3" data-number="16.7.2">
+<h3 data-number="16.7.2" class="anchored" data-anchor-id="matrix-times-column-vector"><span class="header-section-number">16.7.2</span> 2. Matrix Times Column Vector</h3>
+<p>Multiplying an <span class="math inline">\(m \times n\)</span> matrix by an <span class="math inline">\(n \times 1\)</span> column vector yields another <strong>column vector</strong> of dimensions <span class="math inline">\(m \times 1\)</span>:</p>
+<p><span id="eq-matvec3"><span class="math display">\[
+\mathbf{A}_{5 \times 5} \times \mathbf{b}_{5 \times 1} = \mathbf{c}_{5 \times 1}
+\tag{16.7}\]</span></span></p>
+<hr>
+</section>
+</section>
+<section id="sec-allones" class="level2" data-number="16.8">
+<h2 data-number="16.8" class="anchored" data-anchor-id="sec-allones"><span class="header-section-number">16.8</span> Matrix Times the “All Ones” Vector: Summing Row and Columns</h2>
+<p>In matrix algebra, the <strong>all ones vector</strong> (symbol: <span class="math inline">\(\mathbf{1}\)</span>) is a special vector consisting entirely of ones. It has an incredibly useful property in social network analysis: <strong>it acts as a summation tool</strong>.</p>
+<section id="row-vector-of-all-ones-mathbf1_1-times-n" class="level3" data-number="16.8.1">
+<h3 data-number="16.8.1" class="anchored" data-anchor-id="row-vector-of-all-ones-mathbf1_1-times-n"><span class="header-section-number">16.8.1</span> 1. Row Vector of All Ones (<span class="math inline">\(\mathbf{1}_{1 \times n}\)</span>)</h3>
+<p>If you multiply the <span class="math inline">\(1 \times n\)</span> row vector of all ones by any square adjacency matrix <span class="math inline">\(\mathbf{A}\)</span>, the product is a row vector containing the <strong>column sums</strong> of the matrix (equivalent to the <strong>indegrees</strong> of each node in a directed graph!):</p>
+<p><span id="eq-allones1"><span class="math display">\[
+\mathbf{1}_{1 \times 5} \times \mathbf{A}_{5 \times 5} = \mathbf{b}_{1 \times 5}
+\tag{16.8}\]</span></span></p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-allones1" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-allones1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div id="tbl-allones1-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones1-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) 1 X 5 all ones row vector
+</figcaption>
+<div aria-describedby="tbl-allones1-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-allones1-1" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="tbl-allones1-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones1-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) 5 X 5 square binary matrix
+</figcaption>
+<div aria-describedby="tbl-allones1-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-allones1-2" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="tbl-allones1-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones1-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) 1 X 5 product row vector (Column Sums / Indegrees)
+</figcaption>
+<div aria-describedby="tbl-allones1-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-allones1-3" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-allones1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.9: Row vector resulting from multiplying the all ones row vector by a square adjacency matrix.
+</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section id="column-vector-of-all-ones-mathbf1t_n-times-1" class="level3" data-number="16.8.2">
+<h3 data-number="16.8.2" class="anchored" data-anchor-id="column-vector-of-all-ones-mathbf1t_n-times-1"><span class="header-section-number">16.8.2</span> 2. Column Vector of All Ones (<span class="math inline">\(\mathbf{1}^T_{n \times 1}\)</span>)</h3>
+<p>If you multiply a square adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> by the <span class="math inline">\(n \times 1\)</span> column vector of all ones, the product is a column vector containing the <strong>row sums</strong> of the matrix (equivalent to the <strong>outdegrees</strong> of each node!):</p>
+<p><span id="eq-allones2"><span class="math display">\[
+\mathbf{A}_{5 \times 5} \times \mathbf{1}^T_{5 \times 1} = \mathbf{b}_{5 \times 1}
+\tag{16.9}\]</span></span></p>
+<div id="tbl-allones2" class="quarto-layout-panel anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-allones2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-allones2" style="flex-basis: 33.3%;justify-content: center;">
+<div id="tbl-allones2-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones2-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) 5 X 5 square binary matrix
+</figcaption>
+<div aria-describedby="tbl-allones2-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-allones2-1" class="table table-striped table-hover table-condensed caption-top">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-allones2" style="flex-basis: 33.3%;justify-content: center;">
+<div id="tbl-allones2-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones2-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) 5 X 1 all ones column vector
+</figcaption>
+<div aria-describedby="tbl-allones2-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-allones2-2" class="table table-striped table-hover table-condensed caption-top">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-allones2" style="flex-basis: 33.3%;justify-content: center;">
+<div id="tbl-allones2-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones2-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) 5 X 1 product column vector (Row Sums / Outdegrees)
+</figcaption>
+<div aria-describedby="tbl-allones2-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-allones2-3" class="table table-striped table-hover table-condensed caption-top">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-allones2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.10: Column vector resulting from multiplying a square matrix by the all ones column vector.
+</figcaption>
+</figure>
+</div>
+<p>Thus, multiplying by the all-ones vector is the formal algebraic way to sum rows and columns!</p>
+<hr>
+</section>
+</section>
+<section id="sec-identitymat" class="level2" data-number="16.9">
+<h2 data-number="16.9" class="anchored" data-anchor-id="sec-identitymat"><span class="header-section-number">16.9</span> The Identity Matrix</h2>
+<p>The <strong>identity matrix</strong> (symbol: <span class="math inline">\(\mathbf{I}\)</span>) is a square matrix of dimensions <span class="math inline">\(n \times n\)</span> with “1” in <em>every diagonal cell</em>, and “0” in <em>every off-diagonal cell</em>.</p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-idmat" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-idmat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed cell caption-top table-sm small">
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-idmat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.11: A 5 X 5 Identity Matrix (I).
+</figcaption>
+</figure>
+</div>
+</div>
+<p>In matrix algebra, <span class="math inline">\(\mathbf{I}\)</span> serves as the multiplicative identity (equivalent to the number “1” in regular arithmetic). Multiplying any conformable square matrix <span class="math inline">\(\mathbf{A}\)</span> by the identity matrix yields the original matrix unchanged:</p>
+<p><span id="eq-idmat1"><span class="math display">\[
+\mathbf{A} \times \mathbf{I} = \mathbf{A}
+\tag{16.10}\]</span></span></p>
+<p><span id="eq-idmat2"><span class="math display">\[
+\mathbf{I} \times \mathbf{A} = \mathbf{A}
+\tag{16.11}\]</span></span></p>
+<hr>
+</section>
+<section id="sec-commonneighbors" class="level2" data-number="16.10">
+<h2 data-number="16.10" class="anchored" data-anchor-id="sec-commonneighbors"><span class="header-section-number">16.10</span> Matrix Multiplication and Common Neighbors</h2>
+<p>What happens when we multiply a network’s adjacency matrix (<span class="math inline">\(\mathbf{A}\)</span>) by its transpose (<span class="math inline">\(\mathbf{A}^T\)</span>)?</p>
+<p><span class="math display">\[
+\mathbf{A} \times \mathbf{A}^T = \mathbf{B}
+\]</span></p>
+<p>Let’s calculate this product for our running 12-person hangout network. The resulting matrix <span class="math inline">\(\mathbf{B}\)</span> is shown in <a href="#tbl-comm" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-comm</span></a>:</p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-comm" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-comm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-striped table-hover table-condensed cell caption-top table-sm small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">K</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">L</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">G</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">H</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">I</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">J</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">K</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">L</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-comm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.12: Adjacency matrix multiplied by its transpose (A x A^T).
+</figcaption>
+</figure>
+</div>
+</div>
+<p>This resulting matrix <span class="math inline">\(\mathbf{B}\)</span> contains two incredibly valuable pieces of network information:</p>
+<ol type="1">
+<li><strong>Diagonal Entries (<span class="math inline">\(b_{ii}\)</span>)</strong>: The diagonal entries count the <strong>degree</strong> of each node. This is because multiplying row <span class="math inline">\(i\)</span> by column <span class="math inline">\(i\)</span> (which is identical in a symmetric matrix) squares each binary entry and sums them, giving the total number of neighbors node <span class="math inline">\(i\)</span> has.</li>
+<li><strong>Off-Diagonal Entries (<span class="math inline">\(b_{ij}\)</span>)</strong>: The off-diagonal entries count <strong>the exact number of common neighbors shared by node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span></strong>!</li>
+</ol>
+<p>Let’s trace why this happens. Look at <span class="math inline">\(b_{AC} = 1\)</span> (Row A, Column C). This entry is obtained by multiplying the first row of the adjacency matrix (representing <span class="math inline">\(A\)</span>’s connections) by the third column of the adjacency matrix (representing <span class="math inline">\(C\)</span>’s connections), as shown in <a href="#tbl-commex" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-commex</span></a>:</p>
+<div class="cell" data-tbl-cap-location="bottom">
+<div id="tbl-commex" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-commex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div id="tbl-commex-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-commex-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Node A's connection vector (row 1)
+</figcaption>
+<div aria-describedby="tbl-commex-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-commex-1" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">K</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">L</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="tbl-commex-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-commex-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Node C's connection vector (column 3)
+</figcaption>
+<div aria-describedby="tbl-commex-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-commex-2" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">K</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">L</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="tbl-commex-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<figure class="quarto-float quarto-subfloat-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-commex-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) Cell-by-cell product (A x C)
+</figcaption>
+<div aria-describedby="tbl-commex-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table id="tbl-commex-3" class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">G</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">H</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">I</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">J</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">K</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">L</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-tbl" id="tbl-commex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.13: Adjacency vector multiplication tracing common neighbors
+</figcaption>
+</figure>
+</div>
+</div>
+<p>The cell-by-cell product vector shown in <a href="#tbl-commex-3" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-commex-3</span></a> contains a “1” <em>only</em> in the position corresponding to node <span class="math inline">\(D\)</span>. Because both <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span> are connected to <span class="math inline">\(D\)</span>, the product of their ties to <span class="math inline">\(D\)</span> is <span class="math inline">\(1 \times 1 = 1\)</span>. For any node they do not both share as a neighbor, the product is 0.</p>
+<p>Summing up this product vector yields <span class="math inline">\(1\)</span>, confirming that <strong>node <span class="math inline">\(D\)</span> is the single, shared common neighbor between <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span></strong>.</p>
+<p>Thus, multiplying an adjacency matrix by its transpose is the formal algebraic way to map out all <strong>common neighbors</strong> in a network!</p>
+<hr>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-festinger49" class="csl-entry" role="listitem">
+Festinger, Leon. 1949. <span>“The Analysis of Sociograms Using Matrix Algebra.”</span> <em>Human Relations</em> 2 (2): 153–58.
+</div>
+<div id="ref-luce49" class="csl-entry" role="listitem">
+Luce, RD, and Albert D Perry. 1949. <span>“A Method of Matrix Analysis of Group Structure.”</span> <em>Psychometrika</em> 14 (2): 95–116.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-matrix-operations.html" class="pagination-link" aria-label="Basic Matrix Operations">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Basic Matrix Operations</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-sna-degree-centrality.html" class="pagination-link" aria-label="Centralities based on Degree">
+        <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Centralities based on Degree</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Copyright 2023, Omar Lizardo &amp; Isaac Jilbert</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
