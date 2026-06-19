@@ -1,1213 +1,1631 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Graph Theory</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.9.38">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-ff0ccb7d4eb037a8a36c8a521491e6d6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-e05e2933af3979f1b577a1e58c7f9e9c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-ff0ccb7d4eb037a8a36c8a521491e6d6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
 
-  <title>Graph Theory</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
-  <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
-      vertical-align: middle;
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
     }
-  </style>
-  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto-2740581606dc327e82f18f789b69d8a0.css">
-  <link rel="stylesheet" href="ucla-theme.css">
-  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
-  <style type="text/css">
-    .reveal div.sourceCode {
-      margin: 0;
-      overflow: auto;
-    }
-    .reveal div.hanging-indent {
-      margin-left: 1em;
-      text-indent: -1em;
-    }
-    .reveal .slide:not(.center) {
-      height: 100%;
-      overflow-y: auto;
-    }
-    .reveal .slide.scrollable {
-      overflow-y: auto;
-    }
-    .reveal .footnotes {
-      height: 100%;
-      overflow-y: auto;
-    }
-    .reveal .slide .absolute {
-      position: absolute;
-      display: block;
-    }
-    .reveal .footnotes ol {
-      counter-reset: ol;
-      list-style-type: none; 
-      margin-left: 0;
-    }
-    .reveal .footnotes ol li:before {
-      counter-increment: ol;
-      content: counter(ol) ". "; 
-    }
-    .reveal .footnotes ol li > p:first-child {
-      display: inline-block;
-    }
-    .reveal .slide ul,
-    .reveal .slide ol {
-      margin-bottom: 0.5em;
-    }
-    .reveal .slide ul li,
-    .reveal .slide ol li {
-      margin-top: 0.4em;
-      margin-bottom: 0.2em;
-    }
-    .reveal .slide ul[role="tablist"] li {
-      margin-bottom: 0;
-    }
-    .reveal .slide ul li > *:first-child,
-    .reveal .slide ol li > *:first-child {
-      margin-block-start: 0;
-    }
-    .reveal .slide ul li > *:last-child,
-    .reveal .slide ol li > *:last-child {
-      margin-block-end: 0;
-    }
-    .reveal .slide .columns:nth-child(3) {
-      margin-block-start: 0.8em;
-    }
-    .reveal blockquote {
-      box-shadow: none;
-    }
-    .reveal .tippy-content>* {
-      margin-top: 0.2em;
-      margin-bottom: 0.7em;
-    }
-    .reveal .tippy-content>*:last-child {
-      margin-bottom: 0.2em;
-    }
-    .reveal .slide > img.stretch.quarto-figure-center,
-    .reveal .slide > img.r-stretch.quarto-figure-center {
-      display: block;
-      margin-left: auto;
-      margin-right: auto; 
-    }
-    .reveal .slide > img.stretch.quarto-figure-left,
-    .reveal .slide > img.r-stretch.quarto-figure-left  {
-      display: block;
-      margin-left: 0;
-      margin-right: auto; 
-    }
-    .reveal .slide > img.stretch.quarto-figure-right,
-    .reveal .slide > img.r-stretch.quarto-figure-right  {
-      display: block;
-      margin-left: auto;
-      margin-right: 0; 
-    }
-  </style>
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
-<body class="quarto-light">
-  <div class="reveal">
-    <div class="slides">
 
-<section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Graph Theory</h1>
-  <p class="subtitle">The Basics of Social Network Analysis</p>
+<body class="quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
-<div class="quarto-title-authors">
+<div id="quarto-search-results"></div>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction-to-graphs" id="toc-introduction-to-graphs" class="nav-link active" data-scroll-target="#introduction-to-graphs">Introduction to Graphs</a>
+  <ul class="collapse">
+  <li><a href="#what-is-a-graph" id="toc-what-is-a-graph" class="nav-link" data-scroll-target="#what-is-a-graph">What is a Graph?</a></li>
+  <li><a href="#the-building-blocks-nodes" id="toc-the-building-blocks-nodes" class="nav-link" data-scroll-target="#the-building-blocks-nodes">The Building Blocks: Nodes</a></li>
+  <li><a href="#the-building-blocks-edges" id="toc-the-building-blocks-edges" class="nav-link" data-scroll-target="#the-building-blocks-edges">The Building Blocks: Edges</a></li>
+  <li><a href="#what-is-a-graph-an-example-1" id="toc-what-is-a-graph-an-example-1" class="nav-link" data-scroll-target="#what-is-a-graph-an-example-1">What is a Graph? (An Example) (1)</a></li>
+  <li><a href="#what-is-a-graph-an-example-2" id="toc-what-is-a-graph-an-example-2" class="nav-link" data-scroll-target="#what-is-a-graph-an-example-2">What is a Graph? (An Example) (2)</a></li>
+  <li><a href="#what-is-a-graph-an-example-3" id="toc-what-is-a-graph-an-example-3" class="nav-link" data-scroll-target="#what-is-a-graph-an-example-3">What is a Graph? (An Example) (3)</a></li>
+  <li><a href="#variations-of-g4-2" id="toc-variations-of-g4-2" class="nav-link" data-scroll-target="#variations-of-g4-2">Variations of <span class="math inline">\(G(4, 2)\)</span></a></li>
+  <li><a href="#g4-2-variation-1" id="toc-g4-2-variation-1" class="nav-link" data-scroll-target="#g4-2-variation-1">G(4, 2) Variation 1</a></li>
+  <li><a href="#g4-2-variation-2" id="toc-g4-2-variation-2" class="nav-link" data-scroll-target="#g4-2-variation-2">G(4, 2) Variation 2</a></li>
+  <li><a href="#g4-2-variation-3" id="toc-g4-2-variation-3" class="nav-link" data-scroll-target="#g4-2-variation-3">G(4, 2) Variation 3</a></li>
+  <li><a href="#g4-2-variation-4-unlabeled" id="toc-g4-2-variation-4-unlabeled" class="nav-link" data-scroll-target="#g4-2-variation-4-unlabeled">G(4, 2) Variation 4 (Unlabeled)</a></li>
+  <li><a href="#graph-labeling" id="toc-graph-labeling" class="nav-link" data-scroll-target="#graph-labeling">Graph Labeling</a></li>
+  <li><a href="#trivial-graphs" id="toc-trivial-graphs" class="nav-link" data-scroll-target="#trivial-graphs">Trivial Graphs</a></li>
+  <li><a href="#basic-relationships-between-nodes-and-edges-in-graphs" id="toc-basic-relationships-between-nodes-and-edges-in-graphs" class="nav-link" data-scroll-target="#basic-relationships-between-nodes-and-edges-in-graphs">Basic Relationships Between Nodes and Edges in Graphs</a></li>
+  <li><a href="#basic-relationships-between-nodes-and-edges-in-graphs-1" id="toc-basic-relationships-between-nodes-and-edges-in-graphs-1" class="nav-link" data-scroll-target="#basic-relationships-between-nodes-and-edges-in-graphs-1">Basic Relationships Between Nodes and Edges in Graphs</a></li>
+  <li><a href="#the-graph-complement" id="toc-the-graph-complement" class="nav-link" data-scroll-target="#the-graph-complement">The Graph Complement</a></li>
+  <li><a href="#the-graph-complement-example" id="toc-the-graph-complement-example" class="nav-link" data-scroll-target="#the-graph-complement-example">The Graph Complement: Example</a></li>
+  <li><a href="#the-graph-complement-example-1" id="toc-the-graph-complement-example-1" class="nav-link" data-scroll-target="#the-graph-complement-example-1">The Graph Complement: Example</a></li>
+  <li><a href="#simple-graphs" id="toc-simple-graphs" class="nav-link" data-scroll-target="#simple-graphs">Simple Graphs</a></li>
+  <li><a href="#non-simple-graphs" id="toc-non-simple-graphs" class="nav-link" data-scroll-target="#non-simple-graphs">Non-Simple Graphs</a></li>
+  <li><a href="#graphs-are-not-pictures" id="toc-graphs-are-not-pictures" class="nav-link" data-scroll-target="#graphs-are-not-pictures">Graphs are Not Pictures!</a></li>
+  <li><a href="#same-graph-different-drawings-1" id="toc-same-graph-different-drawings-1" class="nav-link" data-scroll-target="#same-graph-different-drawings-1">Same Graph, Different Drawings (1)</a></li>
+  <li><a href="#same-graph-different-drawings-2" id="toc-same-graph-different-drawings-2" class="nav-link" data-scroll-target="#same-graph-different-drawings-2">Same Graph, Different Drawings (2)</a></li>
+  </ul></li>
+  <li><a href="#graphs-and-subgraphs" id="toc-graphs-and-subgraphs" class="nav-link" data-scroll-target="#graphs-and-subgraphs">Graphs and Subgraphs</a>
+  <ul class="collapse">
+  <li><a href="#graphs-and-subgraphs-1" id="toc-graphs-and-subgraphs-1" class="nav-link" data-scroll-target="#graphs-and-subgraphs-1">Graphs and Subgraphs</a></li>
+  <li><a href="#original-graph" id="toc-original-graph" class="nav-link" data-scroll-target="#original-graph">Original Graph</a></li>
+  <li><a href="#a-subgraph-of-the-original" id="toc-a-subgraph-of-the-original" class="nav-link" data-scroll-target="#a-subgraph-of-the-original">A Subgraph of the Original</a></li>
+  <li><a href="#vertex-induced-subgraphs" id="toc-vertex-induced-subgraphs" class="nav-link" data-scroll-target="#vertex-induced-subgraphs">Vertex-Induced Subgraphs</a></li>
+  <li><a href="#vertex-induced-subgraphs-example" id="toc-vertex-induced-subgraphs-example" class="nav-link" data-scroll-target="#vertex-induced-subgraphs-example">Vertex-Induced Subgraphs: Example</a></li>
+  <li><a href="#vertex-deleted-subgraphs" id="toc-vertex-deleted-subgraphs" class="nav-link" data-scroll-target="#vertex-deleted-subgraphs">Vertex-Deleted Subgraphs</a></li>
+  <li><a href="#vertex-deleted-subgraphs-example" id="toc-vertex-deleted-subgraphs-example" class="nav-link" data-scroll-target="#vertex-deleted-subgraphs-example">Vertex-Deleted Subgraphs: Example</a></li>
+  <li><a href="#special-cases-of-vertex-deletion" id="toc-special-cases-of-vertex-deletion" class="nav-link" data-scroll-target="#special-cases-of-vertex-deletion">Special Cases of Vertex Deletion</a></li>
+  <li><a href="#edge-deleted-subgraphs" id="toc-edge-deleted-subgraphs" class="nav-link" data-scroll-target="#edge-deleted-subgraphs">Edge-Deleted Subgraphs</a></li>
+  <li><a href="#edge-deleted-subgraphs-example" id="toc-edge-deleted-subgraphs-example" class="nav-link" data-scroll-target="#edge-deleted-subgraphs-example">Edge-Deleted Subgraphs: Example</a></li>
+  <li><a href="#spanning-empty-subgraphs" id="toc-spanning-empty-subgraphs" class="nav-link" data-scroll-target="#spanning-empty-subgraphs">Spanning &amp; Empty Subgraphs</a></li>
+  <li><a href="#special-subgraphs-ego-graph" id="toc-special-subgraphs-ego-graph" class="nav-link" data-scroll-target="#special-subgraphs-ego-graph">Special Subgraphs: Ego Graph</a></li>
+  <li><a href="#vertex-fusion-1" id="toc-vertex-fusion-1" class="nav-link" data-scroll-target="#vertex-fusion-1">Vertex Fusion (1)</a></li>
+  <li><a href="#vertex-fusion-2" id="toc-vertex-fusion-2" class="nav-link" data-scroll-target="#vertex-fusion-2">Vertex Fusion (2)</a></li>
+  <li><a href="#set-operations-on-graphs-union" id="toc-set-operations-on-graphs-union" class="nav-link" data-scroll-target="#set-operations-on-graphs-union">Set Operations on Graphs: Union</a></li>
+  <li><a href="#set-operations-on-graphs-intersection" id="toc-set-operations-on-graphs-intersection" class="nav-link" data-scroll-target="#set-operations-on-graphs-intersection">Set Operations on Graphs: Intersection</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="graph-theory.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content column-page-left" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Graph Theory</h1>
+<p class="subtitle lead">The Basics of Social Network Analysis</p>
 </div>
 
-</section>
-<section>
-<section id="introduction-to-graphs" class="title-slide slide level1 center">
-<h1>Introduction to Graphs</h1>
 
-</section>
-<section id="what-is-a-graph" class="slide level2">
-<h2>What is a Graph?</h2>
+
+<div class="quarto-title-meta column-page-left">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction-to-graphs" class="level1">
+<h1>Introduction to Graphs</h1>
+<hr>
+<section id="what-is-a-graph" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-graph">What is a Graph?</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:60%;">
-<ul>
-<li class="fragment">A <strong>graph</strong> (<span class="math inline">\(G\)</span>) is an abstract mathematical object consisting of two main parts:</li>
-<li class="fragment">A <strong>vertex set</strong>, <span class="math inline">\(V\)</span>, which contains all the nodes (actors) in the network.
-<ul>
-<li class="fragment">e.g., <span class="math inline">\(V = \{A, B, C, D\}\)</span></li>
+<div class="incremental">
+<ul class="incremental">
+<li>A <strong>graph</strong> (<span class="math inline">\(G\)</span>) is an abstract mathematical object consisting of two main parts:</li>
+<li>A <strong>vertex set</strong>, <span class="math inline">\(V\)</span>, which contains all the nodes (actors) in the network.
+<ul class="incremental">
+<li>e.g., <span class="math inline">\(V = \{A, B, C, D\}\)</span></li>
 </ul></li>
-<li class="fragment">An <strong>edge set</strong>, <span class="math inline">\(E\)</span>, which contains all the ties (relationships) between the nodes.
-<ul>
-<li class="fragment">e.g., <span class="math inline">\(E = \{AB, AC\}\)</span></li>
+<li>An <strong>edge set</strong>, <span class="math inline">\(E\)</span>, which contains all the ties (relationships) between the nodes.
+<ul class="incremental">
+<li>e.g., <span class="math inline">\(E = \{AB, AC\}\)</span></li>
 </ul></li>
-<li class="fragment">Together, they define the graph: <span class="math inline">\(G = \{V, E\}\)</span></li>
+<li>Together, they define the graph: <span class="math inline">\(G = \{V, E\}\)</span></li>
 </ul>
+</div>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center" width="576"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="the-building-blocks-nodes" class="slide level2">
-<h2>The Building Blocks: Nodes</h2>
-<ul>
-<li class="fragment">In social networks, <strong>nodes</strong> represent the actors
-<ul>
-<li class="fragment">Usually drawn as circles or points in a diagram</li>
-<li class="fragment">Often individuals (people) or organizations (groups, companies)</li>
+<section id="the-building-blocks-nodes" class="level2">
+<h2 class="anchored" data-anchor-id="the-building-blocks-nodes">The Building Blocks: Nodes</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>In social networks, <strong>nodes</strong> represent the actors
+<ul class="incremental">
+<li>Usually drawn as circles or points in a diagram</li>
+<li>Often individuals (people) or organizations (groups, companies)</li>
 </ul></li>
-<li class="fragment">In wider applications of <strong>network science</strong>:
-<ul>
-<li class="fragment">Nodes can represent any entities in a system</li>
-<li class="fragment">Examples: power generation stations, proteins, websites</li>
+<li>In wider applications of <strong>network science</strong>:
+<ul class="incremental">
+<li>Nodes can represent any entities in a system</li>
+<li>Examples: power generation stations, proteins, websites</li>
 </ul></li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="the-building-blocks-edges" class="slide level2">
-<h2>The Building Blocks: Edges</h2>
-<ul>
-<li class="fragment"><strong>Edges</strong> represent a connection or a <strong>social tie</strong> between two nodes
-<ul>
-<li class="fragment">Can be a permanent relationship (e.g., “brother of”)</li>
-<li class="fragment">Or a fleeting interaction (e.g., a text message, co-presence)</li>
+<section id="the-building-blocks-edges" class="level2">
+<h2 class="anchored" data-anchor-id="the-building-blocks-edges">The Building Blocks: Edges</h2>
+<div class="incremental">
+<ul class="incremental">
+<li><strong>Edges</strong> represent a connection or a <strong>social tie</strong> between two nodes
+<ul class="incremental">
+<li>Can be a permanent relationship (e.g., “brother of”)</li>
+<li>Or a fleeting interaction (e.g., a text message, co-presence)</li>
 </ul></li>
-<li class="fragment">In set theory:
-<ul>
-<li class="fragment">The set of edges is a collection of pairs of nodes</li>
-<li class="fragment">If node <span class="math inline">\(A\)</span> is linked to node <span class="math inline">\(B\)</span>, then <span class="math inline">\(AB \in E\)</span> (or written as <span class="math inline">\(V_A V_B\)</span>)</li>
-<li class="fragment">Edges act as channels for <strong>flows of content</strong>:
-<ul>
-<li class="fragment">Positive/Neutral: influence, advice, information, support, power, traffic</li>
-<li class="fragment">Negative: disease, bullying, gossip, conflict</li>
+<li>In set theory:
+<ul class="incremental">
+<li>The set of edges is a collection of pairs of nodes</li>
+<li>If node <span class="math inline">\(A\)</span> is linked to node <span class="math inline">\(B\)</span>, then <span class="math inline">\(AB \in E\)</span> (or written as <span class="math inline">\(V_A V_B\)</span>)</li>
+<li>Edges act as channels for <strong>flows of content</strong>:
+<ul class="incremental">
+<li>Positive/Neutral: influence, advice, information, support, power, traffic</li>
+<li>Negative: disease, bullying, gossip, conflict</li>
 </ul></li>
 </ul></li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="what-is-a-graph-an-example-1" class="slide level2">
-<h2>What is a Graph? (An Example) (1)</h2>
+<section id="what-is-a-graph-an-example-1" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-graph-an-example-1">What is a Graph? (An Example) (1)</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:50%;">
-<ul>
-<li class="fragment">Let’s define a graph <span class="math inline">\(G\)</span> with 4 nodes (<span class="math inline">\(A, B, C, D\)</span>) and 2 edges (<span class="math inline">\(AB, AC\)</span>):
-<ul>
-<li class="fragment"><span class="math inline">\(V = \{A, B, C, D\}\)</span></li>
-<li class="fragment"><span class="math inline">\(E = \{AB, AC\}\)</span></li>
-<li class="fragment"><span class="math inline">\(G = \{V, E\}\)</span></li>
+<div class="incremental">
+<ul class="incremental">
+<li>Let’s define a graph <span class="math inline">\(G\)</span> with 4 nodes (<span class="math inline">\(A, B, C, D\)</span>) and 2 edges (<span class="math inline">\(AB, AC\)</span>):
+<ul class="incremental">
+<li><span class="math inline">\(V = \{A, B, C, D\}\)</span></li>
+<li><span class="math inline">\(E = \{AB, AC\}\)</span></li>
+<li><span class="math inline">\(G = \{V, E\}\)</span></li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="576"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="what-is-a-graph-an-example-2" class="slide level2">
-<h2>What is a Graph? (An Example) (2)</h2>
+<section id="what-is-a-graph-an-example-2" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-graph-an-example-2">What is a Graph? (An Example) (2)</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:50%;">
-<ul>
-<li class="fragment">For the graph <span class="math inline">\(G = \{V, E\}\)</span>:</li>
-<li class="fragment">The <strong>cardinality</strong> (number of members in a set) is denoted by <span class="math inline">\(|N|\)</span>:
-<ul>
-<li class="fragment">Vertex set cardinality: <span class="math inline">\(|V| = n = 4\)</span></li>
-<li class="fragment">Edge set cardinality: <span class="math inline">\(|E| = m = 2\)</span></li>
+<div class="incremental">
+<ul class="incremental">
+<li>For the graph <span class="math inline">\(G = \{V, E\}\)</span>:</li>
+<li>The <strong>cardinality</strong> (number of members in a set) is denoted by <span class="math inline">\(|N|\)</span>:
+<ul class="incremental">
+<li>Vertex set cardinality: <span class="math inline">\(|V| = n = 4\)</span></li>
+<li>Edge set cardinality: <span class="math inline">\(|E| = m = 2\)</span></li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="576"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-3-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="what-is-a-graph-an-example-3" class="slide level2">
-<h2>What is a Graph? (An Example) (3)</h2>
+<section id="what-is-a-graph-an-example-3" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-graph-an-example-3">What is a Graph? (An Example) (3)</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:50%;">
-<ul>
-<li class="fragment">This graph can be represented by the signature <span class="math inline">\(G(n, m) = G(4, 2)\)</span></li>
-<li class="fragment">Note the lack of edges:
-<ul>
-<li class="fragment">No edge between <span class="math inline">\(B\)</span> and <span class="math inline">\(C\)</span> means no relationship between them.</li>
-<li class="fragment">Node <span class="math inline">\(D\)</span> is not connected to any other node.</li>
+<div class="incremental">
+<ul class="incremental">
+<li>This graph can be represented by the signature <span class="math inline">\(G(n, m) = G(4, 2)\)</span></li>
+<li>Note the lack of edges:
+<ul class="incremental">
+<li>No edge between <span class="math inline">\(B\)</span> and <span class="math inline">\(C\)</span> means no relationship between them.</li>
+<li>Node <span class="math inline">\(D\)</span> is not connected to any other node.</li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="576"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="variations-of-g4-2" class="slide level2">
-<h2>Variations of <span class="math inline">\(G(4, 2)\)</span></h2>
+<section id="variations-of-g4-2" class="level2">
+<h2 class="anchored" data-anchor-id="variations-of-g4-2">Variations of <span class="math inline">\(G(4, 2)\)</span></h2>
 <ul>
 <li>The signature <span class="math inline">\(G(4, 2)\)</span> (4 nodes, 2 edges) does not uniquely define a single graph.</li>
 <li>It can describe multiple topologically distinct graphs.</li>
 </ul>
+<hr>
 </section>
-<section id="g4-2-variation-1" class="slide level2">
-<h2>G(4, 2) Variation 1</h2>
-
-<img data-src="graph-theory_files/figure-revealjs/plt-g42-1-1.png" class="quarto-figure quarto-figure-center r-stretch" width="576"></section>
-<section id="g4-2-variation-2" class="slide level2">
-<h2>G(4, 2) Variation 2</h2>
-
-<img data-src="graph-theory_files/figure-revealjs/plt-g42-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="576"></section>
-<section id="g4-2-variation-3" class="slide level2">
-<h2>G(4, 2) Variation 3</h2>
-
-<img data-src="graph-theory_files/figure-revealjs/plt-g42-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="576"></section>
-<section id="g4-2-variation-4-unlabeled" class="slide level2">
-<h2>G(4, 2) Variation 4 (Unlabeled)</h2>
-
-<img data-src="graph-theory_files/figure-revealjs/plt-g42-4-1.png" class="quarto-figure quarto-figure-center r-stretch" width="576"></section>
-<section id="graph-labeling" class="slide level2">
-<h2>Graph Labeling</h2>
+<section id="g4-2-variation-1" class="level2">
+<h2 class="anchored" data-anchor-id="g4-2-variation-1">G(4, 2) Variation 1</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-g42-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="g4-2-variation-2" class="level2">
+<h2 class="anchored" data-anchor-id="g4-2-variation-2">G(4, 2) Variation 2</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-g42-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="g4-2-variation-3" class="level2">
+<h2 class="anchored" data-anchor-id="g4-2-variation-3">G(4, 2) Variation 3</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-g42-3-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="g4-2-variation-4-unlabeled" class="level2">
+<h2 class="anchored" data-anchor-id="g4-2-variation-4-unlabeled">G(4, 2) Variation 4 (Unlabeled)</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-g42-4-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="graph-labeling" class="level2">
+<h2 class="anchored" data-anchor-id="graph-labeling">Graph Labeling</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:55%;">
-<ul>
-<li class="fragment"><strong>Labeled Graphs</strong>:
-<ul>
-<li class="fragment">Distinctions are made between nodes (e.g., A, B, C are different people).</li>
-<li class="fragment">Swapping node names mathematically changes the graph.</li>
+<div class="incremental">
+<ul class="incremental">
+<li><strong>Labeled Graphs</strong>:
+<ul class="incremental">
+<li>Distinctions are made between nodes (e.g., A, B, C are different people).</li>
+<li>Swapping node names mathematically changes the graph.</li>
 </ul></li>
-<li class="fragment"><strong>Unlabeled Graphs</strong>:
-<ul>
-<li class="fragment">Nodes are interchangeable or anonymous.</li>
-<li class="fragment">The focus is strictly on the abstract structure of connections.</li>
+<li><strong>Unlabeled Graphs</strong>:
+<ul class="incremental">
+<li>Nodes are interchangeable or anonymous.</li>
+<li>The focus is strictly on the abstract structure of connections.</li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="912"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-5-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="912"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="trivial-graphs" class="slide level2">
-<h2>Trivial Graphs</h2>
-<ul>
-<li class="fragment"><strong>Trivial Graph</strong>:
-<ul>
-<li class="fragment">A <span class="math inline">\(G(1, 0)\)</span> graph: a single isolated node with zero connections.</li>
-<li class="fragment">Social equivalent: An isolated person with no connections to others.</li>
+<section id="trivial-graphs" class="level2">
+<h2 class="anchored" data-anchor-id="trivial-graphs">Trivial Graphs</h2>
+<div class="incremental">
+<ul class="incremental">
+<li><strong>Trivial Graph</strong>:
+<ul class="incremental">
+<li>A <span class="math inline">\(G(1, 0)\)</span> graph: a single isolated node with zero connections.</li>
+<li>Social equivalent: An isolated person with no connections to others.</li>
 </ul></li>
-<li class="fragment"><strong>Non-Trivial Graphs</strong>:
-<ul>
-<li class="fragment">Any graph larger than <span class="math inline">\(G(1, 0)\)</span> used for social network analysis.</li>
-<li class="fragment"><strong>Connected Dyad</strong>: The <span class="math inline">\(G(2, 1)\)</span> graph. Two nodes connected by a single link. The “hydrogen atom” of society.</li>
-<li class="fragment"><strong>Disconnected Dyad</strong>: A <span class="math inline">\(G(2, 0)\)</span> graph. Two nodes with no link (e.g., two people on a deserted island not speaking).</li>
+<li><strong>Non-Trivial Graphs</strong>:
+<ul class="incremental">
+<li>Any graph larger than <span class="math inline">\(G(1, 0)\)</span> used for social network analysis.</li>
+<li><strong>Connected Dyad</strong>: The <span class="math inline">\(G(2, 1)\)</span> graph. Two nodes connected by a single link. The “hydrogen atom” of society.</li>
+<li><strong>Disconnected Dyad</strong>: A <span class="math inline">\(G(2, 0)\)</span> graph. Two nodes with no link (e.g., two people on a deserted island not speaking).</li>
 </ul></li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="basic-relationships-between-nodes-and-edges-in-graphs" class="slide level2">
-<h2>Basic Relationships Between Nodes and Edges in Graphs</h2>
+<section id="basic-relationships-between-nodes-and-edges-in-graphs" class="level2">
+<h2 class="anchored" data-anchor-id="basic-relationships-between-nodes-and-edges-in-graphs">Basic Relationships Between Nodes and Edges in Graphs</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:60%;">
-<ul>
-<li class="fragment">Two nodes are:
-<ul>
-<li class="fragment"><strong>Adjacent</strong>: If they are joined by an edge in the graph (e.g., <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>).</li>
-<li class="fragment"><strong>Nonadjacent</strong>: If they are <em>not</em> joined by an edge in the graph (e.g., <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span>).</li>
-<li class="fragment"><strong>End Vertices</strong> with respect to and edge: if the lie at the ends of an edge (e.g., <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> for edge <span class="math inline">\(AB\)</span>).</li>
+<div class="incremental">
+<ul class="incremental">
+<li>Two nodes are:
+<ul class="incremental">
+<li><strong>Adjacent</strong>: If they are joined by an edge in the graph (e.g., <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>).</li>
+<li><strong>Nonadjacent</strong>: If they are <em>not</em> joined by an edge in the graph (e.g., <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span>).</li>
+<li><strong>End Vertices</strong> with respect to and edge: if the lie at the ends of an edge (e.g., <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> for edge <span class="math inline">\(AB\)</span>).</li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/plt-basic-props-1-1.png" class="quarto-figure quarto-figure-center" width="576"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-basic-props-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="basic-relationships-between-nodes-and-edges-in-graphs-1" class="slide level2">
-<h2>Basic Relationships Between Nodes and Edges in Graphs</h2>
+<section id="basic-relationships-between-nodes-and-edges-in-graphs-1" class="level2">
+<h2 class="anchored" data-anchor-id="basic-relationships-between-nodes-and-edges-in-graphs-1">Basic Relationships Between Nodes and Edges in Graphs</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:60%;">
-<ul>
-<li class="fragment">An edge is:
-<ul>
-<li class="fragment"><strong>Incident</strong> to a node: If it connects to that node (e.g., edge <span class="math inline">\(AB\)</span> is incident to nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>).</li>
-<li class="fragment"><strong>Non-incident</strong> to a node: If it does not connect to that node (e.g., edge <span class="math inline">\(AB\)</span> is non-incident to node <span class="math inline">\(C\)</span>).</li>
+<div class="incremental">
+<ul class="incremental">
+<li>An edge is:
+<ul class="incremental">
+<li><strong>Incident</strong> to a node: If it connects to that node (e.g., edge <span class="math inline">\(AB\)</span> is incident to nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>).</li>
+<li><strong>Non-incident</strong> to a node: If it does not connect to that node (e.g., edge <span class="math inline">\(AB\)</span> is non-incident to node <span class="math inline">\(C\)</span>).</li>
 </ul></li>
-<li class="fragment">A node is an <strong>isolate</strong>: if it has no incident edges or is not adjacent to another node (e.g., <span class="math inline">\(D\)</span>).</li>
+<li>A node is an <strong>isolate</strong>: if it has no incident edges or is not adjacent to another node (e.g., <span class="math inline">\(D\)</span>).</li>
 </ul>
+</div>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/plt-basic-props-2-1.png" class="quarto-figure quarto-figure-center" width="576"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-basic-props-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="the-graph-complement" class="slide level2">
-<h2>The Graph Complement</h2>
-<ul>
-<li class="fragment">The <strong>complement</strong> (<span class="math inline">\(G'\)</span>) of a graph <span class="math inline">\(G\)</span> contains an edge between two nodes <em>if and only if</em> they are disconnected in <span class="math inline">\(G\)</span>.</li>
-<li class="fragment">It represents the “negative” of the original graph, showing all the ties that <em>could</em> exist but don’t.</li>
+<section id="the-graph-complement" class="level2">
+<h2 class="anchored" data-anchor-id="the-graph-complement">The Graph Complement</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>The <strong>complement</strong> (<span class="math inline">\(G'\)</span>) of a graph <span class="math inline">\(G\)</span> contains an edge between two nodes <em>if and only if</em> they are disconnected in <span class="math inline">\(G\)</span>.</li>
+<li>It represents the “negative” of the original graph, showing all the ties that <em>could</em> exist but don’t.</li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="the-graph-complement-example" class="slide level2">
-<h2>The Graph Complement: Example</h2>
+<section id="the-graph-complement-example" class="level2">
+<h2 class="anchored" data-anchor-id="the-graph-complement-example">The Graph Complement: Example</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:50%;">
-<ul>
-<li class="fragment">Let’s start with a simple graph <span class="math inline">\(G\)</span> containing 6 nodes and 5 edges.</li>
-<li class="fragment">Nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(F\)</span> act as central connectors.</li>
-<li class="fragment">This original graph has many missing edges (e.g., <span class="math inline">\(B-C\)</span>, <span class="math inline">\(D-E\)</span>).</li>
+<div class="incremental">
+<ul class="incremental">
+<li>Let’s start with a simple graph <span class="math inline">\(G\)</span> containing 6 nodes and 5 edges.</li>
+<li>Nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(F\)</span> act as central connectors.</li>
+<li>This original graph has many missing edges (e.g., <span class="math inline">\(B-C\)</span>, <span class="math inline">\(D-E\)</span>).</li>
 </ul>
+</div>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/plt-complement-slides-1-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-complement-slides-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="528"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="the-graph-complement-example-1" class="slide level2">
-<h2>The Graph Complement: Example</h2>
+<section id="the-graph-complement-example-1" class="level2">
+<h2 class="anchored" data-anchor-id="the-graph-complement-example-1">The Graph Complement: Example</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:50%;">
-<ul>
-<li class="fragment">The complement graph <span class="math inline">\(G'\)</span> on the right connects all pairs that were <em>not</em> connected in <span class="math inline">\(G\)</span>.</li>
-<li class="fragment">Every edge present in the original graph is now missing.</li>
-<li class="fragment">Every edge missing in the original graph is now present.</li>
+<div class="incremental">
+<ul class="incremental">
+<li>The complement graph <span class="math inline">\(G'\)</span> on the right connects all pairs that were <em>not</em> connected in <span class="math inline">\(G\)</span>.</li>
+<li>Every edge present in the original graph is now missing.</li>
+<li>Every edge missing in the original graph is now present.</li>
 </ul>
+</div>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/plt-complement-slides-2-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-complement-slides-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="528"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="simple-graphs" class="slide level2 scrollable">
-<h2>Simple Graphs</h2>
-<ul>
-<li class="fragment">Most social networks are represented as <strong>simple graphs</strong>.</li>
-<li class="fragment">A graph is simple if it meets two requirements:
-<ol type="1">
-<li class="fragment"><strong>No Multiple Edges</strong>: Only one edge can join any pair of nodes.</li>
-<li class="fragment"><strong>No Loops</strong>: No edges connect a node to itself.</li>
+<section id="simple-graphs" class="level2">
+<h2 class="anchored" data-anchor-id="simple-graphs">Simple Graphs</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>Most social networks are represented as <strong>simple graphs</strong>.</li>
+<li>A graph is simple if it meets two requirements:
+<ol class="incremental" type="1">
+<li><strong>No Multiple Edges</strong>: Only one edge can join any pair of nodes.</li>
+<li><strong>No Loops</strong>: No edges connect a node to itself.</li>
 </ol></li>
-<li class="fragment">Loops and multiple edges do not make sense for most typical sociological applications.</li>
+<li>Loops and multiple edges do not make sense for most typical sociological applications.</li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="non-simple-graphs" class="slide level2">
-<h2>Non-Simple Graphs</h2>
+<section id="non-simple-graphs" class="level2">
+<h2 class="anchored" data-anchor-id="non-simple-graphs">Non-Simple Graphs</h2>
 <div class="columns">
 <div class="column" style="width:55%;">
-<ul>
-<li class="fragment">Graphs that do not meet these requirements are <strong>non-simple</strong> (or multigraphs).</li>
-<li class="fragment">The diagram on the right shows:
-<ul>
-<li class="fragment"><strong>Multiple Edges</strong>: Two edges connect nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>.</li>
-<li class="fragment"><strong>Loop</strong>: An edge connects node <span class="math inline">\(C\)</span> to itself.</li>
+<div class="incremental">
+<ul class="incremental">
+<li>Graphs that do not meet these requirements are <strong>non-simple</strong> (or multigraphs).</li>
+<li>The diagram on the right shows:
+<ul class="incremental">
+<li><strong>Multiple Edges</strong>: Two edges connect nodes <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>.</li>
+<li><strong>Loop</strong>: An edge connects node <span class="math inline">\(C\)</span> to itself.</li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/plt-non-simple-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-non-simple-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="528"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="graphs-are-not-pictures" class="slide level2">
-<h2>Graphs are Not Pictures!</h2>
-<ul>
-<li class="fragment">Do not confuse a mathematical “graph” (a set of two sets) with its “drawing” (a point and line plot).</li>
-<li class="fragment">The same graph can have many different, and even misleading, drawings.</li>
-<li class="fragment">The drawing is just a visual aid; the underlying structure is what matters.</li>
+<section id="graphs-are-not-pictures" class="level2">
+<h2 class="anchored" data-anchor-id="graphs-are-not-pictures">Graphs are Not Pictures!</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>Do not confuse a mathematical “graph” (a set of two sets) with its “drawing” (a point and line plot).</li>
+<li>The same graph can have many different, and even misleading, drawings.</li>
+<li>The drawing is just a visual aid; the underlying structure is what matters.</li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="same-graph-different-drawings-1" class="slide level2">
-<h2>Same Graph, Different Drawings (1)</h2>
-
-<img data-src="graph-theory_files/figure-revealjs/plt-random-slides-1-1.png" class="quarto-figure quarto-figure-center r-stretch" width="528"></section>
-<section id="same-graph-different-drawings-2" class="slide level2">
-<h2>Same Graph, Different Drawings (2)</h2>
-
-<img data-src="graph-theory_files/figure-revealjs/plt-random-slides-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="528"></section></section>
-<section>
-<section id="graphs-and-subgraphs" class="title-slide slide level1 center">
+<section id="same-graph-different-drawings-1" class="level2">
+<h2 class="anchored" data-anchor-id="same-graph-different-drawings-1">Same Graph, Different Drawings (1)</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-random-slides-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="528"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="same-graph-different-drawings-2" class="level2">
+<h2 class="anchored" data-anchor-id="same-graph-different-drawings-2">Same Graph, Different Drawings (2)</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-random-slides-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="528"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="graphs-and-subgraphs" class="level1">
 <h1>Graphs and Subgraphs</h1>
-
-</section>
-<section id="graphs-and-subgraphs-1" class="slide level2">
-<h2>Graphs and Subgraphs</h2>
-<ul>
-<li class="fragment">Sometimes we are interested in analyzing only some parts of a <strong>whole network</strong>.</li>
-<li class="fragment">A <strong>subgraph</strong> <span class="math inline">\(G' = \{V', E'\}\)</span> is a subset of the original graph <span class="math inline">\(G = \{V, E\}\)</span>, which is written as <span class="math inline">\(G' \subset G\)</span>:
-<ul>
-<li class="fragment">The node set <span class="math inline">\(V'\)</span> is a subset of <span class="math inline">\(V\)</span> (<span class="math inline">\(V' \subset V\)</span>).</li>
-<li class="fragment">The edge set <span class="math inline">\(E'\)</span> is a subset of <span class="math inline">\(E\)</span> (<span class="math inline">\(E' \subset E\)</span>).</li>
-<li class="fragment">Edges in the subgraph must have both endpoints in the node subset <span class="math inline">\(V'\)</span>.</li>
+<hr>
+<section id="graphs-and-subgraphs-1" class="level2">
+<h2 class="anchored" data-anchor-id="graphs-and-subgraphs-1">Graphs and Subgraphs</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>Sometimes we are interested in analyzing only some parts of a <strong>whole network</strong>.</li>
+<li>A <strong>subgraph</strong> <span class="math inline">\(G' = \{V', E'\}\)</span> is a subset of the original graph <span class="math inline">\(G = \{V, E\}\)</span>, which is written as <span class="math inline">\(G' \subset G\)</span>:
+<ul class="incremental">
+<li>The node set <span class="math inline">\(V'\)</span> is a subset of <span class="math inline">\(V\)</span> (<span class="math inline">\(V' \subset V\)</span>).</li>
+<li>The edge set <span class="math inline">\(E'\)</span> is a subset of <span class="math inline">\(E\)</span> (<span class="math inline">\(E' \subset E\)</span>).</li>
+<li>Edges in the subgraph must have both endpoints in the node subset <span class="math inline">\(V'\)</span>.</li>
 </ul></li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="original-graph" class="slide level2">
-<h2>Original Graph</h2>
-
-<img data-src="graph-theory_files/figure-revealjs/plt-subgraph-slides-1-1.png" class="quarto-figure quarto-figure-center r-stretch" width="528"></section>
-<section id="a-subgraph-of-the-original" class="slide level2">
-<h2>A Subgraph of the Original</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<ul>
-<li class="fragment">Created by keeping a subset of nodes: <span class="math inline">\(V' = \{A, B, C, D, E\}\)</span>.</li>
-<li class="fragment">Retains only edges connecting these five nodes.</li>
-<li class="fragment">All other nodes (<span class="math inline">\(F, G, H, I, J\)</span>) and their incident edges are removed.</li>
-</ul>
-</div><div class="column" style="width:50%;">
+<section id="original-graph" class="level2">
+<h2 class="anchored" data-anchor-id="original-graph">Original Graph</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/plt-subgraph-slides-2-1.png" class="quarto-figure quarto-figure-center" width="480"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-subgraph-slides-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="528"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+<hr>
 </section>
-<section id="vertex-induced-subgraphs" class="slide level2">
-<h2>Vertex-Induced Subgraphs</h2>
-<ul>
-<li class="fragment">A <strong>vertex-induced subgraph</strong> is created by selecting a subset of nodes (<span class="math inline">\(V' \subset V\)</span>) and including <em>all</em> the edges from the original graph that connect nodes within that subset.</li>
-<li class="fragment">This is the most common method for creating subgraphs in social network analysis.</li>
+<section id="a-subgraph-of-the-original" class="level2">
+<h2 class="anchored" data-anchor-id="a-subgraph-of-the-original">A Subgraph of the Original</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="incremental">
+<ul class="incremental">
+<li>Created by keeping a subset of nodes: <span class="math inline">\(V' = \{A, B, C, D, E\}\)</span>.</li>
+<li>Retains only edges connecting these five nodes.</li>
+<li>All other nodes (<span class="math inline">\(F, G, H, I, J\)</span>) and their incident edges are removed.</li>
 </ul>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-subgraph-slides-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<hr>
 </section>
-<section id="vertex-induced-subgraphs-example" class="slide level2">
-<h2>Vertex-Induced Subgraphs: Example</h2>
+<section id="vertex-induced-subgraphs" class="level2">
+<h2 class="anchored" data-anchor-id="vertex-induced-subgraphs">Vertex-Induced Subgraphs</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>A <strong>vertex-induced subgraph</strong> is created by selecting a subset of nodes (<span class="math inline">\(V' \subset V\)</span>) and including <em>all</em> the edges from the original graph that connect nodes within that subset.</li>
+<li>This is the most common method for creating subgraphs in social network analysis.</li>
+</ul>
+</div>
+<hr>
+</section>
+<section id="vertex-induced-subgraphs-example" class="level2">
+<h2 class="anchored" data-anchor-id="vertex-induced-subgraphs-example">Vertex-Induced Subgraphs: Example</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:55%;">
-<ul>
-<li class="fragment">Let’s select the subset of nodes: <span class="math display">\[V' = \{D, E, G, I\}\]</span></li>
-<li class="fragment">Keeping all original edges between these nodes yields the vertex-induced subgraph on the right.</li>
+<div class="incremental">
+<ul class="incremental">
+<li>Let’s select the subset of nodes: <span class="math display">\[V' = \{D, E, G, I\}\]</span></li>
+<li>Keeping all original edges between these nodes yields the vertex-induced subgraph on the right.</li>
 </ul>
+</div>
 </div><div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/plt-subgraph-induced-1.png" class="quarto-figure quarto-figure-center" width="480"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-subgraph-induced-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="vertex-deleted-subgraphs" class="slide level2">
-<h2>Vertex-Deleted Subgraphs</h2>
-<ul>
-<li class="fragment">A subgraph can be defined by deleting a set of nodes: <span class="math display">\[G' = G - \{a, b, c\}\]</span></li>
-<li class="fragment"><strong>CRITICAL RULE</strong>: Deleting nodes automatically removes all edges incident to them (edges that connect to the deleted nodes).</li>
+<section id="vertex-deleted-subgraphs" class="level2">
+<h2 class="anchored" data-anchor-id="vertex-deleted-subgraphs">Vertex-Deleted Subgraphs</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>A subgraph can be defined by deleting a set of nodes: <span class="math display">\[G' = G - \{a, b, c\}\]</span></li>
+<li><strong>CRITICAL RULE</strong>: Deleting nodes automatically removes all edges incident to them (edges that connect to the deleted nodes).</li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="vertex-deleted-subgraphs-example" class="slide level2">
-<h2>Vertex-Deleted Subgraphs: Example</h2>
+<section id="vertex-deleted-subgraphs-example" class="level2">
+<h2 class="anchored" data-anchor-id="vertex-deleted-subgraphs-example">Vertex-Deleted Subgraphs: Example</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:40%;">
-<ul>
-<li class="fragment">Example: Deleting <span class="math inline">\(\{F, G, H, I, J\}\)</span> from the original graph.</li>
-<li class="fragment">This removes those 5 nodes (highlighted in red, left) and all their incident edges, yielding the disconnected subgraph (right).</li>
-<li class="fragment">This is equivalent to the vertex-induced subgraph on <span class="math inline">\(\{A, B, C, D, E\}\)</span>.</li>
+<div class="incremental">
+<ul class="incremental">
+<li>Example: Deleting <span class="math inline">\(\{F, G, H, I, J\}\)</span> from the original graph.</li>
+<li>This removes those 5 nodes (highlighted in red, left) and all their incident edges, yielding the disconnected subgraph (right).</li>
+<li>This is equivalent to the vertex-induced subgraph on <span class="math inline">\(\{A, B, C, D, E\}\)</span>.</li>
 </ul>
+</div>
 </div><div class="column" style="width:60%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-6-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="special-cases-of-vertex-deletion" class="slide level2">
-<h2>Special Cases of Vertex Deletion</h2>
-<ul>
-<li class="fragment">Two special cases of vertex deletion are:
-<ul>
-<li class="fragment"><strong>Null Graph</strong>: The subgraph that results from removing <em>all</em> nodes from the original graph.</li>
-<li class="fragment"><strong>Singleton Graph</strong> (or <strong>Trivial Graph</strong>): The subgraph that results from removing all nodes <em>except for one</em>.</li>
+<section id="special-cases-of-vertex-deletion" class="level2">
+<h2 class="anchored" data-anchor-id="special-cases-of-vertex-deletion">Special Cases of Vertex Deletion</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>Two special cases of vertex deletion are:
+<ul class="incremental">
+<li><strong>Null Graph</strong>: The subgraph that results from removing <em>all</em> nodes from the original graph.</li>
+<li><strong>Singleton Graph</strong> (or <strong>Trivial Graph</strong>): The subgraph that results from removing all nodes <em>except for one</em>.</li>
 </ul></li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="edge-deleted-subgraphs" class="slide level2">
-<h2>Edge-Deleted Subgraphs</h2>
-<ul>
-<li class="fragment">A subgraph can be defined by deleting a set of edges: <span class="math display">\[G' = G - \{e_1, e_2, ...\}\]</span></li>
-<li class="fragment"><strong>CRITICAL RULE</strong>: Nodes remain in the graph when their edges are deleted (unlike vertex deletion, which automatically deletes incident edges).</li>
+<section id="edge-deleted-subgraphs" class="level2">
+<h2 class="anchored" data-anchor-id="edge-deleted-subgraphs">Edge-Deleted Subgraphs</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>A subgraph can be defined by deleting a set of edges: <span class="math display">\[G' = G - \{e_1, e_2, ...\}\]</span></li>
+<li><strong>CRITICAL RULE</strong>: Nodes remain in the graph when their edges are deleted (unlike vertex deletion, which automatically deletes incident edges).</li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="edge-deleted-subgraphs-example" class="slide level2">
-<h2>Edge-Deleted Subgraphs: Example</h2>
+<section id="edge-deleted-subgraphs-example" class="level2">
+<h2 class="anchored" data-anchor-id="edge-deleted-subgraphs-example">Edge-Deleted Subgraphs: Example</h2>
 <div class="columns" data-align="center">
 <div class="column" style="width:40%;">
-<ul>
-<li class="fragment">Example: Deleting six specific edges from the original graph:
-<ul>
-<li class="fragment"><span class="math inline">\(\{AB, GJ, CI, AE, AC, CE\}\)</span></li>
+<div class="incremental">
+<ul class="incremental">
+<li>Example: Deleting six specific edges from the original graph:
+<ul class="incremental">
+<li><span class="math inline">\(\{AB, GJ, CI, AE, AC, CE\}\)</span></li>
 </ul></li>
-<li class="fragment">Removing these edges (highlighted in red, left) keeps all 10 nodes intact, yielding the edge-deleted subgraph (right).</li>
+<li>Removing these edges (highlighted in red, left) keeps all 10 nodes intact, yielding the edge-deleted subgraph (right).</li>
 </ul>
+</div>
 </div><div class="column" style="width:60%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-7-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="spanning-empty-subgraphs" class="slide level2">
-<h2>Spanning &amp; Empty Subgraphs</h2>
-<ul>
-<li class="fragment">Two key concepts in edge deletion:
-<ul>
-<li class="fragment"><strong>Spanning Subgraph</strong>: A subgraph that leaves all original nodes intact, removing only edges (like the example we just saw).</li>
-<li class="fragment"><strong>Empty Graph</strong>: The subgraph that results from removing all edges, leaving only isolated nodes.</li>
+<section id="spanning-empty-subgraphs" class="level2">
+<h2 class="anchored" data-anchor-id="spanning-empty-subgraphs">Spanning &amp; Empty Subgraphs</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>Two key concepts in edge deletion:
+<ul class="incremental">
+<li><strong>Spanning Subgraph</strong>: A subgraph that leaves all original nodes intact, removing only edges (like the example we just saw).</li>
+<li><strong>Empty Graph</strong>: The subgraph that results from removing all edges, leaving only isolated nodes.</li>
 </ul></li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="special-subgraphs-ego-graph" class="slide level2">
-<h2>Special Subgraphs: Ego Graph</h2>
+<section id="special-subgraphs-ego-graph" class="level2">
+<h2 class="anchored" data-anchor-id="special-subgraphs-ego-graph">Special Subgraphs: Ego Graph</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<ul>
-<li class="fragment"><strong>Ego Graph</strong>: Subgraph centered on a node (ego), containing the ego, its neighbors (alters), and all ties among them.</li>
-<li class="fragment">Particularly useful for actor-level network analysis.</li>
-<li class="fragment">Example: Ego graph for node <strong>D</strong> (in red) and its alters <strong>A</strong>, <strong>B</strong>, and <strong>G</strong> (in tan).</li>
+<div class="incremental">
+<ul class="incremental">
+<li><strong>Ego Graph</strong>: Subgraph centered on a node (ego), containing the ego, its neighbors (alters), and all ties among them.</li>
+<li>Particularly useful for actor-level network analysis.</li>
+<li>Example: Ego graph for node <strong>D</strong> (in red) and its alters <strong>A</strong>, <strong>B</strong>, and <strong>G</strong> (in tan).</li>
 </ul>
+</div>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/plt-subgraph-ego-1.png" class="quarto-figure quarto-figure-center" width="480"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/plt-subgraph-ego-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="vertex-fusion-1" class="slide level2">
-<h2>Vertex Fusion (1)</h2>
+<section id="vertex-fusion-1" class="level2">
+<h2 class="anchored" data-anchor-id="vertex-fusion-1">Vertex Fusion (1)</h2>
 <div class="columns">
 <div class="column" style="width:45%;">
-<ul>
-<li class="fragment">We can construct a new graph from a graph by <strong>fusing</strong> two vertices.</li>
-<li class="fragment"><strong>Vertex Fusion</strong>:
-<ul>
-<li class="fragment">Replace two original vertices with a single vertex.</li>
-<li class="fragment">Keep the combined adjacency relations of both original vertices.</li>
+<div class="incremental">
+<ul class="incremental">
+<li>We can construct a new graph from a graph by <strong>fusing</strong> two vertices.</li>
+<li><strong>Vertex Fusion</strong>:
+<ul class="incremental">
+<li>Replace two original vertices with a single vertex.</li>
+<li>Keep the combined adjacency relations of both original vertices.</li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:55%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="576"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-8-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="vertex-fusion-2" class="slide level2">
-<h2>Vertex Fusion (2)</h2>
-<ul>
-<li class="fragment">Vertex fusion is useful in social network analysis for:
-<ul>
-<li class="fragment">Collapsing equivalence classes.</li>
-<li class="fragment">Analyzing blockmodels.</li>
-<li class="fragment">Merging groups or roles.</li>
+<section id="vertex-fusion-2" class="level2">
+<h2 class="anchored" data-anchor-id="vertex-fusion-2">Vertex Fusion (2)</h2>
+<div class="incremental">
+<ul class="incremental">
+<li>Vertex fusion is useful in social network analysis for:
+<ul class="incremental">
+<li>Collapsing equivalence classes.</li>
+<li>Analyzing blockmodels.</li>
+<li>Merging groups or roles.</li>
 </ul></li>
 </ul>
+</div>
+<hr>
 </section>
-<section id="set-operations-on-graphs-union" class="slide level2">
-<h2>Set Operations on Graphs: Union</h2>
+<section id="set-operations-on-graphs-union" class="level2">
+<h2 class="anchored" data-anchor-id="set-operations-on-graphs-union">Set Operations on Graphs: Union</h2>
 <div class="columns">
 <div class="column" style="width:60%;">
-<ul>
-<li class="fragment">Because graphs are defined as sets, we can perform standard set operations on them.</li>
-<li class="fragment"><strong>Union</strong> (<span class="math inline">\(\cup\)</span>): Combine the vertices and edges of two graphs.
-<ul>
-<li class="fragment"><span class="math inline">\(V(G_1 \cup G_2) = V(G_1) \cup V(G_2)\)</span></li>
-<li class="fragment"><span class="math inline">\(E(G_1 \cup G_2) = E(G_1) \cup E(G_2)\)</span></li>
+<div class="incremental">
+<ul class="incremental">
+<li>Because graphs are defined as sets, we can perform standard set operations on them.</li>
+<li><strong>Union</strong> (<span class="math inline">\(\cup\)</span>): Combine the vertices and edges of two graphs.
+<ul class="incremental">
+<li><span class="math inline">\(V(G_1 \cup G_2) = V(G_1) \cup V(G_2)\)</span></li>
+<li><span class="math inline">\(E(G_1 \cup G_2) = E(G_1) \cup E(G_2)\)</span></li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-9-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="528"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
+</div>
+</div>
+<hr>
 </section>
-<section id="set-operations-on-graphs-intersection" class="slide level2">
-<h2>Set Operations on Graphs: Intersection</h2>
+<section id="set-operations-on-graphs-intersection" class="level2">
+<h2 class="anchored" data-anchor-id="set-operations-on-graphs-intersection">Set Operations on Graphs: Intersection</h2>
 <div class="columns">
 <div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><strong>Intersection</strong> (<span class="math inline">\(\cap\)</span>): Keep only the vertices and edges present in <em>both</em> graphs.
-<ul>
-<li class="fragment"><span class="math inline">\(V(G_1 \cap G_2) = V(G_1) \cap V(G_2)\)</span></li>
-<li class="fragment"><span class="math inline">\(E(G_1 \cap G_2) = E(G_1) \cap E(G_2)\)</span></li>
+<div class="incremental">
+<ul class="incremental">
+<li><strong>Intersection</strong> (<span class="math inline">\(\cap\)</span>): Keep only the vertices and edges present in <em>both</em> graphs.
+<ul class="incremental">
+<li><span class="math inline">\(V(G_1 \cap G_2) = V(G_1) \cap V(G_2)\)</span></li>
+<li><span class="math inline">\(E(G_1 \cap G_2) = E(G_1) \cap E(G_2)\)</span></li>
 </ul></li>
 </ul>
+</div>
 </div><div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="graph-theory_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+<figure class="figure">
+<p><img src="graph-theory_files/figure-revealjs/unnamed-chunk-10-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="528"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
-
-
-</section></section>
-    </div>
-  <div class="quarto-auto-generated-content" style="display: none;">
-<div class="footer footer-default">
-
 </div>
-</div></div>
+</div>
 
-  <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="../site_libs/revealjs/dist/reveal.js"></script>
-  <!-- reveal.js plugins -->
-  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
-  
 
-  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
-  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="../site_libs/revealjs/plugin/math/math.js"></script>
-  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+</section>
+</section>
 
-  <script>
+</main> <!-- /main -->
 
-      // Full list of configuration options available at:
-      // https://revealjs.com/config/
-      Reveal.initialize({
-'controlsAuto': true,
-'previewLinksAuto': false,
-'pdfSeparateFragments': false,
-'autoAnimateEasing': "ease",
-'autoAnimateDuration': 1,
-'autoAnimateUnmatched': true,
-'jumpToSlide': true,
-'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
-'smaller': false,
- 
-        // Display controls in the bottom right corner
-        controls: false,
 
-        // Help the user learn the controls by providing hints, for example by
-        // bouncing the down arrow when they first encounter a vertical slide
-        controlsTutorial: false,
+<script>
 
-        // Determines where controls appear, "edges" or "bottom-right"
-        controlsLayout: 'edges',
+  // htmlwidgets need to know to resize themselves when slides are shown/hidden.
 
-        // Visibility rule for backwards navigation arrows; "faded", "hidden"
-        // or "visible"
-        controlsBackArrows: 'faded',
+  // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
 
-        // Display a presentation progress bar
-        progress: true,
+  // slide changes (different for each slide format).
 
-        // Display the page number of the current slide
-        slideNumber: false,
+  (function () {
 
-        // 'all', 'print', or 'speaker'
-        showSlideNumber: 'all',
+    // dispatch for htmlwidgets
 
-        // Add the current slide number to the URL hash so that reloading the
-        // page/copying the URL will return you to the same slide
-        hash: true,
+    function fireSlideEnter() {
 
-        // Start with 1 for the hash rather than 0
-        hashOneBasedIndex: false,
+      const event = window.document.createEvent("Event");
 
-        // Flags if we should monitor the hash and change slides accordingly
-        respondToHashChanges: true,
+      event.initEvent("slideenter", true, true);
 
-        // Push each slide change to the browser history
-        history: true,
+      window.document.dispatchEvent(event);
 
-        // Enable keyboard shortcuts for navigation
-        keyboard: true,
+    }
 
-        // Enable the slide overview mode
-        overview: true,
 
-        // Disables the default reveal.js slide layout (scaling and centering)
-        // so that you can use custom CSS layout
-        disableLayout: false,
 
-        // Vertical centering of slides
-        center: false,
+    function fireSlideChanged(previousSlide, currentSlide) {
 
-        // Enables touch navigation on devices with touch input
-        touch: true,
+      fireSlideEnter();
 
-        // Loop the presentation
-        loop: false,
 
-        // Change the presentation direction to be RTL
-        rtl: false,
 
-        // see https://revealjs.com/vertical-slides/#navigation-mode
-        navigationMode: 'linear',
+      // dispatch for shiny
 
-        // Randomizes the order of slides each time the presentation loads
-        shuffle: false,
+      if (window.jQuery) {
 
-        // Turns fragments on and off globally
-        fragments: true,
+        if (previousSlide) {
 
-        // Flags whether to include the current fragment in the URL,
-        // so that reloading brings you to the same fragment position
-        fragmentInURL: false,
+          window.jQuery(previousSlide).trigger("hidden");
 
-        // Flags if the presentation is running in an embedded mode,
-        // i.e. contained within a limited portion of the screen
-        embedded: false,
+        }
 
-        // Flags if we should show a help overlay when the questionmark
-        // key is pressed
-        help: true,
+        if (currentSlide) {
 
-        // Flags if it should be possible to pause the presentation (blackout)
-        pause: true,
+          window.jQuery(currentSlide).trigger("shown");
 
-        // Flags if speaker notes should be visible to all viewers
-        showNotes: false,
+        }
 
-        // Global override for autoplaying embedded media (null/true/false)
-        autoPlayMedia: null,
+      }
 
-        // Global override for preloading lazy-loaded iframes (null/true/false)
-        preloadIframes: null,
+    }
 
-        // Number of milliseconds between automatically proceeding to the
-        // next slide, disabled when set to 0, this value can be overwritten
-        // by using a data-autoslide attribute on your slides
-        autoSlide: 0,
 
-        // Stop auto-sliding after user input
-        autoSlideStoppable: true,
 
-        // Use this method for navigation when auto-sliding
-        autoSlideMethod: null,
+    // hookup for slidy
 
-        // Specify the average time in seconds that you think you will spend
-        // presenting each slide. This is used to show a pacing timer in the
-        // speaker view
-        defaultTiming: null,
+    if (window.w3c_slidy) {
 
-        // Enable slide navigation via mouse wheel
-        mouseWheel: false,
+      window.w3c_slidy.add_observer(function (slide_num) {
 
-        // The display mode that will be used to show slides
-        display: 'block',
+        // slide_num starts at position 1
 
-        // Hide cursor if inactive
-        hideInactiveCursor: true,
+        fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
 
-        // Time before the cursor is hidden (in ms)
-        hideCursorTime: 5000,
-
-        // Opens links in an iframe preview overlay
-        previewLinks: false,
-
-        // Transition style (none/fade/slide/convex/concave/zoom)
-        transition: 'none',
-
-        // Transition speed (default/fast/slow)
-        transitionSpeed: 'default',
-
-        // Transition style for full page slide backgrounds
-        // (none/fade/slide/convex/concave/zoom)
-        backgroundTransition: 'none',
-
-        // Number of slides away from the current that are visible
-        viewDistance: 3,
-
-        // Number of slides away from the current that are visible on mobile
-        // devices. It is advisable to set this to a lower number than
-        // viewDistance in order to save resources.
-        mobileViewDistance: 2,
-
-        // The "normal" size of the presentation, aspect ratio will be preserved
-        // when the presentation is scaled to fit different resolutions. Can be
-        // specified using percentage units.
-        width: 1280,
-
-        height: 720,
-
-        // Factor of the display size that should remain empty around the content
-        margin: 0.1,
-
-        // Bounds for smallest/largest possible scale to apply to content
-        minScale: 0.2,
-
-        math: {
-          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
-          config: 'TeX-AMS_HTML-full',
-          tex2jax: {
-            inlineMath: [['\\(','\\)']],
-            displayMath: [['\\[','\\]']],
-            balanceBraces: true,
-            processEscapes: false,
-            processRefs: true,
-            processEnvironments: true,
-            preview: 'TeX',
-            skipTags: ['script','noscript','style','textarea','pre','code'],
-            ignoreClass: 'tex2jax_ignore',
-            processClass: 'tex2jax_process'
-          },
-        },
-
-        // reveal.js plugins
-        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
-
-          RevealMath,
-          RevealNotes,
-          RevealSearch,
-          RevealZoom
-        ]
       });
-    </script>
-    
 
-    <script>
+    }
 
-      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
 
-      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
 
-      // slide changes (different for each slide format).
+  })();
 
-      (function () {
+</script>
 
-        // dispatch for htmlwidgets
 
-        function fireSlideEnter() {
 
-          const event = window.document.createEvent("Event");
-
-          event.initEvent("slideenter", true, true);
-
-          window.document.dispatchEvent(event);
-
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
         }
-
-    
-
-        function fireSlideChanged(previousSlide, currentSlide) {
-
-          fireSlideEnter();
-
-    
-
-          // dispatch for shiny
-
-          if (window.jQuery) {
-
-            if (previousSlide) {
-
-              window.jQuery(previousSlide).trigger("hidden");
-
-            }
-
-            if (currentSlide) {
-
-              window.jQuery(currentSlide).trigger("shown");
-
-            }
-
-          }
-
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
         }
-
-    
-
-        // hookup for slidy
-
-        if (window.w3c_slidy) {
-
-          window.w3c_slidy.add_observer(function (slide_num) {
-
-            // slide_num starts at position 1
-
-            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-
-          });
-
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-
-    
-
-      })();
-
-    </script>
-
-    
-
-    <script id="quarto-html-after-body" type="application/javascript">
-      window.document.addEventListener("DOMContentLoaded", function (event) {
-        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
-        tabsets.forEach(function(tabset) {
-          const tabby = new Tabby('#' + tabset.id);
-        });
-        const isCodeAnnotation = (el) => {
-          for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
-              return true;
-            }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
           }
-          return false;
         }
-        const onCopySuccess = function(e) {
-          // button target
-          const button = e.trigger;
-          // don't keep focus
-          button.blur();
-          // flash "checked"
-          button.classList.add('code-copy-button-checked');
-          var currentTitle = button.getAttribute("title");
-          button.setAttribute("title", "Copied!");
-          let tooltip;
-          if (window.bootstrap) {
-            button.setAttribute("data-bs-toggle", "tooltip");
-            button.setAttribute("data-bs-placement", "left");
-            button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
-                customClass: "code-copy-button-tooltip",
-                offset: [0, -8]});
-            tooltip.show();    
-          }
-          setTimeout(function() {
-            if (tooltip) {
-              tooltip.hide();
-              button.removeAttribute("data-bs-title");
-              button.removeAttribute("data-bs-toggle");
-              button.removeAttribute("data-bs-placement");
-            }
-            button.setAttribute("title", currentTitle);
-            button.classList.remove('code-copy-button-checked');
-          }, 1000);
-          // clear code selection
-          e.clearSelection();
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
         }
-        const getTextToCopy = function(trigger) {
-          const outerScaffold = trigger.parentElement.cloneNode(true);
-          const codeEl = outerScaffold.querySelector('code');
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
           }
-          return codeEl.innerText;
         }
-        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-          text: getTextToCopy
-        });
-        clipboard.on('success', onCopySuccess);
-        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-            text: getTextToCopy,
-            container: window.document.getElementById('quarto-embedded-source-code-modal')
-          });
-          clipboardModal.on('success', onCopySuccess);
-        }
-          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-          var mailtoRegex = new RegExp(/^mailto:/);
-            var filterRegex = new RegExp('/' + window.location.host + '/');
-          var isInternal = (href) => {
-              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-          }
-          // Inspect non-navigation links and adorn them if external
-         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-          for (var i=0; i<links.length; i++) {
-            const link = links[i];
-            if (!isInternal(link.href)) {
-              // undo the damage that might have been done by quarto-nav.js in the case of
-              // links that we want to consider external
-              if (link.dataset.originalHref !== undefined) {
-                link.href = link.dataset.originalHref;
-              }
-            }
-          }
-        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-          const config = {
-            allowHTML: true,
-            maxWidth: 500,
-            delay: 100,
-            arrow: false,
-            appendTo: function(el) {
-                return el.closest('section.slide') || el.parentElement;
-            },
-            interactive: true,
-            interactiveBorder: 10,
-            theme: 'light-border',
-            placement: 'bottom-start',
-          };
-          if (contentFn) {
-            config.content = contentFn;
-          }
-          if (onTriggerFn) {
-            config.onTrigger = onTriggerFn;
-          }
-          if (onUntriggerFn) {
-            config.onUntrigger = onUntriggerFn;
-          }
-            config['offset'] = [0,0];
-            config['maxWidth'] = 700;
-          window.tippy(el, config); 
-        }
-        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-        for (var i=0; i<noterefs.length; i++) {
-          const ref = noterefs[i];
-          tippyHover(ref, function() {
-            // use id or data attribute instead here
-            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-            try { href = new URL(href).hash; } catch {}
-            const id = href.replace(/^#\/?/, "");
-            const note = window.document.getElementById(id);
-            if (note) {
-              return note.innerHTML;
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
             } else {
-              return "";
+              container.appendChild(child.cloneNode(true));
+              break;
             }
-          });
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
         }
-        const findCites = (el) => {
-          const parentEl = el.parentElement;
-          if (parentEl) {
-            const cites = parentEl.dataset.cites;
-            if (cites) {
-              return {
-                el,
-                cites: cites.split(' ')
-              };
-            } else {
-              return findCites(el.parentElement)
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
             }
           } else {
-            return undefined;
-          }
-        };
-        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-        for (var i=0; i<bibliorefs.length; i++) {
-          const ref = bibliorefs[i];
-          const citeInfo = findCites(ref);
-          if (citeInfo) {
-            tippyHover(citeInfo.el, function() {
-              var popup = window.document.createElement('div');
-              citeInfo.cites.forEach(function(cite) {
-                var citeDiv = window.document.createElement('div');
-                citeDiv.classList.add('hanging-indent');
-                citeDiv.classList.add('csl-entry');
-                var biblioDiv = window.document.getElementById('ref-' + cite);
-                if (biblioDiv) {
-                  citeDiv.innerHTML = biblioDiv.innerHTML;
-                }
-                popup.appendChild(citeDiv);
-              });
-              return popup.innerHTML;
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
             });
           }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
         }
+      }, function(instance) {
       });
-      </script>
-    
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
 
 </body></html>
