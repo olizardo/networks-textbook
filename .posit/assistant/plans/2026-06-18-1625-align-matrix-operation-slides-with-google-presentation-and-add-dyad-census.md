@@ -1,49 +1,47 @@
-# Plan: Refactor Structural Holes Slide Deck (Live Plots, Gould & Fernandez Typologies, and Obstfeld Process Matrix)
+# Plan: Create "Chains of Affection" Sexual Networks & Local Norms Slide Deck
 
 ## Goal
-Optimize `slides/structural-holes.qmd` by converting static diagrams into beautifully styled, live-rendered R `ggraph` network plots (with exact node/text scaling and coordinate boundaries to prevent horizontal/vertical cropping), and expanding the deck with detailed, step-by-step slides covering the **Gould & Fernandez Brokerage Roles** and **Obstfeld's Process Orientations**, incorporating the $2 \times 3$ decoupling matrix from his 2014 paper, with all key concepts bolded.
+Create a comprehensive, high-pedagogy Quarto (`.qmd`) slide deck for a new unit in the social networks class. The unit will discuss how sexual and romantic networks act as the "perfect laboratory" to study how micro-level social rules (local norms) generate macro-level network structures. It integrates Bearman's classic study, McMillan et al.'s friendship peer code, fictional TV networks (Glee, Grey's Anatomy), sexual orientation variations (The L Word), and celebrity rumor networks (from whosdatedwho.com).
 
-## Detailed Steps
+## Target Slide File
+We will create a new slide deck: `slides/chains-of-affection.qmd`.
 
-### 1. Define Live R Graph Renderings (To Prevent Cropping)
-We will add a Quarto setup chunk at the top of `slides/structural-holes.qmd` to load libraries (`ggraph`, `tidygraph`, `igraph`, `ggplot2`, `dplyr`) and define manual layouts with precise coordinate boundaries:
-*   **Structural Hole Visual**:
-    - Group A (cohesive on the left, blue nodes), Group B (cohesive on the right, green nodes), and the Broker (bridging them in the middle, red node).
-    - Scaled to `size = 14`, text `size = 7`, and explicit coordinate bounds `coord_cartesian(xlim = c(-2.5, 2.5), ylim = c(-1.0, 1.0), clip = "off")` to prevent any cropping.
-*   **Gould & Fernandez Brokerage Roles**:
-    - Define a modular R plotting function `plot_brokerage(node_groups, title)` that draws a uniform directed V-shape: $A \rightarrow B \rightarrow C$, where $B$ is the Broker.
-    - Node size set to `size = 14`, text to `size = 7`.
-    - Retract directed arrowheads using `arrow = arrow(length = unit(3, 'mm')), end_cap = circle(7.5, 'mm')` to prevent overlapping with the node boundaries.
-*   **Obstfeld Process Diagrams**:
-    - Draw R-rendered directed triads illustrating:
-      - **Conduit**: $A \xrightarrow{\text{info}} B \xrightarrow{\text{info}} C$ (direct transmission flow, no $A-C$ tie).
-      - **Tertius Gaudens**: $A \leftarrow B \rightarrow C$ (Ego separates or exploits, no $A-C$ tie).
-      - **Tertius Iungens**: A closed triad $A-B-C$ with a newly forged direct tie $A-C$ highlighted in red to represent the joining action.
+## Detailed Slide Deck Outline & Layouts
 
-### 2. Expand Gould & Fernandez Section Step-by-Step (Across 6 Slides)
-We will split the current single slide into 6 distinct, high-pedagogy slides:
-- **Gould & Fernandez: Typology of Brokerage Roles (Intro)**: Bolds key concepts like **membership partitioning**, **directed transaction networks**, and **structures of mediation**.
-- **1. Coordinator (Within-Group)**: Bolds key concepts like **internal coordination** and **local integration** (all 3 nodes in Group 1; live R plot of a Coordinator triangle).
-- **2. Itinerant Broker / Consultant (Within-Group)**: Bolds key concepts like **external consulting** and **impartial intermediation** (Source/Target in Group 1, Broker is outsider in Group 2; live R plot).
-- **3. Gatekeeper (Between-Group)**: Bolds key concepts like **resource gatekeeping** and **inward boundary spanning** (Source in Group 1, Broker/Target in Group 2; Broker controls inward flow).
-- **4. Representative (Between-Group)**: Bolds key concepts like **external representation** and **outward boundary spanning** (Source/Broker in Group 1, Target in Group 2; Broker acts as spokesperson).
-- **5. Liaison (Between-Group)**: Bolds key concepts like **cross-boundary mediation** and **unaffiliated intermediation** (Source, Broker, Target all in three completely different groups; live R plot).
+### 1. Title & Introduction (The Micro-Macro Link)
+*   **Slide 1: Title Slide**: "Chains of Affection: How Local Norms Shape Romantic and Sexual Networks".
+*   **Slide 2: The Perfect Laboratory**: Introduces why sexual/romantic networks are ideal for study (finite boundaries, highly consequential for epidemics, but actors have zero global awareness—they only navigate immediate local choices).
+*   **Slide 3: Micro-Rules, Global Structures**: Focuses on the central question: How do unwritten, local rules scale up to large-scale network topologies? Bolds key concepts like **emergence**, **micro-level proscriptions**, and **macro-level networks**.
 
-### 3. Expand Obstfeld's Brokerage Process Section Step-by-Step (Across 5 Slides)
-We will split the current single slide into 5 highly detailed slides with key concepts bolded:
-- **Brokerage as a Process: Action vs. Structure**: Introduces Obstfeld, Borgatti, and Davis's (2014) action-oriented view, explaining that structural holes are merely **opportunities** requiring **motivation and social action**. Bolds concepts like **action-structure decoupling**.
-- **1. The Conduit Process**: Discusses transferring information to solve problems through synthesis, even without a structural hole. Shows live R diagram.
-- **2. The Tertius Gaudens Orientation**: Discusses the "third who benefits/enjoys" (Simmel), where the broker actively maintains gaps, separates alters, or cultivates competition/conflict ("divide and rule") to exploit information asymmetry. Shows live R diagram.
-- **3. The Tertius Iungens Orientation**: Discusses the "third who joins" (Obstfeld 2005), where the broker actively connects disconnected alters, closing structural holes to forge trust, closure, and direct collaboration. Shows live R diagram.
-- **4. Decoupling Action from Structure: The Obstfeld Matrix**: Introduces the $2 \times 3$ decoupling matrix from Obstfeld et al. (2014) as a beautifully formatted Markdown table, bolding key concepts for each cell:
-  - *Conduit/Open*: **Information Transfer**.
-  - *Conduit/Closed*: **Facilitated Synthesis**.
-  - *Gaudens/Open*: **Arbitrage & Separation**.
-  - *Gaudens/Closed*: **Divide et Impera (Divide & Rule)**.
-  - *Iungens/Open*: **Introducing Alters**.
-  - *Iungens/Closed*: **Coordinated Collaboration**.
+### 2. Peter Bearman's Landmark Study (Jefferson High)
+*   **Slide 4: The Spanning Tree Mystery**: Peter Bearman, James Moody, and Katherine Stovel's (2004) *AJS* study of Jefferson High. Bolds **spanning tree** and **chain-like branches**.
+*   **Slide 5: The Absence of Cycles**: Explains that standard network models predict highly clustered, dense pockets. Jefferson High, however, has a complete absence of short cycles (especially 4-cycles). 
+*   **Slide 6: The "Seconds Partnership" Taboo**: Explains Bearman's proposed rule: "A person does not date their ex's current partner's ex." Displays a clean diagram of a 4-cycle loop (A-B-C-D) and details why completing this loop causes a public loss of status ("taking seconds").
+
+### 3. McMillan et al. & Peer Context (Girl Code / Bro Code)
+*   **Slide 7: Critique of the Classic Norm**: Cassie McMillan, Derek Kreager, and René Veenstra (2022) "Keeping to the Code". Bolds **face validity** and **peer context**. Explains that high schoolers don't think in complex ex-partner chains.
+*   **Slide 8: Girl Code and Bro Code**: Introduces the alternative, peer-grounded rule: "Do not date a friend's previous partner" ("no seconds" norm). Bolds **relationship dissolution** and **friendship loyalty**.
+*   **Slide 9: Visualizing peer-dating rules**: Illustrates how the same-sex friendship code naturally blocks the closure of 4-cycles, generating the exact same **spanning tree** macro-structure but with vastly higher social realism.
+
+### 4. Reality vs. Fiction (The TV Cases of Glee and Grey's Anatomy)
+*   **Slide 10: Fictional Network Overlaps**: Jimi Adams (2015) on *Glee* (seasons 1-2) and Marcum et al. (2016) on *Grey's Anatomy* (GAN, seasons 1-6).
+*   **Slide 11: Plot Tensions and 4-Cycles**: Explains that television shows have way more 4-cycles (42% in Glee, 12 in GAN) than real high schools because writers violate norms to create **dramatic tension**.
+*   **Slide 12: Art Imitates Taboo**: Shows that once you control for cast size and activity via ERGMs, fictional characters *still* show a statistically significant aversion to 4-cycles. Fictional writing implicitly conforms to societal taboos!
+
+### 5. Same-Sex Constraints (The L Word Case)
+*   **Slide 13: Adult Same-Sex Hook-ups**: Marcum, Lin, and Koehly (2016) comparing Grey's Anatomy with Showtime's *The L Word* (predominately lesbian same-sex network).
+*   **Slide 14: Structural Market Constraints**: Shows that *The L Word* has **no aversion** to 4-cycles. Bolds **structural constraints** and **market size**. In small, same-sex dating markets, cycle avoidance is suspended out of necessity; "love triangles" are normalized.
+
+### 6. Rumors vs. Reality (Celebrity Networks & WhosDatedWho)
+*   **Slide 15: Celebrity Networks**: Carmella Nicole Stoddard's (2024) UCLA dissertation using whosdatedwho.com (109,626 nodes, 88,746 edges).
+*   **Slide 16: Confirmed vs. Rumored Ties**: Explains the difference between confirmed relationships and rumored ties. Bolds **gossip**, **rumors**, and **counter-normative behavior**.
+*   **Slide 17: How Gossip Reveals Structure**: Details the finding that rumored ties **significantly increase short cycles (3-cycles and 4-cycles)** and bisexual nodes. Bolds **salaciousness** and **surveillant interest**. Gossip is a social filter that selectively targets and amplifies norm violations because they are interesting!
+
+### 7. Class Discussion & Takeaways
+*   **Slide 18: Summary of Micro-to-Macro Link**: Reviews the main rules.
+*   **Slide 19: Epidemiological Consequences**: Contrasts spanning trees (extremely fragile to random interventions) with core models (highly resilient).
+*   **Slide 20: Class Discussion Questions**: Prompts students on local norms and network structures.
 
 ## Verification Plans
-- Run standalone Quarto render (`quarto render slides/structural-holes.qmd` with `_quarto.yml` temporarily renamed to prevent book project errors) to ensure:
-  - The document renders with `Exit code: 0`.
-  - All LaTeX equations, R code chunks, and HTML kable tables compile cleanly with no formatting or parsing warnings.
+1. Check that the `.qmd` slide deck compiles successfully with Quarto render.
+2. Verify that there are no cropping issues on any ASCII art or ggraph plots (using explicit coordinate limits and `clip = "off"` on any included R code plots).
