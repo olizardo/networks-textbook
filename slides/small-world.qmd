@@ -1,0 +1,258 @@
+---
+title: "The Small World Phenomenon"
+subtitle: "Bridges, Hubs, and the Science of Shortcuts"
+format:
+  revealjs:
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(patchwork)
+
+# Perfect triangle coordinates for 3-node triad drawings
+x_triad <- c(0, 2, 1)
+y_triad <- c(0, 0, 1.2)
+```
+
+## Defining the "Small World"
+
+::: {.incremental}
+- In real-world social networks, we observe a fascinating structural paradox.
+- The **small world phenomenon** describes networks with two key features simultaneously:
+  1. High local **clustering**: Individuals are deeply embedded in close-knit, highly connected local circles ("cliquishness").
+  2. Low **average path length**: The overall network allows for surprisingly short paths linking any two random individuals ("shortcuts").
+- This dual property allows information, news, and innovations to propagate globally with extreme speed, even while preserving tight local communities.
+:::
+
+---
+
+## The Graph Theory Basis: Clustering
+
+- **Clustering Coefficient** ($CC_i$): Measures the local density of an individual's ego network (cliquishness).
+- Quantifies the fraction of an ego's contacts who are connected to each other:
+  $$CC_i = \frac{m}{n(n-1)/2}$$
+  - Where $n$ is the number of neighbors, and $m$ is the actual number of links among them.
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 10
+#| fig-height: 4.5
+    gr_open <- create_empty(3, directed = FALSE) %>% 
+        bind_edges(data.frame(from = c(1, 2), to = c(2, 3))) %>%
+        mutate(name = toupper(letters[1:3]))
+    p1 <- ggraph(gr_open, layout = "manual", x = x_triad, y = y_triad) +
+        geom_edge_link(color = "#2c3e50", edge_width = 1.2) +
+        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
+        theme_graph() + ggtitle("Open Triad (CC = 0)") +
+        coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
+        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
+
+    gr_closed <- create_empty(3, directed = FALSE) %>% 
+        bind_edges(data.frame(from = c(1, 2, 3), to = c(2, 3, 1))) %>%
+        mutate(name = toupper(letters[1:3]))
+    p2 <- ggraph(gr_closed, layout = "manual", x = x_triad, y = y_triad) +
+        geom_edge_link(color = "#2c3e50", edge_width = 1.2) +
+        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
+        theme_graph() + ggtitle("Closed Triad (CC = 1)") +
+        coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
+        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
+
+    p1 + p2 + plot_layout(nrow = 1)
+```
+
+---
+
+## The Graph Theory Basis: Paths
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Connections across a network are measured via **shortest paths** (also called **geodesics**).
+- **Path Length**: The number of edges contained in a path.
+- **Average Path Length**: The mean geodesic distance between all pairs of nodes in a network:
+  $$\langle L \rangle = \frac{1}{N(N-1)} \sum_{i \neq j} d(i,j)$$
+- In a "Small World" network, $\langle L \rangle$ is surprisingly small, typically scaling logarithmically with network size:
+  $$\langle L \rangle \approx \ln(N)$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+    set.seed(42)
+    gr_path <- play_islands(4, 5, 0.8, 1) %>% mutate(name = row_number())
+    ggraph(gr_path, layout = "nicely") +
+      geom_edge_link(color = "#7f8c8d", alpha = 0.6, edge_width = 1.1) +
+      geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+      geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
+      theme_graph() + coord_cartesian(xlim = c(-1.5, 1.5), ylim = c(-1.5, 1.5), clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Milgram's Pioneer Experiment (1967)
+
+- **Stanley Milgram's** seminal letter-forwarding study in Nebraska and Boston.
+- Tasked starting participants with sending a folder to a target Boston stockbroker using only chains of personal acquaintances.
+
+::: {.incremental}
+- **The Core Findings**:
+  - **Six degrees of separation**: Completed chains took an average of **5.2 intermediaries** (about six steps).
+  - Choice of contacts was dominated by **homophily** (forwarding to acquaintances of similar age, gender, and socioeconomic status).
+  - Proved that short paths exist empirically in massive, decentralized human societies.
+:::
+
+---
+
+## Digital Replication: Dodds-Muhamad-Watts (2003)
+
+- Replicated Milgram's experiment for the digital era using email (98,847 participants, 166 countries, 18 targets).
+
+::: {.incremental}
+- **Key Discoveries**:
+  - Confirmed the "six degrees" thesis with a median reconstructed path length of **5 to 7 steps**.
+  - **Social Foci** (shared school, occupation, or work settings) acted as the critical "gateways" for successful chains.
+  - Professional ties (rather than close kin or friends) were highly effective "bridges" for linking distant segments of the network.
+:::
+
+---
+
+## Exploring Search: The Reverse Small World
+
+- How do people actually find these short paths if they only possess local information?
+
+::: {.incremental}
+- Killworth and Bernard's (1979) **Reverse Small World** study:
+  - Participants were given diverse global targets and asked: *"Who is the first person you would contact to reach this target, and why?"*
+  - Revealed that people use highly systematic **search heuristics** based on:
+    1. Geographic proximity (getting the folder to the target's city).
+    2. Occupational similarity (getting the folder to the target's industry).
+  - Proved that social networks are not only short, but **searchable** using local cues.
+:::
+
+---
+
+## Computational Models: Watts-Strogatz (1998)
+
+- **Duncan Watts and Steven Strogatz** modeled the transition from a highly clustered circle lattice to a random network.
+
+::: {.incremental}
+- By introducing a small probability ($p$) of **random rewiring**:
+  - **Regular Lattice ($p=0$)**: High clustering, but long path lengths (very localized).
+  - **Random Graph ($p=1$)**: Low clustering, but very short path lengths.
+  - **Small-World Region ($p \in (0.01, 0.1)$)**: High clustering is preserved, but path length drops precipitously!
+  - A tiny fraction of **shortcuts** (bridging ties) connects distant clusters, creating massive shortcuts.
+:::
+
+---
+
+## Visualizing the Watts-Strogatz Transition
+
+- As $p$ increases, random shortcuts link opposite sides of the circle, slashing average path length while maintaining dense local neighborhoods.
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 11
+#| fig-height: 5.5
+    set.seed(42)
+    g_regular <- play_smallworld(1, 20, 2, 0)
+    g_smallworld <- play_smallworld(1, 20, 2, 0.08)
+    g_random <- play_smallworld(1, 20, 2, 1)
+
+    plot_ws <- function(graph, title) {
+      ggraph(graph, layout = 'circle') +
+        geom_edge_link(color = "steelblue", alpha = 0.5, edge_width = 0.8) +
+        geom_node_point(size = 8, fill = "tan2", color = "#2c3e50", shape = 21, stroke = 1.0) +
+        theme_graph() + ggtitle(title) +
+        coord_cartesian(xlim = c(-1.1, 1.2), ylim = c(-1.1, 1.2), clip = "off") +
+        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
+    }
+
+    plot_ws(g_regular, "Regular Lattice (p = 0)") + 
+      plot_ws(g_smallworld, "Small World (p = 0.08)") + 
+      plot_ws(g_random, "Random Graph (p = 1)") + 
+      plot_layout(nrow = 1)
+```
+
+---
+
+## Scale-Free Shortcuts: The Barabási-Albert Model (1999)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Preferential Attachment**: A growth model where new nodes are more likely to connect to highly connected nodes ("the rich get richer").
+- Results in a power-law degree distribution featuring massive **hubs**.
+- These high-degree hubs act as natural super-shortcuts, connecting peripheral nodes and keeping the network's diameter low.
+- *Trade-off*: Unlike real social networks, BA networks have very low local **clustering**.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+    set.seed(42)
+    g_ba <- play_barabasi_albert(n = 60, power = 1, growth = 1, directed = FALSE) %>%
+      mutate(degree = centrality_degree())
+
+    ggraph(g_ba, layout = 'fr') +
+      geom_edge_link(color = "steelblue", alpha = 0.4, edge_width = 0.8) +
+      geom_node_point(aes(size = degree), fill = "tan2", color = "#2c3e50", shape = 21, stroke = 1.0) +
+      scale_size_continuous(range = c(2, 10)) +
+      theme_graph() +
+      coord_cartesian(xlim = c(-1.5, 1.5), ylim = c(-1.5, 1.5), clip = "off") +
+      theme(legend.position = "none")
+```
+:::
+
+::::
+
+---
+
+## Navigating the Small World: Searchability
+
+- How do individuals find targets without seeing the whole graph?
+
+::: {.incremental}
+- Watts, Dodds, and Newman (2002) modeled **searchability**:
+  - Human social networks are organized into nested, multi-dimensional communities (geography, occupation, interests).
+  - We use a **social distance heuristic** to navigate, passing the message to the contact closest to the target in social dimensions (leveraging **homophily**).
+  - Alternatively, we employ a **hub strategy**, routing messages through highly connected, high-status actors.
+:::
+
+---
+
+## Summary of the Small World Phenomenon
+
+- **Socio-Structural Principle**: Real human networks are local *and* global—dense clusters connected by rare but powerful bridges.
+- **Empirical Proof**: From Milgram's letters to modern email cascades, we are linked by approximately **six degrees of separation**.
+- **Generative Models**:
+  - **Watts-Strogatz**: Random rewiring ($p \approx 0.05$) creates shortcuts.
+  - **Barabási-Albert**: Preferential attachment creates shortcutting **hubs**.
+- **Cognitive Navigation**: Search succeeds because we exploit nested social communities and use social distance heuristics.
