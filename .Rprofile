@@ -1,3 +1,4 @@
+source("renv/activate.R")
 # Global override for ggraph's theme_graph to use "sans" instead of "Arial Narrow"
 # to prevent "font family not found in Windows font database" warnings.
 theme_graph <- function(base_family = "sans", ...) {
