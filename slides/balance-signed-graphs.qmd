@@ -12,6 +12,38 @@ format:
     min-scale: 0.2
 ---
 
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+
+# Custom transparent theme for slides
+theme_slides <- function(base_size = 12) {
+  theme_graph() +
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    legend.background = element_rect(fill = "transparent", color = NA),
+    legend.box.background = element_rect(fill = "transparent", color = NA),
+    legend.text = element_text(color = "#2c3e50", size = 11, face = "bold"),
+    plot.title = element_text(size = base_size * 1.2, face = "bold", hjust = 0.5, color = "#2c3e50"),
+    plot.subtitle = element_text(size = base_size * 1.0, hjust = 0.5, color = "#7f8c8d")
+  )
+}
+
+# Set global chunk options
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  dev = "png",
+  dev.args = list(bg = "transparent")
+)
+```
+
 # Part 1: The Relational Basis of Valenced Networks & Dyadic Balance
 
 ---
@@ -32,15 +64,19 @@ format:
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph TD
-  A((A)) -- "+" --> B((B))
-  B -- "+" --> C((C))
-  C -- "-" --> A
-  
-  style A fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style B fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style C fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+edges <- data.frame(from = c("A", "B", "C"), to = c("B", "C", "A"), sign = c("+", "+", "-"))
+g <- graph_from_data_frame(edges, directed = FALSE)
+lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 2.5, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 22, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -62,14 +98,21 @@ graph TD
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph LR
-  Ego((Ego)) -- "+ (Liking/Helping)" --> B((Alter 1))
-  Ego -- "- (Disliking/Conflict)" --> C((Alter 2))
-  
-  style Ego fill:#fff,stroke:#2c3e50,stroke-width:2px
-  style B fill:#d4edda,stroke:#28a745,stroke-width:2px
-  style C fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+```{r}
+#| fig.width: 5
+#| fig.height: 4.5
+edges <- data.frame(from = c("Ego", "Ego"), to = c("Alter 1", "Alter 2"), sign = c("+", "-"))
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(0, 0, -1, -1, 1, -1), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
+                 end_cap = circle(12, "mm"), start_cap = circle(12, "mm"), width = 2.5) +
+  geom_node_point(aes(fill = name), size = 26, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  scale_fill_manual(values = c("Ego" = "#fff", "Alter 1" = "#d4edda", "Alter 2" = "#f8d7da")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -91,19 +134,26 @@ graph LR
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph TD
-  subgraph Similarity [Symmetric Similarity]
-    A1((a)) ---|Same Group| B1((b))
-  end
-  subgraph Sentiment [Asymmetric Sentiment]
-    A2((a)) -- "Liking (+)" --> B2((b))
-  end
-  
-  style A1 fill:#ecf0f1,stroke:#2c3e50
-  style B1 fill:#ecf0f1,stroke:#2c3e50
-  style A2 fill:#ecf0f1,stroke:#2c3e50
-  style B2 fill:#ecf0f1,stroke:#2c3e50
+```{r}
+#| fig.width: 5.5
+#| fig.height: 4.5
+edges <- data.frame(
+  from = c("a1", "a2"), 
+  to = c("b1", "b2"), 
+  type = c("Symmetric Co-membership", "Asymmetric Liking")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(-0.8, 1, 0.8, 1, -0.8, -0.8, 0.8, -0.8), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Symmetric Co-membership", ] },
+                 end_cap = circle(10, "mm"), start_cap = circle(10, "mm"), width = 2) +
+  geom_edge_link(aes(color = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Asymmetric Liking", ] },
+                 arrow = arrow(length = unit(4, "mm"), type = "closed"),
+                 end_cap = circle(10, "mm"), start_cap = circle(10, "mm"), width = 2) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = c("a", "b", "a", "b")), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("Symmetric Co-membership" = "#2980b9", "Asymmetric Liking" = "forestgreen")) +
+  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 :::
 :::
@@ -123,15 +173,23 @@ graph TD
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph LR
-  A((A)) ---|Symmetric Co-workers| B((B))
-  A -.->|Asymmetric Liking| B
-  B -.->|Asymmetric Liking| A
-  A ---|Symmetric Lunch Partner| B
-  
-  style A fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style B fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```{r}
+#| fig.width: 5.5
+#| fig.height: 4.5
+edges <- data.frame(
+  from = c("A", "A", "B", "A"),
+  to   = c("B", "B", "A", "B"),
+  type = c("Co-workers", "Liking", "Liking", "Lunch Partner")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+ggraph(g, layout = "linear") +
+  geom_edge_fan(aes(color = type, linetype = type), width = 2, 
+                arrow = arrow(length = unit(3, "mm"), type = "closed"), 
+                end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+  geom_node_point(size = 24, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("Co-workers" = "#7f8c8d", "Liking" = "forestgreen", "Lunch Partner" = "#d35400")) +
+  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 :::
 :::
@@ -154,14 +212,22 @@ graph LR
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph LR
-  A((a)) ---|Symmetric S| B((b))
-  A -- "Dislike (-)" --> B
-  
-  style A fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
-  style B fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
-  linkStyle 1 stroke:#dc3545,stroke-width:2px,stroke-dasharray: 5, 5;
+```{r}
+#| fig.width: 5
+#| fig.height: 4.5
+edges <- data.frame(from = c("a", "a"), to = c("b", "b"), type = c("Similarity S", "Dislike D"))
+g <- graph_from_data_frame(edges, directed = TRUE)
+ggraph(g, layout = "linear") +
+  geom_edge_fan(aes(color = type, linetype = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Similarity S", ] }, width = 2,
+                end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
+  geom_edge_fan(aes(color = type, linetype = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Dislike D", ] }, width = 2,
+                arrow = arrow(length = unit(4, "mm"), type = "closed"),
+                end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
+  geom_node_point(size = 26, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 8, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("Similarity S" = "#3498db", "Dislike D" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Similarity S" = "solid", "Dislike D" = "dashed")) +
+  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 :::
 :::
@@ -186,15 +252,19 @@ graph LR
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph TD
-  P((P <br> Focal)) -- "+ / -" --> O((O <br> Other))
-  P -- "+ / -" --> Q((Q <br> Object))
-  O -- "+ / -" --> Q
-  
-  style P fill:#d4edda,stroke:#28a745,stroke-width:2px
-  style O fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style Q fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+edges <- data.frame(from = c("P", "P", "O"), to = c("O", "Q", "Q"), type = c("sentiment", "sentiment", "sentiment"))
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(arrow = arrow(length = unit(4, "mm"), type = "closed"), width = 1.8, 
+                 color = "#7f8c8d", end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+  geom_node_point(aes(fill = name), size = 26, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
+  scale_fill_manual(values = c("P" = "#d4edda", "O" = "#ecf0f1", "Q" = "#f8d7da")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -246,25 +316,27 @@ graph TD
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph TD
-  subgraph Triad1 [Friend of Friend]
-    P1((P)) -- "+" --> O1((O))
-    O1 -- "+" --> Q1((Q))
-    P1 -- "+" --> Q1
-  end
-  subgraph Triad2 [Enemy of Enemy]
-    P2((P)) -- "-" --> O2((O))
-    O2 -- "-" --> Q2((Q))
-    P2 -- "+" --> Q2
-  end
-  
-  style P1 fill:#d4edda,stroke:#28a745,stroke-width:2px
-  style O1 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style Q1 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style P2 fill:#d4edda,stroke:#28a745,stroke-width:2px
-  style O2 fill:#f8d7da,stroke:#dc3545,stroke-width:2px
-  style Q2 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+edges <- data.frame(
+  from = c("P1", "O1", "P1", "P2", "O2", "P2"),
+  to   = c("O1", "Q1", "Q1", "O2", "Q2", "Q2"),
+  sign = c("+", "+", "+", "-", "-", "+")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(
+  -1.2, 1, -2.0, -0.2, -0.4, -0.2, # Triad 1
+   1.2, 1,  0.4, -0.2,  2.0, -0.2  # Triad 2
+), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = c("P", "O", "Q", "P", "O", "Q")), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -288,25 +360,27 @@ graph TD
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph TD
-  subgraph Triad3 [Friend is Enemy]
-    P3((P)) -- "+" --> O3((O))
-    O3 -- "+" --> Q3((Q))
-    P3 -- "-" --> Q3
-  end
-  subgraph Triad4 [All Enemies]
-    P4((P)) -- "-" --> O4((O))
-    O4 -- "-" --> Q4((Q))
-    P4 -- "-" --> Q4
-  end
-  
-  style P3 fill:#fff,stroke:#2c3e50,stroke-width:2px
-  style O3 fill:#fff,stroke:#2c3e50,stroke-width:2px
-  style Q3 fill:#fff,stroke:#2c3e50,stroke-width:2px
-  style P4 fill:#fff,stroke:#2c3e50,stroke-width:2px
-  style O4 fill:#fff,stroke:#2c3e50,stroke-width:2px
-  style Q4 fill:#fff,stroke:#2c3e50,stroke-width:2px
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+edges <- data.frame(
+  from = c("P3", "O3", "P3", "P4", "O4", "P4"),
+  to   = c("O3", "Q3", "Q3", "O4", "Q4", "Q4"),
+  sign = c("+", "+", "-", "-", "-", "-")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(
+  -1.2, 1, -2.0, -0.2, -0.4, -0.2, # Triad 3
+   1.2, 1,  0.4, -0.2,  2.0, -0.2  # Triad 4
+), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = c("P", "O", "Q", "P", "O", "Q")), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -326,18 +400,28 @@ graph TD
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph LR
-  A["Unbalanced Triad <br> (P+O, O+Q, P-Q) <br> [TENSION]"]
-  B["Balanced Triad <br> (P-O, O+Q, P-Q)"]
-  C["Balanced Triad <br> (P+O, O+Q, P+Q)"]
-  
-  A -->|End friendship with O| B
-  A -->|Make peace with Q| C
-  
-  style A fill:#f8d7da,stroke:#dc3545,stroke-width:2px
-  style B fill:#d4edda,stroke:#28a745,stroke-width:1px
-  style C fill:#d4edda,stroke:#28a745,stroke-width:1px
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+edges <- data.frame(
+  from = c("P_unb", "O_unb", "P_unb", "P_bal", "O_bal", "P_bal"),
+  to   = c("O_unb", "Q_unb", "Q_unb", "O_bal", "Q_bal", "Q_bal"),
+  sign = c("+", "+", "-", "+", "+", "+")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(
+  -1.2, 1, -2.0, -0.2, -0.4, -0.2, # Unbalanced
+   1.2, 1,  0.4, -0.2,  2.0, -0.2  # Balanced
+), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = c("P", "O", "Q", "P", "O", "Q")), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  annotate("text", x = 0, y = 0.4, label = "Restores Balance\n=======>\nChanges '-' to '+'", fontface="bold", color="#7f8c8d", size=4) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -357,18 +441,24 @@ graph LR
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph TD
-  P((P <br> Torn)) -- "+" --> O1((O1))
-  P -- "+" --> O2((O2))
-  O1 -- "Likes (+)" --> Q((Q))
-  O2 -- "Dislikes (-)" --> Q
-  P -.->|Ambivalent ?| Q
-  
-  style P fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
-  style O1 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style O2 fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style Q fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+edges <- data.frame(
+  from = c("P", "P", "O1", "O2", "P"),
+  to   = c("O1", "O2", "Q", "Q", "Q"),
+  sign = c("+", "+", "+", "-", "?")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(0, 1, -1, 0, 1, 0, 0, -1), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+  geom_node_point(size = 22, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "?" = "goldenrod")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed", "?" = "dotted")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -388,18 +478,24 @@ graph TD
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph TD
-  P((You)) -- "+" --> B((Brother))
-  P -- "+" --> S((Sister))
-  B -- "Support (+)" --> D{Democrats}
-  S -- "Oppose (-)" --> D
-  P -.->|Ambivalence| D
-  
-  style P fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
-  style B fill:#ecf0f1,stroke:#2c3e50,stroke-width:1px
-  style S fill:#ecf0f1,stroke:#2c3e50,stroke-width:1px
-  style D fill:#e2e8f0,stroke:#64748b,stroke-width:2px
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+edges <- data.frame(
+  from = c("You", "You", "Brother", "Sister", "You"),
+  to   = c("Brother", "Sister", "Democrats", "Democrats", "Democrats"),
+  sign = c("+", "+", "+", "-", "?")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(0, 1, -1, 0, 1, 0, 0, -1), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
+  geom_node_point(size = 24, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "?" = "goldenrod")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed", "?" = "dotted")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -426,19 +522,19 @@ graph TD
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph LR
-  A((A)) -- "+" --> B((B))
-  B -- "+" --> C((C))
-  C -- "-" --> D((D))
-  D -- "+" --> E((E))
-  A -- "-" --> E
-  
-  style A fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style B fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style C fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style D fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
-  style E fill:#ecf0f1,stroke:#2c3e50,stroke-width:2px
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+set.seed(422)
+g <- play_erdos_renyi(n = 5, p = 1, directed = FALSE)
+E(g)$sign <- c("+", "-", "+", "+", "-", "+", "-", "+", "-", "+")
+ggraph(g, layout = "circle") +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 2) +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = 1:5), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -460,29 +556,27 @@ graph LR
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph LR
-  subgraph Faction1 [Faction 1]
-    A((A)) -- "+" --- B((B))
-    B -- "+" --- C((C))
-    C -- "+" --- A
-  end
-  subgraph Faction2 [Faction 2]
-    D((D)) -- "+" --- E((E))
-    E -- "+" --- F((F))
-    F -- "+" --- D
-  end
-  
-  A -.->| - | D
-  B -.->| - | E
-  C -.->| - | F
-  
-  style A fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
-  style B fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
-  style C fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
-  style D fill:#c084fc,stroke:#a855f7,stroke-width:2px
-  style E fill:#c084fc,stroke:#a855f7,stroke-width:2px
-  style F fill:#c084fc,stroke:#a855f7,stroke-width:2px
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+nodes <- data.frame(name = LETTERS[1:6], faction = c(rep("1", 3), rep("2", 3)))
+edges <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors = FALSE) %>%
+  filter(from < to) %>%
+  mutate(
+    f_from = nodes$faction[match(from, nodes$name)],
+    f_to = nodes$faction[match(to, nodes$name)],
+    sign = ifelse(f_from == f_to, "+", "-")
+  )
+g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
+lay <- matrix(c(-1.5, 0.8, -1.5, -0.8, -2.5, 0, 1.5, 0.8, 1.5, -0.8, 2.5, 0), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 2, alpha = 0.8) +
+  geom_node_point(aes(fill = faction), size = 24, color = "white", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "white") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -534,21 +628,24 @@ $$M = \begin{pmatrix}
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph LR
-  subgraph Group1 [Group 1]
-    A((Start)) -- "+" --> B((Node B))
-  end
-  subgraph Group2 [Group 2]
-    C((Node C)) -- "+" --> D((End))
-  end
-  B -- "-" --> C
-  D -- "-" --> A
-  
-  style A fill:#3b82f6,color:#fff
-  style B fill:#ecf0f1,stroke:#2c3e50
-  style C fill:#ecf0f1,stroke:#2c3e50
-  style D fill:#a855f7,color:#fff
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+edges <- data.frame(
+  from = c("Start", "Node B", "Node C", "End"),
+  to   = c("Node B", "Node C", "End", "Start"),
+  sign = c("+", "-", "+", "-")
+)
+g <- graph_from_data_frame(edges, directed = FALSE)
+lay <- matrix(c(-1.5, 0.8, -1.5, -0.8, 1.5, -0.8, 1.5, 0.8), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 2.5) +
+  geom_node_point(aes(fill = name %in% c("Start", "Node B")), size = 22, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  scale_fill_manual(values = c("TRUE" = "#93c5fd", "FALSE" = "#c084fc")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -569,26 +666,23 @@ graph LR
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph LR
-  subgraph Liberal [Liberal Faction]
-    L1((L1)) --- L2((L2))
-    L2 --- L3((L3))
-  end
-  subgraph Conservative [Conservative Faction]
-    C1((C1)) --- C2((C2))
-    C2 --- C3((C3))
-  end
-  
-  L2 -.->|Conflict link| C1
-  L3 -.->|Conflict link| C3
-  
-  style L1 fill:#3b82f6,color:#fff
-  style L2 fill:#3b82f6,color:#fff
-  style L3 fill:#3b82f6,color:#fff
-  style C1 fill:#ef4444,color:#fff
-  style C2 fill:#ef4444,color:#fff
-  style C3 fill:#ef4444,color:#fff
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+set.seed(422)
+g1 <- play_erdos_renyi(n = 6, p = 0.8, directed = FALSE)
+g2 <- play_erdos_renyi(n = 6, p = 0.8, directed = FALSE)
+g <- disjoint_union(g1, g2)
+V(g)$faction <- c(rep("Liberal", 6), rep("Conservative", 6))
+g <- add_edges(g, c(1,7, 3,9, 5,11))
+E(g)$sign <- c(rep("+", ecount(g)-3), rep("-", 3))
+ggraph(g, layout = "kk") +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 2, alpha = 0.8) +
+  geom_node_point(aes(fill = faction), size = 16, color = "white", shape = 21, stroke = 1.5) +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  scale_fill_manual(values = c("Liberal" = "#3b82f6", "Conservative" = "#ef4444")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -612,28 +706,31 @@ graph LR
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph TD
-  subgraph Cluster1 [Cluster 1 Red]
-    A((A)) --- B((B))
-  end
-  subgraph Cluster2 [Cluster 2 Blue]
-    C((C)) --- D((D))
-  end
-  subgraph Cluster3 [Cluster 3 Yellow]
-    E((E)) --- F((F))
-  end
-  
-  A -.->|Negative| C
-  C -.->|Negative| E
-  E -.->|Negative| A
-  
-  style A fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
-  style B fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
-  style C fill:#c084fc,stroke:#a855f7,stroke-width:2px
-  style D fill:#c084fc,stroke:#a855f7,stroke-width:2px
-  style E fill:#fde047,stroke:#ca8a04,stroke-width:2px
-  style F fill:#fde047,stroke:#ca8a04,stroke-width:2px
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+nodes <- data.frame(name = LETTERS[1:9], faction = c(rep("1", 3), rep("2", 3), rep("3", 3)))
+edges <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors = FALSE) %>%
+  filter(from < to) %>%
+  mutate(
+    f_from = nodes$faction[match(from, nodes$name)],
+    f_to = nodes$faction[match(to, nodes$name)],
+    sign = ifelse(f_from == f_to, "+", "-")
+  )
+g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
+lay <- matrix(c(
+  -0.35, 2.0, -0.65, 1.5, 0, 1.5,  # Cluster 1
+  -1.0, 0.5, -1, 0, -0.65, -0.2,   # Cluster 2
+  0.5, -0.5, 0, -0.5, 0.5, 0       # Cluster 3
+), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 1.8, alpha = 0.7) +
+  geom_node_point(aes(fill = faction), size = 20, color = "white", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "white") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid", "3" = "goldenrod")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -727,23 +824,27 @@ graph TD
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph LR
-  subgraph PositiveSphere [Positive Sphere]
-    A((Positive Spreader)) -- "Positive (+)" --> B((Receiver))
-    C((Sender)) -- "Positive (+)" --> A
-  end
-  subgraph NegativeSphere [Negative Sphere]
-    X((Negative Spreader)) -- "Negative (-)" --> Y((Receiver))
-    Z((Sender)) -- "Negative (-)" --> X
-  end
-  
-  style A fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
-  style B fill:#ecf0f1,stroke:#2c3e50
-  style C fill:#ecf0f1,stroke:#2c3e50
-  style X fill:#fca5a5,stroke:#ef4444,stroke-width:2px
-  style Y fill:#ecf0f1,stroke:#2c3e50
-  style Z fill:#ecf0f1,stroke:#2c3e50
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+edges <- data.frame(
+  from = c("Pos Spreader", "Pos Spreader", "Pos Sender", "Neg Spreader", "Neg Spreader", "Neg Sender"),
+  to   = c("Pos Target", "Pos Target 2", "Pos Spreader", "Neg Target", "Neg Target 2", "Neg Spreader"),
+  sign = c("+", "+", "+", "-", "-", "-")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(
+  -1.2, 1, -2.2, 1.8, -2.2, 0.2, -0.2, 1,   # Pos Sphere
+   1.2, -1, 2.2, -1.8, 2.2, -0.2, 0.2, -1   # Neg Sphere
+), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(aes(fill = name %in% c("Pos Spreader", "Neg Spreader")), size = 18, color = "white", shape = 21, stroke = 1.5) +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  scale_fill_manual(values = c("TRUE" = "darkorange", "FALSE" = "dodgerblue")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -766,16 +867,25 @@ graph LR
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph TD
-  A((A <br> High Status))
-  B((B <br> Low Status))
-  C((Ego)) -- "Deference (+)" --> A
-  C -- "Dominance (-)" --> B
-  
-  style A fill:#fdfd96,stroke:#f8e71c,stroke-width:3px
-  style B fill:#e2e8f0,stroke:#64748b,stroke-width:1px
-  style C fill:#fff,stroke:#2c3e50,stroke-width:1px
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+edges <- data.frame(
+  from = c("Ego", "Ego"), 
+  to = c("High Status", "Low Status"), 
+  sign = c("+", "-")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(0, 0, 1.5, 1.5, -1.5, -1.5), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
+                 width = 2.5, end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
+  geom_node_point(aes(fill = name), size = 26, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  scale_fill_manual(values = c("Ego" = "#fff", "High Status" = "#fdfd96", "Low Status" = "#ecf0f1")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
@@ -796,21 +906,25 @@ graph TD
 :::
 
 ::: {.column width="45%"}
-```{mermaid}
-graph TD
-  subgraph Elite [Popular Tier]
-    A((A)) -- "Solidarity (+)" --> B((B))
-  end
-  subgraph Subordinate [Subordinate Tier]
-    C((C)) -- "Solidarity (+)" --> D((D))
-  end
-  C -- "Deference (+)" --> A
-  A -- "Dominance (-)" --> C
-  
-  style A fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
-  style B fill:#fdfd96,stroke:#f8e71c,stroke-width:2px
-  style C fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
-  style D fill:#93c5fd,stroke:#3b82f6,stroke-width:2px
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+edges <- data.frame(
+  from = c("Elite A", "Elite B", "Sub C", "Sub D", "Sub C", "Elite A"),
+  to   = c("Elite B", "Elite A", "Sub D", "Sub C", "Elite A", "Sub C"),
+  type = c("Solidarity", "Solidarity", "Solidarity", "Solidarity", "Deference", "Dominance")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(-1.5, 1.5, 1.5, 1.5, -1.5, -1.5, 1.5, -1.5), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = type, linetype = type), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+  geom_node_point(aes(fill = name), size = 20, color = "white", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = c("A", "B", "C", "D")), fontface = "bold", size = 7, color = "white") +
+  scale_edge_color_manual(values = c("Solidarity" = "#3498db", "Deference" = "forestgreen", "Dominance" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Solidarity" = "solid", "Deference" = "solid", "Dominance" = "dashed")) +
+  scale_fill_manual(values = c("Elite A" = "gold", "Elite B" = "gold", "Sub C" = "dodgerblue", "Sub D" = "dodgerblue")) +
+  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 :::
 :::
@@ -830,14 +944,24 @@ graph TD
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph LR
-  A["Micro-motives <br> (Cognitive Balance)"] -->|Triadic Aggregation| B["Meso-structures <br> (Factions/Cliques)"]
-  B -->|Network-wide Convergence| C["Macro-patterns <br> (Structural Balance / Davis Clustering)"]
-  
-  style A fill:#d4edda,stroke:#28a745,stroke-width:1px
-  style B fill:#fdfd96,stroke:#f8e71c,stroke-width:1px
-  style C fill:#f8d7da,stroke:#dc3545,stroke-width:1px
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+edges <- data.frame(
+  from = c("Micro", "Meso"),
+  to   = c("Meso", "Macro"),
+  type = c("Triadic Aggregation", "Convergence")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(-1.5, 1, 0, 0, 1.5, -1), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = type), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
+                 width = 2.5, end_cap = circle(18, "mm"), start_cap = circle(18, "mm")) +
+  geom_node_point(aes(fill = name), size = 30, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6.5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("Triadic Aggregation" = "#34495e", "Convergence" = "#2c3e50")) +
+  scale_fill_manual(values = c("Micro" = "#d4edda", "Meso" = "#fdfd96", "Macro" = "#f8d7da")) +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
