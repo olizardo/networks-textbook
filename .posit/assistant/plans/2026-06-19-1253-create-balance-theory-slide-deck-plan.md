@@ -1,80 +1,40 @@
-# Plan: Title Cleanup, Node Label Fitting, and Short Dashes for Slide Decks
+# Plan: Resolve Netlify/GH-Pages Slides Deployment Issue
 
-This plan details the specific visual and structural adjustments for `slides/balance-signed-graphs.qmd` and `slides/valenced-interactions.qmd` to:
-1. Remove "Slide X:" prefixes from all slide titles.
-2. Shorten node labels for a perfect fit within circles.
-3. Prevent overlapping edges.
-4. Replace long dashes (`"dashed"`) with custom short dashes (`"33"`) for negative ties.
+The user reports that slides no longer show up under `https://networks-textbook.netlify.app/slides/slide-name` on Netlify, even though Netlify is configured to deploy directly from the `gh-pages` branch.
 
----
-
-## Part 1: Slide Title Prefix Removal
-
-To make the presentations look cleaner and more professional, we will remove all "Slide X:" prefixes from slide titles in both files.
-
-### 1. In `slides/balance-signed-graphs.qmd`:
-- `## Slide 1: Balance Theory and Signed Graphs` $\implies$ `## Balance Theory and Signed Graphs`
-- `## Slide 2: The Anatomy of Sentiment Networks` $\implies$ `## The Anatomy of Sentiment Networks`
-- `## Slide 3: Fritz Heider's Dyadic Balance` $\implies$ `## Fritz Heider's Dyadic Balance`
-- `## Slide 4: Proximity, Similarity, and Multiplexity` $\implies$ `## Proximity, Similarity, and Multiplexity`
-- `## Slide 5: Dyadic Balance and Cognitive Tension` $\implies$ `## Dyadic Balance and Cognitive Tension`
-- `## Slide 6: Fritz Heider’s P-O-Q Triad` $\implies$ `## Fritz Heider’s P-O-Q Triad`
-- `## Slide 7: The Mathematics of Triadic Balance` $\implies$ `## The Mathematics of Triadic Balance`
-- `## Slide 8: Balanced Triads: The 4 Stable Configurations` $\implies$ `## Balanced Triads: The 4 Stable Configurations`
-- `## Slide 9: Unbalanced Triads: The 4 Unstable Configurations` $\implies$ `## Unbalanced Triads: The 4 Unstable Configurations`
-- `## Slide 10: Tension and Change` $\implies$ `## Tension and Change`
-- `## Slide 11: Cross-Pressure` $\implies$ `## Cross-Pressure`
-- `## Slide 12: Cross-Pressure in Real-Life: Politics` $\implies$ `## Cross-Pressure in Real-Life: Politics`
-- `## Slide 13: Structural Balance at the Network Level` $\implies$ `## Structural Balance at the Network Level`
-- `## Slide 14: The Fundamental Theorem of Structural Balance` $\implies$ `## The Fundamental Theorem of Structural Balance`
-- `## Slide 15: Signed Matrices & Faction Detection` $\implies$ `## Signed Matrices & Faction Detection`
-- `## Slide 16: Cycles and Paths in Balanced Graphs` $\implies$ `## Cycles and Paths in Balanced Graphs`
-- `## Slide 17: Empirical Case Study: Political Blogs` $\implies$ `## Empirical Case Study: Political Blogs`
-- `## Slide 18: Beyond Two Factions: Davis's Theorem` $\implies$ `## Beyond Two Factions: Davis's Theorem`
-- `## Slide 19: The All-Negative Triad Rule` $\implies$ `## The All-Negative Triad Rule`
-- `## Slide 20: Summary: Structural Balance vs. Clusterability` $\implies$ `## Summary: Structural Balance vs. Clusterability`
-
-### 2. In `slides/valenced-interactions.qmd`:
-- `## Slide 1: Introduction to Valenced Interactions` $\implies$ `## Introduction to Valenced Interactions`
-- `## Slide 2: Karma Theory: Core Concept` $\implies$ `## Karma Theory: Core Concept`
-- `## Slide 3: Karma Theory: Network-Wide Flow` $\implies$ `## Karma Theory: Network-Wide Flow`
-- `## Slide 4: Karma Dynamics: Virtuous vs. Vicious Cycles` $\implies$ `## Karma Dynamics: Virtuous vs. Vicious Cycles`
-- `## Slide 5: Status Theory: Introduction` $\implies$ `## Status Theory: Introduction`
-- `## Slide 6: Prestige and Deference Alignment` $\implies$ `## Prestige and Deference Alignment`
-- `## Slide 7: Status and Outgoing Sentiments` $\implies$ `## Status and Outgoing Sentiments`
-- `## Slide 8: Status Dynamics: Centralization and Hierarchy Growth` $\implies$ `## Status Dynamics: Centralization and Hierarchy Growth`
-- `## Slide 9: Solidarity Theory: Core Concept` $\implies$ `## Solidarity Theory: Core Concept`
-- `## Slide 10: Measuring Shared Position` $\implies$ `## Measuring Shared Position`
-- `## Slide 11: Solidarity Dynamics: Stratification and Clique Growth` $\implies$ `## Solidarity Dynamics: Stratification and Clique Growth`
-- `## Slide 12: Comparison of Karma, Status, and Solidarity` $\implies$ `## Comparison of Karma, Status, and Solidarity`
-- `## Slide 13: Co-Evolution of Valenced Networks: A Combined Model` $\implies$ `## Co-Evolution of Valenced Networks: A Combined Model`
+An investigation of the repository and the deployment history reveals:
+1. The `gh-pages` branch is updated via local manual builds (the last commits are authored by the user with the commit message `"Built site for gh-pages"`, which is the default for `quarto publish gh-pages`).
+2. When Quarto renders the book locally, it only processes the book chapters specified in `_quarto.yml` and outputs them to `_sites/`. It does **not** compile or copy the `slides/` directory because `slides/` is not a book chapter.
+3. As a result, when publishing from the local machine via `quarto publish gh-pages`, the `slides/` folder is left out of the deployment to `gh-pages`.
 
 ---
 
-## Part 2: Node Label Adjustments for Perfect Sizing
+## The Solution
 
-To prevent long labels from spilling out of node points, we will shorten all multi-character labels into clean, natural abbreviations that fit inside standard node sizes (e.g., `size = 20` or `24`) with size `5` or `6` fonts.
+We can configure Quarto to treat the `slides/` directory as a **project resource**. This tells Quarto to automatically copy the entire compiled `slides/` folder (including the HTML slide decks, CSS theme files, and support figure folders) into the output `_sites/slides/` directory whenever the book is rendered or published.
 
-### 1. In `slides/balance-signed-graphs.qmd`:
-- **Slide 2**: Change `"Alter 1"` to `"A1"`, `"Alter 2"` to `"A2"`.
-- **Slide 12**: Change `"Brother"` to `"Bro"`, `"Sister"` to `"Sis"`, and `"Democrats"` to `"Dems"`.
+### Step 1: Update `_quarto.yml`
+We will add `slides/` to the `resources:` list under `project:` in `_quarto.yml`:
+```yaml
+project:
+  type: book
+  output-dir: _sites
+  resources:
+    - .nojekyll
+    - slides/
+```
 
-### 2. In `slides/valenced-interactions.qmd`:
-- **Slide 1**: Change `"Alter 1"` to `"A1"`, `"Alter 2"` to `"A2"`.
-- **Slide 2**: Change `"Friend"` to `"Frnd"`.
-- **Slide 4**: Change `"You"` to `"You"`, `"Bully"` to `"Bly"`, `"Friend"` to `"Frnd"`.
-- **Slide 6**: Change `"High Status"` to `"High"`, `"Low Status"` to `"Low"`.
+### Step 2: Push Local Changes
+Since the local `main` branch is currently ahead of `origin/main` by several commits, once the files are saved, the local commits and the new slide decks should be pushed to GitHub:
+```bash
+git push origin main
+```
+This will trigger the GitHub Actions workflow to publish the site automatically.
 
----
-
-## Part 3: Short Dashes for Negative Edge Lines
-
-To replace long dashes with high-contrast, short dashes, we will modify `scale_edge_linetype_manual` values in all R chunks to map negative lines to `"33"` or `"dashed"` with a custom pattern, or use the standard short-dashed R layout `"33"` (3 units on, 3 units off).
-
-- We will change all occurrences of `"-" = "dashed"` or `"Negative Tie" = "dashed"` to use the short-dashed format: `"-" = "33"` or `"Negative Tie" = "33"`.
-
----
-
-## Execution and Quality Control
-
-We will use the `edit` tool to perform precise, exact replacements in both `.qmd` files, and compile them to confirm zero warnings or errors.
+### Step 3: Local Publishing fallback
+Alternatively, if the user publishes manually from their machine, they can now simply run:
+```bash
+quarto render slides/
+quarto publish gh-pages --no-render
+```
+Because `slides/` is listed in the project resources, the local `quarto publish` command will now **automatically bundle and deploy** the slides onto the `gh-pages` branch, serving them flawlessly on Netlify!
