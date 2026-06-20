@@ -356,4 +356,112 @@ Thus, the transposed version of a matrix contains the exact same numerical infor
 
 ---
 
+## Matrix Algebra of the Dyad Census {#sec-matrix-dyad-census}
+
+We can combine the operations of the **matrix transpose** ($^T$) and the **Hadamard product** ($\circ$, also called the matrix dot product) to systematically count and classify directed dyad configurations (the **dyad census** of a directed graph) using elegant, cell-by-cell matrix algebra.
+
+As covered in @sec-ties and @sec-cliques, under asymmetric relations, any pair of nodes (a **dyad**) can have one of three mutually exclusive configurations:
+1.  **Mutual (M)**: Both directed edges are present ($i \leftrightarrow j$).
+2.  **Asymmetric (A)**: Only one directed edge is present ($i \rightarrow j$ or $j \rightarrow i$).
+3.  **Null (N)**: Neither directed edge is present (completely disconnected).
+
+This is the standard **MAN classification** of directed dyads. From a directed adjacency matrix $\mathbf{A}$ and its transpose $\mathbf{A}^T$, we can define three separate matrices that isolate each of these configurations.
+
+### 1. The Mutual Dyads Matrix ($\mathbf{M}$)
+
+To retain only reciprocal ties, we multiply the adjacency matrix $\mathbf{A}$ by its transpose $\mathbf{A}^T$ element-wise. This is the Hadamard product:
+
+$
+\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T
+${#eq-matrix-mutual}
+
+Because a cell $M_{ij} = a_{ij} \times a_{ji}$ will equal $1$ only if $a_{ij} = 1$ and $a_{ji} = 1$, the matrix $\mathbf{M}$ filters out all non-reciprocal ties. The actual number of mutual dyads in the graph ($N_M$) is given by summing all the cells of $\mathbf{M}$ and dividing by two (since each mutual dyad contributes two symmetric $1$s to the matrix):
+
+$
+N_M = \frac{\sum_{i,j} M_{ij}}{2}
+${#eq-count-mutual}
+
+### 2. The Asymmetric Dyads Matrix ($\mathbf{S}$)
+
+To isolate unreciprocated, one-way ties, we multiply $\mathbf{A}$ element-wise by the logical complement of its transpose ($\mathbf{1} - \mathbf{A}^T$), where $\mathbf{1}$ is a matrix of all ones:
+
+$
+\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T)
+${#eq-matrix-asym}
+
+A cell $S_{ij} = a_{ij} \times (1 - a_{ji})$ will equal $1$ only if a tie is sent ($a_{ij} = 1$) but not returned ($a_{ji} = 0$). The total count of asymmetric dyads ($N_A$) is simply the sum of all cells in $\mathbf{S}$:
+
+$
+N_A = \sum_{i,j} S_{ij}
+${#eq-count-asym}
+
+Note that unlike mutual dyads, we do not divide by two here. If node $i$ sends an unreciprocated tie to $j$, then $S_{ij} = 1$ and $S_{ji} = 0$, contributing exactly one $1$ to the matrix for that dyad.
+
+### 3. The Null Dyads Matrix ($\mathbf{N}$)
+
+To isolate completely disconnected pairs of nodes, we multiply the complement of the adjacency matrix by the complement of its transpose:
+
+$
+\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T)
+${#eq-matrix-null}
+
+A cell $N_{ij}$ will equal $1$ only if there are no ties in either direction ($a_{ij} = 0$ and $a_{ji} = 0$). To count the actual number of null dyads ($N_N$), we sum the off-diagonal cells ($i \neq j$) and divide by two:
+
+$
+N_N = \frac{\sum_{i \neq j} N_{ij}}{2}
+${#eq-count-null}
+
+### A Worked Example in R
+
+Let us calculate the matrix dyad census for a 6-node directed reference graph $\mathbf{A}$ using these exact algebraic steps in R:
+
+```{r}
+#| label: tbl-dyad-matrix-census
+#| echo: true
+
+# Define 6x6 directed adjacency matrix
+A <- matrix(c(
+  0, 0, 1, 0, 1, 0,
+  1, 0, 1, 1, 0, 0,
+  1, 0, 0, 1, 1, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 1, 0, 1,
+  0, 0, 0, 1, 1, 0
+), nrow = 6, byrow = TRUE, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+
+# 1. Mutual Matrix
+M <- A * t(A)
+
+# 2. Asymmetric Matrix
+S <- A * (1 - t(A))
+
+# 3. Null Matrix
+N <- (1 - A) * (1 - t(A))
+
+# Calculate Counts
+N_M <- sum(M) / 2
+N_A <- sum(S)
+N_N <- sum(N[lower.tri(N)]) # sums off-diagonal cells on one side
+
+cat(sprintf("Mutual Dyads (N_M): %d\nAsymmetric Dyads (N_A): %d\nNull Dyads (N_N): %d\n", N_M, N_A, N_N))
+```
+
+### The Matrix Dyad Identity Check
+
+In any graph of order $n$, the total number of node pairs (dyads) is $\frac{n(n-1)}{2}$. For our $n = 6$ graph, there must be exactly $\frac{6 \times 5}{2} = 15$ dyads. We can verify our counts:
+
+$
+N_M + N_A + N_N = 2 + 8 + 5 = 15
+$
+
+Moreover, at the matrix level, our three dyadic matrices perfectly partition all possible relations in the network (excluding self-loops). If we sum the mutual matrix, the asymmetric matrix, the transpose of the asymmetric matrix (representing incoming asymmetric ties), and the null matrix, they sum to a complete graph adjacency matrix (all ones except the diagonal, $\mathbf{J} - \mathbf{I}$):
+
+$
+\mathbf{M} + \mathbf{S} + \mathbf{S}^T + \mathbf{N} = \mathbf{J} - \mathbf{I}
+${#eq-matrix-identity}
+
+This elegant algebraic identity check guarantees that every single pair of nodes in the network has been accounted for and classified.
+
+---
+
 ## References {.unnumbered}
