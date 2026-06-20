@@ -38,9 +38,16 @@ jobs:
 
       - name: Render Slides
         run: |
-          quarto render slides/
+          Get-ChildItem -Path slides -Filter *.qmd | ForEach-Object { quarto render $_.FullName }
           New-Item -ItemType Directory -Force -Path _sites/slides
           Copy-Item -Path slides/* -Destination _sites/slides/ -Recurse -Force
+        shell: pwsh
+
+      - name: Render Homeworks
+        run: |
+          Get-ChildItem -Path homeworks -Filter *.qmd | ForEach-Object { quarto render $_.FullName }
+          New-Item -ItemType Directory -Force -Path _sites/homeworks
+          Copy-Item -Path homeworks/* -Destination _sites/homeworks/ -Recurse -Force
         shell: pwsh
 
       - name: Deploy to GitHub Pages
