@@ -1,0 +1,627 @@
+---
+title: "Theories of Valenced Interactions"
+subtitle: "Karma, Status, and Solidarity in Sentiment Networks"
+format:
+  revealjs:
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(patchwork)
+
+# Custom transparent theme for slides
+theme_slides <- function(base_size = 12) {
+  theme_graph() +
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    legend.background = element_rect(fill = "transparent", color = NA),
+    legend.box.background = element_rect(fill = "transparent", color = NA),
+    legend.text = element_text(color = "#2c3e50", size = 11, face = "bold"),
+    plot.title = element_text(size = base_size * 1.2, face = "bold", hjust = 0.5, color = "#2c3e50"),
+    plot.subtitle = element_text(size = base_size * 1.0, hjust = 0.5, color = "#7f8c8d"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+}
+
+# Set global chunk options
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  dev = "png",
+  dev.args = list(bg = "transparent")
+)
+```
+
+# Part 1: Valenced Interactions & Karma Theory
+
+---
+
+## Introduction to Valenced Interactions
+### Beyond Simple Co-membership
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- In social network analysis, we move beyond simple presence or absence of links to examine **sentiment networks**.
+- Relationships have an emotional and evaluative character, labeled as **valence**:
+  - *Positive valence* (e.g., liking, helping, admiring).
+  - *Negative valence* (e.g., disliking, bullying, fighting).
+- **Valenced Interactions** are governed by deep-seated psychological micro-motives.
+- These principles drive how networks **grow**, **change**, and **cohere** into stable macrostructures.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+# Visualizing simple positive vs negative valence
+edges <- data.frame(
+  from = c("A", "C"),
+  to = c("B", "D"),
+  sign = c("+", "-")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(-1, 0.5, 1, 0.5, -1, -0.5, 1, -0.5), ncol = 2, byrow = TRUE)
+rownames(lay) <- c("A", "B", "C", "D")
+
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"),
+                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.0, 1.0), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+:::
+
+---
+
+## Karma Theory: Core Concept
+### Direct Reciprocity and Sentiment Feedback
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Core Principle: *"You get what you spread out!"*
+- Proposes that individuals tend to **reciprocate** the sentiments that others broadcast to the network.
+- Predicts received **valenced indegree** (what you receive) based on expressed **valenced outdegree** (what you send out).
+- Illustrates common expressions:
+  - *"Likers get liked"* (positive reciprocity).
+  - *"Bullies get bullied"* (negative reciprocity).
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+# Side-by-side patchwork comparing Likers get Liked vs Bullies get Bullied
+edges1 <- data.frame(from = c("You", "Frnd"), to = c("Frnd", "You"), sign = c("+", "+"))
+g1 <- graph_from_data_frame(edges1, directed = TRUE)
+lay1 <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
+rownames(lay1) <- c("You", "Frnd")
+
+p1 <- ggraph(g1, layout = lay1) +
+  geom_edge_parallel(aes(color = sign, linetype = sign), width = 2, sep = unit(4, "mm"),
+                     arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                     end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#d4edda", color = "#28a745", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
+  coord_fixed(xlim = c(-0.5, 2.5), ylim = c(-0.6, 0.6), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Likers Get Liked")
+
+edges2 <- data.frame(from = c("You", "Bly"), to = c("Bly", "You"), sign = c("-", "-"))
+g2 <- graph_from_data_frame(edges2, directed = TRUE)
+lay2 <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
+rownames(lay2) <- c("You", "Bly")
+
+p2 <- ggraph(g2, layout = lay2) +
+  geom_edge_parallel(aes(color = sign, linetype = sign), width = 2, sep = unit(4, "mm"),
+                     arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                     end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#f8d7da", color = "#dc3545", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("-" = "33")) +
+  coord_fixed(xlim = c(-0.5, 2.5), ylim = c(-0.6, 0.6), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Bullies Get Bullied")
+
+p1 + p2 + plot_layout(nrow = 1)
+```
+:::
+:::
+
+---
+
+## Karma Theory: Network-Wide Flow
+
+::: {.columns}
+::: {.column width="45%"}
+::: {.incremental}
+- **Karma Flows** can be generalized across broader spheres in the network.
+- **Positive Sphere**: Node A (positive spreader) actively initiates friendly ties and receives deference/support in return from the network.
+- **Negative Sphere**: Node B (negative spreader) actively initiates hostile ties and attracts reciprocal conflict/bullying from multiple alters.
+- Establishes separate, cohesive emotional regions.
+:::
+:::
+
+::: {.column width="55%"}
+```{r}
+#| fig.width: 6.5
+#| fig.height: 5.5
+nodes <- data.frame(
+  name = LETTERS[1:14],
+  role = c("Positive Spreader", "Negative Spreader", rep("Receiver", 3), rep("Sender", 3), rep("Receiver", 3), rep("Sender", 3))
+)
+edges <- data.frame(
+  from = c("A", "A", "A", "F", "G", "H", "B", "B", "B", "L", "M", "N"),
+  to   = c("C", "D", "E", "A", "A", "A", "I", "J", "K", "B", "B", "B"),
+  sign = c(rep("+", 6), rep("-", 6))
+) %>% mutate(type = ifelse(sign == "+", "Positive Tie", "Negative Tie"))
+g <- graph_from_data_frame(edges, directed = TRUE, vertices = nodes)
+lay <- matrix(c(
+   0,  5,   0, -5,   # Spreaders
+   2,  7,   2,  5,   2,  3, # Pos Receiver
+  -2,  7,  -2,  5,  -2,  3, # Pos Sender
+   2, -7,   2, -5,   2, -3, # Neg Receiver
+  -2, -7,  -2, -5,  -2, -3  # Neg Sender
+), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_parallel(aes(color = type, linetype = type), arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                     sep = unit(4, "mm"), end_cap = circle(9, "mm"), start_cap = circle(9, "mm"), width = 1.5) +
+  geom_node_point(aes(fill = role), size = 16, color = "white", shape = 21, stroke = 1.2) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "white") +
+  scale_edge_color_manual(values = c("Positive Tie" = "forestgreen", "Negative Tie" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Positive Tie" = "solid", "Negative Tie" = "33")) +
+  scale_fill_manual(values = c("Positive Spreader" = "gold", "Negative Spreader" = "darkorange", "Receiver" = "dodgerblue", "Sender" = "darkred")) +
+  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-8.0, 8.0), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+:::
+
+---
+
+## Karma Dynamics: Virtuous vs. Vicious Cycles
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Karma principles drive valenced networks to **grow** and **evolve** via feedback loops:
+- **Virtuous Cycles**: An initial positive act ($+$) breeds positive reciprocity ($+$). These positive feedback loops lock actors into mutually reinforcing, cooperative cliques.
+- **Vicious Cycles**: A single unprovoked negative act ($-$) breeds hostile counter-attacks ($-$). This triggers cascading negative spirals, spreading localized conflict throughout the network.
+- Over time, outdegree and received indegree valences converge on a node-by-node basis.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+# Virtuous vs Vicious cycle growth pathways
+edges1 <- data.frame(
+  from = c("A", "B", "A", "B"),
+  to   = c("B", "A", "B", "A"),
+  type = c("Acts Nice (+)", "Reciprocates (+)", "Lunch (+)", "Support (+)")
+)
+g1 <- graph_from_data_frame(edges1, directed = TRUE)
+lay1 <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
+rownames(lay1) <- c("A", "B")
+
+p1 <- ggraph(g1, layout = lay1) +
+  geom_edge_parallel(aes(color = type), width = 1.8, sep = unit(4, "mm"),
+                     arrow = arrow(length = unit(3, "mm"), type = "closed"),
+                     end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#d4edda", color = "#28a745", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("Acts Nice (+)" = "#2ecc71", "Reciprocates (+)" = "#27ae60", "Lunch (+)" = "#1abc9c", "Support (+)" = "#16a085")) +
+  coord_fixed(xlim = c(-0.5, 2.5), ylim = c(-0.6, 0.6), clip = "off") +
+  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank()) + ggtitle("Virtuous Cycle")
+
+edges2 <- data.frame(
+  from = c("C", "D", "C", "D"),
+  to   = c("D", "C", "D", "C"),
+  type = c("Acts Rude (-)", "Retaliates (-)", "Bullying (-)", "Snubbing (-)")
+)
+g2 <- graph_from_data_frame(edges2, directed = TRUE)
+lay2 <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
+rownames(lay2) <- c("C", "D")
+
+p2 <- ggraph(g2, layout = lay2) +
+  geom_edge_parallel(aes(color = type), width = 1.8, sep = unit(4, "mm"),
+                     arrow = arrow(length = unit(3, "mm"), type = "closed"),
+                     end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#f8d7da", color = "#dc3545", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("Acts Rude (-)" = "#e74c3c", "Retaliates (-)" = "#c0392b", "Bullying (-)" = "#d35400", "Snubbing (-)" = "#962d22")) +
+  coord_fixed(xlim = c(-0.5, 2.5), ylim = c(-0.6, 0.6), clip = "off") +
+  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank()) + ggtitle("Vicious Cycle")
+
+p1 + p2 + plot_layout(nrow = 1)
+```
+:::
+:::
+
+---
+
+# Part 2: Status Theory
+
+---
+
+## Status Theory: Introduction
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- **Status Theory** proposes that sentiments towards an alter are heavily driven by how *others* feel about them.
+- This represents a social **prestige alignment** mechanism:
+  - If someone is liked by many, you align your sentiment and like them too.
+  - If someone is disliked by many, you align your sentiment and dislike them.
+- A node's status is determined by the **valence signs** of incoming ties:
+  - High status = receiving many positive links.
+  - Low status = receiving many negative links.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+edges <- data.frame(
+  from = c("1", "2", "3", "4", "5", "6"),
+  to   = c("Elite", "Elite", "Elite", "Subordinate", "Subordinate", "Subordinate"),
+  sign = c("+", "+", "+", "-", "-", "-")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(
+  -1, 1.2, 0, 1.5, 1, 1.2,  # Senders
+  -1, -1.2, 0, -1.5, 1, -1.2, # Senders
+  0, 0.4, 0, -0.4 # Targets
+), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                 width = 1.8, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(aes(fill = name %in% c("Elite", "Subordinate")), size = 20, color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
+  scale_fill_manual(values = c("TRUE" = "gold", "FALSE" = "#ecf0f1")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.8, 1.8), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+:::
+
+---
+
+## Prestige and Deference Alignment
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- Inside status-seeking systems, tie directions carry implicit status expectations:
+  - Directed positive tie from Ego to Alter $\implies$ Ego considers Alter to have higher status (**Deference**).
+  - Directed negative tie from Ego to Alter $\implies$ Ego considers Alter to have lower status (**Dominance**).
+- Status-seeking actors strive to align their sentiments with prestige to avoid losing their own social standing.
+- Node labels are shortened (**Ego**, **High**, **Low**) to fit node markers perfectly.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+edges <- data.frame(
+  from = c("Ego", "Ego"), 
+  to = c("High", "Low"), 
+  sign = c("+", "-")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(0, 0, 1.2, 1.2, -1.2, -1.2), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
+                 width = 2.5, end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
+  geom_node_point(aes(fill = name), size = 26, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
+  scale_fill_manual(values = c("Ego" = "#fff", "High" = "#fdfd96", "Low" = "#ecf0f1")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.5, 1.5), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+:::
+
+---
+
+## Status and Outgoing Sentiments
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Your outgoing ties affect your own social position:
+  - **Status Gain**:
+    - Sending positive ties to high-status actors (basking in reflected glory).
+    - Sending negative ties to low-status actors (distancing from pariahs).
+  - **Status Loss**:
+    - Sending positive ties to low-status actors (guilt by association).
+    - Sending negative ties to high-status actors (hostility to elites backfires).
+- Actors actively prune or withdraw ties that cause status loss.
+:::
+:::
+
+::: {.column width="50%"}
+| Outgoing Tie Sign | Target Status | Impact on Sender's Status |
+| :---: | :---: | :---: |
+| **Positive ($+$)** | High Status | **Gain (+)** |
+| **Negative ($-$)** | Low Status | **Gain (+)** |
+| **Positive ($+$)** | Low Status | **Loss (-)** |
+| **Negative ($-$)** | High Status | **Loss (-)** |
+:::
+:::
+
+---
+
+## Status Dynamics: Centralization and Hierarchy Growth
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- How status networks **grow** and **change** over time:
+  - **Preferential Deference**: High-status nodes attract a disproportionate share of incoming positive ties over time (a "rich-get-richer" effect).
+  - **Dynamic Pruning**: High-status nodes lose their negative ties, while low-status nodes lose their positive ties.
+  - **"Gang-up" Effect**: Subordinates consolidate negative ties onto low-status pariahs to boost their own standings.
+  - **Hierarchy Emergence**: Sentiments organize into highly centralized, strictly ordered prestige rankings.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+# Transition from initial unorganized state to highly centralized status hierarchy
+set.seed(422)
+g1 <- play_erdos_renyi(n = 5, p = 0.6, directed = TRUE)
+E(g1)$sign <- sample(c("+", "-"), ecount(g1), replace = TRUE)
+p1 <- ggraph(g1, layout = "circle") +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(2.5, "mm"), type = "closed"), width = 1.5) +
+  geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.2) +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Unorganized State")
+
+edges2 <- data.frame(
+  from = c("B", "C", "D", "E", "A", "A", "A", "A"),
+  to   = c("A", "A", "A", "A", "E", "D", "C", "B"),
+  sign = c("+", "+", "+", "+", "-", "-", "-", "-")
+)
+g2 <- graph_from_data_frame(edges2, directed = TRUE)
+lay2 <- matrix(c(0, 1.5, -1, 0.5, 1, 0.5, -1, -1, 1, -1), ncol = 2, byrow = TRUE)
+rownames(lay2) <- c("A", "B", "C", "D", "E")
+
+p2 <- ggraph(g2, layout = lay2) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3, "mm"), type = "closed"), 
+                 width = 1.8, end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+  geom_node_point(aes(fill = name == "A"), size = 16, color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
+  scale_fill_manual(values = c("TRUE" = "gold", "FALSE" = "#ecf0f1")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.8, 1.8), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Status Hierarchy")
+
+p1 + p2 + plot_layout(nrow = 1)
+```
+:::
+:::
+
+---
+
+# Part 3: Solidarity Theory
+
+---
+
+## Solidarity Theory: Core Concept
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Central idea: *"Those in similar positions stick together!"*
+- We feel positively towards others who are similarly situated within the sentiment network, and negatively towards those who are differently situated.
+- Shared position is measured based on the status of incoming ties (both popular or both unpopular).
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 5
+#| fig.height: 5
+# Visualizing simple solidarity
+edges <- data.frame(from = c("A", "B"), to = c("B", "A"), sign = c("+", "+"))
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(-1, 0, 1, 0), ncol = 2, byrow = TRUE)
+rownames(lay) <- c("A", "B")
+ggraph(g, layout = lay) +
+  geom_edge_parallel(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                     width = 2, sep = unit(4, "mm"), end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+  geom_node_point(size = 22, fill = "gold", color = "white", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "black") +
+  scale_edge_color_manual(values = c("+" = "forestgreen")) +
+  scale_edge_linetype_manual(values = c("+" = "solid")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-0.8, 0.8), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+:::
+
+---
+
+## Measuring Shared Position
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Structural similarity acts as a strong motivator for positive bonding:
+  - **Status Solidarity**: Elite, popular actors share a similar high status, motivating them to like and support one another (*"popular kids stick together"*).
+  - **Unpopularity Solidarity**: Disliked, downtrodden actors share a similar lower-tier position, motivating them to bond (*"downtrodden stick together"*).
+  - **Vertical Cleavages**: Since different positions motivate negative sentiments, positive ties spanning across tiers are actively pruned.
+:::
+:::
+
+::: {.column width="50%"}
+| Actor A Status | Actor B Status | Position Match | Predicted Sentiment |
+| :---: | :---: | :---: | :---: |
+| High Status | High Status | **Similar** | **Solidarity (+)** |
+| Low Status | Low Status | **Similar** | **Solidarity (+)** |
+| High Status | Low Status | **Different** | **Hostility (-)** |
+:::
+:::
+
+---
+
+## Solidarity Dynamics: Stratification and Clique Growth
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- How Solidarity networks **grow** and **stratify** over time:
+  - **Horizontal Integration**: Structural equivalence drives the creation of reciprocal positive ties within the same tier (clique formation).
+  - **Class Cohesion**: Solidarity processes stabilize clusters into horizontal social classes (e.g., unions, associations, exclusive clubs).
+  - **Vertical Hostility**: Cross-tier positive ties are severed, and negative ties (deference/dominance) solidify vertical boundaries.
+  - **Clique Stratification**: The network evolves into a horizontally integrated, vertically polarized system.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+edges <- data.frame(
+  from = c("Elite A", "Elite B", "Sub C", "Sub D", "Sub C", "Elite A"),
+  to   = c("Elite B", "Elite A", "Sub D", "Sub C", "Elite A", "Sub C"),
+  type = c("Solidarity", "Solidarity", "Solidarity", "Solidarity", "Deference", "Dominance")
+)
+g <- graph_from_data_frame(edges, directed = TRUE)
+lay <- matrix(c(-1.5, 1.5, 1.5, 1.5, -1.5, -1.5, 1.5, -1.5), ncol = 2, byrow = TRUE)
+ggraph(g, layout = lay) +
+  geom_edge_parallel(aes(color = type, linetype = type), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+                     width = 2, sep = unit(3.5, "mm"), end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(aes(fill = name), size = 20, color = "white", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = c("A", "B", "C", "D")), fontface = "bold", size = 7, color = "white") +
+  scale_edge_color_manual(values = c("Solidarity" = "#3498db", "Deference" = "forestgreen", "Dominance" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Solidarity" = "solid", "Deference" = "solid", "Dominance" = "33")) +
+  scale_fill_manual(values = c("Elite A" = "gold", "Elite B" = "gold", "Sub C" = "darkorange", "Sub D" = "darkorange")) +
+  coord_fixed(xlim = c(-2.0, 2.0), ylim = c(-2.0, 2.0), clip = "off") +
+  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
+```
+:::
+:::
+
+---
+
+# Part 4: Comparative Summary & Synthesis
+
+---
+
+## Comparison of Karma, Status, and Solidarity
+
+::: {.columns}
+::: {.column width="45%"}
+::: {.incremental}
+- Compare how distinct social-psychological principles drive micro-motives.
+- Each theory assumes different levels of agency and structural awareness:
+  - **Karma**: Focuses strictly on dyadic reciprocity (actions sent vs. received).
+  - **Status**: Aligns sentiments with prestige hierarchies (prestige seeking).
+  - **Solidarity**: Aligns sentiments with structural equivalence (horizontal classes).
+:::
+:::
+
+::: {.column width="55%"}
+| Theory | Core Micro-Mechanism | Expected Local Pattern | Expected Global Structure |
+| :--- | :---: | :---: | :---: |
+| **Karma** | Direct Reciprocity | Virtuous/Vicious Loops | Positive/Negative Regions |
+| **Status** | Prestige Alignment | Deference / Dominance | Centralized Hierarchies |
+| **Solidarity** | Structural Equivalence | Horizontal Mutual Ties | Horizontally Cohesive Classes |
+:::
+:::
+
+---
+
+## Co-Evolution of Valenced Networks: A Combined Model
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- In real-world sentiment networks, these three principles do not act in isolation; they **interact and co-evolve**:
+  1. **Phase 1: Raw Interaction**: Initial encounters are governed by **Karma** (direct reciprocity loops).
+  2. **Phase 2: Hierarchy Emergence**: As actors seek status and prestige, **Status seeking** creates centralized deference paths.
+  3. **Phase 3: Factional Stratification**: Structural equivalence triggers **Solidarity**, freezing actors into cohesive horizontal classes.
+- Explains how complex social stratifications emerge from simple micro-motives.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+# Showing the three phases of growth side-by-side using patchwork
+lay_sub <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
+
+# Phase 1: Karma Reciprocity
+g_k <- graph_from_data_frame(data.frame(from = c("A", "B"), to = c("B", "A"), sign = c("+", "+")), directed = TRUE)
+p_k <- ggraph(g_k, layout = matrix(c(-1, 0, 1, 0), ncol = 2, byrow = TRUE)) +
+  geom_edge_parallel(aes(color = sign), width = 1.5, arrow = arrow(length = unit(2.5, "mm"), type = "closed"), sep = unit(3, "mm"),
+                     end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+  geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.2) +
+  scale_edge_color_manual(values = c("+" = "forestgreen")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1, 1), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Phase 1: Karma (Reciprocity)")
+
+# Phase 2: Status Hierarchy
+g_st <- graph_from_data_frame(data.frame(from = c("B", "C"), to = c("A", "A"), sign = c("+", "+")), directed = TRUE)
+p_st <- ggraph(g_st, layout = lay_sub) +
+  geom_edge_link(aes(color = sign), width = 1.5, arrow = arrow(length = unit(2.5, "mm"), type = "closed"),
+                 end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+  geom_node_point(aes(fill = name == "A"), size = 12, color = "#2c3e50", shape = 21, stroke = 1.2) +
+  scale_edge_color_manual(values = c("+" = "forestgreen")) +
+  scale_fill_manual(values = c("TRUE" = "gold", "FALSE" = "#ecf0f1")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Phase 2: Status (Hierarchy)")
+
+# Phase 3: Solidarity Classes
+g_sol <- graph_from_data_frame(data.frame(from = c("B", "C", "C", "B"), to = c("C", "B", "A", "A"), sign = c("+", "+", "-", "-")), directed = TRUE)
+p_sol <- ggraph(g_sol, layout = lay_sub) +
+  geom_edge_parallel(aes(color = sign, linetype = sign), width = 1.5, arrow = arrow(length = unit(2.5, "mm"), type = "closed"), sep = unit(3, "mm"),
+                     end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+  geom_node_point(aes(fill = name == "A"), size = 12, color = "#2c3e50", shape = 21, stroke = 1.2) +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
+  scale_fill_manual(values = c("TRUE" = "gold", "FALSE" = "dodgerblue")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Phase 3: Class (Solidarity)")
+
+p_k + p_st + p_sol + plot_layout(nrow = 1)
+```
+:::
+:::
