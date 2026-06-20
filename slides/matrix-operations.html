@@ -1,0 +1,2276 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="matrix-operations_files/libs/clipboard/clipboard.min.js"></script>
+<script src="matrix-operations_files/libs/quarto-html/tabby.min.js"></script>
+<script src="matrix-operations_files/libs/quarto-html/popper.min.js"></script>
+<script src="matrix-operations_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="matrix-operations_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="matrix-operations_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="matrix-operations_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.9.38">
+
+  <title>Matrix Algebra in Social Networks</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="matrix-operations_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="matrix-operations_files/libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+  </style>
+  <link rel="stylesheet" href="matrix-operations_files/libs/revealjs/dist/theme/quarto-2740581606dc327e82f18f789b69d8a0.css">
+  <link rel="stylesheet" href="ucla-theme.css">
+  <link href="matrix-operations_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="matrix-operations_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="matrix-operations_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="matrix-operations_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+  <script src="matrix-operations_files/libs/kePrint-0.0.1/kePrint.js"></script>
+
+  <link href="matrix-operations_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Matrix Algebra in Social Networks</h1>
+  <p class="subtitle">Basic Operations, Conformability, and Matrix Multiplication</p>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section>
+<section id="part-1-basic-operations-network-overlap" class="title-slide slide level1 center">
+<h1>Part 1: Basic Operations &amp; Network Overlap</h1>
+
+</section>
+<section id="combining-social-relations" class="slide level2 scrollable">
+<h2>Combining Social Relations</h2>
+<ul>
+<li>In social network analysis, we often record <strong>multiple types of relationships</strong> for the same set of nodes (e.g., <em>Parties With</em> vs.&nbsp;<em>Plays Games With</em>).</li>
+<li>How do we combine, subtract, or intersect these overlapping structures?</li>
+<li>We use <strong>Basic Matrix Operations</strong> performed cell-by-cell on adjacency matrices of the same dimensions:
+<ol type="1">
+<li><strong>Matrix Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>)</strong>: Measures overall relationship volume (uniplex vs.&nbsp;multiplex).</li>
+<li><strong>Subtracting from a Matrix (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>)</strong>: Flips ties to find the <strong>graph complement</strong> (<em>Does Not Party With</em>).</li>
+<li><strong>Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>)</strong>: Extracts multiplex overlap (<em>Parties and Plays Games With</em>).</li>
+</ol></li>
+</ul>
+</section>
+<section id="adjacency-matrices-mathbfp-and-mathbfg" class="slide level2">
+<h2>Adjacency Matrices: <span class="math inline">\(\mathbf{P}\)</span> and <span class="math inline">\(\mathbf{G}\)</span></h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="parties-with-mathbfp">Parties With (<span class="math inline">\(\mathbf{P}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-2-1.png" width="336"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div><div class="column" style="width:50%;">
+<h3 id="plays-games-with-mathbfg">Plays Games With (<span class="math inline">\(\mathbf{G}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-4-1.png" width="336"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="step-by-step-addition-mathbfp-mathbfg-setup" class="slide level2">
+<h2>Step-by-Step Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>): Setup</h2>
+<ul>
+<li><strong>Addition (<span class="math inline">\(s_{ij} = p_{ij} + g_{ij}\)</span>)</strong> adds corresponding cells of each matrix.</li>
+<li>Let’s trace how the resulting sum matrix is constructed from the first two:
+<ul>
+<li><span class="math inline">\(s_{\text{A, B}} = p_{\text{A, B}} + g_{\text{A, B}} = 1 + 1 = \mathbf{2}\)</span> (Multiplex)</li>
+<li><span class="math inline">\(s_{\text{A, C}} = p_{\text{A, C}} + g_{\text{A, C}} = 1 + 0 = \mathbf{1}\)</span> (Uniplex)</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{P} + \mathbf{G} = \begin{pmatrix} 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\ 1 &amp; 1 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix} + \begin{pmatrix} 0 &amp; 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\ 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
+</div>
+</section>
+<section id="step-by-step-addition-mathbfp-mathbfg-calculation" class="slide level2">
+<h2>Step-by-Step Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>): Calculation</h2>
+<ul>
+<li>We add the entries cell-by-cell to get the final sum matrix:</li>
+</ul>
+<p><span class="math display">\[\mathbf{P} + \mathbf{G} = \begin{pmatrix} 0+0 &amp; 1+1 &amp; 1+0 &amp; 0+0 &amp; 1+1 &amp; 0+1 \\ 1+1 &amp; 0+0 &amp; 1+1 &amp; 1+0 &amp; 0+0 &amp; 0+0 \\ 1+0 &amp; 1+1 &amp; 0+0 &amp; 1+1 &amp; 1+0 &amp; 1+0 \\ 0+0 &amp; 1+0 &amp; 1+1 &amp; 0+0 &amp; 1+1 &amp; 0+1 \\ 1+1 &amp; 0+0 &amp; 1+0 &amp; 1+1 &amp; 0+0 &amp; 1+1 \\ 0+1 &amp; 0+0 &amp; 1+0 &amp; 0+1 &amp; 1+1 &amp; 0+0 \end{pmatrix}\]</span></p>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{P} + \mathbf{G} = \begin{pmatrix} 0 &amp; \mathbf{2} &amp; 1 &amp; 0 &amp; \mathbf{2} &amp; 1 \\ \mathbf{2} &amp; 0 &amp; \mathbf{2} &amp; 1 &amp; 0 &amp; 0 \\ 1 &amp; \mathbf{2} &amp; 0 &amp; \mathbf{2} &amp; 1 &amp; 1 \\ 0 &amp; 1 &amp; \mathbf{2} &amp; 0 &amp; \mathbf{2} &amp; 1 \\ \mathbf{2} &amp; 0 &amp; 1 &amp; \mathbf{2} &amp; 0 &amp; \mathbf{2} \\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; \mathbf{2} &amp; 0 \end{pmatrix}\]</span></p>
+<ul>
+<li><strong>Sociological Interpretation</strong>:
+<ul>
+<li>Value <strong>2</strong> represents a <strong>multiplex tie</strong> (connected by <em>both</em> relationships).</li>
+<li>Value <strong>1</strong> represents a <strong>uniplex tie</strong> (connected by <em>exactly one</em> relationship).</li>
+<li>Value <strong>0</strong> represents <strong>no relationship</strong>.</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="visualizing-matrix-addition-mathbfp-mathbfg" class="slide level2">
+<h2>Visualizing Matrix Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="parties-or-plays-games-with-or-both">Parties or Plays Games With or Both</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li><strong>1 (Blue)</strong> = Uniplex bond.</li>
+<li><strong>2 (Purple)</strong> = Multiplex bond.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-6-1.png" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="subtracting-a-number-from-a-matrix-mathbf1---mathbfp-setup" class="slide level2">
+<h2>Subtracting a Number From a Matrix (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>): Setup</h2>
+<ul>
+<li>We can subtract an adjacency matrix from 1 (excluding the diagonal) to find the <strong>graph complement</strong>.</li>
+<li>Subtracting from 1 flips 1s into 0s and 0s into 1s:
+<ul>
+<li><span class="math inline">\(c_{ij} = 1 - p_{ij}\)</span></li>
+</ul></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{1} - \mathbf{P} = 1 - \begin{pmatrix} - &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\ 1 &amp; - &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\ 1 &amp; 1 &amp; - &amp; 1 &amp; 1 &amp; 1 \\ 0 &amp; 1 &amp; 1 &amp; - &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; - &amp; 1 \\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; - \end{pmatrix}\]</span></p>
+</div>
+</section>
+<section id="subtracting-a-number-from-a-matrix-mathbf1---mathbfp-calculation" class="slide level2">
+<h2>Subtracting a Number From a Matrix (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>): Calculation</h2>
+<ul>
+<li>Subtracting each cell from 1 yields:</li>
+</ul>
+<p><span class="math display">\[\mathbf{1} - \mathbf{P} = \begin{pmatrix} - &amp; 1-1 &amp; 1-1 &amp; 1-0 &amp; 1-1 &amp; 1-0 \\ 1-1 &amp; - &amp; 1-1 &amp; 1-1 &amp; 1-0 &amp; 1-0 \\ 1-1 &amp; 1-1 &amp; - &amp; 1-1 &amp; 1-1 &amp; 1-1 \\ 1-0 &amp; 1-1 &amp; 1-1 &amp; - &amp; 1-1 &amp; 1-0 \\ 1-1 &amp; 1-0 &amp; 1-1 &amp; 1-1 &amp; - &amp; 1-1 \\ 1-0 &amp; 1-0 &amp; 1-1 &amp; 1-0 &amp; 1-1 &amp; - \end{pmatrix}\]</span></p>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{1} - \mathbf{P} = \begin{pmatrix} - &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\ 0 &amp; - &amp; 0 &amp; 0 &amp; 1 &amp; 1 \\ 0 &amp; 0 &amp; - &amp; 0 &amp; 0 &amp; 0 \\ 1 &amp; 0 &amp; 0 &amp; - &amp; 0 &amp; 1 \\ 0 &amp; 1 &amp; 0 &amp; 0 &amp; - &amp; 0 \\ 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 &amp; - \end{pmatrix}\]</span>$</p>
+<ul>
+<li><strong>Sociological Meaning</strong>:
+<ul>
+<li>The resulting matrix records the <strong>absence</strong> of the original relationship.</li>
+<li>The graph corresponding to this matrix is called the <strong>complement</strong> of the original graph (<em>Does Not Party With</em>).</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="visualizing-graph-complement-mathbf1---mathbfp" class="slide level2">
+<h2>Visualizing Graph Complement (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="does-not-party-with">Does Not Party With</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Holds <span class="math inline">\(1\)</span>s where there was no original tie.</li>
+<li>Diagonal remains blocked.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-8-1.png" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="step-by-step-hadamard-product-mathbfp-circ-mathbfg-setup" class="slide level2">
+<h2>Step-by-Step Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>): Setup</h2>
+<ul>
+<li><strong>Hadamard / Element-Wise Product (<span class="math inline">\(c_{ij} = p_{ij} \times g_{ij}\)</span>)</strong> represents <strong>relational intersection</strong>:</li>
+<li>Let’s trace how the multiplex intersection emerges from the product of the first two matrices:
+<ul>
+<li><span class="math inline">\(c_{\text{A, B}} = p_{\text{A, B}} \times g_{\text{A, B}} = 1 \times 1 = \mathbf{1}\)</span> (Both active)</li>
+<li><span class="math inline">\(c_{\text{A, C}} = p_{\text{A, C}} \times g_{\text{A, C}} = 1 \times 0 = \mathbf{0}\)</span> (Only one active)</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{P} \circ \mathbf{G} = \begin{pmatrix} 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\ 1 &amp; 1 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix} \circ \begin{pmatrix} 0 &amp; 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 1 \\ 1 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\ 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
+</div>
+</section>
+<section id="step-by-step-hadamard-product-mathbfp-circ-mathbfg-calculation" class="slide level2">
+<h2>Step-by-Step Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>): Calculation</h2>
+<ul>
+<li>Multiplying corresponding entries cell-by-cell yields:</li>
+</ul>
+<p><span class="math display">\[\mathbf{P} \circ \mathbf{G} = \begin{pmatrix} 0\times0 &amp; 1\times1 &amp; 1\times0 &amp; 0\times0 &amp; 1\times1 &amp; 0\times1 \\ 1\times1 &amp; 0\times0 &amp; 1\times1 &amp; 1\times0 &amp; 0\times0 &amp; 0\times0 \\ 1\times0 &amp; 1\times1 &amp; 0\times0 &amp; 1\times1 &amp; 1\times0 &amp; 1\times0 \\ 0\times0 &amp; 1\times0 &amp; 1\times1 &amp; 0\times0 &amp; 1\times1 &amp; 0\times1 \\ 1\times1 &amp; 0\times0 &amp; 1\times0 &amp; 1\times1 &amp; 0\times0 &amp; 1\times1 \\ 0\times1 &amp; 0\times0 &amp; 1\times0 &amp; 0\times1 &amp; 1\times1 &amp; 0\times0 \end{pmatrix}\]</span></p>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{P} \circ \mathbf{G} = \begin{pmatrix} 0 &amp; \mathbf{1} &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; 0 \\ \mathbf{1} &amp; 0 &amp; \mathbf{1} &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; \mathbf{1} &amp; 0 &amp; \mathbf{1} &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; \mathbf{1} &amp; 0 &amp; \mathbf{1} &amp; 0 \\ \mathbf{1} &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; 0 &amp; \mathbf{1} \\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; 0 \end{pmatrix}\]</span></p>
+<ul>
+<li><strong>Sociological Meaning</strong>:
+<ul>
+<li>Cell value is <strong>1</strong> <em>only if</em> both <span class="math inline">\(p_{ij} = 1\)</span> and <span class="math inline">\(g_{ij} = 1\)</span>.</li>
+<li>It extracts <strong>multiplex ties</strong> (the overlap/intersection) and erases all uniplex ties.</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="visualizing-the-hadamard-product-mathbfp-circ-mathbfg" class="slide level2">
+<h2>Visualizing the Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="parties-and-plays-games-with">Parties and Plays Games With</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Retains only the shared ties.</li>
+<li>All uniplex ties are erased, leaving a sparse overlap network.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-10-1.png" width="432"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-2-the-matrix-transpose-directed-graphs" class="title-slide slide level1 center">
+<h1>Part 2: The Matrix Transpose &amp; Directed Graphs</h1>
+
+</section>
+<section id="the-matrix-transpose-mathbfat" class="slide level2">
+<h2>The Matrix Transpose (<span class="math inline">\(\mathbf{A}^T\)</span>)</h2>
+<ul>
+<li>The <strong>Transpose</strong> of a matrix <span class="math inline">\(\mathbf{A}\)</span> is the same matrix with its rows and columns flipped:
+<ul>
+<li>Written as <span class="math inline">\(\mathbf{A}^T\)</span> or <span class="math inline">\(\mathbf{A}'\)</span>.</li>
+<li><strong>The Rule</strong>: Row <span class="math inline">\(i\)</span> of the original matrix becomes Column <span class="math inline">\(i\)</span> of the transpose.</li>
+<li><strong>Formally</strong>: <span class="math inline">\(a^T_{ij} = a_{ji}\)</span> for all cells.</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Symmetric vs.&nbsp;Asymmetric Adjacency Matrices</strong>:
+<ul>
+<li>For <strong>undirected graphs</strong>, relationships are reciprocal by definition, so the matrix is symmetric (<span class="math inline">\(\mathbf{A}^T = \mathbf{A}\)</span>).</li>
+<li>For <strong>directed graphs (digraphs)</strong>, ties can be one-way, resulting in an asymmetric matrix (<span class="math inline">\(\mathbf{A}^T \neq \mathbf{A}\)</span>).</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="visualizing-the-matrix-transpose" class="slide level2">
+<h2>Visualizing the Matrix Transpose</h2>
+<div class="columns">
+<div class="column" style="width:32%;">
+<h3 id="matrix-mathbfa">Matrix <span class="math inline">\(\mathbf{A}\)</span></h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Row 1 of <span class="math inline">\(\mathbf{A}\)</span> <code>(0, 0, 1, 0, 1, 0)</code> is Column 1 of <span class="math inline">\(\mathbf{A}^T\)</span>.</li>
+<li><strong>Rule</strong>: Row <span class="math inline">\(i\)</span> of <span class="math inline">\(\mathbf{A}\)</span> becomes Column <span class="math inline">\(i\)</span> of <span class="math inline">\(\mathbf{A}^T\)</span>.</li>
+</ul>
+</div><div class="column" style="width:32%;">
+<h3 id="transpose-mathbfat">Transpose <span class="math inline">\(\mathbf{A}^T\)</span></h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Flipped horizontally: rows become columns.</li>
+<li>Reverses the direction of every single arrow in the network.</li>
+</ul>
+</div><div class="column" style="width:36%;">
+<h3 id="directed-graph-mathbfa">Directed Graph (<span class="math inline">\(\mathbf{A}\)</span>)</h3>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-13-1.png" width="403"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-3-directed-dyads-the-dyad-census" class="title-slide slide level1 center">
+<h1>Part 3: Directed Dyads &amp; The Dyad Census</h1>
+
+</section>
+<section id="dyads-in-directed-graphs" class="slide level2 scrollable">
+<h2>Dyads in Directed Graphs</h2>
+<ul>
+<li>In a directed graph, any pair of nodes (a <strong>dyad</strong>) can have one of three configurations:
+<ol type="1">
+<li><strong>Mutual (M)</strong>: Both directed edges are present (<span class="math inline">\(i \leftrightarrow j\)</span>).</li>
+<li><strong>Asymmetric (A)</strong>: Only one directed edge is present (<span class="math inline">\(i \rightarrow j\)</span> or <span class="math inline">\(j \rightarrow i\)</span>).</li>
+<li><strong>Null (N)</strong>: Neither directed edge is present (disconnected).</li>
+</ol></li>
+<li>An easy way to remember these three types of dyads is the mnemonic <strong>MAN</strong> (Mutual, Asymmetric, Null).</li>
+</ul>
+<div class="fragment">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-14-1.png" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div>
+</section>
+<section id="the-dyad-census" class="slide level2">
+<h2>The Dyad Census</h2>
+<ul>
+<li>The <strong>Dyad Census</strong> is a count of the total number of Mutuals (<span class="math inline">\(N_M\)</span>), Asymmetrics (<span class="math inline">\(N_A\)</span>), and Nulls (<span class="math inline">\(N_N\)</span>) in a directed graph.</li>
+<li>We can compute these counts systematically using cell-by-cell matrix operations (the Hadamard product and matrix subtraction) on the directed adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> and its transpose <span class="math inline">\(\mathbf{A}^T\)</span>!</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>We will perform these calculations on our 6-node directed reference graph <span class="math inline">\(\mathbf{A}\)</span>:
+<ul>
+<li><span class="math inline">\(N_M\)</span> = number of mutual dyads</li>
+<li><span class="math inline">\(N_A\)</span> = number of asymmetric dyads</li>
+<li><span class="math inline">\(N_N\)</span> = number of null dyads</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="mutual-dyads-matrix-mathbfm-mathbfa-circ-mathbfat-setup" class="slide level2">
+<h2>1. Mutual Dyads Matrix (<span class="math inline">\(\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T\)</span>): Setup</h2>
+<ul>
+<li>Multiplying <span class="math inline">\(\mathbf{A}\)</span> by its transpose <span class="math inline">\(\mathbf{A}^T\)</span> element-wise extracts only mutual dyads where <span class="math inline">\(a_{ij}=1\)</span> and <span class="math inline">\(a_{ji}=1\)</span>:</li>
+</ul>
+<p><span class="math display">\[\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T = \begin{pmatrix} 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\\\ 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\\\ 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 \end{pmatrix} \circ \begin{pmatrix} 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\\\ 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\\\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 1 \\\\ 1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 1 \\\\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
+</section>
+<section id="mutual-dyads-matrix-mathbfm-mathbfa-circ-mathbfat-calculation" class="slide level2">
+<h2>1. Mutual Dyads Matrix (<span class="math inline">\(\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T\)</span>): Calculation</h2>
+<ul>
+<li>We multiply the corresponding cells of <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{A}^T\)</span> element-wise:</li>
+</ul>
+<div style="font-size: 72%;">
+<p><span class="math display">\[\mathbf{M} = \begin{pmatrix} 0\times0 &amp; 0\times1 &amp; 1\times1 &amp; 0\times0 &amp; 1\times0 &amp; 0\times0 \\\\ 1\times0 &amp; 0\times0 &amp; 1\times0 &amp; 1\times0 &amp; 0\times0 &amp; 0\times0 \\\\ 1\times1 &amp; 0\times1 &amp; 0\times0 &amp; 1\times0 &amp; 1\times0 &amp; 0\times0 \\\\ 0\times0 &amp; 0\times1 &amp; 0\times1 &amp; 0\times0 &amp; 0\times1 &amp; 0\times1 \\\\ 0\times1 &amp; 0\times0 &amp; 0\times1 &amp; 1\times0 &amp; 0\times0 &amp; 1\times1 \\\\ 0\times0 &amp; 0\times0 &amp; 0\times0 &amp; 1\times0 &amp; 1\times1 &amp; 0\times0 \end{pmatrix} = \begin{pmatrix} - &amp; 0 &amp; \mathbf{1} &amp; 0 &amp; 0 &amp; 0 \\\\ 0 &amp; - &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\\\ \mathbf{1} &amp; 0 &amp; - &amp; 0 &amp; 0 &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; - &amp; 0 &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; - &amp; \mathbf{1} \\\\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; - \end{pmatrix}\]</span></p>
+</div>
+<div class="columns">
+<div class="column" style="width:38%;">
+<h3 id="census-count-n_m">Census Count (<span class="math inline">\(N_M\)</span>)</h3>
+<ul>
+<li>Only reciprocal ties are kept (A-C and E-F).</li>
+<li>Sum of cells in <span class="math inline">\(\mathbf{M}\)</span> is 4.</li>
+<li><span class="math display">\[N_M = \frac{\sum M_{ij}}{2} = \frac{4}{2} = \mathbf{2} \text{ mutual dyads}\]</span></li>
+</ul>
+</div><div class="column" style="width:32%;">
+<h3 id="matrix-result-mathbfm">Matrix Result (<span class="math inline">\(\mathbf{M}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:30%;">
+<h3 id="mutual-ties-graph">Mutual ties graph</h3>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-16-1.png" width="268"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="asymmetric-dyads-matrix-mathbfs-mathbfa-circ-mathbf1---mathbfat-setup" class="slide level2">
+<h2>2. Asymmetric Dyads Matrix (<span class="math inline">\(\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T)\)</span>): Setup</h2>
+<ul>
+<li>Multiplying <span class="math inline">\(\mathbf{A}\)</span> by the complement of transpose (<span class="math inline">\(\mathbf{1} - \mathbf{A}^T\)</span>) extracts unreciprocated ties:</li>
+</ul>
+<p><span class="math display">\[\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T) = \begin{pmatrix} 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\\\ 1 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\\\ 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 0 \end{pmatrix} \circ \begin{pmatrix} - &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\\\ 1 &amp; - &amp; 1 &amp; 1 &amp; 1 &amp; 1 \\\\ 0 &amp; 0 &amp; - &amp; 1 &amp; 1 &amp; 1 \\\\ 1 &amp; 0 &amp; 0 &amp; - &amp; 0 &amp; 0 \\\\ 0 &amp; 1 &amp; 0 &amp; 1 &amp; - &amp; 0 \\\\ 1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; - \end{pmatrix}\]</span></p>
+</section>
+<section id="asymmetric-dyads-matrix-mathbfs-mathbfa-circ-mathbf1---mathbfat-calculation" class="slide level2">
+<h2>2. Asymmetric Dyads Matrix (<span class="math inline">\(\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T)\)</span>): Calculation</h2>
+<ul>
+<li>We multiply the corresponding cells of <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\((\mathbf{1} - \mathbf{A}^T)\)</span> element-wise:</li>
+</ul>
+<div style="font-size: 72%;">
+<p><span class="math display">\[\mathbf{S} = \begin{pmatrix} 0\times- &amp; 0\times0 &amp; 1\times0 &amp; 0\times1 &amp; 1\times0 &amp; 0\times1 \\\\ 1\times1 &amp; 0\times- &amp; 1\times1 &amp; 1\times1 &amp; 0\times1 &amp; 0\times1 \\\\ 1\times0 &amp; 0\times0 &amp; 0\times- &amp; 1\times1 &amp; 1\times1 &amp; 0\times1 \\\\ 0\times1 &amp; 0\times0 &amp; 0\times0 &amp; 0\times- &amp; 0\times0 &amp; 0\times0 \\\\ 0\times0 &amp; 0\times1 &amp; 0\times0 &amp; 1\times1 &amp; 0\times- &amp; 1\times0 \\\\ 0\times1 &amp; 0\times1 &amp; 0\times1 &amp; 1\times1 &amp; 1\times0 &amp; 0\times- \end{pmatrix} = \begin{pmatrix} - &amp; 0 &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; 0 \\\\ \mathbf{1} &amp; - &amp; \mathbf{1} &amp; \mathbf{1} &amp; 0 &amp; 0 \\\\ 0 &amp; 0 &amp; - &amp; \mathbf{1} &amp; \mathbf{1} &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; - &amp; 0 &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; - &amp; 0 \\\\ 0 &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; 0 &amp; - \end{pmatrix}\]</span></p>
+</div>
+<div class="columns">
+<div class="column" style="width:38%;">
+<h3 id="census-count-n_a">Census Count (<span class="math inline">\(N_A\)</span>)</h3>
+<ul>
+<li>Retains only unreciprocated outgoing ties.</li>
+<li>Sum of cells in <span class="math inline">\(\mathbf{S}\)</span> is 8.</li>
+<li><span class="math display">\[N_S = \sum S_{ij} = \mathbf{8} \text{ asymmetric dyads}\]</span></li>
+</ul>
+</div><div class="column" style="width:32%;">
+<h3 id="matrix-result-mathbfs">Matrix Result (<span class="math inline">\(\mathbf{S}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:30%;">
+<h3 id="asymmetric-ties-graph">Asymmetric ties graph</h3>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-18-1.png" width="268"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="null-dyads-matrix-mathbfn-mathbf1---mathbfa-circ-mathbf1---mathbfat-setup" class="slide level2">
+<h2>3. Null Dyads Matrix (<span class="math inline">\(\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T)\)</span>): Setup</h2>
+<ul>
+<li>Multiplying the complement of <span class="math inline">\(\mathbf{A}\)</span> by the complement of transpose (<span class="math inline">\(\mathbf{1} - \mathbf{A}^T\)</span>) extracts completely disconnected dyads:</li>
+</ul>
+<p><span class="math display">\[\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T) = \begin{pmatrix} - &amp; 1 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\\\ 0 &amp; - &amp; 0 &amp; 0 &amp; 1 &amp; 1 \\\\ 0 &amp; 1 &amp; - &amp; 0 &amp; 0 &amp; 1 \\\\ 1 &amp; 1 &amp; 1 &amp; - &amp; 1 &amp; 1 \\\\ 1 &amp; 1 &amp; 1 &amp; 0 &amp; - &amp; 0 \\\\ 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; - \end{pmatrix} \circ \begin{pmatrix} - &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 \\\\ 1 &amp; - &amp; 1 &amp; 1 &amp; 1 &amp; 1 \\\\ 0 &amp; 0 &amp; - &amp; 1 &amp; 1 &amp; 1 \\\\ 1 &amp; 0 &amp; 0 &amp; - &amp; 0 &amp; 0 \\\\ 0 &amp; 1 &amp; 0 &amp; 1 &amp; - &amp; 0 \\\\ 1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; - \end{pmatrix}\]</span></p>
+</section>
+<section id="null-dyads-matrix-mathbfn-mathbf1---mathbfa-circ-mathbf1---mathbfat-calculation" class="slide level2">
+<h2>3. Null Dyads Matrix (<span class="math inline">\(\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T)\)</span>): Calculation</h2>
+<ul>
+<li>We multiply the corresponding cells of <span class="math inline">\((\mathbf{1} - \mathbf{A})\)</span> and <span class="math inline">\((\mathbf{1} - \mathbf{A}^T)\)</span> element-wise:</li>
+</ul>
+<div style="font-size: 72%;">
+<p><span class="math display">\[\mathbf{N} = \begin{pmatrix} -\times- &amp; 1\times0 &amp; 0\times0 &amp; 1\times1 &amp; 0\times0 &amp; 1\times1 \\\\ 0\times1 &amp; -\times- &amp; 0\times1 &amp; 0\times1 &amp; 1\times1 &amp; 1\times1 \\\\ 0\times0 &amp; 1\times0 &amp; -\times- &amp; 0\times1 &amp; 0\times1 &amp; 1\times1 \\\\ 1\times1 &amp; 1\times0 &amp; 1\times0 &amp; -\times- &amp; 1\times0 &amp; 1\times0 \\\\ 1\times0 &amp; 1\times1 &amp; 1\times0 &amp; 0\times1 &amp; -\times- &amp; 0\times0 \\\\ 1\times1 &amp; 1\times1 &amp; 1\times1 &amp; 0\times1 &amp; 0\times0 &amp; -\times- \end{pmatrix} = \begin{pmatrix} - &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; 0 &amp; \mathbf{1} \\\\ 0 &amp; - &amp; 0 &amp; 0 &amp; \mathbf{1} &amp; \mathbf{1} \\\\ 0 &amp; 0 &amp; - &amp; 0 &amp; 0 &amp; \mathbf{1} \\\\ \mathbf{1} &amp; 0 &amp; 0 &amp; - &amp; 0 &amp; 0 \\\\ 0 &amp; \mathbf{1} &amp; 0 &amp; 0 &amp; - &amp; 0 \\\\ \mathbf{1} &amp; \mathbf{1} &amp; \mathbf{1} &amp; 0 &amp; 0 &amp; - \end{pmatrix}\]</span></p>
+</div>
+<div class="columns">
+<div class="column" style="width:38%;">
+<h3 id="census-count-n_n">Census Count (<span class="math inline">\(N_N\)</span>)</h3>
+<ul>
+<li>Retains completely disconnected dyads.</li>
+<li>Sum of cells in <span class="math inline">\(\mathbf{N}\)</span> is 10.</li>
+<li><span class="math display">\[N_N = \frac{\sum N_{ij}}{2} = \frac{10}{2} = \mathbf{5} \text{ null dyads}\]</span></li>
+</ul>
+</div><div class="column" style="width:32%;">
+<h3 id="matrix-result-mathbfn">Matrix Result (<span class="math inline">\(\mathbf{N}\)</span>)</h3>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">F</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">F</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:30%;">
+<h3 id="reference-graph-a">Reference Graph (A)</h3>
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-20-1.png" width="268"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="the-dyad-census-identity-check" class="slide level2">
+<h2>The Dyad Census Identity Check</h2>
+<ul>
+<li>In any directed graph of size <span class="math inline">\(n\)</span>, the total number of dyads (pairs) is <span class="math inline">\(\frac{n(n-1)}{2}\)</span>.</li>
+<li>For our <span class="math inline">\(n=6\)</span> graph, we must have exactly <span class="math inline">\(\frac{6 \times 5}{2} = 15\)</span> dyads.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Check</strong>:
+<ul>
+<li><span class="math inline">\(N_M + N_A + N_N = 2 + 8 + 5 = \mathbf{15}\)</span></li>
+<li>The mathematics accounts for every single pair in the network perfectly!</li>
+</ul></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li><strong>The Matrix Identity</strong>:
+<ul>
+<li>The cell-wise sum of our three matrices always equals the complete graph minus the diagonal (<span class="math inline">\(\mathbf{J} - \mathbf{I}\)</span>):</li>
+<li><span class="math inline">\(\mathbf{M} + \mathbf{S} + \mathbf{N} = \mathbf{J} - \mathbf{I}\)</span></li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="graph-reciprocity-r" class="slide level2">
+<h2>Graph Reciprocity (<span class="math inline">\(R\)</span>)</h2>
+<ul>
+<li><strong>Graph Reciprocity (<span class="math inline">\(R\)</span>)</strong> measures the extent to which a directed graph approximates the ideal of complete reciprocity.</li>
+<li>It is defined as the proportion of connected dyads that are mutual: <span class="math inline">\(R = \frac{N_M}{N_M + N_A}\)</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Calculation</strong>:
+<ul>
+<li>We know <span class="math inline">\(N_M = 2\)</span> and <span class="math inline">\(N_A = 8\)</span>.</li>
+<li><span class="math inline">\(R = \frac{2}{2 + 8} = \frac{2}{10} = \mathbf{0.20}\)</span></li>
+</ul></li>
+<li><strong>Sociological Meaning</strong>:
+<ul>
+<li><strong>20%</strong> of the connected dyads in this network are mutual. This represents a relatively low level of reciprocity!</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-4-conformability-rules" class="title-slide slide level1 center">
+<h1>Part 4: Conformability Rules</h1>
+
+</section>
+<section id="standard-matrix-multiplication-mathbfa-times-mathbfb" class="slide level2">
+<h2>Standard Matrix Multiplication (<span class="math inline">\(\mathbf{A} \times \mathbf{B}\)</span>)</h2>
+<ul>
+<li>Unlike the element-wise Hadamard product, standard matrix multiplication is <strong>non-elementary</strong>.</li>
+<li>It involves multiplying the <strong>rows of the left matrix</strong> by the <strong>columns of the right matrix</strong>.</li>
+<li>Because rows and columns are matched, the sizes of the two multiplier matrices must follow a strict structural rule.</li>
+<li>This rule is called <strong>Conformability</strong>.</li>
+</ul>
+</section>
+<section id="the-conformability-rule" class="slide level2">
+<h2>The Conformability Rule</h2>
+<ul>
+<li><em>You can only multiply two matrices if the number of columns of the first matrix equals the number of rows of the second matrix.</em></li>
+<li>Put their dimensions side-by-side:</li>
+</ul>
+<p><span class="math display">\[\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}\]</span></p>
+<ul>
+<li><strong>Inner Dimensions</strong>: The bold “fives” are the inner dimensions. They <strong>must be identical</strong> for the multiplication to be defined (<strong>conformable</strong>).</li>
+<li><strong>Outer Dimensions</strong>: The “three” and “six” are the outer dimensions. They dictate the size of the resulting product matrix:</li>
+</ul>
+<p><span class="math display">\[\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}\]</span></p>
+</section>
+<section id="conformable-vs.-non-conformable" class="slide level2">
+<h2>Conformable vs.&nbsp;Non-Conformable</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="conformable-example">Conformable Example</h3>
+<ul>
+<li>Line up dimensions: <span class="math display">\[\mathbf{A}_{4 \times \mathbf{2}} \times \mathbf{B}_{\mathbf{2} \times 3}\]</span></li>
+<li><strong>Inner dimensions match</strong> (2 = 2).</li>
+<li>The multiplication is fully defined.</li>
+<li><strong>Product Matrix size</strong>: <span class="math display">\[\mathbf{C}_{4 \times 3}\]</span></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<h3 id="non-conformable-example">Non-Conformable Example</h3>
+<ul>
+<li>Line up dimensions: <span class="math display">\[\mathbf{A}_{3 \times \mathbf{4}} \times \mathbf{B}_{\mathbf{2} \times 3}\]</span></li>
+<li><strong>Inner dimensions clash</strong> (4 <span class="math inline">\(\neq\)</span> 2).</li>
+<li>This operation is <strong>mathematically impossible</strong>.</li>
+<li><strong>The Visual Reason</strong>: When you try to dot-multiply a row of 4 by a column of 2, you “run out of numbers” on the right, making the sum undefined.</li>
+</ul>
+</div></div>
+</section>
+<section id="matrix-multiplication-is-non-commutative" class="slide level2">
+<h2>Matrix Multiplication is Non-Commutative</h2>
+<ul>
+<li>In scalar math, order doesn’t matter: <span class="math inline">\(4 \times 3 = 3 \times 4\)</span>.</li>
+<li>In matrix algebra, order <strong>completely changes the structure</strong>:</li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{A}_{2 \times \mathbf{3}} \times \mathbf{B}_{\mathbf{3} \times 2} = \mathbf{C}_{2 \times 2} \quad \text{(Square 2x2 Matrix)}\]</span></p>
+</div>
+<div class="fragment">
+<p><span class="math display">\[\mathbf{B}_{3 \times \mathbf{2}} \times \mathbf{A}_{\mathbf{2} \times 3} = \mathbf{D}_{3 \times 3} \quad \text{(Square 3x3 Matrix)}\]</span></p>
+<ul>
+<li>Changing the multiplication order changes both the conformability checks and the resulting network’s dimensions!</li>
+</ul>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-5-step-by-step-multiplication-mechanics" class="title-slide slide level1 center">
+<h1>Part 5: Step-by-Step Multiplication Mechanics</h1>
+
+</section>
+<section id="row-by-column-vector-multiplication" class="slide level2">
+<h2>Row-by-Column Vector Multiplication</h2>
+<ul>
+<li>Let’s multiply a <span class="math inline">\(2 \times 3\)</span> matrix <span class="math inline">\(\mathbf{A}\)</span> by a <span class="math inline">\(3 \times 2\)</span> matrix <span class="math inline">\(\mathbf{B}\)</span> to produce a <span class="math inline">\(2 \times 2\)</span> matrix <span class="math inline">\(\mathbf{C}\)</span>:</li>
+</ul>
+<p><span class="math display">\[\mathbf{A} = \begin{pmatrix} \mathbf{3} &amp; \mathbf{4} &amp; \mathbf{5} \\ 7 &amp; 6 &amp; 3 \end{pmatrix} \quad \mathbf{B} = \begin{pmatrix} \mathbf{3} &amp; 7 \\ \mathbf{4} &amp; 9 \\ \mathbf{5} &amp; 3 \end{pmatrix}\]</span></p>
+<ul>
+<li>To compute cell <span class="math inline">\(c_{ij}\)</span> in the target matrix, we multiply row <span class="math inline">\(i\)</span> of the left matrix by column <span class="math inline">\(j\)</span> of the right matrix, then sum the products.</li>
+<li>Let’s trace each of the 4 cells in the target matrix <span class="math inline">\(\mathbf{C}_{2 \times 2}\)</span> progressively.</li>
+</ul>
+</section>
+<section id="target-cell-c_11-row-1-column-1" class="slide level2">
+<h2>Target Cell <span class="math inline">\(c_{11}\)</span> (Row 1, Column 1)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-vectors">Highlighted Vectors</h3>
+<ul>
+<li><strong>Row 1 of A</strong>: <span class="math inline">\(\color{red}{\{3, 4, 5\}}\)</span></li>
+<li><strong>Column 1 of B</strong>: <span class="math inline">\(\color{blue}{\{3, 4, 5\}}\)</span></li>
+</ul>
+<h3 id="calculation">Calculation</h3>
+<p><span class="math display">\[c_{11} = (\color{red}{3} \times \color{blue}{3}) + (\color{red}{4} \times \color{blue}{4}) + (\color{red}{5} \times \color{blue}{5})\]</span> <span class="math display">\[c_{11} = 9 + 16 + 25 = \mathbf{50}\]</span></p>
+</div><div class="column" style="width:50%;">
+<h3 id="target-matrix-c">Target Matrix C</h3>
+<p><span class="math display">\[\mathbf{C} = \begin{pmatrix} \mathbf{50} &amp; ? \\ ? &amp; ? \end{pmatrix}\]</span></p>
+</div></div>
+</section>
+<section id="target-cell-c_12-row-1-column-2" class="slide level2">
+<h2>Target Cell <span class="math inline">\(c_{12}\)</span> (Row 1, Column 2)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-vectors-1">Highlighted Vectors</h3>
+<ul>
+<li><strong>Row 1 of A</strong>: <span class="math inline">\(\color{red}{\{3, 4, 5\}}\)</span></li>
+<li><strong>Column 2 of B</strong>: <span class="math inline">\(\color{blue}{\{7, 9, 3\}}\)</span></li>
+</ul>
+<h3 id="calculation-1">Calculation</h3>
+<p><span class="math display">\[c_{12} = (\color{red}{3} \times \color{blue}{7}) + (\color{red}{4} \times \color{blue}{9}) + (\color{red}{5} \times \color{blue}{3})\]</span> <span class="math display">\[c_{12} = 21 + 36 + 15 = \mathbf{72}\]</span></p>
+</div><div class="column" style="width:50%;">
+<h3 id="target-matrix-c-1">Target Matrix C</h3>
+<p><span class="math display">\[\mathbf{C} = \begin{pmatrix} 50 &amp; \mathbf{72} \\ ? &amp; ? \end{pmatrix}\]</span></p>
+</div></div>
+</section>
+<section id="target-cell-c_21-row-2-column-1" class="slide level2">
+<h2>Target Cell <span class="math inline">\(c_{21}\)</span> (Row 2, Column 1)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-vectors-2">Highlighted Vectors</h3>
+<ul>
+<li><strong>Row 2 of A</strong>: <span class="math inline">\(\color{red}{\{7, 6, 3\}}\)</span></li>
+<li><strong>Column 1 of B</strong>: <span class="math inline">\(\color{blue}{\{3, 4, 5\}}\)</span></li>
+</ul>
+<h3 id="calculation-2">Calculation</h3>
+<p><span class="math display">\[c_{21} = (\color{red}{7} \times \color{blue}{3}) + (\color{red}{6} \times \color{blue}{4}) + (\color{red}{3} \times \color{blue}{5})\]</span> <span class="math display">\[c_{21} = 21 + 24 + 15 = \mathbf{60}\]</span></p>
+</div><div class="column" style="width:50%;">
+<h3 id="target-matrix-c-2">Target Matrix C</h3>
+<p><span class="math display">\[\mathbf{C} = \begin{pmatrix} 50 &amp; 72 \\ \mathbf{60} &amp; ? \end{pmatrix}\]</span></p>
+</div></div>
+</section>
+<section id="target-cell-c_22-row-2-column-2" class="slide level2">
+<h2>Target Cell <span class="math inline">\(c_{22}\)</span> (Row 2, Column 2)</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="highlighted-vectors-3">Highlighted Vectors</h3>
+<ul>
+<li><strong>Row 2 of A</strong>: <span class="math inline">\(\color{red}{\{7, 6, 3\}}\)</span></li>
+<li><strong>Column 2 of B</strong>: <span class="math inline">\(\color{blue}{\{7, 9, 3\}}\)</span></li>
+</ul>
+<h3 id="calculation-3">Calculation</h3>
+<p><span class="math display">\[c_{22} = (\color{red}{7} \times \color{blue}{7}) + (\color{red}{6} \times \color{blue}{9}) + (\color{red}{3} \times \color{blue}{3})\]</span> <span class="math display">\[c_{22} = 49 + 54 + 9 = \mathbf{112}\]</span></p>
+</div><div class="column" style="width:50%;">
+<h3 id="finished-target-matrix-c">Finished Target Matrix C</h3>
+<p><span class="math display">\[\mathbf{C} = \begin{pmatrix} 50 &amp; 72 \\ 60 &amp; \mathbf{112} \end{pmatrix}\]</span></p>
+</div></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-6-dynamic-network-applications" class="title-slide slide level1 center">
+<h1>Part 6: Dynamic Network Applications</h1>
+
+</section>
+<section id="transpose-multiplication-common-neighbors" class="slide level2">
+<h2>Transpose Multiplication: Common Neighbors</h2>
+<ul>
+<li>If we multiply a network’s adjacency matrix <span class="math inline">\(\mathbf{P}\)</span> by its transpose <span class="math inline">\(\mathbf{P}^T\)</span>: <span class="math display">\[\mathbf{P} \times \mathbf{P}^T = \mathbf{C}_{\text{common}}\]</span></li>
+<li>Why does this standard matrix multiplication reveal structural overlaps?</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>The Diagonal Cells (<span class="math inline">\(c_{ii}\)</span>)</strong>:
+<ul>
+<li>Corresponds to multiplying Row <span class="math inline">\(i\)</span> of <span class="math inline">\(\mathbf{P}\)</span> by Column <span class="math inline">\(i\)</span> of <span class="math inline">\(\mathbf{P}^T\)</span> (which is identical to Row <span class="math inline">\(i\)</span>).</li>
+<li><strong>Result</strong>: Counts the total number of neighbors of node <span class="math inline">\(i\)</span> (the <strong>node degree</strong>).</li>
+</ul></li>
+<li><strong>The Off-Diagonal Cells (<span class="math inline">\(c_{ij}\)</span>)</strong>:
+<ul>
+<li>Multiplies Row <span class="math inline">\(i\)</span> (node <span class="math inline">\(i\)</span>’s friendships) by Column <span class="math inline">\(j\)</span> of <span class="math inline">\(\mathbf{P}^T\)</span> (which is identical to Row <span class="math inline">\(j\)</span> of <span class="math inline">\(\mathbf{P}\)</span>, node <span class="math inline">\(j\)</span>’s friendships).</li>
+<li><strong>Result</strong>: Counts exactly how many <strong>common neighbors</strong> node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span> share!</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="transpose-multiplication-mathbfp-times-mathbfpt-setup" class="slide level2">
+<h2>Transpose Multiplication (<span class="math inline">\(\mathbf{P} \times \mathbf{P}^T\)</span>): Setup</h2>
+<ul>
+<li>Let’s write out the complete multiplication of our <span class="math inline">\(6 \times 6\)</span> symmetric “Parties With” adjacency matrix <span class="math inline">\(\mathbf{P}\)</span> (<span class="math inline">\(\mathbf{P}^T = \mathbf{P}\)</span>):</li>
+</ul>
+<p><span class="math display">\[\mathbf{P} \times \mathbf{P}^T = \begin{pmatrix} 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\\\ 1 &amp; 1 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \\\\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 \\\\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix} \times \begin{pmatrix} 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\\\ 1 &amp; 1 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \\\\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 \\\\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
+<div class="fragment">
+<ul>
+<li>To find any cell <span class="math inline">\(c_{ij}\)</span> of the resulting common neighbors matrix, we multiply <strong>Row <span class="math inline">\(i\)</span> of <span class="math inline">\(\mathbf{P}\)</span></strong> by <strong>Column <span class="math inline">\(j\)</span> of <span class="math inline">\(\mathbf{P}^T\)</span></strong> (element-wise), then sum the products.</li>
+<li>Let’s trace how node degrees and common neighbors emerge progressively across the next slides.</li>
+</ul>
+</div>
+</section>
+<section id="transpose-multiplication-mathbfp-times-mathbfpt-diagonal-cells" class="slide level2">
+<h2>Transpose Multiplication (<span class="math inline">\(\mathbf{P} \times \mathbf{P}^T\)</span>): Diagonal Cells</h2>
+<ul>
+<li>For diagonal cells, we multiply a node’s row by its own transposed column (itself).</li>
+<li>Let’s trace <strong>Node C</strong> (<span class="math inline">\(c_{33}\)</span>), which corresponds to <strong>Row 3 of <span class="math inline">\(\mathbf{P}\)</span></strong> and <strong>Column 3 of <span class="math inline">\(\mathbf{P}^T\)</span></strong>:</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Row 3 (C)</strong>: <span class="math inline">\(\color{red}{\{1, 1, 0, 1, 1, 1\}}\)</span></li>
+<li><strong>Column 3 (C)</strong>: <span class="math inline">\(\color{blue}{\{1, 1, 0, 1, 1, 1\}}\)</span></li>
+</ul>
+<p><span class="math display">\[c_{33} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1})\]</span> <span class="math display">\[c_{33} = 1 + 1 + 0 + 1 + 1 + 1 = \mathbf{5}\]</span></p>
+<ul>
+<li><strong>Sociological Meaning</strong>:
+<ul>
+<li>Cell <span class="math inline">\(c_{33} = 5\)</span> represents the <strong>degree of Node C</strong> (it has 5 friendships).</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="transpose-multiplication-mathbfp-times-mathbfpt-off-diagonal-cells" class="slide level2">
+<h2>Transpose Multiplication (<span class="math inline">\(\mathbf{P} \times \mathbf{P}^T\)</span>): Off-Diagonal Cells</h2>
+<ul>
+<li>For off-diagonal cells, we multiply Row <span class="math inline">\(i\)</span> (node <span class="math inline">\(i\)</span>’s friends) by Column <span class="math inline">\(j\)</span> of <span class="math inline">\(\mathbf{P}^T\)</span> (node <span class="math inline">\(j\)</span>’s friends).</li>
+<li>Let’s trace common neighbors between <strong>Node A</strong> (Row 1) and <strong>Node C</strong> (Column 3):</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><strong>Row 1 (A)</strong>: <span class="math inline">\(\color{red}{\{0, 1, 1, 0, 1, 0\}}\)</span></li>
+<li><strong>Column 3 (C)</strong>: <span class="math inline">\(\color{blue}{\{1, 1, 0, 1, 1, 1\}}\)</span></li>
+</ul>
+<p><span class="math display">\[c_{\text{A, C}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1})\]</span> <span class="math display">\[c_{\text{A, C}} = 0 + \mathbf{1} + 0 + 0 + \mathbf{1} + 0 = \mathbf{2}\]</span></p>
+<ul>
+<li><strong>Sociological Meaning</strong>:
+<ul>
+<li>Node A and Node C share exactly <strong>2</strong> common neighbors.</li>
+<li>The non-zero products reveal they both share friendships with <strong>B</strong> (<span class="math inline">\(1 \times 1 = 1\)</span>) and <strong>E</strong> (<span class="math inline">\(1 \times 1 = 1\)</span>).</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="transpose-multiplication-mathbfp-times-mathbfpt-output-matrix" class="slide level2">
+<h2>Transpose Multiplication (<span class="math inline">\(\mathbf{P} \times \mathbf{P}^T\)</span>): Output Matrix</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<h3 id="common-neighbors-matrix-mathbfp-times-mathbfpt">Common Neighbors Matrix (<span class="math inline">\(\mathbf{P} \times \mathbf{P}^T\)</span>)</h3>
+<p><span class="math display">\[\mathbf{P} \times \mathbf{P}^T = \begin{pmatrix} \mathbf{3} &amp; 1 &amp; 2 &amp; 3 &amp; 1 &amp; 2 \\\\ 1 &amp; \mathbf{3} &amp; 2 &amp; 1 &amp; 3 &amp; 1 \\\\ 2 &amp; 2 &amp; \mathbf{5} &amp; 2 &amp; 3 &amp; 1 \\\\ 3 &amp; 1 &amp; 2 &amp; \mathbf{3} &amp; 1 &amp; 2 \\\\ 1 &amp; 3 &amp; 3 &amp; 1 &amp; \mathbf{4} &amp; 1 \\\\ 2 &amp; 1 &amp; 1 &amp; 2 &amp; 1 &amp; \mathbf{2} \end{pmatrix}\]</span></p>
+<ul>
+<li><strong>Diagonals</strong>: Node degrees <span class="math inline">\((3, 3, 5, 3, 4, 2)\)</span>.</li>
+<li><strong>Off-diagonals</strong>: Shared neighbors counts.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-21-1.png" width="403"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>Node B and E are connected to A, C, and D, matching the cell value of <strong>3</strong> in the table.</li>
+</ul>
+</center>
+</div></div>
+</section>
+<section id="matrix-powers-mathbfpn-paths-in-networks" class="slide level2">
+<h2>Matrix Powers (<span class="math inline">\(\mathbf{P}^n\)</span>) &amp; Paths in Networks</h2>
+<ul>
+<li>Multiplying a square adjacency matrix by itself recursively reveals <strong>indirect connections (walks)</strong>:
+<ul>
+<li><span class="math inline">\(\mathbf{P}^2 = \mathbf{P} \times \mathbf{P}\)</span></li>
+<li><span class="math inline">\(\mathbf{P}^3 = \mathbf{P} \times \mathbf{P} \times \mathbf{P}\)</span></li>
+</ul></li>
+<li>In network science, the entries of the <span class="math inline">\(n^{\text{th}}\)</span> power of an adjacency matrix have a precise graph-theoretic meaning:
+<ul>
+<li><strong>Off-Diagonal Cells (<span class="math inline">\(p^{n}_{ij}\)</span>)</strong>: Record the exact number of <strong>walks of length <span class="math inline">\(n\)</span></strong> connecting node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span>.</li>
+<li><strong>Diagonal Cells (<span class="math inline">\(p^{n}_{ii}\)</span>)</strong>: Record the exact number of <strong>cycles of length <span class="math inline">\(n\)</span></strong> that start and end at node <span class="math inline">\(i\)</span>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="walks-of-length-2-mathbfp2-setup" class="slide level2">
+<h2>Walks of Length 2 (<span class="math inline">\(\mathbf{P}^2\)</span>): Setup</h2>
+<ul>
+<li>Let’s square our <span class="math inline">\(6 \times 6\)</span> symmetric adjacency matrix <span class="math inline">\(\mathbf{P}\)</span>:</li>
+</ul>
+<p><span class="math display">\[\mathbf{P}^2 = \begin{pmatrix} 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\\\ 1 &amp; 1 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \\\\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 \\\\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix} \times \begin{pmatrix} 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\\\ 1 &amp; 1 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \\\\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 \\\\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
+<div class="fragment">
+<ul>
+<li>Since <span class="math inline">\(\mathbf{P}\)</span> is undirected, <span class="math inline">\(\mathbf{P}^T = \mathbf{P}\)</span>, making <span class="math inline">\(\mathbf{P}^2\)</span> identical to <span class="math inline">\(\mathbf{P} \times \mathbf{P}^T\)</span>.</li>
+<li>Therefore, walks of length 2 are mathematically equivalent to <strong>common neighbors</strong>!</li>
+<li>Why? To go from <span class="math inline">\(i \rightarrow k \rightarrow j\)</span> (walk of length 2), node <span class="math inline">\(k\)</span> must be a common friend connected to both <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</li>
+</ul>
+</div>
+</section>
+<section id="walks-of-length-2-mathbfp2-tracing-cell-p2_texta-c" class="slide level2 scrollable">
+<h2>Walks of Length 2 (<span class="math inline">\(\mathbf{P}^2\)</span>): Tracing Cell <span class="math inline">\(p^2_{\text{A, C}}\)</span></h2>
+<ul>
+<li>Let’s compute the number of walks of length 2 between <strong>Node A</strong> (Row 1) and <strong>Node C</strong> (Column 3):
+<ul>
+<li>Row 1 (A): <span class="math inline">\(\color{red}{\{0, 1, 1, 0, 1, 0\}}\)</span></li>
+<li>Column 3 (C): <span class="math inline">\(\color{blue}{\{1, 1, 0, 1, 1, 1\}}\)</span></li>
+</ul></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[p^2_{\text{A, C}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1}) = \mathbf{2}\]</span></p>
+<ul>
+<li>These two distinct walks of length 2 are:
+<ol type="1">
+<li><span class="math inline">\(A \rightarrow \mathbf{B} \rightarrow C\)</span> (via common friend B)</li>
+<li><span class="math inline">\(A \rightarrow \mathbf{E} \rightarrow C\)</span> (via common friend E)</li>
+</ol></li>
+</ul>
+</div>
+</section>
+<section id="walks-of-length-2-mathbfp2-tracing-diagonal-cell-p2_textc-c" class="slide level2">
+<h2>Walks of Length 2 (<span class="math inline">\(\mathbf{P}^2\)</span>): Tracing Diagonal Cell <span class="math inline">\(p^2_{\text{C, C}}\)</span></h2>
+<ul>
+<li>Let’s compute the diagonal cell <span class="math inline">\(p^2_{\text{C, C}}\)</span> (Row 3, Column 3):
+<ul>
+<li>Row 3 (C): <span class="math inline">\(\color{red}{\{1, 1, 0, 1, 1, 1\}}\)</span></li>
+<li>Column 3 (C): <span class="math inline">\(\color{blue}{\{1, 1, 0, 1, 1, 1\}}\)</span></li>
+</ul></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[p^2_{\text{C, C}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) = \mathbf{5}\]</span></p>
+<ul>
+<li>Walks of length 2 starting and ending at C are simply round-trips from C to its friends and back:
+<ul>
+<li><span class="math inline">\(C \rightarrow A \rightarrow C\)</span>, <span class="math inline">\(C \rightarrow B \rightarrow C\)</span>, <span class="math inline">\(C \rightarrow D \rightarrow C\)</span>, <span class="math inline">\(C \rightarrow E \rightarrow C\)</span>, and <span class="math inline">\(C \rightarrow F \rightarrow C\)</span>.</li>
+</ul></li>
+<li>Thus, the diagonal elements in <span class="math inline">\(\mathbf{P}^2\)</span> represent the <strong>degrees</strong> of each node!</li>
+</ul>
+</div>
+</section>
+<section id="the-completed-squared-matrix-mathbfp2" class="slide level2">
+<h2>The Completed Squared Matrix (<span class="math inline">\(\mathbf{P}^2\)</span>)</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<h3 id="squared-matrix-mathbfp2">Squared Matrix (<span class="math inline">\(\mathbf{P}^2\)</span>)</h3>
+<p><span class="math display">\[\mathbf{P}^2 = \begin{pmatrix} \mathbf{3} &amp; 1 &amp; 2 &amp; 3 &amp; 1 &amp; 2 \\\\ 1 &amp; \mathbf{3} &amp; 2 &amp; 1 &amp; 3 &amp; 1 \\\\ 2 &amp; 2 &amp; \mathbf{5} &amp; 2 &amp; 3 &amp; 1 \\\\ 3 &amp; 1 &amp; 2 &amp; \mathbf{3} &amp; 1 &amp; 2 \\\\ 1 &amp; 3 &amp; 3 &amp; 1 &amp; \mathbf{4} &amp; 1 \\\\ 2 &amp; 1 &amp; 1 &amp; 2 &amp; 1 &amp; \mathbf{2} \end{pmatrix}\]</span></p>
+<ul>
+<li><strong>Diagonals</strong>: Node degrees <span class="math inline">\((3, 3, 5, 3, 4, 2)\)</span>.</li>
+<li><strong>Off-diagonals</strong>: Number of length-2 walks (common friends).</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-22-1.png" width="403"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="walks-of-length-3-mathbfp3-setup" class="slide level2">
+<h2>Walks of Length 3 (<span class="math inline">\(\mathbf{P}^3\)</span>): Setup</h2>
+<ul>
+<li>To find walks of length 3, we multiply the squared matrix <span class="math inline">\(\mathbf{P}^2\)</span> by the original matrix <span class="math inline">\(\mathbf{P}\)</span>:</li>
+</ul>
+<p><span class="math display">\[\mathbf{P}^3 = \begin{pmatrix} 3 &amp; 1 &amp; 2 &amp; 3 &amp; 1 &amp; 2 \\\\ 1 &amp; 3 &amp; 2 &amp; 1 &amp; 3 &amp; 1 \\\\ 2 &amp; 2 &amp; 5 &amp; 2 &amp; 3 &amp; 1 \\\\ 3 &amp; 1 &amp; 2 &amp; 3 &amp; 1 &amp; 2 \\\\ 1 &amp; 3 &amp; 3 &amp; 1 &amp; 4 &amp; 1 \\\\ 2 &amp; 1 &amp; 1 &amp; 2 &amp; 1 &amp; 2 \end{pmatrix} \times \begin{pmatrix} 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\\\ 1 &amp; 1 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \\\\ 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \\\\ 1 &amp; 0 &amp; 1 &amp; 1 &amp; 0 &amp; 1 \\\\ 0 &amp; 0 &amp; 1 &amp; 0 &amp; 1 &amp; 0 \end{pmatrix}\]</span></p>
+<div class="fragment">
+<ul>
+<li><strong>Diagonal cells (<span class="math inline">\(p^3_{ii}\)</span>)</strong>: Count length-3 cycles (triangles) starting and ending at node <span class="math inline">\(i\)</span>.</li>
+<li>Since each triangle can be walked in two directions (clockwise &amp; counterclockwise), the number of triangles node <span class="math inline">\(i\)</span> belongs to is: <span class="math display">\[\text{Triangles}(i) = \frac{p^3_{ii}}{2}\]</span></li>
+</ul>
+</div>
+</section>
+<section id="walks-of-length-3-mathbfp3-tracing-diagonal-cell-p3_textc-c" class="slide level2">
+<h2>Walks of Length 3 (<span class="math inline">\(\mathbf{P}^3\)</span>): Tracing Diagonal Cell <span class="math inline">\(p^3_{\text{C, C}}\)</span></h2>
+<ul>
+<li>Let’s compute the diagonal cell <span class="math inline">\(p^3_{\text{C, C}}\)</span> (Row 3, Column 3):
+<ul>
+<li>Row 3 of <span class="math inline">\(\mathbf{P}^2\)</span>: <span class="math inline">\(\color{red}{\{2, 2, 5, 2, 3, 1\}}\)</span></li>
+<li>Column 3 of <span class="math inline">\(\mathbf{P}\)</span>: <span class="math inline">\(\color{blue}{\{1, 1, 0, 1, 1, 1\}}\)</span></li>
+</ul></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[p^3_{\text{C, C}} = (\color{red}{2} \times \color{blue}{1}) + (\color{red}{2} \times \color{blue}{1}) + (\color{red}{5} \times \color{blue}{0}) + (\color{red}{2} \times \color{blue}{1}) + (\color{red}{3} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1})\]</span> <span class="math display">\[p^3_{\text{C, C}} = 2 + 2 + 0 + 2 + 3 + 1 = \mathbf{10}\]</span></p>
+<ul>
+<li>The number of triangles containing Node C is: <span class="math display">\[\text{Triangles}(C) = \frac{10}{2} = \mathbf{5} \text{ triangles}\]</span></li>
+<li>Looking at the graph, C is indeed part of 5 triangles: {C,A,B}, {C,A,E}, {C,B,D}, {C,D,E}, and {C,E,F}.</li>
+</ul>
+</div>
+</section>
+<section id="the-completed-cubed-matrix-mathbfp3" class="slide level2">
+<h2>The Completed Cubed Matrix (<span class="math inline">\(\mathbf{P}^3\)</span>)</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<h3 id="cubed-matrix-mathbfp3">Cubed Matrix (<span class="math inline">\(\mathbf{P}^3\)</span>)</h3>
+<p><span class="math display">\[\mathbf{P}^3 = \begin{pmatrix} \mathbf{4} &amp; 8 &amp; 10 &amp; 4 &amp; 10 &amp; 3 \\\\ 8 &amp; \mathbf{4} &amp; 9 &amp; 8 &amp; 5 &amp; 5 \\\\ 10 &amp; 9 &amp; \mathbf{10} &amp; 10 &amp; 10 &amp; 8 \\\\ 4 &amp; 8 &amp; 10 &amp; \mathbf{4} &amp; 10 &amp; 3 \\\\ 10 &amp; 5 &amp; 10 &amp; 10 &amp; \mathbf{6} &amp; 7 \\\\ 3 &amp; 5 &amp; 8 &amp; 3 &amp; 7 &amp; \mathbf{2} \end{pmatrix}\]</span></p>
+<ul>
+<li><strong>Diagonals (bold)</strong>: Twice the number of triangles. Node degrees and triangle counts are:
+<ul>
+<li>C (<span class="math inline">\(10/2 = \mathbf{5}\)</span> triangles)</li>
+<li>E (<span class="math inline">\(6/2 = \mathbf{3}\)</span> triangles)</li>
+<li>F (<span class="math inline">\(2/2 = \mathbf{1}\)</span> triangle)</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:45%;">
+<center>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-23-1.png" width="403"></p>
+</figure>
+</div>
+</div>
+</div>
+</center>
+</div></div>
+</section>
+<section id="walks-of-length-3-weighted-graph-representation" class="slide level2">
+<h2>Walks of Length 3: Weighted Graph Representation</h2>
+<ul>
+<li>Plotting the network with edge sizes and color intensities proportional to the entries of <span class="math inline">\(\mathbf{P}^3\)</span> reveals distinct clique structures and <strong>dense subgroups</strong> (like B, C, D, E) sharing multiple indirect pathways:</li>
+</ul>
+
+<img data-src="matrix-operations_files/figure-revealjs/unnamed-chunk-24-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section></section>
+<section>
+<section id="part-7-summary-conclusion" class="title-slide slide level1 center">
+<h1>Part 7: Summary &amp; Conclusion</h1>
+
+</section>
+<section id="summary-of-matrix-algebraic-power" class="slide level2">
+<h2>Summary of Matrix Algebraic Power</h2>
+<ul>
+<li><strong>Basic operations combine relationships</strong>:
+<ul>
+<li>Addition (<span class="math inline">\(\mathbf{P} + \mathbf{G}\)</span>) counts uniplex vs.&nbsp;multiplex relationships.</li>
+<li>Subtraction from 1 (<span class="math inline">\(\mathbf{1} - \mathbf{P}\)</span>) flips relations to yield the graph complement (<em>Does Not Party With</em>).</li>
+<li>Hadamard Product (<span class="math inline">\(\mathbf{P} \circ \mathbf{G}\)</span>) extracts multiplex overlaps.</li>
+</ul></li>
+<li><strong>The Matrix Transpose (<span class="math inline">\(\mathbf{A}^T\)</span>)</strong>:
+<ul>
+<li>Flips rows and columns; essential for analyzing directed relations.</li>
+</ul></li>
+<li><strong>The Directed Dyad Census</strong>:
+<ul>
+<li>We use <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{A}^T\)</span> cell-by-cell to compute Mutuals (<span class="math inline">\(M\)</span>), Asymmetrics (<span class="math inline">\(S\)</span>), and Nulls (<span class="math inline">\(N\)</span>), spelling the <strong>MAN</strong> census.</li>
+<li>Graph Reciprocity is computed as <span class="math inline">\(R = \frac{N_M}{N_M + N_A}\)</span>.</li>
+</ul></li>
+<li><strong>Conformability dictates standard multiplication</strong>:
+<ul>
+<li>Inner dimensions must be equal.</li>
+</ul></li>
+<li><strong>Standard multiplication and powers reveal structures</strong>:
+<ul>
+<li><span class="math inline">\(\mathbf{A} \times \mathbf{A}^T\)</span> computes common neighbors (off-diagonals) and degrees (diagonals).</li>
+<li><span class="math inline">\(\mathbf{A}^n\)</span> maps indirect walks of length <span class="math inline">\(n\)</span>. <span class="math inline">\(\mathbf{A}^2\)</span> diagonals are degrees; <span class="math inline">\(\mathbf{A}^3\)</span> diagonals are twice the number of triangles.</li>
+</ul></li>
+</ul>
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="matrix-operations_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="matrix-operations_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="matrix-operations_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="matrix-operations_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="matrix-operations_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="matrix-operations_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="matrix-operations_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="matrix-operations_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="matrix-operations_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="matrix-operations_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 720,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 0.2,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+
+    <script>
+
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
+      // slide changes (different for each slide format).
+
+      (function () {
+
+        // dispatch for htmlwidgets
+
+        function fireSlideEnter() {
+
+          const event = window.document.createEvent("Event");
+
+          event.initEvent("slideenter", true, true);
+
+          window.document.dispatchEvent(event);
+
+        }
+
+    
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+
+          fireSlideEnter();
+
+    
+
+          // dispatch for shiny
+
+          if (window.jQuery) {
+
+            if (previousSlide) {
+
+              window.jQuery(previousSlide).trigger("hidden");
+
+            }
+
+            if (currentSlide) {
+
+              window.jQuery(currentSlide).trigger("shown");
+
+            }
+
+          }
+
+        }
+
+    
+
+        // hookup for slidy
+
+        if (window.w3c_slidy) {
+
+          window.w3c_slidy.add_observer(function (slide_num) {
+
+            // slide_num starts at position 1
+
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
+          });
+
+        }
+
+    
+
+      })();
+
+    </script>
+
+    
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>

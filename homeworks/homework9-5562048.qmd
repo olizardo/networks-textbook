@@ -1,0 +1,231 @@
+# Homework IX: Subgroups, Graph Connectivity, and Structural Similarity {.unnumbered}
+
+---
+sidebar: false
+navbar: false
+toc: false
+---
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+    library(ggraph)
+    library(tidygraph)
+    library(igraph)
+    library(kableExtra)
+```
+
+## Cliques and n-Cliques
+
+```{r}
+#| label: fig-grex1
+#| fig-width: 12
+#| fig-height: 12
+#| fig-cap: "An undirected graph."
+#| fig-cap-location: bottom
+    set.seed(34758935)
+    n <- 13
+    names <- LETTERS[sample(1:n)]
+    gr1 <- create_complete(4) |> 
+        mutate(name = names[1:4])
+    gr2 <- create_complete(4) |>
+        mutate(name = names[5:8])
+    gr3 <- create_complete(5) |>
+        mutate(name = names[9:13])
+    gr4 <- play_islands(n_islands = 4, size_islands = 4, 
+                        p_within = 0.45, m_between = 1) |>
+         mutate(name = LETTERS[1:16])
+    gr <- bind_graphs(gr1) |>
+         bind_graphs(gr2) |>
+         bind_graphs(gr3) |>
+         graph_join(gr4)
+    gr <- as_undirected(gr)
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.15) 
+    p <- p + geom_node_point(color = "tan2", size = 16) 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() 
+    p
+    gr_fig1 <- gr
+```
+
+1. List the nodes in all the **cliques** of *size four* in @fig-grex1.
+
+```{r}
+    c4 <- cliques(gr, min = 4, max = 4)
+    c4_matrix <- matrix(vertex_attr(gr, "name")[unlist(c4)], ncol = 4, byrow = TRUE)
+    c4_matrix <- t(apply(c4_matrix, 1, sort))
+    kbl(c4_matrix)
+```
+
+1. List the nodes in all the **cliques** of *size five* in @fig-grex1.
+
+```{r}
+    c5 <- cliques(gr, min = 5, max = 5)
+    c5_matrix <- matrix(vertex_attr(gr, "name")[unlist(c5)], ncol = 5, byrow = TRUE)
+    c5_matrix <- t(apply(c5_matrix, 1, sort))
+    kbl(c5_matrix)
+```
+
+  
+1. How many **cliques** of *size four* does node *A* belong to?
+
+```{r, include = FALSE}
+    c4 <- cliques(gr, min = 4, max = 4)
+    count_A <- sum(sapply(c4, function(x) { "A" %in% vertex_attr(gr, "name")[x] }))
+```
+
+ANSWER: `r count_A`
+
+
+1. List the nodes in one of the **2-cliques** in @fig-grex1:
+
+```{r, include = FALSE}
+    dist_gr <- distances(gr)
+    adj_2clique <- (dist_gr <= 2) * 1
+    diag(adj_2clique) <- 0
+    g_2clique <- graph_from_adjacency_matrix(adj_2clique, mode = "undirected")
+    cl_2clique <- max_cliques(g_2clique)
+```
+
+ANSWER: `r paste(sort(vertex_attr(gr, "name")[cl_2clique[[1]]]), collapse = ", ")`
+
+
+1. List the nodes in the *five cliques of size four* nested inside the clique of size five in @fig-grex1.
+
+```{r}
+    c5 <- cliques(gr, min = 5, max = 5)
+    c5_nodes <- vertex_attr(gr, "name")[c5[[1]]]
+    c4 <- cliques(gr, min = 4, max = 4)
+    nested_c4 <- c4[sapply(c4, function(x) { all(vertex_attr(gr, "name")[x] %in% c5_nodes) })]
+    nested_matrix <- matrix(vertex_attr(gr, "name")[unlist(nested_c4)], ncol = 4, byrow = TRUE)
+    nested_matrix <- t(apply(nested_matrix, 1, sort))
+    kbl(nested_matrix)
+```
+
+## Structural Equivalence and Structural Similarity
+
+```{r}
+#| label: fig-grex2
+#| fig-cap: "An undirected graph."
+#| fig-cap-location: bottom
+#| fig-height: 8
+#| fig-width: 8
+
+    set.seed(5678)
+    pm <- matrix(c( .15, .11, .12,  1, 
+                    .11, .5, .12,   0,
+                    .14, .14, .5,  0,
+                     1,  0,  0,   0), nrow=4)
+    pm[lower.tri(pm)] = t(pm)[lower.tri(pm)]
+    gr <- play_blocks(n = 12, size_blocks = c(2, 2, 4, 4), 
+                      p_between = pm)
+    V(gr)$name <- sample(LETTERS[1:length(V(gr))])
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_link(color = "steelblue", width = 1.07) 
+    p <- p + geom_node_point(color = "tan2", size = 14) 
+    p <- p + geom_node_text(aes(label = name), size = 8, color = "white")
+    p <- p + theme_graph() 
+    p
+```
+
+- In the matrix below, write down the cell entries for the **adjacency matrix** corresponding to the graph shown in @fig-grex2:
+
+```{r}
+    a <- as.matrix(as_adjacency_matrix(gr))
+    a <- a[LETTERS[1:nrow(a)], LETTERS[1:nrow(a)]]
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (2:length(V(gr)), 
+                      border_left = T, border_right = T) %>%
+         row_spec(1:length(V(gr)), 
+                  extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+```
+
+- Using the information from the previous matrix, in the matrix below, write down the cell entries for the **structural similarity matrix** corresponding to the graph shown in @fig-grex2 using the **Euclidean Distance**:
+
+```{r}
+    a <- as.matrix(round(dist(as.matrix(as_adjacency_matrix(gr))), 2))
+    a <- a[LETTERS[1:nrow(a)], LETTERS[1:nrow(a)]]
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (2:length(V(gr)), 
+                      border_left = T, border_right = T) %>%
+         row_spec(1:length(V(gr)), 
+                  extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+```
+
+1. Using the Information in the previous matrix, write down the sets of nodes that are **structurally equivalent** (e.g., connected to the same set of neighbors) in the graph shown in @fig-grex2.
+
+```{r}
+    a <- as.matrix(round(dist(as.matrix(as_adjacency_matrix(gr))), 2))
+    a <- (a == 0) * 1
+    diag(a) <- 0
+    a[lower.tri(a)] <- 0
+    se <- graph_from_adjacency_matrix(a, mode = "undirected")
+    kbl(as_edgelist(se))
+```
+
+1. Out of the nodes that are not structurally equivalent, which pairs of nodes have the highest **structural similarity** in the graph shown in @fig-grex2?
+
+```{r}
+    a <- as.matrix(round(dist(as.matrix(as_adjacency_matrix(gr))), 2))
+    a <- (a == min(a[a!=0])) * 1
+    a[lower.tri(a)] <- 0
+    se <- graph_from_adjacency_matrix(a, mode = "undirected")
+    kbl(as_edgelist(se))
+```
+
+1. Using the **Jaccard Similarity** metric, compute the structural similarity between nodes *J* and *M* in the graph shown in @fig-grex1.
+
+```{r, include = FALSE}
+    A_fig1 <- as.matrix(as_adjacency_matrix(gr_fig1))
+    M_fig1 <- A_fig1 %*% A_fig1
+    d_fig1 <- rowSums(A_fig1)
+```
+
+ANSWER: `r round(M_fig1["J", "M"]/(d_fig1["J"] + d_fig1["M"] - M_fig1["J", "M"]), 3)`
+
+1. Using the **Dice Similarity** metric, compute the structural similarity between nodes *E* and *N* in the graph shown in @fig-grex1.
+
+ANSWER: `r round((2 * M_fig1["E", "N"])/(d_fig1["E"] + d_fig1["N"]), 3)`
+
+1. Using the **Cosine Similarity** metric, compute the structural similarity between nodes *D* and *H* in the graph shown in @fig-grex1.
+
+ANSWER: `r round((M_fig1["D", "H"])/sqrt(d_fig1["D"] * d_fig1["H"]), 3)`
+
+## Graph Connectivity
+
+```{r, include = FALSE}
+    gr <- gr_fig1
+```
+
+1. Write down a **node cut set** for the graph shown in @fig-grex1.
+
+```{r, include = FALSE}
+    seps <- min_separators(gr)
+```
+
+ANSWER: `r paste(vertex_attr(gr, "name")[seps[[1]]], collapse = ", ")`
+
+
+1. Write down an **edge cut set** for the graph shown in @fig-grex1.
+
+```{r, include = FALSE}
+    res_cut <- min_cut(gr, value.only = FALSE)
+```
+
+ANSWER: `r paste(gsub("\\|", "--", as_ids(res_cut[['cut']])), collapse = ", ")`
+
+1. What is the **k-connectivity** of the graph in @fig-grex1?
+
+ANSWER: `r vertex_connectivity(gr)`
+
+1. What is the **edge connectivity** of the graph in @fig-grex1?
+
+ANSWER: `r edge_connectivity(gr)`
+
+1. What is the **pairwise k-connectivity** between nodes *E* and *N* in @fig-grex1?
+
+ANSWER: `r vertex_connectivity(gr, source = "E", target = "N")`

@@ -1,0 +1,189 @@
+# Homework II: Directed Graphs {.unnumbered}
+
+---
+sidebar: false
+navbar: false
+toc: false
+---
+
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+    require(ggraph)
+    require(tidygraph)
+    require(igraph)
+    require(kableExtra)
+```
+
+```{r}
+#| label: fig-grex1
+#| fig-cap: "A directed graph."
+#| fig-cap-location: bottom
+#| fig-height: 12
+#| fig-width: 12
+    set.seed(12456734)
+    gr <- sample_gnp(n = 12, p = 0.2, directed = TRUE, loops = FALSE)
+    V(gr)$name <- LETTERS[1:12]
+    gr <- gr - edge("D|L")
+    gr <- gr - edge("E|L")
+    gr <- gr + edge("L", "D")
+    gr <- gr + edge("L", "E")
+    p <- ggraph(gr, layout = 'kk') 
+    p <- p + geom_edge_parallel(color = "steelblue", edge_width = 1.25,
+                            arrow = arrow(length = unit(5, 'mm')),
+                            end_cap = circle(10, 'mm'), 
+                            sep = unit(8, 'mm'))    
+    p <- p + geom_node_point(aes(x = x, y = y), size = 22, color = "tan2") 
+    p <- p + geom_node_text(aes(label = name), size = 10, color = "white")
+    p <- p + theme_graph()
+    p
+```
+
+
+
+Consider the graph shown in @fig-grex1:
+
+
+1. Write down the **edge set** of the graph:
+<br>
+```{r}
+    edges <- get.edgelist(gr)
+    a <- edges[,1]
+    b <- edges[,2]
+    b <- paste(b, ", ", sep = "")
+    c <- paste(a, b, sep = "")
+    kbl(t(c))
+```
+<br>
+
+## Directed Graph Neighborhoods
+
+1. Who are the **out-neighbors** of node *A*?
+<br>
+`r LETTERS[neighbors(gr, "A", mode = "out")]`
+<br>
+
+1. Who are the **in-neighbors** of node *E*?
+<br>
+`r LETTERS[neighbors(gr, "E", mode = "in")]`
+<br>
+
+1. What is the **intersection** of the **out-neighborhoods** of nodes *A* and *I*?
+<br>
+`r intersect(LETTERS[neighbors(gr, "A", mode = "out")], LETTERS[neighbors(gr, "I", mode = "out")])`
+<br>
+
+1. What is the **intersection** of the **in-neighborhoods** of nodes *H* and *E*?
+<br>
+`r intersect(LETTERS[neighbors(gr, "H", mode = "in")], LETTERS[neighbors(gr, "E", mode = "in")])`
+<br>
+
+1. What is the **union** of the **out-neighborhoods** of nodes *G* and *K*?
+<br>
+`r union(LETTERS[neighbors(gr, "G", mode = "out")], LETTERS[neighbors(gr, "K", mode = "out")])`
+
+<br>
+
+1. What is the **union** of the **in-neighborhoods** of nodes *B* and *I*?
+<br>
+`r union(LETTERS[neighbors(gr, "B", mode = "in")], LETTERS[neighbors(gr, "I", mode = "in")])`
+<br>
+
+## Directed Graph Degrees
+
+1. What is the **out-degree** of node *H*?
+<br>
+`r degree(gr, "H", mode = "out")`
+<br>
+
+1. What is the **in-degree** of node *E*?
+<br>
+`r degree(gr, "E", mode = "in")`
+<br>
+
+1. What is(are) the node(s) with the largest **out-degree**?
+<br>
+`r names(which(degree(gr, mode = "out") == max_degree(gr, mode = "out")))`
+<br>
+
+1. What is(are) the node(s) with the largest **in-degree**?
+<br>
+`r names(which(degree(gr, mode = "in") == max_degree(gr, mode = "in")))`
+<br>
+
+1. What is(are) the node(s) with the smallest **out-degree**?
+<br>
+`r names(which(degree(gr, mode = "out") == min(degree(gr, mode = "out"))))`
+<br>
+
+1. What is(are) the node(s) with the smallest **in-degree**?
+<br>
+`r names(which(degree(gr, mode = "in") == min(degree(gr, mode = "in"))))`
+<br>
+
+## Directed Graph Node Types
+
+1. Which is(are) the **receiver node(s)** in the graph?
+<br>
+`r names(which(degree(gr, mode = "out") == 0))`
+<br>
+
+1. Which is(are) the **transmitter node(s)** in the graph?
+<br>
+`r names(which(degree(gr, mode = "in") == 0))`
+<br>
+
+## Directed Graph Metrics
+
+1. What is the graph's **in-degree sequence**?
+<br>
+```{r} 
+    kbl(t(sort(degree(gr, mode = "in"), decreasing = TRUE)))
+```
+<br>
+
+1. What is the graph's **out-degree range**?
+<br>
+`r max(degree(gr, mode = "out")) - min(degree(gr, mode = "out"))`
+<br>
+
+1. What is the graph's **in-degree range**?
+<br>
+`r max(degree(gr, mode = "in")) - min(degree(gr, mode = "in"))`
+<br>
+
+1. What is the graph's **sum of degrees**?
+<br>
+`r sum(degree(gr, mode = "in"))`
+<br>
+
+1. What is the **size** of the graph?
+<br>
+`r ecount(gr)`
+<br>
+
+1. What is the graph's **maximum size**?
+<br>
+`r vcount(gr) * (vcount(gr)-1)`
+<br>
+
+1. Compute the **density** of the graph:
+<br>
+`r round(edge_density(gr), 3)`
+<br>
+
+## From Graph to Matrix
+
+- In the matrix below, write down the cell entries for the **adjacency matrix** corresponding to the graph shown in @fig-grex1:
+
+```{r}
+    a <- as.matrix(as_adjacency_matrix(gr))
+    rownames(a) <- toupper(letters[1:12])
+    colnames(a) <- toupper(letters[1:12])
+    diag(a) <- "----"
+    kbl(a, format = "html", align = "c")  %>% 
+         column_spec(1, bold = TRUE) %>% 
+         column_spec (2:13, border_left = T, border_right = T) %>%
+         row_spec(1:12, extra_css = "border-bottom: 1px solid") %>%
+         kable_styling()
+```
