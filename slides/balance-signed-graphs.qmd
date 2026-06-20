@@ -18,6 +18,7 @@ library(ggraph)
 library(tidygraph)
 library(igraph)
 library(dplyr)
+library(patchwork)
 
 # Custom transparent theme for slides
 theme_slides <- function(base_size = 12) {
@@ -29,7 +30,8 @@ theme_slides <- function(base_size = 12) {
     legend.box.background = element_rect(fill = "transparent", color = NA),
     legend.text = element_text(color = "#2c3e50", size = 11, face = "bold"),
     plot.title = element_text(size = base_size * 1.2, face = "bold", hjust = 0.5, color = "#2c3e50"),
-    plot.subtitle = element_text(size = base_size * 1.0, hjust = 0.5, color = "#7f8c8d")
+    plot.subtitle = element_text(size = base_size * 1.0, hjust = 0.5, color = "#7f8c8d"),
+    plot.margin = margin(10, 10, 10, 10)
   )
 }
 
@@ -59,7 +61,7 @@ knitr::opts_chunk$set(
 - **Balance Theory** is the foundational framework linking:
   - Local, psychological micro-motives.
   - Global, macro-structural network patterns (like polarization).
-- Today we will cover: Dyadic Balance, Triadic Balance, Structural Balance, Clusterability, and Modern Extensions.
+- Today we will cover: Dyadic Balance, Triadic Balance, Structural Balance, and Clusterability.
 :::
 :::
 
@@ -72,10 +74,11 @@ g <- graph_from_data_frame(edges, directed = FALSE)
 lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), width = 2.5, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 22, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -107,11 +110,12 @@ lay <- matrix(c(0, 0, -1, -1, 1, -1), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
                  end_cap = circle(12, "mm"), start_cap = circle(12, "mm"), width = 2.5) +
-  geom_node_point(aes(fill = name), size = 26, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_point(aes(fill = name), size = 24, color = "#2c3e50", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
   scale_fill_manual(values = c("Ego" = "#fff", "Alter 1" = "#d4edda", "Alter 2" = "#f8d7da")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.4, 0.4), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -153,6 +157,7 @@ ggraph(g, layout = lay) +
   geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = c("a", "b", "a", "b")), fontface = "bold", size = 6, color = "#2c3e50") +
   scale_edge_color_manual(values = c("Symmetric Co-membership" = "#2980b9", "Asymmetric Liking" = "forestgreen")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-1.2, 1.4), clip = "off") +
   theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 :::
@@ -169,6 +174,7 @@ ggraph(g, layout = lay) +
 - **Principle of Propinquity** (Newcomb 1956): Sharing physical space or social contexts automatically facilitates acquaintance and liking.
   - Proximity breeds interaction, which breeds similarity, which in turn breeds liking, support, and advice.
 - Relationships transition from uniplex (single-stranded) to multiplex.
+- Multiple/reciprocal arrows use **parallel edges** to prevent overlapping.
 :::
 :::
 
@@ -182,13 +188,16 @@ edges <- data.frame(
   type = c("Co-workers", "Liking", "Liking", "Lunch Partner")
 )
 g <- graph_from_data_frame(edges, directed = TRUE)
-ggraph(g, layout = "linear") +
-  geom_edge_fan(aes(color = type, linetype = type), width = 2, 
-                arrow = arrow(length = unit(3, "mm"), type = "closed"), 
-                end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
-  geom_node_point(size = 24, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+lay <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
+rownames(lay) <- c("A", "B")
+ggraph(g, layout = lay) +
+  geom_edge_parallel(aes(color = type, linetype = type), width = 2, sep = unit(4, "mm"),
+                     arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+                     end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
   scale_edge_color_manual(values = c("Co-workers" = "#7f8c8d", "Liking" = "forestgreen", "Lunch Partner" = "#d35400")) +
+  coord_fixed(xlim = c(-0.5, 2.5), ylim = c(-0.6, 0.6), clip = "off") +
   theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 :::
@@ -207,7 +216,7 @@ ggraph(g, layout = "linear") +
 - **Resolution of Imbalance**:
   - Break the similarity tie (e.g., quit the job).
   - Transform the dislike into liking (e.g., adapt to like the co-worker).
-- Represented in a **signed adjacency matrix** using $\{+1, -1, 0\}$.
+- Multiple/reciprocal arrows use **parallel edges** to prevent overlapping.
 :::
 :::
 
@@ -217,16 +226,19 @@ ggraph(g, layout = "linear") +
 #| fig.height: 4.5
 edges <- data.frame(from = c("a", "a"), to = c("b", "b"), type = c("Similarity S", "Dislike D"))
 g <- graph_from_data_frame(edges, directed = TRUE)
-ggraph(g, layout = "linear") +
-  geom_edge_fan(aes(color = type, linetype = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Similarity S", ] }, width = 2,
-                end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
-  geom_edge_fan(aes(color = type, linetype = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Dislike D", ] }, width = 2,
-                arrow = arrow(length = unit(4, "mm"), type = "closed"),
-                end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
-  geom_node_point(size = 26, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
+lay <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
+rownames(lay) <- c("a", "b")
+ggraph(g, layout = lay) +
+  geom_edge_parallel(aes(color = type, linetype = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Similarity S", ] }, width = 2, sep = unit(4, "mm"),
+                     end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+  geom_edge_parallel(aes(color = type, linetype = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Dislike D", ] }, width = 2, sep = unit(4, "mm"),
+                     arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                     end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+  geom_node_point(size = 22, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = name), fontface = "bold", size = 8, color = "#2c3e50") +
   scale_edge_color_manual(values = c("Similarity S" = "#3498db", "Dislike D" = "firebrick")) +
   scale_edge_linetype_manual(values = c("Similarity S" = "solid", "Dislike D" = "dashed")) +
+  coord_fixed(xlim = c(-0.5, 2.5), ylim = c(-0.6, 0.6), clip = "off") +
   theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 :::
@@ -261,9 +273,10 @@ lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(arrow = arrow(length = unit(4, "mm"), type = "closed"), width = 1.8, 
                  color = "#7f8c8d", end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
-  geom_node_point(aes(fill = name), size = 26, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_point(aes(fill = name), size = 24, color = "#2c3e50", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
   scale_fill_manual(values = c("P" = "#d4edda", "O" = "#ecf0f1", "Q" = "#f8d7da")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -319,24 +332,34 @@ ggraph(g, layout = lay) +
 ```{r}
 #| fig.width: 6
 #| fig.height: 5
-edges <- data.frame(
-  from = c("P1", "O1", "P1", "P2", "O2", "P2"),
-  to   = c("O1", "Q1", "Q1", "O2", "Q2", "Q2"),
-  sign = c("+", "+", "+", "-", "-", "+")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(
-  -1.2, 1, -2.0, -0.2, -0.4, -0.2, # Triad 1
-   1.2, 1,  0.4, -0.2,  2.0, -0.2  # Triad 2
-), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+# Uses patchwork to keep layouts independent and perfectly uncropped
+edges1 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("+", "+", "+"))
+g1 <- graph_from_data_frame(edges1, directed = TRUE)
+edges2 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("-", "-", "+"))
+g2 <- graph_from_data_frame(edges2, directed = TRUE)
+lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
+
+p1 <- ggraph(g1, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
                  width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
   geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = c("P", "O", "Q", "P", "O", "Q")), fontface = "bold", size = 6, color = "#2c3e50") +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
-  theme_slides() + theme(legend.position = "none")
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Friend of Friend")
+
+p2 <- ggraph(g2, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Enemy of Enemy")
+
+p1 + p2 + plot_layout(nrow = 1)
 ```
 :::
 :::
@@ -363,24 +386,34 @@ ggraph(g, layout = lay) +
 ```{r}
 #| fig.width: 6
 #| fig.height: 5
-edges <- data.frame(
-  from = c("P3", "O3", "P3", "P4", "O4", "P4"),
-  to   = c("O3", "Q3", "Q3", "O4", "Q4", "Q4"),
-  sign = c("+", "+", "-", "-", "-", "-")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(
-  -1.2, 1, -2.0, -0.2, -0.4, -0.2, # Triad 3
-   1.2, 1,  0.4, -0.2,  2.0, -0.2  # Triad 4
-), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+# Uses patchwork to keep layouts independent and perfectly uncropped
+edges1 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("+", "+", "-"))
+g1 <- graph_from_data_frame(edges1, directed = TRUE)
+edges2 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("-", "-", "-"))
+g2 <- graph_from_data_frame(edges2, directed = TRUE)
+lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
+
+p1 <- ggraph(g1, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
                  width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
   geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = c("P", "O", "Q", "P", "O", "Q")), fontface = "bold", size = 6, color = "#2c3e50") +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
-  theme_slides() + theme(legend.position = "none")
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Friend is Enemy")
+
+p2 <- ggraph(g2, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("All Enemies")
+
+p1 + p2 + plot_layout(nrow = 1)
 ```
 :::
 :::
@@ -403,25 +436,35 @@ ggraph(g, layout = lay) +
 ```{r}
 #| fig.width: 6
 #| fig.height: 5
-edges <- data.frame(
-  from = c("P_unb", "O_unb", "P_unb", "P_bal", "O_bal", "P_bal"),
-  to   = c("O_unb", "Q_unb", "Q_unb", "O_bal", "Q_bal", "Q_bal"),
-  sign = c("+", "+", "-", "+", "+", "+")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(
-  -1.2, 1, -2.0, -0.2, -0.4, -0.2, # Unbalanced
-   1.2, 1,  0.4, -0.2,  2.0, -0.2  # Balanced
-), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
+edges1 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("+", "+", "-"))
+g1 <- graph_from_data_frame(edges1, directed = TRUE)
+
+edges2 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("+", "+", "+"))
+g2 <- graph_from_data_frame(edges2, directed = TRUE)
+
+lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
+
+p1 <- ggraph(g1, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
                  width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
   geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = c("P", "O", "Q", "P", "O", "Q")), fontface = "bold", size = 6, color = "#2c3e50") +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
-  annotate("text", x = 0, y = 0.4, label = "Restores Balance\n=======>\nChanges '-' to '+'", fontface="bold", color="#7f8c8d", size=4) +
-  theme_slides() + theme(legend.position = "none")
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Unbalanced (Tension)")
+
+p2 <- ggraph(g2, layout = lay) +
+  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
+                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = c("P", "O", "Q")), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Resolved (Balance)")
+
+p1 + p2 + plot_layout(nrow = 1)
 ```
 :::
 :::
@@ -454,10 +497,11 @@ lay <- matrix(c(0, 1, -1, 0, 1, 0, 0, -1), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
                  width = 2, end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
-  geom_node_point(size = 22, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.5) +
+  geom_node_point(size = 20, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.5) +
   geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "?" = "goldenrod")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed", "?" = "dotted")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.4, 1.4), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -491,10 +535,11 @@ lay <- matrix(c(0, 1, -1, 0, 1, 0, 0, -1), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
                  width = 2, end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
-  geom_node_point(size = 24, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  geom_node_point(size = 22, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "?" = "goldenrod")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed", "?" = "dotted")) +
+  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.4, 1.4), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -530,10 +575,11 @@ g <- play_erdos_renyi(n = 5, p = 1, directed = FALSE)
 E(g)$sign <- c("+", "-", "+", "+", "-", "+", "-", "+", "-", "+")
 ggraph(g, layout = "circle") +
   geom_edge_link(aes(color = sign, linetype = sign), width = 2) +
-  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = 1:5), fontface = "bold", size = 6, color = "#2c3e50") +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = 1:5), fontface = "bold", size = 5.5, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  coord_fixed(xlim = c(-1.4, 1.4), ylim = c(-1.4, 1.4), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -571,11 +617,12 @@ g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
 lay <- matrix(c(-1.5, 0.8, -1.5, -0.8, -2.5, 0, 1.5, 0.8, 1.5, -0.8, 2.5, 0), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), width = 2, alpha = 0.8) +
-  geom_node_point(aes(fill = faction), size = 24, color = "white", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "white") +
+  geom_node_point(aes(fill = faction), size = 22, color = "white", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "white") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
   scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid")) +
+  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-1.3, 1.3), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -640,11 +687,12 @@ g <- graph_from_data_frame(edges, directed = FALSE)
 lay <- matrix(c(-1.5, 0.8, -1.5, -0.8, 1.5, -0.8, 1.5, 0.8), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), width = 2.5) +
-  geom_node_point(aes(fill = name %in% c("Start", "Node B")), size = 22, color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
+  geom_node_point(aes(fill = name %in% c("Start", "Node B")), size = 20, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 4.5, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
   scale_fill_manual(values = c("TRUE" = "#93c5fd", "FALSE" = "#c084fc")) +
+  coord_fixed(xlim = c(-2.0, 2.0), ylim = c(-1.3, 1.3), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -678,10 +726,11 @@ g <- add_edges(g, c(1,7, 3,9, 5,11))
 E(g)$sign <- c(rep("+", ecount(g)-3), rep("-", 3))
 ggraph(g, layout = "kk") +
   geom_edge_link(aes(color = sign, linetype = sign), width = 2, alpha = 0.8) +
-  geom_node_point(aes(fill = faction), size = 16, color = "white", shape = 21, stroke = 1.5) +
+  geom_node_point(aes(fill = faction), size = 14, color = "white", shape = 21, stroke = 1.5) +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
   scale_fill_manual(values = c("Liberal" = "#3b82f6", "Conservative" = "#ef4444")) +
+  coord_fixed(clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -725,11 +774,12 @@ lay <- matrix(c(
 ), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), width = 1.8, alpha = 0.7) +
-  geom_node_point(aes(fill = faction), size = 20, color = "white", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "white") +
+  geom_node_point(aes(fill = faction), size = 18, color = "white", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "white") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
   scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid", "3" = "goldenrod")) +
+  coord_fixed(xlim = c(-1.4, 0.9), ylim = c(-0.9, 2.4), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -750,218 +800,90 @@ ggraph(g, layout = lay) +
 :::
 
 ::: {.column width="50%"}
-```{mermaid}
-graph TD
-  subgraph ClusterableTriads [Permitted under Davis]
-    T1((+)) -- "+" --> T2((+))
-    T2 -- "+" --> T3((+))
-    T3 -- "+" --> T1
-    
-    U1((+)) -- "-" --> U2((+))
-    U2 -- "-" --> U3((+))
-    U3 -- "+" --> U1
-    
-    V1((+)) -- "-" --> V2((+))
-    V2 -- "-" --> V3((+))
-    V3 -- "-" --> V1
-  end
-  
-  style T1 fill:#d4edda,stroke:#28a745
-  style T2 fill:#d4edda,stroke:#28a745
-  style T3 fill:#d4edda,stroke:#28a745
-  style U1 fill:#f8d7da,stroke:#dc3545
-  style U2 fill:#f8d7da,stroke:#dc3545
-  style U3 fill:#d4edda,stroke:#28a745
-  style V1 fill:#f8d7da,stroke:#dc3545
-  style V2 fill:#f8d7da,stroke:#dc3545
-  style V3 fill:#f8d7da,stroke:#dc3545
-```
-:::
-:::
-
----
-
-## Slide 20: Structural Comparison: Balance vs. Clusterability
-
-::: {.columns}
-::: {.column width="50%"}
-::: {.incremental}
-- Compare how local triadic configurations determine global network partitions.
-- Allowing the all-negative triad shifts the global topology from:
-  - Strict **bipartite polarization** to **k-partite fragmentation**.
-- Both theories show that local psychological rules predict macro structures.
-:::
-:::
-
-::: {.column width="50%"}
-| Property | Cartwright-Harary Balance | James Davis Clusterability |
-| :--- | :---: | :---: |
-| **Permitted Triads** | 0 or 2 negative links | 0, 2, or 3 negative links |
-| **Forbidden Triads** | 1 or 3 negative links | Exactly 1 negative link |
-| **Global Topology** | Exactly **two factions** ($k=2$) | Any number of **clusters** ($k \ge 1$) |
-| **Within-Cluster Ties** | Entirely positive ($+$) | Entirely positive ($+$) |
-| **Between-Cluster Ties** | Entirely negative ($-$) | Entirely negative ($-$) |
-:::
-:::
-
----
-
-# Part 5: Theoretical Extensions of Balance: Valenced Interaction Theories
-
----
-
-## Slide 21: Karma Theory
-
-::: {.columns}
-::: {.column width="50%"}
-::: {.incremental}
-- A modern social psychological theory predicting ties based on generalized feedback.
-- Core Principle: "You get what you spread out!"
-- Proposes that individuals tend to receive the sentiments they broadcast to the network.
-- Predicts **valenced indegree** (received sentiments) based on **valenced outdegree** (expressed sentiments).
-- Captures direct reciprocity: "bullies get bullied" and "likers get liked".
-:::
-:::
-
-::: {.column width="50%"}
-```{r}
-#| fig.width: 6
-#| fig.height: 5
-edges <- data.frame(
-  from = c("Pos Spreader", "Pos Spreader", "Pos Sender", "Neg Spreader", "Neg Spreader", "Neg Sender"),
-  to   = c("Pos Target", "Pos Target 2", "Pos Spreader", "Neg Target", "Neg Target 2", "Neg Spreader"),
-  sign = c("+", "+", "+", "-", "-", "-")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(
-  -1.2, 1, -2.2, 1.8, -2.2, 0.2, -0.2, 1,   # Pos Sphere
-   1.2, -1, 2.2, -1.8, 2.2, -0.2, 0.2, -1   # Neg Sphere
-), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(aes(fill = name %in% c("Pos Spreader", "Neg Spreader")), size = 18, color = "white", shape = 21, stroke = 1.5) +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
-  scale_fill_manual(values = c("TRUE" = "darkorange", "FALSE" = "dodgerblue")) +
-  theme_slides() + theme(legend.position = "none")
-```
-:::
-:::
-
----
-
-## Slide 22: Status Theory
-
-::: {.columns}
-::: {.column width="50%"}
-::: {.incremental}
-- Proposes that sentiments towards an alter are driven by how *others* feel about them (**prestige alignment**).
-- Status in valenced networks is defined as:
-  - High status = receiving positive links.
-  - Low status = receiving negative links.
-  - Positive tie from Ego $\implies$ Alter is higher status.
-  - Negative tie from Ego $\implies$ Alter is lower status.
-- Promotes structural effects: **"rich-get-richer"** (high status accumulate positives) and **"gang-up"** (low status accumulate negatives).
-:::
-:::
-
-::: {.column width="50%"}
 ```{r}
 #| fig.width: 5
 #| fig.height: 5
-edges <- data.frame(
-  from = c("Ego", "Ego"), 
-  to = c("High Status", "Low Status"), 
-  sign = c("+", "-")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(0, 0, 1.5, 1.5, -1.5, -1.5), ncol = 2, byrow = TRUE)
+edges <- data.frame(from = c("A", "B", "C"), to = c("B", "C", "A"), sign = c("-", "-", "-"))
+g <- graph_from_data_frame(edges, directed = FALSE)
+lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 width = 2.5, end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
-  geom_node_point(aes(fill = name), size = 26, color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 2.5, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  scale_edge_color_manual(values = c("-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("-" = "dashed")) +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+:::
+
+---
+
+## Slide 20: Summary: Structural Balance vs. Clusterability
+
+::: {.columns}
+::: {.column width="40%"}
+::: {.incremental}
+- **Structural Balance (Cartwright-Harary 1956)**:
+  - Local rule: Triads cannot have an odd number of negative ties.
+  - Global topology: Splits the network into exactly **two factions**.
+- **Clusterability (Davis 1967)**:
+  - Local rule: Relaxes constraints by permitting all-negative triads (no triads with exactly one negative tie).
+  - Global topology: Splits the network into **any number of clusters ($k \ge 1$)**.
+:::
+:::
+
+::: {.column width="60%"}
+```{r}
+#| fig.width: 8
+#| fig.height: 5
+# Visual summary comparing structural balance vs clusterability side-by-side
+nodes_b <- data.frame(name = LETTERS[1:6], faction = c(rep("1", 3), rep("2", 3)))
+edges_b <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors = FALSE) %>%
+  filter(from < to) %>%
+  mutate(
+    f_from = nodes_b$faction[match(from, nodes_b$name)],
+    f_to = nodes_b$faction[match(to, nodes_b$name)],
+    sign = ifelse(f_from == f_to, "+", "-")
+  )
+g_b <- graph_from_data_frame(edges_b, directed = FALSE, vertices = nodes_b)
+lay_b <- matrix(c(-1.5, 0.8, -1.5, -0.8, -2.5, 0, 1.5, 0.8, 1.5, -0.8, 2.5, 0), ncol = 2, byrow = TRUE)
+
+p_bal <- ggraph(g_b, layout = lay_b) +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 1.2, alpha = 0.6) +
+  geom_node_point(aes(fill = faction), size = 14, color = "white", shape = 21, stroke = 1.2) +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
-  scale_fill_manual(values = c("Ego" = "#fff", "High Status" = "#fdfd96", "Low Status" = "#ecf0f1")) +
-  theme_slides() + theme(legend.position = "none")
-```
-:::
-:::
+  scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid")) +
+  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-1.3, 1.3), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Structural Balance (2 Factions)")
 
----
+nodes_c <- data.frame(name = LETTERS[1:9], faction = c(rep("1", 3), rep("2", 3), rep("3", 3)))
+edges_c <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors = FALSE) %>%
+  filter(from < to) %>%
+  mutate(
+    f_from = nodes_c$faction[match(from, nodes_c$name)],
+    f_to = nodes_c$faction[match(to, nodes_c$name)],
+    sign = ifelse(f_from == f_to, "+", "-")
+  )
+g_c <- graph_from_data_frame(edges_c, directed = FALSE, vertices = nodes_c)
+lay_c <- matrix(c(
+  -0.35, 2.0, -0.65, 1.5, 0, 1.5,  # Cluster 1
+  -1.0, 0.5, -1, 0, -0.65, -0.2,   # Cluster 2
+  0.5, -0.5, 0, -0.5, 0.5, 0       # Cluster 3
+), ncol = 2, byrow = TRUE)
 
-## Slide 23: Solidarity Theory
+p_clust <- ggraph(g_c, layout = lay_c) +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 1.2, alpha = 0.6) +
+  geom_node_point(aes(fill = faction), size = 14, color = "white", shape = 21, stroke = 1.2) +
+  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed")) +
+  scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid", "3" = "goldenrod")) +
+  coord_fixed(xlim = c(-1.4, 0.9), ylim = c(-0.9, 2.4), clip = "off") +
+  theme_slides() + theme(legend.position = "none") + ggtitle("Clusterability (k Clusters)")
 
-::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- Posits that individuals feel positively towards others who occupy **similar structural positions** (structural equivalence).
-- Focuses on status alignment:
-  - Standard popular actors form horizontal positive ties with other popular actors ("cool kids stick together").
-  - Disliked or subordinate actors form horizontal positive ties with other subordinate actors ("downtrodden stick together").
-- Vertical sentiments between different tiers are predicted to be negative.
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| fig.width: 6
-#| fig.height: 5
-edges <- data.frame(
-  from = c("Elite A", "Elite B", "Sub C", "Sub D", "Sub C", "Elite A"),
-  to   = c("Elite B", "Elite A", "Sub D", "Sub C", "Elite A", "Sub C"),
-  type = c("Solidarity", "Solidarity", "Solidarity", "Solidarity", "Deference", "Dominance")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(-1.5, 1.5, 1.5, 1.5, -1.5, -1.5, 1.5, -1.5), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = type, linetype = type), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
-  geom_node_point(aes(fill = name), size = 20, color = "white", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = c("A", "B", "C", "D")), fontface = "bold", size = 7, color = "white") +
-  scale_edge_color_manual(values = c("Solidarity" = "#3498db", "Deference" = "forestgreen", "Dominance" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("Solidarity" = "solid", "Deference" = "solid", "Dominance" = "dashed")) +
-  scale_fill_manual(values = c("Elite A" = "gold", "Elite B" = "gold", "Sub C" = "dodgerblue", "Sub D" = "dodgerblue")) +
-  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
-```
-:::
-:::
-
----
-
-## Slide 24: Summary and Future Directions
-
-::: {.columns}
-::: {.column width="50%"}
-::: {.incremental}
-- Signed network analysis helps capture the nuance of real, emotional social ties.
-- Local psychological motives (Heider) generate macro structures (Cartwright-Harary, Davis).
-- Modern extensions (Karma, Status, Solidarity) provide the micro-foundations for dynamic realignments.
-- Applications: tracking online echo chambers, algorithmic polarization, international alliances, and corporate factions.
-:::
-:::
-
-::: {.column width="50%"}
-```{r}
-#| fig.width: 6
-#| fig.height: 5
-edges <- data.frame(
-  from = c("Micro", "Meso"),
-  to   = c("Meso", "Macro"),
-  type = c("Triadic Aggregation", "Convergence")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(-1.5, 1, 0, 0, 1.5, -1), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = type), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 width = 2.5, end_cap = circle(18, "mm"), start_cap = circle(18, "mm")) +
-  geom_node_point(aes(fill = name), size = 30, color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6.5, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("Triadic Aggregation" = "#34495e", "Convergence" = "#2c3e50")) +
-  scale_fill_manual(values = c("Micro" = "#d4edda", "Meso" = "#fdfd96", "Macro" = "#f8d7da")) +
-  theme_slides() + theme(legend.position = "none")
+p_bal + p_clust + plot_layout(nrow = 1)
 ```
 :::
 :::
