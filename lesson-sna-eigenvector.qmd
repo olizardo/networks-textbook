@@ -55,7 +55,7 @@ Let's see how this would work.
     A <- as.matrix(as_adjacency_matrix(gr))
     kbl(A, format = "html", align = "c") %>% 
          column_spec(1, bold = TRUE) %>% 
-         kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+         kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 ```{r}
@@ -116,29 +116,29 @@ We can record these initial centralities in a table for each node, shown as @tbl
   d <- degree(gr)/max(degree(gr)) 
   kbl(round(d, 2), format = "html", align = "c", col.names = NULL) %>% 
           column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
   kbl(round(eig.res$m[,3], 2), format = "html", align = "c", col.names = NULL) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
   kbl(round(eig.res$m[,4], 2), format = "html", align = "c", col.names = NULL) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
      e <- eig.res$m[,5]
      names(e) <- LETTERS[1:10]
   kbl(round(e, 2), format = "html", align = "c", col.names = NULL) %>% 
           column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
   kbl(round(eig.res$m[,6], 2), format = "html", align = "c", col.names = NULL) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
   kbl(round(eig.res$m[,7], 2), format = "html", align = "c", col.names = NULL) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
      e <- eig.res$m[,8]
      names(e) <- LETTERS[1:10]
   kbl(round(e, 2), format = "html", align = "c", col.names = NULL) %>% 
           column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
   kbl(round(eig.res$m[,9], 2), format = "html", align = "c", col.names = NULL) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
   kbl(round(eig.res$m[,10], 2), format = "html", align = "c", col.names = NULL) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 Now, of course, we can keep going and apply @eq-eig1 again, but this time the centrality "points" each node gets are the $C(1)$ scores recorded in @tbl-eig-1. So in this step, node $E$'s centrality is simply:
@@ -171,13 +171,13 @@ That means that as we proceed further and further, until the ranks begin to "fre
   names(e1) <- LETTERS[1:10]
   kbl(round(sort(e1, decreasing = TRUE), 3), format = "html", align = "c", col.names = NULL) %>% 
           column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
   e2 <- abs(eigen(A)$vectors[, 1])
   e2 <- e2/max(e2)
   names(e2) <- LETTERS[1:10]
   kbl(round(sort(e2, decreasing = TRUE), 3), format = "html", align = "c", col.names = NULL) %>% 
           column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 Now it turns out there is a way to derive a set of centrality scores that will arrange the nodes in the graph from top to bottom, just like we did in @tbl-eig-final, but without going through all the work of iterating through various steps using @eq-eig1. Imagine that there is a magical unknown number---let's call it $\lambda$---and a magical vector---let's call it $\mathbf{b}$--- containing the scores that we want. The numbers in the vector will arrange the nodes in the graph exactly like in @tbl-eig-final, only if the following equation is satisfied:
@@ -217,10 +217,10 @@ At the same time, each column of $U$ can be considered separately as a vector, a
   colnames(V) <- LETTERS[1:10]
   kbl(round(U, 2), format = "html", align = "c") %>% 
           column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
   kbl(round(V, 2), format = "html", align = "c") %>%
           column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 To cut to the chase, the *first* column of $U$, corresponding to the firt eigenvector of $A$, contains the centrality scores we seek (those that go into the vector $\mathbf{b}$ and therefore satisfy @eq-eig2) and the number in the first row and first column of the matrix $\Lambda$ is the eigenvalue that satisfies @eq-eig2 ($\lambda$). Because of this, the centrality scores $\mathbf{b}$ obtained via this method are called the **eigenvector centralities** of the nodes in the network represented by the adjacency matrix $A$ [@bonacich72]. 
@@ -241,13 +241,13 @@ a <- round(t(U[,1]), 3)
 b <- abs(a)
 c <- round(b/max(b), 3)
   kbl(a, format = "html", align = "c") %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 
   kbl(b, format = "html", align = "c") %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
  
   kbl(c, format = "html", align = "c") %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
 
 First, we take the first column of @tbl-eigen-1 and arrange it as a vector $\mathbf{e}$, as in @tbl-eigvec-1. Since the numbers in the eigenvector are negative, we get rid of the negative by taking the absolute value of the scores in the vector $|\mathbf{e}|$, as in @tbl-eigvec-2. Finally, because we only care about the rank, not the specific number, we divide by the maximum value $max(|\mathbf{e}|) = 0.473$, yielding the scores shown in @tbl-eigvec-3. As shown in @tbl-eig-final-2, these scores are identical to those that we found via our iterative procedure!

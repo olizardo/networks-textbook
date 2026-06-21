@@ -52,7 +52,7 @@ The information on the pairwise geodesic distances between every pair of nodes i
     o <- LETTERS[1:14]
     kbl(d[o,o], format = "html", align = "c", padding = 2) %>% 
         column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = 
+        kable_styling(full_width = FALSE, bootstrap_options = 
                         c("striped", "hover", "condensed", "responsive"))
 ```
 
@@ -84,7 +84,7 @@ Let's see how this works for the graph in @fig-clos. First, we get the row sums 
     kbl(d, format = "html", align = "c", padding = 2,
         col.names = c("Sum of Distances (d)", "Inverse (1/d)", "Normalized (N-1/d)")) %>% 
         column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
 
 But we want closeness, not farness, so the second column of @tbl-clos shows what happens when we divide one by the number in the second column. Now, node $E$ has the largest score $CC^{CLOS}_E = 0.045$, which is what we want. 
@@ -128,7 +128,7 @@ So far, so good. Closeness seems to be a strong measure of node importance, givi
     d <- distances(gr)
     kbl(d, format = "html", align = "c", padding = 2) %>% 
       column_spec(1, bold = TRUE) %>% 
-        kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+        kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
 
 Note that in @tbl-dis2, pairs of nodes that cannot **reach** one another in the disconnected graph get a geodesic distance of "Inf" (infinity) in the respective cell of the geodesic distance matrix. This is a problem because, when we compute the row sums of the geodesic distance matrix to calculate centrality according to @eq-closcen, we obtain the "numbers" shown in @tbl-inf.
@@ -140,7 +140,7 @@ Note that in @tbl-dis2, pairs of nodes that cannot **reach** one another in the 
 
     d <- t(rowSums(d))
     kbl(d, format = "html", align = "c", padding = 2) %>% 
-      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
+      kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive")) 
 ```
 So that's a bummer since all the "numbers" in @tbl-inf are just infinity. Not to get too philosophical, but the problem is that when you add any number to "infinity," the answer is, well, *infinity*.^[For more details, see [https://byjus.com/maths/infinity/](https://byjus.com/maths/infinity/)] This means that closeness centrality is only defined for **connected graphs**. When it comes to disconnected graphs, we are out of luck. 
 
@@ -168,7 +168,7 @@ So let's check by taking every entry in @tbl-dis2 and dividing one by the number
     d <- round(1/d, 1)
     diag(d) <- 0
     kbl(d, format = "html", align = "c", padding = 2)  %>% 
-      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+      kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 Beautiful! Now, instead of weird "Inf"s, we have zeroes, which is great because we can add stuff to zero and get a real number back. We can then apply @eq-harmcen to the numbers in @tbl-dis3 (e.g., computing the sum of each row and then multiplying that by $\frac{1}{N-1}$) to get the **harmonic closeness centrality** for each node in @fig-connected1-2. These are shown in @tbl-clos2.
@@ -180,7 +180,7 @@ Beautiful! Now, instead of weird "Inf"s, we have zeroes, which is great because 
 
     d <- round(t(rowSums(d)) * (1/(nrow(d)-1)), 2)
     kbl(d, format = "html", align = "c", padding = 2) %>% 
-      kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+      kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
 Great! Now we have a measure of closeness centrality we can apply to all kinds of graphs, whether they are **connected** or **disconnected**. 
