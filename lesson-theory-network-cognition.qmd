@@ -1,0 +1,239 @@
+# Network Cognition and Cognitive Social Structures {#sec-cognition}
+
+Historically, social network analysis (SNA) developed with a strong focus on "objective," behavioral social relationships—who actually talks to whom, who lends money to whom, or who is related by blood. However, in the late 1980s, network science experienced what can be called the **cognitive turn**. Led by the sociologist David Krackhardt, researchers began to emphasize that networks are not just external patterns of behavior; they are also mental maps that individuals construct, store, and utilize. 
+
+This chapter explores **network cognition**—how people perceive, represent, and sometimes distort the social structures around them. We focus on David Krackhardt's seminal **Cognitive Social Structures (CSS)** framework [@krackhardt87], the mathematical methods used to aggregate subjective perceptions into objective structures, and classical empirical studies demonstrating the profound link between cognitive accuracy and organizational power [@krackhardt90].
+
+---
+
+## The Cognitive Turn in Network Science
+
+In everyday life, we do not have an objective, bird's-eye view of our social networks. Instead, we must rely on our **cognitive representations** of who is connected to whom. For example, when deciding whether to ask a colleague for a favor, or trying to understand why a promotion went to a rival, we navigate the "informal organizational chart" that exists in our minds. 
+
+This cognitive layer of social networks is crucial for three reasons:
+1.  **Action is Guided by Perception:** We act based on what we *believe* the network structure is, not necessarily what it actually is. If $i$ falsely believes that $j$ and $h$ are close friends, $i$ will behave with the caution appropriate for a tight-knit triad, regardless of whether $j$ and $h$ actually dislike each other.
+2.  **Perceptions Vary Widely:** Different individuals in the same organization hold wildly different mental maps of the same network. These variations are structured by an individual's structural position (e.g., central actors have more accurate maps than peripheral ones).
+3.  **Accuracy is a Resource:** Having a structurally accurate map of informal relationships is an independent source of power, influence, and strategic advantage.
+
+To measure this mental landscape systematically, Krackhardt [-@krackhardt87] designed a survey and mathematical methodology called **Cognitive Social Structures (CSS)**.
+
+---
+
+## The Cognitive Social Structures (CSS) Framework
+
+Standard network surveys collect data by asking respondents about their own direct relationships (their "ego-network slices"). For example, a standard advice generator might ask: *"Who do you go to for advice?"* This yields a single row vector of outbound ties for each respondent.
+
+A CSS survey, by contrast, asks every respondent about **every possible pair** of actors in the network:
+$$\text{"Do you think student A goes to student B for advice?"}$$
+$$\text{"Do you think student B goes to student C for advice?"}$$
+
+If there are $N$ actors in the network, each respondent $k$ answers the relation question for all $N(N-1)$ directed pairs (excluding self-loops). This results in a massive, three-dimensional data structure.
+
+### The 3D CSS Matrix ($R_{N \times N \times N}$)
+
+Instead of a standard 2D adjacency matrix $\mathbf{A}_{N \times N}$, CSS surveys yield a three-dimensional binary matrix $\mathbf{R}_{N \times N \times N}$, where:
+
+$$
+R_{ijk} = 1 \quad \text{if person } k \text{ perceives that a tie exists from } i \text{ to } j
+$${#eq-css-one}
+
+$$
+R_{ijk} = 0 \quad \text{if person } k \text{ perceives that no tie exists}
+$${#eq-css-zero}
+
+#### Individual Cognitive Slices ($\mathbf{R}_{..k}$)
+Slicing this 3D data cube along the third dimension ($k$) yields $N$ distinct 2D adjacency matrices. The matrix $\mathbf{R}_{..k}$ is the **cognitive slice** of person $k$. It represents the entire network structure of the group as perceived through the subjective mental lens of individual $k$.
+
+---
+
+## CSS Aggregations: Reconstructing the "Actual" Network
+
+Because CSS surveys collect $N$ different versions of the network, network analysts face a critical challenge: *How do we combine these subjective slices to approximate the "actual" underlying network?* 
+
+Krackhardt [-@krackhardt87] proposed two primary aggregation approaches: **Locally Aggregated Structures (LAS)** and **Consensus Structures (CS)**.
+
+### 1. Locally Aggregated Structures (LAS)
+
+Locally Aggregated Structures combine the direct perceptions of the two parties directly involved in a given dyad (the sender $i$ and the receiver $j$), ignoring the reports of all other third-party observers. There are two standard ways to define an LAS tie:
+
+#### The Intersection LAS (Agreement LAS)
+A directed tie $i \rightarrow j$ is considered to exist *only if* both $i$ and $j$ agree that $i$ sends a tie to $j$. That is, the sender reports sending it, and the receiver reports receiving it:
+
+$$
+LAS^{\cap}_{ij} = R_{iji} \times R_{ijj}
+$${#eq-las-intersection}
+
+This is a highly conservative measure of a tie, representing strong mutual agreement.
+
+#### The Union LAS (Or LAS)
+A directed tie $i \rightarrow j$ is considered to exist if *either* $i$ or $j$ (or both) report that a tie exists from $i$ to $j$:
+
+$$
+LAS^{\cup}_{ij} = \max(R_{iji}, R_{ijj})
+$${#eq-las-union}
+
+This is a more inclusive measure, capturing any relation that has at least some behavioral or perceived foundation from either of the primary actors.
+
+### 2. Consensus Structures (CS)
+
+Sometimes, we want to leverage the "wisdom of the crowd." A Consensus Structure aggregates the perceptions of the entire group (or a subset of disinterested third-party observers) to determine whether a tie is "real."
+
+#### Threshold Consensus ($\alpha$)
+Under a threshold consensus model, a tie $i \rightarrow j$ is considered to exist if at least a certain proportion $\alpha$ of all group members perceive it:
+
+$$
+CS^{\alpha}_{ij} = 1 \quad \text{if} \quad \frac{\sum_{k} R_{ijk}}{N} \ge \alpha, \quad \text{else} \quad 0
+$${#eq-cs-threshold}
+
+Where $N$ is the number of perceivers.
+
+*   **Majority Consensus ($\alpha = 0.50$):** A tie is considered active if more than $50\%$ of the organization's members agree that it exists. 
+*   **Stricter Consensus ($\alpha = 0.75$):** A tie is considered active only if a solid three-quarters majority of the group agrees on its existence.
+
+Table @tbl-css-comparison contrasts these three classical aggregation methods:
+
+| Aggregation Method | Mathematical Definition | Sociological Focus | Key Property |
+| :--- | :--- | :--- | :--- |
+| **Intersection LAS ($LAS^{\cap}$)** | $R_{iji} \times R_{ijj} = 1$ | Mutual agreement and dyadic confirmation. | High reliability; low density. |
+| **Union LAS ($LAS^{\cup}$)** | $\max(R_{iji}, R_{ijj}) = 1$ | Inclusivity; capturing any active connection. | Low barrier; high density. |
+| **Consensus Structure ($CS^{0.50}$)** | $\frac{\sum_k R_{ijk}}{N} \ge 0.50$ | Public recognition and organizational reputation. | Filters out individual noise/bias. |
+
+: CSS Aggregation and Reconstructions {#tbl-css-comparison}
+
+---
+
+## Measuring Cognitive Accuracy
+
+Once we have reconstructed a consensus or behavioral network (such as the majority consensus structure $\mathbf{CS}$), we can compare each individual's subjective slice ($\mathbf{R}_{..k}$) to this standard to measure their **cognitive accuracy**.
+
+### 1. Structural Accuracy (Hamming Distance)
+The simplest way to calculate accuracy is by computing the **Hamming distance** between person $k$'s cognitive slice and the consensus matrix. The Hamming distance is the count of cells where the individual's perception disagrees with the consensus:
+
+$$
+\text{Hamming Distance}(k) = \sum_{i,j} |R_{ijk} - CS_{ij}|
+$${#eq-hamming}
+
+A lower Hamming distance represents higher accuracy (fewer perceptual errors).
+
+### 2. Relational Accuracy (QAP Correlation)
+Because social networks are structurally interdependent (violating standard statistical assumptions of independence), researchers typically compute the **correlation** between the vectorized matrices $\mathbf{R}_{..k}$ and $\mathbf{CS}$ using the **Quadratic Assignment Procedure (QAP)**. A higher QAP correlation coefficient ($r \in [-1.0, +1.0]$) represents a more structurally accurate mental map of the organization.
+
+### Cognitive Network Biases
+Human brains are not perfect recorders; they are wired to simplify complex information. When individuals reconstruct networks in their minds, they systematically introduce three cognitive biases:
+
+1.  **Ego Bias (Centrality Inflation):** Individuals consistently overestimate their own popularity, centrality, and closeness to prestigious others. Egos routinely perceive themselves as receiving more incoming ties (indegree) than the consensus structure supports.
+2.  **Reciprocity Bias (Symmetry Pressure):** Humans experience cognitive discomfort with unreciprocated friendships. Consequently, if person $i$ nominates $j$ as a friend, $i$'s mental slice $\mathbf{R}_{..i}$ will almost always depict $j$ reciprocating that friendship ($R_{jii} = 1$), even if $j$'s actual report is null.
+3.  **Balance Bias (Transitivity Pressure):** Drawing from Heider's balance theory (see @sec-sbalance), our minds prefer closed, balanced triads. If $i$ knows that $j$ and $h$ are their friends, $i
+
+---
+
+## Applied Research: Structure, Cognition, and Power
+
+Does having a more accurate mental map of your social network make you more powerful? This fundamental question was tested in David Krackhardt's landmark 1990 study, **"Assessing the Political Landscape: Structure, Cognition, and Power in Organizations"** [@krackhardt90].
+
+### The Silicon Systems Study
+Krackhardt surveyed a small manufacturing firm of $N = 36$ employees, including managers and supervisors (the "Silicon Systems" company). He collected complete CSS data for two distinct networks:
+1.  **The Advice Network:** Who goes to whom for work-related technical help or advice.
+2.  **The Friendship Network:** Who hangs out with whom outside of formal work duties.
+
+He also measured **Reputed Power** by asking every employee to rate the relative power and influence of every other employee in the organization on a 1-to-5 scale.
+
+### Key Findings and Results
+Krackhardt calculated the cognitive accuracy of each of the 36 employees' mental slices against the consensus network. He then ran multiple regressions to predict reputed power:
+
+*   **Accuracy is Power:** An individual's **cognitive accuracy** regarding the advice network was highly and positively associated with their reputed power within the firm ($r = 0.51$, $p < 0.001$).
+*   **The Advice Advantage:** Interestingly, accuracy regarding the *advice* network was far more critical for power than accuracy regarding the *friendship* network. Power was tied to knowing who holds technical expertise and institutional knowledge, rather than knowing who hangs out with whom.
+*   **Centrality Control:** Most importantly, this effect remained highly significant *even when controlling for actual network centrality* (such as actual advice indegree or betweenness). 
+
+$$\text{Advice Accuracy} \implies \text{Power} \quad (\text{Independent of actual Centrality})$$
+
+### Why is Perceptual Accuracy an Independent Source of Power?
+An employee who holds an accurate "cognitive map" of the advice network has a decisive strategic advantage. They know:
+*   Who actually influences whom (allowing them to lobby key influencers rather than formal figureheads).
+*   Where the actual **structural holes** and bottlenecks lie (allowing them to position themselves as brokers, see @sec-sht).
+*   Who is dependent on whom (allowing them to predict coalition-building and political dynamics).
+
+Conversely, highly central actors who have inaccurate mental maps are "structurally blind." They are prone to political missteps, making coalitions with marginal actors or misjudging the influence of key gatekeepers.
+
+---
+
+## Applied Research: Simmelian Ties and Constraint
+
+Krackhardt's work bridging cognition and structure also led to the development of **Simmelian Tie Theory** [-@krackhardt99]. 
+
+Named after the classical German sociologist Georg Simmel, a Simmelian tie is a highly constrained, strong tie. Two actors, $i$ and $j$, share a Simmelian tie if:
+1.  They have a mutually reciprocated tie ($i \leftrightarrow j$).
+2.  They are both mutually connected to a third party $h$ ($i \leftrightarrow h$ and $j \leftrightarrow h$), forming a mutual clique of size three or larger.
+
+### The "Torture" of Simmelian Cliues
+Krackhardt [-@krackhardt99] famously referred to Simmelian ties as **"the ties that torture."** 
+
+Unlike a simple, unconstrained dyadic tie where two individuals can negotiate their relationship bilaterally, a Simmelian tie is heavily monitored and constrained by third-party observers. In a Simmelian clique:
+*   **Expectations of Conformity:** The group demands high consensus. Individual deviance is immediately observed, sanctioned, and corrected by the other members.
+*   **Reduced Autonomy:** Individuals experience high cognitive and behavioral "torture" because they must subordinate their personal opinions and bilateral negotiations to preserve the stability and consensus of the triad.
+
+While weak ties provide access to novel information (see @sec-swt), Simmelian ties represent the ultimate structural constraint, locking individuals into stable, norm-enforced communities that resist change but provide extreme trust and stability.
+
+---
+
+## References {.unnumbered}
+
+::: {#refs}
+:::
+s brain will mentally "close" the triangle, perceiving $j$ and $h$ to be friends ($R_{jhi} = 1$) even if they have no connection.
+
+---
+
+## Applied Research: Structure, Cognition, and Power
+
+Does having a more accurate mental map of your social network make you more powerful? This fundamental question was tested in David Krackhardt's landmark 1990 study, **"Assessing the Political Landscape: Structure, Cognition, and Power in Organizations"** [@krackhardt90].
+
+### The Silicon Systems Study
+Krackhardt surveyed a small manufacturing firm of $N = 36$ employees, including managers and supervisors (the "Silicon Systems" company). He collected complete CSS data for two distinct networks:
+1.  **The Advice Network:** Who goes to whom for work-related technical help or advice.
+2.  **The Friendship Network:** Who hangs out with whom outside of formal work duties.
+
+He also measured **Reputed Power** by asking every employee to rate the relative power and influence of every other employee in the organization on a 1-to-5 scale.
+
+### Key Findings and Results
+Krackhardt calculated the cognitive accuracy of each of the 36 employees' mental slices against the consensus network. He then ran multiple regressions to predict reputed power:
+
+*   **Accuracy is Power:** An individual's **cognitive accuracy** regarding the advice network was highly and positively associated with their reputed power within the firm ($r = 0.51$, $p < 0.001$).
+*   **The Advice Advantage:** Interestingly, accuracy regarding the *advice* network was far more critical for power than accuracy regarding the *friendship* network. Power was tied to knowing who holds technical expertise and institutional knowledge, rather than knowing who hangs out with whom.
+*   **Centrality Control:** Most importantly, this effect remained highly significant *even when controlling for actual network centrality* (such as actual advice indegree or betweenness). 
+
+$$\text{Advice Accuracy} \implies \text{Power} \quad (\text{Independent of actual Centrality})$$
+
+### Why is Perceptual Accuracy an Independent Source of Power?
+An employee who holds an accurate "cognitive map" of the advice network has a decisive strategic advantage. They know:
+*   Who actually influences whom (allowing them to lobby key influencers rather than formal figureheads).
+*   Where the actual **structural holes** and bottlenecks lie (allowing them to position themselves as brokers, see @sec-sht).
+*   Who is dependent on whom (allowing them to predict coalition-building and political dynamics).
+
+Conversely, highly central actors who have inaccurate mental maps are "structurally blind." They are prone to political missteps, making coalitions with marginal actors or misjudging the influence of key gatekeepers.
+
+---
+
+## Applied Research: Simmelian Ties and Constraint
+
+Krackhardt's work bridging cognition and structure also led to the development of **Simmelian Tie Theory** [-@krackhardt99]. 
+
+Named after the classical German sociologist Georg Simmel, a Simmelian tie is a highly constrained, strong tie. Two actors, $i$ and $j$, share a Simmelian tie if:
+1.  They have a mutually reciprocated tie ($i \leftrightarrow j$).
+2.  They are both mutually connected to a third party $h$ ($i \leftrightarrow h$ and $j \leftrightarrow h$), forming a mutual clique of size three or larger.
+
+### The "Torture" of Simmelian Cliues
+Krackhardt [-@krackhardt99] famously referred to Simmelian ties as **"the ties that torture."** 
+
+Unlike a simple, unconstrained dyadic tie where two individuals can negotiate their relationship bilaterally, a Simmelian tie is heavily monitored and constrained by third-party observers. In a Simmelian clique:
+*   **Expectations of Conformity:** The group demands high consensus. Individual deviance is immediately observed, sanctioned, and corrected by the other members.
+*   **Reduced Autonomy:** Individuals experience high cognitive and behavioral "torture" because they must subordinate their personal opinions and bilateral negotiations to preserve the stability and consensus of the triad.
+
+While weak ties provide access to novel information (see @sec-swt), Simmelian ties represent the ultimate structural constraint, locking individuals into stable, norm-enforced communities that resist change but provide extreme trust and stability.
+
+---
+
+## References {.unnumbered}
+
+::: {#refs}
+:::
