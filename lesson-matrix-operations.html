@@ -2350,24 +2350,36 @@ Table&nbsp;15.8: A matrix and its transpose
 <section id="the-mutual-dyads-matrix-mathbfm" class="level3" data-number="15.5.1">
 <h3 data-number="15.5.1" class="anchored" data-anchor-id="the-mutual-dyads-matrix-mathbfm"><span class="header-section-number">15.5.1</span> 1. The Mutual Dyads Matrix (<span class="math inline">\(\mathbf{M}\)</span>)</h3>
 <p>To retain only reciprocal ties, we multiply the adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> by its transpose <span class="math inline">\(\mathbf{A}^T\)</span> element-wise. This is the Hadamard product:</p>
-<p>$$ = ^T ${#eq-matrix-mutual}</p>
+<p><span id="eq-matrix-mutual"><span class="math display">\[
+\mathbf{M} = \mathbf{A} \circ \mathbf{A}^T
+\tag{15.8}\]</span></span></p>
 <p>Because a cell <span class="math inline">\(M_{ij} = a_{ij} \times a_{ji}\)</span> will equal <span class="math inline">\(1\)</span> only if <span class="math inline">\(a_{ij} = 1\)</span> and <span class="math inline">\(a_{ji} = 1\)</span>, the matrix <span class="math inline">\(\mathbf{M}\)</span> filters out all non-reciprocal ties. The actual number of mutual dyads in the graph (<span class="math inline">\(N_M\)</span>) is given by summing all the cells of <span class="math inline">\(\mathbf{M}\)</span> and dividing by two (since each mutual dyad contributes two symmetric <span class="math inline">\(1\)</span>s to the matrix):</p>
-<p>$$ N_M = ${#eq-count-mutual}</p>
+<p><span id="eq-count-mutual"><span class="math display">\[
+N_M = \frac{\sum_{i,j} M_{ij}}{2}
+\tag{15.9}\]</span></span></p>
 </section>
 <section id="the-asymmetric-dyads-matrix-mathbfs" class="level3" data-number="15.5.2">
 <h3 data-number="15.5.2" class="anchored" data-anchor-id="the-asymmetric-dyads-matrix-mathbfs"><span class="header-section-number">15.5.2</span> 2. The Asymmetric Dyads Matrix (<span class="math inline">\(\mathbf{S}\)</span>)</h3>
 <p>To isolate unreciprocated, one-way ties, we multiply <span class="math inline">\(\mathbf{A}\)</span> element-wise by the logical complement of its transpose (<span class="math inline">\(\mathbf{1} - \mathbf{A}^T\)</span>), where <span class="math inline">\(\mathbf{1}\)</span> is a matrix of all ones:</p>
-<p>$$ = ( - ^T) ${#eq-matrix-asym}</p>
+<p><span id="eq-matrix-asym"><span class="math display">\[
+\mathbf{S} = \mathbf{A} \circ (\mathbf{1} - \mathbf{A}^T)
+\tag{15.10}\]</span></span></p>
 <p>A cell <span class="math inline">\(S_{ij} = a_{ij} \times (1 - a_{ji})\)</span> will equal <span class="math inline">\(1\)</span> only if a tie is sent (<span class="math inline">\(a_{ij} = 1\)</span>) but not returned (<span class="math inline">\(a_{ji} = 0\)</span>). The total count of asymmetric dyads (<span class="math inline">\(N_A\)</span>) is simply the sum of all cells in <span class="math inline">\(\mathbf{S}\)</span>:</p>
-<p>$$ N_A = <em>{i,j} S</em>{ij} ${#eq-count-asym}</p>
+<p><span id="eq-count-asym"><span class="math display">\[
+N_A = \sum_{i,j} S_{ij}
+\tag{15.11}\]</span></span></p>
 <p>Note that unlike mutual dyads, we do not divide by two here. If node <span class="math inline">\(i\)</span> sends an unreciprocated tie to <span class="math inline">\(j\)</span>, then <span class="math inline">\(S_{ij} = 1\)</span> and <span class="math inline">\(S_{ji} = 0\)</span>, contributing exactly one <span class="math inline">\(1\)</span> to the matrix for that dyad.</p>
 </section>
 <section id="the-null-dyads-matrix-mathbfn" class="level3" data-number="15.5.3">
 <h3 data-number="15.5.3" class="anchored" data-anchor-id="the-null-dyads-matrix-mathbfn"><span class="header-section-number">15.5.3</span> 3. The Null Dyads Matrix (<span class="math inline">\(\mathbf{N}\)</span>)</h3>
 <p>To isolate completely disconnected pairs of nodes, we multiply the complement of the adjacency matrix by the complement of its transpose:</p>
-<p>$$ = ( - ) ( - ^T) ${#eq-matrix-null}</p>
+<p><span id="eq-matrix-null"><span class="math display">\[
+\mathbf{N} = (\mathbf{1} - \mathbf{A}) \circ (\mathbf{1} - \mathbf{A}^T)
+\tag{15.12}\]</span></span></p>
 <p>A cell <span class="math inline">\(N_{ij}\)</span> will equal <span class="math inline">\(1\)</span> only if there are no ties in either direction (<span class="math inline">\(a_{ij} = 0\)</span> and <span class="math inline">\(a_{ji} = 0\)</span>). To count the actual number of null dyads (<span class="math inline">\(N_N\)</span>), we sum the off-diagonal cells (<span class="math inline">\(i \neq j\)</span>) and divide by two:</p>
-<p>$$ N_N = ${#eq-count-null}</p>
+<p><span id="eq-count-null"><span class="math display">\[
+N_N = \frac{\sum_{i \neq j} N_{ij}}{2}
+\tag{15.13}\]</span></span></p>
 </section>
 <section id="a-worked-example" class="level3" data-number="15.5.4">
 <h3 data-number="15.5.4" class="anchored" data-anchor-id="a-worked-example"><span class="header-section-number">15.5.4</span> A Worked Example</h3>
@@ -2531,7 +2543,7 @@ Table&nbsp;15.10: Mutual Dyads Matrix <span class="math inline">\(\mathbf{M} = \
 </div>
 </figure>
 </div>
-<p>Summing all elements in <a href="#tbl-mutual-ref" class="quarto-xref">Table&nbsp;<span>15.10</span></a>, we get <span class="math inline">\(4\)</span>. Plugging this into <span class="quarto-unresolved-ref">?eq-count-mutual</span> gives the count of mutual dyads: <span class="math display">\[
+<p>Summing all elements in <a href="#tbl-mutual-ref" class="quarto-xref">Table&nbsp;<span>15.10</span></a>, we get <span class="math inline">\(4\)</span>. Plugging this into <a href="#eq-count-mutual" class="quarto-xref">Equation&nbsp;<span>15.9</span></a> gives the count of mutual dyads: <span class="math display">\[
 N_M = \frac{4}{2} = 2\text{ mutual dyads (A-C and E-F)}
 \]</span></p>
 </section>
@@ -2701,7 +2713,7 @@ Table&nbsp;15.12: Null Dyads Matrix <span class="math inline">\(\mathbf{N} = (\m
 </div>
 </figure>
 </div>
-<p>Summing only the off-diagonal cells in <a href="#tbl-null-ref" class="quarto-xref">Table&nbsp;<span>15.12</span></a>, we find <span class="math inline">\(10\)</span> ones. Plugging this into <span class="quarto-unresolved-ref">?eq-count-null</span> gives the count of null dyads: <span class="math display">\[
+<p>Summing only the off-diagonal cells in <a href="#tbl-null-ref" class="quarto-xref">Table&nbsp;<span>15.12</span></a>, we find <span class="math inline">\(10\)</span> ones. Plugging this into <a href="#eq-count-null" class="quarto-xref">Equation&nbsp;<span>15.13</span></a> gives the count of null dyads: <span class="math display">\[
 N_N = \frac{10}{2} = 5\text{ null dyads}
 \]</span></p>
 </section>
@@ -2715,7 +2727,7 @@ N_M + N_A + N_N = 2 + 8 + 5 = 15
 <p>Moreover, at the matrix level, our three dyadic matrices perfectly partition all possible relations in the network (excluding self-loops). If we sum the mutual matrix, the asymmetric matrix, the transpose of the asymmetric matrix (representing incoming asymmetric ties), and the null matrix, they sum to a complete graph adjacency matrix (all ones except the diagonal, <span class="math inline">\(\mathbf{J} - \mathbf{I}\)</span>):</p>
 <p><span id="eq-matrix-identity"><span class="math display">\[
 \mathbf{M} + \mathbf{S} + \mathbf{S}^T + \mathbf{N} = \mathbf{J} - \mathbf{I}
-\tag{15.8}\]</span></span></p>
+\tag{15.14}\]</span></span></p>
 <p>This elegant algebraic identity check guarantees that every single pair of nodes in the network has been accounted for and classified.</p>
 
 
