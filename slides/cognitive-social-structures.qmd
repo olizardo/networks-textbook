@@ -1,0 +1,140 @@
+---
+title: "Cognitive Social Structures"
+subtitle: "Perceptions, Slices, and Accuracy in Social Networks"
+format:
+  revealjs:
+    incremental: true
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+bibliography: ../networks.bib
+---
+
+## Introduction to Cognitive Social Structures
+
+Social networks are not just objective, behavioral realities; they are also cognitive representations that exist in the minds of the people who navigate them.
+
+- **The Cognitive Turn (Krackhardt, 1987):**
+  - Pioneer of the **Cognitive Social Structures (CSS)** framework: David @krackhardt87.
+  - Standard network surveys ask: *"Who do you go to for advice?"* (Ego's direct outbound ties).
+  - CSS surveys ask: *"For every pair of people $$i$$ and $$j$$ in this group, do you think $$i$$ goes to $$j$$ for advice?"*
+  - This captures each individual's **perception** of the *entire* network structure, going beyond their own immediate ego-network.
+
+---
+
+## The 3D CSS Network Matrix ($$R_{N \times N \times N}$$)
+
+While standard network data is represented as a 2D adjacency matrix $$\mathbf{A}_{N \times N}$$, CSS data is represented as a three-dimensional matrix $$\mathbf{R}_{N \times N \times N}$$.
+
+- **Matrix Formulation:**
+  - $$R_{ijk} = 1 \quad \text{if person } k \text{ perceives a tie exists from } i \text{ to } j$$
+  - $$R_{ijk} = 0 \quad \text{if person } k \text{ perceives no tie exists}$$
+- **Cognitive Slices ($$\mathbf{R}_{..k}$$):**
+  - Slicing the 3D data cube along the third dimension ($$k$$) yields $$N$$ distinct 2D adjacency matrices.
+  - Each slice represents the complete group network from the specific, subjective mental lens of individual $$k$$.
+
+---
+
+## Locally Aggregated Structures (LAS)
+
+To study the "actual" underlying network using subjective reports, Krackhardt defined methods to aggregate individual perceptions. 
+
+- **Locally Aggregated Structures (LAS)** combine the direct reports of the dyad directly involved ($$i$$ and $$j$$):
+  - **1. Intersection LAS (Row/Agreement LAS):**
+    - A tie $$i \rightarrow j$$ is considered to exist *only if* both $$i$$ and $$j$$ agree that $$i$$ sends a tie to $$j$$:
+    - $$LAS^{\cap}_{ij} = R_{iji} \times R_{ijj}$$
+  - **2. Union LAS (Or LAS):**
+    - A tie $$i \rightarrow j$$ exists if *either* $$i$$ or $$j$$ (or both) say it exists:
+    - $$LAS^{\cup}_{ij} = \max(R_{iji}, R_{ijj})$$
+
+---
+
+## Consensus Structures (CS)
+
+We can also aggregate perceptions across the entire group to find a "public consensus" of who is connected to whom.
+
+- **Consensus Structures (CS):**
+  - Also called **Consensus Networks** or *Central Limit Theorem* structures.
+  - A tie $$i \rightarrow j$$ is considered to exist if a threshold proportion ($$\alpha$$) of all group members perceive it:
+  - $$CS^{\alpha}_{ij} = 1 \quad \text{if} \quad \frac{\sum_{k} R_{ijk}}{N} \ge \alpha, \quad \text{else} \quad 0$$
+- **Majority Consensus:**
+  - Commonly setting $$\alpha = 0.50$$ (the tie is "real" if more than half of the organization agrees it exists).
+
+---
+
+## Key CSS Metrics: Perceptual Accuracy
+
+By separating *cognition* from *structure*, we can measure how accurately individuals perceive the social world around them.
+
+- **Cognitive Accuracy:**
+  - Computed as the QAP correlation (Quadratic Assignment Procedure) or Hamming distance between an individual's slice $$\mathbf{R}_{..k}$$ and the group Consensus Structure ($$\mathbf{CS}$$) or $$\mathbf{LAS}$$.
+- **Network Cognitive Biases:**
+  - **Ego Bias:** Over-perceiving ties to oneself, or over-reporting one's own popularity/centrality.
+  - **Reciprocity Bias:** Perceptually symmetrizing asymmetric relations (if I like $$j$$, I assume $$j$$ likes me).
+  - **Balance/Transitivity Bias:** Subjectively "closing" open triads in our minds (perceiving a friend's friend as our friend, even if they aren't).
+
+---
+
+## Applied Research: Structure, Cognition, and Power
+
+Do more accurate cognitive maps of informal networks make you more powerful? This was tested empirically by @krackhardt90.
+
+- **The Landmark ASQ Study (Krackhardt, 1990):**
+  - Analyzed a small manufacturing firm (Silicon Systems) of $$N = 36$$ employees.
+  - Collected complete CSS surveys for both **advice** and **friendship** networks.
+  - repited power was measured by having every employee rate the influence of all other employees.
+- **Key Findings:**
+  - Individual **cognitive accuracy** regarding the advice network was highly and positively correlated with **reputed power** ($$r = 0.51$$, $$p < 0.001$$).
+  - This effect held strong *even when controlling* for actual network centrality (indegree, outdegree, and betweenness).
+  - **Conclusion:** Power belongs to those who have an accurate map of who is connected to whom.
+
+---
+
+## Applied Research: The Ties That Torture
+
+CSS data also helps researchers understand the psychological stress of structural constraints, leading to Simmelian Tie Theory (@krackhardt99).
+
+- **Simmelian Ties:**
+  - A tie between $$i$$ and $$j$$ is **Simmelian** if:
+    1. The tie is mutually reciprocated ($$i \leftrightarrow j$$).
+    2. Both $$i$$ and $$j$$ are mutually connected to a third party $$h$$, forming a co-members clique of size $$\ge 3$$.
+- **Perceptual and Behavioral "Torture":**
+  - Simmelian ties are heavily constrained by third-party observation and norms, leading to strong expectations of conformity and consensus.
+  - Simmelian cliques are highly stable, but individuals in them experience reduced autonomy, as conflicts cannot be easily negotiated bilaterally.
+
+---
+
+## Additional Dimensions: Graph Connectedness and Efficiency
+
+In addition to CSS, Krackhardt (1994) developed fundamental structural metrics of informal organizations based on **reachability** ($$D^r$$).
+
+- **1. Graph Connectedness ($$C$$):**
+  - The proportion of all possible directed pairs of nodes that are actually reachable via a path of any length:
+  - $$C = \frac{\sum_{i \neq j} D^r_{ij}}{N(N-1)}$$
+- **2. Graph Efficiency ($$F$$):**
+  - Measures how "economically" the network is connected. A tree graph is maximally efficient ($$F = 1.0$$), while a complete graph is minimally efficient ($$F = 0$$):
+  - $$F = 1 - \left[\frac{2(m - n + 1)}{(n-1)(n-2)}\right]$$
+
+---
+
+## Summary of David Krackhardt's Key Contributions
+
+David Krackhardt’s work is foundational to the cognitive and structural analysis of informal organizations.
+
+- **Key Contributions to SNA:**
+  - **CSS Methodology (1987, 1990):** Pioneer of 3D matrix networks and cognitive social structures.
+  - **Structure, Cognition, and Power (1990):** Proving that cognitive accuracy is an independent source of power.
+  - **E-I Index (1988):** Standard metric for group homophily and boundary ties.
+  - **Informal Dimensions (1994):** Reachability-based measures (Connectedness, Hierarchy, Efficiency, LCA).
+  - **Simmelian Ties (1999):** Analysis of triadic consensus and structural constraint.
+
+---
+
+## References
+
+::: {#refs}
+:::
