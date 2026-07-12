@@ -86,7 +86,7 @@ Consider the directed graph shown in @fig-directed. Earlier, we derived an asymm
 
 In a graph, node *B* is said to be **reachable** by node *A* if there is **path** (of any length) that has *A* as the origin node and *B* as the destination node. In that case, we say that *A* can **reach** *B*.
 
-Sometimes, it is useful to encode reachability relations between nodes to in order to compute some important graph metrics. This is done using the **reachability matrix**, written $D^r$. The reachability matrix is just like the adjacency matrix, except that instead of putting a one the corresponding matrix cell if the node in the row sends a tie to the node in the respective column, we put a one in the corresponding matrix cell if the node in the rode *can reach* the node in the column via a path. @tbl-reachmat shows the reachability matrix corresponding to the directed graph shown in @fig-directed.
+Sometimes, it is useful to encode reachability relations between nodes in order to compute some important graph metrics. This is done using the **reachability matrix**, written $D^r$. The reachability matrix is just like the adjacency matrix, except that instead of putting a one in the corresponding matrix cell if the node in the row sends a tie to the node in the respective column, we put a one in the corresponding matrix cell if the node in the row *can reach* the node in the column via a path. @tbl-reachmat shows the reachability matrix corresponding to the directed graph shown in @fig-directed.
 
 Note that if a node sends a regular old directed edge (a path of length one!) that counts for reachability too. This means that if the cell corresponding to the relationship between two nodes has a one in the adjacency matrix, then it should also have a one in the reachability  matrix. 
 
@@ -113,7 +113,7 @@ Then we ask, can node *A* reach node *C*? The answer is no. Note that there is n
 
 Further, we can ask, can node *A* reach node *D*? Note that here the answer is yes! While node *A* is not directly connected to node *D*, they are **indirectly connected**, so node *A* can **reach** node *D* in two ways: First, via a path of length two that goes: $A \rightarrow B, B \rightarrow D$, and via path of length three that goes: $A \rightarrow F, F \rightarrow G, G \rightarrow D$.^[Because nodes can be indirectly connected by more than one path, it is possible to come up with a **weighted** version of the reachability matrix, that encodes the *number of paths of any length* via which the row node can reach the column node.] So $d^r_{13} = 1$.
 
-We can continue like this and finish the row for node *A* and the the rows for all the other nodes. If we do we end up with numbers shown in $tbl-reachmat. There are some interesting things about this matrix. Reading across the rows for each node, we can figure out the number of other nodes that that particular node can reach.
+We can continue like this and finish the row for node *A* and the rows for all the other nodes. If we do, we end up with the numbers shown in @tbl-reachmat. There are some interesting things about this matrix. Reading across the rows for each node, we can figure out the number of other nodes that that particular node can reach.
 
 Note than an interesting feature of the graph shown in @fig-directed is that while some nodes (like node *A*) cannot reach all the nodes in the graph, other nodes (like node *E*) can! It seems like *E* has access to everyone in the network, whether directly or indirectly. Maybe they are pretty important [@krackhardt94]. Node *C* is almost like node *E*. They can reach almost everyone in the network, *except* for *E*. Maybe they are the second in command.
 
@@ -153,7 +153,7 @@ This tells us that about $57\%$ of all directed pairs in this network are connec
     diag(r) <- "--"
     kbl(r, format =  "pipe")
 ```
-For instance, the reachability matrix corresponding to a perfectly hierarchical directed tree graph containing only **antisymmetric** relations, such as the one shown in @fig-tree, has an interesting property. This is shown in @tbl-treemat. If you look at the reachability matrix's **lower-triangle**, it is full of zeroes! The only ones present in the matrix are contained in the matrix's **upper-triangle**. This means that when looking at a reachability matrix of any directed graph, we can get a sense of much they approximate a pure antisymmetric hierarchy by This means that when looking at a reachability matrix of any directed graph, we can get a sense of much they approximate a pure antisymmetric hierarchy by counting the number of ones that appear in the reachability matrix's lower-triangle. 
+For instance, the reachability matrix corresponding to a perfectly hierarchical directed tree graph containing only **antisymmetric** relations, such as the one shown in @fig-tree, has an interesting property. This is shown in @tbl-treemat. If you look at the reachability matrix's **lower-triangle**, it is full of zeroes! The only ones present in the matrix are contained in the matrix's **upper-triangle**. This means that when looking at a reachability matrix of any directed graph, we can get a sense of how much they approximate a pure antisymmetric hierarchy by counting the number of ones that appear in the reachability matrix's lower-triangle.
 
 ### Graph Connectivity Levels and Reachability Matrix Zeros
 
@@ -183,7 +183,7 @@ Consider the directed graph shown in @fig-undirected again. In @tbl-symmadjmat w
     knitr::kable(d, format = "pipe")
 ```
 
-The distance matrix reveals a number of things about the network. First, note that nodes that are adjacent in @fig-undirected have a geodesic distance of 1.0 by definition. In addition, nodes are at minimum distance from themselves, so we put a value of 0 in the diagonal cells; **d**$_{ij} = 0$ for all $i=j$. Second, note that the maximum geodesic distance between any two nodes in the graph is 3.0. As we saw in the lesson on indirect connections, this is an important graph metric, called the **graph diameter**. Finally, note that just like an undirected graph yields a symmetric adjacency matrix, it also yields a symmetric distance matrix. If the geodesic distance between nodes *A* and *G* in an the undirected graph is 3.0, then the geodesic distance between *G* and *A* is also 3.0: **d**$_{ij}$ = **d**$_{ji}$ for all $i$ and $j$.
+The distance matrix reveals a number of things about the network. First, note that nodes that are adjacent in @fig-undirected have a geodesic distance of 1.0 by definition. In addition, nodes are at a minimum distance from themselves, so we put a value of 0 in the diagonal cells; **d**$_{ij} = 0$ for all $i=j$. Second, note that the maximum geodesic distance between any two nodes in the graph is 3.0. As we saw in the lesson on indirect connections, this is an important graph metric, called the **graph diameter**. Finally, note that just like an undirected graph yields a symmetric adjacency matrix, it also yields a symmetric distance matrix. If the geodesic distance between nodes *A* and *G* in an undirected graph is 3.0, then the geodesic distance between *G* and *A* is also 3.0: **d**$_{ij}$ = **d**$_{ji}$ for all $i$ and $j$.
 
 We can also generate geodesic distance matrices for directed graphs, such as the one shown in @fig-directed. The corresponding distance matrix for this graph is shown in @tbl-distancemat2.
 
@@ -257,7 +257,7 @@ As we noted in the original graph theory lesson, it is possible for the **neighb
 
 This can be used as a measure of the **overlap** of the neighborhood between two nodes. For instance, imagine you have a friend and that friend knows *all* your friends and you know *all* their friends. In which case we would say that the overlap between your node neighborhoods is pretty high; in fact the two neighborhoods overlap *completely*.
 
-Now imagine you just met a new person online who lives in a far away country, and as far as you know, they know *none* of your friends and you know *none* of their friends. In which case, we would say that the overlap if the two neighborhoods is nil or as close to zero as it can get.
+Now imagine you just met a new person online who lives in a far away country, and as far as you know, they know *none* of your friends and you know *none* of their friends. In which case, we would say that the overlap of the two neighborhoods is nil or as close to zero as it can get.
 
 $$
   o_{ij} = \frac{|\mathcal{N}(i) \cap \mathcal{N}(j)|}{|\mathcal{N}(i) \cup \mathcal{N}(j)|}

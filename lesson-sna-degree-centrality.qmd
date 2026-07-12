@@ -10,7 +10,7 @@
 
 The most basic way of defining centrality is simply as a measure of how many alters an ego is connected to. This simply takes a node's degree, as introduced in @sec-degree, and treats it as a reflection of the node's *importance* in the network. The logic is that those with more direct connections to others, compared to those with fewer, hold a more prominent place in the network. 
 
-Once we have constructed the **adjacency matrix** for the network (**A**), then degree centrality is easy to calculate. As @eq-degcen for a given node *i*, the degree centrality is given by summing the entries of its corresponding row.
+Once we have constructed the **adjacency matrix** for the network (**A**), then degree centrality is easy to calculate. As shown in @eq-degcen for a given node *i*, the degree centrality is given by summing the entries of its corresponding row.
 
 $$
   C_i^{DEG} = \sum_{j= 1}^{n}a_{ij}
@@ -20,7 +20,7 @@ $$ {#eq-degcen}
 
 Although it might seem a simple task to just add up the number of connections of each node, that is essentially what the mathematical equation below is doing! Mathematical notation plays an important role in expressing network measures succinctly. 
 
-For instance, if we were to use @eq-degcen to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in @fig-undirected then we would end up with the following degree centralities for each node:
+For instance, if we were to use @eq-degcen to calculate the degree centrality of each node from the symmetric adjacency matrix corresponding to the graph shown in @fig-undirected, then we would end up with the following degree centralities for each node:
 
 ```{r}
 #| label: tbl-degcen 
@@ -58,7 +58,7 @@ $$   {#eq-indegcen}
 
 Note that in this version of the equation, we are summing over *j* (the columns) not over *i* (the rows) as given by subscript under the $\sum$ symbol.
 
-For instance, if we were to use equations @eq-outdegcen and @eq-outdegcen to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in @fig-directed, then we would end up with the following centralities for each node:
+For instance, if we were to use equations @eq-outdegcen and @eq-indegcen to calculate the outdegree and indegree centrality of each node from the asymmetric adjacency matrix corresponding to the graph shown in @fig-directed, then we would end up with the following centralities for each node:
 
 ```{r}
 #| label: tbl-outindegcen
@@ -78,7 +78,7 @@ For instance, if we were to use equations @eq-outdegcen and @eq-outdegcen to cal
     kbl(d, format = "pipe", align = "c") 
 ```
 
-Just like the degree centrality for undirected graphs, the outdegree and indegree centralities rank each node in a directed graph. The first, outdegree centrality, ranks each node based on the number of other nodes that they are connected to. This is a kind of popularity based on *sociability*, or the tendency to seek out the company of others. The second, indegree centrality, ranks each node in the graph by the number of other nodes that connect to it. This is a kind of popularity based on on *being sought after* a kind of status. 
+Just like the degree centrality for undirected graphs, the outdegree and indegree centralities rank each node in a directed graph. The first, outdegree centrality, ranks each node based on the number of other nodes that they are connected to. This is a kind of popularity based on *sociability*, or the tendency to seek out the company of others. The second, indegree centrality, ranks each node in the graph by the number of other nodes that connect to it. This is a kind of popularity based on *being sought after*, a kind of status.
 
 ### Normalized Degree Centrality {#sec-normdeg}
 When we compute the degree centrality of a node, we are counting the number of other nodes to which it is connected. Obviously, the more nodes there are to connect to, the more opportunities there will be to reach a larger number. But what happens if we want to compare the degree centrality of nodes in two very different networks? 
@@ -91,21 +91,21 @@ We can compute the normalized degree centrality using the following equation:
 
 $$
   C_{i(norm)}^{DEG} = \frac{C_{i}^{DEG}}{N-1}
-$$   {#eq-indegcen}
+$$   {#eq-normdegcen}
 
-Where we just divide the regular degree centrality computed using @eq-degcen by the order of the graph minus one. This will be equal to $1.0$ if a person knows *everyone* and $0$ is a person knows *no one*. For all other nodes, it will be a number between 0 and 1. 
+Where we just divide the regular degree centrality computed using @eq-degcen by the order of the graph minus one. This will be equal to $1.0$ if a person knows *everyone* and $0$ if a person knows *no one*. For all other nodes, it will be a number between 0 and 1.
 
 Moreover, this measure is sensitive to the order of the graph. Thus, for a person with twenty friends in a high school of a thousand people, the normalized degree centrality is equal to:
 
 $$
   C_{i(norm)}^{DEG} = \frac{20}{1000-1}= 0.02
-$$   {#eq-indegcen}
+$$   {#eq-normdegcen2}
 
 But for the person with the same twenty friends in a high school of one-hundred people, it is equal to:
 
 $$
   C_{i(norm)}^{DEG} = \frac{20}{100-1}= 0.20
-$$   {#eq-indegcen}
+$$   {#eq-normdegcen3}
 
 Indicating that a person with the same number of friends in the smaller place is indeed more central!
 
