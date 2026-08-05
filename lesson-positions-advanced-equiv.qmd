@@ -1,0 +1,118 @@
+---
+title: "Automorphic and Regular Equivalence"
+---
+
+```{r setup, include=FALSE}
+library(igraph)
+library(tidygraph)
+library(ggraph)
+library(dplyr)
+```
+
+## Introduction
+
+In our previous discussions on network positions, we focused primarily on **structural equivalence**. Recall that two nodes are structurally equivalent if they share the exact same neighbors. While this is a powerful concept, it is often too restrictive for real-world social networks. In many situations, individuals occupy similar social roles or positions without knowing the exact same people.
+
+To address this, network analysts use two relaxed notions of equivalence: **automorphic equivalence** and **regular equivalence**. These concepts allow us to group nodes based on the *structure* of their ties or the *roles* they play, rather than their specific local connections.
+
+## Automorphic Equivalence
+
+**Automorphic equivalence** focuses on the structural symmetry of a network. Two nodes are automorphically equivalent if they occupy indistinguishable structural locations in the overall network, even if their specific neighbors are different. 
+
+Formally, two nodes are automorphically equivalent if there is a way to relabel the nodes (an automorphism) such that the overall structure of the graph remains mathematically identical, and the two nodes can be swapped.
+
+### Example of Automorphic Equivalence
+
+Consider a network structured like a corporate hierarchy with two distinct branches. 
+
+```{r}
+#| label: fig-automorphic
+#| fig-cap: "A network illustrating automorphic equivalence."
+#| fig-cap-location: bottom
+
+# Create a graph with two symmetric branches
+edge_list <- data.frame(
+  from = c("CEO", "CEO", "VP_Sales", "VP_Sales", "VP_Ops", "VP_Ops"),
+  to = c("VP_Sales", "VP_Ops", "Sales_1", "Sales_2", "Ops_1", "Ops_2")
+)
+gr <- tbl_graph(edges = edge_list)
+
+# Plotting the graph
+ggraph(gr, layout = 'tree') + 
+  geom_edge_link(color = "gray50", width = 1) + 
+  geom_node_point(aes(color = name), size = 15) + 
+  geom_node_text(aes(label = name), color = "black", repel = TRUE, size = 4) +
+  theme_graph() +
+  theme(legend.position = "none") +
+  scale_color_brewer(palette = "Set3")
+```
+
+In @fig-automorphic, the `CEO` is connected to two Vice Presidents: `VP_Sales` and `VP_Ops`. Each VP manages two employees. 
+
+- `Sales_1` and `Sales_2` are **structurally equivalent** because they share the exact same neighbor (`VP_Sales`).
+- `VP_Sales` and `VP_Ops` are **not** structurally equivalent because they do not share the exact same neighbors (they manage different employees).
+- However, `VP_Sales` and `VP_Ops` are **automorphically equivalent**. If we were to swap the entire Sales branch with the Operations branch, the overall structure of the organization chart would look exactly the same. They occupy identical structural positions within the network's topology.
+
+## Regular Equivalence
+
+**Regular equivalence** is an even broader concept that focuses on the *roles* actors play. Two actors are regularly equivalent if they have similar types of relationships to other *roles* or *types* of actors, rather than being connected to structurally symmetric positions.
+
+For example, a doctor in a large urban hospital and a doctor in a small rural clinic might not be automorphically equivalent (because the overall structure of their respective hospitals is completely different), but they are regularly equivalent because they both treat patients and report to medical directors.
+
+### Example of Regular Equivalence
+
+Let's look at an example involving teachers, students, and principals in two different schools.
+
+```{r}
+#| label: fig-regular
+#| fig-cap: "A network illustrating regular equivalence."
+#| fig-cap-location: bottom
+
+# Create a graph for two different schools
+edges_school <- data.frame(
+  from = c(
+    # School A (Small)
+    "Principal_A", "Principal_A", "Teacher_A1", "Teacher_A2",
+    # School B (Large)
+    "Principal_B", "Principal_B", "Principal_B", 
+    "Teacher_B1", "Teacher_B1", "Teacher_B2", "Teacher_B3"
+  ),
+  to = c(
+    "Teacher_A1", "Teacher_A2", "Student_A1", "Student_A2",
+    "Teacher_B1", "Teacher_B2", "Teacher_B3",
+    "Student_B1", "Student_B2", "Student_B3", "Student_B4"
+  )
+)
+gr_school <- tbl_graph(edges = edges_school)
+
+# Assign roles for coloring
+gr_school <- gr_school %>%
+  activate(nodes) %>%
+  mutate(role = case_when(
+    grepl("Principal", name) ~ "Principal",
+    grepl("Teacher", name) ~ "Teacher",
+    grepl("Student", name) ~ "Student"
+  ))
+
+# Plotting the graph
+ggraph(gr_school, layout = 'fr') + 
+  geom_edge_link(color = "gray50", width = 1) + 
+  geom_node_point(aes(color = role), size = 12) + 
+  geom_node_text(aes(label = name), color = "black", repel = TRUE, size = 3) +
+  theme_graph() +
+  scale_color_manual(values = c("Principal" = "tomato", "Teacher" = "lightblue", "Student" = "lightgreen"))
+```
+
+In @fig-regular, School A is small, while School B is larger and has a different structural shape. Therefore, a teacher in School A is not automorphically equivalent to a teacher in School B.
+
+However, all teachers are **regularly equivalent** to one another. Why? Because they all share a pattern of ties to other *roles*: every teacher is connected to a principal and to one or more students. Regular equivalence identifies the underlying social role ("Teacher") based on the pattern of connections to other roles ("Principal" and "Student"), ignoring the exact number of ties or the overarching symmetry of the graph.
+
+## Summary of Equivalences
+
+To summarize the three main types of network equivalence:
+
+1. **Structural Equivalence:** Actors share the *exact same specific neighbors*. (Most restrictive)
+2. **Automorphic Equivalence:** Actors occupy *indistinguishable structural locations* in a perfectly symmetric graph.
+3. **Regular Equivalence:** Actors play the *same social role*, connecting to similar types of other actors. (Most flexible)
+
+Understanding these different levels of equivalence allows us to zoom out from the specific individuals in a network to analyze the broader roles, positions, and institutional structures that shape social life.
