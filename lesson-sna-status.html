@@ -135,7 +135,7 @@ window.Quarto = {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -721,6 +721,12 @@ window.Quarto = {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -742,7 +748,7 @@ window.Quarto = {
 </nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content">
+<main class="content page-columns page-full column-body" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-sna-degree-centrality.html">Centrality and Status</a></li><li class="breadcrumb-item"><a href="./lesson-sna-status.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Status</span></a></li></ol></nav>
@@ -766,8 +772,10 @@ window.Quarto = {
 
 <p>Sometimes you hear the phrase “you are who you know.” This is the basis of thinking of “status” (sometimes also called “prestige”) from a social networks perspective. The basic idea is that you <em>get</em> status from the connections that you have with other people, or more precisely people “give” you status when they direct connections toward you. The “better connected” you are, that is, the more people direct deferential ties toward you, the more status you have.</p>
 <p>However, note that this immediately introduces a complication. If you get status from the connections that you have, that means that the people you are connected to <em>also</em> get status from the connections <em>they</em> have (which may include you!) but that also means that the people whom they are connected to also get status from the connections <em>they</em> have and so on, forever and ever.</p>
-<p>People have tried to grapple with this <strong>recursive</strong> nature of status in social network to develop various status metrics <span class="citation" data-cites="vigna16">(<a href="lesson-theory-network-cognition.html#ref-vigna16" role="doc-biblioref">Vigna 2016</a>)</span>. In this lesson we will begin with the simplest case and move on to headier and more complicated cases.</p>
-<section id="status-as-indegree-centrality" class="level2" data-number="23.1">
+<p>People have tried to grapple with this <strong>recursive</strong> nature of status in social network to develop various status metrics <span class="citation" data-cites="vigna16">(<a href="#ref-vigna16" role="doc-biblioref">Vigna 2016</a>)</span>. In this lesson we will begin with the simplest case and move on to headier and more complicated cases.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-vigna16" class="csl-entry" role="listitem">
+Vigna, Sebastiano. 2016. <span>“Spectral Ranking.”</span> <em>Network Science</em> 4 (4): 433–45.
+</div></div><section id="status-as-indegree-centrality" class="level2" data-number="23.1">
 <h2 data-number="23.1" class="anchored" data-anchor-id="status-as-indegree-centrality"><span class="header-section-number">23.1</span> Status as Indegree Centrality</h2>
 <p>Consider a network which could be composed of asymmetric ties indicating some kind of positive regard or esteem that node <em>i</em> has for node <em>j</em>, represented by the directed graph in <a href="lesson-sna-hubs-and-authorities.html#fig-dirgraph" class="quarto-xref">Figure&nbsp;<span>24.1</span></a>, with result adjacency matrix shown in <a href="lesson-sna-hubs-and-authorities.html#tbl-adjmat" class="quarto-xref">Table&nbsp;<span>24.1</span></a>.</p>
 <p>The directed edges could be “thinks the other person is great,’’ or”respects the other person” or “would take advice from that person.” Note that all these relations are <strong>asymmetric</strong> you can think that person <em>A</em> is great, but that does not mean they think the same thing about you.</p>
@@ -1462,7 +1470,7 @@ Table&nbsp;23.3: Incresing powers of the number 0.75.
 \tag{23.5}\]</span></span></p>
 <p>Why is this bit of math important? We will see next!</p>
 </section>
-<section id="katz-status-index" class="level2" data-number="23.5">
+<section id="katz-status-index" class="level2 page-columns page-full" data-number="23.5">
 <h2 data-number="23.5" class="anchored" data-anchor-id="katz-status-index"><span class="header-section-number">23.5</span> Katz Status Index</h2>
 <p>In the mid-twentieth century, the great statistician <a href="https://en.wikipedia.org/wiki/Leo_Katz_(statistician)">Leo Katz</a> set out to develop a measure of status in social networks that took into account indirect connections. He first observed that the new matrix that results from taking the original <strong>adjacency matrix</strong> and raising it to a power (using matrix multiplication) has a clear interpretation. For instance, as we saw in <a href="lesson-matrix-multiplication.html#sec-pows" class="quarto-xref"><span>Section 17.3</span></a>, if we raise the adjacency matrix <span class="math inline">\(A\)</span> shown in <a href="lesson-sna-hubs-and-authorities.html#tbl-adjmat" class="quarto-xref">Table&nbsp;<span>24.1</span></a> to the third power (<span class="math inline">\(\mathbf{A}^3\)</span>) the resulting matrix will contain, as cell entries <span class="math inline">\(a^3_{ij}\)</span>, all the <strong>directed paths</strong> of length <span class="math inline">\(l = 3\)</span> that have row node <span class="math inline">\(i\)</span> as the starting column node and node <span class="math inline">\(j\)</span> as the destination node, the same goes for any number <span class="math inline">\(\mathbf{A}^k\)</span>. This means that the <strong>column sums</strong> of this matrix—or the row sums of the transpose <span class="math inline">\(A^T\)</span>—will contain the number of paths of length three that are directed from all other nodes to a given node.</p>
 <p>Katz saw this as a way to incorporate indirect connections to construct a measure of status using only endogenous information. The idea would be to say that your total status is the sum of number of other people who choose you (or think you are great, or a great source or advice or whatever). However, among the people that choose you the ones that are chosen by many others should count for more. Those are people who are two-steps away from you. But the same should apply to the people who choose those others (people three-steps away from you). Overall, you should get more status from people who choose the people who choose the people, who choose the people…who choose you and you should get more status from the more people who are most likely to be chosen by those others, across any number of steps.</p>
@@ -1489,8 +1497,10 @@ I + \alpha A + \alpha^2 A^2 + \alpha^3 A^3 + \alpha^4 A^4 + \ldots \alpha^\infty
 <p><span id="eq-katz3"><span class="math display">\[
 \mathbf{1} \sum_{k = 0}^{k = \infty} \alpha^k A^k = \mathbf{1} (I - \alpha A)^{-1}
 \tag{23.8}\]</span></span></p>
-<p>Where <span class="math inline">\(I\)</span> refers to the identity matrix (see <a href="lesson-matrix-multiplication.html#sec-identitymat" class="quarto-xref"><span>Section 17.9</span></a>). What <span class="citation" data-cites="katz53">Katz (<a href="lesson-theory-network-cognition.html#ref-katz53" role="doc-biblioref">1953</a>)</span> proposed is that we can turn the infinite sum part of <a href="#eq-katz3" class="quarto-xref">Equation&nbsp;<span>23.8</span></a> (<span class="math inline">\(I + \alpha A + \alpha A^2 + \alpha A^3 + \alpha A^4 + \ldots \alpha A^{\infty})\)</span> into just <span class="math inline">\((I- \alpha A)^{-1}\)</span> following the principle outlined earlier in <a href="#eq-infsum2" class="quarto-xref">Equation&nbsp;<span>23.5</span></a>. Just like the endless sum of squares of a number <span class="math inline">\(x\)</span> between <span class="math inline">\(-1\)</span> and and <span class="math inline">\(1\)</span> just turns into just <span class="math inline">\((1-x)^{-1}\)</span>, the endless sums of a matrix <em>containing</em> numbers between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span> as its entries <span class="math inline">\(\alpha A\)</span> turns into <span class="math inline">\((I-\alpha A)^{-1}\)</span>, with <span class="math inline">\(I\)</span> playing the role of <span class="math inline">\(1\)</span> and raising <span class="math inline">\(I-\alpha A\)</span> to the power of <span class="math inline">\(-1\)</span> playing the role of taking the reciprocal.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
-<p>Katz showed that the new matrix, <span class="math inline">\(A^* = (I-\alpha A)^{-1}\)</span> contains all the information we need, as it condenses the sums of all the status that a persons gets from <em>all their connections</em> both direct and indirect, regardless of how indirect, and it weighs each person’s contribution to each other person’s status by the status of those people (which is calculated in the same way). The column sums of this matrix <span class="math inline">\(\mathbf{1}(I-\alpha A)^{-1}\)</span>will give us the Katz status scores we need as the contain information on all the indirect paths that start with other nodes and end in the focal node. Math magic to the rescue!</p>
+<p>Where <span class="math inline">\(I\)</span> refers to the identity matrix (see <a href="lesson-matrix-multiplication.html#sec-identitymat" class="quarto-xref"><span>Section 17.9</span></a>). What <span class="citation" data-cites="katz53">Katz (<a href="#ref-katz53" role="doc-biblioref">1953</a>)</span> proposed is that we can turn the infinite sum part of <a href="#eq-katz3" class="quarto-xref">Equation&nbsp;<span>23.8</span></a> (<span class="math inline">\(I + \alpha A + \alpha A^2 + \alpha A^3 + \alpha A^4 + \ldots \alpha A^{\infty})\)</span> into just <span class="math inline">\((I- \alpha A)^{-1}\)</span> following the principle outlined earlier in <a href="#eq-infsum2" class="quarto-xref">Equation&nbsp;<span>23.5</span></a>. Just like the endless sum of squares of a number <span class="math inline">\(x\)</span> between <span class="math inline">\(-1\)</span> and and <span class="math inline">\(1\)</span> just turns into just <span class="math inline">\((1-x)^{-1}\)</span>, the endless sums of a matrix <em>containing</em> numbers between <span class="math inline">\(-1\)</span> and <span class="math inline">\(1\)</span> as its entries <span class="math inline">\(\alpha A\)</span> turns into <span class="math inline">\((I-\alpha A)^{-1}\)</span>, with <span class="math inline">\(I\)</span> playing the role of <span class="math inline">\(1\)</span> and raising <span class="math inline">\(I-\alpha A\)</span> to the power of <span class="math inline">\(-1\)</span> playing the role of taking the reciprocal.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<div class="no-row-height column-margin column-container"><div id="ref-katz53" class="csl-entry" role="listitem">
+Katz, Leo. 1953. <span>“A New Status Index Derived from Sociometric Analysis.”</span> <em>Psychometrika</em> 18 (1): 39–43.
+</div><div id="fn1"><p><sup>1</sup>&nbsp;Recall from high school algebra that <span class="math inline">\(x^{-1} = \frac{1}{x}\)</span> and that for any number <span class="math inline">\(x\)</span> the <strong>reciprocal</strong> of <span class="math inline">\(x\)</span> is <span class="math inline">\(\frac{1}{x}\)</span>.</p></div></div><p>Katz showed that the new matrix, <span class="math inline">\(A^* = (I-\alpha A)^{-1}\)</span> contains all the information we need, as it condenses the sums of all the status that a persons gets from <em>all their connections</em> both direct and indirect, regardless of how indirect, and it weighs each person’s contribution to each other person’s status by the status of those people (which is calculated in the same way). The column sums of this matrix <span class="math inline">\(\mathbf{1}(I-\alpha A)^{-1}\)</span>will give us the Katz status scores we need as the contain information on all the indirect paths that start with other nodes and end in the focal node. Math magic to the rescue!</p>
 <p>Let’s see how it works, step by step:</p>
 <ul>
 <li><p>First we create the <span class="math inline">\(12 \times 12\)</span> identity matrix <span class="math inline">\(I_{12 \times 12}\)</span>, show in <a href="#tbl-katz-1" class="quarto-xref">Table&nbsp;<span>23.4 (a)</span></a>. As noted, this matrix has twelve ones across the diagonals and zeroes everywhere else. Then we choose a value for alpha. There are obscure mathematical reasons for why this value cannot be too big (depending on <span class="math inline">\(A\)</span>), but for this example <span class="math inline">\(\alpha = 0.45\)</span> will work.</p></li>
@@ -1499,7 +1509,7 @@ I + \alpha A + \alpha^2 A^2 + \alpha^3 A^3 + \alpha^4 A^4 + \ldots \alpha^\infty
 <li><p>Fourth, we find the matrix that equals the reciprocal of <span class="math inline">\(I-\alpha A\)</span> (also called the <strong>matrix inverse</strong> of <span class="math inline">\(I-\alpha A\)</span>) to get <span class="math inline">\((I-\alpha A)^{-1}\)</span>. The matrix inverse is somewhat involved to calculate for larger matrices like <span class="math inline">\(I-\alpha A\)</span>, so, for now, chalk the numbers in <a href="#tbl-katz-4" class="quarto-xref">Table&nbsp;<span>23.4 (d)</span></a> up to math magic. Essentially you are trying to find a new matrix <span class="math inline">\(W\)</span> such that when you multiply it by <span class="math inline">\((I-\alpha A)\)</span> you get <span class="math inline">\(I\)</span> as the result; that is a matrix <span class="math inline">\(W\)</span> is the inverse of another matrix <span class="math inline">\((I-\alpha A)\)</span> if and only if <span class="math inline">\(W(I-\alpha A) = I\)</span>. This is just like the the reciprocal of any number <span class="math inline">\(x\)</span>, namely, <span class="math inline">\(\frac{1}{x}\)</span> always equals to one when multiplied by that number: <span class="math inline">\(\frac{1}{x} \times x = \frac{x}{x} = 1\)</span>. This new matrix, called the <strong>Katz proximity matrix</strong> is shown in <a href="#tbl-katz-4" class="quarto-xref">Table&nbsp;<span>23.4 (d)</span></a>.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> In this matrix, the larger the number in the cell, the more node <span class="math inline">\(i\)</span> is connected to node <span class="math inline">\(j\)</span> via indirect connections.</p></li>
 <li><p>Finally, we compute the <em>column sums</em> of the Katz proximity matrix to get the Katz status scores for each node. In equation form:</p></li>
 </ul>
-<p><span id="eq-katz4"><span class="math display">\[
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;Note that we set the diagonals of the matrix to zero, since we don’t care about the contributions the person makes to their own status based on <strong>cycles</strong> (walks that begin and end in the same node).</p></div></div><p><span id="eq-katz4"><span class="math display">\[
 s^{katz}_i = \mathbf{1} (I - \alpha A)^{-1}
 \tag{23.9}\]</span></span></p>
 <p>The resulting scores are shown in <a href="#tbl-status-5" class="quarto-xref">Table&nbsp;<span>23.2 (e)</span></a> for each node of <a href="lesson-sna-hubs-and-authorities.html#fig-dirgraph" class="quarto-xref">Figure&nbsp;<span>24.1</span></a>.</p>
@@ -2378,12 +2388,14 @@ Table&nbsp;23.4: Example of estimating status in social networks using exogeneou
 </figure>
 </div>
 </section>
-<section id="hubbells-tweak-on-katzs-score" class="level2" data-number="23.6">
+<section id="hubbells-tweak-on-katzs-score" class="level2 page-columns page-full" data-number="23.6">
 <h2 data-number="23.6" class="anchored" data-anchor-id="hubbells-tweak-on-katzs-score"><span class="header-section-number">23.6</span> Hubbell’s Tweak on Katz’s Score</h2>
 <p>So far, we have discussed two main ways to measure the status of node in a social network, both based on the similar principle that people gain status from being (directly or indirectly) connected to high-status others (and get less status from being directly or indirectly connected to low status others). There are two ways to get a sense of the status of others. On the <strong>exogenous</strong> approach, we use some kind of prior ranking or knowledge (see <a href="#tbl-status-2" class="quarto-xref">Table&nbsp;<span>23.2 (b)</span></a>) on the endogenous approach, we use only information on network connectivity (in-degree or the Katz approach).</p>
 <p>What if there was a way to <em>combine</em> both approaches and get the best of both worlds? That is, we count <em>all</em> the paths coming into a node from other nodes—of any length— and we <em>weigh</em> each path so that paths that <em>start</em> with high status nodes (according to our exogenous scores) count for more than paths that have low status nodes as their starting point.</p>
-<p>This is exactly what was proposed by <span class="citation" data-cites="hubbell65">Hubbell (<a href="lesson-theory-network-cognition.html#ref-hubbell65" role="doc-biblioref">1965</a>)</span>. It revolves around a relatively small tweak on Katz’s approach. The trick is to take the Katz proximity matrix computed according to to <a href="#eq-katz4" class="quarto-xref">Equation&nbsp;<span>23.9</span></a> and pre-multiply it not by a row vector full of ones, like with <a href="#eq-katz4" class="quarto-xref">Equation&nbsp;<span>23.9</span></a>, but by the external row vector of status scores <span class="math inline">\(\mathbf{b}\)</span> itself.</p>
-<p>In equation form:</p>
+<p>This is exactly what was proposed by <span class="citation" data-cites="hubbell65">Hubbell (<a href="#ref-hubbell65" role="doc-biblioref">1965</a>)</span>. It revolves around a relatively small tweak on Katz’s approach. The trick is to take the Katz proximity matrix computed according to to <a href="#eq-katz4" class="quarto-xref">Equation&nbsp;<span>23.9</span></a> and pre-multiply it not by a row vector full of ones, like with <a href="#eq-katz4" class="quarto-xref">Equation&nbsp;<span>23.9</span></a>, but by the external row vector of status scores <span class="math inline">\(\mathbf{b}\)</span> itself.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-hubbell65" class="csl-entry" role="listitem">
+Hubbell, Charles H. 1965. <span>“An Input-Output Approach to Clique Identification.”</span> <em>Sociometry</em>, 377–99.
+</div></div><p>In equation form:</p>
 <p><span id="eq-hubbell"><span class="math display">\[
 s^{hubbell} = \mathbf{b}(I-\alpha A)^{-1}
 \tag{23.10}\]</span></span></p>
@@ -2394,25 +2406,9 @@ s^{hubbell} = \mathbf{b}(I-\alpha A)^{-1}
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-hubbell65" class="csl-entry" role="listitem">
-Hubbell, Charles H. 1965. <span>“An Input-Output Approach to Clique Identification.”</span> <em>Sociometry</em>, 377–99.
-</div>
-<div id="ref-katz53" class="csl-entry" role="listitem">
-Katz, Leo. 1953. <span>“A New Status Index Derived from Sociometric Analysis.”</span> <em>Psychometrika</em> 18 (1): 39–43.
-</div>
-<div id="ref-vigna16" class="csl-entry" role="listitem">
-Vigna, Sebastiano. 2016. <span>“Spectral Ranking.”</span> <em>Network Science</em> 4 (4): 433–45.
-</div>
-</div>
+
 </section>
-<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
-<hr>
-<ol>
-<li id="fn1"><p>Recall from high school algebra that <span class="math inline">\(x^{-1} = \frac{1}{x}\)</span> and that for any number <span class="math inline">\(x\)</span> the <strong>reciprocal</strong> of <span class="math inline">\(x\)</span> is <span class="math inline">\(\frac{1}{x}\)</span>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Note that we set the diagonals of the matrix to zero, since we don’t care about the contributions the person makes to their own status based on <strong>cycles</strong> (walks that begin and end in the same node).<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section>
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

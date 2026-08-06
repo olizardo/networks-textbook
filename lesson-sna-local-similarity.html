@@ -135,7 +135,7 @@ window.Quarto = {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -721,6 +721,12 @@ window.Quarto = {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -739,12 +745,11 @@ window.Quarto = {
   <li><a href="#cosine-similarity" id="toc-cosine-similarity" class="nav-link" data-scroll-target="#cosine-similarity"><span class="header-section-number">34.2.3</span> Cosine Similarity</a></li>
   <li><a href="#neighborhood-overlap-in-directed-graphs" id="toc-neighborhood-overlap-in-directed-graphs" class="nav-link" data-scroll-target="#neighborhood-overlap-in-directed-graphs"><span class="header-section-number">34.2.4</span> Neighborhood Overlap in Directed Graphs</a></li>
   </ul></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content">
+<main class="content page-columns page-full column-body" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-sna-groups-cliques.html">Subgroups and Blocks</a></li><li class="breadcrumb-item"><a href="./lesson-sna-local-similarity.html"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Local Node Similarities</span></a></li></ol></nav>
@@ -768,7 +773,7 @@ window.Quarto = {
 
 <p>As we noted in <a href="lesson-graphs-intro.html#sec-nodenei" class="quarto-xref"><span>Section 6.12</span></a>, it is possible for the <strong>neighborhood</strong> of two nodes in a graph to <em>overlap</em>. Recall that for each node, we define its neighborhood as the set of other nodes that it is adjacent to. That means the neighborhood between two nodes can have members in common, which is the <strong>intersection</strong> of these two sets. <em>The more members they have in common, the more structurally similar two nodes are</em>.</p>
 <p>Similarities based on the neighborhood overlap between two nodes are called <strong>local node similarities</strong> because they only use information on the immediate <strong>ego network</strong> of the two nodes, based only on direct (one-step) connections.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
-<section id="structural-equivalence-and-local-similarity" class="level2" data-number="34.1">
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;We can also define similarities based on indirect connections between nodes, but that’s a subject for a future lesson.</p></div></div><section id="structural-equivalence-and-local-similarity" class="level2" data-number="34.1">
 <h2 data-number="34.1" class="anchored" data-anchor-id="structural-equivalence-and-local-similarity"><span class="header-section-number">34.1</span> Structural Equivalence and Local Similarity</h2>
 <p>If two nodes <em>A</em> and <em>B</em> are structurally equivalent, then their neighborhood overlap <span class="math inline">\(O(A, B)\)</span> is equivalent to their total set of neighbors, meaning that the cardinality of their neighborhood sets is the same as the cardinality of the intersection of those sets. In mathese, for structurally equivalent nodes:</p>
 <p><span class="math display">\[
@@ -795,7 +800,7 @@ Figure&nbsp;34.1: An undirected graph.
 </div>
 </div>
 </section>
-<section id="the-neighborhood-overlap-matrix" class="level2" data-number="34.2">
+<section id="the-neighborhood-overlap-matrix" class="level2 page-columns page-full" data-number="34.2">
 <h2 data-number="34.2" class="anchored" data-anchor-id="the-neighborhood-overlap-matrix"><span class="header-section-number">34.2</span> The Neighborhood Overlap Matrix</h2>
 <p>To measure structural similarity between nodes based on their neighborhood overlap, we construct a new matrix, called the <strong>neighborhood overlap matrix</strong>, which stores neighborhood overlap information for each pair of nodes.</p>
 <p>Consider the graph shown in <a href="#fig-stsim" class="quarto-xref">Figure&nbsp;<span>34.1</span></a>. Its corresponding neighborhood overlap matrix is shown in <a href="#tbl-neiover" class="quarto-xref">Table&nbsp;<span>34.1</span></a>. In the matrix, each cell gives us the overlap between the row node and the column node. Because <span class="math inline">\(O(i, j) = O(j, i)\)</span> for all nodes <em>i</em> and <em>j</em> in a graph, the neighborhood overlap matrix is <strong>symmetric</strong> (has the same information in the upper and lower triangles).</p>
@@ -1016,10 +1021,12 @@ Table&nbsp;34.1: Neighborhood overlap matrix of an undirected graph.
 </figure>
 </div>
 </div>
-<section id="jaccard-similarity" class="level3" data-number="34.2.1">
+<section id="jaccard-similarity" class="level3 page-columns page-full" data-number="34.2.1">
 <h3 data-number="34.2.1" class="anchored" data-anchor-id="jaccard-similarity"><span class="header-section-number">34.2.1</span> Jaccard Similarity</h3>
-<p>Once we have recorded the neighborhood overlap information, we can construct a measure of structural similarity between two nodes called <a href="https://en.wikipedia.org/wiki/Jaccard_index"><strong>Jaccard’s Similarity Coefficient</strong></a> (<span class="math inline">\(J_{ij}\)</span>) <span class="citation" data-cites="jaccard01">(<a href="lesson-theory-network-cognition.html#ref-jaccard01" role="doc-biblioref">Jaccard 1901</a>)</span>. Actually, we will need one more piece of information before computing this measure (and the other measures that follow): the graph’s degree set. This is shown in <a href="#tbl-degsetover" class="quarto-xref">Table&nbsp;<span>34.2</span></a>.</p>
-<div class="cell" data-tbl-cap-location="bottom">
+<p>Once we have recorded the neighborhood overlap information, we can construct a measure of structural similarity between two nodes called <a href="https://en.wikipedia.org/wiki/Jaccard_index"><strong>Jaccard’s Similarity Coefficient</strong></a> (<span class="math inline">\(J_{ij}\)</span>) <span class="citation" data-cites="jaccard01">(<a href="#ref-jaccard01" role="doc-biblioref">Jaccard 1901</a>)</span>. Actually, we will need one more piece of information before computing this measure (and the other measures that follow): the graph’s degree set. This is shown in <a href="#tbl-degsetover" class="quarto-xref">Table&nbsp;<span>34.2</span></a>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-jaccard01" class="csl-entry" role="listitem">
+Jaccard, Paul. 1901. <span>“Distribution of the Alpine Flora in the Dranse’s Basin and Some Neighbouring Regions.”</span> <em>Bulletin de La Societe Vaudoise Des Sciences Naturelles</em> 37 (1): 241–72.
+</div></div><div class="cell" data-tbl-cap-location="bottom">
 <div id="tbl-degsetover" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
 <figure class="quarto-float quarto-float-tbl figure">
 <div aria-describedby="tbl-degsetover-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1295,10 +1302,12 @@ Table&nbsp;34.3: Structural similarity matrix based on Jaccard’s index.
 </div>
 <p>The structural similarities among all nodes in <a href="#fig-stsim" class="quarto-xref">Figure&nbsp;<span>34.1</span></a>, based on Jaccard’s index, are shown in <a href="#tbl-jaccard" class="quarto-xref">Table&nbsp;<span>34.3</span></a>.</p>
 </section>
-<section id="dice-similarity" class="level3" data-number="34.2.2">
+<section id="dice-similarity" class="level3 page-columns page-full" data-number="34.2.2">
 <h3 data-number="34.2.2" class="anchored" data-anchor-id="dice-similarity"><span class="header-section-number">34.2.2</span> Dice Similarity</h3>
-<p>A second measure of structural similarity between nodes, based on neighborhood overlap, is the <a href="https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient"><strong>Dice Similarity Index</strong></a>. It goes like this <span class="citation" data-cites="dice45">(<a href="lesson-theory-network-cognition.html#ref-dice45" role="doc-biblioref">Dice 1945</a>)</span>:</p>
-<p><span id="eq-dice"><span class="math display">\[
+<p>A second measure of structural similarity between nodes, based on neighborhood overlap, is the <a href="https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient"><strong>Dice Similarity Index</strong></a>. It goes like this <span class="citation" data-cites="dice45">(<a href="#ref-dice45" role="doc-biblioref">Dice 1945</a>)</span>:</p>
+<div class="no-row-height column-margin column-container"><div id="ref-dice45" class="csl-entry" role="listitem">
+Dice, Lee R. 1945. <span>“Measures of the Amount of Ecologic Association Between Species.”</span> <em>Ecology</em> 26 (3): 297–302.
+</div></div><p><span id="eq-dice"><span class="math display">\[
   D_{ij} = \frac{2n_{ij}}{k_i + k_j}
 \tag{34.3}\]</span></span></p>
 <p>This says that the structural similarity between two nodes equals twice the number of people they know in common, divided by the sum of their degrees.</p>
@@ -1769,27 +1778,12 @@ D_{DH} = \frac{3}{\sqrt{5 \times 5}} = \frac{3}{\sqrt{25}} = \frac{3}{5} = 0.60
 <p><span id="eq-cosin"><span class="math display">\[
   C_{ij}^{in} = \frac{n_{ij}^{in}}{\sqrt{k_i^{in}k_j^{in}}}
 \tag{34.6}\]</span></span></p>
-</section>
-</section>
-<section id="references" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-dice45" class="csl-entry" role="listitem">
-Dice, Lee R. 1945. <span>“Measures of the Amount of Ecologic Association Between Species.”</span> <em>Ecology</em> 26 (3): 297–302.
-</div>
-<div id="ref-jaccard01" class="csl-entry" role="listitem">
-Jaccard, Paul. 1901. <span>“Distribution of the Alpine Flora in the Dranse’s Basin and Some Neighbouring Regions.”</span> <em>Bulletin de La Societe Vaudoise Des Sciences Naturelles</em> 37 (1): 241–72.
-</div>
-</div>
+
 </section>
-<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
-<hr>
-<ol>
-<li id="fn1"><p>We can also define similarities based on indirect connections between nodes, but that’s a subject for a future lesson.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
 </section>
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

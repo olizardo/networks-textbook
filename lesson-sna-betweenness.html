@@ -135,7 +135,7 @@ window.Quarto = {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -721,6 +721,12 @@ window.Quarto = {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -738,7 +744,7 @@ window.Quarto = {
 </nav>
     </div>
 <!-- main -->
-<main class="content column-body" id="quarto-document-content">
+<main class="content page-columns page-full column-body" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-sna-degree-centrality.html">Centrality and Status</a></li><li class="breadcrumb-item"><a href="./lesson-sna-betweenness.html"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Centralities based on Shortest Paths</span></a></li></ol></nav>
@@ -760,9 +766,13 @@ window.Quarto = {
 </header>
 
 
-<p>Recall that in our discussion of shortest paths between pairs of nodes in <a href="lesson-graphs-paths.html" class="quarto-xref"><span>Chapter 11</span></a>, we noted the importance of the <strong>inner nodes</strong> that <em>intervene</em> or <em>mediate</em> between any one node in the graph that wants to reach another one. Nodes that stand in these <strong>brokerage</strong> or <strong>gatekeeper</strong> slots in the network <span class="citation" data-cites="gould_fernandez89">(<a href="lesson-theory-network-cognition.html#ref-gould_fernandez89" role="doc-biblioref">Gould and Fernandez 1989</a>)</span>, occupy an important position <span class="citation" data-cites="marsden83">(<a href="lesson-theory-network-cognition.html#ref-marsden83" role="doc-biblioref">Marsden 1983</a>)</span>, and this is different from having a lot of contacts (like degree centrality; see <a href="lesson-sna-degree-centrality.html" class="quarto-xref"><span>Chapter 18</span></a>), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality; see <a href="lesson-sna-closeness.html" class="quarto-xref"><span>Chapter 19</span></a>).</p>
-<p>Instead, the kind of centrality we are talking about is about being <em>in-between</em> the indirect communications of other nodes in the graph. In this chapter, we discuss some centrality metrics designed to capture the extent to which nodes serve as <em>intermediaries</em> between other nodes in a social network.</p>
-<section id="stress-centrality" class="level2" data-number="20.1">
+<p>Recall that in our discussion of shortest paths between pairs of nodes in <a href="lesson-graphs-paths.html" class="quarto-xref"><span>Chapter 11</span></a>, we noted the importance of the <strong>inner nodes</strong> that <em>intervene</em> or <em>mediate</em> between any one node in the graph that wants to reach another one. Nodes that stand in these <strong>brokerage</strong> or <strong>gatekeeper</strong> slots in the network <span class="citation" data-cites="gould_fernandez89">(<a href="#ref-gould_fernandez89" role="doc-biblioref">Gould and Fernandez 1989</a>)</span>, occupy an important position <span class="citation" data-cites="marsden83">(<a href="#ref-marsden83" role="doc-biblioref">Marsden 1983</a>)</span>, and this is different from having a lot of contacts (like degree centrality; see <a href="lesson-sna-degree-centrality.html" class="quarto-xref"><span>Chapter 18</span></a>), or being able to reach lots of other nodes by traversing relatively small distances (like closeness centrality; see <a href="lesson-sna-closeness.html" class="quarto-xref"><span>Chapter 19</span></a>).</p>
+<div class="no-row-height column-margin column-container"><div id="ref-gould_fernandez89" class="csl-entry" role="listitem">
+Gould, Roger V, and Roberto M Fernandez. 1989. <span>“Structures of Mediation: A Formal Approach to Brokerage in Transaction Networks.”</span> <em>Sociological Methodology</em> 19: 89–126.
+</div><div id="ref-marsden83" class="csl-entry" role="listitem">
+Marsden, Peter V. 1983. <span>“Restricted Access in Networks and Models of Power.”</span> <em>American Journal of Sociology</em> 88 (4): 686–717.
+</div></div><p>Instead, the kind of centrality we are talking about is about being <em>in-between</em> the indirect communications of other nodes in the graph. In this chapter, we discuss some centrality metrics designed to capture the extent to which nodes serve as <em>intermediaries</em> between other nodes in a social network.</p>
+<section id="stress-centrality" class="level2 page-columns page-full" data-number="20.1">
 <h2 data-number="20.1" class="anchored" data-anchor-id="stress-centrality"><span class="header-section-number">20.1</span> Stress Centrality</h2>
 <p>For instance, let’s say you were actor <span class="math inline">\(K\)</span> in the network shown in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>20.1</span></a>, and you wanted to know who you depend on most to communicate with actor <span class="math inline">\(J\)</span>. Here, dependence means that you are forced to “go through them.” One way <span class="math inline">\(K\)</span> could figure this out is by listing every shortest path, using each as the <strong>origin node</strong> and <span class="math inline">\(J\)</span> as the <strong>destination node</strong>.</p>
 <p>After you have this list, you can see which of the other nodes shows up as an <strong>inner node</strong>—an intermediary or gatekeeper—in those paths the most times. Remember that two actors can be indirectly linked by <em>multiple shortest paths of the same length</em>.</p>
@@ -854,8 +864,10 @@ Table&nbsp;20.1: Intermediaries between nodes J and K
 </div>
 </div>
 <p>So it looks like, looking at the second column of <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;<span>20.1</span></a>, that <span class="math inline">\(H\)</span> is the other actor that <span class="math inline">\(J\)</span> depends on the most to reach <span class="math inline">\(K\)</span>, since they show up three times in the paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> (<span class="math inline">\(n_{K(H)J} = 3\)</span>), beating out all the other nodes.</p>
-<p>We can use this information—aggregated across all pairs of nodes in the graph for every other node—to construct a centrality metric. That is, for each node in the graph <span class="math inline">\(k\)</span>, we can ask how often they show up as an intermediary between every other pair of nodes in the graph <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and then we sum up this quantity across all pairs. This centrality index was first proposed by Alfonso <span class="citation" data-cites="shimbel53">Shimbel (<a href="lesson-theory-network-cognition.html#ref-shimbel53" role="doc-biblioref">1953</a>)</span> and is called <strong>stress centrality</strong>.</p>
-<p>In equation form, you write the stress centrality index like this:</p>
+<p>We can use this information—aggregated across all pairs of nodes in the graph for every other node—to construct a centrality metric. That is, for each node in the graph <span class="math inline">\(k\)</span>, we can ask how often they show up as an intermediary between every other pair of nodes in the graph <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and then we sum up this quantity across all pairs. This centrality index was first proposed by Alfonso <span class="citation" data-cites="shimbel53">Shimbel (<a href="#ref-shimbel53" role="doc-biblioref">1953</a>)</span> and is called <strong>stress centrality</strong>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-shimbel53" class="csl-entry" role="listitem">
+Shimbel, Alfonso. 1953. <span>“Structural Parameters of Communication Networks.”</span> <em>The Bulletin of Mathematical Biophysics</em> 15: 501–7.
+</div></div><p>In equation form, you write the stress centrality index like this:</p>
 <p><span id="eq-stress"><span class="math display">\[
 C^{STRESS}_k = \sum_{i \neq k} \sum_{j \neq k} n_{i(k)j}
 \tag{20.1}\]</span></span></p>
@@ -915,17 +927,23 @@ Table&nbsp;20.2: Stress centrality scores.
 </div>
 <p><a href="#tbl-stress" class="quarto-xref">Table&nbsp;<span>20.2</span></a> shows the results of computing the stress centralities for all the nodes in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>20.1</span></a>. It is clear that, according to this metric, nodes <span class="math inline">\(E\)</span> and <span class="math inline">\(J\)</span> win out, standing at the center of a whopping <span class="math inline">\(n_{i(E)j} = n_{i(J)j} = 48\)</span> shortest paths among other nodes in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>20.1</span></a>. Node <span class="math inline">\(I\)</span> receives a stress centrality score of <span class="math inline">\(n_{i(I)j} = 0\)</span> because it is not an inner node between any other pair of nodes.</p>
 </section>
-<section id="betweenness-centrality" class="level2" data-number="20.2">
+<section id="betweenness-centrality" class="level2 page-columns page-full" data-number="20.2">
 <h2 data-number="20.2" class="anchored" data-anchor-id="betweenness-centrality"><span class="header-section-number">20.2</span> Betweenness Centrality</h2>
-<p>While Shimbel’s Stress Centrality idea goes a long way toward capturing which nodes are most intermediary, it can be improved upon. This is what was noted by Anthonisse and later Linton Freeman in a landmark series of papers, where they developed a centrality metric aimed to measure node intermediation called <strong>betweenness centrality</strong> <span class="citation" data-cites="anthonisse71 freeman77 freeman80">(<a href="lesson-theory-network-cognition.html#ref-anthonisse71" role="doc-biblioref">Anthonisse 1971</a>; <a href="lesson-theory-network-cognition.html#ref-freeman77" role="doc-biblioref">Freeman 1977</a>, <a href="lesson-theory-network-cognition.html#ref-freeman80" role="doc-biblioref">1980</a>)</span></p>
-<p>The basic observation behind betweenness centrality is pretty simple. It rests on the idea that, rather than <em>counting</em> the raw number of shortest paths a particular node sits on as an inner node, it is better to look at the <em>percentage</em> (or proportion) of such paths.</p>
+<p>While Shimbel’s Stress Centrality idea goes a long way toward capturing which nodes are most intermediary, it can be improved upon. This is what was noted by Anthonisse and later Linton Freeman in a landmark series of papers, where they developed a centrality metric aimed to measure node intermediation called <strong>betweenness centrality</strong> <span class="citation" data-cites="anthonisse71 freeman77 freeman80">(<a href="#ref-anthonisse71" role="doc-biblioref">Anthonisse 1971</a>; <a href="#ref-freeman77" role="doc-biblioref">Freeman 1977</a>, <a href="#ref-freeman80" role="doc-biblioref">1980</a>)</span></p>
+<div class="no-row-height column-margin column-container"><div id="ref-anthonisse71" class="csl-entry" role="listitem">
+Anthonisse, Jac M. 1971. <span>“The Rush in a Directed Graph.”</span> <em>Stichting Mathematisch Centrum. Mathematische Besliskunde</em>, nos. BN 9/71.
+</div><div id="ref-freeman77" class="csl-entry" role="listitem">
+Freeman, Linton C. 1977. <span>“A Set of Measures of Centrality Based on Betweenness.”</span> <em>Sociometry</em> 40 (1): 35–41.
+</div></div><p>The basic observation behind betweenness centrality is pretty simple. It rests on the idea that, rather than <em>counting</em> the raw number of shortest paths a particular node sits on as an inner node, it is better to look at the <em>percentage</em> (or proportion) of such paths.</p>
 <p>Let us return to our earlier example, in which nodes <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> serve as the end nodes. To measure the proportion of shortest paths featuring nodes in the inner node set <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> standing between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>, we simply take <span class="math inline">\(n_{K(x)J}\)</span> and divide it by the <em>total</em> number of shortest paths between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. We will call this quantity <span class="math inline">\(n_{KJ}\)</span>, and we already noted from the list we constructed before that <span class="math inline">\(n_{KJ} = 6\)</span>. The new quantity that results from dividing up <span class="math inline">\(n_{K(x)J}\)</span> (for any <span class="math inline">\(x\)</span>) by <span class="math inline">\(n_{KJ}\)</span> we will call <span class="math inline">\(p_{K(x)J}\)</span> where the <span class="math inline">\(p\)</span> is a shorthand for the <em>proportion</em> of paths between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> featuring node <span class="math inline">\(x\)</span> as an inner node.</p>
 <p>For instance, let’s say we wanted to calculate <span class="math inline">\(p_{K(x)J}\)</span> for node <span class="math inline">\(H\)</span>, written <span class="math inline">\(p_{K(H)J}\)</span>. We can write this in equation form like this:</p>
 <p><span id="eq-pairdep"><span class="math display">\[
   p_{K(H)J} = \frac{n_{K(H)J}}{n_{KJ}} = \frac{3}{6} = 0.5
 \tag{20.2}\]</span></span></p>
-<p>Just as before, in <a href="#eq-pairdep" class="quarto-xref">Equation&nbsp;<span>20.2</span></a>, <span class="math inline">\(n_{K(H)J}\)</span> is the number of shortest paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> featuring <span class="math inline">\(H\)</span> as an inner node, and <span class="math inline">\(n_{KJ}\)</span> is the <em>total</em> number of shortest paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. In this case, <span class="math inline">\(n_{K(H)J} = 3\)</span> and <span class="math inline">\(n_{KJ} = 6\)</span>, which means that actor <span class="math inline">\(K\)</span> depends on actor <span class="math inline">\(H\)</span> for <em>fifty percent</em> of their shortest path access to <span class="math inline">\(J\)</span>. Making <span class="math inline">\(H\)</span> the actor in the network <span class="math inline">\(K\)</span> depends most on being able to reach <span class="math inline">\(J\)</span>. The third column of <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;<span>20.1</span></a> shows the <span class="math inline">\(p_{K(x)J}\)</span> scores for all the nodes in the inner node set <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> standing between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. <span class="citation" data-cites="freeman80">Freeman (<a href="lesson-theory-network-cognition.html#ref-freeman80" role="doc-biblioref">1980</a>)</span> calls the measure in <a href="#eq-pairdep" class="quarto-xref">Equation&nbsp;<span>20.2</span></a> the <strong>pair-dependency</strong> of actor <span class="math inline">\(K\)</span> on actor <span class="math inline">\(H\)</span> to reach a given node <span class="math inline">\(J\)</span>.</p>
-<p>Generalizing this approach, we can do the same for each triplet of actors <span class="math inline">\(i\)</span>, <span class="math inline">\(j\)</span>, and <span class="math inline">\(k\)</span> in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>20.1</span></a> This is the basis for calculating <strong>betweenness centrality</strong>. That is, we can count the number of times <span class="math inline">\(K\)</span> stands on the shortest path between two other actors <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and we can then divide it by the total number of shortest paths linking actors <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> in the network. As noted, this ratio gives us the <em>proportion</em> of shortest paths in the network that have <span class="math inline">\(i\)</span> and <span class="math inline">\(J\)</span> as the end nodes and feature <span class="math inline">\(K\)</span> as an intermediate node, which we denote by <span class="math inline">\(p_{i(k)j}\)</span>. In equation form:</p>
+<p>Just as before, in <a href="#eq-pairdep" class="quarto-xref">Equation&nbsp;<span>20.2</span></a>, <span class="math inline">\(n_{K(H)J}\)</span> is the number of shortest paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span> featuring <span class="math inline">\(H\)</span> as an inner node, and <span class="math inline">\(n_{KJ}\)</span> is the <em>total</em> number of shortest paths linking <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. In this case, <span class="math inline">\(n_{K(H)J} = 3\)</span> and <span class="math inline">\(n_{KJ} = 6\)</span>, which means that actor <span class="math inline">\(K\)</span> depends on actor <span class="math inline">\(H\)</span> for <em>fifty percent</em> of their shortest path access to <span class="math inline">\(J\)</span>. Making <span class="math inline">\(H\)</span> the actor in the network <span class="math inline">\(K\)</span> depends most on being able to reach <span class="math inline">\(J\)</span>. The third column of <a href="#tbl-pairdep" class="quarto-xref">Table&nbsp;<span>20.1</span></a> shows the <span class="math inline">\(p_{K(x)J}\)</span> scores for all the nodes in the inner node set <span class="math inline">\(\{A, C, D, E, F, H, N\}\)</span> standing between <span class="math inline">\(K\)</span> and <span class="math inline">\(J\)</span>. <span class="citation" data-cites="freeman80">Freeman (<a href="#ref-freeman80" role="doc-biblioref">1980</a>)</span> calls the measure in <a href="#eq-pairdep" class="quarto-xref">Equation&nbsp;<span>20.2</span></a> the <strong>pair-dependency</strong> of actor <span class="math inline">\(K\)</span> on actor <span class="math inline">\(H\)</span> to reach a given node <span class="math inline">\(J\)</span>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-freeman80" class="csl-entry" role="listitem">
+Freeman, Linton C. 1980. <span>“The Gatekeeper, Pair-Dependency and Structural Centrality.”</span> <em>Quality and Quantity</em> 14 (4): 585–92.
+</div></div><p>Generalizing this approach, we can do the same for each triplet of actors <span class="math inline">\(i\)</span>, <span class="math inline">\(j\)</span>, and <span class="math inline">\(k\)</span> in <a href="#fig-bet" class="quarto-xref">Figure&nbsp;<span>20.1</span></a> This is the basis for calculating <strong>betweenness centrality</strong>. That is, we can count the number of times <span class="math inline">\(K\)</span> stands on the shortest path between two other actors <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and we can then divide it by the total number of shortest paths linking actors <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> in the network. As noted, this ratio gives us the <em>proportion</em> of shortest paths in the network that have <span class="math inline">\(i\)</span> and <span class="math inline">\(J\)</span> as the end nodes and feature <span class="math inline">\(K\)</span> as an intermediate node, which we denote by <span class="math inline">\(p_{i(k)j}\)</span>. In equation form:</p>
 <p><span id="eq-pk"><span class="math display">\[
 p_{i(k)j} = \frac{n_{i(k)j}}{n_{ij}}
 \tag{20.3}\]</span></span></p>
@@ -996,26 +1014,7 @@ Table&nbsp;20.3: Betweenness centrality scores.
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-anthonisse71" class="csl-entry" role="listitem">
-Anthonisse, Jac M. 1971. <span>“The Rush in a Directed Graph.”</span> <em>Stichting Mathematisch Centrum. Mathematische Besliskunde</em>, nos. BN 9/71.
-</div>
-<div id="ref-freeman77" class="csl-entry" role="listitem">
-Freeman, Linton C. 1977. <span>“A Set of Measures of Centrality Based on Betweenness.”</span> <em>Sociometry</em> 40 (1): 35–41.
-</div>
-<div id="ref-freeman80" class="csl-entry" role="listitem">
-Freeman, Linton C. 1980. <span>“The Gatekeeper, Pair-Dependency and Structural Centrality.”</span> <em>Quality and Quantity</em> 14 (4): 585–92.
-</div>
-<div id="ref-gould_fernandez89" class="csl-entry" role="listitem">
-Gould, Roger V, and Roberto M Fernandez. 1989. <span>“Structures of Mediation: A Formal Approach to Brokerage in Transaction Networks.”</span> <em>Sociological Methodology</em> 19: 89–126.
-</div>
-<div id="ref-marsden83" class="csl-entry" role="listitem">
-Marsden, Peter V. 1983. <span>“Restricted Access in Networks and Models of Power.”</span> <em>American Journal of Sociology</em> 88 (4): 686–717.
-</div>
-<div id="ref-shimbel53" class="csl-entry" role="listitem">
-Shimbel, Alfonso. 1953. <span>“Structural Parameters of Communication Networks.”</span> <em>The Bulletin of Mathematical Biophysics</em> 15: 501–7.
-</div>
-</div>
+
 </section>
 
 </main> <!-- /main -->
