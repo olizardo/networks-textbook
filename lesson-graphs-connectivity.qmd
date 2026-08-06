@@ -7,7 +7,7 @@
 ```
 
 ## Connected and Disconnected Graphs
-Look at the graph shown in @fig-paths1 (in the previous lesson) again. Are there any **disconnected** pairs of nodes in the graph? The answer is no. If you pick any pair of nodes, they are either directly connected or indirectly connected to one another via a path of some length. So, how can we disconnect two nodes in a simple undirected graph? The answer is that there has to be some kind of "gap" splitting the graph into two or more pieces, so that some set of nodes can no longer reach some of the other ones. 
+Look at the graph shown in @fig-paths1 again. Are there any **disconnected** pairs of nodes in the graph? The answer is no. If you pick any pair of nodes, they are either directly connected or indirectly connected to one another via a path of some length. So, how can we disconnect two nodes in a simple undirected graph? The answer is that there has to be some kind of "gap" splitting the graph into two or more pieces, so that some set of nodes can no longer reach some of the other ones. 
 
 
 ```{r}
@@ -96,9 +96,7 @@ Note that a graph is disconnected even if there is just one pair of nodes that c
 ## Components and the Giant Component
 When a graph goes from connected (like @fig-connected1-1) to disconnected (like @fig-connected1-2), it is split into a number of **subgraphs** that are themselves connected. The pairs of nodes inside the subgraph can reach one another, but they can't reach the nodes outside the subgraph.
 
-For instance, in @fig-connected1-2, the set of nodes $\{A, B, C, D, E\}$ forms a **connected subgraph** of the larger disconnected graph. A connected subgraph within a larger disconnected graph is called a **component** of the larger graph. Disconnected graphs, by definition, have multiple components, with the smallest number of components being two.  
-
-For instance, in @fig-connected1-2, there are two components, one formed by the connected subgraph with node set $\{A, B, C, D, E\}$, and the other formed by the connected subgraph with node set $\{F, G, H, I\}$. 
+For instance, in @fig-connected1-2, the set of nodes $\{A, B, C, D, E\}$ forms a **connected subgraph** of the larger disconnected graph. A connected subgraph within a larger disconnected graph is called a **component** of the larger graph. Disconnected graphs, by definition, have multiple components, with the smallest number of components being two. In @fig-connected1-2, there are two components, one formed by the connected subgraph with node set $\{A, B, C, D, E\}$, and the other formed by the connected subgraph with node set $\{F, G, H, I\}$. 
 
 ```{r}
 #| label: fig-connected2
@@ -384,23 +382,105 @@ For instance, in @fig-connected4-1, consider the nodes $H$ and $K$. The edge $HK
 
 Note that from the perspective of nodes $D$ and $H$, the purple $HK$ edge is a local bridge of degree three, because $l_{DH} = 2$ in @fig-connected4-1 and $l_{DH} = 3$ when the edge $HK$ is removed from the graph in @fig-connected4-2.
 
-## Connectivity in Directed Graphs
+## Connectivity in Directed Graphs {#sec-indirectconnectivity}
 
 Connectivity in directed graphs (digraphs) is more complex than in undirected graphs. Because edges have directionality, the fact that node $u$ can reach node $v$ does not guarantee that node $v$ can reach node $u$ (as we saw in @sec-dirpaths). 
 
-To account for this asymmetry, graph theory distinguishes between two different types of connectivity for directed graphs: **weak connectivity** and **strong connectivity**.
+To account for this asymmetry, graph theory distinguishes between three different hierarchical levels of connectivity for directed graphs: **weak connectivity**, **unilateral connectivity**, and **strong connectivity**.
 
-### Weakly Connected Graphs
-A directed graph is **weakly connected** if the graph is connected when we completely ignore the direction of the arrows (replacing all directed arcs with simple undirected edges). 
+### Pairwise Connectivity States
+To understand the connectivity of a whole directed graph, we must first look at the connectivity between individual pairs of nodes. For any pair of nodes $u$ and $v$ in a directed network, they can exist in one of several states:
 
-In other words, if the underlying undirected graph is connected, the digraph is weakly connected. Under this definition, even if some nodes cannot reach other nodes due to opposing arrow directions, they are still considered part of the same weakly connected structure.
+1. **Pairwise Weakly Connected:** Node $u$ and $v$ are connected by at least one **semipath** (connected if we ignore the arrow directions). They are part of the same general network, but there is no directed path starting from either node that can reach the other.
+2. **Pairwise Unilaterally Connected:** A directed path exists from $u \rightarrow v$ **OR** from $v \rightarrow u$. Information or influence can flow from one person to the other, but it is a one-way street; there is no mutual exchange.
+3. **Pairwise Strongly Connected:** A directed path exists from $u \rightarrow v$ **AND** from $v \rightarrow u$. Both nodes can mutually reach each other (mutual reachability), although the paths in each direction may use completely different intermediate nodes or channels.
+4. **Pairwise Recursively Connected:** A directed path exists from $u \rightarrow v$ and $v \rightarrow u$, **AND** the directed path in both directions shares the exact same set of intermediate nodes. The relationship can be traversed back-and-forth along the same closed, mutually symmetric cycle.
 
-### Strongly Connected Graphs
-A directed graph is **strongly connected** if there exists a directed path from *every* node to *every other* node in the graph. This means that for any pair of nodes $u$ and $v$, $u$ can reach $v$ ($u \rightarrow v$) and $v$ can reach $u$ ($v \rightarrow u$) via directed paths of some finite length.
+### Whole Graph Connectivity
 
-Let's apply these definitions to the simple directed graph shown in @fig-directed (from @sec-directedgraphs):
-- **Is it strongly connected?** No. For example, node $C$ is a receiver node with $k_{out} = 0$. Since it has no outgoing connections, once you reach $C$, you cannot get to any other node in the graph. Likewise, node $E$ has $k_{in} = 0$, meaning no other node can ever reach $E$. Thus, it is not strongly connected.
-- **Is it weakly connected?** Yes. If we replace all directed arrows in @fig-directed with simple undirected lines, we get a single, fully connected undirected graph where every node can reach every other node.
+A **whole graph's** overall level of connectivity is defined by the **weakest pairwise connectivity state** present in the network. Global graph connectivity is built on top of individual node-to-node pairwise states. If even a single pair drops to a lower state, the entire graph's connectivity level drops!
+
+#### 1. Strongly Connected Graphs
+A directed graph is **strongly connected** if *every* single pair of nodes in the graph is pairwise strongly connected. This means that there is a directed path from every node to every other node in the graph (complete mutual reachability).
+
+```{r}
+#| label: fig-strong
+#| fig-cap: "A strongly connected directed graph."
+#| fig-cap-location: bottom
+#| fig-width: 6
+#| fig-height: 6
+
+edges_large_strong <- data.frame(
+  from = c(1, 2, 3, 4, 5, 6, 7, 1, 3, 6), 
+  to   = c(2, 3, 4, 5, 6, 7, 1, 4, 6, 2)
+)
+nodes_7 <- data.frame(name = as.character(1:7))
+gr_large_strong <- tbl_graph(nodes = nodes_7, edges = edges_large_strong, directed = TRUE)
+
+ggraph(gr_large_strong, layout = "circle") +
+  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     color = "steelblue", edge_width = 1.1, sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+In @fig-strong, notice how the graph consists of a complete spanning cycle ($1 \rightarrow 2 \rightarrow 3 \rightarrow 4 \rightarrow 5 \rightarrow 6 \rightarrow 7 \rightarrow 1$) plus some additional chord arcs. Because of the continuous cycle, any node can reach any other node, ensuring complete mutual reachability.
+
+#### 2. Unilaterally Connected Graphs
+A directed graph is **unilaterally connected** if for *every* pair of nodes, there is *at least one* directed path connecting them (every pair is at least pairwise unilaterally connected), but the graph fails to be strongly connected.
+
+```{r}
+#| label: fig-unilateral
+#| fig-cap: "A unilaterally connected directed graph."
+#| fig-cap-location: bottom
+#| fig-width: 6
+#| fig-height: 6
+
+edges_large_uni <- data.frame(
+  from = c(1, 2, 3, 4, 5, 6, 1, 3, 2), 
+  to   = c(2, 3, 4, 5, 6, 7, 4, 6, 5)
+)
+gr_large_uni <- tbl_graph(nodes = nodes_7, edges = edges_large_uni, directed = TRUE)
+
+ggraph(gr_large_uni, layout = "circle") +
+  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     color = "steelblue", edge_width = 1.1, sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+In @fig-unilateral, the edges flow strictly forward ($1 \rightarrow 2 \rightarrow 3 \dots \rightarrow 7$). The feedback edge $7 \rightarrow 1$ has been removed. Here, node 1 can reach node 7, but node 7 cannot reach node 1 (no mutual reachability). However, for every single pair you can pick, at least one directed pathway exists between them.
+
+#### 3. Weakly Connected Graphs
+A directed graph is **weakly connected** if the graph is connected when we completely ignore the direction of the arrows (replacing all directed arcs with simple undirected edges). This means at least one pair of nodes in the graph is only pairwise weakly connected (they can't reach each other via directed paths, but they are part of the same structure).
+
+```{r}
+#| label: fig-weak
+#| fig-cap: "A weakly connected directed graph."
+#| fig-cap-location: bottom
+#| fig-width: 6
+#| fig-height: 6
+
+edges_large_weak <- data.frame(
+  from = c(1, 1, 2, 2, 2, 4, 5, 5, 6, 7, 7), 
+  to   = c(2, 6, 1, 4, 3, 2, 3, 4, 1, 6, 4)
+)
+gr_large_weak <- tbl_graph(nodes = nodes_7, edges = edges_large_weak, directed = TRUE)
+
+ggraph(gr_large_weak, layout = "circle") +
+  geom_edge_parallel(arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm'),
+                     color = "steelblue", edge_width = 1.1, sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface="bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+In @fig-weak, there is no directed path from node 5 to node 7, nor is there a directed path from node 7 to node 5. Thus, $\{5, 7\}$ is a mutually unreachable pair, violating unilateral connectivity. However, if we ignored the arrows, the graph is a single connected piece, making it weakly connected.
 
 ### Directed Components
 
@@ -418,7 +498,5 @@ Decomposing @fig-directed yields:
   4. The singleton transmitter component: $\{G\}$.
 
 Decomposing networks into strongly and weakly connected components has powerful applications. For example, in an information flow or gossip network, a **strongly connected component** represents a "rumor mill" where information can diffuse rapidly and completely to all members. On the other hand, nodes outside the SCC (like receivers or transmitters) either act as pure information sinks or pure information sources.
-
----
 
 ## References {.unnumbered}
