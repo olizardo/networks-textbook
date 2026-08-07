@@ -55,7 +55,7 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./lesson-theory-balance-directed.html" rel="next">
+<link href="./lesson-theory-valenced-interactions.html" rel="next">
 <link href="./lesson-theory-balance-triadic.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -98,6 +98,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -647,26 +676,14 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-balance-directed.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Directed Structural Balance</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./lesson-theory-balance-struct-adv.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Advanced Topics in Structural Balance</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./lesson-theory-valenced-interactions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Theories of Valenced Interactions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Theories of Valenced Interactions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-theory-hierarchies.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Dominance Hierarchies</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Dominance Hierarchies</span></span></a>
   </div>
 </li>
       </ul>
@@ -683,13 +700,13 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-theory-diffusion.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">The Diffusion of Innovations</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">The Diffusion of Innovations</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-theory-small-world.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">The Small World Phenomenon</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">The Small World Phenomenon</span></span></a>
   </div>
 </li>
       </ul>
@@ -716,8 +733,23 @@ div.csl-indent {
   </ul></li>
   <li><a href="#cycles-in-a-balanced-signed-graph" id="toc-cycles-in-a-balanced-signed-graph" class="nav-link" data-scroll-target="#cycles-in-a-balanced-signed-graph"><span class="header-section-number">42.2</span> Cycles in a Balanced Signed Graph</a></li>
   <li><a href="#paths-in-a-balanced-signed-graph" id="toc-paths-in-a-balanced-signed-graph" class="nav-link" data-scroll-target="#paths-in-a-balanced-signed-graph"><span class="header-section-number">42.3</span> Paths in a Balanced Signed Graph</a></li>
-  <li><a href="#from-balance-to-clustering" id="toc-from-balance-to-clustering" class="nav-link" data-scroll-target="#from-balance-to-clustering"><span class="header-section-number">42.4</span> From Balance to Clustering</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#checking-for-balance-with-matrix-powers" id="toc-checking-for-balance-with-matrix-powers" class="nav-link" data-scroll-target="#checking-for-balance-with-matrix-powers"><span class="header-section-number">42.4</span> Checking for Balance with Matrix Powers</a></li>
+  <li><a href="#measuring-partial-balance-indices-of-balance" id="toc-measuring-partial-balance-indices-of-balance" class="nav-link" data-scroll-target="#measuring-partial-balance-indices-of-balance"><span class="header-section-number">42.5</span> Measuring Partial Balance: Indices of Balance</a>
+  <ul class="collapse">
+  <li><a href="#the-cycle-index-of-balance" id="toc-the-cycle-index-of-balance" class="nav-link" data-scroll-target="#the-cycle-index-of-balance"><span class="header-section-number">42.5.1</span> 1. The Cycle Index of Balance</a></li>
+  <li><a href="#the-line-index-of-balance" id="toc-the-line-index-of-balance" class="nav-link" data-scroll-target="#the-line-index-of-balance"><span class="header-section-number">42.5.2</span> 2. The Line Index of Balance</a></li>
+  </ul></li>
+  <li><a href="#from-balance-to-clustering" id="toc-from-balance-to-clustering" class="nav-link" data-scroll-target="#from-balance-to-clustering"><span class="header-section-number">42.6</span> From Balance to Clustering</a></li>
+  <li><a href="#directed-structural-balance-and-semicycles" id="toc-directed-structural-balance-and-semicycles" class="nav-link" data-scroll-target="#directed-structural-balance-and-semicycles"><span class="header-section-number">42.7</span> Directed Structural Balance and Semicycles</a>
+  <ul class="collapse">
+  <li><a href="#why-directed-cycles-are-too-restrictive" id="toc-why-directed-cycles-are-too-restrictive" class="nav-link" data-scroll-target="#why-directed-cycles-are-too-restrictive"><span class="header-section-number">42.7.1</span> Why Directed Cycles are Too Restrictive</a></li>
+  <li><a href="#semipaths-and-semicycles" id="toc-semipaths-and-semicycles" class="nav-link" data-scroll-target="#semipaths-and-semicycles"><span class="header-section-number">42.7.2</span> Semipaths and Semicycles</a></li>
+  <li><a href="#whole-network-examples-of-directed-balance-and-imbalance" id="toc-whole-network-examples-of-directed-balance-and-imbalance" class="nav-link" data-scroll-target="#whole-network-examples-of-directed-balance-and-imbalance"><span class="header-section-number">42.7.3</span> Whole-Network Examples of Directed Balance and Imbalance</a></li>
+  </ul></li>
+  <li><a href="#ranked-clusterability-bridging-balance-and-hierarchy" id="toc-ranked-clusterability-bridging-balance-and-hierarchy" class="nav-link" data-scroll-target="#ranked-clusterability-bridging-balance-and-hierarchy"><span class="header-section-number">42.8</span> Ranked Clusterability: Bridging Balance and Hierarchy</a>
+  <ul class="collapse">
+  <li><a href="#visualizing-a-ranked-clusterable-digraph-an-organizational-pecking-order" id="toc-visualizing-a-ranked-clusterable-digraph-an-organizational-pecking-order" class="nav-link" data-scroll-target="#visualizing-a-ranked-clusterable-digraph-an-organizational-pecking-order"><span class="header-section-number">42.8.1</span> Visualizing a Ranked Clusterable Digraph: An Organizational Pecking Order</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -744,17 +776,31 @@ div.csl-indent {
 </header>
 
 
-<p>The concept of balance can be extended from individual triads to the entire social network, which is analyzed at the <strong>whole network</strong> level. This extension is known as <strong>Structural Balance Theory</strong>.</p>
-<p>In its original formulation, structural balance theory applies to <strong>complete signed graphs</strong>. A <strong>signed graph</strong> is a special kind of graph featuring <em>one</em> set of vertices (nodes) and <em>two</em> disjoint sets of edges: positive links (E+) and negative links (E-).</p>
-<p>A <strong>complete signed graph</strong> is one in which every pair of nodes is connected by either a positive or a negative edge. In an <strong>adjacency matrix</strong> representation of a signed graph, positive links are typically represented by +1, negative links by -1, and non-adjacent nodes by 0, though for structural balance, it is often applied to complete graphs where all connections exist.</p>
+<p>The concept of balance can be extended from individual triads, which we covered in <a href="lesson-theory-balance-triadic.html" class="quarto-xref"><span>Chapter 41</span></a>, to the <strong>whole network</strong> level. This extension is known as <strong>Structural Balance Theory</strong>.</p>
+<p>In its original formulation, structural balance theory applies to <strong>complete signed graphs</strong>, where every pair of nodes is joined by an edge. However, as subsequent researchers realized, structural balance theory can be applied to <strong>any signed graph</strong>, complete or incomplete.</p>
+<p>First, some graph theory defintions:</p>
+<p>A <strong>signed graph</strong> is a graph featuring <em>one</em> set of vertices (nodes) and <em>two</em> disjoint sets of edges: positive links (<span class="math inline">\(E^+\)</span>) and negative links (<span class="math inline">\(E^-\)</span>). In an <strong>adjacency matrix</strong> representation of a signed graph, positive links are represented by <span class="math inline">\(+1\)</span>, negative links by <span class="math inline">\(-1\)</span>, and non-adjacent (null) ties by <span class="math inline">\(0\)</span>. A <strong>complete signed graph</strong> is one in which every pair of distinct nodes is connected by either a positive or a negative edge (with no missing edges).</p>
 <section id="the-fundamental-theorem-of-structural-balance" class="level2 page-columns page-full" data-number="42.1">
 <h2 data-number="42.1" class="anchored" data-anchor-id="the-fundamental-theorem-of-structural-balance"><span class="header-section-number">42.1</span> The Fundamental Theorem of Structural Balance</h2>
-<p>The <strong>Fundamental Theorem of Structural Balance</strong> was discovered by mathematicians Dorwin Cartwright and Frank Harary in 1956 <span class="citation" data-cites="cartwright_harary56">(<a href="#ref-cartwright_harary56" role="doc-biblioref">Cartwright and Harary 1956</a>)</span>. This theorem states that if a complete signed graph contains only balanced triads (i.e., every triad in the network is balanced as defined in <a href="lesson-theory-balance-triadic.html" class="quarto-xref"><span>Chapter 41</span></a>), then the graph is balanced.</p>
-<div class="no-row-height column-margin column-container"></div><p>Furthermore, such a balanced graph can be divided into two groups such that:</p>
+<p>The <strong>Fundamental Theorem of Structural Balance</strong> (also known as the <strong>Structure Theorem</strong>) was discovered by mathematicians Dorwin Cartwright and Frank Harary in 1956 <span class="citation" data-cites="cartwright_harary56">(<a href="#ref-cartwright_harary56" role="doc-biblioref">Cartwright and Harary 1956</a>)</span>. The theorem holds for <em>all</em> signed graphs (complete or incomplete) and states:</p>
+<div class="no-row-height column-margin column-container"></div><div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>The Cartwright-Harary Structure Theorem (1956)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A signed graph is <strong>balanced</strong> if and only if its nodes can be partitioned into two disjoint subsets (factions) such that:</p>
 <ol type="1">
-<li>There are only positive links within each group.</li>
-<li>There are only negative links between the two groups.</li>
+<li><p>All positive edges are <strong>within</strong> the subsets.</p></li>
+<li><p>All negative edges are <strong>between</strong> the subsets.</p></li>
 </ol>
+</div>
+</div>
+<p>If a signed graph is <em>complete</em>, checking for balance is relatively simple: a complete signed graph is balanced if and only if every cycle of length 3 (every complete triad as defined in <a href="lesson-graphs-dyads-triads.html" class="quarto-xref"><span>Chapter 8</span></a>) is balanced as defined in <a href="lesson-theory-balance-triadic.html" class="quarto-xref"><span>Chapter 41</span></a>. One such complete balanced graph is shown in <a href="#fig-balance" class="quarto-xref">Figure&nbsp;<span>42.1</span></a>.</p>
 <p>This theorem implies that structural balance is equivalent to perfect <strong>group polarization</strong>. For example, in a balanced network, nodes A, B, and C (in blue in <a href="#fig-balance" class="quarto-xref">Figure&nbsp;<span>42.1</span></a>) might form one group with positive ties (green solid edges) among themselves, while nodes D, E, and F (in purple in <a href="#fig-balance" class="quarto-xref">Figure&nbsp;<span>42.1</span></a>) form another group with positive ties among themselves, and all ties <em>between</em> these two groups would be negative (in red dashed edges). Note that in <a href="#fig-balance" class="quarto-xref">Figure&nbsp;<span>42.1</span></a>, <em>every</em> triangle is balanced, going by the sign multiplication rule covered in <a href="lesson-theory-balance-triadic.html" class="quarto-xref"><span>Chapter 41</span></a>. In a balanced graph, the polarized structure of these two distinct groups can be recovered by rearranging the rows and columns of the signed adjacency matrix such that nodes in the same group are near one another.</p>
 <div class="cell fig-cap-location-bottom">
 <div class="cell-output-display">
@@ -774,7 +820,7 @@ Figure&nbsp;42.1: Complete Balanced Signed Graph Illustrating the Fundamental Th
 <p>Essentially, any new node entering such a network will fall into one of the two existing polarized groups, maintaining internal positive ties and external negative ties, thereby keeping the network polarized.</p>
 <section id="balance-does-not-necessarily-imply-a-good-social-state" class="level3" data-number="42.1.1">
 <h3 data-number="42.1.1" class="anchored" data-anchor-id="balance-does-not-necessarily-imply-a-good-social-state"><span class="header-section-number">42.1.1</span> Balance Does Not Necessarily Imply a “Good” Social State</h3>
-<p>Despite the term “balanced,” this state does not inherently denote a harmonious or desirable social situation. On the contrary, structural balance describes a stable state of maximal polarization and potential conflict, such as seen in <strong>political polarization</strong> (e.g., Republicans versus Democrats), as in the network plot of Twitter bloggers shown in <a href="#fig-twitter" class="quarto-xref">Figure&nbsp;<span>42.2</span></a>, with yellow lines indicating negative links between accounts (e.g., someone posting a negative comment about the other).</p>
+<p>Despite the term “balanced” play a central role in the theory, a balanced state at the whole graph level does not inherently denote a harmonious or desirable social situation. On the contrary, structural balance describes a stable state of maximal polarization and potential conflict, such as seen in <strong>political polarization</strong> (e.g., Republicans versus Democrats), as in the network plot of Twitter bloggers shown in <a href="#fig-twitter" class="quarto-xref">Figure&nbsp;<span>42.2</span></a>, with yellow lines indicating negative links between accounts (e.g., someone posting a negative comment about the other).</p>
 <div id="fig-twitter" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-twitter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -798,23 +844,40 @@ Figure&nbsp;42.2: (Formerly) Twitter network of political bloggers during the 20
 </section>
 <section id="paths-in-a-balanced-signed-graph" class="level2" data-number="42.3">
 <h2 data-number="42.3" class="anchored" data-anchor-id="paths-in-a-balanced-signed-graph"><span class="header-section-number">42.3</span> Paths in a Balanced Signed Graph</h2>
-<p>Recall that a path is a sequence of distinct vertices and edges connecting a start node to an end node. The <em>sign</em> of the path is the product of the sign of each edge in the path. In a balanced graph, the <strong>end nodes</strong> of a path could belong to the same group, or each could belong to different groups in the polarized structure.</p>
-<ol type="1">
-<li><em>Paths with End Nodes in the Same Group</em>: If a path begins and ends within the same polarized group (e.g., both start and end nodes are in Group 1, or both are in Group 2), <em>the product of the signs of its edges will always be positive</em>.</li>
-</ol>
-<p>Reasoning: To start and end in the same group, the path must either stay entirely within that group (meaning all its links are positive, and thus their product is positive) or it must cross between the two groups an even number of times. Each time the path crosses from one group to the other, it traverses a negative link (by definition of the two-group partition). Since an even number of negative links multiplied together results in a positive sign (-1 * -1 = +1), and any within-group links are positive, the overall product of signs for the entire path will be positive.</p>
-<ol start="2" type="1">
-<li><em>Paths with End Nodes in Different Groups</em>: If a path begins in one polarized group and ends in the other (e.g., starts in Group 1 and ends in Group 2), <em>the product of the signs of its edges will always be negative</em>.</li>
-</ol>
-<p>Reasoning: To connect nodes in different groups, the path must necessarily cross the boundary between the two groups an odd number of times. Each time it crosses, it utilizes a negative link. Since an odd number of negative links multiplied together results in a negative sign (+1 * -1 = -1), the overall product of signs for the entire path will be negative.</p>
-<p>In summary, the two-group partitioning, which is a hallmark of structural balance in complete signed graphs, creates a predictable environment for path signs. Paths that “stay” within their original group’s alignment (by ending in the same group) retain a positive sign, while paths that “cross” the network’s fundamental division (by ending in a different group) acquire a negative sign, reflecting the inherent polarization.</p>
+<p>Recall from <a href="lesson-graphs-paths.html" class="quarto-xref"><span>Chapter 11</span></a> that a path is a sequence of distinct vertices and edges connecting a start node to an end node. The <em>sign</em> of the path in a signed graph is the product of the sign of each edge in the path. In a balanced graph, the <strong>end nodes</strong> of a path could belong to the same group, or each could belong to different groups in the polarized structure.</p>
+<p>If a path begins and ends within the same group (e.g., both start and end nodes are in Group 1, or both are in Group 2), <em>the product of the signs of its edges will always be positive</em>. The reason for this is that for a path to start and end with nodes in the same group, the path must either stay entirely within that group (meaning all its links are positive, and thus their product is positive) or it must cross between the two groups an even number of times. Each time the path crosses from one group to the other, it traverses a negative link (by definition of the two-group partition). Since an even number of negative links multiplied together results in a positive sign (-1 * -1 = +1), and any within-group links are positive, the overall product of signs for the entire path will be positive.</p>
+<p>If a path begins in one polarized group and ends in the other (e.g., starts in Group 1 and ends in Group 2), <em>the product of the signs of its edges will always be negative</em>. The reason for this is that for a path to connect nodes in different groups, the path must necessarily cross the boundary between the two groups an odd number of times. Each time it crosses, it uses a negative link (as per the structure theorem). Since an odd number of negative links multiplied together results in a negative sign (+1 * -1 = -1), the overall product of signs for the entire path will be negative.</p>
+<p>In sum, the two-group partitioning of the complete signed balanced graph, creates a predictable environment in terms of path signs. Paths that “stay” within their original group’s alignment (by beginning and ending with nodes in the same group) retain a positive sign, while paths that “cross” the network’s fundamental division (by beginning and ending with nodes in different groups) have a negative sign, reflecting the inherent polarization of the overall structure.</p>
 </section>
-<section id="from-balance-to-clustering" class="level2 page-columns page-full" data-number="42.4">
-<h2 data-number="42.4" class="anchored" data-anchor-id="from-balance-to-clustering"><span class="header-section-number">42.4</span> From Balance to Clustering</h2>
+<section id="checking-for-balance-with-matrix-powers" class="level2" data-number="42.4">
+<h2 data-number="42.4" class="anchored" data-anchor-id="checking-for-balance-with-matrix-powers"><span class="header-section-number">42.4</span> Checking for Balance with Matrix Powers</h2>
+<p>How can we check if a large, complex signed graph is structurally balanced without manually drawing every possible cycle and multiplying their signs? As we learned in <a href="lesson-matrix-operations.html" class="quarto-xref"><span>Chapter 16</span></a>, we can leverage the power of <strong>matrix algebra</strong>.</p>
+<p>Recall that the elements of a signed adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> are defined as: - <span class="math inline">\(a_{ij} = +1\)</span> if node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span> have a positive tie. - <span class="math inline">\(a_{ij} = -1\)</span> if node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span> have a negative tie. - <span class="math inline">\(a_{ij} = 0\)</span> if there is no tie between node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span>.</p>
+<p>If we raise the signed adjacency matrix <span class="math inline">\(\mathbf{X}\)</span> to the <span class="math inline">\(p\)</span>-th power (<span class="math inline">\(\mathbf{a}^p\)</span>), each diagonal entry <span class="math inline">\(a_{ii}^{(p)}\)</span> represents the sum of the signs of all <strong>closed walks</strong> of length <span class="math inline">\(p\)</span> starting and ending at node <span class="math inline">\(i\)</span>.</p>
+<p>Because a structurally balanced graph cannot contain any negative cycles, the product of signs in every cycle is positive. Consequently, if a signed graph is balanced, the diagonal entries of the power the signed adjacency matrix <span class="math inline">\(\mathbf{A}^p\)</span> must be <strong>non-negative</strong> for all powers up to the number of nodes in the graph (<span class="math inline">\(p = 1, 2, \dots, g\)</span>). If even a single diagonal element in any of these power matrices is negative, it indicates the existence of an unbalanced (negative) cycle of that length, meaning the entire graph is unbalanced.</p>
+</section>
+<section id="measuring-partial-balance-indices-of-balance" class="level2 page-columns page-full" data-number="42.5">
+<h2 data-number="42.5" class="anchored" data-anchor-id="measuring-partial-balance-indices-of-balance"><span class="header-section-number">42.5</span> Measuring Partial Balance: Indices of Balance</h2>
+<p>In empirical research, social networks are messy, and they are almost never <em>perfectly</em> balanced. Because of this, analysts need ways to measure the <strong>degree of balance</strong> rather than treating it as a binary (yes/no) state. Wasserman and Faust <span class="citation" data-cites="wasserman_faust94">(<a href="#ref-wasserman_faust94" role="doc-biblioref">1994</a>)</span> highlight two main structural indices used to quantify partial balance:</p>
+<div class="no-row-height column-margin column-container"><div id="ref-wasserman_faust94" class="csl-entry" role="listitem">
+Wasserman, Stanley, and Katherine Faust. 1994. <em>Social Network Analysis: Methods and Applications</em>. Cambridge University Press.
+</div></div><section id="the-cycle-index-of-balance" class="level3 page-columns page-full" data-number="42.5.1">
+<h3 data-number="42.5.1" class="anchored" data-anchor-id="the-cycle-index-of-balance"><span class="header-section-number">42.5.1</span> 1. The Cycle Index of Balance</h3>
+<p>This index is the ratio of the number of positive cycles to the total number of cycles of all lengths in the graph: <span class="math display">\[\text{Cycle Index} = \frac{PC}{TC}\]</span> where <span class="math inline">\(PC\)</span> is the count of positive cycles and <span class="math inline">\(TC\)</span> is the total count of cycles. This index ranges from <span class="math inline">\(0\)</span> (completely unbalanced) to <span class="math inline">\(1\)</span> (perfectly balanced). Some advanced versions of this index (such as those by Henley, Horsfall, and De Soto <span class="citation" data-cites="henley69">(<a href="#ref-henley69" role="doc-biblioref">1969</a>)</span>) apply weightings based on cycle length, reflecting the fact that shorter cycles (like triads) generate much more immediate psychological and social tension than very long cycles.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-henley69" class="csl-entry" role="listitem">
+Henley, Nancy M, Richard B Horsfall, and Clinton B De Soto. 1969. <span>“Goodness of Figure and Social Structure.”</span> <em>Psychological Review</em> 76 (3): 194–204.
+</div></div></section>
+<section id="the-line-index-of-balance" class="level3 page-columns page-full" data-number="42.5.2">
+<h3 data-number="42.5.2" class="anchored" data-anchor-id="the-line-index-of-balance"><span class="header-section-number">42.5.2</span> 2. The Line Index of Balance</h3>
+<p>First proposed by Frank Harary <span class="citation" data-cites="harary59">(<a href="#ref-harary59" role="doc-biblioref">1959</a>)</span>, the <strong>Line Index of Balance</strong> calculates the minimum number of edge signs that must be changed (or edges removed) in order to eliminate all unbalanced cycles and make the graph perfectly balanced. If a large network with hundreds of nodes has a line index of 1 or 2, it is extremely close to complete balance, even though a cycle-counting method might find dozens of unbalanced cycles.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-harary59" class="csl-entry" role="listitem">
+Harary, Frank. 1959. <span>“On the Measurement of Structural Balance.”</span> <em>Behavioral Science</em> 4 (4): 316–23.
+</div></div></section>
+</section>
+<section id="from-balance-to-clustering" class="level2 page-columns page-full" data-number="42.6">
+<h2 data-number="42.6" class="anchored" data-anchor-id="from-balance-to-clustering"><span class="header-section-number">42.6</span> From Balance to Clustering</h2>
 <p>As we have seen, Cartwright and Harary’s <span class="citation" data-cites="cartwright_harary56">(<a href="#ref-cartwright_harary56" role="doc-biblioref">1956</a>)</span> fundamental theorem of structural balance shows that a balanced network necessarily splits into exactly <em>two</em> polarized factions. While this works beautifully for representing two opposing armies or a strict two-party political divide, it is often too restrictive for some other real-world social networks. In 1967, Davis introduced his <strong>Clusterability Theorem</strong> to generalize structural balance so that a network could fragment into multiple groups, rather than just two.</p>
-<div class="no-row-height column-margin column-container"><div id="ref-cartwright_harary56" class="csl-entry" role="listitem">
-Cartwright, Dorwin, and Frank Harary. 1956. <span>“Structural Balance: A Generalization of Heider’s Theory.”</span> <em>Psychological Review</em> 63 (5): 277–93.
-</div></div><div class="cell" data-cap-location="bottom">
+<div class="no-row-height column-margin column-container"></div><div class="cell" data-cap-location="bottom">
 <div class="cell-output-display">
 <div id="fig-davis" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
 <figure class="quarto-float quarto-float-fig figure">
@@ -828,14 +891,165 @@ Figure&nbsp;42.3: A clusterable graph according to Davis
 </div>
 </div>
 </div>
-<p>Davis realized that by relaxing the rules of balance slightly, he could account for a wider variety of social clustering. Specifically, classical balance theory considers a triad with three negative ties (where everyone hates everyone else) to be unbalanced. Davis argued that in a highly factionalized network, it makes perfect sense for three people from three completely different, competing groups to dislike one another, so it is possible to group this triad with the other balanced configurations.</p>
-<p>Accordingly, under Davis’s model, a graph is <strong>clusterable</strong> if it contains no triads with exactly one negative tie. That is, the only triads that exist are the four balanced triads in <a href="lesson-theory-balance-triadic.html" class="quarto-xref"><span>Chapter 41</span></a>, and the all-negative-ties triad. If this condition is met, the network can be partitioned into any number of distinct clusters, not just two, as in the example graph shown in <a href="#fig-davis" class="quarto-xref">Figure&nbsp;<span>42.3</span></a>. Just like in the Cartwright and Harary model, all the ties within a specific cluster (e.g., D, E, F) are positive, but the ties between any two different clusters are entirely negative. As you can also see, all the triads in the graph either contain no negative links (the all positive triads within clusters) or if they contain negative links they contain two of them (+, -, -) or three of them (-, -, -).</p>
+<p>Davis realized that by relaxing the rules of balance slightly, he could account for a wider variety of clusterings beyond the classic two group partition of <span class="citation" data-cites="cartwright_harary56">Cartwright and Harary (<a href="#ref-cartwright_harary56" role="doc-biblioref">1956</a>)</span>. Specifically, as we saw in <a href="lesson-theory-balance-triadic.html" class="quarto-xref"><span>Chapter 41</span></a>, classical triadic balance theory considers a triad with three negative ties (where everyone hates everyone else) to be unbalanced. Davis argued that in a highly factionalized network, it makes perfect sense for three people from three completely different, competing groups to dislike one another, so it is possible to group this triad with the other balanced configurations.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-davis67" class="csl-entry" role="listitem">
+Davis, James A. 1967. <span>“Clustering and Structural Balance in Graphs.”</span> <em>Human Relations</em> 20 (2): 181–87.
+</div></div><p>Accordingly, Davis <span class="citation" data-cites="davis67">(<a href="#ref-davis67" role="doc-biblioref">1967</a>)</span> formulated two fundamental clustering theorems that distinguish between complete and incomplete networks:</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Davis’s General Clustering Theorem
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A signed graph (complete or incomplete) is <strong>clusterable</strong> if and only if <strong>no cycle of any length contains exactly one negative edge</strong>.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Davis’s Complete Clustering Theorem
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For any <strong>complete signed graph</strong>, the following statements are mathematically equivalent:</p>
+<ol type="1">
+<li><p>The graph is clusterable.</p></li>
+<li><p>The graph has a <strong>unique</strong> clustering.</p></li>
+<li><p>The graph has no cycle of any length with exactly one negative edge.</p></li>
+<li><p>The graph has no cycle of length 3 (triad) with exactly one negative edge.</p></li>
+</ol>
+</div>
+</div>
+<p>These theorems have profound implications for social network analysis:</p>
+<ol type="1">
+<li><p><strong>The Power of Triads:</strong> In complete networks, we do not need to inspect long cycles; looking exclusively at triads (cycles of length 3) is sufficient to assess clusterability.</p></li>
+<li><p><strong>Uniqueness vs.&nbsp;Multiplicity:</strong> If a signed network is complete, there is a single, unique way to partition the actors into clusters. If the network is incomplete (meaning there are null/missing edges, as in <a href="#fig-davis" class="quarto-xref">Figure&nbsp;<span>42.3</span></a>), a unique clustering is no longer guaranteed, and there may be multiple valid ways to group the actors.</p></li>
+</ol>
+<p>Under Davis’s model, the only prohibited triadic configuration is a triad with exactly one negative tie (e.g., <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> like each other, but both dislike <span class="math inline">\(k\)</span>, which creates pressure on <span class="math inline">\(k\)</span> to choose or for the group to resolve the asymmetry). The triad with three negative ties (where everyone dislikes everyone else) is perfectly permissible, as it simply represents three actors belonging to three separate, mutually hostile clusters.</p>
+<p>If these conditions are met, the network can be partitioned into any number of distinct clusters (such as the three clusters shown in <a href="#fig-davis" class="quarto-xref">Figure&nbsp;<span>42.3</span></a>), rather than just two. Within each cluster, all existing ties are positive; between any two different clusters, all existing ties are negative.</p>
 </section>
-<section id="references" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<section id="directed-structural-balance-and-semicycles" class="level2 page-columns page-full" data-number="42.7">
+<h2 data-number="42.7" class="anchored" data-anchor-id="directed-structural-balance-and-semicycles"><span class="header-section-number">42.7</span> Directed Structural Balance and Semicycles</h2>
+<p>As we saw in our discussion of social relations, ties are rarely completely <strong>symmetrical</strong> in the real world. In actual social networks, valenced relations are typically <strong>asymmetrical</strong>: one individual might extend a positive feeling (e.g., liking or friendship) to another who does not reciprocate it, or who might even hold a negative sentiment in return.</p>
+<p>To study structural balance under these more realistic conditions, Cartwright and Harary <span class="citation" data-cites="cartwright_harary56">(<a href="#ref-cartwright_harary56" role="doc-biblioref">1956</a>)</span> extended structural balance from undirected graphs to <strong>signed directed graphs</strong> (or <strong>signed digraphs</strong>).</p>
+<div class="no-row-height column-margin column-container"></div><section id="why-directed-cycles-are-too-restrictive" class="level3 page-columns page-full" data-number="42.7.1">
+<h3 data-number="42.7.1" class="anchored" data-anchor-id="why-directed-cycles-are-too-restrictive"><span class="header-section-number">42.7.1</span> Why Directed Cycles are Too Restrictive</h3>
+<p>In a standard directed graph (digraph), a <strong>directed cycle</strong> is a closed sequence of nodes and directed edges (arcs) in which all arrows point in the same direction (e.g., <span class="math inline">\(n_1 \rightarrow n_2 \rightarrow n_3 \rightarrow n_1\)</span>). If we restricted our study of balance to only directed cycles, we would miss most instances of psychological and social tension in a network. In sentiment networks, social tension can exist even if there is no perfect, closed directed loop of arrows.</p>
+<p>To illustrate, imagine the following three-person configuration (the classic triadic setup discussed in <a href="lesson-theory-balance-triadic.html" class="quarto-xref"><span>Chapter 41</span></a>): - <strong>You</strong> (<span class="math inline">\(n_1\)</span>) like <strong>Alex</strong> (<span class="math inline">\(n_3\)</span>). - <strong>You</strong> (<span class="math inline">\(n_1\)</span>) also like <strong>Jordan</strong> (<span class="math inline">\(n_2\)</span>). - <strong>Alex</strong> (<span class="math inline">\(n_3\)</span>) strongly dislikes <strong>Jordan</strong> (<span class="math inline">\(n_2\)</span>).</p>
+<p>Mathematically, this configuration does not contain a strict directed cycle because the arcs <span class="math inline">\(n_1 \rightarrow n_2\)</span> and <span class="math inline">\(n_3 \rightarrow n_2\)</span> both point toward Jordan (<span class="math inline">\(n_2\)</span>). There is no way to follow the arrows in a single direction to return to your starting node. Yet, despite the lack of a directed cycle, you still experience a palpable <strong>social tension</strong>. Your friend Alex dislikes Jordan, but you are friendly with both. You realize that your friendliness with Jordan is inconsistent with your friend Alex’s unfriendliness with Jordan. This psychological pressure is exactly what Heider’s <span class="citation" data-cites="heider46">(<a href="#ref-heider46" role="doc-biblioref">1946</a>)</span> balance theory predicts, regardless of the direction of the arrows.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-heider46" class="csl-entry" role="listitem">
+Heider, Fritz. 1946. <span>“Attitudes and Cognitive Organization.”</span> <em>The Journal of Psychology</em> 21 (1): 107–12.
+</div></div></section>
+<section id="semipaths-and-semicycles" class="level3 page-columns page-full" data-number="42.7.2">
+<h3 data-number="42.7.2" class="anchored" data-anchor-id="semipaths-and-semicycles"><span class="header-section-number">42.7.2</span> Semipaths and Semicycles</h3>
+<p>To resolve this limitation, Cartwright and Harary <span class="citation" data-cites="cartwright_harary56">(<a href="#ref-cartwright_harary56" role="doc-biblioref">1956</a>)</span> introduced the concepts of <strong>semipaths</strong> and <strong>semicycles</strong> in directed graphs: - <strong>Semipath:</strong> A sequence of distinct nodes and arcs where we <em>ignore</em> the direction of the arrows. We only care that an arc exists between adjacent nodes in the sequence, whether it points from the previous node to the next or vice-versa. - <strong>Semicycle:</strong> A closed semipath in which the first and last nodes are identical. In other words, it is a cycle in the underlying undirected graph.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-cartwright_harary56" class="csl-entry" role="listitem">
+Cartwright, Dorwin, and Frank Harary. 1956. <span>“Structural Balance: A Generalization of Heider’s Theory.”</span> <em>Psychological Review</em> 63 (5): 277–93.
+</div></div><p>Just as with undirected cycles, the <strong>sign of a semicycle</strong> is determined by multiplying the signs of all the arcs that compose it: <span class="math display">\[\text{Sign of Semicycle} = \prod \text{Signs of Arcs}\]</span></p>
+<p>A semicycle is <strong>balanced</strong> if it has an <strong>even number of negative signs</strong> (or zero negative signs), resulting in a positive product (<span class="math inline">\(+1\)</span>). It is <strong>unbalanced</strong> if it has an <strong>odd number of negative signs</strong>, resulting in a negative product (<span class="math inline">\(-1\)</span>). This leads to the fundamental definition of balance in directed graphs:</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Definition: Balanced Signed Digraph
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A signed directed graph (digraph) is <strong>balanced</strong> if and only if <strong>all of its semicycles have positive signs</strong> (i.e., contain an even number of negative arcs).</p>
+</div>
+</div>
+</section>
+<section id="whole-network-examples-of-directed-balance-and-imbalance" class="level3" data-number="42.7.3">
+<h3 data-number="42.7.3" class="anchored" data-anchor-id="whole-network-examples-of-directed-balance-and-imbalance"><span class="header-section-number">42.7.3</span> Whole-Network Examples of Directed Balance and Imbalance</h3>
+<p>Rather than focusing on small, isolated triads (which are discussed in <a href="lesson-theory-balance-triadic.html" class="quarto-xref"><span>Chapter 41</span></a>), structural balance theory is most powerful when applied to analyze polarization, cohesion, and conflict in <strong>whole networks</strong> of any size.</p>
+<p>By the Cartwright-Harary Structure Theorem, a signed directed network of any size is <strong>balanced</strong> if and only if its nodes can be partitioned into two mutually exclusive factions such that: 1. All directed positive ties (<span class="math inline">\(+\)</span>) exist <strong>within</strong> the factions. 2. All directed negative ties (<span class="math inline">\(-\)</span>) exist <strong>between</strong> the factions.</p>
+<p>Let’s illustrate this whole-network property using a 6-node signed directed graph.</p>
+<section id="a-balanced-signed-digraph-polarized-stable-state" class="level4" data-number="42.7.3.1">
+<h4 data-number="42.7.3.1" class="anchored" data-anchor-id="a-balanced-signed-digraph-polarized-stable-state"><span class="header-section-number">42.7.3.1</span> 1. A Balanced Signed Digraph (Polarized Stable State)</h4>
+<p>In <a href="#fig-balanced-digraph-whole" class="quarto-xref">Figure&nbsp;<span>42.4</span></a>, we have partitioned 6 actors into two factions: Faction 1 (nodes A, B, and C in blue, on the left) and Faction 2 (nodes D, E, and F in purple, on the right).</p>
+<p>All internal directed ties (within factions) are positive (solid green lines). All external directed ties (crossing between factions) are negative (dashed red lines). Because every single positive link is internal and every single negative link is external, the network is perfectly partitionable. Under Harary’s theorem, this guarantees that <strong>every semicycle of any length in this whole network is balanced</strong>, resulting in a stable, polarized state.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-balanced-digraph-whole" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-balanced-digraph-whole-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-theory-balance-struct_files/figure-html/fig-balanced-digraph-whole-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-balanced-digraph-whole-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;42.4: A perfectly balanced signed directed graph of 6 nodes partitioned into two polarized factions.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="an-unbalanced-signed-digraph-with-a-violating-tie" class="level4" data-number="42.7.3.2">
+<h4 data-number="42.7.3.2" class="anchored" data-anchor-id="an-unbalanced-signed-digraph-with-a-violating-tie"><span class="header-section-number">42.7.3.2</span> 2. An Unbalanced Signed Digraph (With a Violating Tie)</h4>
+<p>What happens if we introduce even a single “rule-violating” tie into this network? In <a href="#fig-unbalanced-digraph-whole" class="quarto-xref">Figure&nbsp;<span>42.5</span></a>, we have the exact same structure as before, but actor B (in Faction 1) extends a <strong>positive</strong> directed tie to actor E (in Faction 2).</p>
+<p>Because this positive tie crosses the boundary between the two hostile factions, it violates the Cartwright-Harary Structure Theorem. It immediately introduces unbalanced semicycles into the network (for example, the cycle <span class="math inline">\(B \rightarrow E \rightarrow F \rightarrow D \dashrightarrow B\)</span> now contains an odd number of negative ties). Consequently, the entire directed graph becomes <strong>unbalanced</strong>, generating systemic social strain and pressure for actors to re-align their relationships.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-unbalanced-digraph-whole" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-unbalanced-digraph-whole-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-theory-balance-struct_files/figure-html/fig-unbalanced-digraph-whole-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-unbalanced-digraph-whole-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;42.5: An unbalanced signed directed graph of 6 nodes (due to a positive tie crossing factions).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="ranked-clusterability-bridging-balance-and-hierarchy" class="level2 page-columns page-full" data-number="42.8">
+<h2 data-number="42.8" class="anchored" data-anchor-id="ranked-clusterability-bridging-balance-and-hierarchy"><span class="header-section-number">42.8</span> Ranked Clusterability: Bridging Balance and Hierarchy</h2>
+<p>While Fritz Heider’s original balance theory and Davis’s clusterability model assume purely horizontal, symmetric sentiment structures, real-world social groups often exhibit prominent <strong>vertical hierarchies</strong> (such as status, dominance, or prestige).</p>
+<p>To bridge the gap between horizontal sentiment balance and vertical status hierarchies, Davis and Leinhardt <span class="citation" data-cites="davis_leinhardt72">(<a href="#ref-davis_leinhardt72" role="doc-biblioref">1972</a>)</span> introduced the concept of <strong>Ranked Clusterability</strong>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-davis_leinhardt72" class="csl-entry" role="listitem">
+Davis, James A, and Samuel Leinhardt. 1972. <span>“The Structure of Positive Interpersonal Relations in Small Groups.”</span> In <em>Sociological Theories in Progress, Volume 2</em>. Boston: Houghton Mifflin.
+</div></div><p>In a ranked clusterable network, nodes are divided into multiple distinct clusters that are hierarchically ordered: 1. <strong>Within clusters:</strong> Relationships are horizontal and positive, meaning all existing within-cluster ties are positive (<span class="math inline">\(+\)</span>). 2. <strong>Between clusters:</strong> Relationships are vertical. Positive directed ties tend to point <strong>up</strong> the hierarchy (lower-status individuals choosing higher-status individuals as friends). In contrast, directed ties pointing <strong>down</strong> the hierarchy, or ties between clusters that are unranked with respect to one another, are negative (<span class="math inline">\(-\)</span>) or null (<span class="math inline">\(0\)</span>).</p>
+<p>This elegant extension ensures that the principles of balance theory hold even when social ties are asymmetric, and it serves as a vital mathematical link to the study of social stratification, prestige, and dominance hierarchies in networks.</p>
+<section id="visualizing-a-ranked-clusterable-digraph-an-organizational-pecking-order" class="level3" data-number="42.8.1">
+<h3 data-number="42.8.1" class="anchored" data-anchor-id="visualizing-a-ranked-clusterable-digraph-an-organizational-pecking-order"><span class="header-section-number">42.8.1</span> Visualizing a Ranked Clusterable Digraph: An Organizational Pecking Order</h3>
+<p>To make this concept concrete, we can look at a more realistic and interesting example of a vertical hierarchy in a corporate department or organization. In <a href="#fig-ranked-clusters" class="quarto-xref">Figure&nbsp;<span>42.6</span></a>, we model the sentiment network of a 9-person office partitioned into three hierarchical ranks: the <strong>Executive Level</strong> (CEO and VP, in gold), the <strong>Management Level</strong> (Manager A, Manager B, and Lead, in silver), and the <strong>Staff Level</strong> (Staff 1, Staff 2, Staff 3, and Staff 4, in bronze).</p>
+<p>This structure elegantly accommodates different social dynamics across levels:</p>
+<ol type="1">
+<li><strong>Horizontal Peer Solidarity (Within Ranks):</strong> Relationships within the same status level are symmetrical and positive. Peers have mutual friendships and alliances (green mutual arrows, e.g., <span class="math inline">\(CEO \leftrightarrow VP\)</span>, <span class="math inline">\(Staff\_1 \leftrightarrow Staff\_2\)</span>).</li>
+<li><strong>Upward Deference (Asymmetric Positive):</strong> Workers look up to managers, and managers look up to executives. Positive sentiment and aspirational liking flow <strong>upward</strong> the hierarchy (solid green arrows pointing upward, e.g., <span class="math inline">\(Staff\_1 \rightarrow Manager\_A\)</span> or <span class="math inline">\(Manager\_A \rightarrow CEO\)</span>). Crucially, these positive ties are <em>asymmetric</em> (they are not reciprocated).</li>
+<li><strong>Downward Dominance (Asymmetric Negative):</strong> Authority, sanctions, and discipline flow <strong>downward</strong>. When a boss disciplines a subordinate, the tie carrying negative affect points downward (dashed red arrows pointing downward, e.g., <span class="math inline">\(CEO \rightarrow Manager\_A\)</span> or <span class="math inline">\(Manager\_A \rightarrow Staff\_1\)</span>).</li>
+<li><strong>Social Distance (Null Ties):</strong> Many cross-level pairs have no direct tie (represented as <span class="math inline">\(0\)</span>), which is perfectly realistic in large hierarchies.</li>
+</ol>
+<p>This model shows how Davis and Leinhardt’s ranked clusterability accommodates both positive horizontal relationships (peer solidarity) and negative or asymmetric vertical relationships (authority and status aspirations) in a single, stable network configuration.</p>
+<div class="cell fig-cap-location-bottom">
+<div class="cell-output-display">
+<div id="fig-ranked-clusters" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ranked-clusters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lesson-theory-balance-struct_files/figure-html/fig-ranked-clusters-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ranked-clusters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;42.6: Ranked clusterable directed graph modeling a 9-person organizational hierarchy.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -1259,8 +1473,8 @@ Figure&nbsp;42.3: A clusterable graph according to Davis
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./lesson-theory-balance-directed.html" class="pagination-link" aria-label="Directed Structural Balance">
-        <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Directed Structural Balance</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./lesson-theory-valenced-interactions.html" class="pagination-link" aria-label="Theories of Valenced Interactions">
+        <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Theories of Valenced Interactions</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
