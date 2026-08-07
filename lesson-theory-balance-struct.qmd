@@ -1,18 +1,26 @@
 # Structural Balance {#sec-sbalance}
-The concept of balance can be extended from individual triads to the entire social network, which is analyzed at the **whole network** level. This extension is known as **Structural Balance Theory**. 
+The concept of balance can be extended from individual triads, which we covered in @sec-tbalance, to the **whole network** level. This extension is known as **Structural Balance Theory**. 
 
-In its original formulation, structural balance theory applies to **complete signed graphs**. A **signed graph** is a special kind of graph featuring *one* set of vertices (nodes) and *two* disjoint sets of edges: positive links (E+) and negative links (E-). 
+In its original formulation, structural balance theory applies to **complete signed graphs**, where every pair of nodes is joined by an edge. However, as subsequent researchers realized, structural balance theory can be applied to **any signed graph**, complete or incomplete. 
 
-A **complete signed graph** is one in which every pair of nodes is connected by either a positive or a negative edge. In an **adjacency matrix** representation of a signed graph, positive links are typically represented by +1, negative links by -1, and non-adjacent nodes by 0, though for structural balance, it is often applied to complete graphs where all connections exist.
+First, some graph theory defintions:
+
+A **signed graph** is a graph featuring *one* set of vertices (nodes) and *two* disjoint sets of edges: positive links ($E^+$) and negative links ($E^-$). In an **adjacency matrix** representation of a signed graph, positive links are represented by $+1$, negative links by $-1$, and non-adjacent (null) ties by $0$. A **complete signed graph** is one in which every pair of distinct nodes is connected by either a positive or a negative edge (with no missing edges).
 
 ## The Fundamental Theorem of Structural Balance 
 
-The **Fundamental Theorem of Structural Balance** was discovered by mathematicians Dorwin Cartwright and Frank Harary in 1956 [@cartwright_harary56]. This theorem states that if a complete signed graph contains only balanced triads (i.e., every triad in the network is balanced as defined in @sec-tbalance), then the graph is balanced. 
+The **Fundamental Theorem of Structural Balance** (also known as the **Structure Theorem**) was discovered by mathematicians Dorwin Cartwright and Frank Harary in 1956 [@cartwright_harary56]. The theorem holds for *all* signed graphs (complete or incomplete) and states:
 
-Furthermore, such a balanced graph can be divided into two groups such that:
+::: {.callout-note}
+### The Cartwright-Harary Structure Theorem (1956)
+A signed graph is **balanced** if and only if its nodes can be partitioned into two disjoint subsets (factions) such that:
 
-1. There are only positive links within each group.
-2. There are only negative links between the two groups.
+1. All positive edges are **within** the subsets.
+
+2. All negative edges are **between** the subsets.
+:::
+
+If a signed graph is *complete*, checking for balance is relatively simple: a complete signed graph is balanced if and only if every cycle of length 3 (every complete triad as defined in @sec-motifs) is balanced as defined in @sec-tbalance. One such complete balanced graph is shown in @fig-balance.
 
 This theorem implies that structural balance is equivalent to perfect **group polarization**. For example, in a balanced network, nodes A, B, and C (in blue in @fig-balance) might form one group with positive ties (green solid edges) among themselves, while nodes D, E, and F (in purple in @fig-balance) form another group with positive ties among themselves, and all ties *between* these two groups would be negative (in red dashed edges). Note that in @fig-balance, *every* triangle is balanced, going by the sign multiplication rule covered in @sec-tbalance. In a balanced graph, the polarized structure of these two distinct groups can be recovered by rearranging the rows and columns of the signed adjacency matrix such that nodes in the same group are near one another.
 
@@ -79,7 +87,7 @@ Essentially, any new node entering such a network will fall into one of the two 
 
 ### Balance Does Not Necessarily Imply a "Good" Social State
 
-Despite the term "balanced," this state does not inherently denote a harmonious or desirable social situation. On the contrary, structural balance describes a stable state of maximal polarization and potential conflict, such as seen in **political polarization** (e.g., Republicans versus Democrats), as in the network plot of Twitter bloggers shown in @fig-twitter, with yellow lines indicating negative links between accounts (e.g., someone posting a negative comment about the other). 
+Despite the term "balanced" play a central role in the theory, a balanced state at the whole graph level does not inherently denote a harmonious or desirable social situation. On the contrary, structural balance describes a stable state of maximal polarization and potential conflict, such as seen in **political polarization** (e.g., Republicans versus Democrats), as in the network plot of Twitter bloggers shown in @fig-twitter, with yellow lines indicating negative links between accounts (e.g., someone posting a negative comment about the other). 
 
 ![(Formerly) Twitter network of political bloggers during the 2004 election *via*  [https://blogs.cornell.edu/info2040/2012/09/05/5291/](https://blogs.cornell.edu/info2040/2012/09/05/5291/)](images/twitter.png){#fig-twitter}
 
@@ -96,17 +104,38 @@ The direct consequence of this two-group partitioning for **cycles** within a ba
 
 ## Paths in a Balanced Signed Graph
 
-Recall that a path is a sequence of distinct vertices and edges connecting a start node to an end node. The *sign* of the path is the product of the sign of each edge in the path. In a balanced graph, the **end nodes** of a path could belong to the same group, or each could belong to different groups in the polarized structure.
+Recall from @sec-indirect that a path is a sequence of distinct vertices and edges connecting a start node to an end node. The *sign* of the path in a signed graph is the product of the sign of each edge in the path. In a balanced graph, the **end nodes** of a path could belong to the same group, or each could belong to different groups in the polarized structure.
 
-1. *Paths with End Nodes in the Same Group*: If a path begins and ends within the same polarized group (e.g., both start and end nodes are in Group 1, or both are in Group 2), *the product of the signs of its edges will always be positive*.
+If a path begins and ends within the same group (e.g., both start and end nodes are in Group 1, or both are in Group 2), *the product of the signs of its edges will always be positive*. The reason for this is that for a path to start and end with nodes in the same group, the path must either stay entirely within that group (meaning all its links are positive, and thus their product is positive) or it must cross between the two groups an even number of times. Each time the path crosses from one group to the other, it traverses a negative link (by definition of the two-group partition). Since an even number of negative links multiplied together results in a positive sign (-1 * -1 = +1), and any within-group links are positive, the overall product of signs for the entire path will be positive. 
 
-Reasoning: To start and end in the same group, the path must either stay entirely within that group (meaning all its links are positive, and thus their product is positive) or it must cross between the two groups an even number of times. Each time the path crosses from one group to the other, it traverses a negative link (by definition of the two-group partition). Since an even number of negative links multiplied together results in a positive sign (-1 * -1 = +1), and any within-group links are positive, the overall product of signs for the entire path will be positive. 
+If a path begins in one polarized group and ends in the other (e.g., starts in Group 1 and ends in Group 2), *the product of the signs of its edges will always be negative*. The reason for this is that for a path to connect nodes in different groups, the path must necessarily cross the boundary between the two groups an odd number of times. Each time it crosses, it uses a negative link (as per the structure theorem). Since an odd number of negative links multiplied together results in a negative sign (+1 * -1 = -1), the overall product of signs for the entire path will be negative. 
 
-2. *Paths with End Nodes in Different Groups*: If a path begins in one polarized group and ends in the other (e.g., starts in Group 1 and ends in Group 2), *the product of the signs of its edges will always be negative*.
+In sum, the two-group partitioning of the complete signed balanced graph, creates a predictable environment in terms of path signs. Paths that "stay" within their original group's alignment (by beginning and ending with nodes in the same group) retain a positive sign, while paths that "cross" the network's fundamental division (by beginning and ending with nodes in different groups) have a negative sign, reflecting the inherent polarization of the overall structure.
 
-Reasoning: To connect nodes in different groups, the path must necessarily cross the boundary between the two groups an odd number of times. Each time it crosses, it utilizes a negative link. Since an odd number of negative links multiplied together results in a negative sign (+1 * -1 = -1), the overall product of signs for the entire path will be negative. 
+## Checking for Balance with Matrix Powers
 
-In summary, the two-group partitioning, which is a hallmark of structural balance in complete signed graphs, creates a predictable environment for path signs. Paths that "stay" within their original group's alignment (by ending in the same group) retain a positive sign, while paths that "cross" the network's fundamental division (by ending in a different group) acquire a negative sign, reflecting the inherent polarization.
+How can we check if a large, complex signed graph is structurally balanced without manually drawing every possible cycle and multiplying their signs? As we learned in @sec-matops, we can leverage the power of **matrix algebra**.
+
+Recall that the elements of a signed adjacency matrix $\mathbf{A}$ are defined as:
+- $a_{ij} = +1$ if node $i$ and node $j$ have a positive tie.
+- $a_{ij} = -1$ if node $i$ and node $j$ have a negative tie.
+- $a_{ij} = 0$ if there is no tie between node $i$ and node $j$.
+
+If we raise the signed adjacency matrix $\mathbf{X}$ to the $p$-th power ($\mathbf{a}^p$), each diagonal entry $a_{ii}^{(p)}$ represents the sum of the signs of all **closed walks** of length $p$ starting and ending at node $i$. 
+
+Because a structurally balanced graph cannot contain any negative cycles, the product of signs in every cycle is positive. Consequently, if a signed graph is balanced, the diagonal entries of the power the signed  adjacency matrix $\mathbf{A}^p$ must be **non-negative** for all powers up to the number of nodes in the graph ($p = 1, 2, \dots, g$). If even a single diagonal element in any of these power matrices is negative, it indicates the existence of an unbalanced (negative) cycle of that length, meaning the entire graph is unbalanced.
+
+## Measuring Partial Balance: Indices of Balance
+
+In empirical research, social networks are messy, and they are almost never *perfectly* balanced. Because of this, analysts need ways to measure the **degree of balance** rather than treating it as a binary (yes/no) state. Wasserman and Faust [-@wasserman_faust94] highlight two main structural indices used to quantify partial balance:
+
+### 1. The Cycle Index of Balance
+This index is the ratio of the number of positive cycles to the total number of cycles of all lengths in the graph:
+$$\text{Cycle Index} = \frac{PC}{TC}$$
+where $PC$ is the count of positive cycles and $TC$ is the total count of cycles. This index ranges from $0$ (completely unbalanced) to $1$ (perfectly balanced). Some advanced versions of this index (such as those by Henley, Horsfall, and De Soto [-@henley69]) apply weightings based on cycle length, reflecting the fact that shorter cycles (like triads) generate much more immediate psychological and social tension than very long cycles.
+
+### 2. The Line Index of Balance
+First proposed by Frank Harary [-@harary59], the **Line Index of Balance** calculates the minimum number of edge signs that must be changed (or edges removed) in order to eliminate all unbalanced cycles and make the graph perfectly balanced. If a large network with hundreds of nodes has a line index of 1 or 2, it is extremely close to complete balance, even though a cycle-counting method might find dozens of unbalanced cycles.
 
 ## From Balance to Clustering
 As we have seen, Cartwright and Harary's [-@cartwright_harary56] fundamental theorem of structural balance shows that a balanced network necessarily splits into exactly *two* polarized factions. While this works beautifully for representing two opposing armies or a strict two-party political divide, it is often too restrictive for some other real-world social networks. In 1967, Davis introduced his **Clusterability Theorem** to generalize structural balance so that a network could fragment into multiple groups, rather than just two.
@@ -194,7 +223,301 @@ ggraph(g, layout = layout_matrix) +
 
 ```
 
-Davis realized that by relaxing the rules of balance slightly, he could account for a wider variety of social clustering. Specifically, classical balance theory considers a triad with three negative ties (where everyone hates everyone else) to be unbalanced. Davis argued that in a highly factionalized network, it makes perfect sense for three people from three completely different, competing groups to dislike one another, so it is possible to group this triad with the other balanced configurations.
+Davis realized that by relaxing the rules of balance slightly, he could account for a wider variety of clusterings beyond the classic two group partition of @cartwright_harary56. Specifically, as we saw in @sec-tbalance, classical triadic balance theory considers a triad with three negative ties (where everyone hates everyone else) to be unbalanced. Davis argued that in a highly factionalized network, it makes perfect sense for three people from three completely different, competing groups to dislike one another, so it is possible to group this triad with the other balanced configurations.
 
-Accordingly, under Davis's model, a graph is **clusterable** if it contains no triads with exactly one negative tie. That is, the only triads that exist are the four balanced triads in @sec-tbalance, and the all-negative-ties triad. If this condition is met, the network can be partitioned into any number of distinct clusters, not just two, as in the example graph shown in @fig-davis. Just like in the Cartwright and Harary model, all the ties within a specific cluster (e.g., D, E, F) are positive, but the ties between any two different clusters are entirely negative. As you can also see, all the triads in the graph either contain no negative links (the all positive triads within clusters) or if they contain negative links they contain two of them (+, -, -) or three of them (-, -, -).
+Accordingly, Davis [-@davis67] formulated two fundamental clustering theorems that distinguish between complete and incomplete networks:
+
+::: {.callout-note}
+### Davis's General Clustering Theorem 
+A signed graph (complete or incomplete) is **clusterable** if and only if **no cycle of any length contains exactly one negative edge**.
+:::
+
+::: {.callout-note}
+### Davis's Complete Clustering Theorem 
+For any **complete signed graph**, the following statements are mathematically equivalent:
+
+1. The graph is clusterable.
+
+2. The graph has a **unique** clustering.
+
+3. The graph has no cycle of any length with exactly one negative edge.
+
+4. The graph has no cycle of length 3 (triad) with exactly one negative edge.
+:::
+
+These theorems have profound implications for social network analysis:
+
+1. **The Power of Triads:** In complete networks, we do not need to inspect long cycles; looking exclusively at triads (cycles of length 3) is sufficient to assess clusterability. 
+
+2. **Uniqueness vs. Multiplicity:** If a signed network is complete, there is a single, unique way to partition the actors into clusters. If the network is incomplete (meaning there are null/missing edges, as in @fig-davis), a unique clustering is no longer guaranteed, and there may be multiple valid ways to group the actors.
+
+Under Davis's model, the only prohibited triadic configuration is a triad with exactly one negative tie (e.g., $i$ and $j$ like each other, but both dislike $k$, which creates pressure on $k$ to choose or for the group to resolve the asymmetry). The triad with three negative ties (where everyone dislikes everyone else) is perfectly permissible, as it simply represents three actors belonging to three separate, mutually hostile clusters. 
+
+If these conditions are met, the network can be partitioned into any number of distinct clusters (such as the three clusters shown in @fig-davis), rather than just two. Within each cluster, all existing ties are positive; between any two different clusters, all existing ties are negative.
+
+## Directed Structural Balance and Semicycles
+
+As we saw in our discussion of social relations, ties are rarely completely **symmetrical** in the real world. In actual social networks, valenced relations are typically **asymmetrical**: one individual might extend a positive feeling (e.g., liking or friendship) to another who does not reciprocate it, or who might even hold a negative sentiment in return. 
+
+To study structural balance under these more realistic conditions, Cartwright and Harary [-@cartwright_harary56] extended structural balance from undirected graphs to **signed directed graphs** (or **signed digraphs**).
+
+### Why Directed Cycles are Too Restrictive
+
+In a standard directed graph (digraph), a **directed cycle** is a closed sequence of nodes and directed edges (arcs) in which all arrows point in the same direction (e.g., $n_1 \rightarrow n_2 \rightarrow n_3 \rightarrow n_1$). If we restricted our study of balance to only directed cycles, we would miss most instances of psychological and social tension in a network. In sentiment networks, social tension can exist even if there is no perfect, closed directed loop of arrows. 
+
+To illustrate, imagine the following three-person configuration (the classic triadic setup discussed in @sec-tbalance):
+- **You** ($n_1$) like **Alex** ($n_3$).
+- **You** ($n_1$) also like **Jordan** ($n_2$).
+- **Alex** ($n_3$) strongly dislikes **Jordan** ($n_2$).
+
+Mathematically, this configuration does not contain a strict directed cycle because the arcs $n_1 \rightarrow n_2$ and $n_3 \rightarrow n_2$ both point toward Jordan ($n_2$). There is no way to follow the arrows in a single direction to return to your starting node. Yet, despite the lack of a directed cycle, you still experience a palpable **social tension**. Your friend Alex dislikes Jordan, but you are friendly with both. You realize that your friendliness with Jordan is inconsistent with your friend Alex's unfriendliness with Jordan. This psychological pressure is exactly what Heider's [-@heider46] balance theory predicts, regardless of the direction of the arrows.
+
+### Semipaths and Semicycles
+
+To resolve this limitation, Cartwright and Harary [-@cartwright_harary56] introduced the concepts of **semipaths** and **semicycles** in directed graphs:
+- **Semipath:** A sequence of distinct nodes and arcs where we *ignore* the direction of the arrows. We only care that an arc exists between adjacent nodes in the sequence, whether it points from the previous node to the next or vice-versa.
+- **Semicycle:** A closed semipath in which the first and last nodes are identical. In other words, it is a cycle in the underlying undirected graph.
+
+Just as with undirected cycles, the **sign of a semicycle** is determined by multiplying the signs of all the arcs that compose it:
+$$\text{Sign of Semicycle} = \prod \text{Signs of Arcs}$$
+
+A semicycle is **balanced** if it has an **even number of negative signs** (or zero negative signs), resulting in a positive product ($+1$). It is **unbalanced** if it has an **odd number of negative signs**, resulting in a negative product ($-1$). This leads to the fundamental definition of balance in directed graphs:
+
+::: {.callout-note}
+### Definition: Balanced Signed Digraph
+A signed directed graph (digraph) is **balanced** if and only if **all of its semicycles have positive signs** (i.e., contain an even number of negative arcs).
+:::
+
+### Whole-Network Examples of Directed Balance and Imbalance
+
+Rather than focusing on small, isolated triads (which are discussed in @sec-tbalance), structural balance theory is most powerful when applied to analyze polarization, cohesion, and conflict in **whole networks** of any size.
+
+By the Cartwright-Harary Structure Theorem, a signed directed network of any size is **balanced** if and only if its nodes can be partitioned into two mutually exclusive factions such that:
+1. All directed positive ties ($+$) exist **within** the factions.
+2. All directed negative ties ($-$) exist **between** the factions.
+
+Let's illustrate this whole-network property using a 6-node signed directed graph.
+
+#### 1. A Balanced Signed Digraph (Polarized Stable State)
+
+In @fig-balanced-digraph-whole, we have partitioned 6 actors into two factions: Faction 1 (nodes A, B, and C in blue, on the left) and Faction 2 (nodes D, E, and F in purple, on the right). 
+
+All internal directed ties (within factions) are positive (solid green lines). All external directed ties (crossing between factions) are negative (dashed red lines). Because every single positive link is internal and every single negative link is external, the network is perfectly partitionable. Under Harary's theorem, this guarantees that **every semicycle of any length in this whole network is balanced**, resulting in a stable, polarized state.
+
+```{r}
+#| label: fig-balanced-digraph-whole
+#| fig-cap: "A perfectly balanced signed directed graph of 6 nodes partitioned into two polarized factions."
+#| fig-cap-location: bottom
+#| fig-height: 8
+#| fig-width: 8
+
+library(igraph)
+library(ggraph)
+library(dplyr)
+
+# 1. Define nodes and assign them to two mutually exclusive factions
+nodes <- data.frame(
+  name = c("A", "B", "C", "D", "E", "F"),
+  faction = c("Faction 1", "Faction 1", "Faction 1", 
+              "Faction 2", "Faction 2", "Faction 2")
+)
+
+# 2. Define directed ties: internal positive, external negative
+edges_bal <- data.frame(
+  from = c("A", "B", "C", "D", "E", "F", "A", "C", "E", "F"),
+  to   = c("B", "C", "A", "E", "F", "D", "D", "E", "B", "C"),
+  sign = c("+", "+", "+", "+", "+", "+", "-", "-", "-", "-"),
+  type = c(rep("Positive Tie (+)", 6), rep("Negative Tie (-)", 4))
+)
+
+# 3. Create graph
+g_bal <- graph_from_data_frame(edges_bal, directed = TRUE, vertices = nodes)
+
+# 4. Define manual layout to clearly separate the two factions
+layout_matrix_whole <- matrix(c(
+  # Faction 1 (Left)
+  -1.5,  1.0,   # A
+  -2.2,  0.0,   # B
+  -1.5, -1.0,   # C
+  
+  # Faction 2 (Right)
+   1.5,  1.0,   # D
+   2.2,  0.0,   # E
+   1.5, -1.0    # F
+), ncol = 2, byrow = TRUE)
+
+# 5. Plot
+ggraph(g_bal, layout = layout_matrix_whole) +
+  geom_edge_link(
+    aes(color = type, linetype = type),
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    end_cap = circle(8, 'mm'),
+    start_cap = circle(8, 'mm'),
+    width = 1.5,
+    show.legend = FALSE
+  ) +
+  geom_node_point(aes(fill = faction), shape = 21, size = 20, color = "white", stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 10) +
+  scale_edge_color_manual(values = c("Positive Tie (+)" = "forestgreen", "Negative Tie (-)" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Positive Tie (+)" = "solid", "Negative Tie (-)" = "dashed")) +
+  scale_fill_manual(values = c("Faction 1" = "steelblue", "Faction 2" = "darkorchid")) +
+  theme_graph() + 
+  coord_cartesian(clip = "off")
+```
+
+#### 2. An Unbalanced Signed Digraph (With a Violating Tie)
+
+What happens if we introduce even a single "rule-violating" tie into this network? In @fig-unbalanced-digraph-whole, we have the exact same structure as before, but actor B (in Faction 1) extends a **positive** directed tie to actor E (in Faction 2). 
+
+Because this positive tie crosses the boundary between the two hostile factions, it violates the Cartwright-Harary Structure Theorem. It immediately introduces unbalanced semicycles into the network (for example, the cycle $B \rightarrow E \rightarrow F \rightarrow D \dashrightarrow B$ now contains an odd number of negative ties). Consequently, the entire directed graph becomes **unbalanced**, generating systemic social strain and pressure for actors to re-align their relationships.
+
+```{r}
+#| label: fig-unbalanced-digraph-whole
+#| fig-cap: "An unbalanced signed directed graph of 6 nodes (due to a positive tie crossing factions)."
+#| fig-cap-location: bottom
+#| fig-height: 8
+#| fig-width: 8
+
+# Same edges but with a violating positive tie crossing factions: B -> E (+)
+edges_unbal <- data.frame(
+  from = c("A", "B", "C", "D", "E", "F", "A", "C", "E", "F", "B"),
+  to   = c("B", "C", "A", "E", "F", "D", "D", "E", "B", "C", "E"),
+  sign = c("+", "+", "+", "+", "+", "+", "-", "-", "-", "-", "+"),
+  type = c(rep("Positive Tie (+)", 6), rep("Negative Tie (-)", 4), "Positive Tie (+)")
+)
+
+g_unbal <- graph_from_data_frame(edges_unbal, directed = TRUE, vertices = nodes)
+
+ggraph(g_unbal, layout = layout_matrix_whole) +
+  geom_edge_link(
+    aes(color = type, linetype = type),
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    end_cap = circle(8, 'mm'),
+    start_cap = circle(8, 'mm'),
+    width = 1.5,
+    show.legend = FALSE
+  ) +
+  geom_node_point(aes(fill = faction), shape = 21, size = 20, color = "white", stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 10) +
+  scale_edge_color_manual(values = c("Positive Tie (+)" = "forestgreen", "Negative Tie (-)" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Positive Tie (+)" = "solid", "Negative Tie (-)" = "dashed")) +
+  scale_fill_manual(values = c("Faction 1" = "steelblue", "Faction 2" = "darkorchid")) +
+  theme_graph() + 
+  coord_cartesian(clip = "off")
+```
+
+## Ranked Clusterability: Bridging Balance and Hierarchy
+
+While Fritz Heider's original balance theory and Davis's clusterability model assume purely horizontal, symmetric sentiment structures, real-world social groups often exhibit prominent **vertical hierarchies** (such as status, dominance, or prestige). 
+
+To bridge the gap between horizontal sentiment balance and vertical status hierarchies, Davis and Leinhardt [-@davis_leinhardt72] introduced the concept of **Ranked Clusterability**.
+
+In a ranked clusterable network, nodes are divided into multiple distinct clusters that are hierarchically ordered:
+1. **Within clusters:** Relationships are horizontal and positive, meaning all existing within-cluster ties are positive ($+$).
+2. **Between clusters:** Relationships are vertical. Positive directed ties tend to point **up** the hierarchy (lower-status individuals choosing higher-status individuals as friends). In contrast, directed ties pointing **down** the hierarchy, or ties between clusters that are unranked with respect to one another, are negative ($-$) or null ($0$).
+
+This elegant extension ensures that the principles of balance theory hold even when social ties are asymmetric, and it serves as a vital mathematical link to the study of social stratification, prestige, and dominance hierarchies in networks.
+
+### Visualizing a Ranked Clusterable Digraph: An Organizational Pecking Order
+
+To make this concept concrete, we can look at a more realistic and interesting example of a vertical hierarchy in a corporate department or organization. In @fig-ranked-clusters, we model the sentiment network of a 9-person office partitioned into three hierarchical ranks: the **Executive Level** (CEO and VP, in gold), the **Management Level** (Manager A, Manager B, and Lead, in silver), and the **Staff Level** (Staff 1, Staff 2, Staff 3, and Staff 4, in bronze).
+
+This structure elegantly accommodates different social dynamics across levels:
+
+1. **Horizontal Peer Solidarity (Within Ranks):** Relationships within the same status level are symmetrical and positive. Peers have mutual friendships and alliances (green mutual arrows, e.g., $CEO \leftrightarrow VP$, $Staff\_1 \leftrightarrow Staff\_2$).
+2. **Upward Deference (Asymmetric Positive):** Workers look up to managers, and managers look up to executives. Positive sentiment and aspirational liking flow **upward** the hierarchy (solid green arrows pointing upward, e.g., $Staff\_1 \rightarrow Manager\_A$ or $Manager\_A \rightarrow CEO$). Crucially, these positive ties are *asymmetric* (they are not reciprocated).
+3. **Downward Dominance (Asymmetric Negative):** Authority, sanctions, and discipline flow **downward**. When a boss disciplines a subordinate, the tie carrying negative affect points downward (dashed red arrows pointing downward, e.g., $CEO \rightarrow Manager\_A$ or $Manager\_A \rightarrow Staff\_1$).
+4. **Social Distance (Null Ties):** Many cross-level pairs have no direct tie (represented as $0$), which is perfectly realistic in large hierarchies.
+
+This model shows how Davis and Leinhardt's ranked clusterability accommodates both positive horizontal relationships (peer solidarity) and negative or asymmetric vertical relationships (authority and status aspirations) in a single, stable network configuration.
+
+```{r}
+#| label: fig-ranked-clusters
+#| fig-cap: "Ranked clusterable directed graph modeling a 9-person organizational hierarchy."
+#| fig-cap-location: bottom
+#| fig-height: 9
+#| fig-width: 9
+
+library(igraph)
+library(ggraph)
+
+# 1. Define nodes with their organizational rank
+nodes_ranked <- data.frame(
+  name = c("CEO", "VP", "Mgr_A", "Mgr_B", "Lead", "Staff_1", "Staff_2", "Staff_3", "Staff_4"),
+  rank = c(rep("Executive (High)", 2), 
+           rep("Management (Med)", 3), 
+           rep("Staff (Low)", 4))
+)
+
+# 2. Define edges: horizontal mutual (+), upward asymmetric (+), downward asymmetric (-)
+edges_ranked <- data.frame(
+  from = c(
+    # Horizontal Within-Rank Ties (Mutual +)
+    "CEO", "VP", "Mgr_A", "Mgr_B", "Mgr_B", "Lead", "Staff_1", "Staff_2", "Staff_3", "Staff_4",
+    # Upward Aspirational Ties (Asymmetric +)
+    "Staff_1", "Staff_2", "Staff_3", "Staff_4", "Mgr_A", "Mgr_B", "Lead",
+    # Downward Disciplinary Ties (Asymmetric -)
+    "CEO", "VP", "Mgr_A", "Mgr_B", "Lead"
+  ),
+  to = c(
+    # Horizontal Within-Rank Ties (Mutual +)
+    "VP", "CEO", "Mgr_B", "Mgr_A", "Lead", "Mgr_B", "Staff_2", "Staff_1", "Staff_4", "Staff_3",
+    # Upward Aspirational Ties (Asymmetric +)
+    "Mgr_A", "Mgr_A", "Mgr_B", "Lead", "CEO", "CEO", "VP",
+    # Downward Disciplinary Ties (Asymmetric -)
+    "Mgr_A", "Mgr_B", "Staff_1", "Staff_3", "Staff_4"
+  ),
+  sign = c(rep("+", 10), rep("+", 7), rep("-", 5)),
+  type = c(rep("Positive Tie (+)", 17), rep("Negative Tie (-)", 5))
+)
+
+# 3. Create graph
+g_ranked <- graph_from_data_frame(edges_ranked, directed = TRUE, vertices = nodes_ranked)
+
+# 4. Define custom vertical hierarchical coordinates (Pyramid shape)
+layout_matrix_ranked <- matrix(c(
+  # Executive Level (Top)
+  -0.5,  3.0,   # CEO
+   0.5,  3.0,   # VP
+  
+  # Management Level (Middle)
+  -1.2,  1.8,   # Mgr_A
+   0.0,  1.8,   # Mgr_B
+   1.2,  1.8,   # Lead
+  
+  # Staff Level (Bottom)
+  -1.8,  0.6,   # Staff_1
+  -0.6,  0.6,   # Staff_2
+   0.6,  0.6,   # Staff_3
+   1.8,  0.6    # Staff_4
+), ncol = 2, byrow = TRUE)
+
+# 5. Plot using ggraph
+ggraph(g_ranked, layout = layout_matrix_ranked) +
+  geom_edge_link(
+    aes(color = type, linetype = type),
+    arrow = arrow(length = unit(3.5, 'mm'), type = "closed"),
+    end_cap = circle(10, 'mm'),
+    start_cap = circle(10, 'mm'),
+    width = 1.3,
+    alpha = 0.8,
+    show.legend = TRUE
+  ) +
+  geom_node_point(aes(fill = rank), shape = 21, size = 24, color = "white", stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", color = "white", size = 9) +
+  scale_edge_color_manual(values = c("Positive Tie (+)" = "forestgreen", "Negative Tie (-)" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("Positive Tie (+)" = "solid", "Negative Tie (-)" = "dashed")) +
+  scale_fill_manual(values = c("Executive (High)" = "gold2", 
+                               "Management (Med)" = "darkgray", 
+                               "Staff (Low)" = "chocolate2")) +
+  theme_graph() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 11)
+  ) +
+  coord_cartesian(clip = "off")
+```
+
+
 
