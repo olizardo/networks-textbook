@@ -94,14 +94,6 @@ Despite the term "balanced" play a central role in the theory, a balanced state 
 
 This theoretical framework helps explain how factions or polarized groups can form and persist within larger social networks. It is a mathematical property indicating a specific configuration of relationships, not a judgment of social well-being. This nuance is crucial for understanding the implications of balance theory in real-world social networks.
 
-## Cycles in a Balanced Signed Graph
-
-The direct consequence of this two-group partitioning for **cycles** within a balanced signed graph is as follows: *All cycles in a balanced signed graph must have a positive product of signs*.
-
-1. *Cycles entirely within one group*: If a cycle exists entirely within one of the two polarized groups (e.g., within Group 1 or Group 2), then all the edges forming that cycle must be positive, as per the theorem. The product of any number of positive signs is always positive. Therefore, these cycles are inherently "balanced" with respect to their sign product.
-
-2. *Cycles spanning between two groups*: If a cycle involves nodes from both polarized groups, it must cross between the groups an even number of times to return to its starting node. For instance, to go from Group 1 to Group 2 and then back to Group 1, it must cross the "boundary" twice. Each time a link crosses between the two groups, it carries a negative sign. If there's an even number of such negative links in the cycle, then the product of all the signs in the cycle will be positive (because an even number of negative signs multiplied together results in a positive product).
-
 ## Paths in a Balanced Signed Graph
 
 Recall from @sec-indirect that a path is a sequence of distinct vertices and edges connecting a start node to an end node. The *sign* of the path in a signed graph is the product of the sign of each edge in the path. In a balanced graph, the **end nodes** of a path could belong to the same group, or each could belong to different groups in the polarized structure.
@@ -112,6 +104,14 @@ If a path begins in one polarized group and ends in the other (e.g., starts in G
 
 In sum, the two-group partitioning of the complete signed balanced graph, creates a predictable environment in terms of path signs. Paths that "stay" within their original group's alignment (by beginning and ending with nodes in the same group) retain a positive sign, while paths that "cross" the network's fundamental division (by beginning and ending with nodes in different groups) have a negative sign, reflecting the inherent polarization of the overall structure.
 
+## Cycles in a Balanced Signed Graph
+
+The direct consequence of this two-group partitioning for **cycles** within a balanced signed graph is as follows: *All cycles in a balanced signed graph must have a positive product of signs*.
+
+1. *Cycles entirely within one group*: If a cycle exists entirely within one of the two polarized groups (e.g., within Group 1 or Group 2), then all the edges forming that cycle must be positive, as per the theorem. The product of any number of positive signs is always positive. Therefore, these cycles are inherently "balanced" with respect to their sign product.
+
+2. *Cycles spanning between two groups*: If a cycle involves nodes from both polarized groups, it must cross between the groups an even number of times to return to its starting node. For instance, to go from Group 1 to Group 2 and then back to Group 1, it must cross the "boundary" twice. Each time a link crosses between the two groups, it carries a negative sign. If there's an even number of such negative links in the cycle, then the product of all the signs in the cycle will be positive (because an even number of negative signs multiplied together results in a positive product).
+
 ## Checking for Balance with Matrix Powers
 
 How can we check if a large, complex signed graph is structurally balanced without manually drawing every possible cycle and multiplying their signs? As we learned in @sec-matops, we can leverage the power of **matrix algebra**.
@@ -121,21 +121,17 @@ Recall that the elements of a signed adjacency matrix $\mathbf{A}$ are defined a
 - $a_{ij} = -1$ if node $i$ and node $j$ have a negative tie.
 - $a_{ij} = 0$ if there is no tie between node $i$ and node $j$.
 
-If we raise the signed adjacency matrix $\mathbf{X}$ to the $p$-th power ($\mathbf{a}^p$), each diagonal entry $a_{ii}^{(p)}$ represents the sum of the signs of all **closed walks** of length $p$ starting and ending at node $i$. 
+If we raise the signed adjacency matrix $\mathbf{A}$ to the $p$-th power ($\mathbf{A}^p$), each diagonal entry $a_{ii}^{(p)}$ represents the sum of the signs of all **closed walks** of length $p$ starting and ending at node $i$. 
 
 Because a structurally balanced graph cannot contain any negative cycles, the product of signs in every cycle is positive. Consequently, if a signed graph is balanced, the diagonal entries of the power the signed  adjacency matrix $\mathbf{A}^p$ must be **non-negative** for all powers up to the number of nodes in the graph ($p = 1, 2, \dots, g$). If even a single diagonal element in any of these power matrices is negative, it indicates the existence of an unbalanced (negative) cycle of that length, meaning the entire graph is unbalanced.
 
 ## Measuring Partial Balance: Indices of Balance
 
-In empirical research, social networks are messy, and they are almost never *perfectly* balanced. Because of this, analysts need ways to measure the **degree of balance** rather than treating it as a binary (yes/no) state. Wasserman and Faust [-@wasserman_faust94] highlight two main structural indices used to quantify partial balance:
-
-### 1. The Cycle Index of Balance
-This index is the ratio of the number of positive cycles to the total number of cycles of all lengths in the graph:
+In empirical research, social networks are messy, and they are almost never *perfectly* balanced. Because of this, analysts need ways to measure the **degree of balance** rather than treating it as a binary (yes/no) state. There are two main structural indices used to quantify partial balance in a graph. First ther is the **Cycle Index of Balance**. This index is the ratio of the number of positive cycles to the total number of cycles of all lengths in the graph:
 $$\text{Cycle Index} = \frac{PC}{TC}$$
-where $PC$ is the count of positive cycles and $TC$ is the total count of cycles. This index ranges from $0$ (completely unbalanced) to $1$ (perfectly balanced). Some advanced versions of this index (such as those by Henley, Horsfall, and De Soto [-@henley69]) apply weightings based on cycle length, reflecting the fact that shorter cycles (like triads) generate much more immediate psychological and social tension than very long cycles.
+Where $PC$ is the count of positive cycles and $TC$ is the total count of cycles. This index ranges from $0$ (completely unbalanced) to $1$ (perfectly balanced). Some advanced versions of this index (such as those by Henley, Horsfall, and De Soto [-@henley69]) apply weightings based on cycle length, reflecting the fact that shorter cycles (like triads) generate much more immediate psychological and social tension than very long cycles.
 
-### 2. The Line Index of Balance
-First proposed by Frank Harary [-@harary59], the **Line Index of Balance** calculates the minimum number of edge signs that must be changed (or edges removed) in order to eliminate all unbalanced cycles and make the graph perfectly balanced. If a large network with hundreds of nodes has a line index of 1 or 2, it is extremely close to complete balance, even though a cycle-counting method might find dozens of unbalanced cycles.
+Second, there is the **Line Index of Balance** proposed by Frank Harary [-@harary59], which calculates the minimum number of edge signs that must be changed (or edges removed) in order to eliminate all unbalanced cycles and make the graph perfectly balanced. If a large network with hundreds of nodes has a line index of 1 or 2, it is extremely close to complete balance, even though a cycle-counting method might find dozens of unbalanced cycles.
 
 ## From Balance to Clustering
 As we have seen, Cartwright and Harary's [-@cartwright_harary56] fundamental theorem of structural balance shows that a balanced network necessarily splits into exactly *two* polarized factions. While this works beautifully for representing two opposing armies or a strict two-party political divide, it is often too restrictive for some other real-world social networks. In 1967, Davis introduced his **Clusterability Theorem** to generalize structural balance so that a network could fragment into multiple groups, rather than just two.
@@ -245,13 +241,9 @@ For any **complete signed graph**, the following statements are mathematically e
 4. The graph has no cycle of length 3 (triad) with exactly one negative edge.
 :::
 
-These theorems have profound implications for social network analysis:
+These theorems have important implications for social network analysis. First, they show that *triads matter*. In complete networks, we do not need to inspect long cycles; looking exclusively at triads (cycles of length 3) is sufficient to tell whether a graph has clusters or not. Secondly, these considerations allow us to separate graphs that have a *unique clustering* (one special partition of nodes into internal positive groups separated by negative ties) from graphs that have multiple ways of separating nodes into warring clusters. If a signed network is complete, there is a single, unique way to partition the actors into clusters. If the network is incomplete (meaning there are null/missing edges, as in @fig-davis), a unique clustering is no longer guaranteed, and there may be multiple valid ways to clump actors into groups.
 
-1. **The Power of Triads:** In complete networks, we do not need to inspect long cycles; looking exclusively at triads (cycles of length 3) is sufficient to assess clusterability. 
-
-2. **Uniqueness vs. Multiplicity:** If a signed network is complete, there is a single, unique way to partition the actors into clusters. If the network is incomplete (meaning there are null/missing edges, as in @fig-davis), a unique clustering is no longer guaranteed, and there may be multiple valid ways to group the actors.
-
-Under Davis's model, the only prohibited triadic configuration is a triad with exactly one negative tie (e.g., $i$ and $j$ like each other, but both dislike $k$, which creates pressure on $k$ to choose or for the group to resolve the asymmetry). The triad with three negative ties (where everyone dislikes everyone else) is perfectly permissible, as it simply represents three actors belonging to three separate, mutually hostile clusters. 
+Under Davis's model, the only prohibited triadic configuration to guarantee clustering is a triad with exactly one negative tie (e.g., $i$ and $j$ like each other, but both dislike $k$, which creates pressure on $k$ to choose or for the group to resolve the asymmetry). The triad with three negative ties (where everyone dislikes everyone else) is perfectly permissible, as it simply represents three actors belonging to three separate, mutually hostile clusters. 
 
 If these conditions are met, the network can be partitioned into any number of distinct clusters (such as the three clusters shown in @fig-davis), rather than just two. Within each cluster, all existing ties are positive; between any two different clusters, all existing ties are negative.
 
@@ -263,7 +255,7 @@ To study structural balance under these more realistic conditions, Cartwright an
 
 ### Why Directed Cycles are Too Restrictive
 
-In a standard directed graph (digraph), a **directed cycle** is a closed sequence of nodes and directed edges (arcs) in which all arrows point in the same direction (e.g., $n_1 \rightarrow n_2 \rightarrow n_3 \rightarrow n_1$). If we restricted our study of balance to only directed cycles, we would miss most instances of psychological and social tension in a network. In sentiment networks, social tension can exist even if there is no perfect, closed directed loop of arrows. 
+In a standard directed graph (digraph), a **directed cycle** is a closed sequence of nodes and directed edges (arcs) in which all arrows point in the same direction (e.g., $n_1 \rightarrow n_2 \rightarrow n_3 \rightarrow n_1$). If we restricted our study of balance to only directed cycles, we would miss most instances of psychological and social tension in a network. In sentiment networks, social tension can exist even if there is no perfect, closed directed loop of arrows. That's why in @sec-tbalance we computed the sign of the triangles ignoring the arrows. 
 
 To illustrate, imagine the following three-person configuration (the classic triadic setup discussed in @sec-tbalance):
 - **You** ($n_1$) like **Alex** ($n_3$).
@@ -408,7 +400,7 @@ ggraph(g_unbal, layout = layout_matrix_whole) +
 
 ## Ranked Clusterability: Bridging Balance and Hierarchy
 
-While Fritz Heider's original balance theory and Davis's clusterability model assume purely horizontal, symmetric sentiment structures, real-world social groups often exhibit prominent **vertical hierarchies** (such as status, dominance, or prestige). 
+While Fritz Heider's [-@heider46] original balance theory and Davis's clusterability model assume purely horizontal, symmetric sentiment structures, real-world social groups often exhibit prominent **vertical hierarchies** (such as status, dominance, or prestige). 
 
 To bridge the gap between horizontal sentiment balance and vertical status hierarchies, Davis and Leinhardt [-@davis_leinhardt72] introduced the concept of **Ranked Clusterability**.
 
