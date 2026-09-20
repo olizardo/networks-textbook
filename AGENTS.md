@@ -8,6 +8,7 @@ This repository contains the source code for an introductory textbook on social 
 - **Language:** R
 - **Environment Management:** `renv` (R environment)
 - **Build Output:** The site renders to `_sites/`
+- **CI/CD:** GitHub Actions (`.github/workflows/publish.yml`) on `ubuntu-latest` deploying to GitHub Pages
 
 ## Project Structure
 - `*.qmd`: Quarto markdown files containing the lessons. They follow a naming convention organized by topic:
@@ -16,20 +17,24 @@ This repository contains the source code for an introductory textbook on social 
   - `lesson-positions-*.qmd`
   - `lesson-sna-*.qmd`
   - `lesson-theory-*.qmd`
-- `_quarto.yml`: Quarto configuration, detailing the book structure, chapters, and rendering rules.
+- `_quarto.yml`: Quarto configuration, detailing the book structure and chapters. Only chapters listed in `book: chapters:` are built into the textbook.
 - `networks.bib`: Bibliography file containing references/citations for the textbook.
 - `renv.lock` / `renv/`: R environment lockfile and project library.
-- `slides/` & `homeworks/`: Additional course resources included in the build via `_quarto.yml`.
+- `slides/`: Reveal.js slide decks for course lectures. Rendered into `_sites/slides/` during publishing.
+- `homeworks/`: Source Quarto assignments (`homework{1..9}.qmd`). Rendered locally using `./render_homeworks.sh` and synced directly to Canvas LMS (Bruin Learn) via `SOCIOL 111/sync_homeworks_to_canvas.py`. Homeworks are kept off the public textbook site.
+- `scraps/`: Drafts, retired chapters, and working fragments excluded from the book build.
 
 ## Common Tasks & Workflows
-- **Rendering the book:** Use the `quarto render` command (or the IDE build tools) to generate the book into the `_sites/` directory. Note that the Quarto render configuration explicitly ignores files matching `!*_*.qmd_`, `!*-5562048.qmd`, and everything in `!scraps/**`.
-- **Managing Dependencies:** Dependencies are managed via `renv`. If new packages are added in an R session, remember to document them and potentially run `renv::snapshot()` if environment updates are needed. Run `renv::restore()` to install current dependencies.
-- **Network Visualizations:** R code heavily features network plotting tools (e.g., `ggraph`, `igraph`, `tidygraph`). `theme_graph()` is frequently used for styling.
+- **Rendering the book:** Run `quarto render` (or use IDE build tools). Quarto automatically renders the chapters defined under `book: chapters:` in `_quarto.yml`.
+- **Rendering homeworks:** Run `./render_homeworks.sh [hw_number]` (e.g., `./render_homeworks.sh 1` or `./render_homeworks.sh` for all) to generate the HTML and figures used by Bruin Learn.
+- **Managing Dependencies:** Dependencies are managed via `renv`. Run `renv::restore()` to install dependencies and `renv::snapshot()` after adding packages.
 - **Validating References and Citations:**
-  - `python3 check_book_refs.py`: Runs validation checking that all active chapters listed in `_quarto.yml` have properly defined cross-references (such as figures, tables, sections, and equations).
-  - `python3 check_book_citations.py`: Verifies that all bibliography citation keys used in active chapters are present and defined in `networks.bib`.
+  - `python3 check_book_refs.py`: Verifies that all active chapters listed in `_quarto.yml` have properly defined cross-references (figures, tables, sections, equations).
+  - `python3 check_book_citations.py`: Verifies that all bibliography citation keys used in active chapters exist in `networks.bib`.
+  - Both validation scripts return exit code 0 on success and are enforced as pre-render gates in CI.
 
 ## AI Agent Guidelines
-- **Adding Chapters:** When creating a new chapter or lesson, use the existing `.qmd` naming conventions and ensure the new file is appropriately integrated into the table of contents in `_quarto.yml`.
-- **R Code Execution:** Before running complex operations, ensure the active R environment has the necessary packages loaded. 
+- **Adding Chapters:** When creating a new chapter, use established file naming conventions and integrate the file into `_quarto.yml` under `book: chapters:`.
+- **Homework Updates:** Homework assignments are maintained in `homeworks/homework{1..9}.qmd`. Never publish homework solutions or answer keys to `_sites/` or the public web.
+- **Slide Paths:** Slide decks in `slides/` should reference root images as `../images/<filename>`. Root `images/` is registered in `_quarto.yml` under `project.resources` to ensure availability on the deployed site.
 - **Context:** Remember that this is an educational resource. Explanations of code, concepts, and network theory should be clear and accessible for students.

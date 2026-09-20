@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 
 def get_active_chapters():
     chapters = []
@@ -34,7 +35,7 @@ def check_references():
     references = []  # list of tuples: (ref_label, file_where_referenced, line_num, full_line_text)
     
     inline_label_re = re.compile(r'\{#(fig|tbl|sec|eq|thm|lem|cor|prp|cnj|def|exm|rem)-([a-zA-Z0-9_-]+)')
-    chunk_label_re = re.compile(r'#\|\s*label:\s*"?((?:fig|tbl|sec|eq|thm|lem|cor|prp|cnj|def|exm|rem)-[a-zA-Z0-9_-]+)"?')
+    chunk_label_re = re.compile(r'#\|\s*label:\s*["\']?((?:fig|tbl|sec|eq|thm|lem|cor|prp|cnj|def|exm|rem)-[a-zA-Z0-9_-]+)["\']?')
     ref_re = re.compile(r'@(fig|tbl|sec|eq|thm|lem|cor|prp|cnj|def|exm|rem)-([a-zA-Z0-9_-]+)')
     
     for f in chapters:
@@ -116,5 +117,8 @@ def check_references():
                 current_file = def_file
             print(f"    - {label}")
 
+    return len(broken) == 0 and len(missing_files) == 0
+
 if __name__ == '__main__':
-    check_references()
+    success = check_references()
+    sys.exit(0 if success else 1)

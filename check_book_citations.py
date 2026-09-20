@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 
 def get_active_chapters():
     chapters = []
@@ -53,7 +54,15 @@ def check_citations():
             continue
         try:
             with open(f, 'r', encoding='utf-8') as file:
+                in_code_block = False
                 for line_idx, line in enumerate(file, 1):
+                    stripped = line.strip()
+                    if stripped.startswith('```'):
+                        in_code_block = not in_code_block
+                        continue
+                    if in_code_block:
+                        continue
+
                     # Find all @key matches
                     # Look behind to make sure it's not part of an email or word
                     # Key can contain alphanumeric, _, -, ., /, :, etc.
@@ -102,5 +111,8 @@ def check_citations():
     else:
         print("\n[SUCCESS] No broken bibliography citations found in active chapters!")
 
+    return len(unique_missing) == 0
+
 if __name__ == '__main__':
-    check_citations()
+    success = check_citations()
+    sys.exit(0 if success else 1)
