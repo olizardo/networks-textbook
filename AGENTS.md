@@ -30,85 +30,85 @@ Ordered per `book: chapters:` in `_quarto.yml`. Titles are pulled from each file
 **Introduction to Networks**
 | File | Title |
 |---|---|
-| `lesson-theory-what-are-networks.qmd` | What Are Networks? |
-| `lesson-theory-what-are-social-networks.qmd` | What is A *Social* Network? |
-| `lesson-theory-ties-bound.qmd` | Social Ties and Network Boundaries |
-| `lesson-theory-tie-strength.qmd` | Tie Strength |
-| `lesson-theory-multiplex.qmd` | Multiplex Networks |
+| `01-theory-what-are-networks.qmd` | What Are Networks? |
+| `02-theory-what-are-social-networks.qmd` | What is A *Social* Network? |
+| `03-theory-ties-bound.qmd` | Social Ties and Network Boundaries |
+| `04-theory-tie-strength.qmd` | Tie Strength |
+| `05-theory-multiplex.qmd` | Multiplex Networks |
 
 **Networks and Graphs**
 | File | Title |
 |---|---|
-| `lesson-graphs-intro.qmd` | Introduction to Graphs |
-| `lesson-graphs-ties.qmd` | Types of Ties and Their Graphs |
-| `lesson-graphs-dyads-triads.qmd` | Dyads and Triads |
-| `lesson-graphs-metrics.qmd` | Basic Graph Metrics |
-| `lesson-graphs-directed.qmd` | Directed Graphs |
-| `lesson-graphs-paths.qmd` | Indirect Connections |
-| `lesson-graphs-connectivity.qmd` | Graph Connectivity |
-| `lesson-graphs-trees.qmd` | Tree Graphs |
+| `06-graphs-intro.qmd` | Introduction to Graphs |
+| `07-graphs-ties.qmd` | Types of Ties and Their Graphs |
+| `08-graphs-dyads-triads.qmd` | Dyads and Triads |
+| `09-graphs-metrics.qmd` | Basic Graph Metrics |
+| `10-graphs-directed.qmd` | Directed Graphs |
+| `11-graphs-paths.qmd` | Indirect Connections |
+| `12-graphs-connectivity.qmd` | Graph Connectivity |
+| `13-graphs-trees.qmd` | Tree Graphs |
 
 **Networks and Matrices**
 | File | Title |
 |---|---|
-| `lesson-matrix-intro.qmd` | Introduction to Matrices |
-| `lesson-matrix-network.qmd` | The Social Network Matrices |
-| `lesson-matrix-operations.qmd` | Basic Matrix Operations |
-| `lesson-matrix-multiplication.qmd` | Matrix Multiplication and its Applications |
+| `14-matrix-intro.qmd` | Introduction to Matrices |
+| `15-matrix-network.qmd` | The Social Network Matrices |
+| `16-matrix-operations.qmd` | Basic Matrix Operations |
+| `17-matrix-multiplication.qmd` | Matrix Multiplication and its Applications |
 
 **Centrality and Status**
 | File | Title |
 |---|---|
-| `lesson-sna-degree-centrality.qmd` | Centralities based on Degree |
-| `lesson-sna-closeness.qmd` | Centralities based on the Geodesic Distance |
-| `lesson-sna-betweenness.qmd` | Centralities based on Shortest Paths |
-| `lesson-sna-bigthree.qmd` | The "Big Three" Centrality Metrics |
-| `lesson-sna-eigenvector.qmd` | Getting Centrality from Others |
-| `lesson-sna-status.qmd` | Status |
-| `lesson-sna-hubs-and-authorities.qmd` | Hubs and Authorities |
+| `18-sna-degree-centrality.qmd` | Centralities based on Degree |
+| `19-sna-closeness.qmd` | Centralities based on the Geodesic Distance |
+| `20-sna-betweenness.qmd` | Centralities based on Shortest Paths |
+| `21-sna-bigthree.qmd` | The "Big Three" Centrality Metrics |
+| `22-sna-eigenvector.qmd` | Getting Centrality from Others |
+| `23-sna-status.qmd` | Status |
+| `24-sna-hubs-and-authorities.qmd` | Hubs and Authorities |
 
 **Two-Mode & Ego Networks**
 | File | Title |
 |---|---|
-| `lesson-sna-affiliation-networks.qmd` | Affiliation Networks |
-| `lesson-sna-ego-networks.qmd` | Ego Network Metrics |
-| `lesson-sna-ego-collect.qmd` | Collecting Ego-Network Data |
-| `lesson-theory-ego-homo.qmd` | Theories of Ego Network Homogeneity and Diversity |
-| `lesson-theory-network-cognition.qmd` | Network Cognition and Cognitive Social Structures |
+| `25-sna-affiliation-networks.qmd` | Affiliation Networks |
+| `26-sna-ego-networks.qmd` | Ego Network Metrics |
+| `27-sna-ego-collect.qmd` | Collecting Ego-Network Data |
+| `28-sna-ego-homo.qmd` | Theories of Ego Network Homogeneity and Diversity |
+| `29-sna-network-cognition.qmd` | Network Cognition and Cognitive Social Structures |
 
 **Subgroups and Blocks**
 | File | Title |
 |---|---|
-| `lesson-sna-groups-cliques.qmd` | Clique Analysis |
-| `lesson-sna-groups-cohesive.qmd` | Cohesive Subsets |
-| `lesson-theory-struct-equiv.qmd` | Equivalence and Similarity |
-| `lesson-positions-advanced-equiv.qmd` | Automorphic and Regular Equivalence |
-| `lesson-sna-local-similarity.qmd` | Local Node Similarities |
-| `lesson-sna-blockmodeling.qmd` | Blockmodeling |
+| `30-sna-groups-cliques.qmd` | Clique Analysis |
+| `31-sna-groups-cohesive.qmd` | Cohesive Subsets |
+| `32-sna-struct-equiv.qmd` | Equivalence and Similarity |
+| `33-sna-advanced-equiv.qmd` | Automorphic and Regular Equivalence |
+| `34-sna-local-similarity.qmd` | Local Node Similarities |
+| `35-sna-blockmodeling.qmd` | Blockmodeling |
 
 **Network Theory: Ties and Circles**
 | File | Title |
 |---|---|
-| `lesson-theory-dunbar.qmd` | Dunbar's Theory of Social Circles |
-| `lesson-theory-swt.qmd` | The Strength of Weak Ties |
-| `lesson-theory-sht.qmd` | Structural Holes and Brokerage |
-| `lesson-theory-smt.qmd` | Simmelian Tie Theory |
+| `36-theory-dunbar.qmd` | Dunbar's Theory of Social Circles |
+| `37-theory-swt.qmd` | The Strength of Weak Ties |
+| `38-theory-sht.qmd` | Structural Holes and Brokerage |
+| `39-theory-smt.qmd` | Simmelian Tie Theory |
 
 **Network Theory: Balance and Hierarchy**
 | File | Title |
 |---|---|
-| `lesson-theory-balance-dyadic.qmd` | Dyadic Balance |
-| `lesson-theory-balance-triadic.qmd` | Triadic Balance |
-| `lesson-theory-balance-struct.qmd` | Structural Balance |
-| `lesson-theory-valenced-interactions.qmd` | Theories of Valenced Interactions |
-| `lesson-theory-hierarchies.qmd` | Dominance Hierarchies |
+| `40-theory-balance-dyadic.qmd` | Dyadic Balance |
+| `41-theory-balance-triadic.qmd` | Triadic Balance |
+| `42-theory-balance-struct.qmd` | Structural Balance |
+| `43-theory-valenced-interactions.qmd` | Theories of Valenced Interactions |
+| `44-theory-hierarchies.qmd` | Dominance Hierarchies |
 
 **Network Theory: Dynamics and Diffusion**
 | File | Title |
 |---|---|
-| `lesson-theory-cycle-avoidance.qmd` | Micro Rules and Macro Structure: Four-Cycle Avoidance |
-| `lesson-theory-diffusion.qmd` | The Diffusion of Innovations |
-| `lesson-theory-small-world.qmd` | The Small World Phenomenon |
+| `45-theory-cycle-avoidance.qmd` | Micro Rules and Macro Structure: Four-Cycle Avoidance |
+| `46-theory-diffusion.qmd` | The Diffusion of Innovations |
+| `47-theory-small-world.qmd` | The Small World Phenomenon |
 
 Front/back matter: `index.qmd`, `references.qmd`.
 
