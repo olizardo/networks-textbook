@@ -133,7 +133,7 @@ window.Quarto = {
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar floating nav-fixed slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="floating nav-fixed slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -755,14 +755,8 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-  <li><a href="#references" id="toc-references" class="nav-link active" data-scroll-target="#references">References</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content page-columns page-full column-body" id="quarto-document-content">
@@ -787,7 +781,7 @@ window.Quarto = {
 </header>
 
 
-<p>In <a href="lesson-sna-eigenvector.html" class="quarto-xref"><span>Chapter 22</span></a> we saw a way to think of centrality as being “reflected” in the connections you have with others. Rather than being a property of the person, centrality is a property of the relations that a given person has with central others. We studied that idea in the case of an undirected graph, which gave us a conception of this type of reflective centrality as <strong>eigenvector centrality</strong>.</p>
+<p>In <a href="#sec-eigen" class="quarto-xref"><span class="quarto-unresolved-ref">sec-eigen</span></a> we saw a way to think of centrality as being “reflected” in the connections you have with others. Rather than being a property of the person, centrality is a property of the relations that a given person has with central others. We studied that idea in the case of an undirected graph, which gave us a conception of this type of reflective centrality as <strong>eigenvector centrality</strong>.</p>
 <p>In this chapter we extend this idea to the case of asymmetric relations represented as a <strong>directed graph</strong>. The added complexity is that we have to think of two ways people’s centrality is reflected from their connections to others. On the one hand, a person can be central because many people seek their advice or services, or think of them as smart, capable, likable, and so on. That is, people are central when they <em>receive</em> many directed ties from other people. We will call these people <strong>authorities</strong> <span class="citation" data-cites="kleinberg99">(<a href="#ref-kleinberg99" role="doc-biblioref">Kleinberg 1999</a>)</span>.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-kleinberg99" class="csl-entry" role="listitem">
 Kleinberg, Jon M. 1999. <span>“Authoritative Sources in a Hyperlinked Environment.”</span> <em>Journal of the ACM (JACM)</em> 46 (5): 604–32.
@@ -797,7 +791,7 @@ Kleinberg, Jon M. 1999. <span>“Authoritative Sources in a Hyperlinked Environm
 <li><p>Authorities are people who are pointed to by many other people.</p></li>
 <li><p>Hubs are people who point to authorities.</p></li>
 </ul>
-<p>Nevertheless, as we discussed in <a href="lesson-sna-status.html" class="quarto-xref"><span>Chapter 23</span></a>, not all people are created the same. A really good authority should be a person who gets lots of incoming nominations, not just from everyone, but from people who are also considered good hubs by other people. And what is a good hub? Well a good hub is a person who points to really good authorities. Thus, your status as an authority or a hub is both <em>reflective</em> and <em>recursive</em>. The reason for this is that the “goodness” of authorities and hubs is defined in terms of one another, just like the snake eating its own tail we found in <a href="lesson-sna-eigenvector.html" class="quarto-xref"><span>Chapter 22</span></a>.</p>
+<p>Nevertheless, as we discussed in <a href="#sec-status" class="quarto-xref"><span class="quarto-unresolved-ref">sec-status</span></a>, not all people are created the same. A really good authority should be a person who gets lots of incoming nominations, not just from everyone, but from people who are also considered good hubs by other people. And what is a good hub? Well a good hub is a person who points to really good authorities. Thus, your status as an authority or a hub is both <em>reflective</em> and <em>recursive</em>. The reason for this is that the “goodness” of authorities and hubs is defined in terms of one another, just like the snake eating its own tail we found in <a href="#sec-eigen" class="quarto-xref"><span class="quarto-unresolved-ref">sec-eigen</span></a>.</p>
 <p>Thus, if <span class="math inline">\(\mathbf{u}\)</span> is a <span class="math inline">\(n \times 1\)</span> column vector containing the authority scores of a set of nodes in a graph—a set of numbers ranking nodes from top to bottom in terms of their authoritativeness–and <span class="math inline">\(\mathbf{v}\)</span> is a column vector of the same length containing the hub scores—a set of numbers ranking nodes from top to bottom depending of how good they are in pointing to authorities—then the two vectors <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span> should be linked by the following mathematical relationship:</p>
 <p><span id="eq-klein1"><span class="math display">\[
 \mathbf{u} = A^T \mathbf{v}
@@ -806,15 +800,15 @@ Kleinberg, Jon M. 1999. <span>“Authoritative Sources in a Hyperlinked Environm
 \mathbf{v} = A \mathbf{u}
 \tag{24.2}\]</span></span></p>
 <p>Where <span class="math inline">\(A\)</span> is the adjacency matrix. That is, the authority scores should be a function of the hub scores of the <em>incoming</em> ties to a node—recorded in the transpose of the original adjacency matrix <span class="math inline">\(A^T\)</span>—and the hub scores should be a function of authority scores of the outgoing ties to a node—recorded in the origina adjacency matrix <span class="math inline">\(A\)</span>.</p>
-<p>Note that in <a href="#eq-klein1" class="quarto-xref">Equation&nbsp;<span>24.1</span></a> and <a href="#eq-klein2" class="quarto-xref">Equation&nbsp;<span>24.2</span></a> we face the same chicken and the egg problem we encountered in <a href="lesson-sna-eigenvector.html" class="quarto-xref"><span>Chapter 22</span></a>. Because the authorities scores are defined in terms of the hub scores, we can’t figure those out until we find the hub scores, but because the hub scores are defined in terms of the authority scores we can’t figure those out until we find the authority scores!</p>
-<p>The solution to our dilemma is similar to the one we used in <a href="lesson-sna-eigenvector.html" class="quarto-xref"><span>Chapter 22</span></a>. We can give each node in the network the same number of “starting” hub points to give out to every node they point to for free—let’s say every node with an outgoing edge gives one hub point to their out-neighbor—and then calculate the authority scores of all nodes <span class="math inline">\(\mathbf{u}\)</span> using <a href="#eq-klein1" class="quarto-xref">Equation&nbsp;<span>24.1</span></a>. Then we can use those <span class="math inline">\(\mathbf{u}\)</span> scores to calculate the hub scores <span class="math inline">\(\mathbf{v}\)</span> using <a href="#eq-klein2" class="quarto-xref">Equation&nbsp;<span>24.2</span></a>. A node’s authority score is the sum of the hub scores of the nodes that point to it, and a node’s hub score is the sum of the authority scores of the nodes they point to. We rinse, repeat and stop once the rank order of nodes on both the authority and hub ranking stops changing.</p>
-<p>How would this work in a social network? Let us see. <a href="#fig-dirgraph" class="quarto-xref">Figure&nbsp;<span>24.1</span></a> shows a directed graph representing a set of asymmetric ties between people (this is the same graph from <a href="lesson-sna-status.html" class="quarto-xref"><span>Chapter 23</span></a>) and <a href="#tbl-adjmat" class="quarto-xref">Table&nbsp;<span>24.1</span></a> is the corresponding adjacency matrix.</p>
+<p>Note that in <a href="#eq-klein1" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-klein1</span></a> and <a href="#eq-klein2" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-klein2</span></a> we face the same chicken and the egg problem we encountered in <a href="#sec-eigen" class="quarto-xref"><span class="quarto-unresolved-ref">sec-eigen</span></a>. Because the authorities scores are defined in terms of the hub scores, we can’t figure those out until we find the hub scores, but because the hub scores are defined in terms of the authority scores we can’t figure those out until we find the authority scores!</p>
+<p>The solution to our dilemma is similar to the one we used in <a href="#sec-eigen" class="quarto-xref"><span class="quarto-unresolved-ref">sec-eigen</span></a>. We can give each node in the network the same number of “starting” hub points to give out to every node they point to for free—let’s say every node with an outgoing edge gives one hub point to their out-neighbor—and then calculate the authority scores of all nodes <span class="math inline">\(\mathbf{u}\)</span> using <a href="#eq-klein1" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-klein1</span></a>. Then we can use those <span class="math inline">\(\mathbf{u}\)</span> scores to calculate the hub scores <span class="math inline">\(\mathbf{v}\)</span> using <a href="#eq-klein2" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-klein2</span></a>. A node’s authority score is the sum of the hub scores of the nodes that point to it, and a node’s hub score is the sum of the authority scores of the nodes they point to. We rinse, repeat and stop once the rank order of nodes on both the authority and hub ranking stops changing.</p>
+<p>How would this work in a social network? Let us see. <a href="#fig-dirgraph" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dirgraph</span></a> shows a directed graph representing a set of asymmetric ties between people (this is the same graph from <a href="#sec-status" class="quarto-xref"><span class="quarto-unresolved-ref">sec-status</span></a>) and <a href="#tbl-adjmat" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-adjmat</span></a> is the corresponding adjacency matrix.</p>
 <div class="cell fig-cap-location-bottom">
 <div class="cell-output-display">
 <div id="fig-dirgraph" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-dirgraph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="lesson-sna-hubs-and-authorities_files/figure-html/fig-dirgraph-1.png" class="img-fluid figure-img" width="768">
+<img src="24-sna-hubs-and-authorities_files/figure-html/fig-dirgraph-1.png" class="img-fluid figure-img" width="768">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dirgraph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;24.1: A directed graph.
@@ -1039,10 +1033,10 @@ Table&nbsp;24.1: Adjacency matrix corresponding to a directed graph.
 </figure>
 </div>
 </div>
-<p>Now, let’s assign everyone “one” hub point to begin with. That means that the the <span class="math inline">\(\mathbf{v_1}\)</span> column vector that goes into <a href="#eq-klein1" class="quarto-xref">Equation&nbsp;<span>24.1</span></a> will just be a <span class="math inline">\(12 \times 1\)</span> column vector full of ones. This is shown in <a href="#tbl-klein-1" class="quarto-xref">Table&nbsp;<span>24.2 (a)</span></a></p>
-<p>Thus, when we plug the numbers in <a href="#tbl-klein-1" class="quarto-xref">Table&nbsp;<span>24.2 (a)</span></a> into <a href="#eq-klein1" class="quarto-xref">Equation&nbsp;<span>24.1</span></a>, we get a column vector with the entries shown in <a href="#tbl-klein-2" class="quarto-xref">Table&nbsp;<span>24.2 (b)</span></a>. Note that these are the <strong>in-degrees</strong> of each node in the graph. This makes sense, because multiplying an adjacency matrix times the <strong>all ones vector</strong> results in a vector that is just the row sums of the original matrix (as we learned in <a href="lesson-matrix-multiplication.html" class="quarto-xref"><span>Chapter 17</span></a>).</p>
-<p>Multiplying the transpose of the adjacency matrix times the all ones vector gives us the row sums of the transpose, which is the same as the column sums of the original adjacency matrix (which is how we calculate in-degree centrality; see <a href="lesson-sna-degree-centrality.html" class="quarto-xref"><span>Chapter 18</span></a>).</p>
-<p>Now all we need to do is plug the authority score vector <span class="math inline">\(\mathbf{u_1}\)</span> shown in <a href="#tbl-klein-2" class="quarto-xref">Table&nbsp;<span>24.2 (b)</span></a> into <a href="#eq-klein2" class="quarto-xref">Equation&nbsp;<span>24.2</span></a> to calculate the new hub score vector <span class="math inline">\(\mathbf{v_2}\)</span> But before we do that we normalize the authority score vector <span class="math inline">\(\mathbf{u_1}\)</span> by dividing by the maximum observed score (<span class="math inline">\(max(\mathbf{u_1}) = 5\)</span>, to get the new authority score vector <span class="math inline">\(\mathbf{u_1}\)</span> shown in <a href="#tbl-klein-3" class="quarto-xref">Table&nbsp;<span>24.2 (c)</span></a>. We plug in <em>these</em> entries into <a href="#eq-klein2" class="quarto-xref">Equation&nbsp;<span>24.2</span></a> and divide by the maximum, to get the hub score vector <span class="math inline">\(\mathbf{v_2}\)</span> shown in <a href="#tbl-klein-4" class="quarto-xref">Table&nbsp;<span>24.2 (d)</span></a>.</p>
+<p>Now, let’s assign everyone “one” hub point to begin with. That means that the the <span class="math inline">\(\mathbf{v_1}\)</span> column vector that goes into <a href="#eq-klein1" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-klein1</span></a> will just be a <span class="math inline">\(12 \times 1\)</span> column vector full of ones. This is shown in <a href="#tbl-klein-1" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-klein-1</span></a></p>
+<p>Thus, when we plug the numbers in <a href="#tbl-klein-1" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-klein-1</span></a> into <a href="#eq-klein1" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-klein1</span></a>, we get a column vector with the entries shown in <a href="#tbl-klein-2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-klein-2</span></a>. Note that these are the <strong>in-degrees</strong> of each node in the graph. This makes sense, because multiplying an adjacency matrix times the <strong>all ones vector</strong> results in a vector that is just the row sums of the original matrix (as we learned in <a href="#sec-matmult" class="quarto-xref"><span class="quarto-unresolved-ref">sec-matmult</span></a>).</p>
+<p>Multiplying the transpose of the adjacency matrix times the all ones vector gives us the row sums of the transpose, which is the same as the column sums of the original adjacency matrix (which is how we calculate in-degree centrality; see <a href="#sec-degcent" class="quarto-xref"><span class="quarto-unresolved-ref">sec-degcent</span></a>).</p>
+<p>Now all we need to do is plug the authority score vector <span class="math inline">\(\mathbf{u_1}\)</span> shown in <a href="#tbl-klein-2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-klein-2</span></a> into <a href="#eq-klein2" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-klein2</span></a> to calculate the new hub score vector <span class="math inline">\(\mathbf{v_2}\)</span> But before we do that we normalize the authority score vector <span class="math inline">\(\mathbf{u_1}\)</span> by dividing by the maximum observed score (<span class="math inline">\(max(\mathbf{u_1}) = 5\)</span>, to get the new authority score vector <span class="math inline">\(\mathbf{u_1}\)</span> shown in <a href="#tbl-klein-3" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-klein-3</span></a>. We plug in <em>these</em> entries into <a href="#eq-klein2" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-klein2</span></a> and divide by the maximum, to get the hub score vector <span class="math inline">\(\mathbf{v_2}\)</span> shown in <a href="#tbl-klein-4" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-klein-4</span></a>.</p>
 <div id="tbl-klein" class="quarto-layout-panel anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-klein-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1314,7 +1308,7 @@ Table&nbsp;24.2: First four steps in finding hub and authority scores.
 </div>
 </figure>
 </div>
-<p>Of course, the point is to keep this iteration going until we have minimal differences between the <span class="math inline">\(\mathbf{u_k}\)</span> and <span class="math inline">\(\mathbf{u_k}\)</span> vectors at step <span class="math inline">\(k\)</span> and those we found at step <span class="math inline">\(k - 1\)</span>. After 21 iterations, we find the final hub and authority scores shown in <a href="#tbl-hits-1" class="quarto-xref">Table&nbsp;<span>24.3 (a)</span></a> and <a href="#tbl-hits-2" class="quarto-xref">Table&nbsp;<span>24.3 (b)</span></a>, which each node arranged from top to bottom according to their respective scores.</p>
+<p>Of course, the point is to keep this iteration going until we have minimal differences between the <span class="math inline">\(\mathbf{u_k}\)</span> and <span class="math inline">\(\mathbf{u_k}\)</span> vectors at step <span class="math inline">\(k\)</span> and those we found at step <span class="math inline">\(k - 1\)</span>. After 21 iterations, we find the final hub and authority scores shown in <a href="#tbl-hits-1" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-hits-1</span></a> and <a href="#tbl-hits-2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-hits-2</span></a>, which each node arranged from top to bottom according to their respective scores.</p>
 <div id="tbl-hits" class="quarto-layout-panel anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1432,17 +1426,17 @@ Table&nbsp;24.3: Final hub and authority scores.
 </div>
 </figure>
 </div>
-<p>As we can see from <a href="#tbl-hits-1" class="quarto-xref">Table&nbsp;<span>24.3 (a)</span></a>, node <span class="math inline">\(F\)</span> is the undisputed authority in the network. If <a href="#fig-dirgraph" class="quarto-xref">Figure&nbsp;<span>24.1</span></a> was an advice network, that’s the person you’d want to go to, because the people who other people go to, also go to them.</p>
+<p>As we can see from <a href="#tbl-hits-1" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-hits-1</span></a>, node <span class="math inline">\(F\)</span> is the undisputed authority in the network. If <a href="#fig-dirgraph" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dirgraph</span></a> was an advice network, that’s the person you’d want to go to, because the people who other people go to, also go to them.</p>
 <p>Nevertheless, if you didn’t know that <span class="math inline">\(F\)</span> was the main authority, you’d want to ask the people who seek advice from that authority even if not that many people seek advice from them. These are the “hubs” in the network, and they happen to be nodes <span class="math inline">\(J\)</span>, <span class="math inline">\(H\)</span>, and <span class="math inline">\(C\)</span>.</p>
-<p>Node <span class="math inline">\(C\)</span> is an interesting case; no one points to <span class="math inline">\(C\)</span> (<span class="math inline">\(C\)</span>’s in-degree is zero which makes them last in the authority rank as shown in <a href="#tbl-hits-1" class="quarto-xref">Table&nbsp;<span>24.3 (a)</span></a>), but because <span class="math inline">\(C\)</span> points to <span class="math inline">\(F\)</span>, it makes them one of the best hubs (so still a good person to know, because he knows who the important people are).</p>
-<p>Now as you recall from <a href="lesson-sna-eigenvector.html" class="quarto-xref"><span>Chapter 22</span></a>, every time we have this kind of chicken and the egg, snake eating its own tail problem, it seems to also be possible to compute the rankings without iterating back and forth, and instead solving a matrix equation using linear algebra methods <span class="citation" data-cites="bonacich72">(<a href="#ref-bonacich72" role="doc-biblioref">Bonacich 1972</a>)</span>. This time is no exception.</p>
+<p>Node <span class="math inline">\(C\)</span> is an interesting case; no one points to <span class="math inline">\(C\)</span> (<span class="math inline">\(C\)</span>’s in-degree is zero which makes them last in the authority rank as shown in <a href="#tbl-hits-1" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-hits-1</span></a>), but because <span class="math inline">\(C\)</span> points to <span class="math inline">\(F\)</span>, it makes them one of the best hubs (so still a good person to know, because he knows who the important people are).</p>
+<p>Now as you recall from <a href="#sec-eigen" class="quarto-xref"><span class="quarto-unresolved-ref">sec-eigen</span></a>, every time we have this kind of chicken and the egg, snake eating its own tail problem, it seems to also be possible to compute the rankings without iterating back and forth, and instead solving a matrix equation using linear algebra methods <span class="citation" data-cites="bonacich72">(<a href="#ref-bonacich72" role="doc-biblioref">Bonacich 1972</a>)</span>. This time is no exception.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-bonacich72" class="csl-entry" role="listitem">
 Bonacich, Phillip. 1972. <span>“Factoring and Weighting Approaches to Status Scores and Clique Identification.”</span> <em>Journal of Mathematical Sociology</em> 2 (1): 113–20.
 </div></div><p>Consider the matrix <span class="math inline">\(B\)</span> that results when we multiply the transpose of the adjacency matrix times the original adjacency matrix:</p>
 <p><span id="eq-com1"><span class="math display">\[
 B = A^TA
 \tag{24.3}\]</span></span></p>
-<p>This matrix is shown in <a href="#tbl-ata" class="quarto-xref">Table&nbsp;<span>24.4</span></a>. As we have seen, this matrix records the number of <em>common in-neighbors</em> that the row node <em>i</em> has with the column node <em>j</em> (with the diagonals recording the in-degrees of each node).</p>
+<p>This matrix is shown in <a href="#tbl-ata" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-ata</span></a>. As we have seen, this matrix records the number of <em>common in-neighbors</em> that the row node <em>i</em> has with the column node <em>j</em> (with the diagonals recording the in-degrees of each node).</p>
 <div class="cell">
 <div id="tbl-ata" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -1663,7 +1657,7 @@ Table&nbsp;24.4: Common in-neighbors matrix.
 <p><span id="eq-com2"><span class="math display">\[
 C = AA^T
 \tag{24.4}\]</span></span></p>
-<p>This matrix is shown in <a href="#tbl-aat" class="quarto-xref">Table&nbsp;<span>24.5</span></a>. As we have also seen, this matrix records the number of <em>common out-neighbors</em> that the row node <em>i</em> has with the column node <em>j</em> (with the diagonals recording the out-degrees of each node).</p>
+<p>This matrix is shown in <a href="#tbl-aat" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-aat</span></a>. As we have also seen, this matrix records the number of <em>common out-neighbors</em> that the row node <em>i</em> has with the column node <em>j</em> (with the diagonals recording the out-degrees of each node).</p>
 <div class="cell">
 <div id="tbl-aat" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -1887,7 +1881,7 @@ B\mathbf{u} = \lambda^B \mathbf{u}
 <p><span id="eq-eig2"><span class="math display">\[
 C\mathbf{v} = \lambda^C \mathbf{v}
 \tag{24.6}\]</span></span></p>
-<p>Which means that <span class="math inline">\(\mathbf{u}\)</span> in <a href="#eq-eig1" class="quarto-xref">Equation&nbsp;<span>24.5</span></a> is an eigenvector of the common in-neighbors matrix <span class="math inline">\(B\)</span> and <span class="math inline">\(\mathbf{v}\)</span> in <a href="#eq-eig2" class="quarto-xref">Equation&nbsp;<span>24.6</span></a> is an eigenvector of the common out-neighbors matrix <span class="math inline">\(C\)</span> (with <span class="math inline">\(\lambda^B\)</span> and <span class="math inline">\(\lambda^C\)</span> being the corresponding eigenvalues). In fact, <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span> are the leading (first) eigenvectors of the common in and out-neighbors matrices (respectively). The absolute values of these two eigenvectors are shown in <a href="#tbl-hits-eig" class="quarto-xref">Table&nbsp;<span>24.6</span></a>.</p>
+<p>Which means that <span class="math inline">\(\mathbf{u}\)</span> in <a href="#eq-eig1" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig1</span></a> is an eigenvector of the common in-neighbors matrix <span class="math inline">\(B\)</span> and <span class="math inline">\(\mathbf{v}\)</span> in <a href="#eq-eig2" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-eig2</span></a> is an eigenvector of the common out-neighbors matrix <span class="math inline">\(C\)</span> (with <span class="math inline">\(\lambda^B\)</span> and <span class="math inline">\(\lambda^C\)</span> being the corresponding eigenvalues). In fact, <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span> are the leading (first) eigenvectors of the common in and out-neighbors matrices (respectively). The absolute values of these two eigenvectors are shown in <a href="#tbl-hits-eig" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-hits-eig</span></a>.</p>
 <div id="tbl-hits-eig" class="quarto-layout-panel anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hits-eig-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -2030,12 +2024,9 @@ Table&nbsp;24.6: Final hub and authority scores according to the eigenvalues of 
 </figure>
 </div>
 <p>As we can see the order of nodes in terms of authority and hub scores is the same as that obtained by the iterative procedure!</p>
-<section id="references" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
