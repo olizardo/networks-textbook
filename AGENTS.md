@@ -24,6 +24,121 @@ This repository contains the source code for an introductory textbook on social 
 - `homeworks/`: Course homework source assignments (`homework{1..9}.qmd`). Rendered locally using `./render_homeworks.sh` and synced directly to UCLA Bruin Learn (Canvas LMS). Homeworks are explicitly excluded from public web publishing.
 - `scraps/`: Drafts, retired chapters, and working fragments excluded from the book build.
 
+## Chapter Inventory
+Ordered per `book: chapters:` in `_quarto.yml`. Titles are pulled from each file's first `#` heading or YAML `title:` field — regenerate this table if chapters are added, renamed, or reordered rather than hand-editing it.
+
+**Introduction to Networks**
+| File | Title |
+|---|---|
+| `lesson-theory-what-are-networks.qmd` | What Are Networks? |
+| `lesson-theory-what-are-social-networks.qmd` | What is A *Social* Network? |
+| `lesson-theory-ties-bound.qmd` | Social Ties and Network Boundaries |
+| `lesson-theory-tie-strength.qmd` | Tie Strength |
+| `lesson-theory-multiplex.qmd` | Multiplex Networks |
+
+**Networks and Graphs**
+| File | Title |
+|---|---|
+| `lesson-graphs-intro.qmd` | Introduction to Graphs |
+| `lesson-graphs-ties.qmd` | Types of Ties and Their Graphs |
+| `lesson-graphs-dyads-triads.qmd` | Dyads and Triads |
+| `lesson-graphs-metrics.qmd` | Basic Graph Metrics |
+| `lesson-graphs-directed.qmd` | Directed Graphs |
+| `lesson-graphs-paths.qmd` | Indirect Connections |
+| `lesson-graphs-connectivity.qmd` | Graph Connectivity |
+| `lesson-graphs-trees.qmd` | Tree Graphs |
+
+**Networks and Matrices**
+| File | Title |
+|---|---|
+| `lesson-matrix-intro.qmd` | Introduction to Matrices |
+| `lesson-matrix-network.qmd` | The Social Network Matrices |
+| `lesson-matrix-operations.qmd` | Basic Matrix Operations |
+| `lesson-matrix-multiplication.qmd` | Matrix Multiplication and its Applications |
+
+**Centrality and Status**
+| File | Title |
+|---|---|
+| `lesson-sna-degree-centrality.qmd` | Centralities based on Degree |
+| `lesson-sna-closeness.qmd` | Centralities based on the Geodesic Distance |
+| `lesson-sna-betweenness.qmd` | Centralities based on Shortest Paths |
+| `lesson-sna-bigthree.qmd` | The "Big Three" Centrality Metrics |
+| `lesson-sna-eigenvector.qmd` | Getting Centrality from Others |
+| `lesson-sna-status.qmd` | Status |
+| `lesson-sna-hubs-and-authorities.qmd` | Hubs and Authorities |
+
+**Two-Mode & Ego Networks**
+| File | Title |
+|---|---|
+| `lesson-sna-affiliation-networks.qmd` | Affiliation Networks |
+| `lesson-sna-ego-networks.qmd` | Ego Network Metrics |
+| `lesson-sna-ego-collect.qmd` | Collecting Ego-Network Data |
+| `lesson-theory-ego-homo.qmd` | Theories of Ego Network Homogeneity and Diversity |
+| `lesson-theory-network-cognition.qmd` | Network Cognition and Cognitive Social Structures |
+
+**Subgroups and Blocks**
+| File | Title |
+|---|---|
+| `lesson-sna-groups-cliques.qmd` | Clique Analysis |
+| `lesson-sna-groups-cohesive.qmd` | Cohesive Subsets |
+| `lesson-theory-struct-equiv.qmd` | Equivalence and Similarity |
+| `lesson-positions-advanced-equiv.qmd` | Automorphic and Regular Equivalence |
+| `lesson-sna-local-similarity.qmd` | Local Node Similarities |
+| `lesson-sna-blockmodeling.qmd` | Blockmodeling |
+
+**Network Theory: Ties and Circles**
+| File | Title |
+|---|---|
+| `lesson-theory-dunbar.qmd` | Dunbar's Theory of Social Circles |
+| `lesson-theory-swt.qmd` | The Strength of Weak Ties |
+| `lesson-theory-sht.qmd` | Structural Holes and Brokerage |
+| `lesson-theory-smt.qmd` | Simmelian Tie Theory |
+
+**Network Theory: Balance and Hierarchy**
+| File | Title |
+|---|---|
+| `lesson-theory-balance-dyadic.qmd` | Dyadic Balance |
+| `lesson-theory-balance-triadic.qmd` | Triadic Balance |
+| `lesson-theory-balance-struct.qmd` | Structural Balance |
+| `lesson-theory-valenced-interactions.qmd` | Theories of Valenced Interactions |
+| `lesson-theory-hierarchies.qmd` | Dominance Hierarchies |
+
+**Network Theory: Dynamics and Diffusion**
+| File | Title |
+|---|---|
+| `lesson-theory-cycle-avoidance.qmd` | Micro Rules and Macro Structure: Four-Cycle Avoidance |
+| `lesson-theory-diffusion.qmd` | The Diffusion of Innovations |
+| `lesson-theory-small-world.qmd` | The Small World Phenomenon |
+
+Front/back matter: `index.qmd`, `references.qmd`.
+
+## Slide Deck Inventory
+Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto.yml`), each roughly paired with one or more chapters above.
+
+| File | Title |
+|---|---|
+| `slides/what-are-networks.qmd` | What are Networks? |
+| `slides/ties-motifs.qmd` | Ties, Dyads, and Triads |
+| `slides/graph-theory.qmd` | Graph Theory |
+| `slides/graph-metrics.qmd` | Graph Metrics |
+| `slides/graph-connectivity.qmd` | Graph Theory: Paths & Connectivity |
+| `slides/matrix-intro.qmd` | Networks, Graphs, and Matrices |
+| `slides/matrix-operations.qmd` | Matrix Algebra in Social Networks |
+| `slides/matrix-advanced.qmd` | Advanced Network Matrices |
+| `slides/ego-metrics.qmd` | Measuring Ego Networks |
+| `slides/ego-homogeneity.qmd` | Theories of Ego Network Homogeneity and Diversity |
+| `slides/cognitive-social-structures.qmd` | Cognitive Social Structures |
+| `slides/subgroups.qmd` | Graph Theory: Sub-Groups & Cliques |
+| `slides/positional-equivalence.qmd` | Graph Theory: Equivalence & Similarity |
+| `slides/blockmodeling.qmd` | Graph Theory: Blockmodeling |
+| `slides/dunbar-theory.qmd` | Dunbar's Theory of Social Circles |
+| `slides/strength-weak-ties.qmd` | The Strength of Weak Ties |
+| `slides/structural-holes.qmd` | Burt's Theory of Structural Holes |
+| `slides/chains-of-affection.qmd` | Chains of Affection |
+| `slides/balance-signed-graphs.qmd` | Balance Theory and Signed Graphs |
+| `slides/valenced-interactions.qmd` | Theories of Valenced Interactions |
+| `slides/small-world.qmd` | The Small World Phenomenon |
+
 ## Core Workflows
 
 ### 1. Rendering the Textbook
