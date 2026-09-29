@@ -120,7 +120,8 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/what-are-networks.qmd` | What are Networks? |
 | `slides/ties-motifs.qmd` | Ties, Dyads, and Triads |
 | `slides/graph-theory.qmd` | Graph Theory |
-| `slides/graph-metrics.qmd` | Graph Metrics |
+| `slides/graph-metrics-undirected.qmd` | Undirected Graph Metrics |
+| `slides/graph-metrics-directed.qmd` | Directed Graph Metrics |
 | `slides/graph-connectivity.qmd` | Graph Theory: Paths & Connectivity |
 | `slides/matrix-intro.qmd` | Networks, Graphs, and Matrices |
 | `slides/matrix-operations.qmd` | Matrix Algebra in Social Networks |

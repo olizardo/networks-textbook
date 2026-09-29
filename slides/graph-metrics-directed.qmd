@@ -1,0 +1,1415 @@
+---
+title: "Directed Graph Metrics"
+subtitle: "The Basics of Social Network Analysis"
+format:
+  revealjs:
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+library(ggplot2)
+
+# Directed graph and layout for ties intro
+fr_ties <- c("A", "A", "B", "B", "B", "D", "E", "E", "F", "G", "G")
+to_ties <- c("B", "F", "A", "D", "C", "B", "C", "D", "A", "F", "D")
+gr_ties <- tbl_graph(
+  edges = data.frame(from = fr_ties, to = to_ties),
+  nodes = data.frame(name = union(fr_ties, to_ties))
+)
+set.seed(367)
+layout_ties <- create_layout(gr_ties, layout = "kk")
+```
+
+# Directed Graphs: Basic Elements
+
+---
+
+## Asymmetric Ties & Directed Graphs
+
+::: {.incremental}
+- Some relationships have an inherent **directionality** (**asymmetric ties**):
+  - e.g., "A helps B", "A seeks advice from B".
+- Unlike symmetric ties, **mutuality** or **reciprocity** is not guaranteed by definition.
+- Reciprocity is an empirical event in the world (mutuality must be measured rather than assumed).
+:::
+
+---
+
+## Anti-Symmetric Ties & Hierarchies
+
+::: {.incremental}
+- Some directional relationships strictly forbid reciprocity (**anti-symmetric ties**):
+  - If $A \rightarrow B$ exists, then $B \rightarrow A$ is structurally or logically impossible ($AB \implies \neg BA$).
+  - e.g., "A is the father of B", "A is the supervisor of B".
+- Unlike asymmetric ties, reciprocity is not optional—it is strictly prohibited.
+- Concatenating these relations across multiple nodes naturally generates **directed trees** or **strict hierarchies** with no cycles.
+:::
+
+---
+
+## Directed Graph Representation
+
+::: {.incremental}
+- Asymmetric networks are represented as a **directed graph** (or **digraph**):
+  - Simple lines are replaced with **arrows** indicating directionality.
+  - Every edge has a **source node** (sender) and a **destination node** (receiver).
+  - Unlike undirected graphs, node order matters: edge $AB$ is distinct from $BA$.
+:::
+
+---
+
+## Directed Graph: An Example
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Let's look at the digraph on the right:
+  - Arrows indicate the direction of the relationship.
+  - Some ties are **reciprocated** (e.g., $A \leftrightarrow B$ and $B \leftrightarrow D$).
+  - Others are strictly **asymmetric** (e.g., $E \rightarrow C$, $G \rightarrow F$).
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| label: plt-dir-intro-graph
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_ties |>
+  ggraph(layout = "manual", x = layout_ties$x, y = layout_ties$y) +
+  geom_edge_parallel(
+    color = "gray60",
+    edge_width = 1.25,
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(6, 'mm'),
+    end_cap = circle(9, 'mm'),
+    sep = unit(3.5, 'mm')
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+
+## Neighborhoods in Directed Graphs (1)
+
+:::: {.columns}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Because links are directional, nodes have two neighborhoods.
+- **In-Neighborhood** ($N^{in}(v)$):
+  - Set of source nodes pointing *to* $v$.
+  - Example: $N^{in}(D) = \{B, E, G\}$ (highlighted in gold, pointing to focal node D in tomato).
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir <- tbl_graph(
+  nodes = data.frame(name = c("A", "B", "C", "D", "E", "G")),
+  edges = data.frame(
+    from = c(2, 2, 2, 5, 6, 1, 3, 1),
+    to   = c(1, 3, 4, 4, 4, 5, 6, 2)
+  ),
+  directed = TRUE
+)
+
+gr_dir |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name == "D" ~ "focal",
+      name %in% c("B", "E", "G") ~ "neighbor",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  theme_graph() +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Neighborhoods in Directed Graphs (2)
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- **Out-Neighborhood** ($N^{out}(v)$):
+  - Set of destination nodes that $v$ points *to*.
+  - Example: $N^{out}(B) = \{A, C, D\}$ (highlighted in gold, pointing from focal node B in tomato).
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name == "B" ~ "focal",
+      name %in% c("A", "C", "D") ~ "neighbor",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  theme_graph() +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Neighborhoods: Reciprocity
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- A node appears in both neighborhoods only if there is a **reciprocal** (mutual) tie.
+- Example for Node **B** (in tomato):
+  - In-Neighborhood: $N^{in}(B) = \{A\}$
+  - Out-Neighborhood: $N^{out}(B) = \{A, C, D\}$
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name == "B" ~ "focal",
+      name %in% c("A", "C", "D") ~ "neighbor",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Neighborhoods: Reciprocity Overlap
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Since there is a reciprocal tie $A \leftrightarrow B$, node **A** (in gold) belongs to both sets.
+- Therefore, the overlap is the intersection of these two neighborhoods:
+  $$N^{in}(B) \cap N^{out}(B) = \{A\}$$
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name == "B" ~ "focal",
+      name == "A" ~ "neighbor",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Neighborhood Intersection
+
+::: {.incremental}
+- In directed graphs, neighborhood intersections can be defined for incoming or outgoing ties:
+- **In-Neighborhood Intersection**: Common source nodes pointing to both $u$ and $v$:
+  - $N^{in}(D) \cap N^{in}(A) = \{B\}$ (Node $B$ points to both $D$ and $A$)
+- **Out-Neighborhood Intersection**: Common destination nodes that both $u$ and $v$ point to:
+  - $N^{out}(B) \cap N^{out}(E) = \{D\}$ (Both $B$ and $E$ point to $D$)
+:::
+
+---
+
+## Directed Neighborhood Intersection: Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's visualize the **out-neighborhood intersection** of nodes **B** and **E** (in tomato):
+  - $N^{out}(B) = \{A, C, D\}$
+  - $N^{out}(E) = \{D\}$
+- They share one common destination node:
+  - $N^{out}(B) \cap N^{out}(E) = \{D\}$ (in gold)
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name %in% c("B", "E") ~ "focal",
+      name == "D" ~ "common",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "common" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Neighborhood Union
+
+::: {.incremental}
+- Similarly, directed neighborhood unions combine the sets of neighbors:
+- **In-Neighborhood Union**: Nodes pointing to either $u$ or $v$:
+  - $N^{in}(D) \cup N^{in}(A) = \{B, E, G\}$
+- **Out-Neighborhood Union**: Nodes that either $u$ or $v$ points to:
+  - $N^{out}(B) \cup N^{out}(E) = \{A, C, D\}$
+:::
+
+---
+
+## Directed Neighborhood Union: Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's visualize the **out-neighborhood union** of nodes **B** and **E** (in tomato):
+  - $N^{out}(B) = \{A, C, D\}$
+  - $N^{out}(E) = \{D\}$
+- Combining all unique destination nodes gives:
+  - $N^{out}(B) \cup N^{out}(E) = \{A, C, D\}$ (in gold)
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name %in% c("B", "E") ~ "focal",
+      name %in% c("A", "C", "D") ~ "neighbor",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+# Special Classes of Directed Graphs
+
+---
+
+## Symmetric Directed Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Symmetric Directed Graph**:
+  - A digraph where for every directed arc $u \rightarrow v$, the reverse arc $v \rightarrow u$ is also present.
+  - Formally: $AB \iff BA$.
+- **Key Properties**:
+  - It is a directed representation of an undirected (symmetric) graph.
+  - Every connected dyad is **reciprocal** (Mutual).
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_sym_slide <- tbl_graph(
+  nodes = data.frame(name = 1:4),
+  edges = data.frame(from = c(1, 2, 2, 3, 3, 4), to = c(2, 1, 3, 2, 4, 3)),
+  directed = TRUE
+)
+ggraph(gr_sym_slide, layout = "circle") +
+  geom_edge_parallel(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'), end_cap = circle(8.5, 'mm'),
+    color = "steelblue", edge_width = 1.25, sep = unit(3.5, 'mm')
+  ) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Functional Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Functional Graph**:
+  - A directed graph where every node has an outdegree of **exactly 1**:
+    $$k^{out}_v = 1 \quad \text{for all } v \in V$$
+- **Key Properties**:
+  - Represents a single-valued function $f: V \rightarrow V$, mapping each node to exactly one target.
+  - e.g., "Who is your best friend?" or "Who is your immediate boss?"
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_func_slide <- tbl_graph(
+  nodes = data.frame(name = 1:4),
+  edges = data.frame(from = c(1, 2, 3, 4), to = c(2, 3, 4, 1)),
+  directed = TRUE
+)
+ggraph(gr_func_slide, layout = "circle") +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'), end_cap = circle(8.5, 'mm'),
+    color = "steelblue", edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Oriented Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Oriented Graph**:
+  - A directed graph obtained by choosing a **single direction** for each edge in an undirected graph.
+- **Key Properties**:
+  - **No reciprocal (mutual) arcs** can exist: if $u \rightarrow v$ is present, then $v \rightarrow u$ is forbidden.
+  - Represents purely non-reciprocal systems of interaction or asymmetric flows.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_orient_slide <- tbl_graph(
+  nodes = data.frame(name = 1:4),
+  edges = data.frame(from = c(1, 2, 3, 1), to = c(2, 3, 4, 4)),
+  directed = TRUE
+)
+ggraph(gr_orient_slide, layout = "circle") +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'), end_cap = circle(8.5, 'mm'),
+    color = "steelblue", edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Tree Graphs
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Directed Tree Graph**:
+  - A directed, acyclic graph where a single root node has an indegree of 0, and all other nodes have an indegree of **exactly 1**:
+    $$k^{in}_{root} = 0 \quad \text{and} \quad k^{in}_v = 1 \quad \text{for all other } v$$
+- **Key Properties**:
+  - Naturally models **strict authority hierarchies** or family trees.
+  - Every node has exactly one parent or supervisor, with zero loops or overlapping chains of command.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_tree_slide <- tbl_graph(
+  nodes = data.frame(name = 1:4),
+  edges = data.frame(from = c(1, 1, 2), to = c(2, 3, 4)),
+  directed = TRUE
+)
+ggraph(gr_tree_slide, layout = "tree") +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'), end_cap = circle(8.5, 'mm'),
+    color = "steelblue", edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+# Node Degree
+
+---
+
+## Node Degree in Directed Graphs: Indegree
+
+::: {.incremental}
+- Directed graphs have two distinct degrees for each node.
+- **Indegree** ($k^{in}_i$):
+  - Number of edges pointing to node $i$ (cardinality of $N^{in}(i)$).
+  - Sociological meaning: **Popularity, Prestige, or Status**.
+:::
+
+---
+
+## Indegree: An Example
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Let's find the indegree for Node **D** (in tomato) on the right:
+  - Source nodes pointing to **D**: $N^{in}(D) = \{B, E, G\}$ (in gold)
+  - Indegree: $k^{in}_D = |N^{in}(D)| = 3$
+- Node **D** has 3 incoming arrows, representing a node with relatively high popularity or status.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name == "D" ~ "focal",
+      name %in% c("B", "E", "G") ~ "neighbor",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Node Degree in Directed Graphs: Outdegree
+
+::: {.incremental}
+- **Outdegree** ($k^{out}_i$):
+  - Number of edges pointing from node $i$ (cardinality of $N^{out}(i)$).
+  - Sociological meaning: **Sociability or Activity**.
+:::
+
+---
+
+## Outdegree: An Example
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Let's find the outdegree for Node **B** (in tomato) on the right:
+  - Target nodes that **B** points to: $N^{out}(B) = \{A, C, D\}$ (in gold)
+  - Outdegree: $k^{out}_B = |N^{out}(B)| = 3$
+- Node **B** has 3 outgoing arrows, representing a node with relatively high sociability or activity.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name == "B" ~ "focal",
+      name %in% c("A", "C", "D") ~ "neighbor",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+---
+
+## Types of Nodes in Directed Graphs
+
+::: {.incremental}
+- In a directed graph, we can distinguish three types of (non-isolate) nodes based on incoming and outgoing ties:
+  1. **Receivers**: Nodes that receive ties but do not send them ($k_{in} > 0$ and $k_{out} = 0$).
+  2. **Transmitters**: Nodes that send ties but do not receive them ($k_{in} = 0$ and $k_{out} > 0$).
+  3. **Carriers**: Nodes that both receive and send ties ($k_{in} > 0$ and $k_{out} > 0$).
+:::
+
+---
+
+## Node Types: An Example
+
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Looking at the directed graph on the right:
+  - **Receiver**: Node **C** (only receives ties).
+  - **Transmitters**: Nodes **E** and **G** (only send ties).
+  - **Carriers**: Nodes **A**, **B**, **D**, **F** (both receive and send ties).
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| label: plt-dir-node-types
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+
+gr_ties |>
+  activate(nodes) |>
+  mutate(
+    type = case_when(
+      name == "C" ~ "Receiver",
+      name %in% c("E", "G") ~ "Transmitter",
+      TRUE ~ "Carrier"
+    )
+  ) |>
+  ggraph(layout = "manual", x = layout_ties$x, y = layout_ties$y) +
+  geom_edge_parallel(
+    color = "gray80", 
+    edge_width = 1.25,
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(6, 'mm'),
+    end_cap = circle(9, 'mm'),
+    sep = unit(3.5, 'mm')
+  ) +
+  geom_node_point(aes(color = type), size = 25) +
+  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "white") +
+  scale_color_manual(
+    values = c("Receiver" = "tomato", "Transmitter" = "gold", "Carrier" = "skyblue"),
+    name = "Node Type"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(legend.position = "bottom", plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+# Basic Graph Metrics
+
+---
+
+## Graph Order and Size
+
+::: {.incremental}
+- **Graph Order** ($n$):
+  - The number of nodes in the graph ($n = |V|$).
+  - Cardinality of the vertex set.
+- **Graph Size** ($m$):
+  - The number of edges in the graph ($m = |E|$).
+  - Cardinality of the edge set.
+:::
+
+---
+
+## Order and Size: Directed Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the directed graph on the right:
+  - **Node Set** ($V$): $\{A, B, C, D, E, G\}$
+  - **Edge Set** ($E$): $\{BA, BC, BD, ED,$ <br> $GD, AE, CG, AB\}$
+  - **Graph Order** ($n = |V|$): **6** nodes
+  - **Graph Size** ($m = |E|$): **8** edges
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Graph Maximum Size
+
+::: {.incremental}
+- The **maximum size** of a simple graph of order $n$ is the number of edges in a **complete graph** (where every node is connected to every other node).
+- Undirected: $Max(E) = \frac{n(n - 1)}{2}$
+- Directed: $Max(E) = n(n - 1)$
+:::
+
+---
+
+## Maximum Size: Directed Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the directed graph on the right:
+  - **Order** ($n$): 6 nodes
+- **Formula**:
+  $$Max(E) = n(n - 1)$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Maximum Size: Directed Calculation
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Order** ($n$): 6 nodes (shown on the right)
+- **Maximum possible size** calculation:
+  $$Max(E) = 6 \times (6 - 1) = 6 \times 5 = 30\text{ edges}$$
+- **Interpretation**:
+  - A complete directed graph with 6 nodes would have exactly **30** directed arcs.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Graph Density: Formulas (Directed)
+
+::: {.incremental}
+- **Density** ($d$) is the ratio of the observed number of edges ($m$) to the maximum possible number of edges.
+- It is a value between 0 (completely empty) and 1 (complete graph).
+
+- **Directed Graph**:
+  $$d = \frac{m}{n(n-1)}$$
+:::
+
+---
+
+## Graph Density: Interpretation
+
+::: {.incremental}
+- **Connection Probability**:
+  - Density is the probability that any two randomly chosen nodes are connected.
+- **Network Resilience**:
+  - Denser networks are generally more resilient and less vulnerable to breakdowns when key nodes are removed.
+:::
+
+---
+
+## Density: Directed Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the directed graph on the right:
+  - **Order** ($n$): 6 nodes
+  - **Size** ($m$): 8 directed edges
+  - **Maximum possible edges**:
+    $$Max(E) = 6 \times 5 = 30$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Density: Directed Calculation
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Observed directed edges** ($m$): 8 (shown on the right)
+- **Maximum possible edges**: 30
+- **Density Formula**:
+  $$d = \frac{m}{Max(E)} = \frac{8}{30} \approx 0.267$$
+- **Interpretation**:
+  - Exactly **26.7%** of all possible directed ties are present in this network.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+
+---
+
+# Directed Graphs: Degree Metrics
+
+---
+
+## Directed Degree Sets & Sequences
+
+::: {.incremental}
+- Directed graphs have two distinct degree sets (In-Degree set and Out-Degree set) and two distinct sequences.
+- In our 6-node directed graph:
+  - **In-Degree Set**: $\{1, 1, 1, 3, 1, 1\}$
+  - **In-Degree Sequence**: $(3, 1, 1, 1, 1, 1)$
+  - **Out-Degree Set**: $\{2, 3, 1, 0, 1, 1\}$
+  - **Out-Degree Sequence**: $(3, 2, 1, 1, 1, 0)$
+:::
+
+---
+
+## Directed Degree Range & Sum
+
+::: {.incremental}
+- Like undirected graphs, we can define the maximum, minimum, and range of degrees.
+- In directed graphs, these are defined separately for in-degree and out-degree:
+  - **In-Degree Range**: $k^{in}_{max} - k^{in}_{min}$
+  - **Out-Degree Range**: $k^{out}_{max} - k^{out}_{min}$
+- **Degree Sum Rule**:
+  - The sum of in-degrees and the sum of out-degrees are both equal to the graph size $m$ (total number of directed edges/arcs):
+    $\sum_{i=1}^{n} k^{in}_i = \sum_{i=1}^{n} k^{out}_i = m$
+:::
+
+---
+
+## Directed Range & Sum: Example (In-Degree)
+
+:::: {.columns align=center}
+
+::: {.column width="65%"}
+::: {.incremental}
+- For our 6-node directed graph (shown again on the right, $m = 8$):
+  - **In-Degrees**: $k^{in} = (1, 1, 1, 3, 1, 1)$
+    - $k^{in}_{max} = 3$ (Node D), $k^{in}_{min} = 1$
+    - Range $k^{in}_r = 3 - 1 = 2$
+    - Sum $\sum k^{in}_i = 1+1+1+3+1+1 = 8$
+:::
+:::
+
+::: {.column width="35%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Range & Sum: Example (Out-Degree)
+
+:::: {.columns align=center}
+
+::: {.column width="65%"}
+::: {.incremental}
+- For our 6-node directed graph (shown again on the right, $m = 8$):
+  - **Out-Degrees**: $k^{out} = (2, 3, 1, 0, 1, 1)$
+    - $k^{out}_{max} = 3$ (Node B), $k^{out}_{min} = 0$ (Node D)
+    - Range $k^{out}_r = 3 - 0 = 3$
+    - Sum $\sum k^{out}_i = 2+3+1+0+1+1 = 8$
+:::
+:::
+
+::: {.column width="35%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Average Degree
+
+::: {.incremental}
+- **Average In-Degree** ($\bar{k}^{in}$) and **Average Out-Degree** ($\bar{k}^{out}$):
+  $\bar{k}^{in} = \frac{1}{n} \sum_{i=1}^{n} k^{in}_i \quad \text{and} \quad \bar{k}^{out} = \frac{1}{n} \sum_{i=1}^{n} k^{out}_i$
+- **The Equivalence Theorem**:
+  - In *every* directed graph, the average in-degree is **exactly equal** to the average out-degree:
+    $\bar{k}^{in} = \bar{k}^{out} = \frac{m}{n}$
+  - **Why?** Each directed edge $u \rightarrow v$ adds exactly **1** to the out-degree of $u$ and exactly **1** to the in-degree of $v$.
+:::
+
+---
+
+## Interpreting the Density-Degree Connection
+
+::: {.incremental}
+- **Density is Average Degree Scaled by Group Size**:
+  - The density of a directed graph is simply its average degree divided by the maximum possible connections of any single node ($n-1$).
+- **For Example**:
+  - In a group of $n = 10$ people, each person can have at most $n-1 = 9$ connections.
+  - If the average number of friends ($\bar{k}$) is $4.5$, then the density of friendship is:
+    $$d = \frac{4.5}{9} = 0.50 \quad (50\%)$$
+- **Directed Case**:
+  - Since $d^d = \frac{m}{n(n-1)}$ and $\bar{k}$ is $\frac{m}{n}$, we get the same identity:
+    $$d^d = \frac{\bar{k}}{n-1}$$
+:::
+
+---
+
+## Equivalence of Means: Example
+
+:::: {.columns align=center}
+
+::: {.column width="65%"}
+::: {.incremental}
+- In our 6-node directed graph:
+  - **Order** ($n$): 6 nodes
+  - **Size** ($m$): 8 directed edges
+- **Mean In-Degree**:
+  $\bar{k}^{in} = \frac{1+1+1+3+1+1}{6} = \frac{8}{6} \approx 1.33$
+- **Mean Out-Degree**:
+  $\bar{k}^{out} = \frac{2+3+1+0+1+1}{6} = \frac{8}{6} \approx 1.33$
+- **They are equal!** ($\bar{k}^{in} = \bar{k}^{out} = 1.33 = m/n$)
+:::
+:::
+
+::: {.column width="35%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Degree Variance
+
+::: {.incremental}
+- While the means are always equal, the **variances** of in-degree and out-degree can be completely different!
+- **In-Degree Variance** ($\sigma^2_{in}$):
+  $\sigma^2_{in} = \frac{1}{n} \sum_{i=1}^{n} (k^{in}_i - \bar{k}^{in})^2$
+  - Sociological meaning: Measures inequality in **prestige/popularity** (do a few nodes receive all ties?).
+- **Out-Degree Variance** ($\sigma^2_{out}$):
+  $\sigma^2_{out} = \frac{1}{n} \sum_{i=1}^{n} (k^{out}_i - \bar{k}^{out})^2$
+  - Sociological meaning: Measures inequality in **sociability/activity** (do some nodes send way more ties than others?).
+:::
+
+---
+
+## Directed Degree Variance: Example (In-Degree)
+
+:::: {.columns align=center}
+
+::: {.column width="65%"}
+::: {.incremental}
+- In our 6-node directed graph:
+  - Mean degree ($\bar{k}$) is $\approx 1.33$
+- **In-Degree Variance** ($\sigma^2_{in}$):
+  - Values: 
+    - $k^{in} = (1, 1, 1, 3, 1, 1)$
+  - Calculation: 
+    - $\frac{5 \times (1-1.33)^2 + 1 \times (3-1.33)^2}{6} =$ 
+    - $\frac{5 \times 0.11 + 2.78}{6} \approx 0.556$
+:::
+:::
+
+::: {.column width="35%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Degree Variance: Example (Out-Degree)
+
+:::: {.columns align=center}
+
+::: {.column width="65%"}
+::: {.incremental}
+- In our 6-node directed graph:
+  - Mean degree ($\bar{k}$) is $\approx 1.33$
+- **Out-Degree Variance** ($\sigma^2_{out}$):
+  - Values: 
+    - $k^{out} = (2, 3, 1, 0, 1, 1)$
+  - Calculation: 
+    - $\frac{(2-1.33)^2 + (3-1.33)^2 + 3(1-1.33)^2 + (0-1.33)^2}{6} \approx 0.889$
+- Out-degree is **more heterogeneous** than in-degree in this network!
+:::
+:::
+
+::: {.column width="35%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Comparing Density: Undirected vs. Directed
+
+::: {.incremental}
+- **Maximum Possible Edges**:
+  - Undirected: $Max(E)_{undir} = \frac{n(n - 1)}{2}$
+  - Directed: $Max(E)_{dir} = n(n - 1)$
+- **Density Scaling**:
+  - Because a directed graph can hold exactly twice as many edges as an undirected graph of the same order:
+    $d_{dir} = \frac{1}{2} d_{undir} \quad \text{for the same } m \text{ and } n$
+  - Directed density is always more "conservative"—it requires twice as many edges as an undirected graph to reach the same level of density!
+:::
+
+---
+
+## Density Scaling: A Direct Comparison
+
+| Metric | Undirected Graph | Directed Graph |
+|:-------|:----------------:|:--------------:|
+| **Formula** | $d = \frac{2m}{n(n-1)}$ | $d = \frac{m}{n(n-1)}$ |
+| **Max Edges ($n = 6$)** | $15$ edges | $30$ edges |
+| **If $m = 8$ edges** | $d \approx 0.533 \quad (53.3\%)$ | $d \approx 0.267 \quad (26.7\%)$ |
+| **If $m = 15$ edges** | $d = 1.000 \quad (100.0\%)$ | $d = 0.500 \quad (50.0\%)$ |
+
+: Density Comparison Matrix {#tbl-density-scaling}
