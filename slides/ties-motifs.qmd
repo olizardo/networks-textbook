@@ -27,17 +27,19 @@ y_triad <- c(0, 0, 1.2)
 
 # Helper function to plot individual directed triads
 gr_c <- create_empty(3, directed = TRUE)
-plot_tr <- function(edges, title) {
+plot_tr <- function(edges, title, node_size = 18, text_size = 7) {
   g <- gr_c %>% mutate(name = toupper(letters[1:3]))
   if (nrow(edges) > 0) {
     g <- g %>% bind_edges(edges)
   }
+  cap_size <- node_size / 2
+  arrow_len <- node_size / 4
   p <- ggraph(g, layout = "manual", x = x_triad, y = y_triad) +
     geom_edge_link(color = "#2c3e50", edge_width = 1.1,
-                   arrow = arrow(length = unit(3, 'mm'), type = "closed"),
-                   end_cap = circle(6, 'mm'), start_cap = circle(6, 'mm')) +
-    geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-    geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50") +
+                   arrow = arrow(length = unit(arrow_len, 'mm'), type = "closed"),
+                   end_cap = circle(cap_size, 'mm'), start_cap = circle(cap_size, 'mm')) +
+    geom_node_point(size = node_size, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
+    geom_node_text(aes(label = name), size = text_size, fontface = "bold", color = "#2c3e50") +
     theme_graph() + ggtitle(title) + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
     theme(
       plot.title = element_text(size = 10, face="bold", hjust=0.5, color = "#2c3e50"),
@@ -47,15 +49,18 @@ plot_tr <- function(edges, title) {
 }
 
 # Function to create a clean, minimalist 2-node graph plot from the book chapter
-plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cross = FALSE) {
+plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cross = FALSE,
+                           node_size = 25, text_size = 10) {
   g <- tbl_graph(nodes = nodes, edges = edges)
   p <- ggraph(g, layout = "manual", x = x, y = y)
+  cap_size <- node_size / 2.1
+  arrow_len <- node_size / 5
   
   if (directed) {
     p <- p + geom_edge_arc(aes(strength = strength, color = color, linetype = linetype),
-                           arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-                           end_cap = circle(8, 'mm'),
-                           start_cap = circle(8, 'mm'),
+                           arrow = arrow(length = unit(arrow_len, 'mm'), type = "closed"),
+                           end_cap = circle(cap_size, 'mm'),
+                           start_cap = circle(cap_size, 'mm'),
                            width = 1.1,
                            show.legend = FALSE) +
              scale_edge_color_identity() +
@@ -63,13 +68,13 @@ plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cr
   } else {
     p <- p + geom_edge_link(color = "#2c3e50",
                             width = 1.1,
-                            end_cap = circle(8, 'mm'),
-                            start_cap = circle(8, 'mm'),
+                            end_cap = circle(cap_size, 'mm'),
+                            start_cap = circle(cap_size, 'mm'),
                             show.legend = FALSE)
   }
   
-  pBase <- p + geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-    geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50")
+  pBase <- p + geom_node_point(size = node_size, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+    geom_node_text(aes(label = name), size = text_size, fontface = "bold", color = "#2c3e50")
   
   if (has_cross) {
     pBase <- pBase + annotate("text", x = 1.5, y = 0.90, label = "✕", color = "#e74c3c", size = 8, fontface = "bold")
@@ -216,11 +221,11 @@ plot_tie_type(nodes_2, edges_sym, "Symmetric Tie", "e.g., 'is sibling of'", dire
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 6.5
-#| fig-height: 5.5
-p1 <- plot_tie_type(nodes_2, edges_rec, "Asymmetric: Reciprocal Dyad", "e.g., 'A likes B' & 'B likes A'", directed = TRUE)
-p2 <- plot_tie_type(nodes_2, edges_nonrec, "Asymmetric: Non-Reciprocal Dyad", "e.g., 'A sends email to B'", directed = TRUE)
-p1 + p2
+#| fig-width: 5.5
+#| fig-height: 7
+p1 <- plot_tie_type(nodes_2, edges_rec, "Asymmetric: Reciprocal Dyad", "e.g., 'A likes B' & 'B likes A'", directed = TRUE, node_size = 24, text_size = 9)
+p2 <- plot_tie_type(nodes_2, edges_nonrec, "Asymmetric: Non-Reciprocal Dyad", "e.g., 'A sends email to B'", directed = TRUE, node_size = 24, text_size = 9)
+p1 / p2
 ```
 :::
 
@@ -321,8 +326,8 @@ edges_mult <- data.frame(
 gr_mult <- tbl_graph(nodes = nodes_mult, edges = edges_mult, directed = TRUE)
 ggraph(gr_mult, layout = "manual", x = x, y = y) +
   geom_edge_parallel(aes(color = type, linetype = type),
-                     arrow = arrow(length = unit(2.5, 'mm'), type = "closed"),
-                     start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm'),
+                     arrow = arrow(length = unit(3, 'mm'), type = "closed"),
+                     start_cap = circle(9, 'mm'), end_cap = circle(9, 'mm'),
                      sep = unit(3.0, 'mm'), edge_width = 1.0) +
   scale_edge_color_manual(values = c(
     "Coworker" = "#7f8c8d",
@@ -336,7 +341,7 @@ ggraph(gr_mult, layout = "manual", x = x, y = y) +
     "Friendship" = "dotdash",
     "Advice" = "dashed"
   )) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
   theme_graph() + 
   coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.5, 2.5), clip = "off")
@@ -421,15 +426,15 @@ gr1 <- create_empty(2, directed = FALSE) %>% mutate(name = c("A", "B"))
 gr2 <- create_empty(2, directed = FALSE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
 
 p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
   theme_graph() + ggtitle("Disconnected (Size Zero)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
 
 p2 <- ggraph(gr2, layout = 'linear') +
-  geom_edge_link(color = "#2c3e50", width = 1.25, start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm')) +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
+  geom_edge_link(color = "#2c3e50", width = 1.25, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
   theme_graph() + ggtitle("Connected (Size One)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
 
@@ -466,26 +471,26 @@ gr2 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = 1, to =
 gr3 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = c(1, 2), to = c(2, 1))) %>% mutate(name = c("E", "F"))
 
 p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50") +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "#2c3e50") +
   theme_graph() + ggtitle("Null (Disconnected)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
 
 p2 <- ggraph(gr2, layout = 'linear') +
   geom_edge_link(color = "#2c3e50", edge_width = 1,
-                  arrow = arrow(length = unit(3, 'mm'), type = "closed"), 
-                  start_cap = circle(5, 'mm'), end_cap = circle(5, 'mm')) +
-  geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50") +
+                  arrow = arrow(length = unit(4, 'mm'), type = "closed"), 
+                  start_cap = circle(7, 'mm'), end_cap = circle(7, 'mm')) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "#2c3e50") +
   theme_graph() + ggtitle("Asymmetric (Non-reciprocal)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
 
 p3 <- ggraph(gr3, layout = 'linear') +
   geom_edge_parallel(color = "#2c3e50", edge_width = 1,
-                  arrow = arrow(length = unit(3, 'mm'), type = "closed"), 
-                  start_cap = circle(5, 'mm'), end_cap = circle(5, 'mm'), sep = unit(4, 'mm')) +
-  geom_node_point(size = 12, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 5, fontface = "bold", color = "#2c3e50") +
+                  arrow = arrow(length = unit(4, 'mm'), type = "closed"), 
+                  start_cap = circle(7, 'mm'), end_cap = circle(7, 'mm'), sep = unit(5, 'mm')) +
+  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "#2c3e50") +
   theme_graph() + ggtitle("Mutual (Reciprocal)") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
 
@@ -533,17 +538,17 @@ gr1 <- create_empty(2, directed = TRUE) %>% mutate(name = c("A", "B"))
 gr2 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
 
 p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
   theme_graph() + ggtitle("Disconnected") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
   theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
 
 p2 <- ggraph(gr2, layout = 'linear') +
   geom_edge_link(color = "#2c3e50", edge_width = 1.25,
-                  arrow = arrow(length = unit(4, 'mm'), type = "closed"), 
-                  start_cap = circle(6, 'mm'), end_cap = circle(6, 'mm')) +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
+                  arrow = arrow(length = unit(5, 'mm'), type = "closed"), 
+                  start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
   theme_graph() + ggtitle("Non-Reciprocal") + coord_cartesian(clip = "off") +
   theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
 
@@ -592,8 +597,8 @@ p1 / p2
 #| fig-height: 5.5
 gr <- create_empty(3, directed = FALSE) %>% mutate(name = toupper(letters[1:3]))
 p3_ex <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-    geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-    geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "#2c3e50") +
+    geom_node_point(size = 25, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+    geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "#2c3e50") +
     theme_graph() + coord_cartesian(clip = "off")
 p3_ex
 ```
@@ -697,10 +702,10 @@ p3_ex
 #| fig-height: 5.5
 #| fig-width: 11
 
-    p1 <- plot_tr(data.frame(), "1. 003")
-    p2 <- plot_tr(data.frame(from=1, to=2), "2. 012")
-    p3 <- plot_tr(data.frame(from=c(1,2), to=c(2,3)), "3. 021C")
-    p4 <- plot_tr(data.frame(from=c(1,1), to=c(2,3)), "4. 021D")
+    p1 <- plot_tr(data.frame(), "1. 003", node_size = 20, text_size = 8)
+    p2 <- plot_tr(data.frame(from=1, to=2), "2. 012", node_size = 20, text_size = 8)
+    p3 <- plot_tr(data.frame(from=c(1,2), to=c(2,3)), "3. 021C", node_size = 20, text_size = 8)
+    p4 <- plot_tr(data.frame(from=c(1,1), to=c(2,3)), "4. 021D", node_size = 20, text_size = 8)
     
     p1 + p2 + p3 + p4 + plot_layout(nrow = 1)
 ```

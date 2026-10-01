@@ -460,7 +460,6 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 ::: {.incremental}
 - The **maximum size** of a simple graph of order $n$ is the number of edges in a **complete graph** (where every node is connected to every other node).
 - Undirected: $Max(E) = \frac{n(n - 1)}{2}$
-- Directed: $Max(E) = n(n - 1)$
 :::
 
 ---
@@ -524,8 +523,14 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
-  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+gr_complete7 <- tbl_graph(
+  nodes = data.frame(name = LETTERS[1:7]),
+  edges = setNames(as.data.frame(t(combn(7, 2))), c("from", "to")),
+  directed = FALSE
+)
+
+ggraph(gr_complete7, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1) +
   geom_node_point(size = 22, color = "skyblue") +
   geom_node_text(aes(label = name), color = "black", size = 6) +
   scale_x_continuous(expand = expansion(mult = 0.15)) +
@@ -547,17 +552,8 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 - It is a value between 0 (completely empty) and 1 (complete graph).
 - **Undirected Graph**:
   $$d = \frac{2m}{n(n-1)}$$
-:::
-
----
-
-## Graph Density: Interpretation
-
-::: {.incremental}
-- **Connection Probability**:
-  - Density is the probability that any two randomly chosen nodes are connected.
-- **Network Resilience**:
-  - Denser networks are generally more resilient and less vulnerable to breakdowns when key nodes are removed.
+- **Connection Probability**: Density is the probability that any two randomly chosen nodes are connected.
+- **Network Resilience**: Denser networks are generally more resilient and less vulnerable to breakdowns when key nodes are removed.
 :::
 
 ---
@@ -572,7 +568,9 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
   - **Order** ($n$): 7 nodes
   - **Size** ($m$): 7 edges
   - **Maximum possible edges**:
-    $$Max(E) = \frac{7 \times 6}{2} = 21$$
+    $$Max(E) = \frac{n(n-1)}{2}$$
+    $$= \frac{7 \times (7-1)}{2} = \frac{7 \times 6}{2}$$
+    $$= \frac{42}{2} = 21$$
 :::
 :::
 
@@ -607,9 +605,12 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 - **Observed edges** ($m$): 7 (shown on the right)
 - **Maximum possible edges**: 21
 - **Density Formula**:
-  $$d = \frac{m}{Max(E)} = \frac{7}{21} \approx 0.333$$
+  $$d = \frac{m}{Max(E)}$$
+  $$= \frac{7}{21}$$
+  $$\approx 0.333$$
 - **Interpretation**:
   - Exactly **33.3%** of all possible undirected ties are present in this network.
+  - Equivalently, two randomly chosen nodes have a **33.3%** probability of being connected.
 :::
 :::
 
@@ -787,46 +788,6 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 
 ---
 
-## Graphical vs. Non-Graphical Sequences
-
-::: {.incremental}
-- A sequence of non-negative integers is **graphical** if there exists at least one simple, undirected graph (no loops, no multiple edges) that has it as its degree sequence.
-- Otherwise, the sequence is **non-graphical**—no such simple graph can possibly exist in the real world.
-- Why can't certain sequences exist? 
-  - They violate core mathematical rules of graph structure!
-:::
-
----
-
-## Two Quick Tests for Graphicality
-
-Before using complex algorithms, we can apply two fast screening tests:
-
-::: {.incremental}
-1. **The Even Sum Rule (Handshake Lemma)**:
-   - The sum of degrees must be **even**: $\sum k_i = 2m$.
-   - *If the sum of a sequence is odd, it is automatically non-graphical!*
-2. **The Maximum Degree Bound**:
-   - In a simple graph of order $n$, no node can have a degree larger than $n-1$.
-   - *If any degree in the sequence exceeds $n-1$, it is automatically non-graphical!*
-:::
-
----
-
-## Graphicality: Concrete Examples
-
-::: {.incremental}
-- **Graphical Sequence**: $\mathbf{d} = (4, 3, 3, 2, 2, 1, 1)$ with $n = 7$
-  - Sum is $16$ (even). Max degree is $4 \le 6$.
-  - A real simple graph can easily be constructed with these degrees.
-- **Non-Graphical Sequence (Odd Sum Violation)**: $\mathbf{d} = (4, 3, 3, 3, 2, 1, 1)$ with $n = 7$
-  - Sum is $17$ (odd). Violates Handshake Lemma. 
-  - *No simple graph can ever have this sequence.*
-- **Non-Graphical Sequence (Degree Bound Violation)**: $\mathbf{d} = (7, 2, 2, 1)$ with $n = 4$
-  - Max degree is $7$, which is greater than $n-1 = 3$.
-  - *A node in a 4-person group cannot have 7 unique friends!*
-:::
-
 ## Average Degree
 
 :::: {.columns align=center}
@@ -839,6 +800,11 @@ Before using complex algorithms, we can apply two fast screening tests:
   
 - It represents the expected degree of a randomly chosen node.
 - It is also directly related to density, which we will derive on the next slides!
+- **Calculation for the graph on the right**:
+  - Degrees: $k_A=1, k_B=3, k_C=3, k_D=2, k_E=2, k_F=2, k_G=1$
+  $$\bar{k} = \frac{\sum k_i}{n}$$
+  $$= \frac{1+3+3+2+2+2+1}{7}$$
+  $$= \frac{14}{7} = 2.0$$
 :::
 :::
 
@@ -872,6 +838,11 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
   $$d = \frac{2m}{n(n-1)}$$
 - We can rewrite this by pulling out the average degree term ($\bar{k} = \frac{2m}{n}$):
   $$d = \left(\frac{2m}{n}\right) \times \frac{1}{n-1} = \bar{k} \times \frac{1}{n-1} = \frac{\bar{k}}{n-1} \qquad \iff \qquad \bar{k} = d(n-1)$$
+- **Numerical example** (using our graph: $n = 7$, $\bar{k} = 2.0$):
+  $$d = \frac{\bar{k}}{n-1}$$
+  $$= \frac{2.0}{7-1} = \frac{2.0}{6}$$
+  $$\approx 0.333$$
+- This matches the density we computed directly ($d = 7/21 \approx 0.333$)!
 :::
 
 ---
@@ -885,6 +856,11 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
   - In a group of $n = 10$ people, each person can have at most $n-1 = 9$ connections.
   - If the average number of friends ($\bar{k}$) is $4.5$, then the density of friendship is:
     $$d = \frac{4.5}{9} = 0.50 \quad (50\%)$$
+- **Cross-Check with Our Graph** ($n = 7$, $\bar{k} = 2.0$):
+  $$d = \frac{\bar{k}}{n-1}$$
+  $$= \frac{2.0}{7-1} = \frac{2.0}{6}$$
+  $$\approx 0.333$$
+  - Matches the density we computed directly ($d = 7/21 \approx 0.333$)!
 - **Directed Case**:
   - The exact same identity holds! Since $d^d = \frac{m}{n(n-1)}$ and $\bar{k}$ is $\frac{m}{n}$, we get:
     $$d^d = \frac{\bar{k}}{n-1}$$
@@ -1010,7 +986,8 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 - **Degree Variance** ($\sigma^2_k$):
   $$\sigma^2_k = \frac{\sum (k_i - \bar{k})^2}{n}$$
 - **Variance Calculation**:
-  $$\sigma^2_k = \frac{3 \times (2-2)^2 + 2 \times (3-2)^2 + 2 \times (1-2)^2}{7} = \frac{4}{7} \approx 0.571$$
+  $$\sigma^2_k = \frac{3 \times (2-2)^2 + 2 \times (3-2)^2 + 2 \times (1-2)^2}{7}$$
+  $$= \frac{4}{7} \approx 0.571$$
 :::
 :::
 
@@ -1189,29 +1166,44 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 
 ---
 
-## Friendship Paradox: Node Calculations (A-D)
+## Friendship Paradox: Node Calculations
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
-- For the undirected graph shown previously (average degree $\bar{k} = 2.0$):
+- For the undirected graph shown on the right (average degree $\bar{k} = 2.0$):
   - **Node A** (neighbor C): $\bar{k}_{nn(A)} = \frac{k_C}{1} = \frac{3}{1} = 3.0$
   - **Node B** (neighbors C, E, F): $\bar{k}_{nn(B)} = \frac{k_C + k_E + k_F}{3} = \frac{3 + 2 + 2}{3} \approx 2.33$
   - **Node C** (neighbors A, D, B): $\bar{k}_{nn(C)} = \frac{k_A + k_D + k_B}{3} = \frac{1 + 2 + 3}{3} = 2.0$
   - **Node D** (neighbors C, G): $\bar{k}_{nn(D)} = \frac{k_C + k_G}{2} = \frac{3 + 1}{2} = 2.0$
-:::
-
----
-
-## Friendship Paradox: Node Calculations (E-G)
-
-::: {.incremental}
-- Continuing calculations for the remaining nodes:
   - **Node E** (neighbors B, F): $\bar{k}_{nn(E)} = \frac{k_B + k_F}{2} = \frac{3 + 2}{2} = 2.5$
   - **Node F** (neighbors E, B): $\bar{k}_{nn(F)} = \frac{k_E + k_B}{2} = \frac{2 + 3}{2} = 2.5$
   - **Node G** (neighbor D): $\bar{k}_{nn(G)} = \frac{k_D}{1} = \frac{2}{1} = 2.0$
 - **Summary of average neighbor degrees**:
   - $\bar{k}_{nn} = (3.0, 2.33, 2.0, 2.0, 2.5, 2.5, 2.0)$
 :::
+:::
 
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -1224,4 +1216,50 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
   $$\text{Mean}(\bar{k}_{nn}) = \frac{3.0 + 2.33 + 2.0 + 2.0 + 2.5 + 2.5 + 2.0}{7} \approx 2.33$$
 - **Demonstrating the Paradox**:
   - Average degree of nodes' neighbors ($\approx 2.33$) is **greater** than the average degree of nodes ($\bar{k} = 2.0$).
+:::
+
+---
+
+# Bonus Material: Graphicality
+
+---
+
+## Graphical vs. Non-Graphical Sequences
+
+::: {.incremental}
+- A sequence of non-negative integers is **graphical** if there exists at least one simple, undirected graph (no loops, no multiple edges) that has it as its degree sequence.
+- Otherwise, the sequence is **non-graphical**—no such simple graph can possibly exist in the real world.
+- Why can't certain sequences exist? 
+  - They violate core mathematical rules of graph structure!
+:::
+
+---
+
+## Two Quick Tests for Graphicality
+
+Before using complex algorithms, we can apply two fast screening tests:
+
+::: {.incremental}
+1. **The Even Sum Rule (Handshake Lemma)**:
+   - The sum of degrees must be **even**: $\sum k_i = 2m$.
+   - *If the sum of a sequence is odd, it is automatically non-graphical!*
+2. **The Maximum Degree Bound**:
+   - In a simple graph of order $n$, no node can have a degree larger than $n-1$.
+   - *If any degree in the sequence exceeds $n-1$, it is automatically non-graphical!*
+:::
+
+---
+
+## Graphicality: Concrete Examples
+
+::: {.incremental}
+- **Graphical Sequence**: $\mathbf{d} = (4, 3, 3, 2, 2, 1, 1)$ with $n = 7$
+  - Sum is $16$ (even). Max degree is $4 \le 6$.
+  - A real simple graph can easily be constructed with these degrees.
+- **Non-Graphical Sequence (Odd Sum Violation)**: $\mathbf{d} = (4, 3, 3, 3, 2, 1, 1)$ with $n = 7$
+  - Sum is $17$ (odd). Violates Handshake Lemma. 
+  - *No simple graph can ever have this sequence.*
+- **Non-Graphical Sequence (Degree Bound Violation)**: $\mathbf{d} = (7, 2, 2, 1)$ with $n = 4$
+  - Max degree is $7$, which is greater than $n-1 = 3$.
+  - *A node in a 4-person group cannot have 7 unique friends!*
 :::
