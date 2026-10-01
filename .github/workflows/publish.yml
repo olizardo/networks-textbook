@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -49,12 +51,40 @@ jobs:
         run: |
           quarto render
 
+      - name: Determine changed slide decks
+        id: changed-slides
+        run: |
+          ZERO_SHA="0000000000000000000000000000000000000000"
+          if [ "${{ github.event.before }}" != "$ZERO_SHA" ] && git cat-file -e "${{ github.event.before }}" 2>/dev/null; then
+            CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- 'slides/*.qmd')
+          else
+            # No usable base commit (first push, force-push, etc.) - render everything to be safe.
+            CHANGED=$(git ls-files 'slides/*.qmd')
+          fi
+          echo "Changed/rendered slide decks:"
+          echo "$CHANGED"
+          {
+            echo "files<<SLIDES_EOF"
+            echo "$CHANGED"
+            echo "SLIDES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Render Slides
         run: |
-          for f in slides/*.qmd; do
-            echo "Rendering slide deck: $f"
-            quarto render "$f"
-          done
+          FILES="${{ steps.changed-slides.outputs.files }}"
+          if [ -z "$FILES" ]; then
+            echo "No slide .qmd files changed; skipping slide rendering."
+          else
+            echo "$FILES" | while IFS= read -r f; do
+              [ -n "$f" ] || continue
+              echo "Rendering changed slide deck: $f"
+              quarto render "$f"
+            done
+          fi
+
+          # Copy sources plus any freshly rendered HTML/assets from the loop
+          # above. Unchanged decks have no local HTML (gitignored) and simply
+          # fall through to the keep_files behavior on deploy below.
           mkdir -p _sites/slides
           cp -r slides/* _sites/slides/
 
@@ -63,3 +93,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_sites
+          # Preserve previously-deployed slide decks that weren't re-rendered
+          # this run (since only changed decks are rebuilt, not all of them).
+          keep_files: true
