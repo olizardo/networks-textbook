@@ -41,8 +41,30 @@ jobs:
           use-public-rspm: true
 
       - name: Install R package dependencies
-        run: |
-          Rscript -e "install.packages(c('ggraph', 'tidygraph', 'igraph', 'kableExtra', 'signnet', 'dplyr', 'colorspace', 'patchwork', 'expm', 'DiagrammeR', 'corrplot', 'factoextra', 'lsa', 'sna', 'conflicted'))"
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          # No DESCRIPTION file in this project, so the package set is listed
+          # explicitly. pak resolves and caches these; the cache key is
+          # derived from this list, the R version, and the OS, so unrelated
+          # commits restore the library instead of reinstalling it.
+          packages: |
+            any::ggraph
+            any::tidygraph
+            any::igraph
+            any::kableExtra
+            any::signnet
+            any::dplyr
+            any::colorspace
+            any::patchwork
+            any::expm
+            any::DiagrammeR
+            any::corrplot
+            any::factoextra
+            any::lsa
+            any::sna
+            any::conflicted
+          cache: true
+          cache-version: 1
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
