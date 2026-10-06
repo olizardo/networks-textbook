@@ -122,7 +122,9 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/graph-theory.qmd` | Graph Theory |
 | `slides/graph-metrics-undirected.qmd` | Undirected Graph Metrics |
 | `slides/graph-metrics-directed.qmd` | Directed Graph Metrics |
-| `slides/graph-connectivity.qmd` | Graph Theory: Paths & Connectivity |
+| `slides/graph-paths-walks.qmd` | Graph Theory: Paths, Walks & Directed Connections |
+| `slides/graph-connectivity.qmd` | Graph Theory: Connectivity & Components |
+| `slides/graph-trees.qmd` | Graph Theory: Trees, Forests & Efficiency |
 | `slides/matrix-intro.qmd` | Networks, Graphs, and Matrices |
 | `slides/matrix-operations.qmd` | Matrix Algebra in Social Networks |
 | `slides/matrix-advanced.qmd` | Advanced Network Matrices |
