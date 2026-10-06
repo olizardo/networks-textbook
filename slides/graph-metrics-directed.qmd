@@ -131,16 +131,7 @@ gr_ties |>
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dir <- tbl_graph(
-  nodes = data.frame(name = c("A", "B", "C", "D", "E", "G")),
-  edges = data.frame(
-    from = c(2, 2, 2, 5, 6, 1, 3, 1),
-    to   = c(1, 3, 4, 4, 4, 5, 6, 2)
-  ),
-  directed = TRUE
-)
-
-gr_dir |>
+gr_ties |>
   activate(nodes) |>
   mutate(
     highlight = case_when(
@@ -190,7 +181,7 @@ gr_dir |>
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dir |>
+gr_ties |>
   activate(nodes) |>
   mutate(
     highlight = case_when(
@@ -230,7 +221,7 @@ gr_dir |>
 ::: {.incremental}
 - A node appears in both neighborhoods only if there is a **reciprocal** (mutual) tie.
 - Example for Node **B** (in tomato):
-  - In-Neighborhood: $N^{in}(B) = \{A\}$
+  - In-Neighborhood: $N^{in}(B) = \{A, D\}$
   - Out-Neighborhood: $N^{out}(B) = \{A, C, D\}$
 :::
 :::
@@ -241,7 +232,7 @@ gr_dir |>
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dir |>
+gr_ties |>
   activate(nodes) |>
   mutate(
     highlight = case_when(
@@ -282,9 +273,9 @@ gr_dir |>
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- Since there is a reciprocal tie $A \leftrightarrow B$, node **A** (in gold) belongs to both sets.
+- Since there are reciprocal ties $A \leftrightarrow B$ and $B \leftrightarrow D$, nodes **A** and **D** (in gold) belong to both sets.
 - Therefore, the overlap is the intersection of these two neighborhoods:
-  $$N^{in}(B) \cap N^{out}(B) = \{A\}$$
+  $$N^{in}(B) \cap N^{out}(B) = \{A, D\}$$
 :::
 :::
 
@@ -294,12 +285,12 @@ gr_dir |>
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dir |>
+gr_ties |>
   activate(nodes) |>
   mutate(
     highlight = case_when(
       name == "B" ~ "focal",
-      name == "A" ~ "neighbor",
+      name %in% c("A", "D") ~ "neighbor",
       TRUE ~ "other"
     )
   ) |>
@@ -336,7 +327,7 @@ gr_dir |>
 - **In-Neighborhood Intersection**: Common source nodes pointing to both $u$ and $v$:
   - $N^{in}(D) \cap N^{in}(A) = \{B\}$ (Node $B$ points to both $D$ and $A$)
 - **Out-Neighborhood Intersection**: Common destination nodes that both $u$ and $v$ point to:
-  - $N^{out}(B) \cap N^{out}(E) = \{D\}$ (Both $B$ and $E$ point to $D$)
+  - $N^{out}(B) \cap N^{out}(E) = \{C, D\}$ (Both $B$ and $E$ point to $C$ and $D$)
 :::
 
 ---
@@ -349,9 +340,9 @@ gr_dir |>
 ::: {.incremental}
 - Let's visualize the **out-neighborhood intersection** of nodes **B** and **E** (in tomato):
   - $N^{out}(B) = \{A, C, D\}$
-  - $N^{out}(E) = \{D\}$
-- They share one common destination node:
-  - $N^{out}(B) \cap N^{out}(E) = \{D\}$ (in gold)
+  - $N^{out}(E) = \{C, D\}$
+- They share two common destination nodes:
+  - $N^{out}(B) \cap N^{out}(E) = \{C, D\}$ (in gold)
 :::
 :::
 
@@ -361,12 +352,12 @@ gr_dir |>
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dir |>
+gr_ties |>
   activate(nodes) |>
   mutate(
     highlight = case_when(
       name %in% c("B", "E") ~ "focal",
-      name == "D" ~ "common",
+      name %in% c("C", "D") ~ "common",
       TRUE ~ "other"
     )
   ) |>
@@ -401,7 +392,7 @@ gr_dir |>
 ::: {.incremental}
 - Similarly, directed neighborhood unions combine the sets of neighbors:
 - **In-Neighborhood Union**: Nodes pointing to either $u$ or $v$:
-  - $N^{in}(D) \cup N^{in}(A) = \{B, E, G\}$
+  - $N^{in}(D) \cup N^{in}(A) = \{B, E, F, G\}$
 - **Out-Neighborhood Union**: Nodes that either $u$ or $v$ points to:
   - $N^{out}(B) \cup N^{out}(E) = \{A, C, D\}$
 :::
@@ -428,7 +419,7 @@ gr_dir |>
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dir |>
+gr_ties |>
   activate(nodes) |>
   mutate(
     highlight = case_when(
@@ -632,6 +623,293 @@ ggraph(gr_tree_slide, layout = "tree") +
 
 ---
 
+# Basic Graph Metrics
+
+---
+
+## Graph Order and Size
+
+::: {.incremental}
+- **Graph Order** ($n$):
+  - The number of nodes in the graph ($n = |V|$).
+  - Cardinality of the vertex set.
+- **Graph Size** ($m$):
+  - The number of edges in the graph ($m = |E|$).
+  - Cardinality of the edge set.
+:::
+
+---
+
+## Order and Size: Directed Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the directed graph on the right:
+  - **Node Set** ($V$): $\{A, B, C, D, E, F, G\}$
+  - **Edge Set** ($E$): $\{AB, AF, BA, BD,$ <br> $BC, DB, EC, ED,$ <br> $FA, GF, GD\}$
+  - **Graph Order** ($n = |V|$): **7** nodes
+  - **Graph Size** ($m = |E|$): **11** edges
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_ties, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Graph Maximum Size
+
+::: {.incremental}
+- The **maximum size** of a simple graph of order $n$ is the number of edges in a **complete graph** (where every node is connected to every other node).
+- Undirected: $Max(E) = \frac{n(n - 1)}{2}$
+- Directed: $Max(E) = n(n - 1)$
+:::
+
+---
+
+## Maximum Size: Directed Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the directed graph on the right:
+  - **Order** ($n$): 7 nodes
+- **Formula**:
+  $$Max(E) = n(n - 1)$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_ties, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Maximum Size: Directed Calculation
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Order** ($n$): 7 nodes (shown on the right)
+- **Maximum possible size** calculation:
+  $$Max(E) = 7 \times (7 - 1) = 7 \times 6 = 42\text{ edges}$$
+- **Interpretation**:
+  - A complete directed graph with 7 nodes would have exactly **42** directed arcs.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_ties, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Graph Density: Formulas (Directed)
+
+::: {.incremental}
+- **Density** ($d$) is the ratio of the observed number of edges ($m$) to the maximum possible number of edges.
+- It is a value between 0 (completely empty) and 1 (complete graph).
+
+- **Directed Graph**:
+  $$d = \frac{m}{n(n-1)}$$
+:::
+
+---
+
+## Graph Density: Interpretation
+
+::: {.incremental}
+- **Connection Probability**:
+  - Density is the probability that a randomly chosen *ordered* pair of distinct nodes is connected (i.e., that a tie points from the first node to the second).
+- **Network Resilience**:
+  - Denser networks are generally more resilient and less vulnerable to breakdowns when key nodes are removed.
+:::
+
+---
+
+## Density: Directed Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- Let's look at the directed graph on the right:
+  - **Order** ($n$): 7 nodes
+  - **Size** ($m$): 11 directed edges
+  - **Maximum possible edges**:
+    $$Max(E) = 7 \times 6 = 42$$
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_ties, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Density: Directed Calculation
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Observed directed edges** ($m$): 11 (shown on the right)
+- **Maximum possible edges**: 42
+- **Density Formula**:
+  $$d = \frac{m}{Max(E)} = \frac{11}{42} \approx 0.262$$
+- **Interpretation**:
+  - Exactly **26.2%** of all possible directed ties are present in this network.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_ties, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Comparing Density: Undirected vs. Directed
+
+::: {.incremental}
+- **Maximum Possible Edges**:
+  - Undirected: $Max(E)_{undir} = \frac{n(n - 1)}{2}$
+  - Directed: $Max(E)_{dir} = n(n - 1)$
+- **Density Scaling**:
+  - Because a directed graph can hold exactly twice as many edges as an undirected graph of the same order:
+    $d_{dir} = \frac{1}{2} d_{undir} \quad \text{for the same } m \text{ and } n$
+  - Directed density is always more "conservative"—it requires twice as many edges as an undirected graph to reach the same level of density!
+:::
+
+---
+
+## Density Scaling: A Direct Comparison
+
+| Metric | Undirected Graph | Directed Graph |
+|:-------|:----------------:|:--------------:|
+| **Formula** | $d = \frac{2m}{n(n-1)}$ | $d = \frac{m}{n(n-1)}$ |
+| **Max Edges ($n = 7$)** | $21$ edges | $42$ edges |
+| **If $m = 11$ edges** | $d \approx 0.524 \quad (52.4\%)$ | $d \approx 0.262 \quad (26.2\%)$ |
+| **If $m = 21$ edges** | $d = 1.000 \quad (100.0\%)$ | $d = 0.500 \quad (50.0\%)$ |
+
+: Density Comparison Matrix {#tbl-density-scaling}
+
+---
+
 # Node Degree
 
 ---
@@ -666,7 +944,7 @@ ggraph(gr_tree_slide, layout = "tree") +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dir |>
+gr_ties |>
   activate(nodes) |>
   mutate(
     highlight = case_when(
@@ -730,7 +1008,7 @@ gr_dir |>
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dir |>
+gr_ties |>
   activate(nodes) |>
   mutate(
     highlight = case_when(
@@ -762,8 +1040,6 @@ gr_dir |>
 :::
 
 ::::
-
----
 
 ---
 
@@ -835,280 +1111,15 @@ gr_ties |>
 
 ---
 
-# Basic Graph Metrics
-
----
-
-## Graph Order and Size
-
-::: {.incremental}
-- **Graph Order** ($n$):
-  - The number of nodes in the graph ($n = |V|$).
-  - Cardinality of the vertex set.
-- **Graph Size** ($m$):
-  - The number of edges in the graph ($m = |E|$).
-  - Cardinality of the edge set.
-:::
-
----
-
-## Order and Size: Directed Example
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- Let's look at the directed graph on the right:
-  - **Node Set** ($V$): $\{A, B, C, D, E, G\}$
-  - **Edge Set** ($E$): $\{BA, BC, BD, ED,$ <br> $GD, AE, CG, AB\}$
-  - **Graph Order** ($n = |V|$): **6** nodes
-  - **Graph Size** ($m = |E|$): **8** edges
-:::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
-  geom_edge_fan(
-    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-    start_cap = circle(5, 'mm'),
-    end_cap = circle(8.5, 'mm'),
-    color = "steelblue",
-    edge_width = 1.25
-  ) +
-  geom_node_point(size = 22, color = "skyblue") +
-  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
-  scale_x_continuous(expand = expansion(mult = 0.15)) +
-  scale_y_continuous(expand = expansion(mult = 0.15)) +
-  theme_graph() +
-  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
-  coord_cartesian(clip = "off")
-```
-:::
-
-::::
-
----
-
-## Graph Maximum Size
-
-::: {.incremental}
-- The **maximum size** of a simple graph of order $n$ is the number of edges in a **complete graph** (where every node is connected to every other node).
-- Undirected: $Max(E) = \frac{n(n - 1)}{2}$
-- Directed: $Max(E) = n(n - 1)$
-:::
-
----
-
-## Maximum Size: Directed Example
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- Let's look at the directed graph on the right:
-  - **Order** ($n$): 6 nodes
-- **Formula**:
-  $$Max(E) = n(n - 1)$$
-:::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
-  geom_edge_fan(
-    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-    start_cap = circle(5, 'mm'),
-    end_cap = circle(8.5, 'mm'),
-    color = "steelblue",
-    edge_width = 1.25
-  ) +
-  geom_node_point(size = 22, color = "skyblue") +
-  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
-  scale_x_continuous(expand = expansion(mult = 0.15)) +
-  scale_y_continuous(expand = expansion(mult = 0.15)) +
-  theme_graph() +
-  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
-  coord_cartesian(clip = "off")
-```
-:::
-
-::::
-
----
-
-## Maximum Size: Directed Calculation
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- **Order** ($n$): 6 nodes (shown on the right)
-- **Maximum possible size** calculation:
-  $$Max(E) = 6 \times (6 - 1) = 6 \times 5 = 30\text{ edges}$$
-- **Interpretation**:
-  - A complete directed graph with 6 nodes would have exactly **30** directed arcs.
-:::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
-  geom_edge_fan(
-    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-    start_cap = circle(5, 'mm'),
-    end_cap = circle(8.5, 'mm'),
-    color = "steelblue",
-    edge_width = 1.25
-  ) +
-  geom_node_point(size = 22, color = "skyblue") +
-  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
-  scale_x_continuous(expand = expansion(mult = 0.15)) +
-  scale_y_continuous(expand = expansion(mult = 0.15)) +
-  theme_graph() +
-  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
-  coord_cartesian(clip = "off")
-```
-:::
-
-::::
-
----
-
-## Graph Density: Formulas (Directed)
-
-::: {.incremental}
-- **Density** ($d$) is the ratio of the observed number of edges ($m$) to the maximum possible number of edges.
-- It is a value between 0 (completely empty) and 1 (complete graph).
-
-- **Directed Graph**:
-  $$d = \frac{m}{n(n-1)}$$
-:::
-
----
-
-## Graph Density: Interpretation
-
-::: {.incremental}
-- **Connection Probability**:
-  - Density is the probability that any two randomly chosen nodes are connected.
-- **Network Resilience**:
-  - Denser networks are generally more resilient and less vulnerable to breakdowns when key nodes are removed.
-:::
-
----
-
-## Density: Directed Example
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- Let's look at the directed graph on the right:
-  - **Order** ($n$): 6 nodes
-  - **Size** ($m$): 8 directed edges
-  - **Maximum possible edges**:
-    $$Max(E) = 6 \times 5 = 30$$
-:::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
-  geom_edge_fan(
-    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-    start_cap = circle(5, 'mm'),
-    end_cap = circle(8.5, 'mm'),
-    color = "steelblue",
-    edge_width = 1.25
-  ) +
-  geom_node_point(size = 22, color = "skyblue") +
-  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
-  scale_x_continuous(expand = expansion(mult = 0.15)) +
-  scale_y_continuous(expand = expansion(mult = 0.15)) +
-  theme_graph() +
-  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
-  coord_cartesian(clip = "off")
-```
-:::
-
-::::
-
----
-
-## Density: Directed Calculation
-
-:::: {.columns align=center}
-
-::: {.column width="60%"}
-::: {.incremental}
-- **Observed directed edges** ($m$): 8 (shown on the right)
-- **Maximum possible edges**: 30
-- **Density Formula**:
-  $$d = \frac{m}{Max(E)} = \frac{8}{30} \approx 0.267$$
-- **Interpretation**:
-  - Exactly **26.7%** of all possible directed ties are present in this network.
-:::
-:::
-
-::: {.column width="40%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
-  geom_edge_fan(
-    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
-    start_cap = circle(5, 'mm'),
-    end_cap = circle(8.5, 'mm'),
-    color = "steelblue",
-    edge_width = 1.25
-  ) +
-  geom_node_point(size = 22, color = "skyblue") +
-  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
-  scale_x_continuous(expand = expansion(mult = 0.15)) +
-  scale_y_continuous(expand = expansion(mult = 0.15)) +
-  theme_graph() +
-  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
-  coord_cartesian(clip = "off")
-```
-:::
-
-::::
-
-
----
-
-# Directed Graphs: Degree Metrics
-
----
-
 ## Directed Degree Sets & Sequences
 
 ::: {.incremental}
-- Directed graphs have two distinct degree sets (In-Degree set and Out-Degree set) and two distinct sequences.
-- In our 6-node directed graph:
-  - **In-Degree Set**: $\{1, 1, 1, 3, 1, 1\}$
-  - **In-Degree Sequence**: $(3, 1, 1, 1, 1, 1)$
-  - **Out-Degree Set**: $\{2, 3, 1, 0, 1, 1\}$
-  - **Out-Degree Sequence**: $(3, 2, 1, 1, 1, 0)$
+- Directed graphs have two distinct degree multisets and two distinct degree sequences—one of each for in-degree and out-degree.
+- In our 7-node directed graph:
+  - **In-Degree Multiset**: $\{2, 2, 2, 3, 0, 2, 0\}$
+  - **In-Degree Sequence**: $(3, 2, 2, 2, 2, 0, 0)$
+  - **Out-Degree Multiset**: $\{2, 3, 0, 1, 2, 1, 2\}$
+  - **Out-Degree Sequence**: $(3, 2, 2, 2, 1, 1, 0)$
 :::
 
 ---
@@ -1133,11 +1144,11 @@ ggraph(gr_dir, layout = 'circle') +
 
 ::: {.column width="65%"}
 ::: {.incremental}
-- For our 6-node directed graph (shown again on the right, $m = 8$):
-  - **In-Degrees**: $k^{in} = (1, 1, 1, 3, 1, 1)$
-    - $k^{in}_{max} = 3$ (Node D), $k^{in}_{min} = 1$
-    - Range $k^{in}_r = 3 - 1 = 2$
-    - Sum $\sum k^{in}_i = 1+1+1+3+1+1 = 8$
+- For our 7-node directed graph (shown again on the right, $m = 11$):
+  - **In-Degrees**: $k^{in} = (2, 2, 2, 3, 0, 2, 0)$
+    - $k^{in}_{max} = 3$ (Node D), $k^{in}_{min} = 0$ (Nodes E and G)
+    - Range $k^{in}_r = 3 - 0 = 3$
+    - Sum $\sum k^{in}_i = 2+2+2+3+0+2+0 = 11$
 :::
 :::
 
@@ -1147,7 +1158,7 @@ ggraph(gr_dir, layout = 'circle') +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
+ggraph(gr_ties, layout = 'circle') +
   geom_edge_fan(
     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
     start_cap = circle(5, 'mm'),
@@ -1175,11 +1186,11 @@ ggraph(gr_dir, layout = 'circle') +
 
 ::: {.column width="65%"}
 ::: {.incremental}
-- For our 6-node directed graph (shown again on the right, $m = 8$):
-  - **Out-Degrees**: $k^{out} = (2, 3, 1, 0, 1, 1)$
-    - $k^{out}_{max} = 3$ (Node B), $k^{out}_{min} = 0$ (Node D)
+- For our 7-node directed graph (shown again on the right, $m = 11$):
+  - **Out-Degrees**: $k^{out} = (2, 3, 0, 1, 2, 1, 2)$
+    - $k^{out}_{max} = 3$ (Node B), $k^{out}_{min} = 0$ (Node C)
     - Range $k^{out}_r = 3 - 0 = 3$
-    - Sum $\sum k^{out}_i = 2+3+1+0+1+1 = 8$
+    - Sum $\sum k^{out}_i = 2+3+0+1+2+1+2 = 11$
 :::
 :::
 
@@ -1189,7 +1200,7 @@ ggraph(gr_dir, layout = 'circle') +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
+ggraph(gr_ties, layout = 'circle') +
   geom_edge_fan(
     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
     start_cap = circle(5, 'mm'),
@@ -1224,36 +1235,20 @@ ggraph(gr_dir, layout = 'circle') +
 
 ---
 
-## Interpreting the Density-Degree Connection
-
-::: {.incremental}
-- **Density is Average Degree Scaled by Group Size**:
-  - The density of a directed graph is simply its average degree divided by the maximum possible connections of any single node ($n-1$).
-- **For Example**:
-  - In a group of $n = 10$ people, each person can have at most $n-1 = 9$ connections.
-  - If the average number of friends ($\bar{k}$) is $4.5$, then the density of friendship is:
-    $$d = \frac{4.5}{9} = 0.50 \quad (50\%)$$
-- **Directed Case**:
-  - Since $d^d = \frac{m}{n(n-1)}$ and $\bar{k}$ is $\frac{m}{n}$, we get the same identity:
-    $$d^d = \frac{\bar{k}}{n-1}$$
-:::
-
----
-
 ## Equivalence of Means: Example
 
 :::: {.columns align=center}
 
 ::: {.column width="65%"}
 ::: {.incremental}
-- In our 6-node directed graph:
-  - **Order** ($n$): 6 nodes
-  - **Size** ($m$): 8 directed edges
+- In our 7-node directed graph:
+  - **Order** ($n$): 7 nodes
+  - **Size** ($m$): 11 directed edges
 - **Mean In-Degree**:
-  $\bar{k}^{in} = \frac{1+1+1+3+1+1}{6} = \frac{8}{6} \approx 1.33$
+  $\bar{k}^{in} = \frac{2+2+2+3+0+2+0}{7} = \frac{11}{7} \approx 1.57$
 - **Mean Out-Degree**:
-  $\bar{k}^{out} = \frac{2+3+1+0+1+1}{6} = \frac{8}{6} \approx 1.33$
-- **They are equal!** ($\bar{k}^{in} = \bar{k}^{out} = 1.33 = m/n$)
+  $\bar{k}^{out} = \frac{2+3+0+1+2+1+2}{7} = \frac{11}{7} \approx 1.57$
+- **They are equal!** ($\bar{k}^{in} = \bar{k}^{out} = 1.57 = m/n$)
 :::
 :::
 
@@ -1263,7 +1258,7 @@ ggraph(gr_dir, layout = 'circle') +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
+ggraph(gr_ties, layout = 'circle') +
   geom_edge_fan(
     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
     start_cap = circle(5, 'mm'),
@@ -1282,6 +1277,22 @@ ggraph(gr_dir, layout = 'circle') +
 :::
 
 ::::
+
+---
+
+## Interpreting the Density-Degree Connection
+
+::: {.incremental}
+- **Density is Average Degree Scaled by Group Size**:
+  - The density of a directed graph is simply its average degree divided by the maximum possible connections of any single node ($n-1$).
+- **For Example**:
+  - In a group of $n = 10$ people, each person can have at most $n-1 = 9$ connections.
+  - If the average number of friends ($\bar{k}$) is $4.5$, then the density of friendship is:
+    $$d = \frac{4.5}{9} = 0.50 \quad (50\%)$$
+- **Directed Case**:
+  - Since $d^d = \frac{m}{n(n-1)}$ and $\bar{k}$ is $\frac{m}{n}$, we get the same identity:
+    $$d^d = \frac{\bar{k}}{n-1}$$
+:::
 
 ---
 
@@ -1305,14 +1316,14 @@ ggraph(gr_dir, layout = 'circle') +
 
 ::: {.column width="65%"}
 ::: {.incremental}
-- In our 6-node directed graph:
-  - Mean degree ($\bar{k}$) is $\approx 1.33$
+- In our 7-node directed graph:
+  - Mean degree ($\bar{k}$) is $\approx 1.57$
 - **In-Degree Variance** ($\sigma^2_{in}$):
-  - Values: 
-    - $k^{in} = (1, 1, 1, 3, 1, 1)$
-  - Calculation: 
-    - $\frac{5 \times (1-1.33)^2 + 1 \times (3-1.33)^2}{6} =$ 
-    - $\frac{5 \times 0.11 + 2.78}{6} \approx 0.556$
+  - Values:
+    - $k^{in} = (2, 2, 2, 3, 0, 2, 0)$
+  - Calculation:
+    - $\frac{4 \times (2-1.57)^2 + 1 \times (3-1.57)^2 + 2 \times (0-1.57)^2}{7} =$
+    - $\frac{4 \times 0.18 + 2.04 + 2 \times 2.47}{7} \approx 1.102$
 :::
 :::
 
@@ -1322,7 +1333,7 @@ ggraph(gr_dir, layout = 'circle') +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
+ggraph(gr_ties, layout = 'circle') +
   geom_edge_fan(
     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
     start_cap = circle(5, 'mm'),
@@ -1350,14 +1361,14 @@ ggraph(gr_dir, layout = 'circle') +
 
 ::: {.column width="65%"}
 ::: {.incremental}
-- In our 6-node directed graph:
-  - Mean degree ($\bar{k}$) is $\approx 1.33$
+- In our 7-node directed graph:
+  - Mean degree ($\bar{k}$) is $\approx 1.57$
 - **Out-Degree Variance** ($\sigma^2_{out}$):
-  - Values: 
-    - $k^{out} = (2, 3, 1, 0, 1, 1)$
-  - Calculation: 
-    - $\frac{(2-1.33)^2 + (3-1.33)^2 + 3(1-1.33)^2 + (0-1.33)^2}{6} \approx 0.889$
-- Out-degree is **more heterogeneous** than in-degree in this network!
+  - Values:
+    - $k^{out} = (2, 3, 0, 1, 2, 1, 2)$
+  - Calculation:
+    - $\frac{3(2-1.57)^2 + (3-1.57)^2 + (0-1.57)^2 + 2(1-1.57)^2}{7} \approx 0.816$
+- In-degree is **more heterogeneous** than out-degree in this network!
 :::
 :::
 
@@ -1367,7 +1378,7 @@ ggraph(gr_dir, layout = 'circle') +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-ggraph(gr_dir, layout = 'circle') +
+ggraph(gr_ties, layout = 'circle') +
   geom_edge_fan(
     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
     start_cap = circle(5, 'mm'),
@@ -1386,30 +1397,3 @@ ggraph(gr_dir, layout = 'circle') +
 :::
 
 ::::
-
----
-
-## Comparing Density: Undirected vs. Directed
-
-::: {.incremental}
-- **Maximum Possible Edges**:
-  - Undirected: $Max(E)_{undir} = \frac{n(n - 1)}{2}$
-  - Directed: $Max(E)_{dir} = n(n - 1)$
-- **Density Scaling**:
-  - Because a directed graph can hold exactly twice as many edges as an undirected graph of the same order:
-    $d_{dir} = \frac{1}{2} d_{undir} \quad \text{for the same } m \text{ and } n$
-  - Directed density is always more "conservative"—it requires twice as many edges as an undirected graph to reach the same level of density!
-:::
-
----
-
-## Density Scaling: A Direct Comparison
-
-| Metric | Undirected Graph | Directed Graph |
-|:-------|:----------------:|:--------------:|
-| **Formula** | $d = \frac{2m}{n(n-1)}$ | $d = \frac{m}{n(n-1)}$ |
-| **Max Edges ($n = 6$)** | $15$ edges | $30$ edges |
-| **If $m = 8$ edges** | $d \approx 0.533 \quad (53.3\%)$ | $d \approx 0.267 \quad (26.7\%)$ |
-| **If $m = 15$ edges** | $d = 1.000 \quad (100.0\%)$ | $d = 0.500 \quad (50.0\%)$ |
-
-: Density Comparison Matrix {#tbl-density-scaling}

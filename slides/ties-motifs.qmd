@@ -25,16 +25,25 @@ library(patchwork)
 x_triad <- c(0, 2, 1)
 y_triad <- c(0, 0, 1.2)
 
+# Canonical triad orientations: the pivot node (A) sits on top for the
+# out-star (021D) and in-star (021U); 030T uses the classic vertical chain
+xy_top   <- list(x = c(1, 0, 2),   y = c(1.2, 0, 0))
+xy_chain <- list(x = c(1, 0.3, 1), y = c(1.2, 0.55, -0.05))
+
+# Coordinates for 2-node (dyad) drawings
+x <- c(1, 2)
+y <- c(1, 1)
+
 # Helper function to plot individual directed triads
-gr_c <- create_empty(3, directed = TRUE)
-plot_tr <- function(edges, title, node_size = 18, text_size = 7) {
-  g <- gr_c %>% mutate(name = toupper(letters[1:3]))
+plot_tr <- function(edges, title, node_size = 18, text_size = 7, title_color = "#2c3e50",
+                    x = x_triad, y = y_triad) {
+  g <- create_empty(3, directed = TRUE) %>% mutate(name = toupper(letters[1:3]))
   if (nrow(edges) > 0) {
     g <- g %>% bind_edges(edges)
   }
   cap_size <- node_size / 2
   arrow_len <- node_size / 4
-  p <- ggraph(g, layout = "manual", x = x_triad, y = y_triad) +
+  p <- ggraph(g, layout = "manual", x = x, y = y) +
     geom_edge_link(color = "#2c3e50", edge_width = 1.1,
                    arrow = arrow(length = unit(arrow_len, 'mm'), type = "closed"),
                    end_cap = circle(cap_size, 'mm'), start_cap = circle(cap_size, 'mm')) +
@@ -42,7 +51,7 @@ plot_tr <- function(edges, title, node_size = 18, text_size = 7) {
     geom_node_text(aes(label = name), size = text_size, fontface = "bold", color = "#2c3e50") +
     theme_graph() + ggtitle(title) + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
     theme(
-      plot.title = element_text(size = 10, face="bold", hjust=0.5, color = "#2c3e50"),
+      plot.title = element_text(size = 10, face="bold", hjust=0.5, color = title_color),
       plot.margin = margin(5, 5, 5, 5)
     )
   return(p)
@@ -93,6 +102,110 @@ plot_tie_type <- function(nodes, edges, title, subtitle, directed = TRUE, has_cr
   return(pBase)
 }
 
+# Helper: a single 2-node dyad panel
+plot_dyad <- function(edges = NULL, title = NULL, directed = TRUE,
+                      node_size = 18, text_size = 7, title_size = 10) {
+  g <- create_empty(2, directed = directed) %>% mutate(name = toupper(letters[1:2]))
+  if (!is.null(edges) && nrow(edges) > 0) {
+    g <- g %>% bind_edges(edges)
+  }
+  cap_size <- node_size / 2.5
+  p <- ggraph(g, layout = 'linear') +
+    geom_node_point(size = node_size, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
+    geom_node_text(aes(label = name), size = text_size, fontface = "bold", color = "#2c3e50") +
+    theme_graph() + coord_cartesian(xlim = c(0.25, 2.75), clip = "off") +
+    theme(plot.margin = margin(5, 5, 5, 5))
+  if (!is.null(edges) && nrow(edges) > 0) {
+    if (directed && nrow(edges) == 2) {
+      p <- p + geom_edge_parallel(color = "#2c3e50", edge_width = 1,
+                                  arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                                  start_cap = circle(cap_size, 'mm'),
+                                  end_cap = circle(cap_size, 'mm'),
+                                  sep = unit(5, 'mm'))
+    } else {
+      p <- p + geom_edge_link(color = "#2c3e50", edge_width = 1.1,
+                              arrow = if (directed) arrow(length = unit(4, 'mm'), type = "closed") else NULL,
+                              start_cap = circle(cap_size, 'mm'),
+                              end_cap = circle(cap_size, 'mm'))
+    }
+  }
+  if (!is.null(title)) {
+    p <- p + ggtitle(title) +
+      theme(plot.title = element_text(size = title_size, face = "bold", hjust = 0.5, color = "#2c3e50"))
+  }
+  p
+}
+
+# Helper: a single undirected triad panel
+plot_triad_u <- function(edges = NULL, title = NULL, node_size = 20, text_size = 8, title_size = 11) {
+  g <- create_empty(3, directed = FALSE) %>% mutate(name = toupper(letters[1:3]))
+  if (!is.null(edges) && nrow(edges) > 0) {
+    g <- g %>% bind_edges(edges)
+  }
+  p <- ggraph(g, layout = "manual", x = x_triad, y = y_triad) +
+    geom_edge_link(color = "#2c3e50", edge_width = 1.1, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
+    geom_node_point(size = node_size, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+    geom_node_text(aes(label = name), size = text_size, fontface = "bold", color = "#2c3e50") +
+    theme_graph() +
+    coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
+    theme(plot.margin = margin(5, 5, 5, 5))
+  if (!is.null(title)) {
+    p <- p + ggtitle(title) +
+      theme(plot.title = element_text(size = title_size, face = "bold", hjust = 0.5, color = "#2c3e50"))
+  }
+  p
+}
+
+# Marriage cascade: two kinship families merging via marriage
+fam_nodes <- data.frame(
+  name    = c("Mom", "Dad", "You", "Bro", "Mom", "Dad", "Riley", "Sis"),
+  x       = c(-0.5, 0.3, 0.6, -0.9, 2.7, 3.5, 2.4, 3.9),
+  y       = c(2.3, 2.3, 0.7, 1.2, 2.3, 2.3, 0.7, 1.2),
+  label_y = c(2.68, 2.68, 0.42, 0.92, 2.68, 2.68, 0.42, 0.92)
+)
+
+plot_cascade <- function(stage, title) {
+  extra <- switch(
+    stage,
+    data.frame(from = integer(), to = integer(), style = character()),
+    data.frame(from = 3, to = 7, style = "romance"),
+    data.frame(from = c(3, 1, 2, 5, 6, 4, 3),
+               to   = c(7, 7, 7, 3, 3, 7, 8),
+               style = c("marriage", "inlaw_dir", "inlaw_dir", "inlaw_dir",
+                         "inlaw_dir", "inlaw_sym", "inlaw_sym"))
+  )
+  edges <- bind_rows(
+    data.frame(from = c(1, 1, 2, 2, 5, 5, 6, 6),
+               to   = c(3, 4, 3, 4, 7, 8, 7, 8), style = "kin"),
+    extra
+  )
+  g <- tbl_graph(nodes = fam_nodes, edges = edges, directed = TRUE)
+  ggraph(g, layout = "manual", x = fam_nodes$x, y = fam_nodes$y) +
+    geom_edge_link(aes(filter = style == "kin"),
+                   color = "#2c3e50", edge_width = 1) +
+    geom_edge_link(aes(filter = style == "inlaw_sym"),
+                   color = "#c0392b", edge_width = 1, linetype = "dashed") +
+    geom_edge_link(aes(filter = style == "inlaw_dir"),
+                   color = "#c0392b", edge_width = 1, linetype = "dashed",
+                   arrow = arrow(length = unit(2.5, 'mm'), type = "closed"),
+                   end_cap = circle(5, 'mm'), start_cap = circle(5, 'mm')) +
+    geom_edge_link(aes(filter = style == "romance"),
+                   color = "#8e44ad", edge_width = 1, linetype = "dashed",
+                   arrow = arrow(length = unit(2.5, 'mm'), type = "closed"),
+                   end_cap = circle(5, 'mm'), start_cap = circle(5, 'mm')) +
+    geom_edge_link(aes(filter = style == "marriage"),
+                   color = "#c0392b", edge_width = 1.4) +
+    geom_node_point(size = 10, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
+    geom_node_text(aes(label = name, y = label_y), size = 4.5,
+                   fontface = "bold", color = "#2c3e50") +
+    theme_graph() + ggtitle(title) +
+    coord_cartesian(xlim = c(-1.4, 4.4), ylim = c(0.2, 2.9), clip = "off") +
+    theme(
+      plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"),
+      plot.margin = margin(5, 5, 5, 5)
+    )
+}
+
 # Define Nodes
 nodes_2 <- data.frame(name = c("A", "B"), x = c(1, 2), y = c(1, 1))
 
@@ -108,6 +221,18 @@ edges_anti <- data.frame(
   linetype = c("solid", "dashed")
 )
 ```
+
+## Today's Roadmap
+
+::: {.incremental}
+- Today's guiding principle: **the type of tie strictly controls which micro-structures are possible**.
+- **Part 1 — The Taxonomy of Ties**: how sociologists classify ties (similarities, social relations, interactions, flows), and how graph theory classifies them by directionality (symmetric, asymmetric, anti-symmetric).
+- **Part 2 — Dyads and Their Realizations**: the possible configurations of a pair of nodes under each tie type.
+- **Part 3 — Triads and Motifs**: scaling from pairs to triples — the triad census that underlies balance, brokerage, and hierarchy.
+- Keep one question in mind throughout: *what does this tie type allow two (or three) people to do?*
+:::
+
+---
 
 # Part 1: The Taxonomy of Ties
 
@@ -162,7 +287,7 @@ edges_anti <- data.frame(
   - **Symmetric Ties**: Inherently mutual and undirected ($AB \iff BA$).
   - **Asymmetric Ties**: Directional, where reciprocity is optional ($AB \implies$ optional $BA$).
   - **Anti-Symmetric Ties**: Directional, where reciprocity is forbidden ($AB \implies \neg BA$).
-- **The Link**: To represent a network, we must map our sociological tie types (e.g. boss-of, friend-of) onto these three graph-theoretic classes!
+- **The bridge**: To represent a network, we must map our sociological tie types (e.g. boss-of, friend-of) onto these three graph-theoretic classes!
 :::
 
 ---
@@ -209,8 +334,8 @@ plot_tie_type(nodes_2, edges_sym, "Symmetric Tie", "e.g., 'is sibling of'", dire
   - Formally: $AB \implies$ nothing about $BA$
 - **Representation**: Represented by **directed graphs** (digraphs).
 - **Structural Constraint**: Reciprocity is an **empirical event** (it may or may not occur), yielding three possible dyad configurations.
-- **Asymmetric Interactions**:
-  - *Interactions/sentiments are naturally asymmetric*:
+- **Asymmetric Relations**:
+  - *Note*: Asymmetric relations can be either **states** (sentiments like liking) or **events** (interactions like texting) — both are naturally asymmetric:
     - You can follow someone on Twitter, but they don't have to follow you back.
     - You can send a text to someone, but they don't have to respond.
     - You can seek advice from someone without them seeking advice from you.
@@ -292,11 +417,11 @@ plot_tie_type(nodes_2, edges_anti, "Anti-Symmetric Tie", "e.g., 'A is boss of B'
 ::: {.column width="40%"}
 ::: {.incremental}
 - **Four nodes** (diamond layout) connected by **four distinct relationship layers**:
-  - **Symmetric Coworker**: (grey dotted arrows).
-  - **Anti-Symmetric Supervisor-of**: (red solid arrows).
-  - **Asymmetric Advice-Seeking**: (purple dashed arrows).
-  - **Asymmetric/Mutual Friendship**: (green dot-dashed arrows).
-- *Multi-layered ties shape complex social dynamics (e.g. supervisors who are also friends).*
+  - **Symmetric Coworker**: links *every* pair of nodes — a fully connected baseline.
+  - **Anti-Symmetric Supervisor-of**
+  - **Asymmetric Advice-Seeking**
+  - **Asymmetric/Mutual Friendship**
+- *The friendship, advice, and supervisor layers are multiplex on top of this fully connected coworker baseline (e.g., supervisors who are also friends).*
 :::
 :::
 
@@ -311,40 +436,46 @@ nodes_mult <- data.frame(
   x = c(1, 0, 2, 1),
   y = c(2, 1, 1, 0)
 )
+edge_types <- c(
+  "Supervisor-of", "Friendship", "Friendship",
+  "Supervisor-of", "Advice",
+  "Coworker", "Advice",
+  "Friendship", "Friendship",
+  "Supervisor-of", "Coworker",
+  "Coworker", "Advice",
+  "Coworker", "Coworker", "Coworker"
+)
 edges_mult <- data.frame(
-  from = c(1, 1, 2,  1,  3,  2, 3, 2,  2, 4,  4,  3, 4,  1, 4, 4),
-  to   = c(2, 2, 1,  3,  1,  3, 2, 3,  4, 2,  3,  4, 3,  4, 1, 1),
-  type = c(
-    "Supervisor-of", "Friendship", "Friendship",
-    "Supervisor-of", "Advice",
-    "Coworker", "Coworker", "Advice",
-    "Friendship", "Friendship",
-    "Supervisor-of", "Coworker", "Coworker",
-    "Coworker", "Coworker", "Advice"
-  )
+  from = c(1, 1, 2,  1,  3,  2, 2,  2, 4,  4,  3,  1, 4,  2,  1, 4),
+  to   = c(2, 2, 1,  3,  1,  3, 3,  4, 2,  3,  4,  4, 1,  1,  3, 2),
+  type = edge_types,
+  # Coworker is symmetric: drawn as an undirected arc, no arrows
+  arrowed = edge_types != "Coworker"
 )
 gr_mult <- tbl_graph(nodes = nodes_mult, edges = edges_mult, directed = TRUE)
 ggraph(gr_mult, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(aes(color = type, linetype = type),
+  geom_edge_parallel(aes(filter = arrowed, color = type),
                      arrow = arrow(length = unit(3, 'mm'), type = "closed"),
                      start_cap = circle(9, 'mm'), end_cap = circle(9, 'mm'),
                      sep = unit(3.0, 'mm'), edge_width = 1.0) +
+  # Coworker ties run between node pairs that also carry arrowed ties in the
+  # same direction; curving them into arcs (and drawing them last) keeps them
+  # from being occluded by the arrowed edges
+  geom_edge_arc(aes(filter = !arrowed, color = type), strength = 0.25,
+                edge_width = 1.2) +
   scale_edge_color_manual(values = c(
     "Coworker" = "#7f8c8d",
     "Supervisor-of" = "#c0392b",
     "Friendship" = "#27ae60",
     "Advice" = "#8e44ad"
   )) +
-  scale_edge_linetype_manual(values = c(
-    "Coworker" = "dotted",
-    "Supervisor-of" = "solid",
-    "Friendship" = "dotdash",
-    "Advice" = "dashed"
-  )) +
   geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + 
-  coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.5, 2.5), clip = "off")
+  theme_graph() +
+  coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.5, 2.5), clip = "off") +
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10))
 ```
 :::
 
@@ -352,18 +483,34 @@ ggraph(gr_mult, layout = "manual", x = x, y = y) +
 
 ---
 
-## The Growth of Social Networks
+## The Growth of Social Networks: The Marriage Cascade
 
 ::: {.incremental}
 - Social networks are highly dynamic, growing and evolving over time.
 - A classic example of network growth is **the marriage cascade**:
-  1. A romantic tie (an asymmetric, non-kin relation) forms between two individuals from separate families: `You` $\rightarrow$ `Riley`.
-  2. This culminates in a marriage tie (a symmetric, kin relation): `You` $\leftrightarrow$ `Riley`.
-  3. This single event immediately triggers a cascade of new "in-law" ties:
-     - **Symmetric Sibling-in-Law**: between `You` $\leftrightarrow$ `Bro` and `Riley` $\leftrightarrow$ `Sis`.
-     - **Anti-Symmetric Parent-in-Law**: `Parent 1` $\rightarrow$ `Riley` and `Parent 2` $\rightarrow$ `You`.
-  4. This merges two previously separate, independent kinship trees into a single, cohesive, multiplex social network.
+  1. A **romantic tie** (asymmetric) forms between two people from separate families: `You` $\rightarrow$ `Riley`.
+  2. It solidifies into **marriage** (a symmetric kin tie): `You` $\leftrightarrow$ `Riley`.
+  3. The marriage triggers a cascade of new **in-law ties**:
+     - **Symmetric sibling-in-law** ties: `You` $\leftrightarrow$ `Sis` and `Bro` $\leftrightarrow$ `Riley`.
+     - **Anti-symmetric parent-in-law** ties: your parents $\rightarrow$ `Riley`, and Riley's parents $\rightarrow$ `You`.
+  4. Two previously separate kinship trees merge into a single **multiplex** network.
 :::
+
+---
+
+## The Marriage Cascade: A Visual Example
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 11
+#| fig-height: 3.8
+
+plot_cascade(1, "1. Two Separate Families") +
+  plot_cascade(2, "2. A Romantic Tie Forms") +
+  plot_cascade(3, "3. Marriage + In-Law Cascade") +
+  plot_layout(ncol = 3)
+```
 
 # Part 2: Dyads and Their Realizations
 
@@ -391,11 +538,7 @@ ggraph(gr_mult, layout = "manual", x = x, y = y) +
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr_dyad_base <- create_empty(2, directed = FALSE) %>% mutate(name = toupper(letters[1:2]))
-ggraph(gr_dyad_base, layout = 'linear') +
-  geom_node_point(size = 25, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + coord_cartesian(clip = "off")
+plot_dyad(directed = FALSE, node_size = 25, text_size = 10)
 ```
 :::
 
@@ -422,23 +565,10 @@ ggraph(gr_dyad_base, layout = 'linear') +
 #| fig-align: "center"
 #| fig-width: 6
 #| fig-height: 5.5
-gr1 <- create_empty(2, directed = FALSE) %>% mutate(name = c("A", "B"))
-gr2 <- create_empty(2, directed = FALSE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
-
-p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Disconnected (Size Zero)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p2 <- ggraph(gr2, layout = 'linear') +
-  geom_edge_link(color = "#2c3e50", width = 1.25, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
-  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Connected (Size One)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p1 / p2
+plot_dyad(NULL, "Disconnected (Size Zero)", directed = FALSE,
+          node_size = 20, text_size = 8, title_size = 12) /
+  plot_dyad(data.frame(from = 1, to = 2), "Connected (Size One)", directed = FALSE,
+            node_size = 20, text_size = 8, title_size = 12)
 ```
 :::
 
@@ -466,51 +596,13 @@ p1 / p2
 #| fig-align: "center"
 #| fig-width: 6
 #| fig-height: 5.5
-gr1 <- create_empty(2, directed = TRUE) %>% mutate(name = c("A", "B"))
-gr2 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
-gr3 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = c(1, 2), to = c(2, 1))) %>% mutate(name = c("E", "F"))
-
-p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Null (Disconnected)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p2 <- ggraph(gr2, layout = 'linear') +
-  geom_edge_link(color = "#2c3e50", edge_width = 1,
-                  arrow = arrow(length = unit(4, 'mm'), type = "closed"), 
-                  start_cap = circle(7, 'mm'), end_cap = circle(7, 'mm')) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Asymmetric (Non-reciprocal)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p3 <- ggraph(gr3, layout = 'linear') +
-  geom_edge_parallel(color = "#2c3e50", edge_width = 1,
-                  arrow = arrow(length = unit(4, 'mm'), type = "closed"), 
-                  start_cap = circle(7, 'mm'), end_cap = circle(7, 'mm'), sep = unit(5, 'mm')) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.25) +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Mutual (Reciprocal)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 10, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p1 / p2 / p3
+plot_dyad(NULL, "Null (Disconnected)") /
+  plot_dyad(data.frame(from = 1, to = 2), "Asymmetric (Non-reciprocal)") /
+  plot_dyad(data.frame(from = c(1, 2), to = c(2, 1)), "Mutual (Reciprocal)")
 ```
 :::
 
 ::::
-
----
-
-## Separating Tie Properties from Dyad Realizations
-
-::: {.incremental}
-- It is critical to keep the property of the **tie** separate from the property of the **dyad**:
-  - **Asymmetric Tie**: Describes the type of *relation* (directionality is allowed; reciprocity is optional).
-  - **Non-Reciprocal Dyad**: Describes a realized *configuration* of a pair of nodes where reciprocity failed to occur empirically.
-  - **Reciprocal Dyad**: Describes an empirical configuration composed of a *pair* of directed edges under an asymmetric relation.
-- Confusing "asymmetric tie" with "asymmetric dyad" is a common conceptual error!
-:::
 
 ---
 
@@ -534,29 +626,53 @@ p1 / p2 / p3
 #| fig-align: "center"
 #| fig-width: 6
 #| fig-height: 5.5
-gr1 <- create_empty(2, directed = TRUE) %>% mutate(name = c("A", "B"))
-gr2 <- create_empty(2, directed = TRUE) %>% bind_edges(data.frame(from = 1, to = 2)) %>% mutate(name = c("C", "D"))
-
-p1 <- ggraph(gr1, layout = 'linear') +
-  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Disconnected") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p2 <- ggraph(gr2, layout = 'linear') +
-  geom_edge_link(color = "#2c3e50", edge_width = 1.25,
-                  arrow = arrow(length = unit(5, 'mm'), type = "closed"), 
-                  start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
-  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-  theme_graph() + ggtitle("Non-Reciprocal") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"))
-
-p1 / p2
+plot_dyad(NULL, "Disconnected", node_size = 20, text_size = 8, title_size = 12) /
+  plot_dyad(data.frame(from = 1, to = 2), "Non-Reciprocal", node_size = 20, text_size = 8, title_size = 12)
 ```
 :::
 
 ::::
+
+---
+
+## Separating Tie Properties from Dyad Realizations
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- It is critical to keep the property of the **tie** separate from the property of the **dyad**:
+  - **Asymmetric Tie**: Describes the type of *relation* (directionality is allowed; reciprocity is optional).
+  - **Non-Reciprocal Dyad**: Describes a realized *configuration* of a pair of nodes where reciprocity failed to occur empirically.
+  - **Reciprocal Dyad**: Describes an empirical configuration composed of a *pair* of directed edges under an asymmetric relation.
+- Confusing "asymmetric tie" with "asymmetric dyad" is a common conceptual error!
+- With the dyad census complete for all three tie types, we are ready to scale up from pairs to **triads**.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 6
+#| fig-height: 5.5
+
+# One tie property (header), two realized dyad configurations (panels)
+plot_dyad(data.frame(from = 1, to = 2), "Non-Reciprocal Dyad",
+          node_size = 20, text_size = 8, title_size = 11) /
+  plot_dyad(data.frame(from = c(1, 2), to = c(2, 1)), "Reciprocal Dyad",
+            node_size = 20, text_size = 8, title_size = 11) +
+  plot_annotation(
+    title = "Tie Property: Asymmetric (reciprocity optional)",
+    theme = theme(plot.title = element_text(size = 13, face = "bold",
+                                            hjust = 0.5, color = "#2c3e50"))
+  )
+```
+:::
+
+::::
+
+---
 
 # Part 3: Triads and Motifs
 
@@ -595,12 +711,14 @@ p1 / p2
 #| fig-align: "center"
 #| fig-width: 5.5
 #| fig-height: 5.5
-gr <- create_empty(3, directed = FALSE) %>% mutate(name = toupper(letters[1:3]))
-p3_ex <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-    geom_node_point(size = 25, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-    geom_node_text(aes(label = name), size = 10, fontface = "bold", color = "#2c3e50") +
-    theme_graph() + coord_cartesian(clip = "off")
-p3_ex
+plot_triad_u(NULL, "Null", node_size = 16, text_size = 6, title_size = 10) +
+  plot_triad_u(data.frame(from = 1, to = 2), "Disconnected",
+               node_size = 16, text_size = 6, title_size = 10) +
+  plot_triad_u(data.frame(from = c(1, 2), to = c(2, 3)), "Open",
+               node_size = 16, text_size = 6, title_size = 10) +
+  plot_triad_u(data.frame(from = c(1, 2, 3), to = c(2, 3, 1)), "Closed",
+               node_size = 16, text_size = 6, title_size = 10) +
+  plot_layout(ncol = 2)
 ```
 :::
 
@@ -617,64 +735,57 @@ p3_ex
 #| fig-height: 5.5
 #| fig-width: 11
 
-    gr <- create_empty(3, directed = FALSE) %>% mutate(name = toupper(letters[1:3]))
-    p1 <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-        theme_graph() + ggtitle("Null") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
-    
-    gr <- create_empty(3, directed = FALSE) %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        mutate(name = toupper(letters[1:3]))
-    p2 <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-        geom_edge_link(color = "#2c3e50", width = 1.1, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
-        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-        theme_graph() + ggtitle("Disconnected") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
-
-    gr <- create_empty(3, directed = FALSE) %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 3)) %>%
-        mutate(name = toupper(letters[1:3]))
-    p3 <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-        geom_edge_link(color = "#2c3e50", width = 1.1, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
-        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-        theme_graph() + ggtitle("Open") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
-    
-    gr <- create_empty(3, directed = FALSE) %>% 
-        bind_edges(data.frame(from = 1, to = 2)) %>%
-        bind_edges(data.frame(from = 2, to = 3)) %>%
-        bind_edges(data.frame(from = 3, to = 1)) %>%
-        mutate(name = toupper(letters[1:3]))
-    p4 <- ggraph(gr, layout = "manual", x = x_triad, y = y_triad) +
-        geom_edge_link(color = "#2c3e50", width = 1.1, start_cap = circle(8, 'mm'), end_cap = circle(8, 'mm')) +
-        geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-        geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "#2c3e50") +
-        theme_graph() + ggtitle("Closed") + coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.2, 1.4), clip = "off") +
-        theme(plot.title = element_text(size = 11, face="bold", hjust=0.5, color = "#2c3e50"))
-    
-    p1 + p2 + p3 + p4 + plot_layout(nrow = 1)
+plot_triad_u(NULL, "Null") +
+  plot_triad_u(data.frame(from = 1, to = 2), "Disconnected") +
+  plot_triad_u(data.frame(from = c(1, 2), to = c(2, 3)), "Open") +
+  plot_triad_u(data.frame(from = c(1, 2, 3), to = c(2, 3, 1)), "Closed") +
+  plot_layout(nrow = 1)
 ```
 
 ---
 
 ## The Holland & Leinhardt (MAN) Labeling System
 
-- Triads are classified using the standard **Holland and Leinhardt** (1970) system.
+:::: {.columns align=center}
+
+::: {.column width="55%"}
+- Directed triads are classified using the standard Holland and Leinhardt (1970) system.
 - Labels are composed of **three digits** representing:
   - **M**: Number of **Mutual** (reciprocal) dyads.
   - **A**: Number of **Asymmetric** (non-reciprocal) dyads.
   - **N**: Number of **Null** (disconnected) dyads.
 - Since there are 3 node pairs, **M + A + N = 3** always.
-- A trailing letter distinguishes topologies with identical counts:
-  - **D** (Down): Arrows point down from a node, or into a mutual dyad.
-  - **U** (Up): Arrows point up to a node, or out from a mutual dyad.
-  - **C** (Cyclic / Path): Arrows form a path or a cycle.
-  - **T** (Transitive): Arrows form a transitive path.
+- A trailing letter distinguishes triads sharing identical M-A-N counts, based on how the **asymmetric arrows** are arranged:
+  - **D** (Down): an **out-star** — a single node sends both arrows ($021D$); when there is a mutual pair, the lone arrow points *into* it ($111D$).
+  - **U** (Up): an **in-star** — a single node receives both arrows ($021U$); when there is a mutual pair, the lone arrow points *out of* it ($111U$).
+  - **C** (Cyclic): arrows form a directed chain ($021C$) or a closed loop ($030C$).
+  - **T** (Transitive): arrows form a transitive hierarchy: $A \rightarrow B \rightarrow C$ with the shortcut $A \rightarrow C$ ($030T$).
+- Don't read "up"/"down" literally: the names come from Holland and Leinhardt's canonical drawings, and the arrows' direction on screen depends on how a triad happens to be drawn.
+- Keep these four letters in mind: they label every directed triad configuration in the slides that follow.
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.2
+#| fig-height: 5.2
+# Canonical orientations (xy_top, xy_chain defined in the setup chunk)
+
+pD <- plot_tr(data.frame(from = c(1, 1), to = c(2, 3)), "D: 021D (Down)",
+              node_size = 16, text_size = 6, x = xy_top$x, y = xy_top$y)
+pU <- plot_tr(data.frame(from = c(2, 3), to = c(1, 1)), "U: 021U (Up)",
+              node_size = 16, text_size = 6, x = xy_top$x, y = xy_top$y)
+pC <- plot_tr(data.frame(from = c(1, 2, 3), to = c(2, 3, 1)), "C: 030C (Cyclic)",
+              node_size = 16, text_size = 6)
+pT <- plot_tr(data.frame(from = c(1, 1, 2), to = c(2, 3, 3)), "T: 030T (Transitive)",
+              node_size = 16, text_size = 6, x = xy_chain$x, y = xy_chain$y)
+
+pD + pU + pC + pT + plot_layout(nrow = 2)
+```
+:::
+
+::::
 
 ---
 
@@ -683,48 +794,37 @@ p3_ex
 ::: {.incremental}
 - Because reciprocity is strictly forbidden, any triad containing a mutual connection is impossible.
 - This prunes the directed triad census from **16 down to exactly seven** allowed configurations:
-  1. **Null Triad** ($003$, panel 1): All three dyads are completely disconnected.
-  2. **One-tie Triad** ($012$, panel 2): Contains a single non-reciprocal directed tie.
-  3. **Directed Line** ($021C$, panel 3): Non-reciprocal ties form a directed path.
-  4. **Out-Star Triad** ($021D$, panel 4): A single node sends ties to both other nodes.
-  5. **In-Star Triad** ($021U$, panel 5): Both other nodes send ties to a single node.
-  6. **Cycle Triad** ($030C$, panel 6): A directed cycle of length three ($A \rightarrow B \rightarrow C \rightarrow A$).
-  7. **Transitive Hierarchy** ($030T$, panel 7): The classic transitive triad ($A \rightarrow B \rightarrow C$ and $A \rightarrow C$).
+  1. **Null Triad** ($003$): All three dyads are completely disconnected.
+  2. **One-tie Triad** ($012$): Contains a single non-reciprocal directed tie.
+  3. **Directed Line** ($021C$): Non-reciprocal ties form a directed path.
+  4. **Out-Star Triad** ($021D$): A single node sends ties to both other nodes.
+  5. **In-Star Triad** ($021U$): Both other nodes send ties to a single node.
+  6. **Cycle Triad** ($030C$): A directed cycle of length three ($A \rightarrow B \rightarrow C \rightarrow A$).
+  7. **Transitive Hierarchy** ($030T$): The classic transitive triad ($A \rightarrow B \rightarrow C$ and $A \rightarrow C$).
 :::
 
 ---
 
-## Anti-Symmetric Triads (Part 1)
+## Anti-Symmetric Triads
 
 ```{r}
-#| label: fig-antisym-triads-slides-1
+#| label: fig-antisym-triads
 #| fig-align: "center"
-#| fig-height: 5.5
+#| fig-height: 6.5
 #| fig-width: 11
 
-    p1 <- plot_tr(data.frame(), "1. 003", node_size = 20, text_size = 8)
-    p2 <- plot_tr(data.frame(from=1, to=2), "2. 012", node_size = 20, text_size = 8)
-    p3 <- plot_tr(data.frame(from=c(1,2), to=c(2,3)), "3. 021C", node_size = 20, text_size = 8)
-    p4 <- plot_tr(data.frame(from=c(1,1), to=c(2,3)), "4. 021D", node_size = 20, text_size = 8)
-    
-    p1 + p2 + p3 + p4 + plot_layout(nrow = 1)
-```
+p1 <- plot_tr(data.frame(), "1. 003", node_size = 20, text_size = 8)
+p2 <- plot_tr(data.frame(from = 1, to = 2), "2. 012", node_size = 20, text_size = 8)
+p3 <- plot_tr(data.frame(from = c(1, 2), to = c(2, 3)), "3. 021C", node_size = 20, text_size = 8)
+p4 <- plot_tr(data.frame(from = c(1, 1), to = c(2, 3)), "4. 021D",
+              node_size = 20, text_size = 8, x = xy_top$x, y = xy_top$y)
+p5 <- plot_tr(data.frame(from = c(2, 3), to = c(1, 1)), "5. 021U",
+              node_size = 20, text_size = 8, x = xy_top$x, y = xy_top$y)
+p6 <- plot_tr(data.frame(from = c(1, 2, 3), to = c(2, 3, 1)), "6. 030C", node_size = 20, text_size = 8)
+p7 <- plot_tr(data.frame(from = c(1, 1, 2), to = c(2, 3, 3)), "7. 030T",
+              node_size = 20, text_size = 8, x = xy_chain$x, y = xy_chain$y)
 
----
-
-## Anti-Symmetric Triads (Part 2)
-
-```{r}
-#| label: fig-antisym-triads-slides-2
-#| fig-align: "center"
-#| fig-height: 5.5
-#| fig-width: 11
-
-    p5 <- plot_tr(data.frame(from=c(2,3), to=c(1,1)), "5. 021U")
-    p6 <- plot_tr(data.frame(from=c(1,2,3), to=c(2,3,1)), "6. 030C")
-    p7 <- plot_tr(data.frame(from=c(1,1,2), to=c(2,3,3)), "7. 030T")
-    
-    p5 + p6 + p7 + plot_spacer() + plot_layout(nrow = 1)
+p1 + p2 + p3 + p4 + p5 + p6 + p7 + plot_spacer() + plot_layout(ncol = 4)
 ```
 
 ---
@@ -785,10 +885,10 @@ ggraph(gr_hierarchy, layout = "tree") +
 - When relations are asymmetric, reciprocity is allowed but optional.
 - Because each dyadic slot can take on any of the **three** MAN states, we can generate all **sixteen** directed triad configurations.
 - On the next slide, we show the **nine directed configurations** that require at least one **reciprocal (mutual) dyad** to exist:
-  - **Single Mutual**: $102$ (panel 1), $111D$ (panel 2), $111U$ (panel 3).
-  - **Double Mutual**: $201$ (panel 4).
-  - **Mutual-Mixed Closed**: $120C$ (panel 5), $120D$ (panel 6), $120U$ (panel 7).
-  - **Cohesive Closed**: $210$ (panel 8), $300$ (panel 9).
+  - **Single Mutual**: $102$, $111D$, $111U$.
+  - **Double Mutual**: $201$.
+  - **Mutual-Mixed Closed**: $120C$, $120D$, $120U$.
+  - **Cohesive Closed**: $210$, $300$.
 :::
 
 ---
@@ -844,41 +944,68 @@ ggraph(gr_hierarchy, layout = "tree") +
 
 ---
 
-## Triad Summary: Strictly Non-Reciprocal
+## The Full Directed Triad Census
 
-These 7 configurations contain **zero reciprocal (mutual) ties** (referenced in the 7-panel anti-symmetric figure):
+```{r}
+#| label: fig-triad-census
+#| fig-cap: "The 16 directed triad isomorphism classes. Titles in green are permitted under anti-symmetric relations (no mutual dyads); titles in red require at least one reciprocal (mutual) dyad."
+#| fig-cap-location: bottom
+#| fig-align: "center"
+#| fig-width: 11
+#| fig-height: 9
 
-* **0 connected dyads**:
-  - **003** (Null, Anti-Symmetric panel 1)
-* **1 connected dyad**:
-  - **012** (Non-reciprocal, Anti-Symmetric panel 2)
-* **2 connected dyads (Open)**:
-  - **021C** (Directed Line, Anti-Symmetric panel 3)
-  - **021D** (Out-Star, Anti-Symmetric panel 4)
-  - **021U** (In-Star, Anti-Symmetric panel 5)
-* **3 connected dyads (Closed)**:
-  - **030C** (Directed Cycle, Anti-Symmetric panel 6)
-  - **030T** (Transitive Hierarchy, Anti-Symmetric panel 7)
+triad_census <- list(
+  list("003 — Null", data.frame()),
+  list("012 — One Tie", data.frame(from = 1, to = 2)),
+  list("021C — Line", data.frame(from = c(1, 2), to = c(2, 3))),
+  list("021D — Out-Star", data.frame(from = c(1, 1), to = c(2, 3)), xy = xy_top),
+  list("021U — In-Star", data.frame(from = c(2, 3), to = c(1, 1)), xy = xy_top),
+  list("030C — Cycle", data.frame(from = c(1, 2, 3), to = c(2, 3, 1))),
+  list("030T — Transitive", data.frame(from = c(1, 1, 2), to = c(2, 3, 3)), xy = xy_chain),
+  list("102 — One Mutual", data.frame(from = c(1, 2), to = c(2, 1))),
+  list("111D — Mutual + In", data.frame(from = c(2, 1, 3), to = c(1, 2, 1))),
+  list("111U — Mutual + Out", data.frame(from = c(2, 1, 1), to = c(1, 2, 3))),
+  list("201 — Two Mutuals", data.frame(from = c(2, 1, 3, 2), to = c(1, 2, 2, 3))),
+  list("120C — Mutual + Cyclic", data.frame(from = c(1, 2, 2, 3), to = c(2, 1, 3, 1))),
+  list("120D — Mutual + Down", data.frame(from = c(1, 2, 3, 3), to = c(2, 1, 1, 2))),
+  list("120U — Mutual + Up", data.frame(from = c(1, 2, 1, 2), to = c(2, 1, 3, 3))),
+  list("210 — Two Mutuals + Tie", data.frame(from = c(2, 1, 3, 2, 1), to = c(1, 2, 2, 3, 3))),
+  list("300 — All Mutual", data.frame(from = c(2, 1, 3, 2, 1, 3), to = c(1, 2, 2, 3, 3, 1)))
+)
 
----
+panels <- lapply(seq_along(triad_census), function(i) {
+  color <- if (i <= 7) "#27ae60" else "#c0392b"
+  tc <- triad_census[[i]]
+  if (is.null(tc$xy)) {
+    plot_tr(tc[[2]], tc[[1]], node_size = 14, text_size = 5.5, title_color = color)
+  } else {
+    plot_tr(tc[[2]], tc[[1]], node_size = 14, text_size = 5.5, title_color = color,
+            x = tc$xy$x, y = tc$xy$y)
+  }
+})
 
-## Triad Summary: Requiring Reciprocal Ties
-
-These 9 configurations contain **at least one reciprocal (mutual) tie** (referenced in the 9-panel reciprocal figure):
-
-* **1 connected dyad**:
-  - **102** (Reciprocal, Reciprocal panel 1)
-* **2 connected dyads (Open)**:
-  - **111D** & **111U** (Mixed-reciprocity, Reciprocal panels 2 & 3)
-  - **201** (Double reciprocal, Reciprocal panel 4)
-* **3 connected dyads (Closed)**:
-  - **120C**, **120D**, & **120U** (Mixed closed, Reciprocal panels 5, 6, & 7)
-  - **210** (Double reciprocal, Reciprocal panel 8)
-  - **300** (Triple reciprocal, Reciprocal panel 9)
+Reduce(`+`, panels) + plot_layout(ncol = 4)
+```
 
 ---
 
 ## Conclusion & Core Takeaways
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 9
+#| fig-height: 2.8
+
+p_sym <- plot_triad_u(data.frame(from = c(1, 2, 3), to = c(2, 3, 1)),
+                      "Symmetric: 4 Triads", node_size = 14, text_size = 5.5, title_size = 10)
+p_antisym <- plot_tr(data.frame(from = c(1, 1, 2), to = c(2, 3, 3)),
+                     "Anti-Symmetric: 7 Triads", node_size = 14, text_size = 5.5)
+p_asym <- plot_tr(data.frame(from = c(2, 1, 3, 2, 1, 3), to = c(1, 2, 2, 3, 3, 1)),
+                  "Asymmetric: 16 Triads", node_size = 14, text_size = 5.5)
+
+p_sym + p_antisym + p_asym + plot_layout(nrow = 1)
+```
 
 ::: {.incremental}
 - **Ties define dyads, and dyads define triads**:
