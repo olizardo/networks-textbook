@@ -180,5 +180,5 @@ The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push t
 - **Adding Chapters:** When creating a new chapter, use established file naming conventions and integrate the file into `_quarto.yml` under `book: chapters:`.
 - **Canvas Assignment Links:** When lessons conclude a topic with an associated homework, include a callout tip pointing students to the specific assignment on Bruin Learn (`::: {.callout-tip} ## Associated Assignment on Bruin Learn ... :::`).
 - **Slide Image References:** Slide decks in `slides/` must reference root images as `../images/<filename>`. Root `images/` is registered under `project.resources` in `_quarto.yml` to guarantee availability on the deployed site.
-- **R Code Execution:** Before running complex operations, ensure the active R environment has necessary packages loaded (`renv::restore()`).
+- **R Code Execution:** Before running complex operations, ensure the active R environment has necessary packages loaded. Use `renv::restore(prompt = FALSE)` — the confirmation prompt does not render in the Positron console and makes restore appear to hang. Restores are fast because the local renv binary cache is well populated.
 - **Context:** This is an educational resource. Explanations of code, concepts, and network theory should be clear and accessible for students.
