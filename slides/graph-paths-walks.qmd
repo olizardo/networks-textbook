@@ -123,13 +123,26 @@ gr_undir |>
 :::: {.columns align=center}
 
 ::: {.column width="60%"}
-::: {.incremental}
 - Multiple distinct paths can connect the same pair of nodes.
-- Let's trace paths from $B$ to $A$:
-  - $P_1 = \{BE, ED, DA\} \quad (l = 3)$
-  - $P_2 = \{BE, EC, CA\} \quad (l = 3)$
-  - $P_3 = \{BE, ED, DC, CA\} \quad (l = 4)$
-  - $P_4 = \{BE, EC, CD, DA\} \quad (l = 4)$
+- Let's trace paths from $B$ to $A$ (the graph cycles through each as it appears):
+
+::: {.fragment .fade-in data-fragment-index="1"}
+- $P_1 = \{BE, ED, DA\} \quad (l = 3)$
+:::
+
+::: {.fragment .fade-in data-fragment-index="2"}
+- $P_2 = \{BE, EC, CA\} \quad (l = 3)$
+:::
+
+::: {.fragment .fade-in data-fragment-index="3"}
+- $P_3 = \{BE, ED, DC, CA\} \quad (l = 4)$
+:::
+
+::: {.fragment .fade-in data-fragment-index="4"}
+- $P_4 = \{BE, EC, CD, DA\} \quad (l = 4)$
+:::
+
+::: {.fragment .fade-in data-fragment-index="5"}
 - **Shortest Path (Geodesic)**:
   - The path of minimum length between two nodes.
   - **Geodesic Distance**: The length of the geodesic path (here, geodesic distance $d(B, A) = 3$, with tied geodesics $P_1$ and $P_2$).
@@ -137,6 +150,40 @@ gr_undir |>
 :::
 
 ::: {.column width="40%"}
+:::: {.path-stack}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_undir, layout = "manual", x = x, y = y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+::: {.fragment .path-frag .fade-in-then-out data-fragment-index="1"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 4) | (from == 4 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("P1: B-E-D-A (l = 3)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+
+::: {.fragment .path-frag .fade-in-then-out data-fragment-index="2"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
@@ -151,8 +198,71 @@ gr_undir |>
   scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
   geom_node_point(size = 18, color = "tan2") +
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+  theme_graph() + ggtitle("P2: B-E-C-A (l = 3)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
 ```
+:::
+
+::: {.fragment .path-frag .fade-in-then-out data-fragment-index="3"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 4) | (from == 3 & to == 4) | (from == 3 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("P3: B-E-D-C-A (l = 4)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+
+::: {.fragment .path-frag .fade-in-then-out data-fragment-index="4"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 3) | (from == 3 & to == 4) | (from == 4 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("P4: B-E-C-D-A (l = 4)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+
+::: {.fragment .path-frag .fade-in data-fragment-index="5"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_undir |>
+  activate(edges) |>
+  mutate(highlight = ifelse((from == 1 & to == 2) | (from == 2 & to == 4) | (from == 4 & to == 5) | (from == 2 & to == 3) | (from == 3 & to == 5), "yes", "no")) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Tied Geodesics: P1 & P2 (l = 3)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+::::
 :::
 
 ::::
@@ -655,23 +765,54 @@ gr_undir |>
 
 ---
 
+# Part 3: Directed Paths, Reachability & Cycles
+
+---
+
 ## Paths in Directed Graphs (Digraphs)
 
 :::: {.columns align=center}
 
 ::: {.column width="60%"}
-::: {.incremental}
 - In directed graphs, paths must strictly **respect the direction of the arrows**!
-- Let's trace directed paths from $A$ to $B$ in our digraph:
-  - $P_1 = \{AC, CE, EB\} \quad (l = 3)$
-  - $P_2 = \{AD, DE, EB\} \quad (l = 3)$
-  - $P_3 = \{AC, CD, DE, EB\} \quad (l = 4)$
+- Let's trace directed paths from $A$ to $B$ in our digraph (the graph cycles through each as it appears):
+
+::: {.fragment .fade-in data-fragment-index="1"}
+- $P_1 = \{AC, CE, EB\} \quad (l = 3)$
+:::
+
+::: {.fragment .fade-in data-fragment-index="2"}
+- $P_2 = \{AD, DE, EB\} \quad (l = 3)$
+:::
+
+::: {.fragment .fade-in data-fragment-index="3"}
+- $P_3 = \{AC, CD, DE, EB\} \quad (l = 4)$
+:::
+
+::: {.fragment .fade-in data-fragment-index="4"}
 - But can we find any directed path from $B$ to $A$?
   - **No!** All arrows lead away from $A$ and toward $B$.
 :::
 :::
 
 ::: {.column width="40%"}
+:::: {.path-stack}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(color = "steelblue", edge_width = 1.2,
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+
+::: {.fragment .path-frag .fade-in-then-out data-fragment-index="1"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
@@ -693,38 +834,18 @@ gr_dir |>
   scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
   geom_node_point(size = 18, color = "tan2") +
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
-  theme_graph() + coord_cartesian(clip = "off")
+  theme_graph() + ggtitle("P1: A-C-E-B (l = 3)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
 ```
 :::
 
-::::
-
----
-
-## Directed Reachability
-
-::: {.incremental}
-- **Asymmetric Reachability**:
-  - Node $A$ can reach $B$ via directed path $\{AD, DE, EB\}$ ($l_{AB} = 3$).
-  - But node $B$ **cannot** reach $A$ because we cannot travel against the arrows ($l_{BA} = \infty$).
-- **Mutual Reachability**:
-  - Two nodes $u$ and $v$ are mutually reachable if there exists a directed path from $u \rightarrow v$ AND from $v \rightarrow u$.
-  - These two paths **do not** have to be the same length!
-  - **Example**: Nodes $B$ and $C$ are mutually reachable:
-    - $B$ reaches $C$ via $\{BE, ED, DC\} \quad (l = 3)$
-    - $C$ reaches $B$ via shortest path $\{CE, EB\} \quad (l = 2)$
-:::
-
----
-
-## Directed Reachability: Visual Examples
-
+::: {.fragment .path-frag .fade-in-then-out data-fragment-index="2"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 12
+#| fig-width: 5.5
 #| fig-height: 5.5
-p1 <- gr_dir |>
+gr_dir |>
   activate(edges) |>
   mutate(
     from_name = .N()$name[from],
@@ -733,17 +854,136 @@ p1 <- gr_dir |>
   ) |>
   ggraph(layout = "manual", x = x, y = y) +
   geom_edge_parallel(aes(color = highlight, width = highlight),
-                     arrow = arrow(length = unit(3, 'mm'), type = "closed"),
-                     start_cap = circle(5, 'mm'), end_cap = circle(8, 'mm'),
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
                      sep = unit(3.5, 'mm')) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
   scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("Asymmetric (A reaches B, B cannot reach A)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("P2: A-D-E-B (l = 3)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
 
-p2 <- gr_dir |>
+::: {.fragment .path-frag .fade-in-then-out data-fragment-index="3"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(edges) |>
+  mutate(
+    from_name = .N()$name[from],
+    to_name = .N()$name[to],
+    highlight = ifelse((from_name == "A" & to_name == "C") | (from_name == "C" & to_name == "D") | (from_name == "D" & to_name == "E") | (from_name == "E" & to_name == "B"), "yes", "no")
+  ) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = highlight, width = highlight),
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm')) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("P3: A-C-D-E-B (l = 4)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+
+::: {.fragment .path-frag .fade-in data-fragment-index="4"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_dir, layout = "manual", x = x, y = y) +
+  geom_edge_parallel(color = "steelblue", edge_width = 1.2,
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("No Directed Path from B to A") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+::::
+:::
+
+::::
+
+---
+
+## Directed Reachability
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Asymmetric Reachability**:
+  - Node $A$ can reach $B$ via directed path $\{AD, DE, EB\}$ ($l_{AB} = 3$).
+  - But node $B$ **cannot** reach $A$ because we cannot travel against the arrows ($l_{BA} = \infty$).
+- **Mutual Reachability**:
+  - Two nodes $u$ and $v$ are mutually reachable if there exists a directed path from $u \rightarrow v$ AND from $v \rightarrow u$.
+  - These two paths **do not** have to be the same length!
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
+  activate(edges) |>
+  mutate(
+    from_name = .N()$name[from],
+    to_name = .N()$name[to],
+    highlight = ifelse((from_name == "A" & to_name == "D") | (from_name == "D" & to_name == "E") | (from_name == "E" & to_name == "B"), "yes", "no")
+  ) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = highlight, width = highlight),
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(3.5, 'mm')) +
+  scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Asymmetric: A Reaches B, B Cannot Reach A") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
+```
+:::
+
+::::
+
+---
+
+## Mutual Reachability: Example
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- **Example**: Nodes $B$ and $C$ are mutually reachable (shown on the right):
+  - $B$ reaches $C$ via $\{BE, ED, DC\} \quad (l = 3)$
+  - $C$ reaches $B$ via shortest path $\{CE, EB\} \quad (l = 2)$
+- **Note**:
+  - The two paths have different lengths ($3$ vs. $2$) — mutual reachability does not require equal travel times in both directions!
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_dir |>
   activate(edges) |>
   mutate(
     from_name = .N()$name[from],
@@ -752,18 +992,19 @@ p2 <- gr_dir |>
   ) |>
   ggraph(layout = "manual", x = x, y = y) +
   geom_edge_parallel(aes(color = highlight, width = highlight),
-                     arrow = arrow(length = unit(3, 'mm'), type = "closed"),
-                     start_cap = circle(5, 'mm'), end_cap = circle(8, 'mm'),
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
                      sep = unit(3.5, 'mm')) +
   scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
   scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
-  theme_graph() + ggtitle("Mutual (B and C reach each other via paths of length 3 & 2)") + coord_cartesian(clip = "off") +
-  theme(plot.title = element_text(size = 11, face="bold", hjust=0.5))
-
-p1 + p2
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + ggtitle("Mutual: B and C Reach Each Other (l = 3 and 2)") + coord_cartesian(clip = "off") +
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
 ```
+:::
+
+::::
 
 ---
 

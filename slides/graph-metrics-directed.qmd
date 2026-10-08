@@ -322,13 +322,56 @@ gr_ties |>
 
 ## Directed Neighborhood Intersection
 
+:::: {.columns align=center}
+
+::: {.column width="55%"}
 ::: {.incremental}
 - In directed graphs, neighborhood intersections can be defined for incoming or outgoing ties:
 - **In-Neighborhood Intersection**: Common source nodes pointing to both $u$ and $v$:
-  - $N^{in}(D) \cap N^{in}(A) = \{B\}$ (Node $B$ points to both $D$ and $A$)
+  - $N^{in}(D) \cap N^{in}(A) = \{B\}$ (focal nodes $D$ and $A$ in tomato; common source $B$ in gold)
 - **Out-Neighborhood Intersection**: Common destination nodes that both $u$ and $v$ point to:
-  - $N^{out}(B) \cap N^{out}(E) = \{C, D\}$ (Both $B$ and $E$ point to $C$ and $D$)
+  - $N^{out}(B) \cap N^{out}(E) = \{C, D\}$ (shown on the next slide)
 :::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_ties |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name %in% c("D", "A") ~ "focal",
+      name == "B" ~ "common",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "common" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -389,13 +432,56 @@ gr_ties |>
 
 ## Directed Neighborhood Union
 
+:::: {.columns align=center}
+
+::: {.column width="55%"}
 ::: {.incremental}
 - Similarly, directed neighborhood unions combine the sets of neighbors:
 - **In-Neighborhood Union**: Nodes pointing to either $u$ or $v$:
-  - $N^{in}(D) \cup N^{in}(A) = \{B, E, F, G\}$
+  - $N^{in}(D) \cup N^{in}(A) = \{B, E, F, G\}$ (focal nodes $D$ and $A$ in tomato; union members in gold)
 - **Out-Neighborhood Union**: Nodes that either $u$ or $v$ points to:
-  - $N^{out}(B) \cup N^{out}(E) = \{A, C, D\}$
+  - $N^{out}(B) \cup N^{out}(E) = \{A, C, D\}$ (shown on the next slide)
 :::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+gr_ties |>
+  activate(nodes) |>
+  mutate(
+    highlight = case_when(
+      name %in% c("D", "A") ~ "focal",
+      name %in% c("B", "E", "F", "G") ~ "neighbor",
+      TRUE ~ "other"
+    )
+  ) |>
+  ggraph(layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "gray60",
+    edge_width = 1.25
+  ) +
+  geom_node_point(aes(color = highlight), size = 22) +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_color_manual(
+    values = c("focal" = "tomato", "neighbor" = "gold", "other" = "skyblue"),
+    guide = "none"
+  ) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -407,7 +493,7 @@ gr_ties |>
 ::: {.incremental}
 - Let's visualize the **out-neighborhood union** of nodes **B** and **E** (in tomato):
   - $N^{out}(B) = \{A, C, D\}$
-  - $N^{out}(E) = \{D\}$
+  - $N^{out}(E) = \{C, D\}$
 - Combining all unique destination nodes gives:
   - $N^{out}(B) \cup N^{out}(E) = \{A, C, D\}$ (in gold)
 :::
@@ -657,14 +743,44 @@ gr_ties |>
 
 ## Directed Degree Sets & Sequences
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - Directed graphs have two distinct degree sets and two distinct degree sequences—one of each for in-degree and out-degree.
-- In our 7-node directed graph:
+- For our 7-node directed graph (shown on the right):
   - **In-Degree Set**: $\{2, 2, 2, 3, 0, 2, 0\}$
   - **In-Degree Sequence**: $(3, 2, 2, 2, 2, 0, 0)$
   - **Out-Degree Set**: $\{2, 3, 0, 1, 2, 1, 2\}$
   - **Out-Degree Sequence**: $(3, 2, 2, 2, 1, 1, 0)$
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+ggraph(gr_ties, layout = 'circle') +
+  geom_edge_fan(
+    arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+    start_cap = circle(5, 'mm'),
+    end_cap = circle(8.5, 'mm'),
+    color = "steelblue",
+    edge_width = 1.25
+  ) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "white", size = 10, fontface = "bold") +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -1400,5 +1516,3 @@ ggraph(gr_tree_slide, layout = "tree") +
 :::
 
 ::::
-NA
-NA
