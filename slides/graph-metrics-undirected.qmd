@@ -830,21 +830,48 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 
 ## Connecting Density & Average Degree
 
+:::: {.columns align=center}
+
+::: {.column width="58%"}
 ::: {.incremental}
 - There is an **intimate mathematical relationship** between density ($d$) and average degree ($\bar{k}$).
 - Recall the undirected density formula:
   $$d = \frac{2m}{n(n-1)}$$
-- We can rewrite this by pulling out the average degree term ($\bar{k} = \frac{2m}{n}$):
-  $$d = \left(\frac{2m}{n}\right) \times \frac{1}{n-1} = \bar{k} \times \frac{1}{n-1} = \frac{\bar{k}}{n-1} \qquad \iff \qquad \bar{k} = d(n-1)$$
-- **Numerical example** (using our graph: $n = 7$, $\bar{k} = 2.0$):
+- Pulling out the average degree term ($\bar{k} = \frac{2m}{n}$):
+  $$d = \frac{\bar{k}}{n-1} \qquad \iff \qquad \bar{k} = d(n-1)$$
+- **Numerical example** (using our graph on the right: $n = 7$, $\bar{k} = 2.0$):
   $$d = \frac{\bar{k}}{n-1} = \frac{2.0}{7-1} = \frac{2.0}{6} \approx 0.333$$
 - This matches the density we computed directly ($d = 7/21 \approx 0.333$)!
 :::
+:::
+
+::: {.column width="42%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5
+#| fig-height: 5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
 ## Interpreting the Density-Degree Connection
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Density is Average Degree Scaled by Group Size**:
   - The density of an undirected graph is simply its average degree divided by the maximum possible connections of any single node ($n-1$).
@@ -853,14 +880,32 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
   - If the average number of friends ($\bar{k}$) is $4.5$, then the density of friendship is:
     $$d = \frac{4.5}{9} = 0.50 \quad (50\%)$$
 - **Cross-Check with Our Graph** ($n = 7$, $\bar{k} = 2.0$):
-  $$d = \frac{\bar{k}}{n-1}$$
-  $$= \frac{2.0}{7-1} = \frac{2.0}{6}$$
-  $$\approx 0.333$$
+  $$d = \frac{\bar{k}}{n-1} = \frac{2.0}{7-1} = \frac{2.0}{6} \approx 0.333$$
   - Matches the density we computed directly ($d = 7/21 \approx 0.333$)!
 - **Directed Case**:
-  - The exact same identity holds! Since $d^d = \frac{m}{n(n-1)}$ and $\bar{k}$ is $\frac{m}{n}$, we get:
-    $$d^d = \frac{\bar{k}}{n-1}$$
+  - The same identity holds: $d^d = \frac{\bar{k}}{n-1}$
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5
+#| fig-height: 5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -1205,6 +1250,9 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 
 ## Friendship Paradox: Network Average
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - From the node calculations on the previous slide, the average nearest neighbor degrees are:
   - $\bar{k}_{nn} = (3.0, 2.33, 2.0, 2.0, 2.5, 2.5, 2.0)$
@@ -1213,6 +1261,27 @@ ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
 - **Demonstrating the Paradox**:
   - Average degree of nodes' neighbors ($\approx 2.33$) is **greater** than the average degree of nodes ($\bar{k} = 2.0$).
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5
+#| fig-height: 5
+ggraph(gr_letters, layout = "manual", x = layout_fr$x, y = layout_fr$y) +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "skyblue") +
+  geom_node_text(aes(label = name), color = "black", size = 6) +
+  scale_x_continuous(expand = expansion(mult = 0.15)) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  theme_graph() +
+  theme(plot.margin = margin(10, 10, 10, 10, "pt")) +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
 
 ---
 
@@ -1248,10 +1317,13 @@ Before using complex algorithms, we can apply two fast screening tests:
 
 ## Graphicality: Concrete Examples
 
+:::: {.columns align=center}
+
+::: {.column width="60%"}
 ::: {.incremental}
 - **Graphical Sequence**: $\mathbf{d} = (4, 3, 3, 2, 2, 1, 1)$ with $n = 7$
   - Sum is $16$ (even). Max degree is $4 \le 6$.
-  - A real simple graph can easily be constructed with these degrees.
+  - A real simple graph can easily be constructed with these degrees (shown on the right).
 - **Non-Graphical Sequence (Odd Sum Violation)**: $\mathbf{d} = (4, 3, 3, 3, 2, 1, 1)$ with $n = 7$
   - Sum is $17$ (odd). Violates Handshake Lemma. 
   - *No simple graph can ever have this sequence.*
@@ -1259,3 +1331,31 @@ Before using complex algorithms, we can apply two fast screening tests:
   - Max degree is $7$, which is greater than $n-1 = 3$.
   - *A node in a 4-person group cannot have 7 unique friends!*
 :::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5
+#| fig-height: 5
+gr_graphical <- tbl_graph(
+  nodes = data.frame(name = LETTERS[1:7]),
+  edges = data.frame(
+    from = c(1, 1, 1, 1, 2, 2, 3, 4),
+    to   = c(2, 3, 4, 5, 3, 6, 7, 5)
+  ),
+  directed = FALSE
+)
+
+set.seed(2741)
+ggraph(gr_graphical, layout = "fr") +
+  geom_edge_link(color = "steelblue", edge_width = 1.5) +
+  geom_node_point(size = 22, color = "tan2") +
+  geom_node_text(aes(label = name), size = 10, color = "white", fontface = "bold") +
+  theme_graph() +
+  coord_cartesian(clip = "off")
+```
+:::
+
+::::
