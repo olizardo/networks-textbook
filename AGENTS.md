@@ -124,6 +124,7 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/graph-metrics-directed.qmd` | Directed Graph Metrics |
 | `slides/graph-paths-walks.qmd` | Graph Theory: Paths, Walks & Directed Connections |
 | `slides/graph-connectivity.qmd` | Graph Theory: Connectivity & Components |
+| `slides/graph-cutsets-directed.qmd` | Graph Theory: Cutsets, Bridges & Directed Connectivity |
 | `slides/graph-trees.qmd` | Graph Theory: Trees, Forests & Efficiency |
 | `slides/matrix-intro.qmd` | Networks, Graphs, and Matrices |
 | `slides/matrix-operations.qmd` | Matrix Algebra in Social Networks |
@@ -175,6 +176,26 @@ The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push t
 3. **Book Build:** Renders book chapters to `_sites/`.
 4. **Slide Decks Build:** Renders `slides/*.qmd` into `_sites/slides/`.
 5. **Deployment:** Deploys `_sites/` to GitHub Pages.
+
+### 4. Bruin Learn (Canvas) API: Posting Announcements
+Credentials are read from `~/.Renviron` (`CANVAS_API_TOKEN`, `CANVAS_URL`), same pattern as the sibling repo's scripts. Course ID for SOCIOL 111 is `238980`.
+
+**Working pattern (verified 2026-10-13):** post via `POST /api/v1/courses/:course_id/discussion_topics` with a **form-encoded** body — `title`, `message` (HTML), `is_announcement=true`, `published=true`:
+```bash
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode "title=..." \
+  --data-urlencode "message=<p>...</p>" \
+  --data-urlencode "is_announcement=true" \
+  --data-urlencode "published=true" \
+  "https://bruinlearn.ucla.edu/api/v1/courses/238980/discussion_topics"
+```
+Verify the creation response's `is_announcement: true` (the documented `announcement` param is silently ignored — plain discussion fallback requires delete-and-recreate). This matches section "G. Posting Announcements" in `../SOCIOL 111/AGENTS.md`, which is the canonical doc for Bruin Learn operations.
+
+**Route pitfalls (verified 2026-10-13):**
+- `POST /api/v1/courses/:id/announcements`, and `POST`/`GET .../discussions` return a 404 HTML "Page Not Found" page with this token. An HTML 404 here is a wrong-route symptom, not an auth/CSRF problem — don't retry with token tricks.
+- `POST /modules/:id/reorder` is a non-API, CSRF-protected route and always fails with a Bearer token. Reposition module items with `PUT /modules/:module_id/items/:item_id` + `{"module_item": {"position": N}}` instead.
+- Newly created module items default to `published: false`; publish explicitly via `PUT .../items/:item_id` with `{"module_item": {"published": true}}`.
+- `GET` on assignments and modules items works fine, so dates/order facts should be confirmed from the live API before communicating them to students.
 
 ## AI Agent Guidelines
 - **Adding Chapters:** When creating a new chapter, use established file naming conventions and integrate the file into `_quarto.yml` under `book: chapters:`.

@@ -38,6 +38,18 @@ gr_dir <- tbl_graph(nodes = l_dir, edges = edges_dir, directed = TRUE)
 nodes_ham <- data.frame(name = c("A", "B", "C", "D", "E"), x = c(0, -1, -0.6, 0.6, 1), y = c(1, 0.2, -1, -1, 0.2))
 edges_ham <- data.frame(from = c(1, 2, 3, 4, 5, 2), to = c(2, 3, 4, 5, 1, 5))
 gr_ham <- tbl_graph(nodes = nodes_ham, edges = edges_ham, directed = FALSE)
+
+# Disconnected graph showing components and giant component
+nodes_disconnected <- data.frame(
+  name = c("A", "B", "C", "D", "E", "F", "G", "H", "I"),
+  x    = c(0, 1, 1, 0, -1, -1, 3, 4, 3.5),
+  y    = c(1, 0.5, -0.5, -1, -0.5, 0.5, 0.5, 0, -1)
+)
+edges_disconnected <- data.frame(
+  from = c(1, 1, 2, 2, 3, 3, 4, 4, 5, 7, 7, 8),
+  to   = c(2, 6, 3, 5, 4, 5, 5, 6, 6, 8, 9, 9)
+)
+gr_disconnected <- tbl_graph(nodes = nodes_disconnected, edges = edges_disconnected, directed = FALSE)
 ```
 
 # Part 1: Indirect Connections & Paths
@@ -1098,8 +1110,115 @@ gr_dir |>
 
 ---
 
+# Part 4: Graph Connectivity & Components
+
+---
+
+## Connected vs. Disconnected Graphs
+
+:::: {.columns align=center}
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Connected Graph (Single Component)**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.5
+#| fig-height: 4.5
+
+    gr_l_conn <- tbl_graph(
+        nodes = data.frame(name = as.character(1:9)),
+        edges = data.frame(
+            from = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 3, 2),
+            to   = c(2, 3, 4, 5, 6, 7, 8, 9, 1, 5, 7, 8)
+        ),
+        directed = FALSE
+    )
+    
+    ggraph(gr_l_conn, layout = "circle") +
+        geom_edge_link(color = "steelblue", edge_width = 1.0) +
+        geom_node_point(size = 14, color = "tan2") +
+        geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+        theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Disconnected Graph (Two Components)**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.5
+#| fig-height: 4.5
+
+    gr_l_disconn <- tbl_graph(
+        nodes = data.frame(name = as.character(1:9)),
+        edges = data.frame(
+            from = c(1, 2, 3, 4, 5, 6, 1, 7, 8, 9),
+            to   = c(2, 3, 4, 5, 6, 1, 4, 8, 9, 7)
+        ),
+        directed = FALSE
+    )
+    
+    ggraph(gr_l_disconn, layout = "circle") +
+        geom_edge_link(color = "steelblue", edge_width = 1.0) +
+        geom_node_point(size = 14, color = "tan2") +
+        geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+        theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+- **Connected**: A path of some finite length exists between *every* pair of nodes in the graph (left).
+- **Disconnected**: At least one pair of nodes is unreachable; the graph is split into separate pieces (right).
+
+---
+
+## Components & The Giant Component
+
+:::: {.columns align=center}
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center;"}
+**Disconnected Graph with 2 Components**
+
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.5
+#| fig-height: 4.5
+gr_disconnected_colors <- gr_disconnected |>
+  activate(edges) |>
+  mutate(highlight = ifelse(from <= 6 & to <= 6, "giant", "small"))
+
+ggraph(gr_disconnected_colors, layout = "manual", x = x, y = y) +
+  geom_edge_link(aes(color = highlight, edge_width = highlight)) +
+  scale_edge_color_manual(values = c("giant" = "red", "small" = "steelblue"), guide = "none") +
+  scale_edge_width_manual(values = c("giant" = 1.8, "small" = 0.8), guide = "none") +
+  geom_node_point(aes(color = ifelse(name %in% c("G", "H", "I"), "small", "giant")), size = 14) +
+  scale_color_manual(values = c("giant" = "tan2", "small" = "skyblue"), guide = "none") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 50%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;"}
+- **Component**: A maximally connected subgraph within a larger disconnected graph.
+  - The graph on the left contains exactly **two components**.
+- **Giant Component**: The largest connected component in a disconnected graph.
+  - The red component $\{A, B, C, D, E, F\}$ is the **giant component** (of order 6).
+  - The blue component $\{G, H, I\}$ is a smaller component (of order 3).
+:::
+
+::::
+
+---
+
 ## Wrap-Up: Paths & Directed Connections
 
 - **Paths, Geodesics & Cycles**: Indirect connections, shortest paths, and why geodesics matter for diffusion, brokerage, and the small world.
 - **Walks, Trails & Directed Ties**: The $Paths \subset Trails \subset Walks$ hierarchy, plus reachability, directed cycles, and semipaths.
-- **Next up**: What happens when networks come apart — components, cutsets, and robustness.
+- **Connectivity & Components**: Connected vs. disconnected graphs, connected components, and the giant component.
+- **Next up**: Tree graphs — the minimally connected networks.
