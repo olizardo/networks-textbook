@@ -1020,7 +1020,7 @@ gr_dir |>
 
 ---
 
-## Directed Cycles & DAGs
+## Directed Cycles
 
 :::: {.columns align=center}
 
@@ -1029,10 +1029,7 @@ gr_dir |>
 - A **directed cycle** is a cycle where all arrows flow in a single, continuous direction.
   - **Example**: Cycle starting and ending at $C$:
     - $\{CE, ED, DC\} \quad (l = 3)$
-- **Directed Acyclic Graphs (DAGs)**:
-  - Directed graphs that contain **no directed cycles**.
-  - e.g. strict organizational command structures, directed trees.
-  - Anti-symmetric relations (like "is boss of") structurally forbid cycles to maintain consistent hierarchy.
+- Directed cycles imply **mutual reachability**: every node in the cycle can reach (and be reached by) every other node on it.
 :::
 :::
 
@@ -1058,6 +1055,56 @@ gr_dir |>
   scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
   geom_node_point(size = 18, color = "tan2") +
   geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::::
+
+---
+
+## Directed Acyclic Graphs (DAGs)
+
+:::: {.columns align=center}
+
+::: {.column width="60%"}
+::: {.incremental}
+- A **Directed Acyclic Graph (DAG)** is a directed graph containing **no directed cycles**.
+  - e.g. strict organizational command structures, directed trees.
+  - Anti-symmetric relations (like "is boss of") structurally forbid cycles to maintain consistent hierarchy.
+- **DAGs need not be trees**: node $E$ answers to **two bosses** ($B$ and $C$). Multiple parents are fine — arrows just can't loop back up.
+- The dashed arrow ($F \rightarrow A$) is **forbidden**: adding it would close the directed cycle $A \rightarrow C \rightarrow F \rightarrow A$.
+:::
+:::
+
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.5
+#| fig-height: 5.5
+nodes_dag <- data.frame(
+  name = c("A", "B", "C", "D", "E", "F"),
+  x = c(1.5, 0.6, 2.7, 0, 1.5, 3),
+  y = c(2.2, 1.1, 1.1, 0, 0, 0)
+)
+edges_dag <- data.frame(
+  from = c("A", "A", "B", "B", "C", "C", "F"),
+  to   = c("B", "C", "D", "E", "E", "F", "A"),
+  type = c(rep("real", 6), "forbidden")
+)
+tbl_graph(nodes = nodes_dag, edges = edges_dag, directed = TRUE) |>
+  ggraph(layout = "manual", x = x, y = y) +
+  geom_edge_parallel(aes(color = type, width = type, linetype = type),
+                     arrow = arrow(length = unit(4, 'mm'), type = "closed"),
+                     start_cap = circle(6, 'mm'), end_cap = circle(9, 'mm'),
+                     sep = unit(2, 'mm')) +
+  scale_edge_color_manual(values = c(real = "steelblue", forbidden = "firebrick"), guide = "none") +
+  scale_edge_width_manual(values = c(real = 1.0, forbidden = 0.9), guide = "none") +
+  scale_edge_linetype_manual(values = c(real = "solid", forbidden = "2212"), guide = "none") +
+  geom_node_point(size = 18, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
+  annotate("text", x = 2.2, y = 1.3, label = "X", color = "firebrick", size = 9, fontface = "bold") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 :::
