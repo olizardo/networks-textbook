@@ -72,6 +72,9 @@ p <- ggraph(g, layout = "manual", x = x, y = y) +
   geom_circle(data = data.frame(x0 = 0, y0 = 0, r = r2),
               aes(x0 = x0, y0 = y0, r = r), fill = "firebrick", alpha = 0.08,
               color = "grey70", linewidth = 0.3) +
+  geom_circle(data = data.frame(x0 = 0, y0 = 0, r = r1),
+              aes(x0 = x0, y0 = y0, r = r), fill = NA,
+              color = "grey70", linewidth = 0.3) +
   geom_edge_link0(aes(color = type, linetype = type, width = type)) +
   scale_edge_color_manual(values = c(strong = "firebrick", weak = "steelblue"),
                           labels = c(strong = "Strong tie", weak = "Weak tie")) +
@@ -81,6 +84,15 @@ p <- ggraph(g, layout = "manual", x = x, y = y) +
   scale_color_manual(values = c(ego = "grey10", strong = "firebrick", weak = "steelblue"), guide = "none") +
   scale_size_manual(values = c(ego = 9, strong = 5.5, weak = 4.5), guide = "none") +
   geom_node_text(aes(label = label), color = "white", fontface = "bold", size = 3.2, na.rm = TRUE) +
+  annotate("label", x = 1.25, y = -0.02, label = "Support Clique",
+           size = 2.6, color = "grey20", label.padding = unit(0.15, "lines"),
+           alpha = 0.92) +
+  annotate("label", x = -1.87, y = -0.96, label = "Sympathy Group",
+           size = 2.6, color = "grey20", label.padding = unit(0.15, "lines"),
+           alpha = 0.92) +
+  annotate("label", x = -1.86, y = -2.72, label = "Affinity Group /\nActive Network",
+           size = 2.6, color = "grey20", lineheight = 0.9,
+           label.padding = unit(0.15, "lines"), alpha = 0.92) +
   annotate("label", x = 0, y = 1.68, label = "Strong-tie circles:\nclosed, g-transitive triads",
            size = 2.9, fontface = "bold", color = "firebrick", lineheight = 0.9,
            label.padding = unit(0.18, "lines"), alpha = 0.92) +
