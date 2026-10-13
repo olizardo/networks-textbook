@@ -6,8 +6,9 @@
 # while weak ties to the outer circles leave triads open (transitivity
 # violated), so Ego spans structural holes in the periphery.
 #
-# Counts used on the slide (26 closed / 222 open) follow from this exact
-# construction: 13 inner alters with 26 ties among them, 12 outer alters
+# The slide quotes the contrast qualitatively (closure vs. reach), not the
+# exact counts; the sanity check below just verifies the construction is
+# as intended: 13 inner alters with 26 ties among them, 12 outer alters
 # tied only to Ego.
 
 library(igraph)
