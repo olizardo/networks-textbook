@@ -177,7 +177,23 @@ The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push t
 4. **Slide Decks Build:** Renders `slides/*.qmd` into `_sites/slides/`.
 5. **Deployment:** Deploys `_sites/` to GitHub Pages.
 
-### 4. Bruin Learn (Canvas) API: Posting Announcements
+### 4. Slide Overflow QA (verified 2026-10-15)
+Policy: no slide in a Reveal.js deck may scroll vertically; if content genuinely doesn't fit, split it into two consecutive slides rather than shrinking fonts aggressively.
+
+**Measuring overflow:** `scrollable: true` makes overflowing slides scroll, so check empirically instead of by eye. Render the deck, then measure each slide's `scrollHeight` vs `clientHeight` at the deck's native 1280×720 geometry in headless Chrome. No browser is installed in the Crostini container; the working setup (cached under a scratch dir, Node 18-compatible):
+```bash
+npx -y @puppeteer/browsers@2.4.1 install chrome-headless-shell@stable   # latest installer needs Node >= 20
+npm i puppeteer-core                                                     # v25 is ESM-only: use dynamic import()
+```
+Drive it with `Reveal.slide(h, v)` per slide (decks nest `##` slides inside `#` part sections — `.slides > section` alone only sees part headers), wait for `Reveal.isReady()` + `MathJax.startup.promise` + `document.fonts.ready` first. A slide scrolls iff `scrollHeight > clientHeight` and its computed `overflow-y` is `auto`/`scroll`. `scrollHeight`/`clientHeight` ignore Reveal's CSS transform scale, so results are resolution-independent. `# Part N` divider slides report a small scrollHeight delta but are `overflow-y: visible` and shrink-wrapped — they never scroll; ignore them. Quarto's own `scrollable` class on a section is only a heuristic; trust the measurement.
+
+**Quarto/Pandoc pitfalls (both verified 2026-10-15, cost real debugging time):**
+1. A raw `<div style=...>` wrapper must open and close **within** a single `:::` fenced div. If `</div>` lands after the wrapper's parent `:::` closes (straddling the boundary), pandoc mis-pairs the fences and silently swallows the remainder of the deck — the render still prints "Output created" but with a fraction of the slides and a `Div ... unclosed` WARNING. Always check the render log for that warning. Raw `<div>` around plain markdown (tables, bullets) inside a column is fine.
+2. `::: {.column width="60%" style="font-size: 85%;"}` fails: Quarto emits its own `style="width:60%"` and drops the custom style ("Ignoring duplicate attribute" warning). Put everything in `style` instead: `::: {.column style="width: 60%; font-size: 85%;"}`.
+
+**Layout facts that drive overflow in `slides/`:** `ucla-theme.css` sets a 34px base font; its `p, li { font-size: 0.85em }` reduction does NOT apply to tables, so tables render at full size and are usually the tallest element — especially text tables in narrow columns (cells wrap one word per line). Effective fixes in order of preference: split the slide; move bullets into the column that has slack (e.g., under the figure); drop subheadings that duplicate the slide title ("### Matrix Progress", etc.); wrap a column's content in `<div style="font-size: 80-90%">` (72% is the established floor, used in matrix-operations); shrink square `fig-width/fig-height` together (keep them equal so graph layouts don't distort). As of 2026-10-15 all four matrix decks (matrix-intro, matrix-operations, matrix-multiplication, matrix-advanced) measure 0 scrolling slides.
+
+### 5. Bruin Learn (Canvas) API: Posting Announcements
 Credentials are read from `~/.Renviron` (`CANVAS_API_TOKEN`, `CANVAS_URL`), same pattern as the sibling repo's scripts. Course ID for SOCIOL 111 is `238980`.
 
 **Working pattern (verified 2026-10-13):** post via `POST /api/v1/courses/:course_id/discussion_topics` with a **form-encoded** body — `title`, `message` (HTML), `is_announcement=true`, `published=true`:
