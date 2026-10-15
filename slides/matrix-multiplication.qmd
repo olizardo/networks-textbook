@@ -1,0 +1,495 @@
+---
+title: "Matrix Algebra in Social Networks: Part II"
+subtitle: "Multiplication, Conformability, and Applications (Paths & Walks)"
+format:
+  revealjs:
+    incremental: false
+    scrollable: true
+    theme: default
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+library(expm)
+library(patchwork)
+
+# Set seed for reproducible layout of 6-node graphs
+set.seed(444)
+
+# Define exact 6x6 symmetric adjacency matrices
+P <- matrix(c(
+  0, 1, 1, 0, 1, 0,
+  1, 0, 1, 1, 0, 0,
+  1, 1, 0, 1, 1, 1,
+  0, 1, 1, 0, 1, 0,
+  1, 0, 1, 1, 0, 1,
+  0, 0, 1, 0, 1, 0
+), nrow = 6, byrow = TRUE, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+
+# Create tidygraph object
+gr_p <- as_tbl_graph(graph_from_adjacency_matrix(P, mode = "undirected"))
+
+# Define 5-node undirected matrix for Matrix Powers
+A_undir_5 <- matrix(c(
+  0, 1, 0, 0, 0,
+  1, 0, 1, 0, 0,
+  0, 1, 0, 1, 1,
+  0, 0, 1, 0, 1,
+  0, 0, 1, 1, 0
+), nrow = 5, byrow = TRUE, dimnames = list(letters[1:5], letters[1:5]))
+
+gr_undir_5 <- as_tbl_graph(graph_from_adjacency_matrix(A_undir_5, mode = "undirected"))
+
+# Circular layout coordinates for 6 nodes
+l_coords_6 <- matrix(c(
+  0, 1,
+  0.866, 0.5,
+  0.866, -0.5,
+  0, -1,
+  -0.866, -0.5,
+  -0.866, 0.5
+), ncol = 2, byrow = TRUE)
+
+# Manual coordinates for 5-node house-kite graph
+l_coords_5 <- matrix(c(
+  -1.5, 0,    # a
+  -0.5, 0,    # b
+  0.5, 0,     # c
+  1.5, 0.7,   # d
+  1.5, -0.7   # e
+), ncol = 2, byrow = TRUE)
+```
+
+# Part 1: Conformability Rules
+
+---
+
+## Standard Matrix Multiplication ($\mathbf{A} \times \mathbf{B}$)
+
+- Unlike the element-wise Hadamard product, standard matrix multiplication is **non-elementary**.
+- It involves multiplying the **rows of the left matrix** by the **columns of the right matrix**.
+- Because rows and columns are matched, the sizes of the two multiplier matrices must follow a strict structural rule.
+- This rule is called **Conformability**.
+
+---
+
+## The Conformability Rule
+
+- *You can only multiply two matrices if the number of columns of the first matrix equals the number of rows of the second matrix.*
+- Put their dimensions side-by-side:
+
+$$\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}$$
+
+- **Inner Dimensions**: The bold "fives" are the inner dimensions. They **must be identical** for the multiplication to be defined (**conformable**).
+- **Outer Dimensions**: The "three" and "six" are the outer dimensions. They dictate the size of the resulting product matrix:
+
+$$\mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}$$
+
+---
+
+## Clarification: Why Conformability Matters
+
+::: {.columns}
+::: {.column width="60%"}
+When we compute cell $c_{ij}$ in the product matrix, we:
+1. Take **Row $i$** of the left matrix (which has as many elements as the left matrix has columns).
+2. Take **Column $j$** of the right matrix (which has as many elements as the right matrix has rows).
+3. Multiply element-by-element and sum.
+
+**For this to work**, the row length and column length must match!
+:::
+
+::: {.column width="40%"}
+**Example**: 
+- Row from $\mathbf{A}$: 5 numbers
+- Column from $\mathbf{B}$: 5 numbers
+- ✓ Can match them up and multiply.
+
+If Column from $\mathbf{B}$ had 7 numbers, we'd have a mismatch and can't compute the sum.
+:::
+:::
+
+---
+
+## Conformable vs. Non-Conformable
+
+::: {.columns}
+::: {.column width="50%"}
+### Conformable Example
+- Line up dimensions:
+  $$\mathbf{A}_{4 \times \mathbf{2}} \times \mathbf{B}_{\mathbf{2} \times 3}$$
+- **Inner dimensions match** (2 = 2).
+- The multiplication is fully defined.
+- **Product Matrix size**:
+  $$\mathbf{C}_{4 \times 3}$$
+:::
+
+::: {.column width="50%"}
+### Non-Conformable Example
+- Line up dimensions:
+  $$\mathbf{A}_{3 \times \mathbf{4}} \times \mathbf{B}_{\mathbf{2} \times 3}$$
+- **Inner dimensions clash** (4 $\neq$ 2).
+- This operation is **mathematically impossible**.
+- **The Visual Reason**: When you try to dot-multiply a row of 4 by a column of 2, you "run out of numbers" on the right, making the sum undefined.
+:::
+:::
+
+---
+
+## Matrix Multiplication is Non-Commutative
+
+- In scalar math, order doesn't matter: $4 \times 3 = 3 \times 4$.
+- In matrix algebra, order **completely changes the structure**:
+
+. . .
+
+$$\mathbf{A}_{2 \times \mathbf{3}} \times \mathbf{B}_{\mathbf{3} \times 2} = \mathbf{C}_{2 \times 2} \quad \text{(Square 2x2 Matrix)}$$
+
+. . .
+
+$$\mathbf{B}_{3 \times \mathbf{2}} \times \mathbf{A}_{\mathbf{2} \times 3} = \mathbf{D}_{3 \times 3} \quad \text{(Square 3x3 Matrix)}$$
+
+- Changing the multiplication order changes both the conformability checks and the resulting network's dimensions!
+
+---
+
+## Clarification: Non-Commutativity in Networks
+
+**Why does order matter socially?**
+
+- $\mathbf{A} \times \mathbf{B}$: "How many paths are there from ego to alter via intermediate nodes (using $\mathbf{B}$'s ties)?"
+- $\mathbf{B} \times \mathbf{A}$: "How many paths via $\mathbf{A}$'s ties?" *Different question, different answer, different matrix size.*
+
+This mirrors how **network directionality and mediation structure** change under different relationship sequences.
+
+---
+
+# Part 2: Step-by-Step Multiplication Mechanics
+
+---
+
+## Row-by-Column Vector Multiplication
+
+- Let's multiply a $2 \times 3$ matrix $\mathbf{A}$ by a $3 \times 2$ matrix $\mathbf{B}$ to produce a $2 \times 2$ matrix $\mathbf{C}$:
+
+$$\mathbf{A} = \begin{pmatrix} \mathbf{3} & \mathbf{4} & \mathbf{5} \\ 7 & 6 & 3 \end{pmatrix} \quad \mathbf{B} = \begin{pmatrix} \mathbf{3} & 7 \\ \mathbf{4} & 9 \\ \mathbf{5} & 3 \end{pmatrix}$$
+
+- To compute cell $c_{ij}$ in the target matrix, we multiply row $i$ of the left matrix by column $j$ of the right matrix, then sum the products.
+- Let's trace each of the 4 cells in the target matrix $\mathbf{C}_{2 \times 2}$ progressively.
+
+---
+
+## Target Cell $c_{11}$ (Row 1, Column 1)
+
+::: {.columns}
+::: {.column width="50%"}
+### Highlighted Vectors
+* **Row 1 of A**: $\color{red}{\{3, 4, 5\}}$
+* **Column 1 of B**: $\color{blue}{\{3, 4, 5\}}$
+
+### Calculation
+$$c_{11} = (\color{red}{3} \times \color{blue}{3}) + (\color{red}{4} \times \color{blue}{4}) + (\color{red}{5} \times \color{blue}{5})$$
+$$c_{11} = 9 + 16 + 25 = \mathbf{50}$$
+:::
+
+::: {.column width="50%"}
+### Target Matrix C
+$$\mathbf{C} = \begin{pmatrix} \mathbf{50} & ? \\ ? & ? \end{pmatrix}$$
+:::
+:::
+
+---
+
+## Target Cell $c_{12}$ (Row 1, Column 2)
+
+::: {.columns}
+::: {.column width="50%"}
+### Highlighted Vectors
+* **Row 1 of A**: $\color{red}{\{3, 4, 5\}}$
+* **Column 2 of B**: $\color{blue}{\{7, 9, 3\}}$
+
+### Calculation
+$$c_{12} = (\color{red}{3} \times \color{blue}{7}) + (\color{red}{4} \times \color{blue}{9}) + (\color{red}{5} \times \color{blue}{3})$$
+$$c_{12} = 21 + 36 + 15 = \mathbf{72}$$
+:::
+
+::: {.column width="50%"}
+### Target Matrix C
+$$\mathbf{C} = \begin{pmatrix} 50 & \mathbf{72} \\ ? & ? \end{pmatrix}$$
+:::
+:::
+
+---
+
+## Target Cell $c_{21}$ (Row 2, Column 1)
+
+::: {.columns}
+::: {.column width="50%"}
+### Highlighted Vectors
+* **Row 2 of A**: $\color{red}{\{7, 6, 3\}}$
+* **Column 1 of B**: $\color{blue}{\{3, 4, 5\}}$
+
+### Calculation
+$$c_{21} = (\color{red}{7} \times \color{blue}{3}) + (\color{red}{6} \times \color{blue}{4}) + (\color{red}{3} \times \color{blue}{5})$$
+$$c_{21} = 21 + 24 + 15 = \mathbf{60}$$
+:::
+
+::: {.column width="50%"}
+### Target Matrix C
+$$\mathbf{C} = \begin{pmatrix} 50 & 72 \\ \mathbf{60} & ? \end{pmatrix}$$
+:::
+:::
+
+---
+
+## Target Cell $c_{22}$ (Row 2, Column 2)
+
+::: {.columns}
+::: {.column width="50%"}
+### Highlighted Vectors
+* **Row 2 of A**: $\color{red}{\{7, 6, 3\}}$
+* **Column 2 of B**: $\color{blue}{\{7, 9, 3\}}$
+
+### Calculation
+$$c_{22} = (\color{red}{7} \times \color{blue}{7}) + (\color{red}{6} \times \color{blue}{9}) + (\color{red}{3} \times \color{blue}{3})$$
+$$c_{22} = 49 + 54 + 9 = \mathbf{112}$$
+:::
+
+::: {.column width="50%"}
+### Finished Target Matrix C
+$$\mathbf{C} = \begin{pmatrix} 50 & 72 \\ 60 & \mathbf{112} \end{pmatrix}$$
+:::
+:::
+
+---
+
+## Conceptual Bridge: What Does Multiplication Mean in Networks?
+
+Before diving into applications, step back:
+
+- **In matrix multiplication**, each cell $c_{ij}$ of the product counts **paths of a specific type** connecting $i$ to $j$ through intermediate nodes.
+- The row-by-column multiplication is not arbitrary—it's counting **how many intermediate nodes $k$ satisfy** the path condition.
+- In network terms: *"For each person $k$ they both connect to, add 1 to their path count."*
+
+This is the foundation for all dynamic network applications: common neighbors, clustering, walks, reachability.
+
+---
+
+# Part 3: Dynamic Network Applications
+
+---
+
+## Transpose Multiplication: Finding Common Neighbors
+
+- If we multiply a network's adjacency matrix $\mathbf{P}$ by its transpose $\mathbf{P}^T$:
+  $$\mathbf{P} \times \mathbf{P}^T = \mathbf{C}_{\text{common}}$$
+
+---
+
+## Why Does $\mathbf{P} \times \mathbf{P}^T$ Find Common Neighbors?
+
+- **The Diagonal Cells ($c_{ii}$)**: 
+  - Multiplies Row $i$ by Column $i$ (which is Row $i$ again in a symmetric matrix).
+  - **Result**: $\sum_k p_{ik} \times p_{ik} = \sum_k p_{ik}^2$. Since $p_{ik} \in \{0,1\}$, this becomes $\sum_k p_{ik}$ = the **degree of node $i$** (total friends).
+
+- **The Off-Diagonal Cells ($c_{ij}$)**:
+  - Multiplies Row $i$ (node $i$'s friendships) by Column $j$ of $\mathbf{P}^T$ (which is Row $j$, node $j$'s friendships).
+  - **Result**: Counts exactly how many **common neighbors** node $i$ and node $j$ share (mutual friends).
+
+---
+
+## Transpose Multiplication ($\mathbf{P} \times \mathbf{P}^T$): Setup
+
+- Let's write out the complete multiplication of our $6 \times 6$ symmetric "Parties With" adjacency matrix $\mathbf{P}$:
+
+$$\mathbf{P} \times \mathbf{P}^T = \begin{pmatrix} 0 & 1 & 1 & 0 & 1 & 0 \\\\ 1 & 0 & 1 & 1 & 0 & 0 \\\\ 1 & 1 & 0 & 1 & 1 & 1 \\\\ 0 & 1 & 1 & 0 & 1 & 0 \\\\ 1 & 0 & 1 & 1 & 0 & 1 \\\\ 0 & 0 & 1 & 0 & 1 & 0 \end{pmatrix} \times \begin{pmatrix} 0 & 1 & 1 & 0 & 1 & 0 \\\\ 1 & 0 & 1 & 1 & 0 & 0 \\\\ 1 & 1 & 0 & 1 & 1 & 1 \\\\ 0 & 1 & 1 & 0 & 1 & 0 \\\\ 1 & 0 & 1 & 1 & 0 & 1 \\\\ 0 & 0 & 1 & 0 & 1 & 0 \end{pmatrix}$$
+
+---
+
+## Transpose Multiplication ($\mathbf{P} \times \mathbf{P}^T$): Diagonal Cells (Degrees)
+
+- For diagonal cells, we multiply a node's row by its own transposed column (itself). 
+- Let's trace **Node C** ($c_{33}$):
+
+$$c_{33} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1})$$
+$$c_{33} = 1 + 1 + 0 + 1 + 1 + 1 = \mathbf{5}$$
+
+- **Sociological Meaning**: Node C has **5 friends** (degree = 5).
+
+---
+
+## Transpose Multiplication ($\mathbf{P} \times \mathbf{P}^T$): Off-Diagonal Cells (Common Neighbors)
+
+- For off-diagonal cells, we multiply Row $i$ (node $i$'s friends) by Column $j$ (node $j$'s friends).
+- Let's trace common neighbors between **Node A** and **Node C**:
+
+$$c_{\text{A, C}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1})$$
+$$c_{\text{A, C}} = 0 + \mathbf{1} + 0 + 0 + \mathbf{1} + 0 = \mathbf{2}$$
+
+- **Sociological Meaning**: A and C share **2 common friends** (B and E).
+
+---
+
+## Application: Common Neighbors & Clustering
+
+**Why does this matter?**
+
+- **High common neighbors** → likely future tie formation (Granovetter's homophily).
+- **Low common neighbors** → structural hole (Burt's brokerage).
+- **Network clustering** emerges from diagonal sums: nodes with many common neighbors form dense cliques.
+
+---
+
+## Matrix Powers ($\mathbf{P}^n$) & Walks in Networks
+
+- Multiplying a square adjacency matrix by itself recursively reveals **indirect connections (walks)**:
+  - $\mathbf{P}^2 = \mathbf{P} \times \mathbf{P}$
+  - $\mathbf{P}^3 = \mathbf{P} \times \mathbf{P} \times \mathbf{P}$
+- In network science, the entries of the $n^{\text{th}}$ power of an adjacency matrix have a precise graph-theoretic meaning:
+  - **Off-Diagonal Cells ($p^{n}_{ij}$)**: Record the exact number of **walks of length $n$** connecting node $i$ and node $j$.
+  - **Diagonal Cells ($p^{n}_{ii}$)**: Record the exact number of **closed walks (cycles) of length $n$** starting and ending at node $i$.
+
+---
+
+## Clarification: Walks vs. Paths
+
+- **Walk**: A sequence of edges, allowing repetition of nodes and edges. *Example: A→B→A→C* (node A visited twice).
+- **Path**: A walk with no repeated nodes. *Example: A→B→C* (each node visited once).
+- Matrix powers count **walks**, not geodesic (shortest) paths.
+
+For networks, walks reveal **all indirect connections**, not just optimal routes—important for diffusion, information flow, and redundancy.
+
+---
+
+## Walks of Length 2 ($\mathbf{P}^2$): Setup & Intuition
+
+- To find walks of length 2, we square the adjacency matrix:
+
+$$\mathbf{P}^2 = \mathbf{P} \times \mathbf{P}$$
+
+- Since $\mathbf{P}$ is undirected, $\mathbf{P}^T = \mathbf{P}$, making $\mathbf{P}^2$ identical to $\mathbf{P} \times \mathbf{P}^T$.
+- Therefore, **walks of length 2 are mathematically equivalent to common neighbors**!
+- Why? To go from $i \rightarrow k \rightarrow j$ (walk of length 2), node $k$ must be a common friend connected to both $i$ and $j$.
+
+---
+
+## Walks of Length 2 ($\mathbf{P}^2$): Tracing Cell $p^2_{\text{A, C}}$
+
+- Let's compute the number of walks of length 2 between **Node A** and **Node C**:
+  - Row 1 (A): $\color{red}{\{0, 1, 1, 0, 1, 0\}}$
+  - Column 3 (C): $\color{blue}{\{1, 1, 0, 1, 1, 1\}}$
+
+$$p^2_{\text{A, C}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1}) = \mathbf{2}$$
+
+- These two distinct walks of length 2 are:
+  1. $A \rightarrow \mathbf{B} \rightarrow C$ (via common friend B)
+  2. $A \rightarrow \mathbf{E} \rightarrow C$ (via common friend E)
+
+---
+
+## Walks of Length 2 ($\mathbf{P}^2$): Tracing Diagonal Cell $p^2_{\text{C, C}}$
+
+- Let's compute the diagonal cell $p^2_{\text{C, C}}$ (Node C's self-loop via 2-step walks):
+
+$$p^2_{\text{C, C}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) = \mathbf{5}$$
+
+- Walks of length 2 starting and ending at C are round-trips to each friend and back:
+  - $C \rightarrow A \rightarrow C$, $C \rightarrow B \rightarrow C$, $C \rightarrow D \rightarrow C$, $C \rightarrow E \rightarrow C$, and $C \rightarrow F \rightarrow C$.
+- Thus, the diagonal elements in $\mathbf{P}^2$ represent the **degrees** of each node!
+
+---
+
+## Application: Walks and Reachability
+
+**Why count walks?**
+
+- **Short walks (length 2–3)** reveal **local clustering** and potential tie formation.
+- **Longer walks** identify **reachable components** and information-flow paths.
+- **Comparing $\mathbf{P}^n$ for different $n$** shows how networks "thicken" or "thin" with distance.
+
+---
+
+## Walks of Length 3 ($\mathbf{P}^3$) & Triangle Counting
+
+- To find walks of length 3, we multiply the squared matrix $\mathbf{P}^2$ by the original matrix:
+
+$$\mathbf{P}^3 = \mathbf{P}^2 \times \mathbf{P}$$
+
+- **Diagonal cells ($p^3_{ii}$)**: Count length-3 cycles (triangles and longer cycles) starting and ending at node $i$.
+- Since each triangle can be walked in two directions (clockwise & counterclockwise), the number of triangles node $i$ belongs to is:
+  $$\text{Triangles}(i) = \frac{p^3_{ii}}{2}$$
+
+---
+
+## Walks of Length 3 ($\mathbf{P}^3$): Tracing Diagonal Cell $p^3_{\text{C, C}}$
+
+- Let's compute the diagonal cell $p^3_{\text{C, C}}$ (Node C's triangles via 3-step walks):
+  - Row 3 of $\mathbf{P}^2$: $\color{red}{\{2, 2, 5, 2, 3, 1\}}$
+  - Column 3 of $\mathbf{P}$: $\color{blue}{\{1, 1, 0, 1, 1, 1\}}$
+
+$$p^3_{\text{C, C}} = (\color{red}{2} \times \color{blue}{1}) + (\color{red}{2} \times \color{blue}{1}) + (\color{red}{5} \times \color{blue}{0}) + (\color{red}{2} \times \color{blue}{1}) + (\color{red}{3} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) = \mathbf{10}$$
+
+- The number of triangles containing Node C:
+  $$\text{Triangles}(C) = \frac{10}{2} = \mathbf{5}$$
+
+---
+
+## Application: Transitivity & Clustering Coefficient
+
+**Why count triangles?**
+
+- **High triangle count** → **cohesive, clustered** network (friends of friends are friends).
+- **Low triangle count** → **sparse** structure (bridging, structural holes).
+- **Clustering Coefficient** = $\frac{\text{triangles}(i)}{\text{possible triangles at } i}$ measures node's embeddedness in cliques.
+
+---
+
+## Summary: Matrix Multiplication in Networks
+
+You now understand:
+
+1. **Conformability** ensures multiplications are mathematically defined.
+2. **Non-commutativity** means order determines both structure and meaning.
+3. **$\mathbf{A} \times \mathbf{A}^T$** counts common neighbors (off-diagonals) and degrees (diagonals).
+4. **$\mathbf{A}^2$** maps all walks of length 2 (including common neighbors and node degrees).
+5. **$\mathbf{A}^3$** counts walks of length 3 (revealing triangles and cycles).
+6. **Higher powers** reveal reachability, clustering, and diffusion potential.
+
+---
+
+## A Worked Example Recap
+
+Given the 6-node "Parties With" network:
+
+- **Addition** combined it with "Plays Games With" to identify multiplex ties.
+- **Transpose** reversed directions in directed networks and enabled dyad census.
+- **Multiplication** ($\mathbf{P}^2$ and $\mathbf{P}^3$) revealed neighbors, paths, and triangles.
+
+All of these operations—from basic arithmetic to high powers—tell stories about **how social structure emerges from repeated interactions and interconnections**.
+
+---
+
+## Conclusion & Next Steps
+
+**You've mastered:**
+- Basic matrix operations (addition, complement, Hadamard).
+- The transpose and its role in directed networks.
+- The dyad census and graph reciprocity.
+- Conformability and the mechanics of standard multiplication.
+- Dynamic applications: common neighbors, walks, and clustering.
+
+**Real-world applications:**
+- Predict new ties (common neighbors → friendship formation).
+- Identify brokers (low triangle count + high paths).
+- Measure network resilience (walk multiplicities).
+- Detect communities (high clustering, sparse bridges).
