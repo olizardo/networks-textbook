@@ -126,7 +126,8 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/graph-cutsets-directed.qmd` | Graph Theory: Cutsets, Bridges & Directed Connectivity |
 | `slides/graph-trees.qmd` | Graph Theory: Trees, Forests & Efficiency |
 | `slides/matrix-intro.qmd` | Networks, Graphs, and Matrices |
-| `slides/matrix-operations.qmd` | Matrix Algebra in Social Networks |
+| `slides/matrix-operations.qmd` | Matrix Algebra in Social Networks: Part I (Basic Operations, Transpose, Dyad Census) |
+| `slides/matrix-multiplication.qmd` | Matrix Algebra in Social Networks: Part II (Multiplication, Conformability, Applications) |
 | `slides/matrix-advanced.qmd` | Advanced Network Matrices |
 | `slides/ego-metrics.qmd` | Measuring Ego Networks |
 | `slides/ego-homogeneity.qmd` | Theories of Ego Network Homogeneity and Diversity |
