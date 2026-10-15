@@ -231,8 +231,8 @@ We have 5 nodes $\{A, B, C, D, E\}$. Let's build the $5 \times 5$ reachability m
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.5
+#| fig-height: 4.5
 plot_reach_highlight()
 ```
 :::
@@ -261,8 +261,8 @@ Let's trace which nodes can be reached by starting a directed walk at node **A**
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.5
+#| fig-height: 4.5
 plot_reach_highlight(active_edges = c("A-C", "A-D", "C-E", "E-D"), active_nodes = c("A", "C", "D", "E"))
 ```
 :::
@@ -293,8 +293,8 @@ Let's trace which nodes can be reached by starting a directed walk at node **B**
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.5
+#| fig-height: 4.5
 plot_reach_highlight(active_edges = c("B-E", "E-D"), active_nodes = c("B", "E", "D"))
 ```
 :::
@@ -317,20 +317,6 @@ plot_reach_highlight(active_edges = c("B-E", "E-D"), active_nodes = c("B", "E", 
 
 Repeating this row-by-row analysis yields the completed reachability matrix.
 
-:::: {.columns align=center}
-
-::: {.column width="50%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
-plot_reach_highlight()
-```
-:::
-
-::: {.column width="50%"}
-### Reachability Matrix ($\mathbf{D^r}$)
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | 0 | 1 | 1 | 1 |
@@ -341,9 +327,6 @@ plot_reach_highlight()
 
 - **Receiver Node (D)**: Row D is all $0$s (D can't reach anyone).
 - **Transmitter Node (B)**: Column B is all $0$s (B can't be reached by anyone).
-:::
-
-::::
 
 # Part 2: Directed Graphs: Flavors of Connectivity
 
@@ -368,13 +351,12 @@ Every pair of nodes is mutually reachable.
 
 :::: {.columns align=center}
 
-::: {.column width="50%"}
-### Strongly Connected Graph
+::: {.column style="width: 50%; font-size: 85%;"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 3.2
+#| fig-height: 3.2
 ggraph(gr_strong, layout = 'circle') +
   geom_edge_link(color = "steelblue", edge_width = 1.15,
                  arrow = arrow(length = unit(3, 'mm')),
@@ -383,10 +365,11 @@ ggraph(gr_strong, layout = 'circle') +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
+
+- **No Zeros**: Since everyone can reach everyone, the reachability matrix is the **all-ones** matrix!
 :::
 
-::: {.column width="50%"}
-### Reachability Matrix ($\mathbf{D^r}$)
+::: {.column style="width: 50%; font-size: 85%;"}
 | | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **1** | -- | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
@@ -397,8 +380,6 @@ ggraph(gr_strong, layout = 'circle') +
 | **6** | 1 | 1 | 1 | 1 | 1 | -- | 1 | 1 |
 | **7** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | -- | 1 |
 | **8** | 1 | 1 | 1 | 1 | 1 | 1 | 1 | -- |
-
-- **No Zeros**: Since everyone can reach everyone, the reachability matrix is the **all-ones** matrix!
 :::
 
 ::::
@@ -411,25 +392,27 @@ At least one directed path exists between every pair, but not necessarily in bot
 
 :::: {.columns align=center}
 
-::: {.column width="50%"}
-### Unilaterally Connected Graph
+::: {.column style="width: 50%; font-size: 85%;"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 2.6
+#| fig-height: 2.6
 ggraph(gr_unilateral, layout = 'circle') +
-  geom_edge_link(color = "steelblue", edge_width = 1.15,
+  geom_edge_parallel(color = "steelblue", edge_width = 1.15,
                  arrow = arrow(length = unit(3, 'mm')),
-                 end_cap = circle(5, 'mm')) +
+                 end_cap = circle(5, 'mm'),
+                 sep = unit(3.5, 'mm')) +
   geom_node_point(color = "tan2", size = 14) +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
+
+- **Some Zeros**: Matrix contains some $0$s (specifically Column 2, node 2 is a transmitter).
+- **No Symmetric Zeros**: For any pair $\{u, v\}$, we never have *both* $D^r_{uv}=0$ and $D^r_{vu}=0$. At least one direction is always $1$.
 :::
 
-::: {.column width="50%"}
-### Reachability Matrix ($\mathbf{D^r}$)
+::: {.column style="width: 50%; font-size: 85%;"}
 | | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **1** | -- | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | 1 | 1 |
@@ -440,9 +423,6 @@ ggraph(gr_unilateral, layout = 'circle') +
 | **6** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | -- | 1 | 1 |
 | **7** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | -- | 1 |
 | **8** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | 1 | -- |
-
-- **Some Zeros**: Matrix contains some $0$s (specifically Column 2, node 2 is a transmitter).
-- **No Symmetric Zeros**: For any pair $\{u, v\}$, we never have *both* $D^r_{uv}=0$ and $D^r_{vu}=0$. At least one direction is always $1$.
 :::
 
 ::::
@@ -455,13 +435,12 @@ At least one pair of nodes is completely mutually unreachable via directed paths
 
 :::: {.columns align=center}
 
-::: {.column width="50%"}
-### Weakly Connected Graph
+::: {.column style="width: 50%; font-size: 85%;"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 2.7
+#| fig-height: 2.7
 ggraph(gr_weak, layout = 'circle') +
   geom_edge_link(color = "steelblue", edge_width = 1.15,
                  arrow = arrow(length = unit(3, 'mm')),
@@ -470,10 +449,13 @@ ggraph(gr_weak, layout = 'circle') +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
+
+- **Mutually Unreachable Pair**:
+  - Node 2 can't reach 7 ($D^r_{27}=0$), and Node 7 can't reach 2 ($D^r_{72}=0$).
+  - This **symmetric zero** ($D^r_{27} = D^r_{72} = 0$) proves they are mutually unreachable, making the graph **weakly connected**.
 :::
 
-::: {.column width="50%"}
-### Reachability Matrix ($\mathbf{D^r}$)
+::: {.column style="width: 50%; font-size: 85%;"}
 | | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **1** | -- | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 |
@@ -484,10 +466,6 @@ ggraph(gr_weak, layout = 'circle') +
 | **6** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | -- | <span style="color:red; font-weight:bold;">0</span> | 1 |
 | **7** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | -- | 1 |
 | **8** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | <span style="color:red; font-weight:bold;">0</span> | -- |
-
-- **Mutually Unreachable Pair**:
-  - Node 2 can't reach 7 ($D^r_{27}=0$), and Node 7 can't reach 2 ($D^r_{72}=0$).
-  - This **symmetric zero** ($D^r_{27} = D^r_{72} = 0$) proves they are mutually unreachable, making the graph **weakly connected**.
 :::
 
 ::::
@@ -498,30 +476,39 @@ ggraph(gr_weak, layout = 'circle') +
 
 ## Measuring Graph Connectedness ($C$)
 
-:::: {.columns align=center}
+::: {.columns align=center}
 
-::: {.column width="60%"}
+::: {.column style="width: 60%; font-size: 85%;"}
 ::: {.incremental}
 - **Graph Connectedness ($C$)** measures the overall capacity of a network to facilitate connections.
 - It is defined as the **density of the reachability matrix** (excluding diagonal cells):
   - $$C = \frac{\sum_{i \neq j} D^r_{ij}}{N(N-1)}$$
-- **For our weakly connected 8-node graph**:
-  - Sum of all cells containing a $1$ is **42**.
-  - Total possible off-diagonal cells: $8(7) = 56$.
-  - $$C = \frac{42}{56} = 0.75$$
 :::
 :::
 
 ::: {.column width="40%"}
 ### Reachability Density
+<div style="font-size: 85%;">
 | Value | Meaning |
 | :--- | :--- |
-| **$C = 1.0$** | **Strongly connected** network (perfect reachability, all-ones matrix). |
-| **$C < 1.0$** | Unilaterally or weakly connected network (contains zeros). |
-| **$C = 0.0$** | Completely disconnected network (all zeros). |
+| **$C = 1.0$** | **Strongly connected** (all-ones matrix). |
+| **$C < 1.0$** | Unilaterally or weakly connected (has zeros). |
+| **$C = 0.0$** | Completely disconnected (all zeros). |
+</div>
 :::
 
 ::::
+
+---
+
+## Graph Connectedness: Worked Example
+
+::: {.incremental}
+- **For our weakly connected 8-node graph**:
+  - Sum of all cells containing a $1$ is **42**.
+  - Total possible off-diagonal cells: $8(7) = 56$.
+  - $$C = \frac{42}{56} = 0.75$$
+:::
 
 # Part 4: The Geodesic Distance Matrix Step-by-Step
 
@@ -551,14 +538,14 @@ We start with our undirected reference graph. Nodes with direct connections get 
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.5
+#| fig-height: 4.5
 plot_undir_highlight(active_edges = c("A-C", "A-D", "B-E", "C-D", "C-E", "D-E"))
 ```
 :::
 
 ::: {.column width="50%"}
-### Matrix Progress
+<div style="font-size: 90%;">
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | 0 | ? | **1** | **1** | ? |
@@ -569,6 +556,7 @@ plot_undir_highlight(active_edges = c("A-C", "A-D", "B-E", "C-D", "C-E", "D-E"))
 
 - Symmetrical connections $a_{AC} = a_{CA} = 1.0$, etc.
 - Diagonals are initialized to **0** because $d(v, v) = 0$.
+</div>
 :::
 
 ::::
@@ -585,14 +573,14 @@ For non-adjacent nodes, we calculate the length of the shortest path connecting 
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.0
+#| fig-height: 4.0
 plot_undir_highlight(active_edges = c("B-E", "C-E", "D-E", "A-C"), active_nodes = c("A", "B", "C", "D", "E"))
 ```
 :::
 
 ::: {.column width="50%"}
-### Matrix Progress
+<div style="font-size: 90%;">
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | 0 | ? | 1 | 1 | **2** |
@@ -604,6 +592,7 @@ plot_undir_highlight(active_edges = c("B-E", "C-E", "D-E", "A-C"), active_nodes 
 - **B to C**: Shortest path is $B \rightarrow E \rightarrow C$ (length **2**).
 - **B to D**: Shortest path is $B \rightarrow E \rightarrow D$ (length **2**).
 - **A to E**: Shortest path is $A \rightarrow C \rightarrow E$ (length **2**).
+</div>
 :::
 
 ::::
@@ -620,14 +609,14 @@ We compute the remaining non-adjacent pair, representing the maximum distance in
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.0
+#| fig-height: 4.0
 plot_undir_highlight(active_edges = c("A-C", "C-E", "B-E"), active_nodes = c("A", "B"))
 ```
 :::
 
 ::: {.column width="50%"}
-### Symmetric Distance Matrix ($\mathbf{D^g}$)
+<div style="font-size: 90%;">
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | 0 | **3** | 1 | 1 | 2 |
@@ -638,6 +627,7 @@ plot_undir_highlight(active_edges = c("A-C", "C-E", "B-E"), active_nodes = c("A"
 
 - **A to B**: Shortest path is $A \rightarrow C \rightarrow E \rightarrow B$ (length **3**).
 - This completed matrix is perfectly symmetric!
+</div>
 :::
 
 ::::
@@ -654,14 +644,14 @@ For directed graphs, we follow the same process but respect the arrows (Sender $
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 3.8
+#| fig-height: 3.8
 plot_dir_highlight_geo()
 ```
 :::
 
 ::: {.column width="50%"}
-### Matrix Progress
+<div style="font-size: 90%;">
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | 0 | ? | **1** | **1** | **2** |
@@ -672,6 +662,7 @@ plot_dir_highlight_geo()
 
 - **Direct links**: $A \rightarrow C = 1, A \rightarrow D = 1, B \rightarrow E = 1, C \rightarrow E = 1, E \rightarrow D = 1$.
 - **Path of length 2**: $A \rightarrow C \rightarrow E$ (length 2), $B \rightarrow E \rightarrow D$ (length 2), $C \rightarrow E \rightarrow D$ (length 2).
+</div>
 :::
 
 ::::
@@ -688,14 +679,14 @@ If a node $i$ **cannot** reach node $j$ via any directed path, their geodesic di
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.1
+#| fig-height: 4.1
 plot_dir_highlight_geo(active_nodes = "D")
 ```
 :::
 
 ::: {.column width="50%"}
-### Asymmetric Distance Matrix ($\mathbf{D^g}$)
+<div style="font-size: 90%;">
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | 0 | **$\infty$** | 1 | 1 | 2 |
@@ -706,6 +697,7 @@ plot_dir_highlight_geo(active_nodes = "D")
 
 - **Unreachable**: e.g., $B$ can't reach $A \rightarrow d_{BA} = \infty$.
 - **Pure Sink (D)**: Row D is full of $\infty$ cells since node D can't reach anyone.
+</div>
 :::
 
 ::::
@@ -739,14 +731,14 @@ Eccentricity is calculated as the maximum value in each row of the Geodesic Dist
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 3.7
+#| fig-height: 3.7
 plot_undir_highlight()
 ```
 :::
 
 ::: {.column width="50%"}
-### Distance Matrix with Eccentricity ($e$)
+<div style="font-size: 80%;">
 | | A | B | C | D | E | **Row Max ($e$)** |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | 0 | <span style="color:red; font-weight:bold;">3</span> | 1 | 1 | 2 | **$e(A) = 3$** |
@@ -757,6 +749,7 @@ plot_undir_highlight()
 
 - **Graph Diameter ($d$)**: The maximum eccentricity value in the column is **3** ($d = 3$).
 - Nodes C, D, E are the most central (closest "worst-case" distance of 2).
+</div>
 :::
 
 ::::
@@ -790,14 +783,15 @@ Overlap measures the proportion of shared neighbors (Green node) relative to uni
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 3.9
+#| fig-height: 3.9
 plot_neighbors_highlight(active_nodes = c("A", "C"), common_nodes = "D")
 ```
 :::
 
 ::: {.column width="50%"}
 ### Neighborhood Overlap Matrix ($\mathbf{O}$)
+<div style="font-size: 80%;">
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | 0.00 | <span style="color:red; font-weight:bold;">0.25</span> | 0.25 | 0.67 |
@@ -808,6 +802,7 @@ plot_neighbors_highlight(active_nodes = c("A", "C"), common_nodes = "D")
 
 - Cell $O_{AC} = 0.25$ represents the overlap between A (red) and C (red).
 - Their sole common neighbor is node D (green).
+</div>
 :::
 
 ::::
