@@ -179,10 +179,12 @@ def collect_measurements(html_path, chrome_bin):
         cmd = [chrome_bin, "--headless=new", "--disable-gpu", "--no-sandbox",
                "--force-device-scale-factor=1",
                "--window-size=%d,%d" % (WINDOW_W, WINDOW_H),
-               "--virtual-time-budget=90000",
+               "--virtual-time-budget=300000",
                "--screenshot=" + shot.name, url]
         try:
-            subprocess.run(cmd, capture_output=True, timeout=120)
+            # embed-resources decks inline everything as base64 (8MB+) and
+            # need much longer to parse than the virtual-time budget covers
+            subprocess.run(cmd, capture_output=True, timeout=300)
         except subprocess.TimeoutExpired:
             pass
         deadline = time.time() + 30
