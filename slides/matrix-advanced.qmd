@@ -342,6 +342,8 @@ plot_reach_highlight()
 :::
 
 ::: {.column width="55%"}
+<div style="font-size: 90%;">
+
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | 0 | 1 | 1 | 1 |
@@ -352,6 +354,8 @@ plot_reach_highlight()
 
 - **Receiver Node (D)**: Row D is all $0$s (D can't reach anyone).
 - **Transmitter Node (B)**: Column B is all $0$s (B can't be reached by anyone).
+
+</div>
 :::
 
 ::::
@@ -425,16 +429,14 @@ plot_reach_highlight()
 
 ## Case 1: Strongly Connected Graphs
 
-Every pair of nodes is mutually reachable.
-
 :::: {.columns align=center}
 
 ::: {.column style="width: 50%; font-size: 85%;"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 3.2
-#| fig-height: 3.2
+#| fig-width: 3.1
+#| fig-height: 3.1
 ggraph(gr_strong, layout = 'circle') +
   geom_edge_link(color = "steelblue", edge_width = 1.15,
                  arrow = arrow(length = unit(3, 'mm')),
@@ -444,8 +446,9 @@ ggraph(gr_strong, layout = 'circle') +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 
-- **8-Node Example** (Left): several **interlocking directed cycles** thread through all eight nodes (e.g., $1 \to 2 \to 3 \to 1$ and $4 \to 6 \to 8 \to 4$, joined by cross-ties like $3 \to 4$ and $7 \to 1$).
-- **No Zeros**: Since everyone can reach everyone, the reachability matrix is the **all-ones** matrix!
+- **Strongly connected**: **every** pair of nodes is mutually reachable.
+- **8-Node Example** (Left): **interlocking directed cycles** thread through all eight nodes.
+- **No Zeros**: everyone can reach everyone, so the reachability matrix is the **all-ones** matrix!
 :::
 
 ::: {.column style="width: 50%; font-size: 85%;"}
@@ -467,16 +470,14 @@ ggraph(gr_strong, layout = 'circle') +
 
 ## Case 2: Unilaterally Connected Graphs
 
-At least one directed path exists between every pair, but not necessarily in both directions.
-
 :::: {.columns align=center}
 
 ::: {.column style="width: 50%; font-size: 85%;"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 3.5
-#| fig-height: 3.5
+#| fig-width: 3.3
+#| fig-height: 3.3
 ggraph(gr_unilateral, layout = 'circle') +
   geom_edge_parallel(color = "steelblue", edge_width = 1.15,
                  arrow = arrow(length = unit(3.5, 'mm')),
@@ -487,8 +488,9 @@ ggraph(gr_unilateral, layout = 'circle') +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 
-- **Some Zeros**: Matrix contains some $0$s (specifically Column 2, node 2 is a transmitter).
-- **No Symmetric Zeros**: For any pair $\{u, v\}$, we never have *both* $D^r_{uv}=0$ and $D^r_{vu}=0$. At least one direction is always $1$.
+- **Unilaterally connected**: at least one directed path between **every** pair, but not necessarily both ways.
+- **Some Zeros**: Column 2 is all $0$s — node 2 is a **transmitter** (sends to everyone, receives from no one).
+- **No Symmetric Zeros**: for any pair $\{u, v\}$, at least one direction is always $1$.
 :::
 
 ::: {.column style="width: 50%; font-size: 85%;"}
@@ -882,10 +884,7 @@ plot_dir_highlight_geo(active_nodes = "D")
 
 ## Visualizing Node Eccentricity
 
-::: {.incremental}
-- We return to our **undirected 5-node example** and its completed distance matrix (Steps 1–3) — every pair is reachable, so no $\infty$ cells.
-- Eccentricity is calculated as the maximum value in each **row** of the Geodesic Distance Matrix (excluding diagonal 0s).
-:::
+- We return to our **undirected 5-node example** (Steps 1–3 distance matrix): eccentricity is the maximum value in each **row** (excluding diagonal 0s).
 
 :::: {.columns align=center}
 

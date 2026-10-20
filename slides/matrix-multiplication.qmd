@@ -69,6 +69,27 @@ l_coords_5 <- matrix(c(
   1.5, 0.7,   # d
   1.5, -0.7   # e
 ), ncol = 2, byrow = TRUE)
+
+# ---- Plotting helper for the 6-node "parties with" graph (fixed circular layout) ----
+PAL6 <- c(other = "tan1", focus = "red", second = "dodgerblue3", friend = "forestgreen")
+g6 <- function(catmap = character(0), pt = 12, tx = 6.2) {
+  g <- gr_p |>
+    mutate(cat = dplyr::coalesce(catmap[name], "other"))
+  ggraph(g, layout = "manual", x = l_coords_6[, 1], y = l_coords_6[, 2]) +
+    geom_edge_link(color = "steelblue", edge_width = 1, lineend = "round") +
+    geom_node_point(aes(color = cat), size = pt) +
+    scale_color_manual(values = PAL6, guide = "none") +
+    geom_node_text(aes(label = name), size = tx, color = "white", fontface = "bold") +
+    theme_graph() + coord_cartesian(clip = "off")
+}
+# ---- kable helper for 6x6 matrices (bold rowname column) ----
+kb6 <- function(m, font = 11) {
+  kbl(m, format = "html", align = "c") %>%
+    column_spec(1, bold = TRUE) %>%
+    kable_styling(bootstrap_options = c("condensed"), font_size = font)
+}
+# ---- P x P^T for the completed-product slide ----
+CPPT <- P %*% t(P)
 ```
 
 # Part 1: Conformability Rules
@@ -292,8 +313,29 @@ This is the foundation for all dynamic network applications: common neighbors, c
 
 ## Transpose Multiplication: Finding Common Neighbors
 
+::: {.columns}
+::: {.column width="52%"}
 - If we multiply a network's adjacency matrix $\mathbf{P}$ by its transpose $\mathbf{P}^T$:
-  $$\mathbf{P} \times \mathbf{P}^T = \mathbf{C}_{\text{common}}$$
+
+$$\mathbf{P} \times \mathbf{P}^T = \mathbf{C}_{\text{common}}$$
+
+. . .
+
+- The **rows of $\mathbf{P}$** list each node's friends; the **columns of $\mathbf{P}^T$** list them a second time
+- So each cell $c_{ij}$ multiplies node $i$'s friendship list by node $j$'s — the result counts how much the two lists **overlap**: their **common neighbors**!
+:::
+
+::: {.column width="48%"}
+```{r}
+#| echo: false
+#| fig-height: 4.4
+#| fig-width: 4.4
+g6()
+```
+
+- Our running example: six friends (A–F) and their "parties with" ties
+:::
+:::
 
 ---
 
@@ -311,33 +353,153 @@ This is the foundation for all dynamic network applications: common neighbors, c
 
 ## Transpose Multiplication ($\mathbf{P} \times \mathbf{P}^T$): Setup
 
-- Let's write out the complete multiplication of our $6 \times 6$ symmetric "Parties With" adjacency matrix $\mathbf{P}$:
+::: {.columns}
+::: {.column width="30%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+g6(pt = 10, tx = 5.2)
+```
+:::
 
-$$\mathbf{P} \times \mathbf{P}^T = \begin{pmatrix} 0 & 1 & 1 & 0 & 1 & 0 \\\\ 1 & 0 & 1 & 1 & 0 & 0 \\\\ 1 & 1 & 0 & 1 & 1 & 1 \\\\ 0 & 1 & 1 & 0 & 1 & 0 \\\\ 1 & 0 & 1 & 1 & 0 & 1 \\\\ 0 & 0 & 1 & 0 & 1 & 0 \end{pmatrix} \times \begin{pmatrix} 0 & 1 & 1 & 0 & 1 & 0 \\\\ 1 & 0 & 1 & 1 & 0 & 0 \\\\ 1 & 1 & 0 & 1 & 1 & 1 \\\\ 0 & 1 & 1 & 0 & 1 & 0 \\\\ 1 & 0 & 1 & 1 & 0 & 1 \\\\ 0 & 0 & 1 & 0 & 1 & 0 \end{pmatrix}$$
+::: {.column width="35%"}
+$\mathbf{P}$ (the adjacency matrix)
+
+```{r}
+#| echo: false
+kb6(P)
+```
+:::
+
+::: {.column width="35%"}
+$\mathbf{P}^T$ (columns of $\mathbf{P}^T$ = rows of $\mathbf{P}$)
+
+```{r}
+#| echo: false
+kb6(t(P))
+```
+:::
+:::
+
+. . .
+
+- Our $6 \times 6$ "parties with" matrix $\mathbf{P}$ is **symmetric**, so $\mathbf{P}^T$ contains the same numbers — but read its entries by **column**: column $j$ of $\mathbf{P}^T$ is node $j$'s friendship row
+- Multiplying $\mathbf{P} \times \mathbf{P}^T$ therefore compares every node's friendship row with every other node's friendship row
 
 ---
 
 ## Transpose Multiplication ($\mathbf{P} \times \mathbf{P}^T$): Diagonal Cells (Degrees)
 
-- For diagonal cells, we multiply a node's row by its own transposed column (itself). 
-- Let's trace **Node C** ($c_{33}$):
+::: {.columns}
+::: {.column width="26%"}
+```{r}
+#| echo: false
+#| fig-height: 3.0
+#| fig-width: 3.0
+g6(catmap = c(C = "focus", A = "friend", B = "friend", D = "friend", E = "friend", F = "friend"), pt = 10, tx = 5.2)
+```
 
-$$c_{33} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1})$$
-$$c_{33} = 1 + 1 + 0 + 1 + 1 + 1 = \mathbf{5}$$
+- Red = **C**; green = friends
+:::
 
-- **Sociological Meaning**: Node C has **5 friends** (degree = 5).
+::: {.column width="37%"}
+**Row 3 of $\mathbf{P}$** (C's friendships)
+
+```{r}
+#| echo: false
+kb6(P) %>% row_spec(3, background = "#F5B7B1", bold = TRUE)
+```
+:::
+
+::: {.column width="37%"}
+**Column 3 of $\mathbf{P}^T$** (= Row 3 of $\mathbf{P}$)
+
+```{r}
+#| echo: false
+kb6(t(P)) %>% column_spec(4, background = "#AED6F1", bold = TRUE)
+```
+:::
+:::
+
+. . .
+
+$$c_{33} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) = \mathbf{5}$$
+
+. . .
+
+- A diagonal cell pairs node $i$ with **itself** — each green friend contributes 1, so $c_{33} = 5$: the diagonal recovers the whole **degree sequence**!
 
 ---
 
 ## Transpose Multiplication ($\mathbf{P} \times \mathbf{P}^T$): Off-Diagonal Cells (Common Neighbors)
 
-- For off-diagonal cells, we multiply Row $i$ (node $i$'s friends) by Column $j$ (node $j$'s friends).
-- Let's trace common neighbors between **Node A** and **Node C**:
+::: {.columns}
+::: {.column width="26%"}
+```{r}
+#| echo: false
+#| fig-height: 3.0
+#| fig-width: 3.0
+g6(catmap = c(A = "focus", C = "second", B = "friend", E = "friend"), pt = 10, tx = 5.2)
+```
+:::
 
-$$c_{\text{A, C}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1})$$
-$$c_{\text{A, C}} = 0 + \mathbf{1} + 0 + 0 + \mathbf{1} + 0 = \mathbf{2}$$
+::: {.column width="37%"}
+**Row 1 of $\mathbf{P}$** (A's friendships)
 
-- **Sociological Meaning**: A and C share **2 common friends** (B and E).
+```{r}
+#| echo: false
+kb6(P) %>% row_spec(1, background = "#F5B7B1", bold = TRUE)
+```
+:::
+
+::: {.column width="37%"}
+**Column 3 of $\mathbf{P}^T$** (C's friendships)
+
+```{r}
+#| echo: false
+kb6(t(P)) %>% column_spec(4, background = "#AED6F1", bold = TRUE)
+```
+:::
+:::
+
+. . .
+
+$$c_{\text{A, C}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1}) = \mathbf{2}$$
+
+. . .
+
+- In the graph: red **A**, blue **C**, green **shared friends**. Each shared friend contributes $\mathbf{1}$ (the bold pairs) — **A and C share 2 common friends: B and E**
+
+---
+
+## The Completed Product Matrix
+
+::: {.columns}
+::: {.column width="42%"}
+```{r}
+#| echo: false
+Cspec <- CPPT
+for (i in 1:6) Cspec[i, i] <- cell_spec(CPPT[i, i], bold = TRUE, background = "#FCF3CF")
+kbl(Cspec, format = "html", align = "c", escape = FALSE) %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 11)
+```
+:::
+
+::: {.column width="58%"}
+```{r}
+#| echo: false
+#| fig-height: 3.4
+#| fig-width: 3.4
+g6(pt = 11, tx = 5.8)
+```
+
+- **Diagonal (shaded)**: each node compared with itself = its **degree** — C has 5, E has 4, F has 2
+- **Off-diagonal**: pairwise **common friends** — $c_{AC} = 2$ (B and E); $c_{BE} = 3$ (A, C, and D)
+- The matrix is **symmetric**: sharing friends is mutual!
+:::
+:::
 
 ---
 
