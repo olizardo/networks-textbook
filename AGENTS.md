@@ -21,7 +21,7 @@ This repository contains the source code for an introductory textbook on social 
 - `networks.bib`: Bibliography file containing references/citations for the textbook.
 - `renv.lock` / `renv/`: R environment lockfile and project library.
 - `slides/`: Reveal.js slide decks for course lectures. Rendered into `_sites/slides/` during publishing.
-- `homeworks/`: Course homework source assignments (`homework{1..9}.qmd`). Rendered locally using `./render_homeworks.sh` and synced directly to UCLA Bruin Learn (Canvas LMS). Homeworks are explicitly excluded from public web publishing.
+- `homeworks/`: Course homework assignments (`homework{1..9}.qmd`). **Legacy location (2026-09-23 migration):** the primary homework sources now live in the sibling repo `../SOCIOL-111/homeworks/`; this directory is a fallback that the Canvas sync script reads only if the sibling copy is absent. Rendered locally using `./render_homeworks.sh` and synced directly to UCLA Bruin Learn (Canvas LMS). Homeworks are explicitly excluded from public web publishing.
 - `scraps/`: Drafts, retired chapters, and working fragments excluded from the book build.
 
 ## Chapter Inventory
@@ -151,19 +151,19 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 
 ### 2. Homework Authoring & Canvas LMS Sync
 Homework assignments are delivered privately to students via UCLA Bruin Learn (Canvas LMS) rather than published on the open web:
-1. **Edit assignment:** Modify `homeworks/homework{1..9}.qmd`.
-2. **Render locally:** Run `./render_homeworks.sh [hw_number]`
+1. **Edit assignment:** Modify `homework{1..9}.qmd` in the sibling repo's `homeworks/` directory (`C:\projects\SOCIOL-111\homeworks`) — the primary source since 2026-09-23. This repo's `homeworks/` directory is a legacy fallback only.
+2. **Render locally:** From this repo, run `./render_homeworks.sh [hw_number]`
    ```bash
    ./render_homeworks.sh 1       # Render Homework 1
    ./render_homeworks.sh         # Render all Homeworks (1-9)
    ```
    This generates `homeworks/homework{i}.html` and diagram figures in `homeworks/homework{i}_files/figure-html/`.
-3. **Sync to Bruin Learn:** From the sibling repository (`../SOCIOL 111`):
+3. **Sync to Bruin Learn:** From the sibling repository (`../SOCIOL-111`, hyphenated folder name):
    ```bash
    python3 sync_homeworks_to_canvas.py --dry-run --hw 1   # Preview changes
    python3 sync_homeworks_to_canvas.py --hw 1             # Push update live
    ```
-   *Note:* The sync script automatically detects and reads from this local repository (`../networks-textbook`) for instant updates. Pass `--remote` to force fetching from GitHub if needed.
+   *Note:* The sync script resolves homework sources in order: the sibling repo's own `homeworks/` directory (primary), then this local checkout (`../networks-textbook`, the legacy fallback — also settable via the `NETWORKS_TEXTBOOK_DIR` env var), then GitHub. Pass `--remote` to force fetching from GitHub if needed.
 4. **Security & Privacy:** Homework assignments and answer keys must never be published to `_sites/` or exposed on the public site. The legacy numeric suffix hack (`*-5562048*`) and `render_homeworks.ps1` have been retired.
 
 ### 3. Continuous Integration & Deployment (CI/CD)
@@ -173,11 +173,29 @@ The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push t
    - `python check_book_citations.py`: Verifies that all bibliography citation keys used in active chapters exist in `networks.bib`. Fails the build on missing bib keys.
 2. **Fast R Dependency Installation:** Uses `r-lib/actions/setup-r@v2` with Posit Public Package Manager (P3M) binary packages (`use-public-rspm: true`), completing dependency install in seconds.
 3. **Book Build:** Renders book chapters to `_sites/`.
-4. **Slide Decks Build:** Renders `slides/*.qmd` into `_sites/slides/`.
-5. **Deployment:** Deploys `_sites/` to GitHub Pages.
+4. **Slide Decks Build:** Renders changed `slides/*.qmd` into `_sites/slides/`.
+5. **Slide Size Floor Audit (non-blocking):** `python audit_slide_sizes.py --no-render` audits the changed decks (see workflow 5). Currently `continue-on-error: true`; flip to `false` to enforce once remaining figure violations are fixed.
+6. **Deployment:** Deploys `_sites/` to GitHub Pages.
 
-### 4. Bruin Learn (Canvas) API: Posting Announcements
-Credentials are read from `~/.Renviron` (`CANVAS_API_TOKEN`, `CANVAS_URL`), same pattern as the sibling repo's scripts. Course ID for SOCIOL 111 is `238980`.
+### 4. Slide Deck Size Floor (established 2026-10-20)
+Slides must never render matrices or graphs below a minimum readable size on the 1280×720 canvas. Two enforcement layers:
+
+**CSS floor** (`slides/ucla-theme.css`, end of file): `.reveal .math.display { font-size: max(1em, 34px) }` — display math never renders below the deck's 34px base font, no matter what shrinks its container (the theme's `0.85em` prose rule, callouts, `.smaller`). Before this, display math inherited the 0.85em prose shrink and rendered at 28.9px.
+
+**Audit** (`audit_slide_sizes.py`, repo root): renders each deck in headless Chrome (MathJax must finish), measures real on-canvas element sizes, and flags:
+- display math below 34px, wider than the 1024px usable width, or never typeset (raw LaTeX visible to students)
+- figures displayed below 75% of natural raster size (plot text shrinks with the image) or below 300px wide
+
+Usage: `python audit_slide_sizes.py slides/matrix-operations.qmd` (auto-renders stale decks), `--no-render` (audit existing HTML only, used in CI), `--warn-only`. Requires headless Chrome (auto-detected; `CHROME_BIN` overrides). Exit 1 on violations.
+
+**Known remaining violations (as of 2026-10-20):** ~33 figures in `slides/matrix-operations.qmd` and `slides/matrix-advanced.qmd` are rendered at `fig-width: 7` (672px rasters) but displayed in ~263px columns (39% scale, ~6px labels). Fix by matching `fig-width` to the display column (~3.5) when touching those decks.
+
+### 5. Bruin Learn (Canvas) API: Posting Announcements
+Credentials are read from `~/.Renviron` (`CANVAS_API_TOKEN`, `CANVAS_URL`). Course ID for SOCIOL 111 is `238980`.
+
+**File locations & format (on this Windows machine):**
+- R reads `C:\Users\Omar Lizardo\OneDrive\Documents\.Renviron` (R's `~` is OneDrive Documents); it tolerates `KEY = value` with spaces.
+- Shell/Python tools (including `sync_homeworks_to_canvas.py`) read `C:\Users\Omar Lizardo\.Renviron` via `os.path.expanduser`. The sync script's parser requires strict `KEY=value` lines — no spaces around `=` and no quotes — otherwise credentials are silently missed.
 
 **Working pattern (verified 2026-10-13):** post via `POST /api/v1/courses/:course_id/discussion_topics` with a **form-encoded** body — `title`, `message` (HTML), `is_announcement=true`, `published=true`:
 ```bash
@@ -188,7 +206,7 @@ curl -X POST -H "Authorization: Bearer $TOKEN" \
   --data-urlencode "published=true" \
   "https://bruinlearn.ucla.edu/api/v1/courses/238980/discussion_topics"
 ```
-Verify the creation response's `is_announcement: true` (the documented `announcement` param is silently ignored — plain discussion fallback requires delete-and-recreate). This matches section "G. Posting Announcements" in `../SOCIOL 111/AGENTS.md`, which is the canonical doc for Bruin Learn operations.
+Verify the creation response's `is_announcement: true` (the documented `announcement` param is silently ignored — plain discussion fallback requires delete-and-recreate). This matches section "G. Posting Announcements" in `../SOCIOL-111/AGENTS.md`, which is the canonical doc for Bruin Learn operations.
 
 **Route pitfalls (verified 2026-10-13):**
 - `POST /api/v1/courses/:id/announcements`, and `POST`/`GET .../discussions` return a 404 HTML "Page Not Found" page with this token. An HTML 404 here is a wrong-route symptom, not an auth/CSRF problem — don't retry with token tricks.
@@ -198,6 +216,8 @@ Verify the creation response's `is_announcement: true` (the documented `announce
 
 ## AI Agent Guidelines
 - **Adding Chapters:** When creating a new chapter, use established file naming conventions and integrate the file into `_quarto.yml` under `book: chapters:`.
+- **LaTeX matrix row separators:** Inside `$$\begin{pmatrix}...\end{pmatrix}$$` in slide decks, rows are separated by exactly two backslashes (`\\`). Four backslashes (`\\\\`) render as two row breaks in MathJax — empty rows that double matrix height (this bug affected 105 separators in `slides/matrix-operations.qmd`, fixed 2026-10-20).
+- **Slide figure sizing:** Match chunk `fig-width` to the figure's displayed column width so plot text renders at ~1:1 (e.g., `fig-width: 3.5` for a ~263px half-column). Oversized rasters downscaled by the browser produce unreadably small labels, and `audit_slide_sizes.py` will flag them.
 - **Canvas Assignment Links:** When lessons conclude a topic with an associated homework, include a callout tip pointing students to the specific assignment on Bruin Learn (`::: {.callout-tip} ## Associated Assignment on Bruin Learn ... :::`).
 - **Slide Image References:** Slide decks in `slides/` must reference root images as `../images/<filename>`. Root `images/` is registered under `project.resources` in `_quarto.yml` to guarantee availability on the deployed site.
 - **R Code Execution:** Before running complex operations, ensure the active R environment has necessary packages loaded. Use `renv::restore(prompt = FALSE)` — the confirmation prompt does not render in the Positron console and makes restore appear to hang. Restores are fast because the local renv binary cache is well populated.

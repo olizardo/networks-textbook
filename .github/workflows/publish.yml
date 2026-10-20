@@ -110,6 +110,24 @@ jobs:
           mkdir -p _sites/slides
           cp -r slides/* _sites/slides/
 
+      - name: Audit slide sizes (size floor)
+        # Measures rendered matrices/figures in headless Chrome against the
+        # minimum-size floors in audit_slide_sizes.py (math >= 34px, figures
+        # not downscaled below 75%). Currently non-blocking: pre-existing
+        # figure violations are being worked down. To enforce on every
+        # deploy, set continue-on-error to false.
+        continue-on-error: true
+        run: |
+          FILES="${{ steps.changed-slides.outputs.files }}"
+          if [ -n "$FILES" ]; then
+            echo "$FILES" | while IFS= read -r f; do
+              [ -n "$f" ] && AUDIT_FILES="$AUDIT_FILES $f"
+            done
+            python audit_slide_sizes.py --no-render $AUDIT_FILES
+          else
+            echo "No changed slide decks to audit."
+          fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
