@@ -62,6 +62,8 @@ A_dir <- matrix(c(
 ), nrow = 6, byrow = TRUE, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 
 gr_adir <- as_tbl_graph(graph_from_adjacency_matrix(A_dir, mode = "directed"))
+# Transposed network: same nodes, every arrow reversed
+gr_adir_rev <- as_tbl_graph(graph_from_adjacency_matrix(t(A_dir), mode = "directed"))
 
 # Circular layout coordinates for 6 nodes
 l_coords_6 <- matrix(c(
@@ -107,15 +109,15 @@ l_coords_6 <- matrix(c(
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 3.5
-#| fig-width: 3.5
+#| fig-height: 4.5
+#| fig-width: 4.5
 p_p <- ggraph(gr_p, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
-  geom_edge_link(color = "steelblue", width = 2.0) +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  geom_edge_link(color = "steelblue", width = 2.4) +
+  geom_node_point(size = 19, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8.5, fontface = "bold", color = "white") +
   labs(title = "Parties With (P)") +
   theme_graph() +
-  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  theme(plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
   coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 p_p
 ```
@@ -126,15 +128,15 @@ p_p
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 3.5
-#| fig-width: 3.5
+#| fig-height: 4.5
+#| fig-width: 4.5
 p_g <- ggraph(gr_g, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
-  geom_edge_link(color = "firebrick", width = 2.0) +
-  geom_node_point(size = 14, color = "tan2") +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  geom_edge_link(color = "firebrick", width = 2.4) +
+  geom_node_point(size = 19, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8.5, fontface = "bold", color = "white") +
   labs(title = "Plays Games With (G)") +
   theme_graph() +
-  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  theme(plot.title = element_text(size = 20, face = "bold", hjust = 0.5)) +
   coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 p_g
 ```
@@ -156,7 +158,7 @@ P_display <- P
 diag(P_display) <- NA
 kbl(P_display, format = "html", align = "c") %>% 
   column_spec(1, bold = TRUE) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 20)
 ```
 - The matrix is **symmetric**: ties are undirected.
 - Diagonal is always zero (no self-ties).
@@ -166,8 +168,8 @@ kbl(P_display, format = "html", align = "c") %>%
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 3.5
-#| fig-width: 3.5
+#| fig-height: 4.5
+#| fig-width: 4.5
 p_p
 ```
 </center>
@@ -187,7 +189,7 @@ G_display <- G
 diag(G_display) <- NA
 kbl(G_display, format = "html", align = "c") %>% 
   column_spec(1, bold = TRUE) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 20)
 ```
 - Same nodes as $\mathbf{P}$, but a **different relation**.
 - Same dimensions, so $\mathbf{P}$ and $\mathbf{G}$ can be combined cell-by-cell.
@@ -197,8 +199,8 @@ kbl(G_display, format = "html", align = "c") %>%
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 3.5
-#| fig-width: 3.5
+#| fig-height: 4.5
+#| fig-width: 4.5
 p_g
 ```
 </center>
@@ -267,7 +269,7 @@ kbl(P_plus_G, format = "html", align = "c") %>%
 gr_sum <- graph_from_adjacency_matrix(P + G, mode = "undirected", weighted = TRUE)
 ggraph(gr_sum, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(aes(color = as.factor(weight), edge_width = weight*1.5)) +
-  geom_node_point(size = 14, color = "tan2") +
+  geom_node_point(size = 16, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   scale_edge_color_manual(values = c("1" = "steelblue", "2" = "purple")) +
   theme_graph() + theme(legend.position = "none") + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
@@ -336,7 +338,7 @@ kbl(P_comp, format = "html", align = "c") %>%
 gr_comp <- graph_from_adjacency_matrix(1 - P, mode = "undirected", diag = FALSE)
 ggraph(gr_comp, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(color = "forestgreen", width = 2.0) +
-  geom_node_point(size = 14, color = "tan2") +
+  geom_node_point(size = 16, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 ```
@@ -405,7 +407,7 @@ kbl(P_dot_G, format = "html", align = "c") %>%
 gr_dot <- graph_from_adjacency_matrix(P * G, mode = "undirected")
 ggraph(gr_dot, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_link(color = "purple", width = 2.5) +
-  geom_node_point(size = 14, color = "tan2") +
+  geom_node_point(size = 16, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 ```
@@ -424,7 +426,7 @@ ggraph(gr_dot, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
 The most basic operation on a matrix: add up its rows and columns.
 
 ::: {.columns}
-::: {.column width="34%"}
+::: {.column width="30%"}
 ### Adjacency Matrix $\mathbf{A}$
 ```{r}
 #| echo: false
@@ -437,7 +439,28 @@ kbl(A_disp, format = "html", align = "c") %>%
 - The diagonal is all $0$s (no self-ties).
 :::
 
-::: {.column width="66%"}
+::: {.column width="32%"}
+### The Directed Graph ($\mathbf{A}$)
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.9
+#| fig-width: 3.9
+ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
+  geom_edge_parallel(color = "steelblue", width = 1.5,
+                 arrow = arrow(length = unit(3.5, 'mm')),
+                 end_cap = circle(8, 'mm'),
+                 sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
+```
+</center>
+:::
+
+::: {.column width="38%"}
+<div style="font-size: 90%;">
+
 - **Row sum of node $i$**: $\sum_j a_{ij}$ — pick a row, add *across* the columns.
 - **Column sum of node $j$**: $\sum_i a_{ij}$ — pick a column, add *down* the rows.
 
@@ -445,15 +468,17 @@ kbl(A_disp, format = "html", align = "c") %>%
 
 - For a **symmetric** (undirected) adjacency matrix, the row and column sums are identical — they give each node's **degree**.
 - For a **directed** graph they differ... what do they mean? (Next two slides.)
+
+</div>
 :::
 :::
 
 ---
 
-## Working the Example: Row and Column Sums
+## Working the Example: Row Sums
 
 ::: {.columns}
-::: {.column width="34%"}
+::: {.column width="30%"}
 ### Adjacency Matrix $\mathbf{A}$
 ```{r}
 #| echo: false
@@ -465,18 +490,88 @@ kbl(A_disp, format = "html", align = "c") %>%
 ```
 :::
 
-::: {.column width="66%"}
-**Row sum of node B** — add across row **B**:
+::: {.column width="32%"}
+### The Directed Graph ($\mathbf{A}$)
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.9
+#| fig-width: 3.9
+ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
+  geom_edge_parallel(color = "steelblue", width = 1.5,
+                 arrow = arrow(length = unit(3.5, 'mm')),
+                 end_cap = circle(8, 'mm'),
+                 sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
+```
+</center>
+:::
 
-$$\sum_j a_{Bj} = \color{red}{1} + 0 + \color{red}{1} + \color{red}{1} + 0 + 0 = \mathbf{3}$$
+::: {.column width="38%"}
+<div style="font-size: 90%;">
 
-**Column sum of node D** — add down column **D**:
+**Row sum of node B** — add across row **B**, cell by cell:
 
-$$\sum_i a_{iD} = 0 + \color{red}{1} + \color{red}{1} + 0 + \color{red}{1} + \color{red}{1} = \mathbf{4}$$
+$$a_{BA} + a_{BB} + a_{BC} + a_{BD} + a_{BE} + a_{BF} = \color{red}{1} + 0 + \color{red}{1} + \color{red}{1} + 0 + 0 = \mathbf{3}$$
 
-. . .
+- Each cell $a_{Bj}$ reads "**B** ties to $j$" — the first subscript is fixed at B, the second runs over every column.
+- The highlighted cells are exactly the ties **B sends** (its row): B is a pure **sender**.
+- Shorthand: $\sum_j a_{Bj}$ — the summation sign does the "cell by cell" walking for us.
 
-- The highlighted cells are exactly the ties **B sends** (its row) and the ties **D receives** (its column).
+</div>
+:::
+:::
+
+---
+
+## Working the Example: Column Sums
+
+::: {.columns}
+::: {.column width="30%"}
+### Adjacency Matrix $\mathbf{A}$
+```{r}
+#| echo: false
+A_disp <- A_dir
+diag(A_disp) <- NA
+kbl(A_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+:::
+
+::: {.column width="32%"}
+### The Directed Graph ($\mathbf{A}$)
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.9
+#| fig-width: 3.9
+ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
+  geom_edge_parallel(color = "steelblue", width = 1.5,
+                 arrow = arrow(length = unit(3.5, 'mm')),
+                 end_cap = circle(8, 'mm'),
+                 sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
+```
+</center>
+:::
+
+::: {.column width="38%"}
+<div style="font-size: 90%;">
+
+**Column sum of node D** — add down column **D**, cell by cell:
+
+$$a_{AD} + a_{BD} + a_{CD} + a_{DD} + a_{ED} + a_{FD} = 0 + \color{red}{1} + \color{red}{1} + 0 + \color{red}{1} + \color{red}{1} = \mathbf{4}$$
+
+- Each cell $a_{iD}$ reads "$i$ ties to **D**" — the *second* subscript is fixed at D, the first runs over every row.
+- The highlighted cells are exactly the ties **D receives** (its column): D is a pure **receiver**.
+- Shorthand: $\sum_i a_{iD}$.
+
+</div>
 :::
 :::
 
@@ -512,15 +607,15 @@ kbl(t(cs_dir), format = "html", align = "c") %>%
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 3.4
-#| fig-width: 3.4
+#| fig-height: 3.9
+#| fig-width: 3.9
 ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
   geom_edge_parallel(color = "steelblue", width = 1.5,
-                 arrow = arrow(length = unit(3, 'mm')),
-                 end_cap = circle(7.5, 'mm'),
+                 arrow = arrow(length = unit(3.5, 'mm')),
+                 end_cap = circle(8, 'mm'),
                  sep = unit(3.5, 'mm')) +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 ```
 </center>
@@ -614,7 +709,7 @@ p_adir <- ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[
                  arrow = arrow(length = unit(3, 'mm')),
                  end_cap = circle(7.5, 'mm'),
                  sep = unit(3.5, 'mm')) +
-  geom_node_point(size = 14, color = "tan2") +
+  geom_node_point(size = 16, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 p_adir
@@ -622,6 +717,48 @@ p_adir
 </center>
 :::
 :::
+
+---
+
+## The Transpose as a Reversed Graph
+
+- $\mathbf{A}^T$ is not just a table trick — it's a **different network**: the same six people, with **every arrow reversed**.
+
+::: {.columns}
+::: {.column width="50%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.9
+#| fig-width: 3.9
+p_adir
+```
+</center>
+:::
+
+::: {.column width="50%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.9
+#| fig-width: 3.9
+ggraph(gr_adir_rev, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
+  geom_edge_parallel(color = "firebrick", width = 1.5,
+                 arrow = arrow(length = unit(3.5, 'mm')),
+                 end_cap = circle(8, 'mm'),
+                 sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
+```
+</center>
+:::
+:::
+
+. . .
+
+- Check a pair: in $\mathbf{A}$ (left), **B sends to A**; in $\mathbf{A}^T$ (right), **A sends to B**.
+- Sender and receiver swap roles: outdegrees of $\mathbf{A}$ become the indegrees of $\mathbf{A}^T$, and vice versa.
 
 ---
 
@@ -642,7 +779,7 @@ p_adir
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 2.2
+#| fig-height: 2.9
 #| fig-width: 8
 # Create simple 3 dyads representation
 gr_m <- tbl_graph(nodes = data.frame(name = c("B", "E")), edges = data.frame(from = c(1, 2), to = c(2, 1)), directed = TRUE)
@@ -650,24 +787,24 @@ gr_a <- tbl_graph(nodes = data.frame(name = c("C", "E")), edges = data.frame(fro
 gr_n <- tbl_graph(nodes = data.frame(name = c("A", "E")), edges = data.frame(from = numeric(0), to = numeric(0)), directed = TRUE)
 
 p1 <- ggraph(gr_m, layout = "linear") +
-  geom_edge_parallel(color = "steelblue", width = 1.5, arrow = arrow(length = unit(3, 'mm')), end_cap = circle(4, 'mm'), sep = unit(4, 'mm')) +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  geom_edge_parallel(color = "steelblue", width = 1.8, arrow = arrow(length = unit(3.5, 'mm')), end_cap = circle(5, 'mm'), sep = unit(4.5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   labs(title = "Mutual (M)") + theme_graph() + 
   theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
   coord_cartesian(xlim = c(0.6, 2.4), clip = "off")
 
 p2 <- ggraph(gr_a, layout = "linear") +
-  geom_edge_link(color = "steelblue", width = 1.5, arrow = arrow(length = unit(3, 'mm')), end_cap = circle(4, 'mm')) +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  geom_edge_link(color = "steelblue", width = 1.8, arrow = arrow(length = unit(3.5, 'mm')), end_cap = circle(5, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   labs(title = "Asymmetric (A)") + theme_graph() + 
   theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
   coord_cartesian(xlim = c(0.6, 2.4), clip = "off")
 
 p3 <- ggraph(gr_n, layout = "linear") +
-  geom_node_point(size = 12, color = "tan2") +
-  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   labs(title = "Null (N)") + theme_graph() + 
   theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5)) +
   coord_cartesian(xlim = c(0.6, 2.4), clip = "off")
@@ -680,15 +817,30 @@ p1 + p2 + p3
 
 ## The Dyad Census
 
+::: {.columns}
+::: {.column width="52%"}
 - The **Dyad Census** is a count of the total number of Mutuals ($N_M$), Asymmetrics ($N_A$), and Nulls ($N_N$) in a directed graph.
 - We can compute these counts systematically using cell-by-cell matrix operations (the Hadamard product and matrix subtraction) on the directed adjacency matrix $\mathbf{A}$ and its transpose $\mathbf{A}^T$!
 
 . . .
 
-- We will perform these calculations on our 6-node directed reference graph $\mathbf{A}$:
+- We will perform these calculations on our 6-node directed reference graph (right):
   - $N_M$ = number of mutual dyads
   - $N_A$ = number of asymmetric dyads
   - $N_N$ = number of null dyads
+:::
+
+::: {.column width="48%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.2
+#| fig-width: 4.2
+p_adir
+```
+</center>
+:::
+:::
 
 ---
 
@@ -738,12 +890,12 @@ kbl(M_disp, format = "html", align = "c") %>%
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 2.8
-#| fig-width: 2.8
+#| fig-height: 3.3
+#| fig-width: 3.3
 gr_m_only <- as_tbl_graph(graph_from_adjacency_matrix(A_dir * t(A_dir), mode = "directed"))
 ggraph(gr_m_only, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
-  geom_edge_parallel(color = "purple", width = 2.0, arrow = arrow(length = unit(2.5, 'mm')), end_cap = circle(5, 'mm'), sep = unit(4, 'mm')) +
-  geom_node_point(size = 14, color = "tan2") +
+  geom_edge_parallel(color = "purple", width = 2.2, arrow = arrow(length = unit(3.5, 'mm')), end_cap = circle(6.5, 'mm'), sep = unit(4.5, 'mm')) +
+  geom_node_point(size = 16, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 ```
@@ -799,12 +951,12 @@ kbl(S_disp, format = "html", align = "c") %>%
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 2.8
-#| fig-width: 2.8
+#| fig-height: 3.3
+#| fig-width: 3.3
 gr_s_only <- as_tbl_graph(graph_from_adjacency_matrix(A_dir * (1 - t(A_dir)), mode = "directed"))
 ggraph(gr_s_only, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
-  geom_edge_link(color = "steelblue", width = 1.5, arrow = arrow(length = unit(2.5, 'mm')), end_cap = circle(5, 'mm')) +
-  geom_node_point(size = 14, color = "tan2") +
+  geom_edge_link(color = "steelblue", width = 1.8, arrow = arrow(length = unit(3.5, 'mm')), end_cap = circle(6.5, 'mm')) +
+  geom_node_point(size = 16, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 ```
@@ -862,11 +1014,11 @@ kbl(N_disp, format = "html", align = "c") %>%
 <center>
 ```{r}
 #| echo: false
-#| fig-height: 2.8
-#| fig-width: 2.8
+#| fig-height: 3.3
+#| fig-width: 3.3
 p_adir_small <- ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
-  geom_edge_parallel(color = "grey60", width = 1.2, arrow = arrow(length = unit(2.5, 'mm')), end_cap = circle(4.5, 'mm'), sep = unit(3.5, 'mm')) +
-  geom_node_point(size = 14, color = "tan2") +
+  geom_edge_parallel(color = "grey60", width = 1.5, arrow = arrow(length = unit(3.5, 'mm')), end_cap = circle(6.5, 'mm'), sep = unit(4, 'mm')) +
+  geom_node_point(size = 16, color = "tan2") +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
 p_adir_small
