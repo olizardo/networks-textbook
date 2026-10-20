@@ -182,6 +182,11 @@ The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push t
 ### 4. Slide Overflow QA (verified 2026-10-15)
 Policy: no slide in a Reveal.js deck may scroll vertically; if content genuinely doesn't fit, split it into two consecutive slides rather than shrinking fonts aggressively.
 
+**Minimum visibility floors for figures and tables (added 2026-10-20).** Every graph/figure and matrix/table in a slide deck must stay above these thresholds — do not shrink below them to fit content; instead split the slide, rebalance columns, or move content into the column with slack:
+- **Figures (ggraph/ggplot):** minimum `fig-width`/`fig-height` of **3.5in** when square and kept equal (so layouts don't distort); a 3.3in figure is tolerable only inside a narrow (~30%) side column. Wide multi-panel strips (e.g. the MAN dyad triptych at 8in wide) need at least **2.9in** height. Node points ≥ size 15 and node labels ≥ size 7 in ggraph plots; paired-edge arrowheads ≥ 3.5mm with `end_cap` ≥ 6mm so arrowheads stay visible (small open arrowheads read as undirected ties — cost a real fix in matrix-advanced).
+- **kable tables:** `font_size` ≥ **18** (20 preferred for the primary worked-example matrices). A one-off 16 is allowed only for secondary tables in narrow columns.
+- **Rule of thumb:** if a figure or table needs squinting, the slide is overfull — split it or restructure the columns rather than shrink the exhibit. When a worked example references a graph or matrix, the referenced exhibit must be visible on the same slide (the persistent-example-graph convention used in affiliation-networks and matrix-advanced).
+
 **Measuring overflow:** `scrollable: true` makes overflowing slides scroll, so check empirically instead of by eye. Render the deck, then measure each slide's `scrollHeight` vs `clientHeight` at the deck's native 1280×720 geometry in headless Chrome. No browser is installed in the Crostini container; the working setup (cached under a scratch dir, Node 18-compatible):
 ```bash
 npx -y @puppeteer/browsers@2.4.1 install chrome-headless-shell@stable   # latest installer needs Node >= 20
