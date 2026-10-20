@@ -180,18 +180,27 @@ The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push t
 5. **Slide Size Floor Audit (non-blocking):** `python audit_slide_sizes.py --no-render` audits the changed decks (see workflow 4). Currently `continue-on-error: true`; flip to `false` to enforce once remaining figure violations are fixed.
 6. **Deployment:** Deploys `_sites/` to GitHub Pages.
 
-### 4. Slide Deck Size Floor (established 2026-10-20)
+### 4. Slide Deck Size Floor (established 2026-10-20, refined same day)
 Slides must never render matrices or graphs below a minimum readable size on the 1280×720 canvas. Two enforcement layers:
 
-**CSS floor** (`slides/ucla-theme.css`, end of file): `.reveal .math.display { font-size: max(1em, 34px) }` — display math never renders below the deck's 34px base font, no matter what shrinks its container (the theme's `0.85em` prose rule, callouts, `.smaller`). Before this, display math inherited the 0.85em prose shrink and rendered at 28.9px.
+**CSS floor** (`slides/ucla-theme.css`, end of file):
+- `.reveal .math.display { font-size: max(1em, 34px) }` — display math never renders below the deck's 34px base font, no matter what shrinks its container (the theme's `0.85em` prose rule, callouts, `.smaller`).
+- `.reveal .math-dense .math.display { font-size: max(1em, 20.8px) }` — inside an explicitly marked **dense** wrapper (`<div class="math-dense" style="font-size: NN%;">`, the overflow-QA shrink convention from workflow 5), display math follows the wrapper's size like other content but never below 20.8px (72% of the 28.9px prose size). Any deliberate font-size shrink div must carry `class="math-dense"` or the 34px floor will inflate its equations and re-overflow the slide.
 
-**Audit** (`audit_slide_sizes.py`, repo root): renders each deck in headless Chrome (MathJax must finish), measures real on-canvas element sizes, and flags:
-- display math below 34px, wider than the 1024px usable width, or never typeset (raw LaTeX visible to students)
-- figures displayed below 75% of natural raster size (plot text shrinks with the image) or below 300px wide
+**Audit** (`audit_slide_sizes.py`, repo root): renders each deck in headless Chrome (waits for MathJax to typeset every display span and for all images to load), measures real on-canvas element sizes, and flags:
+- display math below the 34px floor (20.8px inside `.math-dense`), wider than the 1024px usable width, or never typeset (raw LaTeX visible to students)
+- figures displayed below 75% of their **intended** size (the knitr `width` attribute = fig-width in CSS px; rasters are 2× retina, so never compare displayed px against the raw raster) or authored below the 3.3in minimum
 
-Usage: `python audit_slide_sizes.py slides/matrix-operations.qmd` (auto-renders stale decks), `--no-render` (audit existing HTML only, used in CI), `--warn-only`. Requires headless Chrome (auto-detected; `CHROME_BIN` overrides). Exit 1 on violations.
+Measurement essentials (each cost a real debugging round):
+- Normalize by `Reveal.getScale()`: `getBoundingClientRect` includes the deck's global transform, and headless Chrome at default DPR ≠ 1 (e.g. 1.25 on this Windows machine → 0.744 deck scale → everything measured ~26% small). The audit passes `--force-device-scale-factor=1` and divides by the scale anyway.
+- Measure the `span.MathJax` inside `MathJax_Display`, not the div — the div is a full-width block and reports container width, not equation width.
+- The injected measurement script lives in the audit; the instrumented copy must be written **next to the deck** (relative `*_files/` resources break from a temp dir).
 
-**Known remaining violations (as of 2026-10-20):** ~33 figures in `slides/matrix-operations.qmd` and `slides/matrix-advanced.qmd` are rendered at `fig-width: 7` (672px rasters) but displayed in ~263px columns (39% scale, ~6px labels). Fix by matching `fig-width` to the display column (~3.5) when touching those decks.
+Usage: `python audit_slide_sizes.py slides/matrix-operations.qmd` (auto-renders stale decks), `--no-render` (audit existing HTML only, used in CI), `--dump PATH` (raw measurements JSON), `--warn-only`. Requires headless Chrome (auto-detected; `CHROME_BIN` overrides). Exit 1 on violations.
+
+**Phantom-slide pitfall (found 2026-10-20):** a `---` slide break placed directly under a `$$...$$` line with no blank line makes pandoc parse the equation as a setext **heading** — the equation silently moves to its own auto-titled slide (id derived from the LaTeX) and renders at heading size (e.g. 1705px wide). Always put a blank line between display math (or a raw `</div>`) and `---`.
+
+**Status (2026-10-20, post-merge):** matrix-operations (26 math blocks, 22 figures), matrix-advanced, and graph-paths-walks audit clean. The dense mechanism + equation splits (worked-example row/column sums, null-calc) cleared the last violations; earlier "~39% figure scale" alarms were measurement artifacts (retina rasters + unnormalized deck scale), not real violations.
 
 ### 5. Slide Overflow QA (updated 2026-10-20)
 Policy: no slide in a Reveal.js deck may scroll vertically; if content genuinely doesn't fit, split it into two consecutive slides rather than shrinking fonts aggressively.

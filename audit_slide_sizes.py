@@ -38,9 +38,10 @@ import urllib.parse
 # Floors (canvas pixels; decks are 1280x720 with 0.1 margins -> 1024 usable)
 # ---------------------------------------------------------------------------
 MATH_FLOOR_PX = 34.0        # display math must render at >= the deck base font
+DENSE_MATH_FLOOR_PX = 20.8  # inside .math-dense wrappers: 72% of prose (28.9px)
 USABLE_WIDTH_PX = 1024       # 1280 * (1 - 2 * 0.1)
-MIN_IMG_SCALE = 0.75         # figures must not be downscaled more than 25%
-MIN_IMG_WIDTH_PX = 300       # and must occupy at least this much canvas width
+MIN_IMG_SCALE = 0.75         # displayed size must be >= 75% of intended size
+MIN_INTENDED_IN = 3.3        # figures must be authored >= 3.3in wide
 WINDOW_W, WINDOW_H = 1280, 720
 
 MEASURE_SCRIPT = r"""
@@ -54,11 +55,19 @@ MEASURE_SCRIPT = r"""
   });
   function measure(){
     var out = [];
+    // Normalize for Reveal.js's global slide scale: getBoundingClientRect
+    // includes the CSS transform, so divide it out to get true canvas px.
+    var rs = (window.Reveal && Reveal.getScale) ? Reveal.getScale() : 1;
     document.querySelectorAll('section[id]').forEach(function(sec){
       sec.querySelectorAll('.MathJax_Display').forEach(function(el){
-        var r = el.getBoundingClientRect();
-        out.push({slide: sec.id, kind: 'math', w: Math.round(r.width),
-                  h: Math.round(r.height), fs: getComputedStyle(el).fontSize});
+        // MathJax_Display is a full-width block div; the typeset math is
+        // the span inside it. Measure that, falling back to the div.
+        var target = el.firstElementChild || el;
+        var r = target.getBoundingClientRect();
+        out.push({slide: sec.id, kind: 'math', w: Math.round(r.width / rs),
+                  h: Math.round(r.height / rs), fs: getComputedStyle(el).fontSize,
+                  dense: !!(el.closest && el.closest('.math-dense')),
+                  dbg: (el.firstElementChild ? el.firstElementChild.className + '/' + el.firstElementChild.tagName : 'NONE')});
       });
       sec.querySelectorAll('span.math.display').forEach(function(span){
         if (!span.querySelector('.MathJax_Display')) {
@@ -70,21 +79,33 @@ MEASURE_SCRIPT = r"""
       sec.querySelectorAll('img').forEach(function(img){
         var r = img.getBoundingClientRect();
         if (r.width > 0) out.push({slide: sec.id, kind: 'img',
-          w: Math.round(r.width), h: Math.round(r.height),
-          natw: img.naturalWidth, nath: img.naturalHeight});
+          w: Math.round(r.width / rs), h: Math.round(r.height / rs),
+          natw: img.naturalWidth, nath: img.naturalHeight,
+          intended: img.getAttribute('width') || '',
+          src: img.getAttribute('src') || img.getAttribute('data-src') || ''});
       });
     });
     location.href = 'http://127.0.0.1:__PORT__/?' + encodeURIComponent(JSON.stringify(out));
   }
-  var last = -1, stable = 0, tries = 0;
+  function untypedCount(){
+    return Array.prototype.filter.call(
+      document.querySelectorAll('span.math.display'),
+      function(s){ return !s.querySelector('.MathJax_Display'); }).length;
+  }
+  function imgsPending(){
+    return Array.prototype.filter.call(
+      document.querySelectorAll('img'),
+      function(i){ return !i.complete; }).length;
+  }
+  var stable = 0, tries = 0;
   function poll(){
-    var n = document.querySelectorAll('.MathJax_Display').length;
-    if (n === last) stable++; else stable = 0;
-    last = n; tries++;
-    if (stable >= 10 || tries > 400) { measure(); return; }
+    var ready = untypedCount() === 0 && imgsPending() === 0;
+    stable = ready ? stable + 1 : 0;
+    tries++;
+    if ((stable >= 5 || tries > 900) && tries > 20) { measure(); return; }
     setTimeout(poll, 100);
   }
-  setTimeout(poll, 1000);
+  setTimeout(poll, 500);
 })();
 </script>
 """
@@ -156,8 +177,9 @@ def collect_measurements(html_path, chrome_bin):
     shot.close()
     try:
         cmd = [chrome_bin, "--headless=new", "--disable-gpu", "--no-sandbox",
+               "--force-device-scale-factor=1",
                "--window-size=%d,%d" % (WINDOW_W, WINDOW_H),
-               "--virtual-time-budget=30000",
+               "--virtual-time-budget=90000",
                "--screenshot=" + shot.name, url]
         try:
             subprocess.run(cmd, capture_output=True, timeout=120)
@@ -202,6 +224,7 @@ def ensure_rendered(qmd, force):
 
 def audit_deck(qmd, chrome_bin, force_render, no_render):
     print(f"Auditing {qmd}")
+    tag = os.path.basename(qmd)
     html = qmd[:-4] + ".html"
     if no_render:
         if not os.path.exists(html):
@@ -210,10 +233,10 @@ def audit_deck(qmd, chrome_bin, force_render, no_render):
     else:
         html = ensure_rendered(qmd, force_render)
     if html is None or not os.path.exists(html):
-        return [("deck", qmd, "could not render deck")]
+        return [("deck", tag, "could not render deck")]
     data = collect_measurements(html, chrome_bin)
     if data is None:
-        return [("deck", qmd, "no measurements received from headless Chrome")]
+        return [("deck", tag, "no measurements received from headless Chrome")]
 
     violations = []
     n_math = n_img = n_untyped = 0
@@ -223,13 +246,14 @@ def audit_deck(qmd, chrome_bin, force_render, no_render):
         if kind == "math":
             n_math += 1
             fs = float(re.sub(r"[^0-9.]", "", d.get("fs", "0")) or 0)
+            floor = DENSE_MATH_FLOOR_PX if d.get("dense") else MATH_FLOOR_PX
             if d["w"] == 0 or d["h"] == 0:
                 violations.append((slide, "math",
                     f"display math block has zero size (not typeset?)"))
                 continue
-            if fs and fs < MATH_FLOOR_PX:
+            if fs and fs < floor:
                 violations.append((slide, "math",
-                    f"display math at {fs:g}px is below the {MATH_FLOOR_PX:g}px floor"))
+                    f"display math at {fs:g}px is below the {floor:g}px floor"))
             if d["w"] > USABLE_WIDTH_PX:
                 violations.append((slide, "math",
                     f"display math {d['w']}px wide exceeds usable width "
@@ -240,17 +264,25 @@ def audit_deck(qmd, chrome_bin, force_render, no_render):
                 f"display math never typeset (raw LaTeX visible): {d.get('tex', '')[:60]}"))
         elif kind == "img":
             n_img += 1
-            if d.get("natw"):
-                scale = d["w"] / d["natw"]
+            # knitr emits width= attributes in CSS px (the intended display
+            # size); the raster is 2x (retina). Scale against the intended
+            # size, not the raw raster.
+            intended = float(d.get("intended") or 0) or d.get("natw") or 0
+            if intended:
+                scale = d["w"] / intended
                 if scale < MIN_IMG_SCALE:
                     violations.append((slide, "img",
-                        f"figure displayed at {scale:.0%} of natural size "
-                        f"(<{MIN_IMG_SCALE:.0%}; plot text shrinks with it)"))
-            if d["w"] < MIN_IMG_WIDTH_PX:
-                violations.append((slide, "img",
-                    f"figure displayed only {d['w']}px wide (<{MIN_IMG_WIDTH_PX}px)"))
-    print(f"  {n_math} math blocks, {n_img} figures, {n_untyped} untyped")
-    return violations
+                        f"figure displayed at {scale:.0%} of its intended "
+                        f"{intended:.0f}px (<{MIN_IMG_SCALE:.0%}; plot text "
+                        f"shrinks with it)"))
+                if intended < MIN_INTENDED_IN * 96 - 1:
+                    violations.append((slide, "img",
+                        f"figure authored at {intended / 96:.1f}in wide "
+                        f"(<{MIN_INTENDED_IN}in minimum)"))
+    print(f"  {n_math} math blocks, {n_img} figures, {n_untyped} untyped, "
+          f"{len(violations)} violations")
+    # tag each violation with the deck so the combined report is unambiguous
+    return [(tag, kind, f"{slide}: {msg}") for (slide, kind, msg) in violations]
 
 
 def main():
@@ -262,6 +294,8 @@ def main():
                         help="audit existing .html only; skip missing decks")
     parser.add_argument("--always-render", action="store_true",
                         help="re-render decks even if HTML looks fresh")
+    parser.add_argument("--dump", metavar="PATH",
+                        help="write raw measurements (all elements) as JSON")
     args = parser.parse_args()
 
     decks = args.decks or sorted(glob.glob(os.path.join("slides", "*.qmd")))
@@ -276,9 +310,19 @@ def main():
     print(f"Using browser: {chrome}")
 
     all_violations = []
+    raw = []
     for qmd in decks:
-        all_violations.extend(
-            audit_deck(qmd, chrome, args.always_render, args.no_render))
+        viol = audit_deck(qmd, chrome, args.always_render, args.no_render)
+        all_violations.extend(viol)
+        if args.dump:
+            html = qmd[:-4] + ".html"
+            if os.path.exists(html):
+                data = collect_measurements(html, chrome)
+                if data:
+                    raw.append({"deck": os.path.basename(qmd), "data": data})
+    if args.dump:
+        with open(args.dump, "w", encoding="utf-8") as f:
+            json.dump(raw, f)
 
     if all_violations:
         print(f"\n{len(all_violations)} size-floor violation(s):")
