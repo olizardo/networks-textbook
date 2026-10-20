@@ -5,6 +5,7 @@ format:
   revealjs:
     scrollable: true
     theme: default
+    center: false
     css: ucla-theme.css
     width: 1280
     height: 720
@@ -91,9 +92,10 @@ plot_dir_highlight <- function(active_edges = NULL, active_nodes = NULL) {
   gr <- tbl_graph(nodes = nodes_mod, edges = edges_mod, directed = TRUE)
   
   p <- ggraph(gr, layout = layout_coords) +
-    geom_edge_link(aes(color = highlight, edge_width = highlight),
+    geom_edge_parallel(aes(color = highlight, edge_width = highlight),
                    arrow = arrow(length = unit(4, 'mm')),
-                   end_cap = circle(6, 'mm')) +
+                   end_cap = circle(6, 'mm'),
+                   sep = unit(3.5, 'mm')) +
     geom_node_point(aes(color = highlight), size = 18) +
     geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
     scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
@@ -237,27 +239,48 @@ m_{41} & m_{42} & m_{43}
 
 :::: {.columns align=center}
 
-::: {.column width="60%"}
-::: {.incremental}
-- **The Main Diagonal**:
-  - The diagonal cells where **row index equals column index** ($i = j$).
-  - Represents the relationship of actors with themselves ($a_{ii}$), which we typically ignore by **blocking the diagonals** with a dash (`--`).
-- **Off-Diagonal Cells ($i \neq j$)**:
-  - **Upper Triangle ($i < j$)**: Cells above the main diagonal (e.g., $a_{12}, a_{13}$).
-  - **Lower Triangle ($i > j$)**: Cells below the main diagonal (e.g., $a_{21}, a_{31}$).
-:::
-:::
-
-::: {.column width="40%"}
-### Blocked Diagonals
-| | Actor A | Actor B | Actor C |
-| :--- | :---: | :---: | :---: |
-| **Actor A** | *--* | $a_{12}$ | $a_{13}$ |
-| **Actor B** | $a_{21}$ | *--* | $a_{23}$ |
-| **Actor C** | $a_{31}$ | $a_{32}$ | *--* |
+::: {.column width="55%"}
+<ul>
+<li class="fragment fade-in" data-fragment-index="1"><strong>The Main Diagonal</strong> ($i = j$): the diagonal cells, where row index equals column index. Represents the relationship of actors with themselves ($a_{ii}$), which we typically ignore by <strong>blocking the diagonals</strong> with a dash (<code>--</code>).</li>
+<li class="fragment fade-in" data-fragment-index="2"><strong>Upper Triangle</strong> ($i < j$): the cells above the main diagonal (e.g., $a_{12}$, $a_{13}$).</li>
+<li class="fragment fade-in" data-fragment-index="3"><strong>Lower Triangle</strong> ($i > j$): the cells below the main diagonal (e.g., $a_{21}$, $a_{31}$).</li>
+</ul>
 
 - **Symmetric**: $a_{ij} = a_{ji}$ (undirected).
 - **Asymmetric**: $a_{ij} \neq a_{ji}$ (directed).
+:::
+
+::: {.column width="45%"}
+### Blocked Diagonals
+
+<table class="tri-table">
+<thead>
+<tr><th></th><th>Actor A</th><th>Actor B</th><th>Actor C</th></tr>
+</thead>
+<tbody>
+<tr><th>Actor A</th>
+<td class="fragment tri-cell tri-diag" data-fragment-index="1"><i>--</i></td>
+<td class="fragment tri-cell tri-upper" data-fragment-index="2"><i>a</i><sub>12</sub></td>
+<td class="fragment tri-cell tri-upper" data-fragment-index="2"><i>a</i><sub>13</sub></td>
+</tr>
+<tr><th>Actor B</th>
+<td class="fragment tri-cell tri-lower" data-fragment-index="3"><i>a</i><sub>21</sub></td>
+<td class="fragment tri-cell tri-diag" data-fragment-index="1"><i>--</i></td>
+<td class="fragment tri-cell tri-upper" data-fragment-index="2"><i>a</i><sub>23</sub></td>
+</tr>
+<tr><th>Actor C</th>
+<td class="fragment tri-cell tri-lower" data-fragment-index="3"><i>a</i><sub>31</sub></td>
+<td class="fragment tri-cell tri-lower" data-fragment-index="3"><i>a</i><sub>32</sub></td>
+<td class="fragment tri-cell tri-diag" data-fragment-index="1"><i>--</i></td>
+</tr>
+</tbody>
+</table>
+
+<p style="font-size: 0.72em; margin-top: 0.5em; text-align: center;">
+<span style="color:#c0392b; font-weight:600;">Diagonal</span> &middot;
+<span style="color:#1b64d1; font-weight:600;">Upper triangle</span> &middot;
+<span style="color:#1e8449; font-weight:600;">Lower triangle</span>
+</p>
 :::
 
 ::::
@@ -305,8 +328,8 @@ We have 5 nodes: $\{A, B, C, D, E\}$ with no arrowheads. Diagonals are blocked (
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_undir_highlight()
 ```
 :::
@@ -335,8 +358,8 @@ Row **A** (sender) connects directly to **B** and **C**. Cells $a_{AB}$ and $a_{
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_undir_highlight(active_edges = c("A-B", "A-C"), active_nodes = "A")
 ```
 :::
@@ -362,12 +385,11 @@ Each undirected edge $\{i, j\}$ maps directly to **two symmetrical cell values**
 :::: {.columns align=center}
 
 ::: {.column width="50%"}
-### Highlighted Edge $\{A, C\}$
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_undir_highlight(active_edges = c("A-C"), active_nodes = c("A", "C"))
 ```
 :::
@@ -395,8 +417,8 @@ Since undirected ties are reciprocal, **Column A** must mirror **Row A**.
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_undir_highlight(active_edges = c("A-B", "A-C"), active_nodes = "A")
 ```
 :::
@@ -425,8 +447,8 @@ Row **B** connects to **A**, **C**, and **D**. $a_{BA} = 1$ (filled!), $a_{BC} =
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_undir_highlight(active_edges = c("A-B", "B-C", "B-D"), active_nodes = "B")
 ```
 :::
@@ -455,8 +477,8 @@ Repeating for rows C, D, and E completes the matrix. Note the perfect bilateral 
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_undir_highlight()
 ```
 :::
@@ -503,8 +525,8 @@ The same 5 nodes $\{A, B, C, D, E\}$ are used, but we now introduce directed arr
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_dir_highlight()
 ```
 :::
@@ -533,8 +555,8 @@ Node **A** sends arrows to **B** and **C**, but none to $D$ or $E$.
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_dir_highlight(active_edges = c("1-2", "1-3"), active_nodes = "A")
 ```
 :::
@@ -563,8 +585,8 @@ In a directed graph, each cell corresponds to a **unique directional relationshi
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_dir_highlight(active_edges = c("1-3"), active_nodes = c("A", "C"))
 ```
 :::
@@ -591,8 +613,8 @@ Node **B** sends arrows to **A**, **C**, and **D**, but none to $E$.
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_dir_highlight(active_edges = c("2-1", "2-3", "2-4"), active_nodes = "B")
 ```
 :::
@@ -621,8 +643,8 @@ Node **C** sends an arrow only to **E** ($C \rightarrow E$). It has no arrows po
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_dir_highlight(active_edges = "3-5", active_nodes = "C")
 ```
 :::
@@ -643,7 +665,7 @@ plot_dir_highlight(active_edges = "3-5", active_nodes = "C")
 
 ## Step 4: The Completed Directed Adjacency Matrix
 
-Row D sends no arrows (sink node) $\rightarrow$ `(0, 0, 0, --, 0)`. Row E sends only one arrow to D ($E \rightarrow D$) $\rightarrow$ `(0, 0, 0, 1, --)`.
+Row D sends no arrows (receiver node) $\rightarrow$ `(0, 0, 0, --, 0)`. Row E sends only one arrow to D ($E \rightarrow D$) $\rightarrow$ `(0, 0, 0, 1, --)`.
 
 :::: {.columns align=center}
 
@@ -651,8 +673,8 @@ Row D sends no arrows (sink node) $\rightarrow$ `(0, 0, 0, --, 0)`. Row E sends 
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_dir_highlight()
 ```
 :::
@@ -730,8 +752,8 @@ Undirected connections create matching mirror-image entries in both the upper (b
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_undir_highlight()
 ```
 :::
@@ -776,8 +798,8 @@ Directed connections break the mirror symmetry. Unreciprocated ties create a $1$
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 4.8
-#| fig-height: 4.8
+#| fig-width: 4.6
+#| fig-height: 4.6
 plot_dir_highlight()
 ```
 :::
@@ -826,7 +848,7 @@ plot_dir_highlight()
 - **Undirected Graphs $\rightarrow$ Symmetric Matrices**:
   - Bidirectional relations mean the matrix is its own transpose ($A = A^T$).
 - **Directed Graphs $\rightarrow$ Asymmetric Matrices**:
-  - Row = Sender, Column = Receiver. Allows us to identify **sinks** (D, row of all 0s) and **asymmetries** (C to E but not E to C).
+  - Row = Sender, Column = Receiver. Allows us to identify **pure receivers** (D, row of all 0s) and **asymmetries** (C to E but not E to C).
 :::
 :::
 

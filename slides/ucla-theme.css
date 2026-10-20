@@ -150,3 +150,60 @@
 .reveal .math.display {
   font-size: max(1em, 34px);
 }
+
+/* Consistent vertical alignment across slides.
+   Reveal.js vertically centers each slide by default, so slides with
+   different content heights shift figures slightly between transitions.
+   Top-aligning every slide fixes this across all decks using this theme. */
+.reveal .slides > section,
+.reveal .slides > section > section {
+  top: 0 !important;
+}
+
+/* Matrix triangle-highlight fragments (e.g., Diagonal vs. Off-Diagonal slide).
+   Cells stay visible but dimmed until their fragment fires, then take on
+   the region color (red = diagonal, blue = upper, green = lower). */
+.reveal .slides .fragment.tri-cell {
+  opacity: 1;
+  visibility: inherit;
+  color: #b0b6bd;
+  transition: all 0.25s ease;
+}
+.reveal .slides .fragment.tri-cell.visible {
+  color: inherit;
+  font-weight: 600;
+}
+.reveal .slides .fragment.tri-cell.visible.tri-diag {
+  color: #c0392b;
+  background-color: rgba(192, 57, 43, 0.08);
+}
+.reveal .slides .fragment.tri-cell.visible.tri-upper {
+  color: #1b64d1;
+  background-color: rgba(27, 100, 209, 0.08);
+}
+.reveal .slides .fragment.tri-cell.visible.tri-lower {
+  color: #1e8449;
+  background-color: rgba(30, 132, 73, 0.08);
+}
+
+.reveal .tri-table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  font-size: 0.95em;
+}
+.reveal .tri-table th,
+.reveal .tri-table td {
+  border: 1px solid #ccd3da;
+  padding: 0.35em 0.9em;
+  text-align: center;
+}
+.reveal .tri-table thead th {
+  background-color: #f1f5f9;
+}
+
+/* Stabilize figure position across consecutive slides: an intro paragraph
+   directly before a columns block gets a fixed minimum height (2 lines),
+   so figures don't drift when intros wrap to 1 vs 2 lines. */
+.reveal .slides section > p:has(+ div.columns) {
+  min-height: 3.2em;
+}

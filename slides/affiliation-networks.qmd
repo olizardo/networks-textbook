@@ -1,0 +1,890 @@
+---
+title: "Affiliation Networks"
+subtitle: "Two-Mode Networks, Bipartite Graphs, and the Duality of Persons and Groups"
+format:
+  revealjs:
+    incremental: false
+    scrollable: true
+    theme: default
+    center: false
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+
+# Running example: 6 students and the 5 clubs they join (fixed, no RNG)
+people <- c("Gabriela", "Parker", "Brandon", "Marie", "Rahul", "Minjoo")
+groups <- c("Super Smash Bros.", "Cheese", "Nerdfighters", "Magic", "Fashion")
+
+aff_edges <- data.frame(
+  from = c("Gabriela", "Gabriela", "Gabriela",
+           "Parker", "Parker",
+           "Brandon",
+           "Marie", "Marie",
+           "Rahul", "Rahul",
+           "Minjoo", "Minjoo", "Minjoo"),
+  to   = c("Super Smash Bros.", "Nerdfighters", "Fashion",
+           "Cheese", "Magic",
+           "Cheese",
+           "Super Smash Bros.", "Nerdfighters",
+           "Cheese", "Fashion",
+           "Cheese", "Magic", "Fashion")
+)
+
+A <- matrix(0, nrow = 6, ncol = 5, dimnames = list(people, groups))
+A[cbind(match(aff_edges$from, people), match(aff_edges$to, groups))] <- 1
+
+# Bipartite graph with manual two-column layout (people left, groups right)
+aff_nodes <- data.frame(
+  name = c(people, groups),
+  mode = c(rep("person", 6), rep("group", 5))
+)
+gr_bi <- tbl_graph(nodes = aff_nodes, edges = aff_edges, directed = FALSE)
+
+xy_person <- c(2.5, 1.5, 0.5, -0.5, -1.5, -2.5)
+xy_group  <- c(2, 1, 0, -1, -2)
+gr_bi <- gr_bi |>
+  mutate(
+    x = ifelse(mode == "person", 0, 2.2),
+    y = ifelse(mode == "person",
+               xy_person[match(name, people)],
+               xy_group[match(name, groups)])
+  )
+
+# Reusable bipartite-graph plot so the running example can sit next to
+# explanatory content on every slide (as in the PPTX deck)
+plot_bipartite <- function(label_size = 5.5) {
+  ggraph(gr_bi, layout = "manual", x = x, y = y) +
+    geom_edge_link(color = "grey60", edge_width = 1) +
+    geom_node_label(aes(label = name, filter = mode == "person"),
+                    fill = "tan2", color = "white", size = label_size,
+                    fontface = "bold", label.size = 0,
+                    label.padding = unit(0.2, "lines")) +
+    geom_node_label(aes(label = name, filter = mode == "group"),
+                    fill = "steelblue", color = "white", size = label_size,
+                    label.size = 0, label.padding = unit(0.2, "lines")) +
+    coord_cartesian(xlim = c(-1, 3.6), clip = "off") +
+    theme_graph()
+}
+```
+
+# Part 1: What Are Affiliation Networks?
+
+---
+
+## Networks of a Different Kind
+
+- Typically, a network consists of a set of units **of the same kind** linked via some kind of relationship:
+  - Person to person **friendship** ties
+  - Organization to organization **alliances**
+  - Airport to airport **plane routes**
+
+. . .
+
+- But sometimes a network is composed of relationships between **two types of entities**:
+  - **Persons** and the **groups** they belong to
+  - **Actors** and the **movies** they appear in
+  - **Scientists** and the **papers** they write
+
+. . .
+
+- These are called **Affiliation Networks**
+
+---
+
+## What Gets Studied as an Affiliation Network?
+
+Types of affiliation networks that have been studied in the literature include:
+
+- **Hollywood actors** and the movies that they make
+- **CEOs** and the boards of directors that they sit on
+- **Books** and the people who buy them
+- **Scientists** and the journals/papers they publish in
+- **Students** and the clubs they join
+
+. . .
+
+- The **corporate interlock network** is a classic example [@mizruchi83]:
+  - When the same executive sits on **multiple company boards**, companies end up connected through shared people (Mizruchi 1983)
+  - Most big corporations end up forming part of [a single giant network](https://en.wikipedia.org/wiki/Interlocking_directorate)
+
+---
+
+# Part 1: From Theory to Graph to Matrix
+
+---
+
+## The Three-Step Shuffle
+
+How a sociological idea becomes a network measure:
+
+::: {.columns}
+::: {.column width="30%"}
+**1. Theory**
+
+Begin with theories specifying the **membership relation** between people and other entities: groups, teams, events.
+:::
+
+::: {.column width="5%"}
+<h2>&rarr;</h2>
+:::
+
+::: {.column width="30%"}
+**2. Graph**
+
+Translate the membership concept into a **graph-theoretic** concept: the **bipartite graph**.
+:::
+
+::: {.column width="5%"}
+<h2>&rarr;</h2>
+:::
+
+::: {.column width="30%"}
+**3. Matrix**
+
+Link the bipartite graph to **matrix algebra** to come up with network-analytic measures (e.g., centralities of individuals and events).
+:::
+:::
+
+---
+
+## Affiliation Networks and Two-Mode Networks
+
+- The general relationship between people and the larger entities they join is called an **affiliation**
+- Networks linking people to the groups, projects, and events they join are **affiliation networks**
+
+. . .
+
+- Affiliation networks are a special case of the larger class of **two-mode networks**: networks with **two types of vertices**
+- Two-mode networks are, in turn, a subset of **multi-mode networks**: networks with **more than two** types of vertices
+
+. . .
+
+- Note that the plain old graphs featuring only one type of node we have been dealing with all along are technically called **unipartite graphs**
+
+---
+
+# Part 2: Bipartite Graphs
+
+---
+
+## The Running Example: Students and Clubs
+
+- Six students and the five college activity clubs they belong to
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.6
+#| fig-width: 7
+plot_bipartite(label_size = 5.5)
+```
+</center>
+
+---
+
+## Bipartite Graphs
+
+::: {.columns}
+::: {.column width="52%"}
+<div style="font-size: 85%;">
+
+- A **bipartite graph** is a special kind of graph featuring:
+  - **Two disjoint sets of vertices**, $U$ and $V$
+    - Two sets are disjoint when they don't share members
+  - **One edge set** ($E$): $G_B = \{E, U, V\}$
+  - Edges link vertices **between** sets but **not within** sets
+  - The two vertex sets can be of **different cardinality**!
+    - $|U| = 6$ people, $|V| = 5$ clubs in our example
+
+. . .
+
+- Affiliation or membership relations are **undirected**
+  - If person $i$ is a member of club $j$, then club $j$ has person $i$ as a member — the relation is **symmetric by definition**
+
+</div>
+:::
+
+::: {.column width="48%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 4.7
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
+---
+
+## Node Neighborhoods in Bipartite Graphs
+
+::: {.columns}
+::: {.column width="55%"}
+- Node neighborhoods work like in regular graphs, except:
+  - The neighbors of nodes from set $U$ are **always members of set $V$** (and vice versa)
+
+. . .
+
+$$N(\text{Minjoo}) = \{\text{Cheese, Magic, Fashion}\}$$
+$$N(\text{Gabriela}) = \{\text{Super Smash Bros., Nerdfighters, Fashion}\}$$
+
+. . .
+
+- The **intersection** of their neighborhoods:
+  - $N(\text{Minjoo}) \cap N(\text{Gabriela}) = \{\text{Fashion}\}$
+  - **One shared club** — a first hint of the overlap idea to come!
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 4.7
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
+---
+
+## Neighborhoods of the Other Mode
+
+::: {.columns}
+::: {.column width="55%"}
+- Both sets of nodes have neighborhoods!
+
+$$N(\text{Cheese}) = \{\text{Parker, Brandon, Rahul, Minjoo}\}$$
+$$N(\text{Fashion}) = \{\text{Gabriela, Rahul, Minjoo}\}$$
+
+. . .
+
+- The **intersection**:
+  - $N(\text{Cheese}) \cap N(\text{Fashion}) = \{\text{Rahul, Minjoo}\}$
+  - The two clubs **share two members**
+
+. . .
+
+- Nodes of the same kind **cannot be connected** in a two-mode network (by construction) — but they can **share neighbors**
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 4.7
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
+---
+
+## Node Degree in Bipartite Graphs
+
+::: {.columns}
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-height: 4.9
+#| fig-width: 4.2
+plot_bipartite(label_size = 4.2)
+```
+:::
+
+::: {.column width="60%"}
+<div style="font-size: 85%;">
+
+- Degree works the same way: $k_i = |N(i)|$
+- But now there are **two sets of degrees**, one per mode:
+
+::: {.columns}
+::: {.column width="50%"}
+**People ($U$)**
+
+| Person | $k$ |
+|:---:|:---:|
+| Gabriela | 3 |
+| Parker | 2 |
+| Brandon | 1 |
+| Marie | 2 |
+| Rahul | 2 |
+| Minjoo | 3 |
+:::
+
+::: {.column width="50%"}
+**Groups ($V$)**
+
+| Group | $k$ |
+|:---:|:---:|
+| Super Smash Bros. | 2 |
+| Cheese | 4 |
+| Nerdfighters | 2 |
+| Magic | 2 |
+| Fashion | 3 |
+:::
+:::
+
+</div>
+:::
+:::
+
+---
+
+## Graph Metrics Double Up
+
+- Every degree-based metric now comes in **two versions**, one per node set:
+  - **Two degree sequences**: $U = \{3, 3, 2, 2, 2, 1\}$; $V = \{4, 3, 2, 2, 2\}$
+  - **Two maximum/minimum degrees**: $k_{max}(U) = 3$ vs. $k_{max}(V) = 4$; $k_{min}(U) = 1$ vs. $k_{min}(V) = 2$
+  - **Two degree ranges**: $k_r(U) = 3 - 1 = 2$; $k_r(V) = 4 - 2 = 2$
+
+. . .
+
+- But only **one sum of degrees**:
+  - $\sum k(U) = 3 + 3 + 2 + 2 + 2 + 1 = 13$
+  - $\sum k(V) = 4 + 3 + 2 + 2 + 2 = 13$
+  - In a bipartite graph, the sum of the degrees of **either** node set equals $m$, the number of edges: $\sum k(U) = \sum k(V) = m = 13$
+
+---
+
+## Graph Metrics Double Up (continued)
+
+- There are still **two average degrees**, one per mode:
+  - $\bar{k}(U) = 13/|U| = 13/6 \approx 2.2$
+  - $\bar{k}(V) = 13/|V| = 13/5 = 2.6$
+
+. . .
+
+- Interpretation:
+  - On average, each student belongs to about **2 clubs**
+  - The average club has about **2–3 members**
+  - Comparing across modes tells us whether groups are larger than the typical person's membership portfolio
+
+---
+
+# Part 3: From Bipartite Graph to Affiliation Matrix
+
+---
+
+## Building the Affiliation Matrix
+
+::: {.columns}
+::: {.column width="55%"}
+<div style="font-size: 85%;">
+
+- The procedure is the same as for the adjacency matrix of a symmetric graph
+- We build a **rectangular matrix $\mathbf{A}$** of dimensions $R \times C$:
+  - Rows: $R = |V_1|$ — the **people**
+  - Columns: $C = |V_2|$ — the **groups**
+- Cells: $a_{ij} = 1$ if person $i$ is affiliated with group $j$; otherwise $a_{ij} = 0$
+
+. . .
+
+**Worked example — Gabriela's row** (add across the columns):
+
+$$\mathbf{A}_{\text{Gabriela},\cdot} = \color{red}{1}_{SSB} + 0_{Cheese} + \color{red}{1}_{NF} + 0_{Magic} + \color{red}{1}_{Fashion}$$
+
+- Gabriela belongs to the Super Smash Bros., Nerdfighters, and Fashion clubs
+
+</div>
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 4.7
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
+---
+
+## The Full Affiliation Matrix
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| echo: false
+kbl(A, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 15)
+```
+
+- $\mathbf{A}$ is the **affiliation matrix** corresponding to the bipartite graph on the right
+- Because the number of people does not have to equal the number of groups, affiliation matrices are usually **rectangular**, not square like adjacency matrices
+:::
+
+::: {.column width="52%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 5.2
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
+---
+
+## Row Sums of the Affiliation Matrix
+
+::: {.columns}
+::: {.column width="50%"}
+- The **row sums** of the affiliation matrix give us the number of **memberships** each person has!
+
+$$C_P^{DEG} = \sum_j a_{ij}$$
+
+```{r}
+#| echo: false
+rs <- rowSums(A)
+kbl(t(rs), format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 15)
+```
+
+- Gabriela belongs to **three clubs**; Brandon belongs to just **one** (the Cheese Club)
+- This is the **degree centrality** of the people mode
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 5.0
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
+---
+
+## Column Sums of the Affiliation Matrix
+
+::: {.columns}
+::: {.column width="50%"}
+- The **column sums** of the affiliation matrix give us the **size** of each group!
+
+$$C_G^{DEG} = \sum_i a_{ij}$$
+
+```{r}
+#| echo: false
+cs <- colSums(A)
+kbl(t(cs), format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 15)
+```
+
+- The centrality scores for the clubs tell us about the **popularity** of each group:
+  - The **Cheese Club** is the most popular (4 members)
+- Two distinct sets of centrality scores: one for the people, one for the groups (Faust 1997)!
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 5.0
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
+---
+
+# Part 4: The Transpose & Matrix Multiplication
+
+---
+
+## The Affiliation Matrix Transpose
+
+::: {.columns}
+::: {.column width="48%"}
+### $\mathbf{A}$ (6 × 5)
+```{r}
+#| echo: false
+kbl(A, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 14)
+```
+:::
+
+::: {.column width="52%"}
+### $\mathbf{A}^T$ (5 × 6)
+```{r}
+#| echo: false
+kbl(t(A), format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 14)
+```
+:::
+:::
+
+- The transpose flips rows and columns: $a^T_{ij} = a_{ji}$
+- $\mathbf{A}^T$ contains **exactly the same information** — but now the *groups* are in the rows
+
+---
+
+## Matrix Multiplication: Conformability
+
+You can multiply any $A_{m \times n}$ matrix by any $B_{q \times p}$ matrix:
+
+::: {.columns}
+::: {.column width="50%"}
+$A_{4 \times 2} \times B_{2 \times 3}$
+
+- **Inner dimensions match** ($n = q = 2$): matrices are **conformable**
+- Result: $C_{4 \times 3}$ — the **outer** dimensions
+:::
+
+::: {.column width="50%"}
+$A_{4 \times 3} \times B_{2 \times 3}$
+
+- **Inner dimensions don't match** ($3 \neq 2$): matrices are **not conformable**
+- Product is **not defined**!
+:::
+:::
+
+. . .
+
+- The **outer** dimensions determine the shape of the result: $A_{m \times n} \times B_{q \times p} = C_{m \times p}$
+
+---
+
+## Multiplying a Matrix by Its Transpose
+
+- Turns out the product of any matrix $\mathbf{A}$ times its transpose $\mathbf{A}^T$ is **always defined**!
+- So is the product of the transpose times the original matrix:
+
+$$A_{R \times C} \times A^T_{C \times R} = C_{R \times R}$$
+$$A^T_{C \times R} \times A_{R \times C} = C_{C \times C}$$
+
+. . .
+
+- The inner dimensions always match ($C$ vs. $C$, then $R$ vs. $R$)
+
+. . .
+
+- Why do we care? Because these two products extract **two new matrices** containing not-obvious information about the two-mode network
+
+---
+
+# Part 5: Overlap Matrices
+
+---
+
+## Co-Membership Matrix: Setup
+
+$$O^P = A_{R \times C} \times A^T_{C \times R}$$
+
+- Multiply the affiliation matrix by its transpose
+- Each cell of the product is the **dot product** of a **row** of $\mathbf{A}$ with a **column** of $\mathbf{A}^T$ — but a column of $\mathbf{A}^T$ is just a **row** of $\mathbf{A}$!
+
+. . .
+
+$$o^P_{ij} = \sum_k a_{ik} \, a_{jk}$$
+
+. . .
+
+- $o^P_{ij}$ counts the clubs $k$ where **both** person $i$ and person $j$ have a 1 — their **shared memberships**
+
+---
+
+## Co-Membership Matrix: Worked Example
+
+**Cell (Gabriela, Marie)** — Gabriela's row dotted with Marie's row:
+
+$$o^P_{GM} = (\color{red}{1})(\color{blue}{1}) + (0)(0) + (\color{red}{1})(\color{blue}{1}) + (0)(0) + (\color{red}{1})(\color{blue}{0}) = \mathbf{2}$$
+
+. . .
+
+**Cell (Gabriela, Parker)**:
+
+$$o^P_{GP} = (\color{red}{1})(\color{blue}{0}) + (0)(1) + (\color{red}{1})(\color{blue}{0}) + (0)(1) + (\color{red}{1})(\color{blue}{0}) = \mathbf{0}$$
+
+. . .
+
+**Cell (Gabriela, Gabriela)** — a row dotted with itself:
+
+$$o^P_{GG} = (1)(1) + (0)(0) + (1)(1) + (0)(0) + (1)(1) = \mathbf{3}$$
+
+---
+
+## The Full Co-Membership Matrix
+
+```{r}
+#| echo: false
+OP <- A %*% t(A)
+kbl(OP, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+
+- $O^P = A \times A^T$ transforms the rectangular affiliation matrix into a **square matrix** with **people in both the rows and the columns**
+
+---
+
+## Properties of the Co-Membership Matrix
+
+- Each **off-diagonal** cell $o^P_{ij}$: the number of affiliations person $i$ has **in common** with person $j$ (Breiger 1974)
+  - Gabriela and Marie share 2 memberships; Gabriela and Parker share none
+- Each **diagonal** cell $o^P_{ii}$: the **total number of memberships** person $i$ has
+  - The diagonal of $O^P$ **is** the row-sum vector of $\mathbf{A}$!
+
+. . .
+
+- $O^P$ represents a **weighted one-mode network**:
+  - Strength of tie between $i$ and $j$ = number of common memberships
+  - A **similarity** relation — and therefore **symmetric**
+
+---
+
+## Group Overlap Matrix
+
+$$O^G = A^T_{C \times R} \times A_{R \times C}$$
+
+- Matrix multiplication is **not commutative**: $A \times A^T \neq A^T \times A$ (for rectangular $\mathbf{A}$) — so this is a **different** matrix!
+
+```{r}
+#| echo: false
+OG <- t(A) %*% A
+kbl(OG, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+
+- **Off-diagonal** cells: the number of **members** groups $i$ and $j$ have in common
+- **Diagonal** cells: the total number of members in group $i$ — the **column-sum vector** of $\mathbf{A}$!
+- Super Smash Bros. and Nerdfighters share 2 members; Super Smash Bros. and Cheese share **none** (a disaffinity!)
+
+---
+
+## Overlap = Intersecting Neighborhoods
+
+- The overlap cell is the **cardinality of the intersection** of two node neighborhoods:
+
+$$N(\text{Gabriela}) = \{\text{Super Smash Bros., Nerdfighters, Fashion}\}$$
+$$N(\text{Marie}) = \{\text{Super Smash Bros., Nerdfighters}\}$$
+
+$$N(\text{Gabriela}) \cap N(\text{Marie}) = \{\text{Super Smash Bros., Nerdfighters}\}$$
+
+. . .
+
+- So $o^P_{\text{Gabriela}, \text{Marie}} = 2$ — exactly what the multiplication computed
+- The same logic works for groups: the group overlap matrix records intersections of **member** neighborhoods
+
+---
+
+# Part 6: Projections, Duality, and Applications
+
+---
+
+## From Co-Membership Matrix Back to a Graph
+
+- $O^P$ looks like the adjacency matrix of a **weighted graph**: cells beyond 0/1, symmetric
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.2
+#| fig-width: 4.2
+gr_p <- graph_from_adjacency_matrix(OP, mode = "undirected", weighted = TRUE, diag = FALSE)
+ggraph(gr_p, layout = "circle") +
+  geom_edge_link(aes(width = weight), color = "steelblue") +
+  scale_edge_width(range = c(0.4, 2.5)) +
+  geom_node_point(size = 18, fill = "tan2", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", repel = TRUE) +
+  theme_graph()
+```
+</center>
+
+- The **one-mode (person) projection**: ties weighted by the number of **shared memberships** — a proxy for **tie strength** when we only have affiliation data
+
+---
+
+## From Group Overlap Matrix Back to a Graph
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.0
+#| fig-width: 4.0
+gr_g <- graph_from_adjacency_matrix(OG, mode = "undirected", weighted = TRUE, diag = FALSE)
+ggraph(gr_g, layout = "circle") +
+  geom_edge_link(aes(width = weight), color = "steelblue") +
+  scale_edge_width(range = c(0.4, 2.5)) +
+  geom_node_point(size = 18, fill = "steelblue", color = "#2c3e50", shape = 22, stroke = 1.5) +
+  geom_node_text(aes(label = name), size = 5.5, fontface = "bold", repel = TRUE) +
+  theme_graph()
+```
+</center>
+
+- The **one-mode (group) projection**: ties weighted by the number of **shared members**
+- Super Smash Bros. and Nerdfighters are tightly connected; the Cheese Club is peripheral in the group-to-group network
+- Every two-mode network has **two** one-mode projections, one per node set
+
+---
+
+## The Duality of Persons and Groups
+
+> People are connected to one another **by virtue of the groups they belong to**; groups are connected to one another **by virtue of the people that belong to them**. — Breiger (1974)
+
+. . .
+
+- The **duality principle**: the position of people in a two-mode network is defined by the positions the groups they affiliate with occupy — and vice versa (Bonacich 1991)
+
+. . .
+
+- In our example:
+  - Minjoo is **peripheral** in the person network (few strong ties)
+  - The Cheese Club is **peripheral** in the group network (little overlap with others)
+  - Peripheral people belong to peripheral groups!
+
+---
+
+## Application 1: Collaboration Networks
+
+- In science, the **scientist × paper** network is an affiliation network
+
+::: {.columns}
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 4.2
+#| fig-width: 4.2
+sci <- c("S1", "S2", "S3", "S4", "S5", "S6", "S7")
+papers <- paste0("P", 1:6)
+A_sci <- matrix(c(
+  1, 1, 0, 0, 1, 0,
+  0, 0, 1, 1, 0, 0,
+  0, 1, 0, 0, 0, 0,
+  1, 0, 1, 0, 0, 1,
+  0, 1, 1, 0, 0, 0,
+  0, 1, 1, 1, 1, 1,
+  0, 0, 0, 1, 0, 1
+), nrow = 7, byrow = TRUE, dimnames = list(sci, papers))
+kbl(A_sci, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+```
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-height: 4.2
+#| fig-width: 4.2
+OP_sci <- A_sci %*% t(A_sci)
+kbl(OP_sci, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+```
+:::
+:::
+
+- The co-membership matrix of scientists yields **co-authorship teams**: $o^P_{ij}$ = number of papers $i$ and $j$ have written together
+
+---
+
+## Application 1: Predicting Future Collaboration
+
+- The diagonal records productivity (papers written): S6 has written **5** papers, S1 and S4 **3** each
+
+. . .
+
+- High co-membership suggests people who **know each other and work well together**:
+  - S4 and S6 have written **2** papers together
+  - S6 has co-authored with **everyone**
+
+. . .
+
+- Maybe we can **predict which scientists will work together in the future**!
+  - Pairs with high past co-membership (e.g., S4–S6, S2–S6) are good candidates for future co-authorship
+  - This is the basis of "suggest a collaborator" features in scholarly databases
+
+---
+
+## Application 2: Product Choice Networks
+
+- In markets, the **person × product** network is an affiliation network
+- The **group overlap matrix** yields a **product network**: two movies are connected by the people who watched both
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| echo: false
+pers <- paste0("P", 1:8)
+movies <- paste0("M", 1:5)
+A_mov <- matrix(c(
+  1, 0, 0, 0, 0,
+  1, 1, 0, 0, 0,
+  0, 0, 0, 1, 1,
+  0, 0, 1, 0, 0,
+  1, 0, 1, 0, 0,
+  0, 0, 1, 0, 0,
+  0, 1, 0, 0, 0,
+  0, 1, 1, 0, 0
+), nrow = 8, byrow = TRUE, dimnames = list(pers, movies))
+kbl(A_mov, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 13)
+```
+:::
+
+::: {.column width="52%"}
+```{r}
+#| echo: false
+OG_mov <- t(A_mov) %*% A_mov
+kbl(OG_mov, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+```
+
+- Movies 1, 2, 3 share watchers — a de facto **genre cluster** ("rom-coms" vs. "action")
+:::
+:::
+
+. . .
+
+- Product networks are at the basis of **recommendation systems**: a person who watched Movie 2 is connected (via overlap) to watchers of Movies 1 and 3, and to no one who watched Movies 4/5 — "people who watched $M_2$ also watched..." is just a row of the group overlap matrix!
+
+---
+
+## Glossary of Key Terms
+
+<div style="font-size: 90%;">
+
+- **Affiliation network**: a social network in which two types of entities (e.g., people and the clubs they join) are linked together
+- **Bipartite graph**: a graph with two disjoint sets of nodes, in which nodes link only to nodes in the *other* set
+  - Bipartite graphs are the natural representation of two-mode networks!
+- **Affiliation matrix**: the matrix recording the adjacency relations between vertices in a bipartite graph (people × groups)
+
+. . .
+
+- **Matrix transpose**: the operation switching the rows and columns of a matrix ($A_{R \times C} \to A^T_{C \times R}$)
+- **Co-membership matrix** ($A \times A^T$): off-diagonal cells record the number of shared memberships for each pair of people
+- **Group overlap matrix** ($A^T \times A$): off-diagonal cells record the number of shared members for each pair of groups
+- **Duality of persons and groups**: people's positions are defined by the groups they belong to; groups' positions by the people who belong to them (Breiger 1974)
+
+</div>
+
+---
+
+## Summary
+
+- Affiliation networks are **two-mode** networks: people linked to the groups, events, and projects they join
+- **Bipartite graphs** represent them; every graph metric **doubles up** (one version per node set), but $\sum k(U) = \sum k(V) = m$
+- The **affiliation matrix** $\mathbf{A}$ (people × groups) is rectangular:
+  - Row sums = person memberships (degree centrality)
+  - Column sums = group sizes (group degree centrality)
+- $\mathbf{A} \times \mathbf{A}^T$ and $\mathbf{A}^T \times \mathbf{A}$ are always defined, and yield the **co-membership** and **group overlap** matrices — two weighted one-mode projections
+- The **duality principle** ties it all together: central people belong to central groups

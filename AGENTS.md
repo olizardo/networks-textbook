@@ -126,11 +126,14 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/graph-cutsets-directed.qmd` | Graph Theory: Cutsets, Bridges & Directed Connectivity |
 | `slides/graph-trees.qmd` | Graph Theory: Trees, Forests & Efficiency |
 | `slides/matrix-intro.qmd` | Networks, Graphs, and Matrices |
-| `slides/matrix-operations.qmd` | Matrix Algebra in Social Networks |
+| `slides/matrix-operations.qmd` | Matrix Algebra in Social Networks: Part I (Basic Operations, Transpose, Dyad Census) |
+| `slides/matrix-multiplication.qmd` | Matrix Algebra in Social Networks: Part II (Multiplication, Conformability, Applications) |
 | `slides/matrix-advanced.qmd` | Advanced Network Matrices |
 | `slides/ego-metrics.qmd` | Measuring Ego Networks |
 | `slides/ego-homogeneity.qmd` | Theories of Ego Network Homogeneity and Diversity |
 | `slides/cognitive-social-structures.qmd` | Cognitive Social Structures |
+| `slides/affiliation-networks.qmd` | Affiliation Networks |
+| `slides/centrality.qmd` | Centrality in Networks |
 | `slides/subgroups.qmd` | Graph Theory: Sub-Groups & Cliques |
 | `slides/positional-equivalence.qmd` | Graph Theory: Equivalence & Similarity |
 | `slides/blockmodeling.qmd` | Graph Theory: Blockmodeling |
@@ -174,7 +177,7 @@ The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push t
 2. **Fast R Dependency Installation:** Uses `r-lib/actions/setup-r@v2` with Posit Public Package Manager (P3M) binary packages (`use-public-rspm: true`), completing dependency install in seconds.
 3. **Book Build:** Renders book chapters to `_sites/`.
 4. **Slide Decks Build:** Renders changed `slides/*.qmd` into `_sites/slides/`.
-5. **Slide Size Floor Audit (non-blocking):** `python audit_slide_sizes.py --no-render` audits the changed decks (see workflow 5). Currently `continue-on-error: true`; flip to `false` to enforce once remaining figure violations are fixed.
+5. **Slide Size Floor Audit (non-blocking):** `python audit_slide_sizes.py --no-render` audits the changed decks (see workflow 4). Currently `continue-on-error: true`; flip to `false` to enforce once remaining figure violations are fixed.
 6. **Deployment:** Deploys `_sites/` to GitHub Pages.
 
 ### 4. Slide Deck Size Floor (established 2026-10-20)
@@ -190,13 +193,35 @@ Usage: `python audit_slide_sizes.py slides/matrix-operations.qmd` (auto-renders 
 
 **Known remaining violations (as of 2026-10-20):** ~33 figures in `slides/matrix-operations.qmd` and `slides/matrix-advanced.qmd` are rendered at `fig-width: 7` (672px rasters) but displayed in ~263px columns (39% scale, ~6px labels). Fix by matching `fig-width` to the display column (~3.5) when touching those decks.
 
-### 5. Bruin Learn (Canvas) API: Posting Announcements
+### 5. Slide Overflow QA (updated 2026-10-20)
+Policy: no slide in a Reveal.js deck may scroll vertically; if content genuinely doesn't fit, split it into two consecutive slides rather than shrinking fonts aggressively.
+
+**Minimum visibility floors for figures and tables (added 2026-10-20).** Every graph/figure and matrix/table in a slide deck must stay above these thresholds — do not shrink below them to fit content; instead split the slide, rebalance columns, or move content into the column with slack:
+- **Figures (ggraph/ggplot):** minimum `fig-width`/`fig-height` of **3.5in** when square and kept equal (so layouts don't distort); a 3.3in figure is tolerable only inside a narrow (~30%) side column. Wide multi-panel strips (e.g. the MAN dyad triptych at 8in wide) need at least **2.9in** height. Node points ≥ size 15 and node labels ≥ size 7 in ggraph plots; paired-edge arrowheads ≥ 3.5mm with `end_cap` ≥ 6mm so arrowheads stay visible (small open arrowheads read as undirected ties — cost a real fix in matrix-advanced).
+- **kable tables:** `font_size` ≥ **18** (20 preferred for the primary worked-example matrices). A one-off 16 is allowed only for secondary tables in narrow columns.
+- **Rule of thumb:** if a figure or table needs squinting, the slide is overfull — split it or restructure the columns rather than shrink the exhibit. When a worked example references a graph or matrix, the referenced exhibit must be visible on the same slide (the persistent-example-graph convention used in affiliation-networks and matrix-advanced).
+
+**Measuring overflow:** `scrollable: true` makes overflowing slides scroll, so check empirically instead of by eye. Render the deck, then measure each slide's `scrollHeight` vs `clientHeight` at the deck's native 1280×720 geometry in headless Chrome. No browser is installed in the Crostini container; the working setup (cached under a scratch dir, Node 18-compatible):
+```bash
+npx -y @puppeteer/browsers@2.4.1 install chrome-headless-shell@stable   # latest installer needs Node >= 20
+npm i puppeteer-core                                                     # v25 is ESM-only: use dynamic import()
+```
+Drive it with `Reveal.slide(h, v)` per slide (decks nest `##` slides inside `#` part sections — `.slides > section` alone only sees part headers), wait for `Reveal.isReady()` + `MathJax.startup.promise` + `document.fonts.ready` first. A slide scrolls iff `scrollHeight > clientHeight` and its computed `overflow-y` is `auto`/`scroll`. `scrollHeight`/`clientHeight` ignore Reveal's CSS transform scale, so results are resolution-independent. `# Part N` divider slides report a small scrollHeight delta but are `overflow-y: visible` and shrink-wrapped — they never scroll; ignore them. Quarto's own `scrollable` class on a section is only a heuristic; trust the measurement.
+
+**Quarto/Pandoc pitfalls (both verified 2026-10-15, cost real debugging time):**
+1. A raw `<div style=...>` wrapper must open and close **within** a single `:::` fenced div. If `</div>` lands after the wrapper's parent `:::` closes (straddling the boundary), pandoc mis-pairs the fences and silently swallows the remainder of the deck — the render still prints "Output created" but with a fraction of the slides and a `Div ... unclosed` WARNING. Always check the render log for that warning. Raw `<div>` around plain markdown (tables, bullets) inside a column is fine.
+2. `::: {.column width="60%" style="font-size: 85%;"}` fails: Quarto emits its own `style="width:60%"` and drops the custom style ("Ignoring duplicate attribute" warning). Put everything in `style` instead: `::: {.column style="width: 60%; font-size: 85%;"}`.
+
+**Layout facts that drive overflow in `slides/`:** `ucla-theme.css` sets a 34px base font; its `p, li { font-size: 0.85em }` reduction does NOT apply to tables, so tables render at full size and are usually the tallest element — especially text tables in narrow columns (cells wrap one word per line). Effective fixes in order of preference: split the slide; move bullets into the column that has slack (e.g., under the figure); drop subheadings that duplicate the slide title ("### Matrix Progress", etc.); wrap a column's content in `<div style="font-size: 80-90%">` (72% is the established floor, used in matrix-operations); shrink square `fig-width/fig-height` together (keep them equal so graph layouts don't distort). Overflow status (2026-10-20, per `measure6.mjs`): 0 slide + 0 table overflows in centrality, affiliation-networks, ties-motifs, matrix-intro, matrix-multiplication, valenced-interactions, graph-cutsets-directed, matrix-operations (46 slides), and matrix-advanced (36 slides) — the pending-fixes list from earlier on 2026-10-20 (matrix-operations "Working the Example"/"Transpose as a Reversed Graph"; matrix-advanced "Step 3", "Case 1", "Case 2", "Visualizing Node Eccentricity") is now cleared: the worked-example slide was split into separate Row Sums and Column Sums slides, and the others were fixed by trimming bullets and modest figure resizing within the visibility floors. **Measure with all Reveal fragments advanced — but NEVER via a blind loop of `Reveal.next()`** (measuring at fragment 0 can miss overflow hidden behind `. . .` builds). VERIFIED 2026-10-20: `measure4.mjs` did `Reveal.slide(h, v, 0)` then `for (i < 40) Reveal.next()` — `Reveal.next()` moves to the NEXT SLIDE once fragments run out, so every measurement landed on a later slide and its "0 overflowing" verdicts were meaningless. `measure5.mjs` fixed the fragment handling (raises the fragment index via `Reveal.slide(h, v, f)`, asserts it never left the target slide, checks every table's — or its `scroll_box` wrapper's — bottom edge against the slide bottom) but still raced lazy images and MathJax layout. The current standard is `measure6.mjs` in the qa scratch dir: measure5 plus (a) it waits for every `<img>` in the slide to finish loading — Quarto revealjs emits `data-src` lazy images, and an unloaded image reports height 0, corrupting the measurement — and (b) re-reads `scrollHeight` across 250 ms polls until it is stable. Companion `dump3.mjs <url> <h> <v>` prints settled per-element geometry (heights/tops of columns, tables, figures, fragments) for diagnosing exactly which element pushes a slide over. Deck-internal conventions that keep 19-row ranking tables from overflowing: `kbl2(df, font)` helper (defined in centrality.qmd setup) splits any node/score table into side-by-side halves, halving its height; and the 19-node example graph should use a fixed `graphlayouts` stress layout (`create_layout(gr19, layout = "stress")` coords stored once, passed via `layout = "manual"`) so the graph looks identical on every slide and labels never collide — FR layouts cram this graph's left cluster.
+
+**Persistent-example conventions (2026-10-20, centrality + matrix-multiplication):** every slide that discusses the worked example keeps that example visible in a side column — explanations must stay visually anchored to the graph/matrix they refer to (user feedback: "disconnected textual examples" where the example disappears are hard to follow). Supporting helpers: pinned layouts (`create_layout(gr, "stress")` coords, or fixed circular coords passed via `layout = "manual"`) so the graph renders identically on every slide it appears on; `kbl2(df, font)` in centrality.qmd splits any node/score table into side-by-side halves, halving the height of 19-row rankings; matrix-multiplication.qmd has `g6(catmap, ...)` (6-node party graph; category colors: red/blue = focus nodes, green = shared friends, tan = others) and `kb6(m, font)` (bold rowname column), and its A×A′ traced-cell slides keep the FULL original matrices on screen with the active row/column highlighted in place via `row_spec(..., background =)` / `column_spec(..., background =)` (light red #F5B7B1 = left-matrix row, light blue #AED6F1 = right-matrix column) rather than showing bare extracted rows. Vertical-space fact: each MathJax display line costs ~80–100px — prefer merging a step-by-step calculation into ONE display line and moving the takeaway to a bullet, and never stack intro bullets above a columns block that already holds a figure + two matrices.
+
+### 6. Bruin Learn (Canvas) API: Posting Announcements
 Credentials are read from `~/.Renviron` (`CANVAS_API_TOKEN`, `CANVAS_URL`). Course ID for SOCIOL 111 is `238980`.
 
 **File locations & format (on this Windows machine):**
 - R reads `C:\Users\Omar Lizardo\OneDrive\Documents\.Renviron` (R's `~` is OneDrive Documents); it tolerates `KEY = value` with spaces.
 - Shell/Python tools (including `sync_homeworks_to_canvas.py`) read `C:\Users\Omar Lizardo\.Renviron` via `os.path.expanduser`. The sync script's parser requires strict `KEY=value` lines — no spaces around `=` and no quotes — otherwise credentials are silently missed.
-
 **Working pattern (verified 2026-10-13):** post via `POST /api/v1/courses/:course_id/discussion_topics` with a **form-encoded** body — `title`, `message` (HTML), `is_announcement=true`, `published=true`:
 ```bash
 curl -X POST -H "Authorization: Bearer $TOKEN" \

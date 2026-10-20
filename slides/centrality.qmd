@@ -1,0 +1,1126 @@
+---
+title: "Centrality in Networks"
+subtitle: "The Big Three Centrality Metrics: Degree, Closeness, and Betweenness"
+format:
+  revealjs:
+    incremental: false
+    scrollable: true
+    theme: default
+    center: false
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(igraph)
+library(dplyr)
+library(kableExtra)
+library(sna)
+conflicted::conflicts_prefer(igraph::degree, igraph::betweenness, igraph::closeness,
+                             base::order, base::attr)
+
+# ---- 19-node undirected example graph (a-s), reconstructed from the lecture deck ----
+M19 <- matrix(c(
+0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
+1,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,
+1,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
+0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
+1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
+0,1,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,
+0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0,
+0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,
+0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,1,0,0,0,
+0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,
+0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0,
+0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,
+0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,
+0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,
+0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+), nrow = 19, byrow = TRUE, dimnames = list(letters[1:19], letters[1:19]))
+gr19 <- graph_from_adjacency_matrix(M19, mode = "undirected")
+
+deg19   <- igraph::degree(gr19)
+dmat19  <- distances(gr19)
+far19   <- rowSums(dmat19)
+clo19   <- round((length(V(gr19)) - 1) / far19, 2)
+bet19   <- round(igraph::betweenness(gr19), 1)
+stress19 <- round(sna::stresscent(M19), 1)
+names(bet19) <- names(stress19) <- letters[1:19]
+rank_df <- function(v, digits = 2) {
+  v <- round(v, digits)
+  o <- order(v, decreasing = TRUE)
+  data.frame(node = names(v)[o], score = v[o])
+}
+set.seed(42)
+# Fixed stress layout so the 19-node graph sits identically on every slide that shows it
+ly19 <- create_layout(gr19, layout = "stress")[, c("x", "y")]
+# Two-up compact table: split rows into side-by-side halves to halve vertical space
+kbl2 <- function(df, font = 12) {
+  n <- nrow(df); h <- ceiling(n / 2)
+  L <- df[1:h, , drop = FALSE]
+  R <- df[(h + 1):n, , drop = FALSE]
+  if (nrow(R) < h) {
+    pad <- as.data.frame(matrix("", nrow = h - nrow(R), ncol = ncol(df)))
+    names(pad) <- names(df)
+    R <- rbind(R, pad)
+  }
+  out <- cbind(L, R)
+  names(out) <- c(names(df), names(df))
+  kbl(out, format = "html", align = "c") %>%
+    kable_styling(bootstrap_options = c("condensed"), font_size = font)
+}
+
+# ---- 8-node directed example graph (v1-v8) ----
+D8 <- matrix(c(
+0,1,0,1,0,0,0,0,
+0,0,1,0,1,0,0,0,
+1,0,0,1,0,0,0,0,
+0,0,0,0,1,1,1,0,
+0,0,1,0,0,0,0,0,
+0,0,0,0,1,0,0,1,
+1,0,0,0,0,0,0,0,
+0,0,0,1,0,0,0,0
+), nrow = 8, byrow = TRUE, dimnames = list(paste0("v", 1:8), paste0("v", 1:8)))
+gr8 <- graph_from_adjacency_matrix(D8, mode = "directed")
+dd8 <- distances(gr8, mode = "out")
+out8 <- rowSums(D8); in8 <- colSums(D8)
+far8 <- rowSums(dd8); clo8 <- round(7 / far8, 2)
+
+# Weakly connected variant: delete the three return edges (v1->v2, v4->v7, v5->v3)
+D8w <- D8
+D8w["v1", "v2"] <- 0; D8w["v4", "v7"] <- 0; D8w["v5", "v3"] <- 0
+gr8w <- graph_from_adjacency_matrix(D8w, mode = "directed")
+dw8 <- distances(gr8w, mode = "out")
+inv8 <- 1 / dw8; inv8[!is.finite(inv8)] <- 0; diag(inv8) <- 0
+har8 <- round(rowSums(inv8), 2); har8n <- round(har8 / 7, 2)
+
+# ---- star graph and centralization example ----
+star7 <- create_star(7) |> mutate(name = toupper(letters[1:7]))
+star_tab <- data.frame(
+  degree = igraph::degree(star7),
+  closeness = round(6 / rowSums(distances(star7)), 2),
+  betweenness = round(igraph::betweenness(star7), 1)
+)
+obs5 <- graph_from_edgelist(matrix(c(
+  "A","B","A","C","A","D","B","C","B","D","B","E","C","E","D","E"
+), ncol = 2, byrow = TRUE), directed = FALSE)
+kobs <- igraph::degree(obs5)
+cent_obs <- sum(max(kobs) - kobs)
+cent_star <- sum(max(igraph::degree(create_star(5))) - igraph::degree(create_star(5)))
+
+# Plotting helpers: fixed layouts keep each example graph visually identical across slides
+g19 <- function(hl = character(0), pt = 10, tx = 6) {
+  g <- gr19 |> as_tbl_graph() |> mutate(hl = name %in% hl)
+  ggraph(g, layout = "manual", x = ly19$x, y = ly19$y) +
+    geom_edge_link(color = "steelblue", edge_width = 0.8, lineend = "round") +
+    geom_node_point(aes(color = hl, x = x, y = y), size = pt) +
+    scale_color_manual(values = c("FALSE" = "tan1", "TRUE" = "red"), guide = "none") +
+    geom_node_text(aes(label = name, x = x, y = y), size = tx,
+                   color = "white", fontface = "bold") +
+    theme_graph()
+}
+g8 <- function(graph = gr8, hl = character(0), pt = 10, tx = 6) {
+  g <- graph |> as_tbl_graph() |> mutate(hl = name %in% hl)
+  ggraph(g, layout = "circle") +
+    geom_edge_parallel(color = "steelblue", edge_width = 1,
+                       arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                       end_cap = circle(6, "mm"), sep = unit(3.5, "mm")) +
+    geom_node_point(aes(color = hl), size = pt) +
+    scale_color_manual(values = c("FALSE" = "tan1", "TRUE" = "red"), guide = "none") +
+    geom_node_text(aes(label = name), size = tx, color = "white", fontface = "bold") +
+    theme_graph() + coord_cartesian(clip = "off")
+}
+```
+
+# Part 1: What is Centrality?
+
+---
+
+## Where We Are in the Course
+
+::: {.columns}
+::: {.column width="20%"}
+**1. Individual**
+:::
+::: {.column width="20%"}
+**2. Dyads**
+:::
+::: {.column width="20%"}
+**3. Triads**
+:::
+::: {.column width="20%"}
+**4. Cliques, Communities**
+:::
+::: {.column width="20%"}
+**5. Whole Network**
+:::
+:::
+
+. . .
+
+- The first part of the course follows this organization
+- **We are now here: the individual level** — asking about the *importance* or *strategic location* of single nodes in the network
+
+---
+
+## What is Centrality?
+
+- A measure of the **importance** or **strategic location** of a node in the network
+- Connected to ideas like:
+  - **Popularity** and **status**
+  - **Influence** and **power**
+  - **Autonomy** and **independence**
+  - **Control**, **risk**, and **exposure**
+  - **Brokerage** and **belongingness**
+
+. . .
+
+- Caution (the three-step shuffle!): these English concepts and centrality **metrics** are related but distinct
+  - The same concept can be measured by more than one metric, and the same metric speaks to different concepts depending on context and flow type (Borgatti 2005)
+
+---
+
+## The Three Sources of Centrality
+
+A **centrality metric** is a summary index of a node's position in a graph, based on sums or averages of one of three things (Borgatti & Everett 2006):
+
+1. The **number of edges** that are directly **incident** upon that node
+1. The **length of the shortest paths** (smaller is better) having that node as one of their **end nodes**
+1. The **proportion of shortest paths** that have that node as one of their **inner nodes**
+
+. . .
+
+- The **more/more principle** (Freeman 1979): *the more a node has of these things, the more central it is!*
+- Think of these as **network goods** (or "bads," when disease or violence flows through the network): centrality should never *decrease* when a node gains access to more of them
+
+---
+
+## From Metric to Ranking
+
+- Applying a centrality metric to every node produces a **ranking** of all nodes
+  - From **most central** (top) to **least central** (bottom)
+
+. . .
+
+- Different metrics embody different ideas of what it means to be "central" — so they can produce **different rankings of the same graph**
+- The classic three are called the **"big three" centrality metrics** (Freeman 1979):
+  1. **Degree centrality** — more edges incident
+  1. **Closeness centrality** — shorter geodesics as end node
+  1. **Betweenness centrality** — more geodesics as inner node
+
+---
+
+# Part 2: Centralities Based on Degrees
+
+---
+
+## Degree Centrality (Undirected)
+
+- The simplest (local) centrality measure to compute
+- **Graph theory definition**: the number of **edges incident** to a node — the cardinality of its set of neighbors
+
+$$C_i^{DEG} = \sum_{j=1}^{n} a_{ij}$$
+
+. . .
+
+- In an undirected graph, given by **either** the row **or** the column sum vector of the symmetric adjacency matrix
+- Once we have the adjacency matrix $\mathbf{A}$, degree centrality is easy to calculate — just sum the rows!
+
+---
+
+## The Example Graph
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 5.1
+#| fig-width: 9.8
+g19(hl = c("h", "i"), pt = 11, tx = 7)
+```
+</center>
+
+- A 19-node undirected graph with a **left cluster** (a–h) and a **right cluster** (j–s), joined through nodes **h** and **i**
+
+---
+
+## Its Adjacency Matrix
+
+```{r}
+#| echo: false
+kbl(M19, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 12) %>%
+  scroll_box(width = "100%", height = "540px")
+```
+
+---
+
+## Degree Centrality from the Adjacency Matrix
+
+- We can obtain the degree centrality of each node by **summing up the rows** of the adjacency matrix!
+
+::: {.columns}
+::: {.column width="55%"}
+```{r}
+#| echo: false
+kbl(M19, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 11) %>%
+  scroll_box(width = "100%", height = "440px")
+```
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+rt <- data.frame(node = letters[1:19], degree = as.vector(deg19))
+kbl2(rt, 13)
+```
+- In this graph, node **j** has the largest degree centrality ($k_j = 7$)!
+:::
+:::
+
+---
+
+## The Degree Centrality Ranking
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = "j", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+```{r}
+#| echo: false
+rd <- rank_df(deg19)
+rd$score <- as.integer(rd$score)
+kbl2(rd, 13)
+```
+
+- Node **j** (7 ties, highlighted) tops the ranking; **r** and **s** (1 tie each) sit at the bottom
+- Popularity, in graph-theoretic form
+:::
+:::
+
+---
+
+## Normalized Degree Centrality
+
+::: {.columns}
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-height: 4.3
+#| fig-width: 4.3
+g19(hl = "j", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="60%"}
+<div style="font-size: 85%;">
+
+- Raw degree is sensitive to the **size** of the network: 20 friends in a 1,000-student high school is not 20 friends in a school of 100!
+
+. . .
+
+- Freeman (1979) proposed **normalizing** by the maximum possible degree, $N - 1$:
+
+$$C_{i(norm)}^{DEG} = \frac{C_i^{DEG}}{N-1}$$
+
+```{r}
+#| echo: false
+rn <- rank_df(deg19 / 18, 2)
+kbl2(rn, 11)
+```
+
+- Ranges 0–1: 20 friends is $\approx 0.02$ in the 1,000-student school but $\approx 0.20$ in one of 100 — more centrality in the smaller world!
+
+</div>
+:::
+:::
+
+---
+
+## Degree Centrality (Directed)
+
+- In **directed** graphs, nodes have **two separate types** of degree centrality:
+
+$$C_i^{OUT} = \sum_j a_{ij} \qquad C_j^{IN} = \sum_i a_{ij}$$
+
+- **Outdegree centrality**: cardinality of the set of **out-neighbors** (rows)
+  - How many others does this node **send** ties to? *Sociability* or *expansiveness*
+- **Indegree centrality**: cardinality of the set of **in-neighbors** (columns)
+  - How many others **seek this node out**? A kind of *status*
+
+---
+
+## The Directed Example
+
+::: {.columns}
+::: {.column width="45%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 4.4
+#| fig-width: 4.4
+gr8l <- gr8 |> as_tbl_graph() |> mutate(hl = name == "v4")
+ggraph(gr8l, layout = "circle") +
+  geom_edge_parallel(color = "steelblue", edge_width = 1,
+                     arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                     end_cap = circle(6, "mm"), sep = unit(3.5, "mm")) +
+  geom_node_point(aes(color = hl), size = 10) +
+  scale_color_manual(values = c("FALSE" = "tan1", "TRUE" = "red"), guide = "none") +
+  geom_node_text(aes(label = name), size = 6, color = "white", fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+</center>
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+kbl(D8, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 13)
+```
+
+- A **strongly connected** directed graph: everyone can reach everyone
+:::
+:::
+
+---
+
+## Outdegree and Indegree Vectors
+
+- **Outdegree** = summing the **rows** of the asymmetric adjacency matrix
+- **Indegree** = summing the **columns**
+
+```{r}
+#| echo: false
+oitable <- data.frame(
+  node = paste0("v", 1:8),
+  outdegree = as.vector(out8),
+  indegree = as.vector(in8),
+  out_norm = round(out8 / 7, 2),
+  in_norm = round(in8 / 7, 2)
+)
+kbl(oitable, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 15)
+```
+
+. . .
+
+- We get **separate rankings** by outdegree and indegree!
+  - **v4** is highest on both ($C^{OUT} = 3$, $C^{IN} = 3$) — an active sociability *and* high status
+  - Normalized by $N - 1 = 7$, as before
+
+---
+
+# Part 3: Centralities Based on the Geodesic Distance
+
+---
+
+## Closeness Centrality
+
+- Sometimes what matters is not **how many** people you know directly, but being **indirectly connected** to a lot of others
+- A node that can **reach** all the other nodes in the graph via the **shortest paths** (on average) has the **largest closeness centrality**!
+
+. . .
+
+- The closeness between two nodes is the **inverse** of their **geodesic distance**: $\frac{1}{d_{ij}}$ (Bavelas 1950)
+- Pairwise geodesic distances for every pair live in the **geodesic distance matrix**
+
+---
+
+## The Most Closeness-Central Node
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 5.1
+#| fig-width: 9.8
+g19(hl = "i", pt = 11, tx = 7)
+```
+</center>
+
+- In this graph, node **i** has the largest closeness centrality!
+
+---
+
+## Worked Example: Distances from Node i
+
+::: {.columns}
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = "i", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="60%"}
+- To compute $C^{CLOS}(i)$, list the shortest-path distance from **i** to every other node:
+
+```{r}
+#| echo: false
+sprow <- data.frame(node = letters[1:19],
+                    distance = as.vector(dmat19["i", ]))
+kbl(t(sprow$distance), format = "html", align = "c",
+    col.names = letters[1:19]) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 11)
+```
+:::
+:::
+
+. . .
+
+$$C^{CLOS}(i) = \frac{N - 1}{\sum_j d_{ij}} = \frac{18}{41} = \mathbf{0.44}$$
+
+---
+
+## The Geodesic Distance Matrix
+
+```{r}
+#| echo: false
+kbl(dmat19, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 12) %>%
+  scroll_box(width = "100%", height = "540px")
+```
+
+---
+
+## Farness: The Row Sums of the Distance Matrix
+
+- The row sums of the geodesic distance matrix tell us the total shortest-path distance from each node to every other node
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = "s", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+. . .
+
+- Bigger numbers are **worse**: this is **farness**, not closeness!
+
+```{r}
+#| echo: false
+rf <- data.frame(node = letters[1:19], farness = as.vector(far19))
+kbl2(rf, 12)
+```
+
+- Node **s** has the largest farness (88) — it is far away from most other nodes
+:::
+:::
+
+---
+
+## From Farness to Closeness
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = c("i", "s"), pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+<div style="font-size: 88%;">
+
+- We want **closeness**, not farness — so we **reverse** the scores by dividing $N - 1$ by each row sum (Freeman 1979):
+
+$$C_i^{CLOS} = \frac{N-1}{\sum_j d_{ij}}$$
+
+```{r}
+#| echo: false
+rcl <- data.frame(node = letters[1:19], farness = as.vector(far19), closeness = clo19)
+kbl2(rcl, 11)
+```
+
+- Ranges from 0 to 1, with 1 being the maximum possible closeness for the graph — **i** tops it (0.44), **s** sits at the bottom (0.20)
+
+</div>
+:::
+:::
+
+---
+
+## The Closeness Centrality Ranking
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = "i", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+<div style="font-size: 85%;">
+
+```{r}
+#| echo: false
+rc <- rank_df(clo19)
+kbl2(rc, 13)
+```
+
+. . .
+
+- **Node i** has the largest closeness centrality (0.44) **even though it doesn't have the largest degree** (that was j)!
+- Closeness and degree capture **different things** — the rankings disagree
+- Practical use (chapter 19): to spread an innovation fastest, seed node **i** first... but if a **disease** is spreading, that's also the worst node to infect!
+
+</div>
+:::
+:::
+
+---
+
+## Closeness Centrality in Directed Graphs
+
+- Compute closeness in a directed graph **as long as the graph is strongly connected** — fill up the geodesic distance matrix as usual, except now the matrix is **asymmetric**!
+
+::: {.columns}
+::: {.column width="38%"}
+```{r}
+#| echo: false
+#| fig-height: 4.3
+#| fig-width: 4.3
+g8(pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="62%"}
+```{r}
+#| echo: false
+kbl(D8, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 12)
+```
+
+. . .
+
+```{r}
+#| echo: false
+kbl(dd8, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 12)
+```
+:::
+:::
+
+---
+
+## Directed Closeness: Row Sums and Ranking
+
+::: {.columns}
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-height: 4.3
+#| fig-width: 4.3
+g8(hl = "v4", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="60%"}
+```{r}
+#| echo: false
+dc8 <- data.frame(node = paste0("v", 1:8),
+                  farness = as.vector(far8), closeness = clo8)
+kbl(dc8, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+```
+
+. . .
+
+- **Node v4** has the largest closeness (0.58) — it is nearest to most nodes
+- Note the directionality: v4's high outdegree *and* good reach drive this
+- Rank order differs from both the outdegree and indegree rankings!
+:::
+:::
+
+---
+
+## Houston, We Have a Problem
+
+- Now consider a **weakly connected** directed graph: delete the return ties $v_1 \to v_2$, $v_4 \to v_7$, and $v_5 \to v_3$
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.4
+#| fig-width: 4.4
+g8(graph = gr8w, pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+```{r}
+#| echo: false
+kbl(D8w, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 13)
+```
+
+. . .
+
+- No one can **reach** nodes v2 and v7 (pure transmitters)
+- Node v5 can **reach no one** (pure receiver)
+:::
+:::
+
+---
+
+## The Row Sums Turn to Infinity
+
+```{r}
+#| echo: false
+kbl(dw8, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 13)
+```
+
+. . .
+
+- The geodesic distance between some pairs is now **infinity** — and the row sums turn into Infs: for any number $x$, $x + \infty = \infty$
+- **Closeness is undefined!**
+
+---
+
+## The Solution: Harmonic Centrality
+
+- The fix (Beauchamp 1965; Boldi & Vigna 2014): sum the **inverses** of the geodesic distances, *not* the inverse of their sum:
+
+$$C_i^{HARM} = \frac{1}{N-1}\sum_j \frac{1}{d_{ij}}$$
+
+- This solves the "infinity" problem because:
+
+$$\frac{1}{\infty} = 0$$
+
+. . .
+
+- Order of operations matters: *first* invert each distance, *then* sum — unreachable nodes contribute **zero** instead of blowing everything up
+
+---
+
+## Harmonic Centrality: Worked Example
+
+- Take the inverse of each cell of the weakly connected geodesic distance matrix:
+
+::: {.columns}
+::: {.column width="42%"}
+```{r}
+#| echo: false
+kbl(dw8, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 12)
+```
+:::
+
+::: {.column width="58%"}
+```{r}
+#| echo: false
+kbl(round(inv8, 2), format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 12)
+```
+:::
+:::
+
+- No more infinities — unreachable pairs become **zeroes**!
+
+---
+
+## The Harmonic Centrality Ranking
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.4
+#| fig-width: 4.4
+g8(graph = gr8w, hl = c("v2", "v5"), pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+```{r}
+#| echo: false
+rh <- data.frame(node = paste0("v", 1:8),
+                 harmonic = har8, normalized = har8n)
+rh <- rh[order(rh$harmonic, decreasing = TRUE), ]
+kbl(rh, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+```
+
+. . .
+
+- **v2** is now highest (0.51): even though nobody can reach it, it can reach almost everybody quickly
+- **v5** gets exactly 0: it can reach no one at all
+- Harmonic centrality is defined for **all** graphs — connected or not!
+:::
+:::
+
+---
+
+# Part 4: Centralities Based on Shortest Paths
+
+---
+
+## Betweenness Centrality
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = "h", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+<div style="font-size: 88%;">
+
+- A node that is **in the middle** of the largest number of shortest paths indirectly connecting **other** pairs of nodes has the largest **betweenness centrality**!
+
+. . .
+
+- In our 19-node graph, node **h** stands on the shortest path between **g** and **i**: $g \to h \to i$
+  - Also on the shortest paths between **p** and **c**, and between **k** and **r**
+- **h** must have high betweenness: it connects the nodes on the **left** of the graph with the nodes on the **right**
+
+. . .
+
+- Node **g** is also high-betweenness — but not as high as **h**!
+
+</div>
+:::
+:::
+
+---
+
+## Stress Centrality: A First Attempt
+
+- For each node $k$: how often does it show up as an **inner node** on shortest paths between every other pair $i, j$? (Shimbel 1953: total **traffic** through the node)
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.3
+#| fig-width: 4.3
+g19(hl = "h", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+$$C^{STRESS}_k = \sum_{i \neq k} \sum_{j \neq k} n_{i(k)j}$$
+
+```{r}
+#| echo: false
+rs19 <- data.frame(node = letters[1:19], stress = as.vector(stress19))
+kbl2(rs19, 12)
+```
+:::
+:::
+
+---
+
+## The Problem with Stress: It Counts, Not Weighs
+
+- Stress centrality treats **all** shortest paths equally — whether a node sits on *all* the paths between a pair or on just *one of many*
+- In our graph, the stress and betweenness rankings disagree:
+  - Stress: h (316), i (288), g (208), j (206)...
+  - Betweenness: h (88.1), i (81.5), **j** (66.5), **g** (53)...
+  - **j** and **g** swap places!
+
+. . .
+
+- The fix (Anthonisse 1971; Freeman 1977): use the **proportion** of shortest paths a node stands on, not the raw count
+
+---
+
+## Relative Betweenness: A Worked Example
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = c("d", "h", "a"), pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+<div style="font-size: 85%;">
+
+- The **relative betweenness** of node $k$ with respect to two other nodes $i, j$ = the proportion of shortest paths between $i$ and $j$ that feature $k$ as an inner node
+- **What is the relative betweenness of node d relative to nodes h and a?** (all three highlighted)
+
+. . .
+
+First, list all shortest paths between h and a:
+
+1. $\{h, g, d, a\}$ — **d is on this path!**
+1. $\{h, c, f, a\}$ — d is not
+1. $\{h, g, b, a\}$ — d is not
+1. $\{h, g, f, a\}$ — d is not
+
+. . .
+
+- So $d$ appears on **1 out of 4** shortest paths: $p_{h(d)a} = \frac{1}{4} = \mathbf{0.25}$
+- Interpretation: if you pick a random shortest path from h to a, there's a 25% chance it goes through d
+
+</div>
+:::
+:::
+
+---
+
+## Betweenness Centrality: The Formula
+
+- Do this for **every triplet** $i, j, k$ (with $i \neq k$ and $j \neq k$) and sum:
+
+$$C_k^{BET} = \sum_{i \neq k} \sum_{j \neq k} \frac{g_{i(k)j}}{g_{ij}}$$
+
+- $g_{ij}$: total number of shortest paths linking nodes $i$ and $j$
+- $g_{i(k)j}$: the number of those paths featuring $k$ as an **inner node**
+
+. . .
+
+- Each term is the **proportion of shortest paths** between $i$ and $j$ that feature $k$ as an intermediary
+- A node gains a full point for being on *all* paths between a pair; a fraction otherwise
+
+---
+
+## The Betweenness Centrality Ranking
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = c("h", "i"), pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+<div style="font-size: 85%;">
+
+```{r}
+#| echo: false
+rb <- rank_df(bet19, 1)
+rb$score <- as.numeric(rb$score)
+kbl2(rb, 13)
+```
+
+. . .
+
+- **h** and **i** are the top betweenness nodes — they broker between the left and right halves of the graph
+- **e**, **o**, **r**, and **s** have betweenness **zero**: they don't stand on any shortest paths between any pair of other nodes
+
+</div>
+:::
+:::
+
+. . .
+
+- Note: the closeness winner (**i**) and the degree winner (**j**) are *not* the betweenness winner — closeness captures **reachability**; betweenness captures **intermediation potential**
+
+---
+
+# Part 5: The Star Graph and Centralization
+
+---
+
+## The Star Graph
+
+<center>
+```{r}
+#| echo: false
+#| fig-height: 5.0
+#| fig-width: 5.0
+ggraph(star7, layout = "star") +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 16, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, color = "white", fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+</center>
+
+- One **central** node (A) connected to all $n - 1$ **satellite** nodes (B–G); satellites connect to nobody else
+- Edge count: $m = n - 1$
+
+---
+
+## The Big Three in the Star Graph
+
+::: {.columns}
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-height: 4.4
+#| fig-width: 4.4
+ggraph(star7, layout = "star") +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, color = "white", fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column width="60%"}
+<div style="font-size: 88%;">
+
+- In the star graph, **all three centralities are maximized** for the central node (Freeman 1979):
+
+```{r}
+#| echo: false
+st7 <- star_tab
+st7$node <- rownames(st7)
+kbl(t(st7[, c("node", "degree", "closeness", "betweenness")]),
+    format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+```
+
+- **Degree**: the central node has $n - 1$; every satellite just 1
+- **Closeness**: the center reaches everyone via paths of **length 1**; satellites need length 2 to reach each other
+- **Betweenness**: the center stands on **every** shortest path linking satellite pairs (all length 2)
+
+. . .
+
+- That's why these three are the "big three": they are precisely the metrics **maximized at the center of a star**
+
+</div>
+:::
+:::
+
+---
+
+## Graph Centralization
+
+- So far: centrality of **nodes**. We can also ask how **centralized** a whole **graph** is (Freeman 1979)
+- Idea: compare the observed network to the **star graph of the same order** — the maximally centralized network
+
+. . .
+
+- For degree centralization: sum the differences between the **maximum degree** and each node's degree:
+
+$$C_G = \frac{\sum_i (k_{max} - k_i)}{\sum_i (k_{max}^{star} - k_i^{star})} = \frac{\sum_i (k_{max} - k_i)}{(n-1)(n-2)}$$
+
+---
+
+## Graph Degree Centralization: Worked Example
+
+::: {.columns}
+::: {.column width="40%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.6
+#| fig-width: 3.6
+ggraph(obs5, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 16, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, color = "white", fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+</center>
+:::
+
+::: {.column width="60%"}
+```{r}
+#| echo: false
+kobs_df <- data.frame(node = names(kobs), k = as.vector(kobs),
+                      diff = max(kobs) - as.vector(kobs))
+kbl(kobs_df, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+```
+
+- Sum of differences: $1 + 0 + 1 + 1 + 1 = \mathbf{4}$
+- Star of the same order: $(n-1)(n-2) = 4 \times 3 = \mathbf{12}$
+- **Degree centralization** $= 4/12 = \mathbf{0.33}$
+:::
+:::
+
+. . .
+
+- Ranges from 0 (every node equally central) to 1 (perfect star)
+- A graph-level summary of how unevenly centrality is distributed
+
+---
+
+# Part 6: Summary
+
+---
+
+## Glossary of Key Terms
+
+<div style="font-size: 88%;">
+
+- **Centrality metric**: a summary index of a node's position based on sums or averages of incident edges, geodesic lengths, or geodesic shares (Borgatti & Everett 2006)
+- **Degree centrality** ($C^{DEG}_i = \sum_j a_{ij}$): number of edges incident to a node; row (or column) sums of the adjacency matrix (Nieminen 1974)
+- **Outdegree/Indegree centrality**: the directed versions — sociability vs. status
+- **Normalized centrality**: divided by $N-1$ (or the appropriate maximum) so networks of different sizes are comparable (Freeman 1979)
+- **Geodesic distance** $d_{ij}$: length of the shortest path between $i$ and $j$
+- **Closeness centrality** ($C^{CLOS}_i = (N-1)/\sum_j d_{ij}$): inverse farness (Sabidussi 1966); only defined for connected graphs
+
+</div>
+
+---
+
+## Glossary of Key Terms (continued)
+
+<div style="font-size: 88%;">
+
+- **Harmonic centrality** ($C^{HARM}_i = \frac{1}{N-1}\sum_j 1/d_{ij}$): works even for disconnected graphs, since $1/\infty = 0$ (Beauchamp 1965)
+- **Stress centrality**: raw count of shortest paths a node stands on as inner node (Shimbel 1953)
+- **Pair dependency** $p_{i(k)j} = g_{i(k)j}/g_{ij}$: proportion of shortest paths between $i$ and $j$ through $k$ (Freeman 1980)
+- **Betweenness centrality**: sum of pair dependencies across all pairs (Freeman 1977)
+- **Star graph**: the graph where all three big centralities are maximized at the center
+- **Graph centralization**: how concentrated centrality is in the whole network, benchmarked against the star
+
+</div>
+
+---
+
+## Summary
+
+- **Centrality** measures a node's strategic location via three sources of "network goods": incident edges, short geodesics, and inner-node shares of geodesics
+- **Degree centrality**: local popularity; two versions in directed graphs (outdegree = sociability, indegree = status); normalize by $N-1$
+- **Closeness centrality**: global reachability via the geodesic distance matrix; fails on disconnected graphs, where **harmonic centrality** takes over
+- **Betweenness centrality**: brokerage — the summed proportion of shortest paths a node intermediates; stress centrality (raw counts) is its unweighted cousin
+- The **big three** are all maximized at the center of a **star graph**, and the rankings **disagree** on real networks — which is exactly why we need all three
+- **Graph centralization** scales this up: how star-like is the whole network?
