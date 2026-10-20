@@ -71,8 +71,12 @@ plot_reach_highlight <- function(active_edges = NULL, active_nodes = NULL) {
 }
 
 # 2. 8-node directed graphs for the three flavors of connectivity
-# strongly connected (all-ones reachability)
-edges_strong <- data.frame(from = c(1,2,3,4,5,6,7,8), to = c(2,3,4,5,6,7,8,1))
+# strongly connected: interlocking directed cycles (same digraph as the
+# centrality deck's directed-closeness example, labels v1-v8 there)
+edges_strong <- data.frame(
+  from = c(1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 6, 6, 7, 8),
+  to   = c(2, 4, 3, 5, 1, 4, 5, 6, 7, 3, 5, 8, 1, 4)
+)
 gr_strong <- tbl_graph(nodes = data.frame(name = 1:8), edges = edges_strong, directed = TRUE)
 
 # unilaterally connected
@@ -164,8 +168,8 @@ plot_dir_highlight_geo <- function(active_edges = NULL, active_nodes = NULL) {
   
   p <- ggraph(gr, layout = layout_coords_undir_5) +
     geom_edge_link(aes(color = highlight, edge_width = highlight),
-                   arrow = arrow(length = unit(4, 'mm')),
-                   end_cap = circle(6, 'mm')) +
+                   arrow = arrow(length = unit(6, 'mm'), type = "closed", angle = 28),
+                   end_cap = circle(9, 'mm')) +
     geom_node_point(aes(color = highlight), size = 18) +
     geom_node_text(aes(label = name), size = 8, fontface = "bold", color = "white") +
     scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
@@ -325,6 +329,19 @@ plot_reach_highlight(active_edges = c("B-E", "E-D"), active_nodes = c("B", "E", 
 
 Repeating this row-by-row analysis yields the completed reachability matrix.
 
+:::: {.columns align=center}
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.2
+#| fig-height: 4.2
+plot_reach_highlight()
+```
+:::
+
+::: {.column width="55%"}
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | -- | 0 | 1 | 1 | 1 |
@@ -335,6 +352,9 @@ Repeating this row-by-row analysis yields the completed reachability matrix.
 
 - **Receiver Node (D)**: Row D is all $0$s (D can't reach anyone).
 - **Transmitter Node (B)**: Column B is all $0$s (B can't be reached by anyone).
+:::
+
+::::
 
 # Part 2: Directed Graphs: Flavors of Connectivity
 
@@ -424,6 +444,7 @@ ggraph(gr_strong, layout = 'circle') +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 
+- **8-Node Example** (Left): several **interlocking directed cycles** thread through all eight nodes (e.g., $1 \to 2 \to 3 \to 1$ and $4 \to 6 \to 8 \to 4$, joined by cross-ties like $3 \to 4$ and $7 \to 1$).
 - **No Zeros**: Since everyone can reach everyone, the reachability matrix is the **all-ones** matrix!
 :::
 
@@ -436,7 +457,7 @@ ggraph(gr_strong, layout = 'circle') +
 | **4** | 1 | 1 | 1 | -- | 1 | 1 | 1 | 1 |
 | **5** | 1 | 1 | 1 | 1 | -- | 1 | 1 | 1 |
 | **6** | 1 | 1 | 1 | 1 | 1 | -- | 1 | 1 |
-| **7** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | -- | 1 |
+| **7** | 1 | 1 | 1 | 1 | 1 | 1 | -- | 1 |
 | **8** | 1 | 1 | 1 | 1 | 1 | 1 | 1 | -- |
 :::
 
@@ -454,15 +475,15 @@ At least one directed path exists between every pair, but not necessarily in bot
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 2.6
-#| fig-height: 2.6
+#| fig-width: 3.5
+#| fig-height: 3.5
 ggraph(gr_unilateral, layout = 'circle') +
   geom_edge_parallel(color = "steelblue", edge_width = 1.15,
-                 arrow = arrow(length = unit(3, 'mm')),
-                 end_cap = circle(5, 'mm'),
-                 sep = unit(3.5, 'mm')) +
-  geom_node_point(color = "tan2", size = 14) +
-  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+                 arrow = arrow(length = unit(3.5, 'mm')),
+                 end_cap = circle(6, 'mm'),
+                 sep = unit(4, 'mm')) +
+  geom_node_point(color = "tan2", size = 16) +
+  geom_node_text(aes(label = name), size = 7.5, fontface = "bold", color = "white") +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 
@@ -577,7 +598,23 @@ ggraph(gr_dir7, layout = 'kk') +
 
 ::: {.columns align=center}
 
-::: {.column style="width: 60%; font-size: 85%;"}
+::: {.column width="28%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 2.9
+#| fig-height: 2.9
+ggraph(gr_weak, layout = 'circle') +
+  geom_edge_link(color = "steelblue", edge_width = 1.15,
+                 arrow = arrow(length = unit(3.5, 'mm')),
+                 end_cap = circle(6, 'mm')) +
+  geom_node_point(color = "tan2", size = 14) +
+  geom_node_text(aes(label = name), size = 7.5, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 40%; font-size: 85%;"}
 ::: {.incremental}
 - **Graph Connectedness ($C$)** measures the overall capacity of a network to facilitate connections.
 - It is defined as the **density of the reachability matrix** (excluding diagonal cells):
@@ -585,7 +622,7 @@ ggraph(gr_dir7, layout = 'kk') +
 :::
 :::
 
-::: {.column width="40%"}
+::: {.column width="32%"}
 ### Reachability Density
 <div style="font-size: 85%;">
 | Value | Meaning |
@@ -602,12 +639,35 @@ ggraph(gr_dir7, layout = 'kk') +
 
 ## Graph Connectedness: Worked Example
 
+::: {.columns align=center}
+
+::: {.column width="38%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 3.6
+#| fig-height: 3.6
+ggraph(gr_weak, layout = 'circle') +
+  geom_edge_link(color = "steelblue", edge_width = 1.15,
+                 arrow = arrow(length = unit(3.5, 'mm')),
+                 end_cap = circle(6, 'mm')) +
+  geom_node_point(color = "tan2", size = 14) +
+  geom_node_text(aes(label = name), size = 7.5, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+:::
+
+::: {.column style="width: 62%; font-size: 85%;"}
 ::: {.incremental}
-- **For our weakly connected 8-node graph**:
+- **For our weakly connected 8-node graph** (left):
   - Sum of all cells containing a $1$ is **42**.
   - Total possible off-diagonal cells: $8(7) = 56$.
   - $$C = \frac{42}{56} = 0.75$$
+  - The missing pairs are those involving the transmitter/receiver nodes 2 and 7 — e.g., $D^r_{27} = D^r_{72} = 0$.
 :::
+:::
+
+::::
 
 # Part 4: The Geodesic Distance Matrix Step-by-Step
 
@@ -822,7 +882,10 @@ plot_dir_highlight_geo(active_nodes = "D")
 
 ## Visualizing Node Eccentricity
 
-Eccentricity is calculated as the maximum value in each row of the Geodesic Distance Matrix (excluding diagonal 0s).
+::: {.incremental}
+- We return to our **undirected 5-node example** and its completed distance matrix (Steps 1–3) — every pair is reachable, so no $\infty$ cells.
+- Eccentricity is calculated as the maximum value in each **row** of the Geodesic Distance Matrix (excluding diagonal 0s).
+:::
 
 :::: {.columns align=center}
 
@@ -846,7 +909,7 @@ plot_undir_highlight()
 | **D** | 1 | <span style="color:orange; font-weight:bold;">2</span> | 1 | 0 | 1 | **$e(D) = 2$** |
 | **E** | <span style="color:orange; font-weight:bold;">2</span> | 1 | 1 | 1 | 0 | **$e(E) = 2$** |
 
-- **Graph Diameter ($d$)**: The maximum eccentricity value in the column is **3** ($d = 3$).
+- **Graph Diameter ($d$)**: The maximum eccentricity across all nodes is **3** ($d = 3$).
 - Nodes C, D, E are the most central (closest "worst-case" distance of 2).
 </div>
 :::
