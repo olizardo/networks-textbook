@@ -133,6 +133,7 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/ego-homogeneity.qmd` | Theories of Ego Network Homogeneity and Diversity |
 | `slides/cognitive-social-structures.qmd` | Cognitive Social Structures |
 | `slides/affiliation-networks.qmd` | Affiliation Networks |
+| `slides/centrality.qmd` | Centrality in Networks |
 | `slides/subgroups.qmd` | Graph Theory: Sub-Groups & Cliques |
 | `slides/positional-equivalence.qmd` | Graph Theory: Equivalence & Similarity |
 | `slides/blockmodeling.qmd` | Graph Theory: Blockmodeling |
