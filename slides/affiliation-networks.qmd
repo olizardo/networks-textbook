@@ -60,6 +60,22 @@ gr_bi <- gr_bi |>
                xy_person[match(name, people)],
                xy_group[match(name, groups)])
   )
+
+# Reusable bipartite-graph plot so the running example can sit next to
+# explanatory content on every slide (as in the PPTX deck)
+plot_bipartite <- function(label_size = 5.5) {
+  ggraph(gr_bi, layout = "manual", x = x, y = y) +
+    geom_edge_link(color = "grey60", edge_width = 1) +
+    geom_node_label(aes(label = name, filter = mode == "person"),
+                    fill = "tan2", color = "white", size = label_size,
+                    fontface = "bold", label.size = 0,
+                    label.padding = unit(0.2, "lines")) +
+    geom_node_label(aes(label = name, filter = mode == "group"),
+                    fill = "steelblue", color = "white", size = label_size,
+                    label.size = 0, label.padding = unit(0.2, "lines")) +
+    coord_cartesian(xlim = c(-1, 3.6), clip = "off") +
+    theme_graph()
+}
 ```
 
 # Part 1: What Are Affiliation Networks?
@@ -171,20 +187,17 @@ Link the bipartite graph to **matrix algebra** to come up with network-analytic 
 #| echo: false
 #| fig-height: 4.6
 #| fig-width: 7
-ggraph(gr_bi, layout = "manual", x = x, y = y) +
-  geom_edge_link(color = "grey60", edge_width = 1) +
-  geom_node_label(aes(label = name, filter = mode == "person"), fill = "tan2", color = "white",
-                  size = 5.5, fontface = "bold", label.size = 0, label.padding = unit(0.25, "lines")) +
-  geom_node_label(aes(label = name, filter = mode == "group"), fill = "steelblue", color = "white",
-                  size = 5.5, label.size = 0, label.padding = unit(0.25, "lines")) +
-  coord_cartesian(xlim = c(-1, 3.6), clip = "off") +
-  theme_graph()
+plot_bipartite(label_size = 5.5)
 ```
 </center>
 
 ---
 
 ## Bipartite Graphs
+
+::: {.columns}
+::: {.column width="52%"}
+<div style="font-size: 85%;">
 
 - A **bipartite graph** is a special kind of graph featuring:
   - **Two disjoint sets of vertices**, $U$ and $V$
@@ -199,10 +212,25 @@ ggraph(gr_bi, layout = "manual", x = x, y = y) +
 - Affiliation or membership relations are **undirected**
   - If person $i$ is a member of club $j$, then club $j$ has person $i$ as a member — the relation is **symmetric by definition**
 
+</div>
+:::
+
+::: {.column width="48%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 4.7
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
 ---
 
 ## Node Neighborhoods in Bipartite Graphs
 
+::: {.columns}
+::: {.column width="55%"}
 - Node neighborhoods work like in regular graphs, except:
   - The neighbors of nodes from set $U$ are **always members of set $V$** (and vice versa)
 
@@ -216,11 +244,24 @@ $$N(\text{Gabriela}) = \{\text{Super Smash Bros., Nerdfighters, Fashion}\}$$
 - The **intersection** of their neighborhoods:
   - $N(\text{Minjoo}) \cap N(\text{Gabriela}) = \{\text{Fashion}\}$
   - **One shared club** — a first hint of the overlap idea to come!
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 4.7
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
 
 ---
 
 ## Neighborhoods of the Other Mode
 
+::: {.columns}
+::: {.column width="55%"}
 - Both sets of nodes have neighborhoods!
 
 $$N(\text{Cheese}) = \{\text{Parker, Brandon, Rahul, Minjoo}\}$$
@@ -235,10 +276,34 @@ $$N(\text{Fashion}) = \{\text{Gabriela, Rahul, Minjoo}\}$$
 . . .
 
 - Nodes of the same kind **cannot be connected** in a two-mode network (by construction) — but they can **share neighbors**
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 4.7
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
 
 ---
 
 ## Node Degree in Bipartite Graphs
+
+::: {.columns}
+::: {.column width="40%"}
+```{r}
+#| echo: false
+#| fig-height: 4.9
+#| fig-width: 4.2
+plot_bipartite(label_size = 4.2)
+```
+:::
+
+::: {.column width="60%"}
+<div style="font-size: 85%;">
 
 - Degree works the same way: $k_i = |N(i)|$
 - But now there are **two sets of degrees**, one per mode:
@@ -267,6 +332,10 @@ $$N(\text{Fashion}) = \{\text{Gabriela, Rahul, Minjoo}\}$$
 | Nerdfighters | 2 |
 | Magic | 2 |
 | Fashion | 3 |
+:::
+:::
+
+</div>
 :::
 :::
 
@@ -309,6 +378,10 @@ $$N(\text{Fashion}) = \{\text{Gabriela, Rahul, Minjoo}\}$$
 
 ## Building the Affiliation Matrix
 
+::: {.columns}
+::: {.column width="55%"}
+<div style="font-size: 85%;">
+
 - The procedure is the same as for the adjacency matrix of a symmetric graph
 - We build a **rectangular matrix $\mathbf{A}$** of dimensions $R \times C$:
   - Rows: $R = |V_1|$ — the **people**
@@ -323,27 +396,43 @@ $$\mathbf{A}_{\text{Gabriela},\cdot} = \color{red}{1}_{SSB} + 0_{Cheese} + \colo
 
 - Gabriela belongs to the Super Smash Bros., Nerdfighters, and Fashion clubs
 
+</div>
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 4.7
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
+
 ---
 
 ## The Full Affiliation Matrix
 
 ::: {.columns}
-::: {.column width="55%"}
+::: {.column width="48%"}
 ```{r}
 #| echo: false
 kbl(A, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 15)
 ```
+
+- $\mathbf{A}$ is the **affiliation matrix** corresponding to the bipartite graph on the right
+- Because the number of people does not have to equal the number of groups, affiliation matrices are usually **rectangular**, not square like adjacency matrices
 :::
 
-::: {.column width="45%"}
-- $\mathbf{A}$ is the **affiliation matrix** corresponding to the bipartite graph
-
-. . .
-
-- Because the number of people does not have to equal the number of groups, affiliation matrices are usually **rectangular**, not square like adjacency matrices
-  - (A square matrix is just the special case!)
+::: {.column width="52%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 5.2
+plot_bipartite(label_size = 4.6)
+```
 :::
 :::
 
@@ -351,6 +440,8 @@ kbl(A, format = "html", align = "c") %>%
 
 ## Row Sums of the Affiliation Matrix
 
+::: {.columns}
+::: {.column width="50%"}
 - The **row sums** of the affiliation matrix give us the number of **memberships** each person has!
 
 $$C_P^{DEG} = \sum_j a_{ij}$$
@@ -359,16 +450,29 @@ $$C_P^{DEG} = \sum_j a_{ij}$$
 #| echo: false
 rs <- rowSums(A)
 kbl(t(rs), format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 18)
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 15)
 ```
 
 - Gabriela belongs to **three clubs**; Brandon belongs to just **one** (the Cheese Club)
-- This is the **degree centrality** of the people mode: people who join many clubs have multiple interests spread across organizations
+- This is the **degree centrality** of the people mode
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 5.0
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
 
 ---
 
 ## Column Sums of the Affiliation Matrix
 
+::: {.columns}
+::: {.column width="50%"}
 - The **column sums** of the affiliation matrix give us the **size** of each group!
 
 $$C_G^{DEG} = \sum_i a_{ij}$$
@@ -377,13 +481,23 @@ $$C_G^{DEG} = \sum_i a_{ij}$$
 #| echo: false
 cs <- colSums(A)
 kbl(t(cs), format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 18)
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 15)
 ```
 
 - The centrality scores for the clubs tell us about the **popularity** of each group:
   - The **Cheese Club** is the most popular (4 members)
-  - Super Smash Bros. and Nerdfighters have 2 members each
 - Two distinct sets of centrality scores: one for the people, one for the groups (Faust 1997)!
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-height: 4.7
+#| fig-width: 5.0
+plot_bipartite(label_size = 4.6)
+```
+:::
+:::
 
 ---
 

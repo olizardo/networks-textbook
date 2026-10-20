@@ -380,6 +380,87 @@
 <li class="fragment">Let’s see how these levels map directly to <strong>zeros and ones in the reachability matrix</strong>.</li>
 </ul>
 </section>
+<section id="pairwise-connectivity-in-directed-graphs" class="slide level2 scrollable">
+<h2>Pairwise Connectivity in Directed Graphs</h2>
+<ul>
+<li>Before we can define whether a <strong>whole graph</strong> has a certain flavor of connectivity, we must define the connectivity state of <strong>individual pairs of nodes (pairwise connectivity)</strong>.</li>
+<li>Two nodes <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> can be connected in four distinct pairwise flavors depending on the directed pathways between them:
+<ol type="1">
+<li><strong>Pairwise Weakly Connected</strong></li>
+<li><strong>Pairwise Unilaterally Connected</strong></li>
+<li><strong>Pairwise Strongly Connected</strong></li>
+<li><strong>Pairwise Recursively Connected</strong></li>
+</ol></li>
+<li>Let’s examine these four pairwise states step-by-step.</li>
+</ul>
+</section>
+<section id="pairwise-weak-unilateral-connectivity" class="slide level2">
+<h2>1. Pairwise Weak &amp; Unilateral Connectivity</h2>
+<ul>
+<li><strong>Pairwise Weakly Connected</strong>:
+<ul>
+<li>Node <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are connected by at least one <strong>semipath</strong> (connected if we ignore the arrow directions).</li>
+<li><strong>Sociological Meaning</strong>: They are part of the same general network, but there is no directed path starting from either node that can reach the other.</li>
+</ul></li>
+<li><strong>Pairwise Unilaterally Connected</strong>:
+<ul>
+<li>A directed path exists from <span class="math inline">\(u \rightarrow v\)</span> <strong>OR</strong> from <span class="math inline">\(v \rightarrow u\)</span> (one-way reachability).</li>
+<li><strong>Sociological Meaning</strong>: Information or influence can flow from one person to the other, but not in both directions (no mutual exchange).</li>
+</ul></li>
+</ul>
+</section>
+<section id="pairwise-strong-recursive-connectivity" class="slide level2">
+<h2>2. Pairwise Strong &amp; Recursive Connectivity</h2>
+<ul>
+<li><strong>Pairwise Strongly Connected</strong>:
+<ul>
+<li>A directed path exists from <span class="math inline">\(u \rightarrow v\)</span> <strong>AND</strong> from <span class="math inline">\(v \rightarrow u\)</span> (mutual reachability).</li>
+<li><strong>Sociological Meaning</strong>: Both nodes can reach each other, but the paths in each direction may use completely different intermediate nodes or channels.</li>
+</ul></li>
+<li><strong>Pairwise Recursively Connected</strong>:
+<ul>
+<li>A directed path exists from <span class="math inline">\(u \rightarrow v\)</span> and <span class="math inline">\(v \rightarrow u\)</span>, <strong>AND</strong> the directed path in both directions shares the exact same set of intermediate nodes (sharing both vertices and edges).</li>
+<li><strong>Sociological Meaning</strong>: The relationship can be traversed back-and-forth along the same closed, mutually symmetric cycle.</li>
+</ul></li>
+</ul>
+</section>
+<section id="node-level-pairwise-vs.-graph-level-connectivity" class="slide level2">
+<h2>Node-Level Pairwise vs.&nbsp;Graph-Level Connectivity</h2>
+<ul>
+<li>A <strong>whole graph</strong>’s flavor of connectivity is defined by the <strong>weakest pairwise connectivity state</strong> present in the network:</li>
+</ul>
+<div class="compact-table">
+<table class="caption-top">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Whole Graph State</th>
+<th style="text-align: left;">Defining Pairwise Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Strongly Connected</strong></td>
+<td style="text-align: left;"><strong>every</strong> pair of nodes is <em>pairwise strongly connected</em>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Unilaterally Connected</strong></td>
+<td style="text-align: left;"><strong>every</strong> pair is <em>at least</em> unilaterally connected, and <strong>at least one</strong> pair is <em>no better than</em> unilaterally connected.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Weakly Connected</strong></td>
+<td style="text-align: left;"><strong>every</strong> pair is <em>at least</em> weakly connected, and <strong>at least one</strong> pair is <em>no better than</em> weakly connected.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><strong>Takeaway</strong>: Graph connectivity is built on top of these pairwise states — if even one pair drops to a lower state, the whole graph’s connectivity level drops!</li>
+</ul>
+</section>
 <section id="case-1-strongly-connected-graphs" class="slide level2">
 <h2>Case 1: Strongly Connected Graphs</h2>
 <p>Every pair of nodes is mutually reachable.</p>
@@ -792,6 +873,42 @@
 </tbody>
 </table>
 </div></div>
+</section>
+<section id="decomposing-directed-components" class="slide level2">
+<h2>Decomposing Directed Components</h2>
+<div class="columns" data-align="center">
+<div class="column" style="width:50%;">
+<ul>
+<li class="fragment">Like undirected graphs, directed graphs can be decomposed into:</li>
+<li class="fragment"><strong>Weakly Connected Components (WCCs)</strong>:
+<ul>
+<li class="fragment">Subgraphs connected when ignoring edge directions.</li>
+<li class="fragment">Yields <strong>one WCC</strong> containing all 7 nodes: <span class="math inline">\(\{A, B, C, D, E, F, G\}\)</span>.</li>
+</ul></li>
+<li class="fragment"><strong>Strongly Connected Components (SCCs)</strong>:
+<ul>
+<li class="fragment">Subgraphs where every pair is mutually reachable.</li>
+<li class="fragment">Yields <strong>four SCCs</strong>:
+<ul>
+<li class="fragment"><span class="math inline">\(\{A, B, D, F\}\)</span> (the core “rumor mill”, highlighted in red).</li>
+<li class="fragment">Singletons: <span class="math inline">\(\{C\}\)</span>, <span class="math inline">\(\{E\}\)</span>, <span class="math inline">\(\{G\}\)</span>.</li>
+</ul></li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="528"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section class="slide level2">
+
 </section></section>
 <section>
 <section id="part-3-graph-connectedness-geodesic-distances" class="title-slide slide level1 center">
@@ -878,7 +995,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="432"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="432"></p>
 </figure>
 </div>
 </div>
@@ -955,7 +1072,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
 </figure>
 </div>
 </div>
@@ -1033,7 +1150,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="384"></p>
 </figure>
 </div>
 </div>
@@ -1110,7 +1227,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="364"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="364"></p>
 </figure>
 </div>
 </div>
@@ -1187,7 +1304,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="393"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="393"></p>
 </figure>
 </div>
 </div>
@@ -1294,7 +1411,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="355"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="355"></p>
 </figure>
 </div>
 </div>
@@ -1408,7 +1525,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="374"></p>
+<p><img data-src="matrix-advanced_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="374"></p>
 </figure>
 </div>
 </div>
