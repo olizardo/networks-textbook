@@ -419,6 +419,121 @@ ggraph(gr_dot, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
 
 ---
 
+## Row and Column Sums
+
+The most basic operation on a matrix: add up its rows and columns.
+
+::: {.columns}
+::: {.column width="34%"}
+### Adjacency Matrix $\mathbf{A}$
+```{r}
+#| echo: false
+A_disp <- A_dir
+diag(A_disp) <- NA
+kbl(A_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+- The diagonal is all $0$s (no self-ties).
+:::
+
+::: {.column width="66%"}
+- **Row sum of node $i$**: $\sum_j a_{ij}$ — pick a row, add *across* the columns.
+- **Column sum of node $j$**: $\sum_i a_{ij}$ — pick a column, add *down* the rows.
+
+. . .
+
+- For a **symmetric** (undirected) adjacency matrix, the row and column sums are identical — they give each node's **degree**.
+- For a **directed** graph they differ... what do they mean? (Next two slides.)
+:::
+:::
+
+---
+
+## Working the Example: Row and Column Sums
+
+::: {.columns}
+::: {.column width="34%"}
+### Adjacency Matrix $\mathbf{A}$
+```{r}
+#| echo: false
+A_disp <- A_dir
+diag(A_disp) <- NA
+kbl(A_disp, format = "html", align = "c") %>% 
+  column_spec(1, bold = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
+```
+:::
+
+::: {.column width="66%"}
+**Row sum of node B** — add across row **B**:
+
+$$\sum_j a_{Bj} = \color{red}{1} + 0 + \color{red}{1} + \color{red}{1} + 0 + 0 = \mathbf{3}$$
+
+**Column sum of node D** — add down column **D**:
+
+$$\sum_i a_{iD} = 0 + \color{red}{1} + \color{red}{1} + 0 + \color{red}{1} + \color{red}{1} = \mathbf{4}$$
+
+. . .
+
+- The highlighted cells are exactly the ties **B sends** (its row) and the ties **D receives** (its column).
+:::
+:::
+
+---
+
+## Row and Column Sums: Outdegrees and Indegrees
+
+::: {.columns}
+::: {.column width="30%"}
+### Row Sums = Outdegree
+```{r}
+#| echo: false
+rs_dir <- rowSums(A_dir)
+kbl(t(rs_dir), format = "html", align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 18)
+```
+- Summing **across** a row counts the ties node $i$ **sends** to others: $i$'s **outdegree**.
+:::
+
+::: {.column width="30%"}
+### Column Sums = Indegree
+```{r}
+#| echo: false
+cs_dir <- colSums(A_dir)
+kbl(t(cs_dir), format = "html", align = "c") %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 18)
+```
+- Summing **down** a column counts the ties node $j$ **receives** from others: $j$'s **indegree**.
+:::
+
+::: {.column width="40%"}
+### Directed Graph ($\mathbf{A}$)
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.4
+#| fig-width: 3.4
+ggraph(gr_adir, layout = "manual", x = l_coords_6[,1], y = l_coords_6[,2]) +
+  geom_edge_parallel(color = "steelblue", width = 1.5,
+                 arrow = arrow(length = unit(3, 'mm')),
+                 end_cap = circle(7.5, 'mm'),
+                 sep = unit(3.5, 'mm')) +
+  geom_node_point(size = 12, color = "tan2") +
+  geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+  theme_graph() + coord_cartesian(xlim = c(-1.3, 1.3), ylim = c(-1.3, 1.3), clip = "off")
+```
+</center>
+:::
+:::
+
+. . .
+
+- **Node B**: outdegree 3, indegree 0 — a pure **sender** (ties to A, C, D; nobody ties to B).
+- **Node D**: indegree 4, outdegree 0 — a pure **receiver** (B, C, E, F all tie to D; D ties to no one).
+
+---
+
 ## The Matrix Transpose ($\mathbf{A}^T$)
 
 - The **Transpose** of a matrix $\mathbf{A}$ is the same matrix with its rows and columns flipped:
