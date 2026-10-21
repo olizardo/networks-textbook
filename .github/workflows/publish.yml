@@ -9,6 +9,14 @@ on:
 permissions:
   contents: write
 
+# Prevent concurrent deploy runs from racing on the gh-pages branch: two
+# pushes to main in quick succession otherwise both fetch the same gh-pages
+# head and the second push is rejected as non-fast-forward. The newer run
+# wins; the superseded one is cancelled.
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: true
+
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
