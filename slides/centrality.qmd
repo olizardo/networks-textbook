@@ -65,7 +65,7 @@ set.seed(42)
 # Fixed stress layout so the 19-node graph sits identically on every slide that shows it
 ly19 <- create_layout(gr19, layout = "stress")[, c("x", "y")]
 # Two-up compact table: split rows into side-by-side halves to halve vertical space
-kbl2 <- function(df, font = 12) {
+kbl2 <- function(df, font = 18) {
   n <- nrow(df); h <- ceiling(n / 2)
   L <- df[1:h, , drop = FALSE]
   R <- df[(h + 1):n, , drop = FALSE]
@@ -259,7 +259,7 @@ g19(hl = c("h", "i"), pt = 11, tx = 7)
 #| echo: false
 kbl(M19, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 12) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18) %>%
   scroll_box(width = "100%", height = "540px")
 ```
 
@@ -275,7 +275,7 @@ kbl(M19, format = "html", align = "c") %>%
 #| echo: false
 kbl(M19, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 11) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18) %>%
   scroll_box(width = "100%", height = "440px")
 ```
 :::
@@ -284,7 +284,7 @@ kbl(M19, format = "html", align = "c") %>%
 ```{r}
 #| echo: false
 rt <- data.frame(node = letters[1:19], degree = as.vector(deg19))
-kbl2(rt, 13)
+kbl2(rt)
 ```
 - In this graph, node **j** has the largest degree centrality ($k_j = 7$)!
 :::
@@ -309,7 +309,7 @@ g19(hl = "j", pt = 9, tx = 5.5)
 #| echo: false
 rd <- rank_df(deg19)
 rd$score <- as.integer(rd$score)
-kbl2(rd, 13)
+kbl2(rd)
 ```
 
 - Node **j** (7 ties, highlighted) tops the ranking; **r** and **s** (1 tie each) sit at the bottom
@@ -329,6 +329,8 @@ kbl2(rd, 13)
 #| fig-width: 4.3
 g19(hl = "j", pt = 9, tx = 5.5)
 ```
+
+- Ranges 0–1: 20 friends is $\approx 0.02$ in the big school, $\approx 0.20$ in the small one.
 :::
 
 ::: {.column width="60%"}
@@ -336,17 +338,13 @@ g19(hl = "j", pt = 9, tx = 5.5)
 
 - Raw degree is sensitive to network **size**: 20 friends means something very different in a school of 1,000 vs. 100.
 
-- Freeman (1979) proposed **normalizing** by the maximum possible degree, $N - 1$:
-
-$$C_{i(norm)}^{DEG} = \frac{C_i^{DEG}}{N-1}$$
+- Freeman (1979) proposed **normalizing** by the maximum possible degree, $N - 1$: $C_{i(norm)}^{DEG} = C_i^{DEG} / (N - 1)$
 
 ```{r}
 #| echo: false
 rn <- rank_df(deg19 / 18, 2)
-kbl2(rn, 11)
+kbl2(rn)
 ```
-
-- Ranges 0–1: 20 friends is $\approx 0.02$ in the big school but $\approx 0.20$ in the small one.
 
 </div>
 :::
@@ -394,7 +392,7 @@ ggraph(gr8l, layout = "circle") +
 #| echo: false
 kbl(D8, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 13)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 - A **strongly connected** directed graph: everyone can reach everyone
@@ -418,7 +416,7 @@ oitable <- data.frame(
   in_norm = round(in8 / 7, 2)
 )
 kbl(oitable, format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 15)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 . . .
@@ -481,7 +479,7 @@ sprow <- data.frame(node = letters[1:19],
                     distance = as.vector(dmat19["i", ]))
 kbl(t(sprow$distance), format = "html", align = "c",
     col.names = letters[1:19]) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 11)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 :::
 :::
@@ -498,7 +496,7 @@ $$C^{CLOS}(i) = \frac{N - 1}{\sum_j d_{ij}} = \frac{18}{41} = \mathbf{0.44}$$
 #| echo: false
 kbl(dmat19, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 12) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18) %>%
   scroll_box(width = "100%", height = "540px")
 ```
 
@@ -506,7 +504,7 @@ kbl(dmat19, format = "html", align = "c") %>%
 
 ## Farness: The Row Sums of the Distance Matrix
 
-- The row sums of the geodesic distance matrix tell us the total shortest-path distance from each node to every other node
+- Row sums of the distance matrix = total shortest-path distance to all others
 
 ::: {.columns}
 ::: {.column width="44%"}
@@ -519,17 +517,15 @@ g19(hl = "s", pt = 9, tx = 5.5)
 :::
 
 ::: {.column width="56%"}
-. . .
-
-- Bigger numbers are **worse**: this is **farness**, not closeness!
+- Bigger = **worse**: this is **farness**, not closeness!
 
 ```{r}
 #| echo: false
 rf <- data.frame(node = letters[1:19], farness = as.vector(far19))
-kbl2(rf, 12)
+kbl2(rf)
 ```
 
-- Node **s** has the largest farness (88) — it is far away from most other nodes
+- Node **s** is the most distant node (farness = 88)
 :::
 :::
 
@@ -545,22 +541,20 @@ kbl2(rf, 12)
 #| fig-width: 4.5
 g19(hl = c("i", "s"), pt = 9, tx = 5.5)
 ```
+
+- Ranges 0–1: **i** tops it (0.44), **s** sits at the bottom (0.20)
 :::
 
 ::: {.column width="56%"}
 <div style="font-size: 88%;">
 
-- We want **closeness**, not farness — so we **reverse** the scores by dividing $N - 1$ by each row sum (Freeman 1979):
-
-$$C_i^{CLOS} = \frac{N-1}{\sum_j d_{ij}}$$
+- We want **closeness**, not farness — so we **reverse** the scores by dividing $N - 1$ by each row sum (Freeman 1979): $C_i^{CLOS} = (N - 1) / \sum_j d_{ij}$
 
 ```{r}
 #| echo: false
 rcl <- data.frame(node = letters[1:19], farness = as.vector(far19), closeness = clo19)
-kbl2(rcl, 11)
+kbl2(rcl)
 ```
-
-- Ranges from 0 to 1, with 1 being the maximum possible closeness for the graph — **i** tops it (0.44), **s** sits at the bottom (0.20)
 
 </div>
 :::
@@ -586,14 +580,14 @@ g19(hl = "i", pt = 9, tx = 5.5)
 ```{r}
 #| echo: false
 rc <- rank_df(clo19)
-kbl2(rc, 13)
+kbl2(rc)
 ```
 
 . . .
 
 - **Node i** has the largest closeness centrality (0.44) **even though it doesn't have the largest degree** (that was j)!
 - Closeness and degree capture **different things** — the rankings disagree
-- Practical use (chapter 19): to spread an innovation fastest, seed node **i** first... but if a **disease** is spreading, that's also the worst node to infect!
+- Practical use (ch. 19): seed **i** first to spread an innovation — also the worst node to infect!
 
 </div>
 :::
@@ -603,7 +597,7 @@ kbl2(rc, 13)
 
 ## Closeness Centrality in Directed Graphs
 
-- Compute closeness in a directed graph **as long as the graph is strongly connected** — fill up the geodesic distance matrix as usual, except now the matrix is **asymmetric**!
+- Compute closeness in a directed graph **as long as the graph is strongly connected** — fill up the geodesic distance matrix as usual, starting from the adjacency matrix:
 
 ::: {.columns}
 ::: {.column width="38%"}
@@ -620,16 +614,33 @@ g8(pt = 9, tx = 5.5)
 #| echo: false
 kbl(D8, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 12)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
+:::
+:::
 
-. . .
+---
+
+## The Directed Geodesic Distance Matrix
+
+::: {.columns}
+::: {.column width="38%"}
+```{r}
+#| echo: false
+#| fig-height: 4.3
+#| fig-width: 4.3
+g8(pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="62%"}
+- Filling in shortest-path distances works as usual — except the matrix is now **asymmetric**!
 
 ```{r}
 #| echo: false
 kbl(dd8, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 12)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 :::
 :::
@@ -654,7 +665,7 @@ g8(hl = "v4", pt = 9, tx = 5.5)
 dc8 <- data.frame(node = paste0("v", 1:8),
                   farness = as.vector(far8), closeness = clo8)
 kbl(dc8, format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 . . .
@@ -686,7 +697,7 @@ g8(graph = gr8w, pt = 9, tx = 5.5)
 #| echo: false
 kbl(D8w, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 13)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 . . .
@@ -704,7 +715,7 @@ kbl(D8w, format = "html", align = "c") %>%
 #| echo: false
 kbl(dw8, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 13)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 . . .
@@ -740,7 +751,7 @@ $$\frac{1}{\infty} = 0$$
 #| echo: false
 kbl(dw8, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 12)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 :::
 
@@ -749,7 +760,7 @@ kbl(dw8, format = "html", align = "c") %>%
 #| echo: false
 kbl(round(inv8, 2), format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 12)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 :::
 :::
@@ -777,7 +788,7 @@ rh <- data.frame(node = paste0("v", 1:8),
                  harmonic = har8, normalized = har8n)
 rh <- rh[order(rh$harmonic, decreasing = TRUE), ]
 kbl(rh, format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 . . .
@@ -829,7 +840,7 @@ g19(hl = "h", pt = 9, tx = 5.5)
 
 ## Stress Centrality: A First Attempt
 
-- For each node $k$: how often does it show up as an **inner node** on shortest paths between every other pair $i, j$? (Shimbel 1953: total **traffic** through the node)
+- For each node $k$: how often does it show up as an **inner node** on shortest paths between every other pair $i, j$? Total **traffic** through the node (Shimbel 1953): $C^{STRESS}_k = \sum_{i \neq k} \sum_{j \neq k} n_{i(k)j}$
 
 ::: {.columns}
 ::: {.column width="44%"}
@@ -842,12 +853,10 @@ g19(hl = "h", pt = 9, tx = 5.5)
 :::
 
 ::: {.column width="56%"}
-$$C^{STRESS}_k = \sum_{i \neq k} \sum_{j \neq k} n_{i(k)j}$$
-
 ```{r}
 #| echo: false
 rs19 <- data.frame(node = letters[1:19], stress = as.vector(stress19))
-kbl2(rs19, 12)
+kbl2(rs19)
 ```
 :::
 :::
@@ -937,7 +946,7 @@ g19(hl = c("h", "i"), pt = 9, tx = 5.5)
 #| echo: false
 rb <- rank_df(bet19, 1)
 rb$score <- as.numeric(rb$score)
-kbl2(rb, 13)
+kbl2(rb)
 ```
 
 . . .
@@ -951,7 +960,7 @@ kbl2(rb, 13)
 
 . . .
 
-- Note: the closeness winner (**i**) and the degree winner (**j**) are *not* the betweenness winner — closeness captures **reachability**; betweenness captures **intermediation potential**
+- Closeness = **reachability**; betweenness = **intermediation** — different winners!
 
 ---
 
@@ -1006,7 +1015,7 @@ st7 <- star_tab
 st7$node <- rownames(st7)
 kbl(t(st7[, c("node", "degree", "closeness", "betweenness")]),
     format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 - **Degree**: the central node has $n - 1$; every satellite just 1
@@ -1060,7 +1069,7 @@ ggraph(obs5, layout = "circle") +
 kobs_df <- data.frame(node = names(kobs), k = as.vector(kobs),
                       diff = max(kobs) - as.vector(kobs))
 kbl(kobs_df, format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 - Sum of differences: $1 + 0 + 1 + 1 + 1 = \mathbf{4}$

@@ -159,6 +159,26 @@
   font-size: max(1em, 20.8px);
 }
 
+/* Minimum size floor for tables. kableExtra writes font-size INLINE on the
+   <table> element, so flooring the table itself would either lose to the
+   inline style or (with !important) clobber larger authored sizes. Flooring
+   the CELLS in em units works: 1em inside a cell resolves to the table's
+   authored inline size, so max(1em, 18px) preserves tables authored at
+   18px+ and lifts only smaller ones to the floor. Enforced by
+   audit_slide_sizes.py's table check. */
+.reveal td,
+.reveal th {
+  font-size: max(1em, 18px);
+}
+
+/* Dense opt-out for secondary tables in narrow columns (the established
+   one-off-16 convention): wrap the table's container in .table-dense and
+   the floor drops to 16px. */
+.reveal .table-dense td,
+.reveal .table-dense th {
+  font-size: max(1em, 16px);
+}
+
 /* Consistent vertical alignment across slides.
    Reveal.js vertically centers each slide by default, so slides with
    different content heights shift figures slightly between transitions.

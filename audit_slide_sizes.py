@@ -39,6 +39,8 @@ import urllib.parse
 # ---------------------------------------------------------------------------
 MATH_FLOOR_PX = 34.0        # display math must render at >= the deck base font
 DENSE_MATH_FLOOR_PX = 20.8  # inside .math-dense wrappers: 72% of prose (28.9px)
+TABLE_FLOOR_PX = 18.0       # table cells must render at >= 18px
+DENSE_TABLE_FLOOR_PX = 16.0  # inside .table-dense wrappers: secondary tables
 USABLE_WIDTH_PX = 1024       # 1280 * (1 - 2 * 0.1)
 MIN_IMG_SCALE = 0.75         # displayed size must be >= 75% of intended size
 MIN_INTENDED_IN = 3.3        # figures must be authored >= 3.3in wide
@@ -83,6 +85,16 @@ MEASURE_SCRIPT = r"""
           natw: img.naturalWidth, nath: img.naturalHeight,
           intended: img.getAttribute('width') || '',
           src: img.getAttribute('src') || img.getAttribute('data-src') || ''});
+      });
+      sec.querySelectorAll('table').forEach(function(tbl){
+        // skip nested tables (measure only the outermost)
+        if (tbl.parentElement && tbl.parentElement.closest('table')) return;
+        var cell = tbl.querySelector('td, th');
+        if (!cell) return;
+        out.push({slide: sec.id, kind: 'table',
+                  fs: getComputedStyle(cell).fontSize,
+                  dense: !!(tbl.closest && tbl.closest('.table-dense')),
+                  rows: tbl.rows.length});
       });
     });
     location.href = 'http://127.0.0.1:__PORT__/?' + encodeURIComponent(JSON.stringify(out));
@@ -251,7 +263,7 @@ def audit_deck(qmd, chrome_bin, force_render, no_render):
         return [("deck", tag, "no measurements received from headless Chrome")]
 
     violations = []
-    n_math = n_img = n_untyped = 0
+    n_math = n_img = n_untyped = n_table = 0
     for d in data:
         kind = d.get("kind")
         slide = d.get("slide", "?")
@@ -274,6 +286,15 @@ def audit_deck(qmd, chrome_bin, force_render, no_render):
             n_untyped += 1
             violations.append((slide, "math",
                 f"display math never typeset (raw LaTeX visible): {d.get('tex', '')[:60]}"))
+        elif kind == "table":
+            n_table += 1
+            fs = float(re.sub(r"[^0-9.]", "", d.get("fs", "0")) or 0)
+            floor = DENSE_TABLE_FLOOR_PX if d.get("dense") else TABLE_FLOOR_PX
+            if fs and fs < floor:
+                violations.append((slide, "table",
+                    f"table text at {fs:g}px is below the {floor:g}px floor — "
+                    f"raise kable font_size, split the slide, or (secondary "
+                    f"tables only) wrap in .table-dense"))
         elif kind == "img":
             n_img += 1
             # knitr emits width= attributes in CSS px (the intended display
@@ -291,8 +312,8 @@ def audit_deck(qmd, chrome_bin, force_render, no_render):
                     violations.append((slide, "img",
                         f"figure authored at {intended / 96:.1f}in wide "
                         f"(<{MIN_INTENDED_IN}in minimum)"))
-    print(f"  {n_math} math blocks, {n_img} figures, {n_untyped} untyped, "
-          f"{len(violations)} violations")
+    print(f"  {n_math} math blocks, {n_img} figures, {n_table} tables, "
+          f"{n_untyped} untyped, {len(violations)} violations")
     # tag each violation with the deck so the combined report is unambiguous
     return [(tag, kind, f"{slide}: {msg}") for (slide, kind, msg) in violations]
 
