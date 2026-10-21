@@ -11,12 +11,7 @@ This repository contains the source code for an introductory textbook on social 
 - **CI/CD:** GitHub Actions (`.github/workflows/publish.yml`) on `ubuntu-latest` deploying to GitHub Pages
 
 ## Project Structure
-- `*.qmd`: Quarto markdown files containing the lessons. They follow a naming convention organized by topic:
-  - `lesson-graphs-*.qmd`
-  - `lesson-matrix-*.qmd`
-  - `lesson-positions-*.qmd`
-  - `lesson-sna-*.qmd`
-  - `lesson-theory-*.qmd`
+- `*.qmd`: Quarto markdown files containing the lessons, named `NN-<topic>-<slug>.qmd` where `NN` is the book order and `<topic>` is one of `theory`, `graphs`, `matrix`, `sna` (see the Chapter Inventory below).
 - `_quarto.yml`: Quarto configuration, detailing the book structure and chapters. Only chapters listed in `book: chapters:` are built into the textbook.
 - `networks.bib`: Bibliography file containing references/citations for the textbook.
 - `renv.lock` / `renv/`: R environment lockfile and project library.
@@ -154,7 +149,7 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 
 ### 2. Homework Authoring & Canvas LMS Sync
 Homework assignments are delivered privately to students via UCLA Bruin Learn (Canvas LMS) rather than published on the open web:
-1. **Edit assignment:** Modify `homework{1..9}.qmd` in the sibling repo's `homeworks/` directory (`C:\projects\SOCIOL-111\homeworks`) — the primary source since 2026-09-23. This repo's `homeworks/` directory is a legacy fallback only.
+1. **Edit assignment:** Modify `homework{1..9}.qmd` in the sibling repo's `homeworks/` directory (`../SOCIOL-111/homeworks/`) — the primary source since 2026-09-23. If the sibling repo is not checked out on the current machine, this repo's legacy `homeworks/` copy is the fallback (or `--remote`; per-machine checkout status lives in user memory).
 2. **Render locally:** From this repo, run `./render_homeworks.sh [hw_number]`
    ```bash
    ./render_homeworks.sh 1       # Render Homework 1
@@ -177,8 +172,10 @@ The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push t
 2. **Fast R Dependency Installation:** Uses `r-lib/actions/setup-r@v2` with Posit Public Package Manager (P3M) binary packages (`use-public-rspm: true`), completing dependency install in seconds.
 3. **Book Build:** Renders book chapters to `_sites/`.
 4. **Slide Decks Build:** Renders changed `slides/*.qmd` into `_sites/slides/`.
-5. **Slide Size Floor Audit (non-blocking):** `python audit_slide_sizes.py --no-render` audits the changed decks (see workflow 4). Currently `continue-on-error: true`; flip to `false` to enforce once remaining figure violations are fixed.
+5. **Slide Size Floor Audit (non-blocking):** `python audit_slide_sizes.py --no-render` audits the changed decks (see workflow 4). Currently `continue-on-error: true`; all figure/size violations were cleared 2026-10-20/21 (0 remaining), so flipping to `false` to enforce is now a plain decision whenever desired.
 6. **Deployment:** Deploys `_sites/` to GitHub Pages.
+
+**Deploy concurrency guard (added 2026-10-21):** the workflow has `concurrency: { group: gh-pages-deploy, cancel-in-progress: true }` because the peaceiris deploy pushes to `gh-pages` non-forced, and two pushes to `main` inside a ~3-minute build window used to race (both fetched the same `gh-pages` head; the second push was rejected non-fast-forward — this actually failed the "agento II" run on 2026-10-21, benignly, since the two commits differed only in `AGENTS.md`). Under the guard, a newer run cancels the superseded one, so superseded runs show as **"cancelled", not "failure"** — that is expected, not a deploy failure.
 
 ### 4. Slide Deck Size Floor (established 2026-10-20, refined same day)
 Slides must never render matrices or graphs below a minimum readable size on the 1280×720 canvas. Two enforcement layers:
@@ -192,7 +189,7 @@ Slides must never render matrices or graphs below a minimum readable size on the
 - figures displayed below 75% of their **intended** size (the knitr `width` attribute = fig-width in CSS px; rasters are 2× retina, so never compare displayed px against the raw raster) or authored below the 3.3in minimum
 
 Measurement essentials (each cost a real debugging round):
-- Normalize by `Reveal.getScale()`: `getBoundingClientRect` includes the deck's global transform, and headless Chrome at default DPR ≠ 1 (e.g. 1.25 on this Windows machine → 0.744 deck scale → everything measured ~26% small). The audit passes `--force-device-scale-factor=1` and divides by the scale anyway.
+- Normalize by `Reveal.getScale()`: `getBoundingClientRect` includes the deck's global transform, and headless Chrome at default DPR ≠ 1 (e.g. 1.25 → 0.744 deck scale → everything measured ~26% small). The audit passes `--force-device-scale-factor=1` and divides by the scale anyway.
 - Measure the `span.MathJax` inside `MathJax_Display`, not the div — the div is a full-width block and reports container width, not equation width.
 - The injected measurement script lives in the audit; the instrumented copy must be written **next to the deck** (relative `*_files/` resources break from a temp dir).
 
@@ -210,7 +207,7 @@ Policy: no slide in a Reveal.js deck may scroll vertically; if content genuinely
 - **kable tables:** `font_size` ≥ **18** (20 preferred for the primary worked-example matrices). A one-off 16 is allowed only for secondary tables in narrow columns.
 - **Rule of thumb:** if a figure or table needs squinting, the slide is overfull — split it or restructure the columns rather than shrink the exhibit. When a worked example references a graph or matrix, the referenced exhibit must be visible on the same slide (the persistent-example-graph convention used in affiliation-networks and matrix-advanced).
 
-**Measuring overflow:** `scrollable: true` makes overflowing slides scroll, so check empirically instead of by eye. Render the deck, then measure each slide's `scrollHeight` vs `clientHeight` at the deck's native 1280×720 geometry in headless Chrome. No browser is installed in the Crostini container; the working setup (cached under a scratch dir, Node 18-compatible):
+**Measuring overflow:** `scrollable: true` makes overflowing slides scroll, so check empirically instead of by eye. Render the deck, then measure each slide's `scrollHeight` vs `clientHeight` at the deck's native 1280×720 geometry in headless Chrome (the persistent chrome-headless-shell install; the QA scripts auto-prefer it and `CHROME_BIN` overrides).
 ```bash
 npx -y @puppeteer/browsers@2.4.1 install chrome-headless-shell@stable   # latest installer needs Node >= 20
 npm i puppeteer-core                                                     # v25 is ESM-only: use dynamic import()
@@ -238,9 +235,7 @@ Drive it with `Reveal.slide(h, v)` per slide (decks nest `##` slides inside `#` 
 ### 6. Bruin Learn (Canvas) API: Posting Announcements
 Credentials are read from `~/.Renviron` (`CANVAS_API_TOKEN`, `CANVAS_URL`). Course ID for SOCIOL 111 is `238980`.
 
-**File locations & format (on this Windows machine):**
-- R reads `C:\Users\Omar Lizardo\OneDrive\Documents\.Renviron` (R's `~` is OneDrive Documents); it tolerates `KEY = value` with spaces.
-- Shell/Python tools (including `sync_homeworks_to_canvas.py`) read `C:\Users\Omar Lizardo\.Renviron` via `os.path.expanduser`. The sync script's parser requires strict `KEY=value` lines — no spaces around `=` and no quotes — otherwise credentials are silently missed.
+**Credentials format:** `~/.Renviron` holds `CANVAS_API_TOKEN` and `CANVAS_URL` (exact per-machine file locations: user memory). The sync script's parser requires strict `KEY=value` lines — no spaces around `=` and no quotes — otherwise credentials are silently missed.
 **Working pattern (verified 2026-10-13):** post via `POST /api/v1/courses/:course_id/discussion_topics` with a **form-encoded** body — `title`, `message` (HTML), `is_announcement=true`, `published=true`:
 ```bash
 curl -X POST -H "Authorization: Bearer $TOKEN" \
@@ -272,8 +267,6 @@ Verify the creation response's `is_announcement: true` (the documented `announce
 - **Unverified deck edits:** none — every edited deck (cognitive-social-structures, subgroups, blockmodeling, chains-of-affection, plus all 15 backlog decks fixed in the final session) was rendered and verified: fleet-wide 0 overflow + 0 size violations across all 26 measurable decks. The overflow backlog is closed.
 - **what-are-networks embed-resources:** the 18-commit remote merge added `embed-resources: true` to this deck (8.2MB single file), making it unmeasurable by the audit and overflow check (empty DOM dump). Decide: keep embed-resources or drop it so QA tooling can measure the deck.
 - **Stray .pptx files at repo root:** the merge brought `Affiliation Networks .pptx` and `Centrality.pptx`. Undecided whether to delete, gitignore, or keep.
-- **Push pending:** RESOLVED 2026-10-21 — the fix commits were pushed, and the Crostini checkout pulled them (local main == origin/main).
 - **Permanent slide-QA scripts (repo root, promoted from scratch 2026-10-20):** `check_overflow.py` (per-slide vertical overflow; `--all`, `--dump`, `--warn-only`, accepts .qmd or .html, exits 1 on overflow) and `dump_slide.py <html> <slide-id...|--overflow|--all>` (per-element geometry sorted by bottom edge — the diagnostic for WHICH element pushes a slide over). Both share `audit_slide_sizes.py`'s injection guarantees and add: isolated `--user-data-dir` per launch, 4-attempt retry, POST transport for payloads (GET query strings break on big dumps — http.server request-line limit), UTF-8-safe stdout, and `what-are-networks` auto-skip.
-- **Chrome launch reliability (found 2026-10-20):** this Windows shell runs ELEVATED, and `chrome.exe --headless=new` intermittently hands the URL off to the user's running browser instead ("Opening in existing browser session", exits in ~0.1s, page never loads, no payload, empty screenshots) — failures come in multi-minute waves and look like content-dependent bugs. Fix: `chrome-headless-shell` (separate binary, cannot hand off) installed at `~/.posit-assistant/tools/chrome-headless-shell/chrome-headless-shell-win64/chrome-headless-shell.exe`; all three QA scripts prefer it automatically. Reinstall after long gaps: `npx -y @puppeteer/browsers@2.4.1 install chrome-headless-shell@stable` or fetch the Chrome-for-Testing win64 zip.
-- **Crostini QA setup (2026-10-21):** the Crostini container has NO Chrome and no `python` (use `python3`); QA scripts need `CHROME_BIN` set. chrome-headless-shell 156.0.8078.47 lives OUTSIDE the repo at `~/.posit-assistant/tools/chrome-headless-shell/linux-156.0.8078.47/chrome-headless-shell-linux64/chrome-headless-shell` (never commit it — a first attempt committed 272 MB of it and the pusho commit had to be amended; it is now `/chrome-headless-shell/`-ignored in .gitignore). Install with `npx -y @puppeteer/browsers@2.4.1 install chrome-headless-shell@stable` (Node 18 works with this installer version) then move the resulting `chrome-headless-shell/` dir to `~/.posit-assistant/tools/`. Render with the Quarto CLI at `/usr/share/positron/resources/app/quarto/bin/quarto` (R `quarto` package also installed; `networklayouts` is NOT available for R 4.5.3 and no deck uses it). `install.packages()` can hang on an interactive prompt in the Positron console — set `options(install.packages.compile.from.source = "always")` first.
+- **Headless Chrome for QA (portable facts):** all three QA scripts auto-prefer `chrome-headless-shell` and honor `CHROME_BIN`; install it OUTSIDE the repo (a first attempt committed 272 MB of it and the "pusho" commit had to be amended — see the Large tracked media note above; it is `chrome-headless-shell/`-ignored in .gitignore). Install via `npx -y @puppeteer/browsers@2.4.1 install chrome-headless-shell@stable`. Machine-specific binary locations and launch quirks live in user memory.
 - **Injected-instrumentation pitfall (cost hours on 2026-10-20):** an injected `<script>...</script>` block MUST include its closing `</script>` — with it missing, everything after injection becomes JS text, the parser hits a syntax error, and NOTHING runs (no payload, no error, deck-dependent-looking failures). Handwritten probes that "worked" were ones whose harness wrapped the JS in its own `<script>` tags — the asymmetry masqueraded as a content bug for a long time.
