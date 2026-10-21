@@ -112,6 +112,16 @@ MEASURE_SCRIPT = r"""
 
 
 def find_chrome():
+    # Prefer chrome-headless-shell: plain chrome.exe intermittently hands
+    # off to the user's running browser when launched from an elevated
+    # shell on Windows (exits in ~0.1s, page never loads) — the measurement
+    # then silently never arrives.
+    shell = os.path.join(
+        os.path.expanduser("~"), ".posit-assistant", "tools",
+        "chrome-headless-shell", "chrome-headless-shell-win64",
+        "chrome-headless-shell.exe")
+    if os.path.exists(shell):
+        return shell
     env = os.environ.get("CHROME_BIN") or os.environ.get("CHROME_PATH")
     if env and os.path.exists(env):
         return env
