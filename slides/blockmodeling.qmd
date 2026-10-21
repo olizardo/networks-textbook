@@ -184,6 +184,10 @@ kbl(diag_clean(cor_6_3), format = "html", align = "c") %>%
 
 ## Structural Positions via CONCOR
 
+:::: {.columns}
+
+::: {.column width="55%"}
+
 ```{r}
 #| echo: false
 kbl(cor_6_3, format = "html", align = "c") %>%
@@ -193,6 +197,9 @@ kbl(cor_6_3, format = "html", align = "c") %>%
   row_spec(6, background = "violet", bold = TRUE) %>%
   kable_styling(bootstrap_options = c("hover", "condensed"))
 ```
+:::
+
+::: {.column width="45%"}
 
 ::: {.incremental}
 - By analyzing the rows of $+1$ and $-1$, we extract perfect structurally equivalent positions:
@@ -201,6 +208,10 @@ kbl(cor_6_3, format = "html", align = "c") %>%
   - Position 3 (Blue): Node $\{E\}$
   - Position 4 (Purple): Node $\{F\}$
 :::
+
+:::
+
+::::
 
 # Part 2: Blockmodeling a 22-Node Network
 
@@ -296,7 +307,7 @@ ggraph(gr_big, layout = 'kk') +
 
 ---
 
-## The Blocked Adjacency Matrix
+## The Blocked Adjacency Matrix (Blocks 1–3)
 
 ```{r}
 #| echo: false
@@ -306,21 +317,38 @@ colnames(adj_mat_big) <- V(gr_big)$name
 final_blocks_order <- c("I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "T", "E", "F", "G", "H", "B", "C", "A", "S", "U", "V", "D")
 blocked_adj <- adj_mat_big[final_blocks_order, final_blocks_order]
 
-kbl(blocked_adj, align = "c", format = "html") %>%
+kbl(blocked_adj[1:15, ], align = "c", format = "html") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-  row_spec(5, extra_css = "border-bottom: 2px solid black;") %>%  
-  row_spec(10, extra_css = "border-bottom: 2px solid black;") %>%  
-  row_spec(15, extra_css = "border-bottom: 2px solid black;") %>%  
-  row_spec(17, extra_css = "border-bottom: 2px solid black;")  %>% 
-  row_spec(19, extra_css = "border-bottom: 2px solid black;")  %>% 
-  row_spec(21, extra_css = "border-bottom: 2px solid black;") %>% 
-  column_spec(6, extra_css = "border-right: 2px solid black;") %>% 
-  column_spec(11, extra_css = "border-right: 2px solid black;") %>%  
-  column_spec(16, extra_css = "border-right: 2px solid black;") %>%  
-  column_spec(18, extra_css = "border-right: 2px solid black;") %>%  
-  column_spec(20, extra_css = "border-right: 2px solid black;") %>% 
-  column_spec(22, extra_css = "border-right: 2px solid black;")  
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 20) %>%
+  row_spec(5, extra_css = "border-bottom: 2px solid black;") %>%
+  row_spec(10, extra_css = "border-bottom: 2px solid black;") %>%
+  row_spec(15, extra_css = "border-bottom: 2px solid black;") %>%
+  column_spec(6, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(11, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(16, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(18, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(20, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(22, extra_css = "border-right: 2px solid black;")
+```
+
+---
+
+## The Blocked Adjacency Matrix (Blocks 4–7)
+
+```{r}
+#| echo: false
+kbl(blocked_adj[16:22, ], align = "c", format = "html") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 20) %>%
+  row_spec(2, extra_css = "border-bottom: 2px solid black;") %>%
+  row_spec(4, extra_css = "border-bottom: 2px solid black;") %>%
+  row_spec(6, extra_css = "border-bottom: 2px solid black;") %>%
+  column_spec(6, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(11, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(16, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(18, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(20, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(22, extra_css = "border-right: 2px solid black;")
 ```
 
 ::: {.incremental}
@@ -341,18 +369,23 @@ kbl(blocked_adj, align = "c", format = "html") %>%
   - We record a **0** if the relation block is a **Zero Block** (completely disconnected).
   - We record a **1** if the relation block is a **One Block** (contains ties).
 - This yields a highly simplified map of role interactions:
-  - $$
-    \mathbf{B} = 
-    \begin{pmatrix}
-    \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} \\
-    \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} \\
-    \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} \\
-    \text{One} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} \\
-    \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{One} & \text{One} \\
-    \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} \\
-    \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{One} & \text{Zero} & \text{Zero}
-    \end{pmatrix}
-    $$
+
+<div class="math-dense" style="font-size: 65%;">
+
+$$
+\mathbf{B} =
+\begin{pmatrix}
+\text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} \\
+\text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} \\
+\text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} \\
+\text{One} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} \\
+\text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{One} & \text{One} \\
+\text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} \\
+\text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{One} & \text{Zero} & \text{Zero}
+\end{pmatrix}
+$$
+
+</div>
 :::
 
 ---
@@ -376,7 +409,7 @@ colnames(image_mat) <- block_names
 
 kbl(image_mat, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 20)
 ```
 
 - High-level representation of block relations.

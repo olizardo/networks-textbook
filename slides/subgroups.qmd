@@ -66,7 +66,7 @@ gr_clique_5 <- create_complete(5) %>% mutate(name = 1:5)
 :::
 
 ::: {.column width="35%"}
-![](../images/three-step.png){fig-align="center" width="100%"}
+![](../images/three-step.png){fig-align="center" width="415px"}
 :::
 
 ::::
@@ -259,6 +259,10 @@ ggraph(gr_enum, layout = 'auto') +
 
 ## The Clique Affiliation Matrix ($C$)
 
+:::: {.columns}
+
+::: {.column width="60%"}
+
 ```{r}
 #| echo: false
 clique.el <- data.frame(matrix(ncol = 2, nrow = 0))
@@ -281,10 +285,17 @@ colnames(clique.el) <- c("Node", "Clique")
 
 kbl(clique.mat, format = "html") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+  kable_styling(bootstrap_options = c("hover", "condensed", "responsive"), font_size = 20)
 ```
+:::
+
+::: {.column width="40%"}
 
 - Node $A$ belongs to only 1 clique ($C_4$), whereas node $D$ is highly "over-committed", belonging to **6 different cliques**!
+
+:::
+
+::::
 
 ---
 
@@ -509,6 +520,10 @@ ggraph(gr_edgecon, layout = 'kk') +
 
 ## The Edge Connectivity Matrix
 
+:::: {.columns}
+
+::: {.column width="55%"}
+
 ```{r}
 #| echo: false
 n_nodes <- length(V(gr_edgecon))
@@ -528,11 +543,18 @@ kbl(m_edge, format = "html") %>%
   column_spec(1, bold = TRUE) %>% 
   kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
 ```
+:::
+
+::: {.column width="45%"}
 
 ::: {.incremental}
 - **Interpretation**: Pairwise edge connectivity represents the **strength of indirect ties** between nodes.
 - In this network, nodes $E$ and $G$ have the highest edge connectivity ($\lambda(E, G) = 4$). We must remove 4 distinct edges to disconnect them!
 :::
+
+:::
+
+::::
 
 ---
 
@@ -609,6 +631,10 @@ ggraph(gr_nodecon, layout = 'kk') +
 
 ## The Node Connectivity Matrix
 
+:::: {.columns}
+
+::: {.column width="55%"}
+
 ```{r}
 #| echo: false
 n_nodes <- length(V(gr_nodecon))
@@ -630,9 +656,16 @@ kbl(m_node, format = "html") %>%
   column_spec(1, bold = TRUE) %>% 
   kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
 ```
+:::
+
+::: {.column width="45%"}
 
 - **Menger's Theorem (Nodes)**: Pairwise node connectivity is equal to the maximum number of **node-independent paths** (paths that share no *inner nodes*) between $u$ and $v$.
 - Nodes $A$ and $H$ are adjacent, but $A$ and $F$ have node connectivity $\kappa(A, F) = 5$, requiring the removal of 5 nodes $\{B, C, D, G, H\}$ to disconnect them.
+
+:::
+
+::::
 
 # Part 5: Lambda Sets & Cohesive Blocking
 
@@ -655,14 +688,12 @@ kbl(m_node, format = "html") %>%
 :::: {.columns}
 
 ::: {.column width="50%"}
-### Step 1: Start with Graph $G$
-- The edge connectivity of this graph is $\lambda(G) = 3$.
-- Removing the minimum edge cutset $\{AF, AL, CP\}$ splits the graph.
+- **Step 1: Start with graph $G$.** Its edge connectivity is $\lambda(G) = 3$; removing the minimum edge cutset $\{AF, AL, CP\}$ splits the graph.
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
+#| fig-width: 4.2
+#| fig-height: 4.2
 set.seed(456)
 gr_lambda <- play_islands(4, 4, .75, 1) %>% 
   mutate(name = toupper(letters[1:16])) 
@@ -685,13 +716,12 @@ plot_net_lambda(gr_lambda)
 :::
 
 ::: {.column width="50%"}
-### Step 2: Remove $\{AF, AL, CP\}$
-- This splits the graph into a clique component $\{A, B, C, D\}$ ($\lambda = 3$) and a giant component ($\lambda = 2$).
+- **Step 2: Remove $\{AF, AL, CP\}$.** This splits the graph into a clique component $\{A, B, C, D\}$ ($\lambda = 3$) and a giant component ($\lambda = 2$).
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
+#| fig-width: 4.2
+#| fig-height: 4.2
 gr_l2 <- gr_lambda - edge("A|F") - edge("A|L") - edge("C|P")
 plot_net_lambda(gr_l2)
 ```
@@ -706,26 +736,24 @@ plot_net_lambda(gr_l2)
 :::: {.columns}
 
 ::: {.column width="50%"}
-### Step 3: Remove $\{HJ, HM\}$
-- The giant component is disconnected by removing $\{HJ, HM\}$, yielding a new component and a clique of size 4.
+- **Step 3: Remove $\{HJ, HM\}$.** This disconnects the giant component, yielding a new component and a clique of size 4.
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
+#| fig-width: 4.2
+#| fig-height: 4.2
 gr_l3 <- gr_l2 - edge("H|J") - edge("H|M")
 plot_net_lambda(gr_l3)
 ```
 :::
 
 ::: {.column width="50%"}
-### Step 4: Remove $\{JN, IN\}$
-- Disconnecting the final remaining components reveals four cohesive subgroups (cliques of size 4).
+- **Step 4: Remove $\{JN, IN\}$.** Disconnecting the final remaining components reveals four cohesive subgroups (cliques of size 4).
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
+#| fig-width: 4.2
+#| fig-height: 4.2
 gr_l4 <- gr_l3 - edge("J|N") - edge("I|N")
 plot_net_lambda(gr_l4)
 ```
@@ -753,8 +781,8 @@ plot_net_lambda(gr_l4)
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 6.5
-#| fig-height: 6.5
+#| fig-width: 5.8
+#| fig-height: 5.8
 a_dend <- list()
 a_dend$merge <- matrix(c(-1, -2,
                     -3, 1,
@@ -832,7 +860,7 @@ p_dend
 :::
 
 ::: {.column width="40%"}
-![](../images/body.jpg){fig-align="center" width="90%"}
+<img src="../images/body.jpg" width="320" style="display:block; margin: 0 auto;">
 :::
 
 ::::
@@ -884,14 +912,12 @@ ggraph(gr_core, layout = 'kk') +
 :::: {.columns}
 
 ::: {.column width="50%"}
-### Original Network ($k=0$ or $k=1$)
-- Nodes on the outer edge (degrees 1) represent peripheral members.
-- Pruning nodes with degree $< 2$ begins our search.
+- **Original network ($k=0$ or $k=1$).** Outer-edge nodes (degree 1) are peripheral members; pruning nodes with degree $< 2$ begins our search.
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5
-#| fig-height: 5
+#| fig-width: 4.2
+#| fig-height: 4.2
 ggraph(gr_core, layout = 'kk') +
   geom_edge_link(color = "steelblue", alpha = 0.5) +
   geom_node_point(color = "tan2", size = 8) +
@@ -900,13 +926,12 @@ ggraph(gr_core, layout = 'kk') +
 :::
 
 ::: {.column width="50%"}
-### The Core Remains ($k=4$)
-- After recursively peeling away low-degree shells, only the **core** subgraph of tightly connected nodes survives!
+- **The core remains ($k=4$).** After recursively peeling away low-degree shells, only the **core** subgraph of tightly connected nodes survives!
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5
-#| fig-height: 5
+#| fig-width: 4.2
+#| fig-height: 4.2
 gr_peeled <- gr_core %>% filter(node_coreness() >= 4)
 ggraph(gr_peeled, layout = 'circle') +
   geom_edge_link(color = "steelblue", edge_width = 1.0) +
@@ -948,6 +973,8 @@ ggraph(gr_peeled, layout = 'circle') +
 
 ## Comparing Meso-Level Structures
 
+<div style="font-size: 60%;">
+
 | Structure Type | Connectivity Criterion | Flexibility | Primary Application |
 | :--- | :--- | :--- | :--- |
 | **Strict Clique** | Complete adjacency (density = 1.0) | Extremely Strict | Highly intimate, close-knit friendship dyads/triads |
@@ -955,6 +982,8 @@ ggraph(gr_peeled, layout = 'circle') +
 | **Lambda Set** | Pairwise edge-connectivity ($\lambda(u, v)$) | Structural | Robust indirect path strength, hierarchical depts |
 | **Cohesive Block** | Pairwise node-connectivity ($\kappa(u, v)$) | Structural | Structural cohesion, political coalitions, solidarity |
 | **$k$-Core** | Minimum degree threshold ($d \ge k$) | Algorithmic | Large-scale core-periphery peeling, finding elites |
+
+</div>
 
 ---
 
