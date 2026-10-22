@@ -94,6 +94,47 @@ kb6 <- function(m, font = 18) {
 CPPT <- P %*% t(P)
 # ---- P^2 for the walks-of-length-3 slide ----
 CP2 <- P %*% P
+
+# ---- Directed 5-node example for the D x D^T / D^T x D slides ----
+# Tie i -> j = "i sent j a party invitation"
+DIR <- matrix(c(
+  0, 1, 1, 1, 0,
+  0, 0, 1, 1, 0,
+  0, 0, 0, 1, 0,
+  0, 0, 0, 0, 1,
+  1, 0, 1, 0, 0
+), nrow = 5, byrow = TRUE, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
+
+gr_dir <- as_tbl_graph(graph_from_adjacency_matrix(DIR, mode = "directed"))
+
+# Circular layout coordinates for the 5-node directed graph
+l_coords_5dir <- matrix(c(
+   0.000,  1.000,
+   0.951,  0.309,
+   0.588, -0.809,
+  -0.588, -0.809,
+  -0.951,  0.309
+), ncol = 2, byrow = TRUE)
+
+# ---- Plotting helper for the directed graph (closed arrowheads, fixed layout) ----
+PAL5 <- c(other = "tan1", focus = "red", second = "dodgerblue3", friend = "forestgreen")
+gd <- function(catmap = character(0), pt = 10, tx = 5.2) {
+  g <- gr_dir |>
+    mutate(cat = dplyr::coalesce(catmap[name], "other"))
+  ggraph(g, layout = "manual", x = l_coords_5dir[, 1], y = l_coords_5dir[, 2]) +
+    geom_edge_link(
+      color = "steelblue", edge_width = 1, lineend = "round",
+      arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+      end_cap = circle(6, "mm")
+    ) +
+    geom_node_point(aes(color = cat), size = pt) +
+    scale_color_manual(values = PAL5, guide = "none") +
+    geom_node_text(aes(label = name), size = tx, color = "white", fontface = "bold") +
+    theme_graph() + coord_cartesian(clip = "off")
+}
+# ---- Directed products for the completed-matrix slides ----
+DDT <- DIR %*% t(DIR)   # common out-neighbors; diagonal = out-degrees
+DTD <- t(DIR) %*% DIR   # common in-neighbors; diagonal = in-degrees
 ```
 
 # Part 1: Conformability Rules
@@ -605,6 +646,379 @@ g6(pt = 11, tx = 5.8)
 
 ---
 
+## The Directed Case: Out-Neighbors vs. In-Neighbors
+
+- Our running example $\mathbf{P}$ is symmetric, so $\mathbf{P} \times \mathbf{P}^T$ and $\mathbf{P}^T \times \mathbf{P}$ are the *same* computation.
+- For a **directed** graph, rows and columns carry different information:
+  - **Row $i$ of $\mathbf{D}$** = node $i$'s **out-ties** (whom $i$ chose)
+  - **Column $j$ of $\mathbf{D}$** = who chose $j$ — $j$'s **in-ties**
+- So the two multiplication orders now answer **different questions**:
+
+. . .
+
+- $\mathbf{D} \times \mathbf{D}^T$: multiplies **rows of $\mathbf{D}$** by **rows of $\mathbf{D}$** (via $\mathbf{D}^T$) → counts nodes **both $i$ and $j$ chose**: their **common out-neighbors**
+- $\mathbf{D}^T \times \mathbf{D}$: multiplies **columns of $\mathbf{D}$** by **columns of $\mathbf{D}$** (via $\mathbf{D}^T$) → counts nodes that **chose both $i$ and $j$**: their **common in-neighbors**
+- Both products are **symmetric** even though $\mathbf{D}$ is not — overlap is mutual
+- **Diagonals differ**: $\mathbf{D}\mathbf{D}^T$ recovers the **out-degrees**; $\mathbf{D}^T\mathbf{D}$ recovers the **in-degrees**
+
+---
+
+## Directed Running Example: "Sends a Party Invitation To"
+
+::: {.columns}
+::: {.column width="30%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd()
+```
+:::
+
+::: {.column width="35%"}
+$\mathbf{D}$ (the directed adjacency matrix)
+
+```{r}
+#| echo: false
+kb6(DIR, font = 18)
+```
+:::
+
+::: {.column width="35%"}
+$\mathbf{D}^T$ (rows of $\mathbf{D}^T$ = columns of $\mathbf{D}$)
+
+```{r}
+#| echo: false
+kb6(t(DIR), font = 18)
+```
+:::
+:::
+
+. . .
+
+- New running example: five people (A–E); a tie $i \rightarrow j$ means **$i$ invited $j$**
+- $\mathbf{D}$ is **not symmetric** — choosing is not the same as being chosen — so $\mathbf{D}^T$ is a genuinely **different matrix**
+- Read $\mathbf{D}$ by **rows** (out-ties: A invites B, C, D) and by **columns** (in-ties: C is invited by A, B, E)
+
+---
+
+## Common Out-Neighbors ($\mathbf{D} \times \mathbf{D}^T$): Tracing the Diagonal Cell $(\mathbf{D}\mathbf{D}^T)_{\text{A, A}}$
+
+::: {.columns}
+::: {.column width="26%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd(catmap = c(A = "focus", B = "friend", C = "friend", D = "friend"), pt = 10, tx = 5.2)
+```
+:::
+
+::: {.column width="37%"}
+**Row A of $\mathbf{D}$** (A's out-ties)
+
+```{r}
+#| echo: false
+kb6(DIR) %>% row_spec(1, background = "#F5B7B1", bold = TRUE)
+```
+:::
+
+::: {.column width="37%"}
+**Column A of $\mathbf{D}^T$** (= Row A of $\mathbf{D}$)
+
+```{r}
+#| echo: false
+kb6(t(DIR)) %>% column_spec(2, background = "#AED6F1", bold = TRUE)
+```
+:::
+:::
+
+<div class="math-dense" style="font-size: 100%;">
+
+$$c_{\text{A, A}} = (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) = \mathbf{3}$$
+
+</div>
+
+- A pairs with **itself**: every out-tie matches itself, so $c_{\text{A, A}} = 3$ = A's **out-degree**
+
+---
+
+## Common Out-Neighbors ($\mathbf{D} \times \mathbf{D}^T$): Tracing Cell $(\mathbf{D}\mathbf{D}^T)_{\text{A, B}}$
+
+::: {.columns}
+::: {.column width="26%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd(catmap = c(A = "focus", B = "second", C = "friend", D = "friend"), pt = 10, tx = 5.2)
+```
+:::
+
+::: {.column width="37%"}
+**Row A of $\mathbf{D}$** (A's out-ties)
+
+```{r}
+#| echo: false
+kb6(DIR) %>% row_spec(1, background = "#F5B7B1", bold = TRUE)
+```
+:::
+
+::: {.column width="37%"}
+**Column B of $\mathbf{D}^T$** (= Row B of $\mathbf{D}$)
+
+```{r}
+#| echo: false
+kb6(t(DIR)) %>% column_spec(3, background = "#AED6F1", bold = TRUE)
+```
+:::
+:::
+
+<div class="math-dense" style="font-size: 100%;">
+
+$$c_{\text{A, B}} = (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) = \mathbf{2}$$
+
+</div>
+
+- Red **A** and blue **B** invited the same two people: **C and D** — 2 common out-neighbors
+
+---
+
+## Common Out-Neighbors ($\mathbf{D} \times \mathbf{D}^T$): Tracing Cell $(\mathbf{D}\mathbf{D}^T)_{\text{C, D}}$
+
+::: {.columns}
+::: {.column width="26%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd(catmap = c(C = "focus", D = "second"), pt = 10, tx = 5.2)
+```
+:::
+
+::: {.column width="37%"}
+**Row C of $\mathbf{D}$** (C's out-ties)
+
+```{r}
+#| echo: false
+kb6(DIR) %>% row_spec(3, background = "#F5B7B1", bold = TRUE)
+```
+:::
+
+::: {.column width="37%"}
+**Column D of $\mathbf{D}^T$** (= Row D of $\mathbf{D}$)
+
+```{r}
+#| echo: false
+kb6(t(DIR)) %>% column_spec(5, background = "#AED6F1", bold = TRUE)
+```
+:::
+:::
+
+<div class="math-dense" style="font-size: 100%;">
+
+$$c_{\text{C, D}} = (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) = \mathbf{0}$$
+
+</div>
+
+- Red **C** invites only **D**; blue **D** invites only **E** — nothing in green: **0 common out-neighbors**
+
+---
+
+## The Completed $\mathbf{D} \times \mathbf{D}^T$ Matrix
+
+::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| echo: false
+DDTspec <- DDT
+for (i in 1:5) DDTspec[i, i] <- cell_spec(DDT[i, i], bold = TRUE, background = "#FCF3CF")
+kbl(DDTspec, format = "html", align = "c", escape = FALSE) %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 20)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd(pt = 11, tx = 5.8)
+```
+
+- **Diagonal (shaded)**: the **out-degrees**
+- **Off-diagonal**: how many people two nodes both invited
+- **Symmetric** — even though $\mathbf{D}$ itself is not
+:::
+:::
+
+---
+
+## Common In-Neighbors ($\mathbf{D}^T \times \mathbf{D}$): Tracing the Diagonal Cell $(\mathbf{D}^T\mathbf{D})_{\text{C, C}}$
+
+::: {.columns}
+::: {.column width="26%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd(catmap = c(C = "focus", A = "friend", B = "friend", E = "friend"), pt = 10, tx = 5.2)
+```
+:::
+
+::: {.column width="37%"}
+**Row C of $\mathbf{D}^T$** (who invited C)
+
+```{r}
+#| echo: false
+kb6(t(DIR)) %>% row_spec(3, background = "#F5B7B1", bold = TRUE)
+```
+:::
+
+::: {.column width="37%"}
+**Column C of $\mathbf{D}$** (who invited C)
+
+```{r}
+#| echo: false
+kb6(DIR) %>% column_spec(4, background = "#AED6F1", bold = TRUE)
+```
+:::
+:::
+
+<div class="math-dense" style="font-size: 100%;">
+
+$$c_{\text{C, C}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) = \mathbf{3}$$
+
+</div>
+
+- C pairs with **itself**: every in-tie matches itself, so $c_{\text{C, C}} = 3$ = C's **in-degree** (A, B, and E invited C)
+
+---
+
+## Common In-Neighbors ($\mathbf{D}^T \times \mathbf{D}$): Tracing Cell $(\mathbf{D}^T\mathbf{D})_{\text{C, D}}$
+
+::: {.columns}
+::: {.column width="26%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd(catmap = c(C = "focus", D = "second", A = "friend", B = "friend"), pt = 10, tx = 5.2)
+```
+:::
+
+::: {.column width="37%"}
+**Row C of $\mathbf{D}^T$** (who invited C)
+
+```{r}
+#| echo: false
+kb6(t(DIR)) %>% row_spec(3, background = "#F5B7B1", bold = TRUE)
+```
+:::
+
+::: {.column width="37%"}
+**Column D of $\mathbf{D}$** (who invited D)
+
+```{r}
+#| echo: false
+kb6(DIR) %>% column_spec(5, background = "#AED6F1", bold = TRUE)
+```
+:::
+:::
+
+<div class="math-dense" style="font-size: 100%;">
+
+$$c_{\text{C, D}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{0}) = \mathbf{2}$$
+
+</div>
+
+- Rows of $\mathbf{D}^T$ are $\mathbf{D}$'s **columns**: **in-tie lists**. Red **C** and blue **D** were invited by the same two people: **A and B** — 2 common in-neighbors
+
+---
+
+## Common In-Neighbors ($\mathbf{D}^T \times \mathbf{D}$): Tracing Cell $(\mathbf{D}^T\mathbf{D})_{\text{A, B}}$
+
+::: {.columns}
+::: {.column width="26%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd(catmap = c(A = "focus", B = "second"), pt = 10, tx = 5.2)
+```
+:::
+
+::: {.column width="37%"}
+**Row A of $\mathbf{D}^T$** (who invited A)
+
+```{r}
+#| echo: false
+kb6(t(DIR)) %>% row_spec(1, background = "#F5B7B1", bold = TRUE)
+```
+:::
+
+::: {.column width="37%"}
+**Column B of $\mathbf{D}$** (who invited B)
+
+```{r}
+#| echo: false
+kb6(DIR) %>% column_spec(3, background = "#AED6F1", bold = TRUE)
+```
+:::
+:::
+
+<div class="math-dense" style="font-size: 100%;">
+
+$$c_{\text{A, B}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{0}) = \mathbf{0}$$
+
+</div>
+
+- Only **E** invites A and only **A** invites B — nobody invites both: **0 common in-neighbors**
+
+---
+
+## The Completed $\mathbf{D}^T \times \mathbf{D}$ Matrix
+
+::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| echo: false
+DTDspec <- DTD
+for (i in 1:5) DTDspec[i, i] <- cell_spec(DTD[i, i], bold = TRUE, background = "#FCF3CF")
+kbl(DTDspec, format = "html", align = "c", escape = FALSE) %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 20)
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-height: 3.3
+#| fig-width: 3.3
+gd(pt = 11, tx = 5.8)
+```
+
+- **Diagonal (shaded)**: the **in-degrees**
+- **Off-diagonal**: how many senders two nodes share
+- **The payoff**: A and B share **2 out-neighbors** but **0 in-neighbors**; C and D are the mirror image
+:::
+:::
+
+---
+
+## Application: Reading the Two Directed Products
+
+**Why the difference matters:**
+
+- $\mathbf{D} \times \mathbf{D}^T$ (**common out-neighbors**): two nodes with the same **taste** — they choose the same people. In citation networks: **bibliographic coupling** (two papers citing the same references).
+- $\mathbf{D}^T \times \mathbf{D}$ (**common in-neighbors**): two nodes chosen by the same people — **shared appeal**. In citation networks: **co-citation** (two papers cited by the same papers).
+- **A and B** invite the same crowd but nobody invites both of them: high out-overlap, zero in-overlap.
+- **C and D** are invited by the same crowd but invite nobody in common: the mirror image.
+
+---
+
 ## Matrix Powers ($\mathbf{P}^n$) & Walks in Networks
 
 - Multiplying a square adjacency matrix by itself recursively reveals **indirect connections (walks)**:
@@ -675,7 +1089,7 @@ $$p^2_{\text{A, C}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} 
 
 </div>
 
-- In the graph: red **A**, blue **C**, green **shared friends**. The two walks are $A \rightarrow \mathbf{B} \rightarrow C$ and $A \rightarrow \mathbf{E} \rightarrow C$ — length-2 walks **are** common neighbors!
+- In the graph: red **A**, blue **C**, green **shared friends**. The two walks are $A \rightarrow \mathbf{B} \rightarrow C$ and $A \rightarrow \mathbf{E} \rightarrow C$ — exactly the **2 common friends** we found for $c_{\text{A, C}}$ earlier!
 
 ---
 
@@ -716,7 +1130,7 @@ $$p^2_{\text{C, C}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} 
 
 </div>
 
-- Walks from C back to C are **round trips** to each friend ($C \rightarrow A \rightarrow C$, etc.) — the diagonal of $\mathbf{P}^2$ recovers the **degrees**!
+- Walks from C back to C are **round trips** to each friend ($C \rightarrow A \rightarrow C$, etc.) — the diagonal of $\mathbf{P}^2$ recovers the **degrees**, same as $\mathbf{P} \times \mathbf{P}^T$!
 
 ---
 
@@ -736,7 +1150,7 @@ $$p^2_{\text{C, C}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} 
 
 $$\mathbf{P}^3 = \mathbf{P}^2 \times \mathbf{P}$$
 
-- **Diagonal cells ($p^3_{ii}$)**: Count length-3 cycles (triangles and longer cycles) starting and ending at node $i$.
+- **Diagonal cells ($p^3_{ii}$)**: Count length-3 cycles — **triangles** — starting and ending at node $i$.
 - Since each triangle can be walked in two directions (clockwise & counterclockwise), the number of triangles node $i$ belongs to is:
   $$\text{Triangles}(i) = \frac{p^3_{ii}}{2}$$
 
@@ -895,13 +1309,14 @@ g6(pt = 11, tx = 5.8)
 ```{r}
 #| echo: false
 ops <- data.frame(
-  Operation = c("P + G", "Pᵀ (transpose)", "P × Pᵀ", "P² = P × P", "P³ = P² × P"),
+  Operation = c("P + G", "Pᵀ (transpose)", "P × Pᵀ", "P² = P × P", "P³ = P² × P", "D × Dᵀ, Dᵀ × D (directed)"),
   What_it_reveals = c(
     "Multiplex ties: connected in both networks",
     "Reversed tie direction; feeds the dyad census",
     "Common neighbors (off-diagonal); degrees (diagonal)",
     "Number of walks of length 2 (= common neighbors)",
-    "Walks of length 3; diagonal ÷ 2 = triangles"
+    "Walks of length 3; diagonal ÷ 2 = triangles",
+    "Common out-neighbors vs. common in-neighbors; diagonals = out- / in-degrees"
   ),
   check.names = FALSE
 )
@@ -923,6 +1338,7 @@ kbl(ops, format = "html", align = "lc") %>%
 - Matrix arithmetic (addition, complement, Hadamard) and the **dyad census**.
 - **Conformability** and the row-by-column mechanics of multiplication.
 - The dynamic readings: **common neighbors, walks, triangles**.
+- The directed pair: common **out**-neighbors ($\mathbf{D}\mathbf{D}^T$) vs. common **in**-neighbors ($\mathbf{D}^T\mathbf{D}$).
 :::
 
 ::: {.column width="50%"}

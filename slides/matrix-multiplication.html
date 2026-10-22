@@ -1334,6 +1334,1182 @@
 <li><strong>Network clustering</strong> emerges from diagonal sums: nodes with many common neighbors form dense cliques.</li>
 </ul>
 </section>
+<section id="the-directed-case-out-neighbors-vs.-in-neighbors" class="slide level2">
+<h2>The Directed Case: Out-Neighbors vs.&nbsp;In-Neighbors</h2>
+<ul>
+<li>Our running example <span class="math inline">\(\mathbf{P}\)</span> is symmetric, so <span class="math inline">\(\mathbf{P} \times \mathbf{P}^T\)</span> and <span class="math inline">\(\mathbf{P}^T \times \mathbf{P}\)</span> are the <em>same</em> computation.</li>
+<li>For a <strong>directed</strong> graph, rows and columns carry different information:
+<ul>
+<li><strong>Row <span class="math inline">\(i\)</span> of <span class="math inline">\(\mathbf{D}\)</span></strong> = node <span class="math inline">\(i\)</span>’s <strong>out-ties</strong> (whom <span class="math inline">\(i\)</span> chose)</li>
+<li><strong>Column <span class="math inline">\(j\)</span> of <span class="math inline">\(\mathbf{D}\)</span></strong> = who chose <span class="math inline">\(j\)</span> — <span class="math inline">\(j\)</span>’s <strong>in-ties</strong></li>
+</ul></li>
+<li>So the two multiplication orders now answer <strong>different questions</strong>:</li>
+</ul>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(\mathbf{D} \times \mathbf{D}^T\)</span>: multiplies <strong>rows of <span class="math inline">\(\mathbf{D}\)</span></strong> by <strong>rows of <span class="math inline">\(\mathbf{D}\)</span></strong> (via <span class="math inline">\(\mathbf{D}^T\)</span>) → counts nodes <strong>both <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> chose</strong>: their <strong>common out-neighbors</strong></li>
+<li><span class="math inline">\(\mathbf{D}^T \times \mathbf{D}\)</span>: multiplies <strong>columns of <span class="math inline">\(\mathbf{D}\)</span></strong> by <strong>columns of <span class="math inline">\(\mathbf{D}\)</span></strong> (via <span class="math inline">\(\mathbf{D}^T\)</span>) → counts nodes that <strong>chose both <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span></strong>: their <strong>common in-neighbors</strong></li>
+<li>Both products are <strong>symmetric</strong> even though <span class="math inline">\(\mathbf{D}\)</span> is not — overlap is mutual</li>
+<li><strong>Diagonals differ</strong>: <span class="math inline">\(\mathbf{D}\mathbf{D}^T\)</span> recovers the <strong>out-degrees</strong>; <span class="math inline">\(\mathbf{D}^T\mathbf{D}\)</span> recovers the <strong>in-degrees</strong></li>
+</ul>
+</div>
+</section>
+<section id="directed-running-example-sends-a-party-invitation-to" class="slide level2">
+<h2>Directed Running Example: “Sends a Party Invitation To”</h2>
+<div class="columns">
+<div class="column" style="width:30%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-19-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:35%;">
+<p><span class="math inline">\(\mathbf{D}\)</span> (the directed adjacency matrix)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:35%;">
+<p><span class="math inline">\(\mathbf{D}^T\)</span> (rows of <span class="math inline">\(\mathbf{D}^T\)</span> = columns of <span class="math inline">\(\mathbf{D}\)</span>)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></div>
+<div class="fragment">
+<ul>
+<li>New running example: five people (A–E); a tie <span class="math inline">\(i \rightarrow j\)</span> means <strong><span class="math inline">\(i\)</span> invited <span class="math inline">\(j\)</span></strong></li>
+<li><span class="math inline">\(\mathbf{D}\)</span> is <strong>not symmetric</strong> — choosing is not the same as being chosen — so <span class="math inline">\(\mathbf{D}^T\)</span> is a genuinely <strong>different matrix</strong></li>
+<li>Read <span class="math inline">\(\mathbf{D}\)</span> by <strong>rows</strong> (out-ties: A invites B, C, D) and by <strong>columns</strong> (in-ties: C is invited by A, B, E)</li>
+</ul>
+</div>
+</section>
+<section id="common-out-neighbors-mathbfd-times-mathbfdt-tracing-the-diagonal-cell-mathbfdmathbfdt_texta-a" class="slide level2">
+<h2>Common Out-Neighbors (<span class="math inline">\(\mathbf{D} \times \mathbf{D}^T\)</span>): Tracing the Diagonal Cell <span class="math inline">\((\mathbf{D}\mathbf{D}^T)_{\text{A, A}}\)</span></h2>
+<div class="columns">
+<div class="column" style="width:26%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-22-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Row A of <span class="math inline">\(\mathbf{D}\)</span></strong> (A’s out-ties)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">A</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Column A of <span class="math inline">\(\mathbf{D}^T\)</span></strong> (= Row A of <span class="math inline">\(\mathbf{D}\)</span>)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></div>
+<div class="math-dense" style="font-size: 100%;">
+<p><span class="math display">\[c_{\text{A, A}} = (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) = \mathbf{3}\]</span></p>
+</div>
+<ul>
+<li>A pairs with <strong>itself</strong>: every out-tie matches itself, so <span class="math inline">\(c_{\text{A, A}} = 3\)</span> = A’s <strong>out-degree</strong></li>
+</ul>
+</section>
+<section id="common-out-neighbors-mathbfd-times-mathbfdt-tracing-cell-mathbfdmathbfdt_texta-b" class="slide level2">
+<h2>Common Out-Neighbors (<span class="math inline">\(\mathbf{D} \times \mathbf{D}^T\)</span>): Tracing Cell <span class="math inline">\((\mathbf{D}\mathbf{D}^T)_{\text{A, B}}\)</span></h2>
+<div class="columns">
+<div class="column" style="width:26%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-25-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Row A of <span class="math inline">\(\mathbf{D}\)</span></strong> (A’s out-ties)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">A</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Column B of <span class="math inline">\(\mathbf{D}^T\)</span></strong> (= Row B of <span class="math inline">\(\mathbf{D}\)</span>)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></div>
+<div class="math-dense" style="font-size: 100%;">
+<p><span class="math display">\[c_{\text{A, B}} = (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) = \mathbf{2}\]</span></p>
+</div>
+<ul>
+<li>Red <strong>A</strong> and blue <strong>B</strong> invited the same two people: <strong>C and D</strong> — 2 common out-neighbors</li>
+</ul>
+</section>
+<section id="common-out-neighbors-mathbfd-times-mathbfdt-tracing-cell-mathbfdmathbfdt_textc-d" class="slide level2">
+<h2>Common Out-Neighbors (<span class="math inline">\(\mathbf{D} \times \mathbf{D}^T\)</span>): Tracing Cell <span class="math inline">\((\mathbf{D}\mathbf{D}^T)_{\text{C, D}}\)</span></h2>
+<div class="columns">
+<div class="column" style="width:26%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-28-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Row C of <span class="math inline">\(\mathbf{D}\)</span></strong> (C’s out-ties)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">C</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Column D of <span class="math inline">\(\mathbf{D}^T\)</span></strong> (= Row D of <span class="math inline">\(\mathbf{D}\)</span>)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></div>
+<div class="math-dense" style="font-size: 100%;">
+<p><span class="math display">\[c_{\text{C, D}} = (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) = \mathbf{0}\]</span></p>
+</div>
+<ul>
+<li>Red <strong>C</strong> invites only <strong>D</strong>; blue <strong>D</strong> invites only <strong>E</strong> — nothing in green: <strong>0 common out-neighbors</strong></li>
+</ul>
+</section>
+<section id="the-completed-mathbfd-times-mathbfdt-matrix" class="slide level2">
+<h2>The Completed <span class="math inline">\(\mathbf{D} \times \mathbf{D}^T\)</span> Matrix</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 20px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">3</span></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">2</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">1</span></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">1</span></td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">2</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-32-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Diagonal (shaded)</strong>: the <strong>out-degrees</strong></li>
+<li><strong>Off-diagonal</strong>: how many people two nodes both invited</li>
+<li><strong>Symmetric</strong> — even though <span class="math inline">\(\mathbf{D}\)</span> itself is not</li>
+</ul>
+</div></div>
+</section>
+<section id="common-in-neighbors-mathbfdt-times-mathbfd-tracing-the-diagonal-cell-mathbfdtmathbfd_textc-c" class="slide level2">
+<h2>Common In-Neighbors (<span class="math inline">\(\mathbf{D}^T \times \mathbf{D}\)</span>): Tracing the Diagonal Cell <span class="math inline">\((\mathbf{D}^T\mathbf{D})_{\text{C, C}}\)</span></h2>
+<div class="columns">
+<div class="column" style="width:26%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-33-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Row C of <span class="math inline">\(\mathbf{D}^T\)</span></strong> (who invited C)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">C</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Column C of <span class="math inline">\(\mathbf{D}\)</span></strong> (who invited C)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></div>
+<div class="math-dense" style="font-size: 100%;">
+<p><span class="math display">\[c_{\text{C, C}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) = \mathbf{3}\]</span></p>
+</div>
+<ul>
+<li>C pairs with <strong>itself</strong>: every in-tie matches itself, so <span class="math inline">\(c_{\text{C, C}} = 3\)</span> = C’s <strong>in-degree</strong> (A, B, and E invited C)</li>
+</ul>
+</section>
+<section id="common-in-neighbors-mathbfdt-times-mathbfd-tracing-cell-mathbfdtmathbfd_textc-d" class="slide level2">
+<h2>Common In-Neighbors (<span class="math inline">\(\mathbf{D}^T \times \mathbf{D}\)</span>): Tracing Cell <span class="math inline">\((\mathbf{D}^T\mathbf{D})_{\text{C, D}}\)</span></h2>
+<div class="columns">
+<div class="column" style="width:26%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-36-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Row C of <span class="math inline">\(\mathbf{D}^T\)</span></strong> (who invited C)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">C</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Column D of <span class="math inline">\(\mathbf{D}\)</span></strong> (who invited D)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></div>
+<div class="math-dense" style="font-size: 100%;">
+<p><span class="math display">\[c_{\text{C, D}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{0}) = \mathbf{2}\]</span></p>
+</div>
+<ul>
+<li>Rows of <span class="math inline">\(\mathbf{D}^T\)</span> are <span class="math inline">\(\mathbf{D}\)</span>’s <strong>columns</strong>: <strong>in-tie lists</strong>. Red <strong>C</strong> and blue <strong>D</strong> were invited by the same two people: <strong>A and B</strong> — 2 common in-neighbors</li>
+</ul>
+</section>
+<section id="common-in-neighbors-mathbfdt-times-mathbfd-tracing-cell-mathbfdtmathbfd_texta-b" class="slide level2">
+<h2>Common In-Neighbors (<span class="math inline">\(\mathbf{D}^T \times \mathbf{D}\)</span>): Tracing Cell <span class="math inline">\((\mathbf{D}^T\mathbf{D})_{\text{A, B}}\)</span></h2>
+<div class="columns">
+<div class="column" style="width:26%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-39-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Row A of <span class="math inline">\(\mathbf{D}^T\)</span></strong> (who invited A)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">A</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(245, 183, 177, 1) !important;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:37%;">
+<p><strong>Column B of <span class="math inline">\(\mathbf{D}\)</span></strong> (who invited B)</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 18px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center; font-weight: bold; background-color: rgba(174, 214, 241, 1) !important;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></div>
+<div class="math-dense" style="font-size: 100%;">
+<p><span class="math display">\[c_{\text{A, B}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{0}) = \mathbf{0}\]</span></p>
+</div>
+<ul>
+<li>Only <strong>E</strong> invites A and only <strong>A</strong> invites B — nobody invites both: <strong>0 common in-neighbors</strong></li>
+</ul>
+</section>
+<section id="the-completed-mathbfdt-times-mathbfd-matrix" class="slide level2">
+<h2>The Completed <span class="math inline">\(\mathbf{D}^T \times \mathbf{D}\)</span> Matrix</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-condensed caption-top" style="font-size: 20px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">A</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">B</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">C</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">D</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">E</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">A</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">1</span></td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">B</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">1</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">C</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">3</span></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">3</span></td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">E</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;"><span style="font-weight: bold;    border-radius: 4px; padding-right: 4px; padding-left: 4px; background-color: rgba(252, 243, 207, 1) !important;">1</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-43-1.png" width="316"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Diagonal (shaded)</strong>: the <strong>in-degrees</strong></li>
+<li><strong>Off-diagonal</strong>: how many senders two nodes share</li>
+<li><strong>The payoff</strong>: A and B share <strong>2 out-neighbors</strong> but <strong>0 in-neighbors</strong>; C and D are the mirror image</li>
+</ul>
+</div></div>
+</section>
+<section id="application-reading-the-two-directed-products" class="slide level2">
+<h2>Application: Reading the Two Directed Products</h2>
+<p><strong>Why the difference matters:</strong></p>
+<ul>
+<li><span class="math inline">\(\mathbf{D} \times \mathbf{D}^T\)</span> (<strong>common out-neighbors</strong>): two nodes with the same <strong>taste</strong> — they choose the same people. In citation networks: <strong>bibliographic coupling</strong> (two papers citing the same references).</li>
+<li><span class="math inline">\(\mathbf{D}^T \times \mathbf{D}\)</span> (<strong>common in-neighbors</strong>): two nodes chosen by the same people — <strong>shared appeal</strong>. In citation networks: <strong>co-citation</strong> (two papers cited by the same papers).</li>
+<li><strong>A and B</strong> invite the same crowd but nobody invites both of them: high out-overlap, zero in-overlap.</li>
+<li><strong>C and D</strong> are invited by the same crowd but invite nobody in common: the mirror image.</li>
+</ul>
+</section>
 <section id="matrix-powers-mathbfpn-walks-in-networks" class="slide level2">
 <h2>Matrix Powers (<span class="math inline">\(\mathbf{P}^n\)</span>) &amp; Walks in Networks</h2>
 <ul>
@@ -1378,7 +2554,7 @@
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-19-1.png" width="316"></p>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-44-1.png" width="316"></p>
 </figure>
 </div>
 </div>
@@ -1538,7 +2714,7 @@
 <p><span class="math display">\[p^2_{\text{A, C}} = (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{0}) + (\color{red}{0} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{1}) = \mathbf{2}\]</span></p>
 </div>
 <ul>
-<li>In the graph: red <strong>A</strong>, blue <strong>C</strong>, green <strong>shared friends</strong>. The two walks are <span class="math inline">\(A \rightarrow \mathbf{B} \rightarrow C\)</span> and <span class="math inline">\(A \rightarrow \mathbf{E} \rightarrow C\)</span> — length-2 walks <strong>are</strong> common neighbors!</li>
+<li>In the graph: red <strong>A</strong>, blue <strong>C</strong>, green <strong>shared friends</strong>. The two walks are <span class="math inline">\(A \rightarrow \mathbf{B} \rightarrow C\)</span> and <span class="math inline">\(A \rightarrow \mathbf{E} \rightarrow C\)</span> — exactly the <strong>2 common friends</strong> we found for <span class="math inline">\(c_{\text{A, C}}\)</span> earlier!</li>
 </ul>
 </section>
 <section id="walks-of-length-2-mathbfp2-tracing-diagonal-cell-p2_textc-c" class="slide level2">
@@ -1549,7 +2725,7 @@
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-22-1.png" width="316"></p>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-47-1.png" width="316"></p>
 </figure>
 </div>
 </div>
@@ -1709,7 +2885,7 @@
 <p><span class="math display">\[p^2_{\text{C, C}} = (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{0} \times \color{blue}{0}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) + (\color{red}{1} \times \color{blue}{1}) = \mathbf{5}\]</span></p>
 </div>
 <ul>
-<li>Walks from C back to C are <strong>round trips</strong> to each friend (<span class="math inline">\(C \rightarrow A \rightarrow C\)</span>, etc.) — the diagonal of <span class="math inline">\(\mathbf{P}^2\)</span> recovers the <strong>degrees</strong>!</li>
+<li>Walks from C back to C are <strong>round trips</strong> to each friend (<span class="math inline">\(C \rightarrow A \rightarrow C\)</span>, etc.) — the diagonal of <span class="math inline">\(\mathbf{P}^2\)</span> recovers the <strong>degrees</strong>, same as <span class="math inline">\(\mathbf{P} \times \mathbf{P}^T\)</span>!</li>
 </ul>
 </section>
 <section id="application-walks-and-reachability" class="slide level2">
@@ -1728,7 +2904,7 @@
 </ul>
 <p><span class="math display">\[\mathbf{P}^3 = \mathbf{P}^2 \times \mathbf{P}\]</span></p>
 <ul>
-<li><strong>Diagonal cells (<span class="math inline">\(p^3_{ii}\)</span>)</strong>: Count length-3 cycles (triangles and longer cycles) starting and ending at node <span class="math inline">\(i\)</span>.</li>
+<li><strong>Diagonal cells (<span class="math inline">\(p^3_{ii}\)</span>)</strong>: Count length-3 cycles — <strong>triangles</strong> — starting and ending at node <span class="math inline">\(i\)</span>.</li>
 <li>Since each triangle can be walked in two directions (clockwise &amp; counterclockwise), the number of triangles node <span class="math inline">\(i\)</span> belongs to is: <span class="math display">\[\text{Triangles}(i) = \frac{p^3_{ii}}{2}\]</span></li>
 </ul>
 </section>
@@ -1740,7 +2916,7 @@
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-25-1.png" width="316"></p>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-50-1.png" width="316"></p>
 </figure>
 </div>
 </div>
@@ -1911,7 +3087,7 @@
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-28-1.png" width="316"></p>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-53-1.png" width="316"></p>
 </figure>
 </div>
 </div>
@@ -2082,7 +3258,7 @@
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-31-1.png" width="316"></p>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-56-1.png" width="316"></p>
 </figure>
 </div>
 </div>
@@ -2262,7 +3438,7 @@
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-34-1.png" width="326"></p>
+<p><img data-src="matrix-multiplication_files/figure-revealjs/unnamed-chunk-59-1.png" width="326"></p>
 </figure>
 </div>
 </div>
@@ -2302,6 +3478,10 @@
 <td style="text-align: left; font-weight: bold;">P³ = P² × P</td>
 <td style="text-align: center;">Walks of length 3; diagonal ÷ 2 = triangles</td>
 </tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">D × Dᵀ, Dᵀ × D (directed)</td>
+<td style="text-align: center;">Common out-neighbors vs. common in-neighbors; diagonals = out- / in-degrees</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -2317,6 +3497,7 @@
 <li>Matrix arithmetic (addition, complement, Hadamard) and the <strong>dyad census</strong>.</li>
 <li><strong>Conformability</strong> and the row-by-column mechanics of multiplication.</li>
 <li>The dynamic readings: <strong>common neighbors, walks, triangles</strong>.</li>
+<li>The directed pair: common <strong>out</strong>-neighbors (<span class="math inline">\(\mathbf{D}\mathbf{D}^T\)</span>) vs.&nbsp;common <strong>in</strong>-neighbors (<span class="math inline">\(\mathbf{D}^T\mathbf{D}\)</span>).</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <p><strong>Where it matters</strong></p>
