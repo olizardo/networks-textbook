@@ -83,6 +83,20 @@ plot_bipartite <- function(label_size = 5.5, active_nodes = character(0)) {
     coord_cartesian(xlim = c(-1, 3.6), clip = "off") +
     theme_graph()
 }
+
+# Affiliation matrix as a kable: rows in `filled` show their 0/1 values,
+# rows not yet built show "?"; `active` row highlighted light red.
+aff_kbl <- function(filled = character(0), active = character(0), font = 18) {
+  M <- matrix("?", nrow(A), ncol(A), dimnames = dimnames(A))
+  fi <- match(filled, rownames(A))
+  if (any(!is.na(fi))) M[fi, ] <- A[fi, ]
+  ai <- match(active, rownames(A))
+  out <- kbl(M, format = "html", align = "c") %>%
+    column_spec(1, bold = TRUE)
+  if (length(ai) && !is.na(ai)) out <- row_spec(out, ai, background = "#F5B7B1")
+  out %>%
+    kable_styling(bootstrap_options = c("striped", "condensed"), font_size = font)
+}
 ```
 
 # Part 1: What Are Affiliation Networks?
@@ -423,7 +437,23 @@ plot_bipartite(label_size = 4.2)
 ## Building the Affiliation Matrix
 
 ::: {.columns}
-::: {.column width="55%"}
+::: {.column width="30%"}
+```{r}
+#| echo: false
+#| fig-height: 4.0
+#| fig-width: 3.4
+plot_bipartite(label_size = 4.6)
+```
+:::
+
+::: {.column width="32%"}
+```{r}
+#| echo: false
+aff_kbl()
+```
+:::
+
+::: {.column width="38%"}
 <div style="font-size: 85%;">
 
 - The procedure is the same as for the adjacency matrix of a symmetric graph
@@ -431,25 +461,108 @@ plot_bipartite(label_size = 4.2)
   - Rows: $R = |V_1|$ — the **people**
   - Columns: $C = |V_2|$ — the **groups**
 - Cells: $a_{ij} = 1$ if person $i$ is affiliated with group $j$; otherwise $a_{ij} = 0$
-
-. . .
-
-**Worked example — Gabriela's row** (add across the columns):
-
-$$\mathbf{A}_{\text{Gabriela},\cdot} = \color{red}{1}_{SSB} + 0_{Cheese} + \color{red}{1}_{NF} + 0_{Magic} + \color{red}{1}_{Fashion}$$
-
-- Gabriela belongs to the Super Smash Bros., Nerdfighters, and Fashion clubs
+- We fill it in **one row at a time**, reading each person's memberships straight off the graph
 
 </div>
 :::
+:::
 
-::: {.column width="45%"}
+---
+
+## Building the Matrix: Gabriela's Row
+
+::: {.columns}
+::: {.column width="30%"}
 ```{r}
 #| echo: false
-#| fig-height: 4.7
-#| fig-width: 4.7
+#| fig-height: 4.0
+#| fig-width: 3.4
 plot_bipartite(label_size = 4.6, active_nodes = "Gabriela")
 ```
+:::
+
+::: {.column width="32%"}
+```{r}
+#| echo: false
+aff_kbl(filled = "Gabriela", active = "Gabriela")
+```
+:::
+
+::: {.column width="38%"}
+<div style="font-size: 85%;">
+
+- Gabriela's ties (red) point to the **Super Smash Bros.**, **Nerdfighters**, and **Fashion** clubs
+- So her row gets a **1** in those three columns, and a **0** everywhere else
+- The zeros are just as informative as the ones: Gabriela does *not* belong to Cheese or Magic
+
+</div>
+:::
+:::
+
+$$\mathbf{A}_{\text{Gabriela},\cdot} = \color{red}{1}_{SSB} + 0_{Cheese} + \color{red}{1}_{NF} + 0_{Magic} + \color{red}{1}_{Fashion}$$
+
+---
+
+## Building the Matrix: Brandon's Row
+
+::: {.columns}
+::: {.column width="30%"}
+```{r}
+#| echo: false
+#| fig-height: 4.0
+#| fig-width: 3.4
+plot_bipartite(label_size = 4.6, active_nodes = "Brandon")
+```
+:::
+
+::: {.column width="32%"}
+```{r}
+#| echo: false
+aff_kbl(filled = c("Gabriela", "Brandon"), active = "Brandon")
+```
+:::
+
+::: {.column width="38%"}
+<div style="font-size: 85%;">
+
+- Brandon belongs to exactly **one** club: the **Cheese Club**
+- His row therefore contains a **single 1** and four 0s
+- Rows can have very different shapes — Gabriela has three memberships, Brandon just one
+- Rows already built (Gabriela, in red) stay in place as we work down the matrix
+
+</div>
+:::
+:::
+
+---
+
+## Building the Matrix: Parker's Row
+
+::: {.columns}
+::: {.column width="30%"}
+```{r}
+#| echo: false
+#| fig-height: 4.0
+#| fig-width: 3.4
+plot_bipartite(label_size = 4.6, active_nodes = "Parker")
+```
+:::
+
+::: {.column width="32%"}
+```{r}
+#| echo: false
+aff_kbl(filled = c("Gabriela", "Brandon", "Parker"), active = "Parker")
+```
+:::
+
+::: {.column width="38%"}
+<div style="font-size: 85%;">
+
+- Parker joins the **Cheese** and **Magic** clubs: a 1 in each of those columns
+- So far every row has a different pattern: **3**, **1**, and **2** memberships
+- The same read-the-edges procedure fills every remaining row
+
+</div>
 :::
 :::
 
@@ -463,9 +576,10 @@ plot_bipartite(label_size = 4.6, active_nodes = "Gabriela")
 #| echo: false
 kbl(A, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 15)
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 18)
 ```
 
+- Marie, Rahul, and Minjoo fill in the same way: read the ties, set the matching cells to 1
 - $\mathbf{A}$ is the **affiliation matrix** corresponding to the bipartite graph on the right
 - Because the number of people does not have to equal the number of groups, affiliation matrices are usually **rectangular**, not square like adjacency matrices
 :::
@@ -496,7 +610,7 @@ A_rs <- cbind(A, Total = rowSums(A))
 kbl(A_rs, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
   row_spec(1, background = "#F5B7B1") %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 15)
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 18)
 ```
 
 - Gabriela's **Total** (red row) is **3**; Brandon's is just **1** (the Cheese Club) — the **degree centrality** of the people mode
@@ -531,7 +645,7 @@ kbl(A_cs, format = "html", align = "c") %>%
   column_spec(1, bold = TRUE) %>%
   row_spec(7, bold = TRUE) %>%
   column_spec(2, background = "#F5B7B1") %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 15)
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 18)
 ```
 
 - The **Total** row gives each group's **popularity**: the **Cheese Club** (red column) is the most popular (4 members)
@@ -837,49 +951,64 @@ N(\text{Gabriela}) \cap N(\text{Marie}) &= \{\text{Super Smash Bros.,}\\
 
 ## From Co-Membership Matrix Back to a Graph
 
-- $O^P$ looks like the adjacency matrix of a **weighted graph**: cells beyond 0/1, symmetric
-
-<center>
+::: {.columns}
+::: {.column width="55%"}
 ```{r}
 #| echo: false
-#| fig-height: 4.2
-#| fig-width: 4.2
+#| fig-height: 5.0
+#| fig-width: 6.2
 gr_p <- graph_from_adjacency_matrix(OP, mode = "undirected", weighted = TRUE, diag = FALSE)
 ggraph(gr_p, layout = "circle") +
   geom_edge_link(aes(width = weight), color = "steelblue") +
-  scale_edge_width(range = c(0.4, 2.5)) +
-  geom_node_point(size = 18, fill = "tan2", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  scale_edge_width(range = c(0.4, 2.5), guide = "none") +
+  geom_node_point(size = 11, fill = "tan2", color = "#2c3e50", shape = 21, stroke = 1.5) +
   geom_node_text(aes(label = name), size = 6, fontface = "bold", repel = TRUE) +
   theme_graph() +
-  coord_cartesian(xlim = c(-1.4, 1.4), ylim = c(-1.4, 1.4), clip = "off")
+  coord_cartesian(xlim = c(-1.55, 1.55), ylim = c(-1.25, 1.25), clip = "off")
 ```
-</center>
+:::
 
+::: {.column width="45%"}
+<div style="font-size: 85%;">
+
+- $O^P$ looks like the adjacency matrix of a **weighted graph**: cells beyond 0/1, symmetric
 - The **one-mode (person) projection**: ties weighted by the number of **shared memberships** — a proxy for **tie strength** when we only have affiliation data
+
+</div>
+:::
+:::
 
 ---
 
 ## From Group Overlap Matrix Back to a Graph
 
-<center>
+::: {.columns}
+::: {.column width="55%"}
 ```{r}
 #| echo: false
-#| fig-height: 4.0
-#| fig-width: 4.0
+#| fig-height: 5.0
+#| fig-width: 6.2
 gr_g <- graph_from_adjacency_matrix(OG, mode = "undirected", weighted = TRUE, diag = FALSE)
 ggraph(gr_g, layout = "circle") +
   geom_edge_link(aes(width = weight), color = "steelblue") +
-  scale_edge_width(range = c(0.4, 2.5)) +
-  geom_node_point(size = 18, fill = "steelblue", color = "#2c3e50", shape = 22, stroke = 1.5) +
+  scale_edge_width(range = c(0.4, 2.5), guide = "none") +
+  geom_node_point(size = 11, fill = "steelblue", color = "#2c3e50", shape = 22, stroke = 1.5) +
   geom_node_text(aes(label = name), size = 5.5, fontface = "bold", repel = TRUE) +
   theme_graph() +
-  coord_cartesian(xlim = c(-1.4, 1.4), ylim = c(-1.4, 1.4), clip = "off")
+  coord_cartesian(xlim = c(-1.55, 1.55), ylim = c(-1.25, 1.25), clip = "off")
 ```
-</center>
+:::
+
+::: {.column width="45%"}
+<div style="font-size: 85%;">
 
 - The **one-mode (group) projection**: ties weighted by the number of **shared members**
 - Super Smash Bros. and Nerdfighters are tightly connected; the Cheese Club is peripheral in the group-to-group network
 - Every two-mode network has **two** one-mode projections, one per node set
+
+</div>
+:::
+:::
 
 ---
 
@@ -947,10 +1076,34 @@ kbl(OP_sci, format = "html", align = "c") %>%
 ## Application 1: Predicting Future Collaboration
 
 ::: {.columns}
-::: {.column width="40%"}
+::: {.column width="30%"}
 ```{r}
 #| echo: false
-OP_sci <- A_sci %*% t(A_sci)
+#| fig-height: 3.4
+#| fig-width: 3.3
+gr_sci <- graph_from_adjacency_matrix(OP_sci, mode = "undirected", weighted = TRUE, diag = FALSE)
+cand <- c("S1", "S2")
+shared <- c("S4", "S6")
+el_sci <- igraph::as_edgelist(gr_sci)
+hl_sci <- (el_sci[, 1] %in% cand & el_sci[, 2] %in% shared) |
+  (el_sci[, 2] %in% cand & el_sci[, 1] %in% shared)
+ggraph(gr_sci, layout = "circle") +
+  geom_edge_link(aes(width = weight, color = hl_sci)) +
+  scale_edge_width(range = c(0.4, 1.8), guide = "none") +
+  scale_edge_color_manual(values = c(`FALSE` = "grey75", `TRUE` = "firebrick2"), guide = "none") +
+  geom_node_point(aes(fill = ifelse(name %in% cand, "red2",
+                                    ifelse(name %in% shared, "green4", "tan2"))),
+                  size = 9, color = "#2c3e50", shape = 21, stroke = 1) +
+  scale_fill_identity(guide = "none") +
+  geom_node_text(aes(label = name), size = 4.5, fontface = "bold", repel = TRUE) +
+  theme_graph() +
+  coord_cartesian(xlim = c(-1.35, 1.35), ylim = c(-1.35, 1.35), clip = "off")
+```
+:::
+
+::: {.column width="33%"}
+```{r}
+#| echo: false
 m_sci <- matrix(as.character(OP_sci), 7, 7, dimnames = list(sci, sci))
 m_sci[cbind(c(4, 6), c(6, 4))] <- cell_spec(m_sci[cbind(c(4, 6), c(6, 4))], format = "html", background = "#F5B7B1")
 m_sci[cbind(1:7, 1:7)] <- cell_spec(m_sci[cbind(1:7, 1:7)], format = "html", background = "#AED6F1")
@@ -967,22 +1120,21 @@ kbl(m_sci, format = "html", align = "c", escape = FALSE) %>%
 </div>
 :::
 
-::: {.column width="60%"}
-<div style="font-size: 85%;">
+::: {.column width="37%"}
+<div style="font-size: 80%;">
 
-- The diagonal records productivity (papers written): S6 has written **5** papers, S1 and S4 **3** each
-
-. . .
-
-- High co-membership suggests people who **know each other and work well together**:
-  - S4 and S6 have written **2** papers together
-  - S6 has co-authored with **everyone**
+- The diagonal records **productivity**: S6 has written **5** papers, S1 and S4 **3** each
 
 . . .
 
-- Maybe we can **predict which scientists will work together in the future**!
-  - Pairs with high past co-membership (e.g., S4–S6, S2–S6) are good candidates for future co-authorship
-  - This is the basis of "suggest a collaborator" features in scholarly databases
+- High co-membership = people who **know each other and work well together** — e.g., S4 and S6 (2 joint papers); S6 has co-authored with **everyone**
+
+. . .
+
+- So we can **predict future collaboration**!
+  - **Repeat collaborators** like S4–S6 tend to team up again
+  - **First ties**: S1 and S2 have never co-authored, but the **red paths** show both working with S4 and S6
+  - Mechanism: **triadic closure** — the shared collaborator who has worked with both brings them onto the next team
 
 </div>
 :::
@@ -1032,9 +1184,54 @@ kbl(OG_mov, format = "html", align = "c") %>%
 
 . . .
 
-- Product networks are at the basis of **recommendation systems**: a person who watched Movie 2 is connected (via overlap) to watchers of Movies 1 and 3, and to no one who watched Movies 4/5 — "people who watched $M_2$ also watched..." is just a row of the group overlap matrix!
+- Product networks like this are the basis of **recommendation systems** — let's see the process on a graph
 
 ---
+
+## Application 2: Recommending Products
+
+::: {.columns}
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-height: 4.8
+#| fig-width: 5.6
+gr_mov <- graph_from_adjacency_matrix(OG_mov, mode = "undirected", weighted = TRUE, diag = FALSE)
+watched <- "M2"
+reco <- c("M1", "M3")
+el_mov <- igraph::as_edgelist(gr_mov)
+hl_mov <- el_mov[, 1] %in% watched | el_mov[, 2] %in% watched
+ggraph(gr_mov, layout = "circle") +
+  geom_edge_link(aes(width = weight, color = hl_mov)) +
+  scale_edge_width(range = c(0.6, 2), guide = "none") +
+  scale_edge_color_manual(values = c(`FALSE` = "grey75", `TRUE` = "firebrick2"), guide = "none") +
+  geom_node_point(aes(fill = ifelse(name %in% watched, "red2",
+                                    ifelse(name %in% reco, "green4", "tan2"))),
+                  size = 11, color = "#2c3e50", shape = 21, stroke = 1.2) +
+  scale_fill_identity(guide = "none") +
+  geom_node_text(aes(label = name), size = 5, fontface = "bold", repel = TRUE) +
+  theme_graph() +
+  coord_cartesian(xlim = c(-1.5, 1.5), ylim = c(-1.3, 1.3), clip = "off")
+```
+:::
+
+::: {.column width="45%"}
+<div style="font-size: 85%;">
+
+- **Red** = the movie a customer just watched ($M_2$); **green** = the recommendations
+- $M_2$'s watchers: P2 (also watched $M_1$), P7, and P8 (also watched $M_3$) — the **red ties**
+
+. . .
+
+- Nobody who watched $M_2$ watched $M_4$ or $M_5$: no shared watchers, no tie, no recommendation
+
+. . .
+
+- So the system recommends **$M_1$ and $M_3$**: "people who watched $M_2$ also watched..." is just **reading a row of the group overlap matrix** — no ratings or genre labels, only **co-viewing patterns**
+
+</div>
+:::
+:::
 
 ## Glossary of Key Terms
 
