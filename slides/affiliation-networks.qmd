@@ -63,16 +63,22 @@ gr_bi <- gr_bi |>
 
 # Reusable bipartite-graph plot so the running example can sit next to
 # explanatory content on every slide (as in the PPTX deck)
-plot_bipartite <- function(label_size = 5.5) {
+plot_bipartite <- function(label_size = 5.5, active_nodes = character(0)) {
+  el <- igraph::as_edgelist(gr_bi)
+  hl <- if (length(active_nodes)) el[, 1] %in% active_nodes | el[, 2] %in% active_nodes else logical(nrow(el))
   ggraph(gr_bi, layout = "manual", x = x, y = y) +
-    geom_edge_link(color = "grey60", edge_width = 1) +
-    geom_node_label(aes(label = name, filter = mode == "person"),
-                    fill = "tan2", color = "white", size = label_size,
+    geom_edge_link(aes(color = hl), edge_width = 1) +
+    scale_edge_color_manual(values = c(`FALSE` = "grey60", `TRUE` = "firebrick2"), guide = "none") +
+    geom_node_label(aes(label = name, filter = mode == "person",
+                        fill = ifelse(name %in% active_nodes, "red2", "tan2")),
+                    color = "white", size = label_size,
                     fontface = "bold", label.size = 0,
                     label.padding = unit(0.2, "lines")) +
-    geom_node_label(aes(label = name, filter = mode == "group"),
-                    fill = "steelblue", color = "white", size = label_size,
+    geom_node_label(aes(label = name, filter = mode == "group",
+                        fill = ifelse(name %in% active_nodes, "red2", "steelblue")),
+                    color = "white", size = label_size,
                     label.size = 0, label.padding = unit(0.2, "lines")) +
+    scale_fill_identity(guide = "none") +
     coord_cartesian(xlim = c(-1, 3.6), clip = "off") +
     theme_graph()
 }
@@ -252,7 +258,7 @@ $$N(\text{Gabriela}) = \{\text{Super Smash Bros., Nerdfighters, Fashion}\}$$
 #| echo: false
 #| fig-height: 4.7
 #| fig-width: 4.7
-plot_bipartite(label_size = 4.6)
+plot_bipartite(label_size = 4.6, active_nodes = c("Minjoo", "Gabriela"))
 ```
 :::
 :::
@@ -285,7 +291,7 @@ $$N(\text{Fashion}) = \{\text{Gabriela, Rahul, Minjoo}\}$$
 #| echo: false
 #| fig-height: 4.7
 #| fig-width: 4.7
-plot_bipartite(label_size = 4.6)
+plot_bipartite(label_size = 4.6, active_nodes = c("Cheese", "Fashion"))
 ```
 :::
 :::
@@ -406,7 +412,7 @@ $$\mathbf{A}_{\text{Gabriela},\cdot} = \color{red}{1}_{SSB} + 0_{Cheese} + \colo
 #| echo: false
 #| fig-height: 4.7
 #| fig-width: 4.7
-plot_bipartite(label_size = 4.6)
+plot_bipartite(label_size = 4.6, active_nodes = "Gabriela")
 ```
 :::
 :::
@@ -444,19 +450,22 @@ plot_bipartite(label_size = 4.6)
 
 ::: {.columns}
 ::: {.column width="50%"}
-- The **row sums** of the affiliation matrix give us the number of **memberships** each person has!
+<div style="font-size: 85%;">
 
-$$C_P^{DEG} = \sum_j a_{ij}$$
+- The **row sums** of the affiliation matrix give the number of **memberships** each person has: $C_P^{DEG} = \sum_j a_{ij}$
 
 ```{r}
 #| echo: false
-rs <- rowSums(A)
-kbl(t(rs), format = "html", align = "c") %>%
+A_rs <- cbind(A, Total = rowSums(A))
+kbl(A_rs, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(1, background = "#F5B7B1") %>%
   kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 15)
 ```
 
-- Gabriela belongs to **three clubs**; Brandon belongs to just **one** (the Cheese Club)
-- This is the **degree centrality** of the people mode
+- Gabriela's **Total** (red row) is **3**; Brandon's is just **1** (the Cheese Club) — the **degree centrality** of the people mode
+
+</div>
 :::
 
 ::: {.column width="50%"}
@@ -475,20 +484,24 @@ plot_bipartite(label_size = 4.6)
 
 ::: {.columns}
 ::: {.column width="50%"}
-- The **column sums** of the affiliation matrix give us the **size** of each group!
+<div style="font-size: 85%;">
 
-$$C_G^{DEG} = \sum_i a_{ij}$$
+- The **column sums** of the affiliation matrix give the **size** of each group: $C_G^{DEG} = \sum_i a_{ij}$
 
 ```{r}
 #| echo: false
-cs <- colSums(A)
-kbl(t(cs), format = "html", align = "c") %>%
+A_cs <- rbind(A, Total = colSums(A))
+kbl(A_cs, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(7, bold = TRUE) %>%
+  column_spec(2, background = "#F5B7B1") %>%
   kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 15)
 ```
 
-- The centrality scores for the clubs tell us about the **popularity** of each group:
-  - The **Cheese Club** is the most popular (4 members)
-- Two distinct sets of centrality scores: one for the people, one for the groups (Faust 1997)!
+- The **Total** row gives each group's **popularity**: the **Cheese Club** (red column) is the most popular (4 members)
+- Two distinct sets of centrality scores — one for the people, one for the groups (Faust 1997)!
+
+</div>
 :::
 
 ::: {.column width="50%"}
@@ -603,6 +616,28 @@ $$o^P_{ij} = \sum_k a_{ik} \, a_{jk}$$
 
 ## Co-Membership Matrix: Worked Example
 
+::: {.columns}
+::: {.column width="45%"}
+```{r}
+#| echo: false
+kbl(A, format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(1, background = "#F5B7B1") %>%
+  row_spec(c(2, 4), background = "#AED6F1") %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 16)
+```
+
+<div style="font-size: 80%;">
+
+- **Red row**: Gabriela — fixed in every product
+- **Blue rows**: the row dotted against her (Marie, then Parker)
+
+</div>
+:::
+
+::: {.column width="55%"}
+<div class="math-dense" style="font-size: 80%;">
+
 **Cell (Gabriela, Marie)** — Gabriela's row dotted with Marie's row:
 
 $$o^P_{GM} = (\color{red}{1})(\color{blue}{1}) + (0)(0) + (\color{red}{1})(\color{blue}{1}) + (0)(0) + (\color{red}{1})(\color{blue}{0}) = \mathbf{2}$$
@@ -618,6 +653,10 @@ $$o^P_{GP} = (\color{red}{1})(\color{blue}{0}) + (0)(1) + (\color{red}{1})(\colo
 **Cell (Gabriela, Gabriela)** — a row dotted with itself:
 
 $$o^P_{GG} = (1)(1) + (0)(0) + (1)(1) + (0)(0) + (1)(1) = \mathbf{3}$$
+
+</div>
+:::
+:::
 
 ---
 
@@ -672,20 +711,41 @@ kbl(OG, format = "html", align = "c") %>%
 
 ## Overlap = Intersecting Neighborhoods
 
-- The overlap cell is the **cardinality of the intersection** of two node neighborhoods:
+::: {.columns}
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-height: 4.2
+#| fig-width: 4.2
+plot_bipartite(label_size = 4.6, active_nodes = c("Gabriela", "Marie"))
+```
+:::
 
-$$N(\text{Gabriela}) = \{\text{Super Smash Bros., Nerdfighters, Fashion}\}$$
-$$N(\text{Marie}) = \{\text{Super Smash Bros., Nerdfighters}\}$$
+::: {.column width="55%"}
+<div style="font-size: 85%;">
+
+- The overlap cell is the **cardinality of the intersection** of two node neighborhoods:
+  - $N(\text{Gabriela})$ = {Super Smash Bros., Nerdfighters, Fashion}
+  - $N(\text{Marie})$ = {Super Smash Bros., Nerdfighters}
+
+</div>
+
+<div class="math-dense" style="font-size: 85%;">
 
 $$\begin{aligned}
 N(\text{Gabriela}) \cap N(\text{Marie}) &= \{\text{Super Smash Bros.,}\\
 &\quad\ \text{Nerdfighters}\}
 \end{aligned}$$
 
+</div>
+
 . . .
 
 - So $o^P_{\text{Gabriela}, \text{Marie}} = 2$ — exactly what the multiplication computed
 - The same logic works for groups: the group overlap matrix records intersections of **member** neighborhoods
+:::
+:::
 
 ---
 
@@ -802,6 +862,30 @@ kbl(OP_sci, format = "html", align = "c") %>%
 
 ## Application 1: Predicting Future Collaboration
 
+::: {.columns}
+::: {.column width="40%"}
+```{r}
+#| echo: false
+OP_sci <- A_sci %*% t(A_sci)
+m_sci <- matrix(as.character(OP_sci), 7, 7, dimnames = list(sci, sci))
+m_sci[cbind(c(4, 6), c(6, 4))] <- cell_spec(m_sci[cbind(c(4, 6), c(6, 4))], format = "html", background = "#F5B7B1")
+m_sci[cbind(1:7, 1:7)] <- cell_spec(m_sci[cbind(1:7, 1:7)], format = "html", background = "#AED6F1")
+kbl(m_sci, format = "html", align = "c", escape = FALSE) %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 14)
+```
+
+<div style="font-size: 80%;">
+
+- **Red cells**: $o^P_{S4,S6} = 2$ — papers co-authored
+- **Blue diagonal**: papers written (productivity)
+
+</div>
+:::
+
+::: {.column width="60%"}
+<div style="font-size: 85%;">
+
 - The diagonal records productivity (papers written): S6 has written **5** papers, S1 and S4 **3** each
 
 . . .
@@ -815,6 +899,10 @@ kbl(OP_sci, format = "html", align = "c") %>%
 - Maybe we can **predict which scientists will work together in the future**!
   - Pairs with high past co-membership (e.g., S4–S6, S2–S6) are good candidates for future co-authorship
   - This is the basis of "suggest a collaborator" features in scholarly databases
+
+</div>
+:::
+:::
 
 ---
 

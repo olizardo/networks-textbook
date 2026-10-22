@@ -97,6 +97,20 @@ edges_dir_7 <- data.frame(
 gr_dir7 <- tbl_graph(nodes = data.frame(name = c("A", "B", "C", "D", "E", "F", "G")),
                      edges = edges_dir_7, directed = TRUE)
 
+# 2b. Reachability matrix of the 7-node digraph; SCC block {A,B,D,F} shaded
+scc_reach_kbl <- function(font = 18) {
+  d <- distances(gr_dir7, mode = "out")
+  m <- matrix(as.character(ifelse(is.infinite(d), 0, 1)), 7, 7,
+              dimnames = list(LETTERS[1:7], LETTERS[1:7]))
+  diag(m) <- "--"
+  scc <- match(c("A", "B", "D", "F"), LETTERS[1:7])
+  kbl(m, align = "c", format = "html") |>
+    kable_styling(full_width = FALSE, font_size = font, position = "center") |>
+    column_spec(1, bold = TRUE) |>
+    row_spec(scc, background = "#F5B7B1") |>
+    column_spec(scc + 1, background = "#F5B7B1")
+}
+
 # 3. 5-node undirected graph for geodesic distance step-by-step (matching PPT slides 132-138)
 nodes_undir_5 <- data.frame(name = c("A", "B", "C", "D", "E"), x = c(0, 1.5, -0.6, 0.6, 0.6), y = c(1, -0.5, 0, 0, -1))
 edges_undir_5 <- data.frame(from = c(1, 1, 2, 3, 3, 4), to = c(3, 4, 5, 4, 5, 5))
@@ -165,8 +179,8 @@ plot_dir_highlight_geo <- function(active_edges = NULL, active_nodes = NULL) {
   }
   
   gr <- tbl_graph(nodes = nodes_mod, edges = edges_mod, directed = TRUE)
-  
-  p <- ggraph(gr, layout = layout_coords_undir_5) +
+
+  p <- ggraph(gr, layout = layout_coords_5) +
     geom_edge_link(aes(color = highlight, edge_width = highlight),
                    arrow = arrow(length = unit(6, 'mm'), type = "closed", angle = 28),
                    end_cap = circle(9, 'mm')) +
@@ -214,6 +228,93 @@ plot_neighbors_highlight <- function(active_nodes = NULL, common_nodes = NULL) {
     theme_graph() + coord_cartesian(clip = "off")
   return(p)
 }
+
+# 6. Progressive reachability matrix for Part 1 (row-by-row fill; active row highlighted)
+reach_states <- list(
+  A = c("--", "0", "1", "1", "1"),
+  B = c("0", "--", "0", "1", "1"),
+  C = c("0", "0", "--", "1", "1"),
+  D = c("0", "0", "0", "--", "0"),
+  E = c("0", "0", "0", "1", "--")
+)
+reach_kbl <- function(filled = character(0), active = character(0), font = 20) {
+  m <- matrix("?", 5, 5, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
+  diag(m) <- "--"
+  for (r in filled) m[r, ] <- reach_states[[r]]
+  out <- kbl(m, align = "c", format = "html") |>
+    kable_styling(full_width = FALSE, font_size = font, position = "center") |>
+    column_spec(1, bold = TRUE)
+  if (length(active)) {
+    out <- out |> row_spec(match(active, LETTERS[1:5]), background = "#F5B7B1")
+  }
+  out
+}
+
+# 8. Reachability matrix of the 8-node weak graph (columns 2 and 7 highlighted)
+# (explicit Node column: kable drops sequential integer rownames)
+weak_reach_kbl <- function(font = 18) {
+  d <- distances(gr_weak, mode = "out")
+  m <- matrix(as.character(ifelse(is.infinite(d), 0, 1)), 8, 8)
+  diag(m) <- "--"
+  df <- data.frame(Node = 1:8, m, check.names = FALSE)
+  names(df) <- c(" ", as.character(1:8))
+  kbl(df, align = "c", format = "html") |>
+    kable_styling(full_width = FALSE, font_size = font, position = "center") |>
+    column_spec(1, bold = TRUE) |>
+    column_spec(c(3, 8), background = "#F5B7B1")
+}
+
+# 9. Neighborhood overlap (Jaccard) matrix for the undirected 5-node graph;
+# highlight = list(c("A","C"), ...) marks symmetric cell pairs
+overlap_kbl <- function(highlight = NULL, font = 18) {
+  Amat <- as.matrix(as_adjacency_matrix(gr_undir_5))
+  kdeg <- rowSums(Amat)
+  common <- Amat %*% Amat
+  O <- common / (outer(kdeg, kdeg, "+") - common)
+  m <- matrix(sprintf("%.2f", O), 5, 5, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
+  diag(m) <- "--"
+  if (!is.null(highlight)) {
+    for (pair in highlight) {
+      m[pair[1], pair[2]] <- cell_spec(m[pair[1], pair[2]], format = "html", background = "#F5B7B1")
+      m[pair[2], pair[1]] <- cell_spec(m[pair[2], pair[1]], format = "html", background = "#F5B7B1")
+    }
+  }
+  kbl(m, align = "c", format = "html", escape = FALSE) |>
+    kable_styling(full_width = FALSE, font_size = font, position = "center") |>
+    column_spec(1, bold = TRUE)
+}
+
+# 7. Mini graphs illustrating the four pairwise connectivity flavors (u/v = focal pair, red)
+plot_pair_flavor <- function(nodes_df, edges_df, highlight = character(0), recip = FALSE) {
+  edges_df$hl <- ifelse(paste(edges_df$from, edges_df$to, sep = "->") %in% highlight, "yes", "no")
+  nodes_df$focal <- ifelse(nodes_df$name %in% c("u", "v"), "pair", "mid")
+  gr <- tbl_graph(nodes = nodes_df, edges = edges_df, directed = TRUE)
+  if (recip) {
+    edge_layer <- geom_edge_parallel(aes(color = hl, edge_width = hl),
+                                     arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                                     end_cap = circle(6, "mm"), sep = unit(4, "mm"))
+  } else {
+    edge_layer <- geom_edge_link(aes(color = hl, edge_width = hl),
+                                 arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                                 end_cap = circle(6, "mm"))
+  }
+  ggraph(gr, layout = as.matrix(nodes_df[, c("x", "y")])) +
+    edge_layer +
+    geom_node_point(aes(color = focal), size = 16) +
+    geom_node_text(aes(label = name), size = 7.5, fontface = "bold", color = "white") +
+    scale_edge_color_manual(values = c("yes" = "red", "no" = "steelblue"), guide = "none") +
+    scale_edge_width_manual(values = c("yes" = 2.0, "no" = 1.0), guide = "none") +
+    scale_color_manual(values = c("pair" = "red", "mid" = "tan2"), guide = "none") +
+    theme_graph() + coord_cartesian(clip = "off")
+}
+pair_w_n <- data.frame(name = c("u", "w", "v"), x = c(-1, 0, 1), y = c(-0.6, 1, -0.6))
+pair_w_e <- data.frame(from = c("w", "w"), to = c("u", "v"))
+pair_u_n <- data.frame(name = c("u", "m", "v"), x = c(-1, 0, 1), y = c(0, 0.8, 0))
+pair_u_e <- data.frame(from = c("u", "m"), to = c("m", "v"))
+pair_s_n <- data.frame(name = c("u", "v", "a", "b"), x = c(-1, 1, 1, -1), y = c(0.8, 0.8, -0.8, -0.8))
+pair_s_e <- data.frame(from = c("u", "a", "v", "b"), to = c("a", "v", "b", "u"))
+pair_r_n <- data.frame(name = c("u", "w", "v"), x = c(-1, 0, 1), y = c(0, 1, 0))
+pair_r_e <- data.frame(from = c("u", "w", "w", "v"), to = c("w", "u", "v", "w"))
 ```
 
 # Part 1: The Reachability Matrix Step-by-Step
@@ -229,13 +330,14 @@ plot_neighbors_highlight <- function(active_nodes = NULL, common_nodes = NULL) {
   - Example: If we have $A \rightarrow C \rightarrow E \rightarrow D$, then $A$ can reach $D$ via a path of length 3, even if no direct arrow $A \rightarrow D$ exists.
 - Representing these reachability relations systematically yields the **Reachability Matrix ($\mathbf{D^r}$)**:
   - Binary matrix where $D^r_{ij} = 1$ if $i$ can reach $j$ via a path of any length, else $0$.
+- **The matrix-algebra route** (from the Matrix Multiplication lesson): since $(\mathbf{A}^k)_{ij}$ counts walks of length $k$, $D^r_{ij} = 1$ exactly when *some* power of the adjacency matrix has a positive entry: $D^r_{ij} = 1 \iff (\mathbf{A} + \mathbf{A}^2 + \mathbf{A}^3 + \dots)_{ij} > 0$.
 :::
 
 ---
 
 ## Reference Graph & Empty Matrix
 
-We have 5 nodes $\{A, B, C, D, E\}$. Let's build the $5 \times 5$ reachability matrix. Diagonals are blocked (`--`).
+We have 5 nodes $\{A, B, C, D, E\}$. Let's build the $5 \times 5$ reachability matrix. Diagonals are blocked (`--`) — a node trivially reaches itself via a length-0 path, but we set the diagonal aside to focus on distinct pairs.
 
 :::: {.columns align=center}
 
@@ -250,13 +352,10 @@ plot_reach_highlight()
 :::
 
 ::: {.column width="50%"}
-| | A | B | C | D | E |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| **A** | -- | ? | ? | ? | ? |
-| **B** | ? | -- | ? | ? | ? |
-| **C** | ? | ? | -- | ? | ? |
-| **D** | ? | ? | ? | -- | ? |
-| **E** | ? | ? | ? | ? | -- |
+```{r}
+#| echo: false
+reach_kbl(font = 32)
+```
 :::
 
 ::::
@@ -280,15 +379,19 @@ plot_reach_highlight(active_edges = c("A-C", "A-D", "C-E", "E-D"), active_nodes 
 :::
 
 ::: {.column width="50%"}
-- **Can A reach B?**
-  - **No** ($d^r_{AB} = 0$). No directed path goes against $B \rightarrow E$.
-- **Can A reach C?**
-  - **Yes** ($d^r_{AC} = 1$). Direct link $A \rightarrow C$.
-- **Can A reach D?**
-  - **Yes** ($d^r_{AD} = 1$). Direct link $A \rightarrow D$.
-- **Can A reach E?**
-  - **Yes** ($d^r_{AE} = 1$). Path $A \rightarrow C \rightarrow E$ exists.
-- **Row A**: `(--,  0,  1,  1,  1)`
+```{r}
+#| echo: false
+reach_kbl(filled = "A", active = "A")
+```
+
+<div style="font-size: 85%;">
+
+- **B? No** ($d^r_{AB} = 0$) — no arrow points *into* B.
+- **C? Yes** ($d^r_{AC} = 1$) — direct link $A \rightarrow C$.
+- **D? Yes** ($d^r_{AD} = 1$) — direct link $A \rightarrow D$.
+- **E? Yes** ($d^r_{AE} = 1$) — path $A \rightarrow C \rightarrow E$.
+
+</div>
 :::
 
 ::::
@@ -312,22 +415,96 @@ plot_reach_highlight(active_edges = c("B-E", "E-D"), active_nodes = c("B", "E", 
 :::
 
 ::: {.column width="50%"}
-- **Can B reach A or C?**
-  - **No** ($d^r_{BA} = 0$, $d^r_{BC} = 0$). No paths go left from E.
-- **Can B reach D?**
-  - **Yes** ($d^r_{BD} = 1$). Path $B \rightarrow E \rightarrow D$ of length 2.
-- **Can B reach E?**
-  - **Yes** ($d^r_{BE} = 1$). Direct link $B \rightarrow E$.
-- **Row B**: `(0,  --,  0,  1,  1)`
+```{r}
+#| echo: false
+reach_kbl(filled = c("A", "B"), active = "B")
+```
+
+<div style="font-size: 85%;">
+
+- **A or C? No** ($d^r_{BA} = d^r_{BC} = 0$) — the only arrow out of E is $E \rightarrow D$, a dead end.
+- **D? Yes** ($d^r_{BD} = 1$) — path $B \rightarrow E \rightarrow D$, length 2.
+- **E? Yes** ($d^r_{BE} = 1$) — direct link $B \rightarrow E$.
+
+</div>
 :::
 
 ::::
 
 ---
 
-## Step 3: Completed Reachability Matrix
+## Step 3: Filling Row C (Actor C's Reachability)
 
-Repeating this row-by-row analysis yields the completed reachability matrix.
+Same trace for node **C** — and a pattern emerges: *nothing ever points into A or B*, the two pure sources.
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.5
+#| fig-height: 4.5
+plot_reach_highlight(active_edges = c("C-E", "E-D"), active_nodes = c("C", "E", "D"))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+reach_kbl(filled = c("A", "B", "C"), active = "C")
+```
+
+<div style="font-size: 85%;">
+
+- **A or B? No** ($d^r_{CA} = d^r_{CB} = 0$) — no directed path can end at a pure source.
+- **D? Yes** ($d^r_{CD} = 1$) — path $C \rightarrow E \rightarrow D$, length 2.
+- **E? Yes** ($d^r_{CE} = 1$) — direct link $C \rightarrow E$.
+
+</div>
+:::
+
+::::
+
+---
+
+## Step 4: Filling Rows D and E
+
+The last two rows are the quickest — and the most informative.
+
+:::: {.columns align=center}
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 4.5
+#| fig-height: 4.5
+plot_reach_highlight(active_edges = "E-D", active_nodes = c("D", "E"))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
+reach_kbl(filled = LETTERS[1:5], active = c("D", "E"))
+```
+
+<div style="font-size: 85%;">
+
+- **Row D**: D has no outgoing arrows, so its row is all $0$s — the **pure receiver**: everyone reaches D, D reaches no one.
+- **Row E**: E's only arrow is $E \rightarrow D$, so E reaches exactly one node: D.
+
+</div>
+:::
+
+::::
+
+---
+
+## Step 5: Completed Reachability Matrix
+
+Tracing every row fills the matrix — and the completed matrix reveals each node's role at a glance.
 
 :::: {.columns align=center}
 
@@ -342,18 +519,15 @@ plot_reach_highlight()
 :::
 
 ::: {.column width="55%"}
+```{r}
+#| echo: false
+reach_kbl(filled = LETTERS[1:5])
+```
+
 <div style="font-size: 90%;">
 
-| | A | B | C | D | E |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| **A** | -- | 0 | 1 | 1 | 1 |
-| **B** | 0 | -- | 0 | 1 | 1 |
-| **C** | 0 | 0 | -- | 1 | 1 |
-| **D** | 0 | 0 | 0 | -- | 0 |
-| **E** | 0 | 0 | 0 | 1 | -- |
-
-- **Receiver Node (D)**: Row D is all $0$s (D can't reach anyone).
-- **Transmitter Node (B)**: Column B is all $0$s (B can't be reached by anyone).
+- **Unreached Sources (A, B)**: columns A and B are all $0$s — no one reaches them.
+- **Pure Receiver (D)**: row D is all $0$s — D reaches no one, while everyone reaches D.
 
 </div>
 :::
@@ -389,25 +563,107 @@ plot_reach_highlight()
 
 ---
 
-## 1. Pairwise Weak & Unilateral Connectivity
+## Pairwise Weakly Connected
 
-- **Pairwise Weakly Connected**:
-  - Node $u$ and $v$ are connected by at least one **semipath** (connected if we ignore the arrow directions).
-  - **Sociological Meaning**: They are part of the same general network, but there is no directed path starting from either node that can reach the other.
-- **Pairwise Unilaterally Connected**:
-  - A directed path exists from $u \rightarrow v$ **OR** from $v \rightarrow u$ (one-way reachability).
-  - **Sociological Meaning**: Information or influence can flow from one person to the other, but not in both directions (no mutual exchange).
+:::: {.columns align=center}
+
+::: {.column style="width: 42%; font-size: 85%;"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 3.5
+#| fig-height: 3.5
+plot_pair_flavor(pair_w_n, pair_w_e, highlight = c("w->u", "w->v"))
+```
+
+- **Example**: $w$ sends to both members of the pair $u, v$ (red).
+:::
+
+::: {.column style="width: 58%; font-size: 85%;"}
+- **Definition**: Nodes $u$ and $v$ are connected by at least one **semipath** (connected if we ignore the arrow directions).
+- **Sociological Meaning**: They are part of the same general network, but there is no directed path starting from either node that can reach the other.
+- **In the example**: $u$ and $v$ are linked only through $w$, and only once we ignore the arrows — no path starts at $u$ or $v$ at all.
+:::
+
+::::
 
 ---
 
-## 2. Pairwise Strong & Recursive Connectivity
+## Pairwise Unilaterally Connected
 
-- **Pairwise Strongly Connected**:
-  - A directed path exists from $u \rightarrow v$ **AND** from $v \rightarrow u$ (mutual reachability).
-  - **Sociological Meaning**: Both nodes can reach each other, but the paths in each direction may use completely different intermediate nodes or channels.
-- **Pairwise Recursively Connected**:
-  - A directed path exists from $u \rightarrow v$ and $v \rightarrow u$, **AND** the directed path in both directions shares the exact same set of intermediate nodes (sharing both vertices and edges).
-  - **Sociological Meaning**: The relationship can be traversed back-and-forth along the same closed, mutually symmetric cycle.
+:::: {.columns align=center}
+
+::: {.column style="width: 42%; font-size: 85%;"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 3.5
+#| fig-height: 3.5
+plot_pair_flavor(pair_u_n, pair_u_e, highlight = c("u->m", "m->v"))
+```
+
+- **Example**: $u$ reaches $v$ via $m$; $v$ cannot reach back.
+:::
+
+::: {.column style="width: 58%; font-size: 85%;"}
+- **Definition**: A directed path exists from $u \rightarrow v$ **OR** from $v \rightarrow u$ (one-way reachability).
+- **Sociological Meaning**: Information or influence can flow from one person to the other, but not in both directions (no mutual exchange).
+- **In the example**: the directed path $u \rightarrow m \rightarrow v$ runs one way only.
+:::
+
+::::
+
+---
+
+## Pairwise Strongly Connected
+
+:::: {.columns align=center}
+
+::: {.column style="width: 42%; font-size: 85%;"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 3.5
+#| fig-height: 3.5
+plot_pair_flavor(pair_s_n, pair_s_e, highlight = c("u->a", "a->v", "v->b", "b->u"))
+```
+
+- **Example**: $u$ reaches $v$ via $a$; $v$ reaches $u$ via $b$.
+:::
+
+::: {.column style="width: 58%; font-size: 85%;"}
+- **Definition**: A directed path exists from $u \rightarrow v$ **AND** from $v \rightarrow u$ (mutual reachability).
+- **Sociological Meaning**: Both nodes can reach each other, but the paths in each direction may use completely different intermediate nodes or channels.
+- **In the example**: the two directions travel through **different** intermediaries ($a$ vs. $b$).
+:::
+
+::::
+
+---
+
+## Pairwise Recursively Connected
+
+:::: {.columns align=center}
+
+::: {.column style="width: 42%; font-size: 85%;"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 3.5
+#| fig-height: 3.5
+plot_pair_flavor(pair_r_n, pair_r_e, highlight = c("u->w", "w->u", "w->v", "v->w"), recip = TRUE)
+```
+
+- **Example**: $u$ and $v$ reach each other through the same intermediary $w$.
+:::
+
+::: {.column style="width: 58%; font-size: 85%;"}
+- **Definition**: A directed path exists from $u \rightarrow v$ and $v \rightarrow u$, **AND** the directed path in both directions shares the exact same set of intermediate nodes (sharing both vertices and edges).
+- **Sociological Meaning**: The relationship can be traversed back-and-forth along the same closed, mutually symmetric cycle.
+- **In the example**: both directions use the same intermediary $w$ and the same reciprocated ties $u \leftrightarrow w \leftrightarrow v$.
+:::
+
+::::
 
 ---
 
@@ -463,6 +719,7 @@ ggraph(gr_strong, layout = 'circle') +
 | **8** | 1 | 1 | 1 | 1 | 1 | 1 | 1 | -- |
 
 - **No Zeros**: everyone can reach everyone, so the reachability matrix is the **all-ones** matrix!
+- **Trace**: $D^r_{18} = 1$ via $1 \rightarrow 4 \rightarrow 6 \rightarrow 8$.
 :::
 
 ::::
@@ -505,6 +762,8 @@ ggraph(gr_unilateral, layout = 'circle') +
 | **6** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | -- | 1 | 1 |
 | **7** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | -- | 1 |
 | **8** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | 1 | -- |
+
+- **Trace**: $D^r_{25} = 1$ via $2 \rightarrow 3 \rightarrow 4 \rightarrow 5$ — but $D^r_{52} = 0$, since no arrow ever points into node 2.
 :::
 
 ::::
@@ -546,6 +805,8 @@ ggraph(gr_weak, layout = 'circle') +
 | **6** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | -- | <span style="color:red; font-weight:bold;">0</span> | 1 |
 | **7** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | -- | 1 |
 | **8** | 1 | <span style="color:red; font-weight:bold;">0</span> | 1 | 1 | 1 | 1 | <span style="color:red; font-weight:bold;">0</span> | -- |
+
+- **Trace**: $D^r_{71} = 1$ via $7 \rightarrow 4 \rightarrow 5 \rightarrow 6 \rightarrow 8 \rightarrow 1$.
 :::
 
 ::::
@@ -556,9 +817,9 @@ ggraph(gr_weak, layout = 'circle') +
 
 :::: {.columns align=center}
 
-::: {.column width="50%"}
+::: {.column style="width: 36%; font-size: 85%;"}
 ::: {.incremental}
-- Like undirected graphs, directed graphs can be decomposed into:
+- A graph that fails even **weak** connectivity breaks into multiple disconnected pieces; our example holds together weakly but decomposes further once direction matters:
 - **Weakly Connected Components (WCCs)**:
   - Subgraphs connected when ignoring edge directions.
   - Yields **one WCC** containing all 7 nodes: $\{A, B, C, D, E, F, G\}$.
@@ -570,12 +831,22 @@ ggraph(gr_weak, layout = 'circle') +
 :::
 :::
 
-::: {.column width="50%"}
+::: {.column style="width: 28%; font-size: 85%;"}
+```{r}
+#| echo: false
+scc_reach_kbl()
+```
+
+- **Red block**: rows/cols $A, B, D, F$ are all 1s — every pair mutually reachable.
+- $E$ and $G$ reach the core, but nothing reaches them; $C$ reaches nothing at all.
+:::
+
+::: {.column width="36%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 5.5
-#| fig-height: 5.5
+#| fig-width: 4.2
+#| fig-height: 4.2
 ggraph(gr_dir7, layout = 'kk') +
   geom_edge_parallel(color = "steelblue", edge_width = 1.2,
                      arrow = arrow(length = unit(3, 'mm'), type = "closed"),
@@ -642,12 +913,12 @@ ggraph(gr_weak, layout = 'circle') +
 
 ::: {.columns align=center}
 
-::: {.column width="38%"}
+::: {.column width="28%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 3.6
-#| fig-height: 3.6
+#| fig-width: 3.3
+#| fig-height: 3.3
 ggraph(gr_weak, layout = 'circle') +
   geom_edge_link(color = "steelblue", edge_width = 1.15,
                  arrow = arrow(length = unit(3.5, 'mm')),
@@ -658,13 +929,21 @@ ggraph(gr_weak, layout = 'circle') +
 ```
 :::
 
-::: {.column style="width: 62%; font-size: 85%;"}
+::: {.column width="34%"}
+```{r}
+#| echo: false
+weak_reach_kbl()
+```
+:::
+
+::: {.column style="width: 38%; font-size: 85%;"}
 ::: {.incremental}
 - **For our weakly connected 8-node graph** (left):
-  - Sum of all cells containing a $1$ is **42**.
   - Total possible off-diagonal cells: $8(7) = 56$.
+  - The $0$ cells sit in the highlighted columns 2 and 7: $7 + 7 = 14$ zeros.
+  - So the sum of all $1$ cells is $56 - 14 = 42$.
   - $$C = \frac{42}{56} = 0.75$$
-  - The missing pairs are those involving the transmitter/receiver nodes 2 and 7 — e.g., $D^r_{27} = D^r_{72} = 0$.
+  - The only mutually unreachable pair is $\{2, 7\}$ — two pure transmitters, with $D^r_{27} = D^r_{72} = 0$.
 :::
 :::
 
@@ -684,13 +963,14 @@ ggraph(gr_weak, layout = 'circle') +
   - Adjacent nodes get a geodesic distance of **1.0**.
   - Nodes are at distance **0.0** from themselves: $D^g_{ii} = 0$ for all diagonal cells.
   - If no directed or indirect path connects them, their geodesic distance is **Infinity ($\infty$)** or *Inf*.
+- **Connection to matrix powers**: $d^g_{ij}$ is the *smallest* $k$ such that $(\mathbf{A}^k)_{ij} > 0$. The step-by-step filling below walks up the power sequence $\mathbf{A}, \mathbf{A}^2, \mathbf{A}^3$ from the Matrix Multiplication lesson.
 :::
 
 ---
 
 ## Step 1: Distance Matrix (Undirected) - Adjacencies
 
-We start with our undirected reference graph. Nodes with direct connections get a geodesic distance of **1.0**.
+We now switch to a **new undirected 5-node example**. Nodes with direct connections get a geodesic distance of **1.0**.
 
 :::: {.columns align=center}
 
@@ -796,7 +1076,7 @@ plot_undir_highlight(active_edges = c("A-C", "C-E", "B-E"), active_nodes = c("A"
 
 ## Step 4: Distance Matrix (Directed) - Paths & Connections
 
-For directed graphs, we follow the same process but respect the arrows (Sender $\rightarrow$ Receiver).
+For directed graphs, we follow the same process but respect the arrows (Sender $\rightarrow$ Receiver) — back on the same digraph we used for reachability in Part 1.
 
 :::: {.columns align=center}
 
@@ -820,7 +1100,7 @@ plot_dir_highlight_geo()
 | **D** | ? | ? | ? | 0 | ? |
 | **E** | ? | ? | ? | **1** | 0 |
 
-- **Direct links**: $A \rightarrow C = 1, A \rightarrow D = 1, B \rightarrow E = 1, C \rightarrow E = 1, E \rightarrow D = 1$.
+- **Direct links**: $A \rightarrow C = 1$, $A \rightarrow D = 1$, $B \rightarrow E = 1$, $C \rightarrow E = 1$, $E \rightarrow D = 1$.
 - **Path of length 2**: $A \rightarrow C \rightarrow E$ (length 2), $B \rightarrow E \rightarrow D$ (length 2), $C \rightarrow E \rightarrow D$ (length 2).
 </div>
 :::
@@ -846,7 +1126,7 @@ plot_dir_highlight_geo(active_nodes = "D")
 :::
 
 ::: {.column width="50%"}
-<div style="font-size: 90%;">
+<div style="font-size: 80%;">
 | | A | B | C | D | E |
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | **A** | 0 | **$\infty$** | 1 | 1 | 2 |
@@ -855,8 +1135,9 @@ plot_dir_highlight_geo(active_nodes = "D")
 | **D** | **$\infty$** | **$\infty$** | **$\infty$** | 0 | **$\infty$** |
 | **E** | **$\infty$** | **$\infty$** | **$\infty$** | 1 | 0 |
 
-- **Unreachable**: e.g., $B$ can't reach $A \rightarrow d_{BA} = \infty$.
+- **Unreachable**: e.g., $B$ can't reach $A$, so $d^g_{BA} = \infty$.
 - **Pure Sink (D)**: Row D is full of $\infty$ cells since node D can't reach anyone.
+- **Check vs. Part 1**: same digraph as Part 1 — every $\infty$ here sits on a $0$ in $\mathbf{D^r}$.
 </div>
 :::
 
@@ -927,64 +1208,131 @@ plot_undir_highlight()
 - **Jaccard Similarity Coefficient ($J_{ij}$)**:
   - Formally, the overlap between node $i$ and node $j$ is:
   - $$J_{ij} = \frac{|\mathcal{N}(i) \cap \mathcal{N}(j)|}{|\mathcal{N}(i) \cup \mathcal{N}(j)|} = \frac{\text{Common Neighbors}}{\text{Total Unique Neighbors}}$$
+- **From matrix algebra**: for an undirected graph the numerator is exactly the common-neighbors count $|\mathcal{N}(i) \cap \mathcal{N}(j)| = (\mathbf{A}^2)_{ij}$ — the same product we computed in the Matrix Multiplication lesson.
 - Placing these pairwise overlap scores into a matrix yields the **Neighborhood Overlap Matrix ($\mathbf{O}$)**.
 :::
 
 ---
 
-## Visualizing Neighborhood Overlap
-
-Overlap measures the proportion of shared neighbors (Green node) relative to unique neighbors.
+## Step-by-Step: Overlap of $A$ and $C$
 
 :::: {.columns align=center}
 
-::: {.column width="50%"}
-### Highlighted Overlap $\{A, C\}$
+::: {.column width="30%"}
 ```{r}
 #| echo: false
 #| fig-align: "center"
-#| fig-width: 3.9
-#| fig-height: 3.9
+#| fig-width: 3.3
+#| fig-height: 3.3
 plot_neighbors_highlight(active_nodes = c("A", "C"), common_nodes = "D")
 ```
+
+- Focal pair in **red**, shared neighbors in **green**.
 :::
 
-::: {.column width="50%"}
-### Neighborhood Overlap Matrix ($\mathbf{O}$)
-<div style="font-size: 80%;">
-| | A | B | C | D | E |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| **A** | -- | 0.00 | <span style="color:red; font-weight:bold;">0.25</span> | 0.25 | 0.67 |
-| **B** | 0.00 | -- | 0.33 | 0.33 | 0.00 |
-| **C** | <span style="color:red; font-weight:bold;">0.25</span> | 0.33 | -- | 0.50 | 0.20 |
-| **D** | 0.25 | 0.33 | 0.50 | -- | 0.20 |
-| **E** | 0.67 | 0.00 | 0.20 | 0.20 | -- |
+::: {.column width="32%"}
+```{r}
+#| echo: false
+overlap_kbl(highlight = list(c("A", "C")))
+```
 
-- Cell $O_{AC} = 0.25$ represents the overlap between A (red) and C (red).
-- Their sole common neighbor is node D (green).
+<div style="font-size: 80%;">
+
+- Diagonal (`--`): $J_{ii}$ is trivially 1.
+
 </div>
+:::
+
+::: {.column style="width: 38%; font-size: 85%;"}
+::: {.incremental}
+- **$\mathcal{N}(A) = \{C, D\}$** ($k_A = 2$)
+- **$\mathcal{N}(C) = \{A, D, E\}$** ($k_C = 3$)
+- **Intersection**: $\mathcal{N}(A) \cap \mathcal{N}(C) = \{D\}$ — node $D$ (green) is connected to both. Cardinality **1**.
+- **Union**: $\mathcal{N}(A) \cup \mathcal{N}(C) = \{A, C, D, E\}$. Cardinality **4**.
+- **Overlap**:
+  $$O_{AC} = \frac{1}{4} = 0.25$$
+:::
 :::
 
 ::::
 
 ---
 
-## Step-by-Step Calculation: Node $A$ and $C$
+## Step-by-Step: Overlap of $C$ and $D$
 
-Let's compute the neighborhood overlap $O_{AC}$ for nodes $A$ and $C$ using our highlighted graph:
+:::: {.columns align=center}
 
-- **$A$'s Neighborhood**: $\mathcal{N}(A) = \{C, D\}$ (degree $k_A = 2$)
-- **$C$'s Neighborhood**: $\mathcal{N}(C) = \{A, D, E\}$ (degree $k_C = 3$)
+::: {.column width="30%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 3.3
+#| fig-height: 3.3
+plot_neighbors_highlight(active_nodes = c("C", "D"), common_nodes = c("A", "E"))
+```
 
-::: {.incremental}
-- **Intersection (Common Neighbors)**:
-  - $\mathcal{N}(A) \cap \mathcal{N}(C) = \{D\}$ (Cardinality = **1**)
-  - Node $D$ is connected to both $A$ and $C$ (shown in green).
-- **Union (Total Unique Neighbors)**:
-  - $\mathcal{N}(A) \cup \mathcal{N}(C) = \{A, C, D, E\}$ (Cardinality = **4**)
-- **Jaccard Overlap**:
-  - $$O_{AC} = \frac{|\{D\}|}{|\{A, C, D, E\}|} = \frac{1}{4} = 0.25$$
+- **Two** shared neighbors this time: $A$ and $E$ (green).
 :::
+
+::: {.column width="32%"}
+```{r}
+#| echo: false
+overlap_kbl(highlight = list(c("C", "D")))
+```
+:::
+
+::: {.column style="width: 38%; font-size: 85%;"}
+::: {.incremental}
+- **$\mathcal{N}(C) = \{A, D, E\}$**
+- **$\mathcal{N}(D) = \{A, C, E\}$**
+- **Intersection**: $\mathcal{N}(C) \cap \mathcal{N}(D) = \{A, E\}$. Cardinality **2**.
+- **Union**: $\{A, C, D, E\}$. Cardinality **4**.
+- **Overlap**:
+  $$O_{CD} = \frac{2}{4} = 0.50$$
+- Half of their neighborhoods overlaps — $C$ and $D$ run in the same circles.
+:::
+:::
+
+::::
+
+---
+
+## Step-by-Step: Overlap of $B$ and $E$
+
+:::: {.columns align=center}
+
+::: {.column width="30%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 3.3
+#| fig-height: 3.3
+plot_neighbors_highlight(active_nodes = c("B", "E"))
+```
+
+- **No** shared neighbors: the tie $B$–$E$ (red) is all they have.
+:::
+
+::: {.column width="32%"}
+```{r}
+#| echo: false
+overlap_kbl(highlight = list(c("B", "E")))
+```
+:::
+
+::: {.column style="width: 38%; font-size: 85%;"}
+::: {.incremental}
+- **$\mathcal{N}(B) = \{E\}$** ($k_B = 1$)
+- **$\mathcal{N}(E) = \{B, C, D\}$** ($k_E = 3$)
+- **Intersection**: $\mathcal{N}(B) \cap \mathcal{N}(E) = \varnothing$. Cardinality **0**.
+- **Union**: $\{B, C, D, E\}$. Cardinality **4**.
+- **Overlap**:
+  $$O_{BE} = \frac{0}{4} = 0.00$$
+- $B$ and $E$ are tied but share nothing else — $B$ is a **pendant** on $E$, with no redundant contacts.
+:::
+:::
+
+::::
 
 ---
 
