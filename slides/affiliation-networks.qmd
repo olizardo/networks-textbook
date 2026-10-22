@@ -12,6 +12,7 @@ format:
     height: 720
     margin: 0.1
     min-scale: 0.2
+bibliography: ../networks.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -121,8 +122,40 @@ Types of affiliation networks that have been studied in the literature include:
 . . .
 
 - The **corporate interlock network** is a classic example [@mizruchi83]:
-  - When the same executive sits on **multiple company boards**, companies end up connected through shared people (Mizruchi 1983)
+  - When the same executive sits on **multiple company boards**, companies end up connected through shared people
   - Most big corporations end up forming part of [a single giant network](https://en.wikipedia.org/wiki/Interlocking_directorate)
+
+---
+
+## A Real Affiliation Network: Corporate Interlocks
+
+::: {.columns}
+::: {.column width="38%"}
+<div style="font-size: 85%;">
+
+- **AIG's board, 2004**: each director (person icon) shown with the **other corporations** they serve (boardroom tables)
+
+. . .
+
+- Exactly the **bipartite** structure from the previous slides: two node sets — **directors** and **boards**
+
+. . .
+
+- **Shared directors connect companies**: Ellen Futter's seats link **J.P. Morgan Chase**, **Bristol-Myers Squibb**, and **Consolidated Edison**
+
+. . .
+
+- This is the **corporate interlock network**: companies tied through the people they share
+
+</div>
+
+<p style="font-size: 60%; color: #666;">Image: TheyRule.net via Wikimedia Commons (CC0)</p>
+:::
+
+::: {.column width="62%"}
+<img src="../images/aig-interlocks-2004.jpg" width="620" style="display:block; margin: 0 auto;">
+:::
+:::
 
 ---
 
@@ -251,6 +284,8 @@ $$N(\text{Gabriela}) = \{\text{Super Smash Bros., Nerdfighters, Fashion}\}$$
 
 - The **intersection** of their neighborhoods:
   - $N(\text{Minjoo}) \cap N(\text{Gabriela}) = \{\text{Fashion}\}$ — **one shared club**, a first hint of the overlap idea to come!
+- The **union** of their neighborhoods:
+  - $N(\text{Minjoo}) \cup N(\text{Gabriela})$ = {Super Smash Bros., Cheese, Nerdfighters, Magic, Fashion} — **all five clubs** touched between them!
 :::
 
 ::: {.column width="40%"}
@@ -283,6 +318,7 @@ $$N(\text{Fashion}) = \{\text{Gabriela, Rahul, Minjoo}\}$$
 - The **intersection**:
   - $N(\text{Cheese}) \cap N(\text{Fashion}) = \{\text{Rahul, Minjoo}\}$
   - The two clubs **share two members**
+- The **union**: $N(\text{Cheese}) \cup N(\text{Fashion})$ = {Gabriela, Parker, Brandon, Rahul, Minjoo} — **five of the six students**, everyone but Marie
 - Same-kind nodes **cannot be connected** in a two-mode network (by construction) — but they can **share neighbors**
 :::
 
@@ -709,6 +745,52 @@ kbl(OG, format = "html", align = "c") %>%
 
 ---
 
+## Group Overlap Matrix: Worked Example
+
+::: {.columns}
+::: {.column width="45%"}
+```{r}
+#| echo: false
+kbl(t(A), format = "html", align = "c") %>%
+  column_spec(1, bold = TRUE) %>%
+  row_spec(1, background = "#F5B7B1") %>%
+  row_spec(c(2, 3), background = "#AED6F1") %>%
+  kable_styling(bootstrap_options = c("condensed"), font_size = 16)
+```
+
+<div style="font-size: 80%;">
+
+- **Red row**: Super Smash Bros. — fixed in every product
+- **Blue rows**: the row dotted against it (Nerdfighters, then Cheese)
+
+</div>
+:::
+
+::: {.column width="55%"}
+<div class="math-dense" style="font-size: 80%;">
+
+**Cell (SSB, NF)** — the Super Smash Bros. row dotted with the Nerdfighters row, matched person by person:
+
+$$o^G_{\text{SSB},\text{NF}} = (\color{red}{1})(\color{blue}{1}) + (0)(0) + (0)(0) + (\color{red}{1})(\color{blue}{1}) + (0)(0) + (0)(0) = \mathbf{2}$$
+
+. . .
+
+**Cell (SSB, Cheese)**:
+
+$$o^G_{\text{SSB},\text{Cheese}} = (\color{red}{1})(\color{blue}{0}) + (0)(1) + (0)(1) + (\color{red}{1})(\color{blue}{0}) + (0)(1) + (0)(1) = \mathbf{0}$$
+
+. . .
+
+**Cell (SSB, SSB)** — a row dotted with itself (= group size):
+
+$$o^G_{\text{SSB},\text{SSB}} = (1)(1) + (0)(0) + (0)(0) + (1)(1) + (0)(0) + (0)(0) = \mathbf{2}$$
+
+</div>
+:::
+:::
+
+---
+
 ## Overlap = Intersecting Neighborhoods
 
 ::: {.columns}
@@ -768,7 +850,8 @@ ggraph(gr_p, layout = "circle") +
   scale_edge_width(range = c(0.4, 2.5)) +
   geom_node_point(size = 18, fill = "tan2", color = "#2c3e50", shape = 21, stroke = 1.5) +
   geom_node_text(aes(label = name), size = 6, fontface = "bold", repel = TRUE) +
-  theme_graph()
+  theme_graph() +
+  coord_cartesian(xlim = c(-1.4, 1.4), ylim = c(-1.4, 1.4), clip = "off")
 ```
 </center>
 
@@ -789,7 +872,8 @@ ggraph(gr_g, layout = "circle") +
   scale_edge_width(range = c(0.4, 2.5)) +
   geom_node_point(size = 18, fill = "steelblue", color = "#2c3e50", shape = 22, stroke = 1.5) +
   geom_node_text(aes(label = name), size = 5.5, fontface = "bold", repel = TRUE) +
-  theme_graph()
+  theme_graph() +
+  coord_cartesian(xlim = c(-1.4, 1.4), ylim = c(-1.4, 1.4), clip = "off")
 ```
 </center>
 
