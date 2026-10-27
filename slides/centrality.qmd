@@ -65,8 +65,15 @@ set.seed(42)
 # Fixed stress layout so the 19-node graph sits identically on every slide that shows it
 ly19 <- create_layout(gr19, layout = "stress")[, c("x", "y")]
 # Two-up compact table: split rows into side-by-side halves to halve vertical space
-kbl2 <- function(df, font = 18) {
+kbl2 <- function(df, font = 18, hl = character(0)) {
   n <- nrow(df); h <- ceiling(n / 2)
+  # Cell-level highlight: row_spec would shade the whole two-up row (left AND right half)
+  if (length(hl)) {
+    hit <- df[[1]] %in% hl
+    for (cc in seq_len(ncol(df))) {
+      df[[cc]][hit] <- cell_spec(df[[cc]][hit], background = "#F5B7B1")
+    }
+  }
   L <- df[1:h, , drop = FALSE]
   R <- df[(h + 1):n, , drop = FALSE]
   if (nrow(R) < h) {
@@ -76,7 +83,7 @@ kbl2 <- function(df, font = 18) {
   }
   out <- cbind(L, R)
   names(out) <- c(names(df), names(df))
-  kbl(out, format = "html", align = "c") %>%
+  kbl(out, format = "html", align = "c", escape = FALSE, row.names = FALSE) %>%
     kable_styling(bootstrap_options = c("condensed"), font_size = font)
 }
 
@@ -117,26 +124,37 @@ obs5 <- graph_from_edgelist(matrix(c(
 kobs <- igraph::degree(obs5)
 cent_obs <- sum(max(kobs) - kobs)
 cent_star <- sum(max(igraph::degree(create_star(5))) - igraph::degree(create_star(5)))
+k5 <- make_full_graph(5); V(k5)$name <- LETTERS[1:5]
 
 # Plotting helpers: fixed layouts keep each example graph visually identical across slides
-g19 <- function(hl = character(0), pt = 10, tx = 6) {
-  g <- gr19 |> as_tbl_graph() |> mutate(hl = name %in% hl)
+g19 <- function(hl = character(0), hl2 = character(0), pt = 10, tx = 6) {
+  g <- gr19 |> as_tbl_graph() |> mutate(
+    hl = dplyr::case_when(
+      name %in% hl ~ "hl",
+      name %in% hl2 ~ "hl2",
+      TRUE ~ "no"))
   ggraph(g, layout = "manual", x = ly19$x, y = ly19$y) +
     geom_edge_link(color = "steelblue", edge_width = 0.8, lineend = "round") +
     geom_node_point(aes(color = hl, x = x, y = y), size = pt) +
-    scale_color_manual(values = c("FALSE" = "tan1", "TRUE" = "red"), guide = "none") +
+    scale_color_manual(values = c("no" = "tan1", "hl" = "red", "hl2" = "forestgreen"),
+                       guide = "none") +
     geom_node_text(aes(label = name, x = x, y = y), size = tx,
                    color = "white", fontface = "bold") +
     theme_graph()
 }
-g8 <- function(graph = gr8, hl = character(0), pt = 10, tx = 6) {
-  g <- graph |> as_tbl_graph() |> mutate(hl = name %in% hl)
+g8 <- function(graph = gr8, hl = character(0), hl2 = character(0), pt = 10, tx = 6) {
+  g <- graph |> as_tbl_graph() |> mutate(
+    hl = dplyr::case_when(
+      name %in% hl ~ "hl",
+      name %in% hl2 ~ "hl2",
+      TRUE ~ "no"))
   ggraph(g, layout = "circle") +
     geom_edge_parallel(color = "steelblue", edge_width = 1,
                        arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
                        end_cap = circle(6, "mm"), sep = unit(3.5, "mm")) +
     geom_node_point(aes(color = hl), size = pt) +
-    scale_color_manual(values = c("FALSE" = "tan1", "TRUE" = "red"), guide = "none") +
+    scale_color_manual(values = c("no" = "tan1", "hl" = "red", "hl2" = "forestgreen"),
+                       guide = "none") +
     geom_node_text(aes(label = name), size = tx, color = "white", fontface = "bold") +
     theme_graph() + coord_cartesian(clip = "off")
 }
@@ -274,6 +292,7 @@ kbl(M19, format = "html", align = "c") %>%
 ```{r}
 #| echo: false
 kbl(M19, format = "html", align = "c") %>%
+  row_spec(match(c("j", "r"), rownames(M19)), background = "#F5B7B1") %>%
   column_spec(1, bold = TRUE) %>%
   kable_styling(bootstrap_options = c("condensed"), font_size = 18) %>%
   scroll_box(width = "100%", height = "440px")
@@ -281,12 +300,13 @@ kbl(M19, format = "html", align = "c") %>%
 :::
 
 ::: {.column width="45%"}
-```{r}
-#| echo: false
-rt <- data.frame(node = letters[1:19], degree = as.vector(deg19))
-kbl2(rt)
-```
-- In this graph, node **j** has the largest degree centrality ($k_j = 7$)!
+- **Node j** has the most ties: its row has seven 1s (columns **i** through **p**):
+
+$$k_j = \underbrace{1 + 1 + \cdots + 1}_{7 \text{ ones}} = 7$$
+
+- **Node r** has the fewest: all 0s except $a_{rh}$:
+
+$$k_r = a_{rh} = 1$$
 :::
 :::
 
@@ -309,7 +329,7 @@ g19(hl = "j", pt = 9, tx = 5.5)
 #| echo: false
 rd <- rank_df(deg19)
 rd$score <- as.integer(rd$score)
-kbl2(rd)
+kbl2(rd, hl = "j")
 ```
 
 - Node **j** (7 ties, highlighted) tops the ranking; **r** and **s** (1 tie each) sit at the bottom
@@ -336,9 +356,12 @@ g19(hl = "j", pt = 9, tx = 5.5)
 ::: {.column width="60%"}
 <div style="font-size: 85%;">
 
-- Raw degree is sensitive to network **size**: 20 friends means something very different in a school of 1,000 vs. 100.
+- Raw degree is sensitive to network **size**
 
 - Freeman (1979) proposed **normalizing** by the maximum possible degree, $N - 1$: $C_{i(norm)}^{DEG} = C_i^{DEG} / (N - 1)$
+
+- In our example graph, $N = 19$, so the maximum possible degree is $N - 1 = 18$
+- Example: **j** scores $7/18 = 0.39$; **r** scores $1/18 = 0.06$ (top and bottom of the table)
 
 ```{r}
 #| echo: false
@@ -406,18 +429,29 @@ kbl(D8, format = "html", align = "c") %>%
 - **Outdegree** = summing the **rows** of the asymmetric adjacency matrix
 - **Indegree** = summing the **columns**
 
+::: {.columns}
+::: {.column width="50%"}
+**Outdegree ranking**
+
 ```{r}
 #| echo: false
-oitable <- data.frame(
-  node = paste0("v", 1:8),
-  outdegree = as.vector(out8),
-  indegree = as.vector(in8),
-  out_norm = round(out8 / 7, 2),
-  in_norm = round(in8 / 7, 2)
-)
-kbl(oitable, format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("condensed"), font_size = 18)
+ro <- data.frame(node = names(out8), outdeg = as.vector(out8), norm = round(out8 / 7, 2))
+ro <- ro[order(-ro[["outdeg"]]), ]
+kbl2(ro, hl = "v4")
 ```
+:::
+
+::: {.column width="50%"}
+**Indegree ranking**
+
+```{r}
+#| echo: false
+ri <- data.frame(node = names(in8), indeg = as.vector(in8), norm = round(in8 / 7, 2))
+ri <- ri[order(-ri[["indeg"]]), ]
+kbl2(ri, hl = "v4")
+```
+:::
+:::
 
 . . .
 
@@ -580,7 +614,7 @@ g19(hl = "i", pt = 9, tx = 5.5)
 ```{r}
 #| echo: false
 rc <- rank_df(clo19)
-kbl2(rc)
+kbl2(rc, hl = "i")
 ```
 
 . . .
@@ -664,7 +698,8 @@ g8(hl = "v4", pt = 9, tx = 5.5)
 #| echo: false
 dc8 <- data.frame(node = paste0("v", 1:8),
                   farness = as.vector(far8), closeness = clo8)
-kbl(dc8, format = "html", align = "c") %>%
+kbl(dc8, format = "html", align = "c", row.names = FALSE) %>%
+  row_spec(match("v4", dc8$node), background = "#F5B7B1") %>%
   kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
@@ -711,6 +746,17 @@ kbl(D8w, format = "html", align = "c") %>%
 
 ## The Row Sums Turn to Infinity
 
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.4
+#| fig-width: 4.4
+g8(graph = gr8w, pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
 ```{r}
 #| echo: false
 kbl(dw8, format = "html", align = "c") %>%
@@ -722,6 +768,8 @@ kbl(dw8, format = "html", align = "c") %>%
 
 - The geodesic distance between some pairs is now **infinity** — and the row sums turn into Infs: for any number $x$, $x + \infty = \infty$
 - **Closeness is undefined!**
+:::
+:::
 
 ---
 
@@ -750,6 +798,7 @@ $$\frac{1}{\infty} = 0$$
 ```{r}
 #| echo: false
 kbl(dw8, format = "html", align = "c") %>%
+  row_spec(match("v2", rownames(dw8)), background = "#F5B7B1") %>%
   column_spec(1, bold = TRUE) %>%
   kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
@@ -759,13 +808,20 @@ kbl(dw8, format = "html", align = "c") %>%
 ```{r}
 #| echo: false
 kbl(round(inv8, 2), format = "html", align = "c") %>%
+  row_spec(match("v2", rownames(inv8)), background = "#F5B7B1") %>%
   column_spec(1, bold = TRUE) %>%
   kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 :::
 :::
 
-- No more infinities — unreachable pairs become **zeroes**!
+- No more infinities — unreachable pairs become **zeroes**! Sum row **v2**, divide by $N - 1 = 7$:
+
+<div class="math-dense" style="font-size: 100%;">
+
+$$C_{v2}^{HARM} = \tfrac{1}{7}(0.5 + 0 + 1 + 0.5 + 1 + 0.33 + 0 + 0.25) = 0.51$$
+
+</div>
 
 ---
 
@@ -777,7 +833,7 @@ kbl(round(inv8, 2), format = "html", align = "c") %>%
 #| echo: false
 #| fig-height: 4.4
 #| fig-width: 4.4
-g8(graph = gr8w, hl = c("v2", "v5"), pt = 9, tx = 5.5)
+g8(graph = gr8w, hl = "v5", hl2 = "v2", pt = 9, tx = 5.5)
 ```
 :::
 
@@ -785,16 +841,18 @@ g8(graph = gr8w, hl = c("v2", "v5"), pt = 9, tx = 5.5)
 ```{r}
 #| echo: false
 rh <- data.frame(node = paste0("v", 1:8),
-                 harmonic = har8, normalized = har8n)
+                 harmonic = as.vector(har8), normalized = as.vector(har8n))
 rh <- rh[order(rh$harmonic, decreasing = TRUE), ]
-kbl(rh, format = "html", align = "c") %>%
+kbl(rh, format = "html", align = "c", row.names = FALSE) %>%
+  row_spec(match("v2", rh$node), background = "#ABEBC6") %>%
+  row_spec(match("v5", rh$node), background = "#F5B7B1") %>%
   kable_styling(bootstrap_options = c("condensed"), font_size = 18)
 ```
 
 . . .
 
-- **v2** is now highest (0.51): even though nobody can reach it, it can reach almost everybody quickly
-- **v5** gets exactly 0: it can reach no one at all
+- **v2** (green) is now highest (0.51): even though nobody can reach it, it can reach almost everybody quickly
+- **v5** (red) gets exactly 0: it can reach no one at all
 - Harmonic centrality is defined for **all** graphs — connected or not!
 :::
 :::
@@ -820,7 +878,12 @@ g19(hl = "h", pt = 9, tx = 5.5)
 ::: {.column width="56%"}
 <div style="font-size: 88%;">
 
-- A node that is **in the middle** of the largest number of shortest paths indirectly connecting **other** pairs of nodes has the largest **betweenness centrality**!
+- **Betweenness centrality** asks: how often does a node sit **in the middle** of shortest paths connecting **other** pairs of nodes?
+
+. . .
+
+- Picture messages, rumors, or goods traveling from node to node along **shortest paths**
+- A high-betweenness node is a **middleperson**: a large share of those trips pass straight through it
 
 . . .
 
@@ -838,9 +901,35 @@ g19(hl = "h", pt = 9, tx = 5.5)
 
 ---
 
+## What is an "Inner Node"?
+
+::: {.columns}
+::: {.column width="44%"}
+```{r}
+#| echo: false
+#| fig-height: 4.5
+#| fig-width: 4.5
+g19(hl = c("g", "i"), hl2 = "h", pt = 9, tx = 5.5)
+```
+:::
+
+::: {.column width="56%"}
+- Pick any two **other** nodes — say **g** and **i** (the red **endpoints**)
+- This graph has exactly one shortest path between them: $g \to h \to i$
+- **h** is the **inner node** — the middleperson (green)
+
+. . .
+
+- Every trip between g and i passes through h: $p_{g(h)i} = 1$ — a **full point** for h!
+- Betweenness: collect h's share for **every pair** of other nodes, then add it all up
+:::
+:::
+
+---
+
 ## Stress Centrality: A First Attempt
 
-- For each node $k$: how often does it show up as an **inner node** on shortest paths between every other pair $i, j$? Total **traffic** through the node (Shimbel 1953): $C^{STRESS}_k = \sum_{i \neq k} \sum_{j \neq k} n_{i(k)j}$
+- A **first attempt** at betweenness: for each node $k$, **count** how many shortest paths between every other pair $i, j$ feature $k$ as an **inner node** — the total **traffic** through $k$ (Shimbel 1953): $C^{STRESS}_k = \sum_{i \neq k} \sum_{j \neq k} n_{i(k)j}$
 
 ::: {.columns}
 ::: {.column width="44%"}
@@ -885,7 +974,7 @@ kbl2(rs19)
 #| echo: false
 #| fig-height: 4.5
 #| fig-width: 4.5
-g19(hl = c("d", "h", "a"), pt = 9, tx = 5.5)
+g19(hl = c("h", "a"), hl2 = "d", pt = 9, tx = 5.5)
 ```
 :::
 
@@ -893,7 +982,7 @@ g19(hl = c("d", "h", "a"), pt = 9, tx = 5.5)
 <div style="font-size: 85%;">
 
 - The **relative betweenness** of $k$ w.r.t. nodes $i, j$ = the proportion of shortest paths between $i$ and $j$ that feature $k$ as an inner node
-- **What is $d$'s relative betweenness w.r.t. $h$ and $a$?** (all highlighted)
+- **What is $d$'s relative betweenness w.r.t. $h$ and $a$?** (endpoints in red; the candidate inner node **d** in green)
 
 First, list all shortest paths between h and a:
 
@@ -913,17 +1002,19 @@ First, list all shortest paths between h and a:
 
 ## Betweenness Centrality: The Formula
 
-- Do this for **every triplet** $i, j, k$ (with $i \neq k$ and $j \neq k$) and sum:
+- The worked example, turned into a recipe — for each node $k$:
+
+1. Pick every pair of **other** nodes $i, j$ — the **endpoints**
+1. Find **all** their shortest paths; count them: $g_{ij}$
+1. Count the ones featuring $k$ as an **inner node**: $g_{i(k)j}$
+1. **Add up** each pair's **fraction** $g_{i(k)j}/g_{ij}$ over all pairs:
 
 $$C_k^{BET} = \sum_{i \neq k} \sum_{j \neq k} \frac{g_{i(k)j}}{g_{ij}}$$
 
-- $g_{ij}$: total number of shortest paths linking nodes $i$ and $j$
-- $g_{i(k)j}$: the number of those paths featuring $k$ as an **inner node**
-
 . . .
 
-- Each term is the **proportion of shortest paths** between $i$ and $j$ that feature $k$ as an intermediary
-- A node gains a full point for being on *all* paths between a pair; a fraction otherwise
+- From the example: pair $(h, a)$ contributed $\frac{1}{4} = 0.25$ to **d**'s total
+- A **full point** when $k$ sits on *all* paths between a pair; a fraction otherwise
 
 ---
 
@@ -1035,13 +1126,51 @@ kbl(t(st7[, c("node", "degree", "closeness", "betweenness")]),
 ## Graph Centralization
 
 - So far: centrality of **nodes**. We can also ask how **centralized** a whole **graph** is (Freeman 1979)
-- Idea: compare the observed network to the **star graph of the same order** — the maximally centralized network
+- Recipe: find the **maximum degree** $k_{max}$; each node "falls short" of it by $k_{max} - k_i$; **add up the shortfalls**
 
 . . .
 
-- For degree centralization: sum the differences between the **maximum degree** and each node's degree:
+- But the raw sum grows with graph **size** — we need a fixed benchmark: the **largest possible** sum of shortfalls
+- The **star** achieves it. In a star with $n$ nodes ($k_{max} = n - 1$):
+  - the **center** falls short by $(n-1) - (n-1) = 0$
+  - each of the $n-1$ **satellites** (degree 1) falls short by $(n-1) - 1 = n-2$
+  - total: $(n-1) \times (n-2)$
 
-$$C_G = \frac{\sum_i (k_{max} - k_i)}{\sum_i (k_{max}^{star} - k_i^{star})} = \frac{\sum_i (k_{max} - k_i)}{(n-1)(n-2)}$$
+$$C_G = \frac{\sum_i (k_{max} - k_i)}{(n-1)(n-2)}$$
+
+---
+
+## Centralization of the Star: The Maximum
+
+::: {.columns}
+::: {.column width="40%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.6
+#| fig-width: 3.6
+ggraph(star7, layout = "star") +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 16, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, color = "white", fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+</center>
+:::
+
+::: {.column width="60%"}
+- Take the 7-node star: $k_{max} = 6$
+- Center **A** falls short by $6 - 6 = 0$
+- Each of the six satellites falls short by $6 - 1 = 5$
+- Sum of shortfalls: $0 + 6 \times 5 = \mathbf{30}$
+- Benchmark: $(n-1)(n-2) = 6 \times 5 = \mathbf{30}$
+
+. . .
+
+- **Degree centralization** $= 30/30 = \mathbf{1.00}$ — the maximum!
+- The star is the **most centralized** graph of its size
+:::
+:::
 
 ---
 
@@ -1078,10 +1207,37 @@ kbl(kobs_df, format = "html", align = "c") %>%
 :::
 :::
 
+---
+
+## The Other Extreme: The Complete Graph
+
+::: {.columns}
+::: {.column width="40%"}
+<center>
+```{r}
+#| echo: false
+#| fig-height: 3.6
+#| fig-width: 3.6
+ggraph(k5, layout = "circle") +
+  geom_edge_link(color = "steelblue", edge_width = 1.2) +
+  geom_node_point(size = 16, color = "tan2") +
+  geom_node_text(aes(label = name), size = 8, color = "white", fontface = "bold") +
+  theme_graph() + coord_cartesian(clip = "off")
+```
+</center>
+:::
+
+::: {.column width="60%"}
+- In the **complete graph** on 5 nodes, everyone ties: $k_{max} = 4$ and every $k_i = 4$
+- Every shortfall: $4 - 4 = 0$; sum of shortfalls: $\mathbf{0}$
+- **Degree centralization** $= 0/12 = \mathbf{0.00}$ — the minimum!
+
 . . .
 
-- Ranges from 0 (every node equally central) to 1 (perfect star)
-- A graph-level summary of how unevenly centrality is distributed
+- Our 19-node example lands in between: $71/306 = 0.23$
+- Centralization: how **unevenly** centrality is distributed across the whole graph — 0 (egalitarian) to 1 (star)
+:::
+:::
 
 ---
 
