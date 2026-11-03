@@ -134,19 +134,206 @@ p_iun <- ggraph(g_iun, layout = "manual", x = l_iun[,1], y = l_iun[,2]) +
   labs(title = "Tertius Iungens (Connecting)") + theme_graph() + 
   coord_cartesian(xlim = c(-1.2, 1.2), ylim = c(-0.2, 0.8), clip = "off") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14), legend.position = "none")
+
+# 4. Two-path with a structural hole (intro slide)
+g_dy <- tbl_graph(nodes = data.frame(name = c("A", "B", "C")),
+                  edges = data.frame(from = c("A", "B"), to = c("B", "C")), directed = TRUE)
+l_dy <- matrix(c(-1.0, 0.0,  0.0, 0.7,  1.0, 0.0), ncol = 2, byrow = TRUE)
+p_dy <- ggraph(g_dy, layout = "manual", x = l_dy[,1], y = l_dy[,2]) +
+  geom_edge_link(color = "steelblue", width = 1.8,
+                 arrow = arrow(length = unit(3, 'mm')),
+                 end_cap = circle(7.5, 'mm'), start_cap = circle(6.0, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  annotate("text", x = 0, y = -0.30, label = "A and C are not tied:\nthe structural hole",
+           color = "firebrick", size = 5.2, fontface = "bold", lineheight = 0.95) +
+  theme_graph() +
+  coord_cartesian(xlim = c(-1.25, 1.25), ylim = c(-0.60, 0.95), clip = "off")
+
+# 5. Mini pair: open two-path vs closed triangle
+make_mini <- function(closed, title) {
+  edges_m <- if (closed) data.frame(from = c("A", "B", "A"), to = c("B", "C", "C"))
+             else data.frame(from = c("A", "B"), to = c("B", "C"))
+  g_m <- tbl_graph(nodes = data.frame(name = c("A", "B", "C")), edges = edges_m, directed = FALSE)
+  l_m <- matrix(c(-0.9, -0.5,  0.0, 0.6,  0.9, -0.5), ncol = 2, byrow = TRUE)
+  ggraph(g_m, layout = "manual", x = l_m[,1], y = l_m[,2]) +
+    geom_edge_link(color = "steelblue", width = 1.6) +
+    geom_node_point(size = 15, color = "tan2") +
+    geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+    labs(title = title) +
+    theme_graph() +
+    coord_cartesian(xlim = c(-1.1, 1.1), ylim = c(-0.8, 0.9), clip = "off") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13))
+}
+p_mini_pair <- make_mini(FALSE, "Open two-path") + make_mini(TRUE, "Closed triangle")
+
+# 6. A second tie crossing the hole (redundancy)
+edges_sh2 <- rbind(edges_sh, data.frame(from = "3", to = "6"))
+gr_sh2 <- tbl_graph(nodes = nodes_sh, edges = edges_sh2, directed = FALSE)
+p_sh2 <- ggraph(gr_sh2, layout = "manual", x = l_coords_sh[,1], y = l_coords_sh[,2]) +
+  geom_edge_link(aes(color = node1.name == "3" & node2.name == "6"), width = 1.8) +
+  scale_edge_color_manual(values = c("TRUE" = "firebrick", "FALSE" = "grey75")) +
+  geom_node_point(aes(color = group), size = 15) +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  scale_color_manual(values = c("Group A" = "steelblue", "Group B" = "forestgreen", "Broker" = "firebrick")) +
+  theme_graph() + theme(legend.position = "none") +
+  coord_cartesian(xlim = c(-2.5, 2.5), ylim = c(-1.0, 1.0), clip = "off")
+
+# 7. Ego networks: high vs low constraint
+plot_ego_c <- function(closed, title) {
+  al <- c("a", "b", "c", "d")
+  edges_e <- data.frame(from = rep("Ego", 4), to = al)
+  if (closed) {
+    pr <- combn(al, 2, simplify = FALSE)
+    edges_e <- rbind(edges_e, data.frame(from = sapply(pr, `[`, 1), to = sapply(pr, `[`, 2)))
+  }
+  nm <- c("Ego", al)
+  g_e <- tbl_graph(nodes = data.frame(name = nm, role = ifelse(nm == "Ego", "Ego", "Alter")),
+                   edges = edges_e, directed = FALSE)
+  ang <- (0:3) * pi/2 + pi/4
+  l_e <- rbind(c(0, 0), cbind(cos(ang), sin(ang)) * 1.15)
+  ggraph(g_e, layout = "manual", x = l_e[,1], y = l_e[,2]) +
+    geom_edge_link(color = "grey65", width = 1.4) +
+    geom_node_point(aes(color = role), size = 15, show.legend = FALSE) +
+    geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+    scale_color_manual(values = c(Ego = "firebrick", Alter = "tan2")) +
+    labs(title = title) +
+    theme_graph() +
+    coord_cartesian(xlim = c(-1.45, 1.45), ylim = c(-1.45, 1.45), clip = "off") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13))
+}
+p_ego_hi <- plot_ego_c(TRUE, "High constraint: closed")
+p_ego_lo <- plot_ego_c(FALSE, "Low constraint: open")
+
+# 8. Three determinants of constraint
+det_plot <- function(names, edges_df, coords, title, hl = "Ego") {
+  g_d <- tbl_graph(nodes = data.frame(name = names, role = ifelse(names == hl, "Focus", "Other")),
+                   edges = edges_df, directed = FALSE)
+  ggraph(g_d, layout = "manual", x = coords[,1], y = coords[,2]) +
+    geom_edge_link(color = "grey65", width = 1.3) +
+    geom_node_point(aes(color = role), size = 14, show.legend = FALSE) +
+    geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+    scale_color_manual(values = c(Focus = "firebrick", Other = "tan2")) +
+    labs(title = title) +
+    coord_cartesian(xlim = c(min(coords[,1]) - 0.45, max(coords[,1]) + 0.45),
+                    ylim = c(min(coords[,2]) - 0.45, max(coords[,2]) + 0.45)) +
+    theme_graph() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12.5))
+}
+
+# Size: six alters, none of them tied to each other
+al6 <- c("a", "b", "c", "d", "e", "f")
+ang6 <- (0:5) * pi/3
+e_size <- data.frame(from = rep("Ego", 6), to = al6)
+p_size <- det_plot(c("Ego", al6), e_size,
+                   rbind(c(0, 0), cbind(cos(ang6), sin(ang6)) * 1.15),
+                   "1. Size: many alters")
+
+# Density: three alters, all tied to each other
+al3 <- c("a", "b", "c")
+pr3 <- combn(al3, 2, simplify = FALSE)
+e_dens <- rbind(data.frame(from = rep("Ego", 3), to = al3),
+                data.frame(from = sapply(pr3, `[`, 1), to = sapply(pr3, `[`, 2)))
+ang3 <- c(pi/2, pi/2 + 2*pi/3, pi/2 + 4*pi/3)
+p_dens <- det_plot(c("Ego", al3), e_dens,
+                   rbind(c(0, 0), cbind(cos(ang3), sin(ang3)) * 1.15),
+                   "2. Density: alters all tied")
+
+# Hierarchy: a, b, c reach each other only through the hub q
+e_hier <- data.frame(from = c("Ego", "Ego", "Ego", "Ego", "q", "q", "q"),
+                     to   = c("a", "b", "c", "q", "a", "b", "c"))
+l_hier <- matrix(c(-1.3, 0.0,   # Ego
+                    0.1, 0.0,   # q (hub)
+                    1.3, 0.75,  # a
+                    1.3, 0.0,   # b
+                    1.3, -0.75), ncol = 2, byrow = TRUE)
+p_hier <- det_plot(c("Ego", "q", "a", "b", "c"), e_hier, l_hier,
+                   "3. Hierarchy: ties funnel through q", hl = "q")
+
+# 9. Idea generation: broker between two information pools
+idea_nodes <- data.frame(name = c("A1", "A2", "A3", "B1", "B2", "B3", "B"),
+                         grp = c(rep("pA", 3), rep("pB", 3), "brok"))
+idea_edges <- data.frame(from = rep("B", 6), to = c("A1", "A2", "A3", "B1", "B2", "B3"))
+g_idea <- tbl_graph(nodes = idea_nodes, edges = idea_edges, directed = FALSE)
+l_idea <- rbind(cbind(-1.4, c(0.8, 0, -0.8)), cbind(1.4, c(0.8, 0, -0.8)), c(0, 0))
+p_idea <- ggraph(g_idea, layout = "manual", x = l_idea[,1], y = l_idea[,2]) +
+  geom_edge_link(color = "grey75", width = 1.4) +
+  geom_node_point(aes(color = grp), size = 14, show.legend = FALSE) +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  scale_color_manual(values = c(pA = "steelblue", pB = "forestgreen", brok = "firebrick")) +
+  annotate("text", x = -1.4, y = 1.35, label = "Group A's pool", size = 5, fontface = "bold", color = "steelblue") +
+  annotate("text", x = 1.4, y = 1.35, label = "Group B's pool", size = 5, fontface = "bold", color = "forestgreen") +
+  theme_graph() +
+  coord_cartesian(xlim = c(-1.9, 1.9), ylim = c(-1.05, 1.55), clip = "off")
+
+# 10. Stylized constraint-reward gradient (Empirical Findings slide)
+p_reward <- ggplot(data.frame(x = c(0, 1)), aes(x)) +
+  stat_function(fun = function(x) 1.05 - 0.85 * x, color = "steelblue", linewidth = 1.6) +
+  scale_y_continuous(limits = c(0, 1.45), breaks = NULL, labels = NULL) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("Low\n(open network)", "High\n(closed network)")) +
+  labs(x = "Network constraint", y = "Organizational rewards") +
+  annotate("text", x = 0.03, y = 1.38, label = "Brokers: higher salary,\nfaster promotion,\nbetter evaluations",
+           hjust = 0, size = 4.6, fontface = "bold", color = "firebrick", lineheight = 0.95) +
+  theme_minimal(base_size = 15) +
+  theme(panel.grid = element_blank(),
+        axis.title = element_text(face = "bold"),
+        axis.text.x = element_text(face = "bold"))
+
+# 11. Gould & Fernandez triad: Source -> Broker -> Target
+g_gfr <- tbl_graph(nodes = data.frame(name = c("A", "B", "C")),
+                   edges = data.frame(from = c("A", "B"), to = c("B", "C")), directed = TRUE)
+l_gfr <- matrix(c(-1.0, 0.0,  0.0, 0.7,  1.0, 0.0), ncol = 2, byrow = TRUE)
+p_gfr <- ggraph(g_gfr, layout = "manual", x = l_gfr[,1], y = l_gfr[,2]) +
+  geom_edge_link(color = "steelblue", width = 1.8, arrow = arrow(length = unit(3, 'mm')),
+                 end_cap = circle(7.5, 'mm'), start_cap = circle(6.0, 'mm')) +
+  geom_node_point(size = 15, color = "tan2") +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  annotate("text", x = -1.0, y = -0.30, label = "Source", size = 5.2, fontface = "bold") +
+  annotate("text", x = 0.0, y = 0.98, label = "Broker", size = 5.2, fontface = "bold") +
+  annotate("text", x = 1.0, y = -0.30, label = "Target", size = 5.2, fontface = "bold") +
+  theme_graph() +
+  coord_cartesian(xlim = c(-1.25, 1.25), ylim = c(-0.50, 1.10), clip = "off")
+
+# 12. Worked constraint example: ego E; alters a, b (tied to each other) and c (isolated)
+g_wk <- tbl_graph(nodes = data.frame(name = c("E", "a", "b", "c"),
+                                     role = ifelse(c("E", "a", "b", "c") == "E", "Ego", "Alter")),
+                  edges = data.frame(from = c("E", "E", "E", "a"), to = c("a", "b", "c", "b")),
+                  directed = FALSE)
+l_wk <- matrix(c(-1.2, 0.0,   # E
+                  0.6, 0.85,  # a
+                  0.6, -0.85, # b
+                  1.7, 0.0), ncol = 2, byrow = TRUE)  # c
+p_wk <- ggraph(g_wk, layout = "manual", x = l_wk[,1], y = l_wk[,2]) +
+  geom_edge_link(color = "grey65", width = 1.6) +
+  geom_node_point(aes(color = role), size = 15, show.legend = FALSE) +
+  geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
+  scale_color_manual(values = c(Ego = "firebrick", Alter = "tan2")) +
+  theme_graph() +
+  coord_cartesian(xlim = c(-1.5, 2.0), ylim = c(-1.1, 1.1), clip = "off")
 ```
 
 ## From Dyads to Triads: Introduction to Brokerage
 
-- In network analysis, moving from **dyads** (two nodes) to **triads** (three nodes) introduces group-level dynamics:
-  - Georg Simmel (1908) argued that a third actor introduces options for alliance, conflict, and **intermediation**.
+::: {.columns}
+::: {.column width="52%"}
+- Moving from **dyads** to **triads** introduces group-level dynamics: Georg Simmel (1908) showed that a third actor creates options for alliance, conflict, and **intermediation**.
 
-- **Intermediation** represents two-paths:
-  - If node A is connected to B, and B is connected to C, but A and C are not connected, B acts as an intermediary.
+- **Intermediation** is a two-path: A is tied to B, B is tied to C, but A and C are **not** tied — B stands between them.
 
-- **Brokerage Opportunities**:
-  - The gaps between disconnected actors represent opportunities for control and information flow.
-  - Ronald Burt's **Structural Holes Theory (SHT)** (1992, 1995) formalizes these opportunities as a key source of **social capital**.
+- Gaps between disconnected actors are opportunities for **control** and **information flow**.
+
+- Ronald Burt's **Structural Holes Theory (SHT)** (1992, 1995) formalizes these gaps as a key source of **social capital**.
+:::
+
+::: {.column width="48%"}
+```{r}
+#| echo: false
+#| fig-height: 3.4
+#| fig-width: 4.6
+p_dy
+```
+:::
+:::
 
 ---
 
@@ -159,17 +346,21 @@ p_iun <- ggraph(g_iun, layout = "manual", x = l_iun[,1], y = l_iun[,2]) +
   - In graph-theoretic terms, they are **two-paths that are not closed triangles**.
 
 - **Open vs. Closed Networks**:
-  - Densely connected groups with high **clustering** (where friends of friends are friends) lack structural holes.
-  - Networks with many disconnected groups contain structural holes.
+  - Densely connected, high-**clustering** groups (friends of friends are friends) lack structural holes.
+  - Disconnected clusters leave holes between them.
   
 - **The Broker**:
   - An actor who spans or "fills" a structural hole is a **broker**.
 :::
 
 ::: {.column width="50%"}
-- **Structural Redundancy**:
-  - Densely clustered networks have high **redundancy**—information spreads rapidly, but everyone hears the same things.
-  - Spanning a structural hole allows an actor to access non-redundant information.
+```{r}
+#| echo: false
+#| fig-height: 3.0
+#| fig-width: 5.5
+p_mini_pair
+```
+- **Redundancy**: in closed networks, everyone hears the same things. Spanning a hole buys access to **non-redundant** information.
 :::
 :::
 
@@ -199,114 +390,196 @@ p_sh
 
 ---
 
+## When a Hole Starts to Close: Redundancy
+
+::: {.columns}
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 4.2
+#| fig-width: 4.6
+p_sh2
+```
+:::
+
+::: {.column width="55%"}
+- Same two groups, same red broker — but now a **second channel** (the red tie 3–6) crosses the gap.
+
+- Information can **route around** the broker: node 9's control advantage shrinks, and the two channels carry overlapping news.
+
+- Burt's point: a broker position is valuable because it is **exclusive**. Every extra tie across a hole makes ego's contacts more **redundant** — and the hole less profitable.
+:::
+:::
+
+---
+
 ## Twin Benefits of Structural Holes
 
-- Ronald Burt (1995) argues that bridging structural holes delivers two primary types of social capital benefits:
+Burt (1995): bridging structural holes pays off in two distinct currencies.
 
-- **1. Passive Exposure Effect (Information Access)**
-  - Access to diverse, novel, and non-redundant information.
-  - Since the connected groups do not interact, they possess different pools of knowledge.
-  - The broker synthesizes these disparate inputs to generate novel ideas.
+::: {.columns}
+::: {.column width="50%"}
+**1. Information access (passive)**
 
-- **2. Active Control Effect (Brokerage Advantage)**
-  - Power to control the flow of information (gatekeeping).
-  - Ability to shape how group members perceive one another.
-  - Opportunity to play disconnected actors against each other (**Tertius Gaudens**).
-  - Greater behavioral freedom; brokers are less constrained by any single group's strict norms and expectations.
+- Disconnected groups hold **different pools** of knowledge and contacts.
+
+- The broker hears things no single group member hears, and can **combine** them into novel ideas.
+:::
+
+::: {.column width="50%"}
+**2. Control (active)**
+
+- **Gatekeeping**: shaping what flows between the groups.
+
+- **Tertius gaudens**: playing disconnected actors against one another.
+
+- **Behavioral freedom**: no single group's norms and expectations fully bind the broker.
+:::
+:::
 
 ---
 
 ## Network Constraint: The Inverse of Structural Holes
 
-- **Definition**:
-  - The opposite of having structural holes in your network is **Network Constraint**.
-  - If you have high constraint, your contacts are highly connected to one another, and you have few brokerage opportunities.
+::: {.columns}
+::: {.column style="width: 32%"}
+```{r}
+#| echo: false
+#| fig-height: 3.4
+#| fig-width: 3.4
+p_ego_hi
+```
+:::
 
-- **Characteristics of High Constraint Networks**:
-  - Your ego network is highly closed (high clustering coefficient).
-  - You are subject to the strong expectations of a single group.
-  - You must rely on others for information rather than being an independent source.
+::: {.column style="width: 32%"}
+```{r}
+#| echo: false
+#| fig-height: 3.4
+#| fig-width: 3.4
+p_ego_lo
+```
+:::
 
-- **Characteristics of Low Constraint Networks**:
-  - Your ego network is open (many structural holes).
-  - You have diverse, disconnected alters who provide unique pathways for information.
+::: {.column style="width: 34%"}
+- **High constraint**: ego's contacts are tied to *each other*. News repeats; a single group's expectations bind ego.
+
+- **Low constraint**: ego's contacts are **disconnected**. Each alter is a separate doorway to a different circle.
+
+- Constraint is the mirror image of brokerage opportunity.
+:::
+:::
 
 ---
 
 ## Determinants of Network Constraint
 
-- An actor's network constraint is determined by three main structural features:
-
-- **1. Network Size (Degree)**
-  - Larger networks typically have lower constraint, as it is harder for a large number of contacts to all be connected to one another.
-
-- **2. Density (Clustering)**
-  - Higher density (cohesion) among your contacts increases your network constraint, making their information redundant.
-
-- **3. Hierarchy**
-  - Hierarchy refers to the centralization of ties.
-  - Constraint increases if your contacts are connected to a single central contact (i.e., they convey information to you via another alter, making you dependent on a central channel).
-
----
-
-## Mathematical Formulation of Constraint
-
 ::: {.columns}
-::: {.column style="width: 54%"}
-- The constraint $c_{ij}$ that alter $j$ exerts on ego $i$ is calculated as:
-  $$c_{ij} = \left(p_{ij} + \sum_{q \neq i,j} p_{iq} p_{qj}\right)^2$$
-
-- **Where**:
-  - $p_{ij}$ is the proportion of ego $i$'s network investment (e.g., tie strength, time, or frequency) dedicated to alter $j$:
-    $$p_{ij} = \frac{z_{ij} + z_{ji}}{\sum_{k} (z_{ik} + z_{ki})}$$
-  - $\sum_{q} p_{iq} p_{qj}$ is the indirect investment of $i$ in $j$ through mutual contacts $q$.
+::: {.column style="width: 33%"}
+```{r}
+#| echo: false
+#| fig-height: 3.0
+#| fig-width: 3.3
+p_size
+```
+**Size**: many alters are hard to close — bigger networks leave more holes.
 :::
 
-::: {.column style="width: 42%"}
-- **Aggregate Network Constraint** ($C_i$) is the sum of dyadic constraints across all alters:
-  $$C_i = \sum_{j} c_{ij}$$
+::: {.column style="width: 33%"}
+```{r}
+#| echo: false
+#| fig-height: 3.0
+#| fig-width: 3.3
+p_dens
+```
+**Density**: alters tied to *each other* say the same things — redundant information, high constraint.
+:::
+
+::: {.column style="width: 33%"}
+```{r}
+#| echo: false
+#| fig-height: 3.0
+#| fig-width: 3.3
+p_hier
+```
+**Hierarchy**: when all routes between ego's contacts run through one hub ($q$), ego depends on that channel.
 :::
 :::
+
+*(The formula behind these three ingredients lives in the optional appendix at the end of the deck.)*
 
 ---
 
 ## Empirical Findings: SHT in Corporate Settings
 
-- Ronald Burt's empirical work (e.g., 2004, 2005) conducts extensive studies in corporate settings to test SHT.
+::: {.columns}
+::: {.column width="46%"}
+Burt's corporate studies (2004, 2005) compare managers who differ in network constraint:
 
-- **Key Findings for Low Constraint (Open Network) Managers**:
-  - **Higher Salaries**: Senior managers and executives with low constraint earn significantly higher compensation.
-  - **Faster Promotions**: Low constraint individuals are promoted to higher ranks at a faster rate.
-  - **Better Performance Evaluations**: They receive superior ratings from their organizations.
+- **Higher salaries** for low-constraint senior managers and executives.
+- **Faster promotions** to higher ranks.
+- **Better performance evaluations** from their organizations.
 
-- **Rank Nuance**:
-  - Constraint matters less for lower-level and entry-level managers, whose work is highly standardized.
-  - For senior managers and executives, constraint is a critical predictor of performance and rewards.
+**Rank nuance**: constraint matters little for entry-level managers, whose work is standardized. For senior managers and executives, it is a critical predictor of rewards.
+:::
+
+::: {.column width="54%"}
+```{r}
+#| echo: false
+#| fig-height: 3.6
+#| fig-width: 5.2
+p_reward
+```
+Stylized gradient, not data: the finding is a **negative** association between constraint and organizational reward.
+:::
+:::
 
 ---
 
 ## Idea Generation: The Broker's Creative Edge
 
-- Why do people bridging structural holes perform better?
-  - **Burt's (2004) Mechanism**: They generate **better ideas**.
+::: {.columns}
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-height: 3.4
+#| fig-width: 4.6
+p_idea
+```
+:::
 
-- **The Idea-Generation Process**:
-  - Densely clustered groups suffer from cognitive entrapment (local echo chambers).
-  - Brokers sit at the intersection of different cognitive and cultural worlds.
-  - By spanning structural holes, brokers can select, translate, and combine disparate concepts from different groups.
-  - This synthesis leads to creative, novel, and highly valued organizational innovations.
+::: {.column width="55%"}
+- Why do brokers perform better? Burt (2004): they **generate better ideas**.
+
+- Densely clustered groups are **echo chambers**; each pool recycles the same assumptions.
+
+- Brokers sit **between pools** and can select, translate, and combine ideas that never meet inside either group.
+
+- The value is in the **recombination**: either group can produce A1 or B2; only the broker can produce the synthesis.
+:::
+:::
 
 ---
 
 ## Gould & Fernandez: Typology of Brokerage Roles
 
-- Gould & Fernandez (1989) formalized brokerage by analyzing how nodes mediate directed transactions between different groups.
-- They argue that brokerage is fundamentally a **triadic relationship** involving three distinct actors:
-  1. The **Source** (Sender)
-  2. The **Broker** (Intermediary)
-  3. The **Target** (Receiver)
-- By partitioning nodes into distinct social groups, they identified **five distinct brokerage roles** based on the group memberships of these three actors.
-- These roles differentiate between **within-group** and **between-group intermediation**.
+::: {.columns}
+::: {.column width="52%"}
+- Gould and Fernandez (1989) treat brokerage as a **triadic role**: a **Source** sends, a **Broker** intermediates, a **Target** receives.
+
+- Partition the nodes into social groups, and the **group memberships** of the three actors define **five brokerage roles**.
+
+- The roles separate **within-group** intermediation (Coordinator, Consultant) from **between-group** intermediation (Gatekeeper, Representative, Liaison).
+:::
+
+::: {.column width="48%"}
+```{r}
+#| echo: false
+#| fig-height: 3.6
+#| fig-width: 4.2
+p_gfr
+```
+:::
+:::
 
 ---
 
@@ -716,3 +989,94 @@ p_iun
 
 - **Bandwidth Matters**:
   - Social capital is a function of both network structure and the information environment. Open networks are best for simple, diverse info; closed networks are best for complex, tacit knowledge.
+
+---
+
+## Optional: The Dyadic Constraint Formula
+
+*The next three slides are optional math detail; the conceptual story is complete without them.*
+
+::: {.columns}
+::: {.column style="width: 54%"}
+- The constraint $c_{ij}$ that alter $j$ exerts on ego $i$ is calculated as:
+
+$$c_{ij} = \left(p_{ij} + \sum_{q \neq i,j} p_{iq} p_{qj}\right)^2$$
+
+- The **square** penalizes concentration: dependence on any single alter costs ego quadratically.
+:::
+
+::: {.column style="width: 42%"}
+- **Reading the formula**:
+  - **Direct investment** $p_{ij}$: the more ego relies on $j$, the more $j$ can constrain ego.
+  - **Indirect investment** $\sum_q p_{iq}p_{qj}$: mutual contacts $q$ give ego second-hand routes to $j$, tightening dependence.
+:::
+:::
+
+---
+
+## Optional: The Investment Shares $p_{ij}$
+
+::: {.columns}
+::: {.column style="width: 54%"}
+- $p_{ij}$ is the proportion of ego $i$'s network investment (tie strength, time, or frequency) dedicated to alter $j$:
+
+$$p_{ij} = \frac{z_{ij} + z_{ji}}{\sum_{k} (z_{ik} + z_{ki})}$$
+:::
+
+::: {.column style="width: 42%"}
+- **Numerator**: the mutual strength of the $i$–$j$ tie.
+
+- **Denominator**: ego's total investment across all alters.
+
+- The shares sum to 1 across alters, so concentrating investment in a few alters raises every $p_{ij}$ — and with it, constraint.
+:::
+:::
+
+---
+
+## Optional: Aggregate Constraint
+
+::: {.columns}
+::: {.column style="width: 46%"}
+- **Aggregate network constraint** sums the dyadic constraints over all of ego's alters:
+
+$$C_i = \sum_{j} c_{ij}$$
+:::
+
+::: {.column style="width: 50%"}
+- **High $C_i$**: a closed, redundant ego network — few holes to span, strong group expectations.
+
+- **Low $C_i$**: an open ego network rich in structural holes — the broker's position.
+
+- Burt's empirical claim: low $C_i$ predicts higher salaries, faster promotions, and better evaluations, at least for senior managers.
+:::
+:::
+
+---
+
+## Optional: A Worked Constraint Example
+
+::: {.columns}
+::: {.column style="width: 36%"}
+```{r}
+#| echo: false
+#| fig-height: 3.2
+#| fig-width: 3.6
+p_wk
+```
+:::
+
+::: {.column style="width: 62%"}
+- Every tie has strength 1, and each contributes $z_{Ej} + z_{jE} = 2$ to ego's total investment of 6; so each direct share is $p_{Ej} = 1/3$.
+
+| Alter | Direct $p_{Ej}$ | Indirect $\sum_q p_{Eq} p_{qj}$ | $c_{Ej}$ |
+|:--|:--|:--|:--|
+| a | 0.33 | 0.17 (via b) | **0.25** |
+| b | 0.33 | 0.17 (via a) | **0.25** |
+| c | 0.33 | 0.00 | 0.11 |
+
+- Aggregate: $C_E = 0.25 + 0.25 + 0.11 = 0.61$.
+
+- **Read the contrast**: the mutual tie between a and b raises their constraint on Ego above c's. Ego can reach each of them through the other, and they can act jointly. The isolated alter c is the hole Ego could span.
+:::
+:::

@@ -14,6 +14,120 @@ format:
     min-scale: 0.2
 ---
 
+```{r setup, include=FALSE}
+library(ggplot2)
+library(ggraph)
+library(tidygraph)
+library(patchwork)
+
+# Blau: heterogeneity (nominal parameters) vs inequality (graduated parameters)
+df_a <- data.frame(
+  grp = factor(rep(c("G1", "G2", "G3", "G4"), 2), levels = c("G1", "G2", "G3", "G4")),
+  share = c(25, 25, 25, 25, 85, 5, 5, 5),
+  soc = rep(c("Heterogeneous", "Homogeneous"), each = 4)
+)
+p_blau_a <- ggplot(df_a, aes(y = soc, x = share, fill = grp)) +
+  geom_col(width = 0.55) +
+  annotate("text", x = 57, y = 2, label = "one group: 85%", size = 3.8, fontface = "bold", color = "white") +
+  scale_fill_brewer(palette = "Set2") +
+  scale_x_continuous(limits = c(0, 103)) +
+  labs(title = "Nominal (race)", x = "Share of population (%)", y = NULL) +
+  theme_minimal(base_size = 12) +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12), legend.position = "none",
+        plot.margin = margin(2, 2, 2, 2), axis.text.y = element_text(face = "bold", size = 11))
+
+p_blau_b <- ggplot(data.frame(x = c(0, 1)), aes(x)) +
+  stat_function(fun = dnorm, args = list(mean = 0.5, sd = 0.16), color = "steelblue", linewidth = 1.4) +
+  stat_function(fun = function(x) 1.45 * dgamma(x, shape = 2, rate = 5), color = "firebrick", linewidth = 1.4) +
+  annotate("text", x = 0.98, y = 2.85, label = "egalitarian", color = "steelblue", hjust = 1, size = 4.2, fontface = "bold") +
+  annotate("text", x = 0.98, y = 2.45, label = "concentrated", color = "firebrick", hjust = 1, size = 4.2, fontface = "bold") +
+  scale_y_continuous(limits = c(0, 3.1)) +
+  labs(title = "Graduated (income)", x = NULL, y = NULL) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 12),
+        axis.text = element_blank(), axis.ticks = element_blank(),
+        plot.margin = margin(2, 2, 2, 2))
+p_blau <- p_blau_a + p_blau_b
+
+# Blau Rule 3: correlated parameters (stylized illustrations)
+df_cc <- expand.grid(race = c("Race A", "Race B"), rel = c("Religion 1", "Religion 2"))
+df_cc$val <- c(0.70, 0.10, 0.05, 0.15)
+p_cc <- ggplot(df_cc, aes(x = rel, y = race, fill = val)) +
+  geom_tile(color = "white", linewidth = 1.5) +
+  geom_text(aes(label = paste0(round(100 * val), "%")), size = 4.2, fontface = "bold") +
+  scale_fill_gradient(low = "grey95", high = "steelblue", guide = "none") +
+  labs(title = "Race × Religion", x = "Religion", y = "Race") +
+  theme_minimal(base_size = 13) +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5))
+
+set.seed(2026)
+df_cg <- data.frame(income = c(rnorm(50, 40, 7), rnorm(50, 72, 9)),
+                    grp = rep(c("Race A", "Race B"), each = 50))
+p_cg <- ggplot(df_cg, aes(x = grp, y = income, color = grp)) +
+  geom_jitter(size = 1.7, alpha = 0.55, width = 0.18, show.legend = FALSE) +
+  scale_color_manual(values = c("Race A" = "steelblue", "Race B" = "firebrick")) +
+  labs(title = "Race × Income", x = NULL, y = "Income") +
+  theme_minimal(base_size = 13) +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5),
+        axis.text.x = element_text(face = "bold"))
+
+df_kk <- data.frame(age = 20:80)
+df_kk$wealth <- 0.9 * (df_kk$age - 18)^1.8 / 10 + rnorm(61, 0, 4)
+p_kk <- ggplot(df_kk, aes(x = age, y = wealth)) +
+  geom_point(size = 1.7, color = "forestgreen", alpha = 0.7) +
+  geom_smooth(se = FALSE, color = "grey30", linewidth = 1) +
+  labs(title = "Age × Wealth", x = "Age", y = "Wealth") +
+  theme_minimal(base_size = 13) +
+  theme(plot.title = element_text(face = "bold", hjust = 0.5))
+p_rule3 <- p_cc | p_cg | p_kk
+
+# Foci continuum: tie generators <-> taste diffusers
+p_foci_spec <- ggplot(data.frame(x = 0:1), aes(x)) +
+  annotate("segment", x = 0.02, xend = 0.98, y = 0, yend = 0,
+           arrow = arrow(length = unit(5, 'mm')), linewidth = 2.2, color = "grey45") +
+  annotate("point", x = c(0.12, 0.5, 0.88), y = 0, size = 10,
+           color = c("steelblue", "darkorchid", "forestgreen")) +
+  annotate("text", x = c(0.12, 0.5, 0.88), y = 0.3,
+           label = c("Student clubs:\ntie generators", "Majors & activities:\nboth roles", "Musical genres:\ntaste diffusers"),
+           size = 4.8, fontface = "bold", lineheight = 0.95,
+           color = c("steelblue", "darkorchid", "forestgreen")) +
+  annotate("text", x = c(0.02, 0.98), y = -0.32,
+           label = c("Concrete sites of activity\n(high barriers, high interaction)",
+                     "Broad cultural structures\n(low barriers, easy adoption)"),
+           size = 4.8, hjust = c(0, 1), lineheight = 0.95) +
+  scale_y_continuous(limits = c(-0.55, 0.6), breaks = NULL, labels = NULL) +
+  scale_x_continuous(limits = c(0, 1), breaks = NULL, labels = NULL) +
+  theme_minimal(base_size = 14) +
+  theme(panel.grid = element_blank(), axis.text = element_blank(),
+        axis.title = element_blank(), axis.ticks = element_blank())
+
+# Hofstra: small dense core vs large sparse extended network
+make_net <- function(n_alt, dense, title) {
+  al <- paste0("a", 1:n_alt)
+  edges_n <- data.frame(from = rep("Ego", n_alt), to = al)
+  if (dense) {
+    pr <- combn(al, 2, simplify = FALSE)
+    edges_n <- rbind(edges_n, data.frame(from = sapply(pr, `[`, 1), to = sapply(pr, `[`, 2)))
+  }
+  nm <- c("Ego", al)
+  g_n <- tbl_graph(nodes = data.frame(name = nm, role = ifelse(nm == "Ego", "Ego", "Alter")),
+                   edges = edges_n, directed = FALSE)
+  ang <- (0:(n_alt - 1)) * 2 * pi / n_alt
+  l_n <- rbind(c(0, 0), cbind(cos(ang), sin(ang)))
+  ggraph(g_n, layout = "manual", x = l_n[,1], y = l_n[,2]) +
+    geom_edge_link(color = "grey70", width = 1.1) +
+    geom_node_point(aes(color = role), size = 11, show.legend = FALSE) +
+    geom_node_text(aes(label = ifelse(role == "Ego", "Ego", "")), vjust = 2.2, size = 7, fontface = "bold", color = "grey25") +
+    labs(title = title) +
+    theme_graph() +
+    coord_cartesian(xlim = c(-1.35, 1.35), ylim = c(-1.35, 1.35), clip = "off") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
+          plot.margin = margin(2, 2, 2, 2)) +
+    scale_color_manual(values = c(Ego = "firebrick", Alter = "tan2"))
+}
+p_hofs <- make_net(5, TRUE, "Small core network") + make_net(9, FALSE, "Large extended network")
+```
+
 ## The Puzzle of Homogeneity and Diversity
 
 - **The Homophily Propensity**:
@@ -78,18 +192,24 @@ format:
 
 ## Blau's Macrostructural Theory: Parameters
 
-- **Social Structure as Distribution**:
-  - Peter Blau (1977) defines social structure as the *distribution* of people across various **social positions** (demographics, occupations, etc.).
-  - These distributions directly determine the *structural opportunities* individuals have to associate with one another.
+::: {.columns}
+::: {.column width="52%"}
+- **Social structure as distribution**: Blau (1977) defines social structure as the *distribution* of people across **social positions**. These distributions determine who has the *opportunity* to meet whom.
 
-- **Structural Parameters**:
-  - The dimensions along which these social distinctions are made:
-  - **Nominal Parameters**: Categorical attributes with no inherent rank or ordering (e.g., gender, race, religion, nationality).
-  - **Graduated Parameters**: Rank-ordered attributes with inherent "higher" and "lower" values (e.g., age, education, income, wealth).
+- **Nominal parameters**: categorical attributes with no rank order (gender, race, religion, nationality). Their distribution is **heterogeneity**.
 
-- **Societal Properties**:
-  - **Heterogeneity**: The degree to which people are equally or unequally distributed across nominal parameters.
-  - **Inequality**: The degree to which resources or attributes are unequally distributed across graduated parameters.
+- **Graduated parameters**: rank-ordered attributes (age, education, income, wealth). Their distribution is **inequality**.
+:::
+
+::: {.column width="48%"}
+```{r}
+#| echo: false
+#| fig-width: 4.8
+#| fig-height: 2.9
+p_blau
+```
+:::
+:::
 
 ---
 
@@ -116,17 +236,18 @@ format:
 
 ## Blau's Multiform Heterogeneity (Rule 3)
 
-- **Rule 3: Correlated Dimensions of Association**
-  - Broad social structures rarely exhibit independent parameters. Instead, dimensions of social differentiation are systematically correlated at the macro level (e.g., race and religion, age and wealth, race and income).
+- **Rule 3: Correlated dimensions of association**: macro structures rarely have independent parameters; dimensions of social differentiation are systematically correlated (race with religion, race with income, age with wealth).
 
-- **Propagated Bias**:
-  - If your network exhibits a bias based on one parameter (e.g., race), it will *automatically* exhibit a bias along correlated parameters (e.g., religion), even if you are entirely neutral about religion.
-  - Observed homogeneity is often an outcome of societal correlations, not personal choices.
+- **Propagated bias**: a network biased on one parameter is automatically biased on every correlated parameter — even if ego is entirely neutral about the second. Observed homogeneity often reflects a societal correlation, not a personal choice.
 
-- **Three Types of Structural Correlations**:
-  - **Categorical-Categorical**: Race and religion (e.g., racial sorting in U.S. religious denominations).
-  - **Categorical-Continuous**: Race and income (e.g., systemic racial wealth/income gaps).
-  - **Continuous-Continuous**: Age and wealth (e.g., wealth accumulating over the life course).
+```{r}
+#| echo: false
+#| fig-width: 9.4
+#| fig-height: 3.1
+p_rule3
+```
+
+*Stylized illustrations for intuition; left to right: categorical × categorical, categorical × graduated, graduated × graduated.*
 
 ---
 
@@ -197,14 +318,20 @@ format:
 
 ## The Foci Continuum: Cultural Structures vs. Sites of Activity
 
-Different social contexts behave differently based on their physical boundedness, entry barriers, and interaction costs (Hachen et al., 2024):
+- Foci differ in **physical boundedness, entry barriers, and interaction costs** (Hachen et al., 2024) — and that determines what they do to networks.
 
-- **1. Concrete Sites of Social Activity (The Tie Generators)**:
-  - *Example*: **Student Clubs**. High face-to-face interaction and entry barriers. They are excellent at generating friendships, but friends do not easily recruit others due to activity/coordination costs.
-- **2. Broad Cultural Structures (The Taste Diffusers)**:
-  - *Example*: **Musical Genres**. Virtually unbounded, low barrier to entry. They do not generate friendships directly, but people are easily "recruited" into adopting musical tastes by pre-existing friends.
-- **3. Hybrid Foci (Generators & Diffusers)**:
-  - *Example*: **Course Areas** (academic majors) and **Activities** (drinking, gaming, volunteering). They involve both concrete face-to-face workspaces (generating ties) and shared cultural-intellectual preferences (diffusing tastes).
+- **Concrete sites** (student clubs): high face-to-face interaction, high entry barriers — excellent **tie generators**, but hard for friends to recruit each other into.
+
+- **Broad cultural structures** (musical genres): unbounded, low barriers — poor tie generators, but excellent **taste diffusers** through existing friends.
+
+- **Hybrid foci** (course areas, activities): concrete workspaces *and* shared cultural preferences — both roles at once.
+
+```{r}
+#| echo: false
+#| fig-width: 9.4
+#| fig-height: 2.6
+p_foci_spec
+```
 
 ---
 
@@ -288,14 +415,24 @@ Different social contexts behave differently based on their physical boundedness
 
 ## Testing Theories in the Digital Era: The Hofstra Facebook Study
 
-- **The Empirical Setting (Hofstra, Corten, van Tubergen, & Ellison, 2017)**:
-  - The authors analyzed the Facebook networks of Dutch adolescents ($N = 2,810$ individuals, ~1.1 million ties) to compare small core (strong-tie) networks with larger extended (weak-tie) networks.
-  - They tested whether classic offline network rules of opportunity (Blau) and context (Feld) hold true in massive, seemingly unbounded online networks.
+::: {.columns}
+::: {.column width="55%"}
+- **Setting**: the Facebook networks of Dutch adolescents (Hofstra, Corten, van Tubergen, & Ellison, 2017; $N = 2{,}810$, ~1.1 million ties), comparing small **core** (strong-tie) with larger **extended** (weak-tie) networks.
 
-- **Core Findings on Segregation**:
-  - **1. Ethnicity vs. Gender**: They found that online networks are significantly more ethnically segregated than gender-segregated.
-    * *Why?* Gender is a 50/50 split in the population (high baseline opportunity for mixed ties), while ethnic group sizes are highly unequal.
-  - **2. The Power of Foci**: Classroom and school compositions (Feld's foci) directly predict online network segregation. Physical meeting opportunities remain the primary gateway to online friendship.
+- **Question**: do the classic offline rules of opportunity (Blau) and context (Feld) still govern friendship in a seemingly unbounded online world?
+
+- **Findings**: online networks are far more **ethnically** segregated than **gender** segregated — gender is a 50/50 population split, ethnic group sizes are not — and classroom and school composition (Feld's foci) directly predicts online segregation.
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-width: 5.2
+#| fig-height: 2.8
+p_hofs
+```
+:::
+:::
 
 ---
 
