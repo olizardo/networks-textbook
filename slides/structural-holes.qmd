@@ -57,6 +57,8 @@ p_sh <- ggraph(gr_sh, layout = "manual", x = l_coords_sh[,1], y = l_coords_sh[,2
   coord_cartesian(xlim = c(-2.5, 2.5), ylim = c(-1.0, 1.0), clip = "off")
 
 # 2. Gould & Fernandez Brokerage Roles Live Plot Function
+# Same-group nodes get a translucent tinted panel (labeled with the group)
+# so the group partition behind each role is visible at a glance
 plot_brokerage <- function(node_groups, title) {
   edges_gf <- data.frame(
     from = c("A", "B"),
@@ -67,26 +69,32 @@ plot_brokerage <- function(node_groups, title) {
     group = node_groups
   )
   g_gf <- tbl_graph(nodes = nodes_gf, edges = edges_gf, directed = TRUE)
-  
-  l_coords_gf <- matrix(c(
-    -1.0,  0.0,  # A
-     0.0,  0.8,  # B (Broker)
-     1.0,  0.0   # C
-  ), ncol = 2, byrow = TRUE)
-  
-  ggraph(g_gf, layout = "manual", x = l_coords_gf[,1], y = l_coords_gf[,2]) +
+  pos <- data.frame(name = c("A", "B", "C"), x = c(-1, 0, 1), y = c(0, 0.8, 0))
+  np <- dplyr::inner_join(nodes_gf, pos, by = "name")
+  sh <- np |>
+    group_by(group) |>
+    filter(n() >= 2) |>
+    summarise(xmin = min(x) - 0.32, xmax = max(x) + 0.32,
+              ymin = min(y) - 0.26, ymax = max(y) + 0.26, .groups = "drop")
+  ggraph(g_gf, layout = "manual", x = pos$x, y = pos$y) +
+    geom_rect(data = sh, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = group),
+              alpha = 0.13, color = NA, inherit.aes = FALSE, show.legend = FALSE) +
+    scale_fill_manual(values = c("Group 1" = "steelblue", "Group 2" = "forestgreen",
+                                 "Group 3" = "firebrick"), guide = "none") +
     geom_edge_link(color = "steelblue", width = 1.8,
                    arrow = arrow(length = unit(3, 'mm')),
                    end_cap = circle(7.5, 'mm'),
                    start_cap = circle(6.0, 'mm')) +
     geom_node_point(aes(color = group), size = 14) +
     geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
-    scale_color_manual(values = c("Group 1" = "steelblue", 
-                                  "Group 2" = "forestgreen", 
+    geom_text(data = sh, aes(x = (xmin + xmax)/2, y = ymin - 0.16, label = group, color = group),
+              size = 4.3, fontface = "bold", show.legend = FALSE, inherit.aes = FALSE) +
+    scale_color_manual(values = c("Group 1" = "steelblue",
+                                  "Group 2" = "forestgreen",
                                   "Group 3" = "firebrick")) +
     labs(title = title) +
-    theme_graph() + 
-    coord_cartesian(xlim = c(-1.2, 1.2), ylim = c(-0.2, 1.0), clip = "off") +
+    theme_graph() +
+    coord_cartesian(xlim = c(-1.45, 1.45), ylim = c(-0.65, 1.05), clip = "off") +
     theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14, margin = margin(b = 10)),
           legend.position = "none")
 }
@@ -270,14 +278,16 @@ p_idea <- ggraph(g_idea, layout = "manual", x = l_idea[,1], y = l_idea[,2]) +
 p_reward <- ggplot(data.frame(x = c(0, 1)), aes(x)) +
   stat_function(fun = function(x) 1.05 - 0.85 * x, color = "steelblue", linewidth = 1.6) +
   scale_y_continuous(limits = c(0, 1.45), breaks = NULL, labels = NULL) +
-  scale_x_continuous(breaks = c(0, 1), labels = c("Low\n(open network)", "High\n(closed network)")) +
+  scale_x_continuous(limits = c(-0.2, 1.2), breaks = c(0, 1),
+                     labels = c("Low\n(open network)", "High\n(closed network)")) +
   labs(x = "Network constraint", y = "Organizational rewards") +
   annotate("text", x = 0.03, y = 1.38, label = "Brokers: higher salary,\nfaster promotion,\nbetter evaluations",
            hjust = 0, size = 4.6, fontface = "bold", color = "firebrick", lineheight = 0.95) +
   theme_minimal(base_size = 15) +
   theme(panel.grid = element_blank(),
         axis.title = element_text(face = "bold"),
-        axis.text.x = element_text(face = "bold"))
+        axis.text.x = element_text(face = "bold"),
+        plot.margin = margin(5, 12, 5, 12))
 
 # 11. Gould & Fernandez triad: Source -> Broker -> Target
 g_gfr <- tbl_graph(nodes = data.frame(name = c("A", "B", "C")),
