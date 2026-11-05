@@ -1,0 +1,875 @@
+---
+title: "Collecting Ego-Network Data"
+subtitle: "Surveys, Name Generators, Name Interpreters, and Alternative Measures"
+format:
+  revealjs:
+    incremental: true
+    scrollable: true
+    theme: default
+    center: false
+    css: ucla-theme.css
+    width: 1280
+    height: 720
+    margin: 0.1
+    min-scale: 0.2
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| include: false
+library(ggplot2)
+library(patchwork)
+library(knitr)
+library(kableExtra)
+
+kbl <- function(df, ...) {
+  kable(df, ...) |>
+    kable_styling(font_size = 18, full_width = FALSE)
+}
+
+# Stylized ego network: ego at the origin, seven alters a-g.
+nodes <- data.frame(
+  id = c("EGO", "a", "b", "c", "d", "e", "f", "g"),
+  x  = c(0, -1.2, -0.2, 1.3, 1.7, 0.9, -0.4, -1.5),
+  y  = c(0, 1.2, 1.6, 1.0, -0.2, -1.4, -1.3, 0.2)
+)
+alter_ids <- nodes$id[-1]
+ties_aa <- data.frame(
+  from = c("a", "a", "b", "b", "b", "f"),
+  to   = c("b", "g", "c", "f", "g", "g")
+)
+
+# Draws ego, alters, ego-alter ties, and the alter-alter ties among kept alters.
+# Dropped alters appear as hollow nodes with no edges.
+draw_net <- function(nd = nodes, aa = ties_aa, keep = nd$id[-1], fill = NULL) {
+  alters <- nd$id[-1]
+  if (is.null(fill)) fill <- setNames(rep("grey85", length(alters)), alters)
+  aa <- aa[aa$from %in% keep & aa$to %in% keep, , drop = FALSE]
+  el <- rbind(data.frame(from = "EGO", to = keep), aa)
+  s  <- nd[match(el$from, nd$id), c("x", "y")]
+  tg <- nd[match(el$to, nd$id), c("x", "y")]
+  edges <- data.frame(x = s$x, y = s$y, xend = tg$x, yend = tg$y)
+  dropped <- !(nd$id %in% c("EGO", keep))
+  nd$pfill <- c("#2C3E50", unname(fill[alters]))
+  nd$pfill[dropped] <- "white"
+  nd$lab <- ifelse(dropped, "grey60", ifelse(nd$id == "EGO", "white", "black"))
+  nd$psize <- ifelse(nd$id == "EGO", 17, 12)
+  nd$tsize <- ifelse(nd$id == "EGO", 4, 5)
+  ggplot() +
+    geom_segment(data = edges, aes(x = x, y = y, xend = xend, yend = yend),
+                 colour = "grey30", linewidth = 0.9) +
+    geom_point(data = nd, aes(x = x, y = y, fill = pfill, size = psize),
+               shape = 21, colour = "grey30") +
+    geom_text(data = nd, aes(x = x, y = y, label = id, colour = lab, size = tsize),
+              fontface = "bold") +
+    scale_fill_identity() +
+    scale_colour_identity() +
+    scale_size_identity() +
+    coord_equal(xlim = range(nd$x) + c(-0.7, 0.7),
+                ylim = range(nd$y) + c(-0.7, 0.7)) +
+    theme_void() +
+    theme(plot.title = element_text(hjust = 0.5, size = 13))
+}
+
+bridge_nodes <- data.frame(
+  id = c("EGO", "a", "b", "c", "d", "e", "f"),
+  x  = c(0, -2.6, -3.0, -2.0, 2.6, 3.0, 2.0),
+  y  = c(0, 1.2, -0.4, -1.4, 1.2, -0.4, -1.4)
+)
+bridge_ties <- data.frame(
+  from = c("a", "a", "b", "d", "d", "e"),
+  to   = c("b", "c", "c", "e", "f", "f")
+)
+
+# Position generator respondents (illustrative): one row per occupation on the list.
+pg_jobs <- c("Lawyer", "Mechanic", "Teacher", "Police officer",
+             "Nurse", "Accountant", "Farmer", "Engineer")
+pg_A <- data.frame(
+  job = pg_jobs,
+  know = c(TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE),
+  years = c(3, NA, 10, NA, 6, 2, NA, 1),
+  relation = c("Relative", NA, "Acquaintance", NA, "Friend", "Co-worker", NA, "Friend"),
+  closeness = c("Very close", NA, "Close", NA, "Very close", "Not close", NA, "Close")
+)
+pg_B <- data.frame(
+  job = pg_jobs,
+  know = c(FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE),
+  years = c(NA, 20, NA, NA, NA, NA, 15, NA),
+  relation = c(NA, "Relative", NA, NA, NA, NA, "Relative", NA),
+  closeness = c(NA, "Very close", NA, NA, NA, NA, "Very close", NA)
+)
+pg_metrics <- function(d) {
+  acc <- d[d$know, ]
+  list(P = nrow(acc), J = nrow(d), types = sort(unique(acc$relation)),
+       years = acc$years, ybar = mean(acc$years),
+       n_close = sum(acc$closeness %in% c("Very close", "Close")))
+}
+
+# Resource generator respondents (illustrative): one row per resource-contact access.
+rg_resources <- c("Repair a car or bike", "Own a car", "Play an instrument",
+                  "Active in a political party", "Help move house", "Give financial advice")
+rg_C <- data.frame(
+  resource = c("Repair a car or bike", "Own a car", "Active in a political party",
+               "Help move house", "Help move house", "Give financial advice"),
+  contact = c("A1", "A2", "A3", "A1", "A4", "A4"),
+  type = c("friend", "family", "acquaintance", "friend", "family", "family")
+)
+rg_C_self <- "Own a car"
+rg_D <- data.frame(
+  resource = c("Own a car", "Help move house", "Give financial advice"),
+  contact = c("B1", "B1", "B1"),
+  type = c("family", "family", "family")
+)
+rg_table <- function(d, self = character(0)) {
+  data.frame(
+    Resource = rg_resources,
+    `Know anyone?` = ifelse(rg_resources %in% d$resource, "Yes", "No"),
+    `Access through` = unname(sapply(rg_resources, function(r) {
+      s <- d[d$resource == r, ]
+      if (nrow(s) == 0) "" else paste0(s$contact, " (", s$type, ")", collapse = ", ")
+    })),
+    `And yourself?` = ifelse(rg_resources %in% self, "Yes", "No"),
+    check.names = FALSE
+  )
+}
+rg_metrics <- function(d) {
+  list(R = length(unique(d$resource)), K = length(rg_resources),
+       events = nrow(d), contacts = length(unique(d$contact)),
+       types = sort(unique(d$type)), n_fam = sum(d$type == "family"))
+}
+```
+
+## Where Does Network Data Come From?
+
+```{r}
+data.frame(
+  Source = c("Surveys", "Direct observation", "Big data"),
+  `What the researcher does` = c(
+    "Asks people about their relations",
+    "Goes to a site and records interactions",
+    "Uses digital traces of communication and interaction"
+  ),
+  `Typical settings` = c(
+    "Any population you can reach",
+    "Classrooms, neighborhoods, karate club, monastery, fraternity house",
+    "Phone logs, email, online platforms"
+  ),
+  `Main limitation` = c(
+    "Depends on what respondents recall and report",
+    "Costly, bounded to one site, and misses ties elsewhere",
+    "Captures only what leaves a digital trace; meaning of ties is often unclear"
+  ),
+  check.names = FALSE
+) |> kbl()
+```
+
+For ego networks, surveys are the optimal method. Sometimes the most effective way to figure out who a person is connected to is simply to ask them.
+
+---
+
+## Ego Networks: Asking People Directly
+
+::: {.columns}
+::: {.column width="55%"}
+<div style="font-size: 90%;">
+
+An ego network records what ego reports about:
+
+- Ego: socio-demographic and other characteristics
+- Role, exchange, and interaction relations between ego and each alter
+- Relations among the alters, as ego perceives them
+- Properties of each relation, from ego's point of view
+
+</div>
+:::
+
+::: {.column width="45%"}
+```{r}
+#| fig-width: 4.6
+#| fig-height: 4.2
+#| fig-align: center
+draw_net()
+```
+:::
+:::
+
+---
+
+## Types of Ties in Ego Networks
+
+```{r}
+data.frame(
+  `Tie type` = c("Role relations", "Sentiments and cognitions", "Behavioral interactions"),
+  Examples = c(
+    "Friends, kin, business partners",
+    "Liking, trusting, acquaintanceship",
+    "Calling, texting, citing, supporting, resource exchange"
+  ),
+  `Example survey item` = c(
+    "Who are your friends?",
+    "Whom do you trust most?",
+    "With whom did you talk in the last week?"
+  ),
+  check.names = FALSE
+) |> kbl()
+```
+
+The same alter can be connected to ego through several tie types at once, so the researcher's choice of tie type determines which network gets measured.
+
+---
+
+## Measuring Ego Networks: Four Steps
+
+1. **Pick the relation of interest.** This defines your name generator.
+2. **Set a maximum number of alters**, typically 5 to 20.
+3. **Pick the alter and tie-level characteristics you care about.** This defines your name interpreter.
+4. **Optionally, collect information on alter-to-alter relations.**
+
+---
+
+## What Each Step Changes
+
+```{r}
+#| fig-width: 10.6
+#| fig-height: 3.3
+#| fig-align: center
+p1 <- draw_net(aa = ties_aa[0, ]) +
+  labs(title = "1. Relation: ego ties")
+p2 <- draw_net(keep = c("a", "b", "c", "f", "g")) +
+  labs(title = "2. Cap: keep five alters")
+p3 <- draw_net(aa = ties_aa[0, ],
+               fill = c(a = "#AED6F1", b = "#F5B7B1", c = "#AED6F1",
+                        d = "#F5B7B1", e = "#AED6F1", f = "#F5B7B1",
+                        g = "#AED6F1")) +
+  labs(title = "3. Alter attributes (shading)")
+p4 <- draw_net() +
+  labs(title = "4. Alter-to-alter ties")
+wrap_plots(p1, p2, p3, p4, nrow = 1)
+```
+
+Panel 2 shows hollow alters that fell outside the cap of five; the cap sets the size of the network that the rest of the survey describes. Shading in panel 3 is one attribute, such as the category of the alter.
+
+---
+
+## Name Generators: Four Approaches
+
+```{r}
+data.frame(
+  Approach = c("Role-relation", "Interaction", "Affective", "Exchange"),
+  `Example prompt` = c(
+    "List up to [X] friends, co-workers, co-authors, roommates, etc.",
+    "List up to [X] people you most frequently interact with.",
+    "List up to [X] people you feel closest to or trust most.",
+    "List up to [X] people you would go to for advice, financial support, etc."
+  ),
+  `Main limitation` = c(
+    "Low reliability; \"friend\" means different things to different people",
+    "Frequency is not the same as importance or closeness",
+    "Same reliability issues as role-relation; elicits smaller networks",
+    "Not appropriate for every purpose"
+  ),
+  `Main strength` = c(
+    "Easy to ask",
+    "Fewer validity problems than role-relation; neutral criterion",
+    "Captures strong, subjectively significant ties",
+    "Fewer reliability problems; captures weak ties and more alters; fits social capital studies"
+  ),
+  check.names = FALSE
+) |> kbl()
+```
+
+Different approaches can produce ego networks with different structural characteristics.
+
+---
+
+## Famous Name Generators
+
+```{r}
+data.frame(
+  Study = c(
+    "Wellman (1979), East York Study",
+    "Fischer (1982), Northern California Communities Study",
+    "Marsden (1987), General Social Survey"
+  ),
+  `Name generator` = c(
+    "\"Name the six persons outside your home that you feel closest to.\"",
+    "\"Name all persons who would provide any of eight types of aid.\"",
+    "\"Named all persons with whom you have discussed matters important to you.\""
+  ),
+  check.names = FALSE
+) |> kbl()
+```
+
+The GSS item elicits **core discussion networks**. It was first fielded in the 1985 GSS as a probability sample of ego networks, and McPherson and Smith-Lovin replicated it in 2004.
+
+---
+
+## Choosing a Name Generator
+
+- Pick the most neutral criterion for eliciting names, such as interaction frequency.
+- Then use name interpreters to recover roles, exchanges, sentiments, and so on.
+- A neutral generator limits what the names say about roles. Interpreters restore that detail for each named alter.
+
+---
+
+## A Data Collection Case: NetHealth
+
+::: {.columns}
+::: {.column width="52%"}
+<div style="font-size: 90%;">
+
+- Interaction-based name generator, up to 20 alters
+- Eight survey waves
+- Wave 3 began feeding back wave N-1 names after subjects listed people
+- Phone number and email are collected to match alters across respondents
+- Uses: alter counts for family, pre-ND, and post-ND friends; comparing tie-strength measures; comparing perceived and actual networks; change over time in ego-network traits
+
+</div>
+:::
+
+::: {.column width="48%"}
+```{r}
+#| fig-width: 5.0
+#| fig-height: 3.6
+#| fig-align: center
+data.frame(
+  Ego = c(101, 101, 101, 101, 102),
+  Alter = c(2044, 2047, 2051, 2060, 2044),
+  Wave = c(1, 1, 2, 2, 1)
+) |>
+  kbl(col.names = c("egoid", "alterid", "wave"))
+```
+
+Long-format name generator file (illustrative rows, not NetHealth data).
+:::
+:::
+
+---
+
+## Storing Ego-Network Data
+
+::: {.columns}
+::: {.column width="50%"}
+**Name-generator file** (one row per ego-alter nomination)
+
+```{r}
+data.frame(
+  egoid = c(101, 101, 101, 102),
+  alterid = c(2044, 2047, 2051, 2044),
+  wave = c(1, 1, 1, 1)
+) |> kbl()
+```
+:::
+
+::: {.column width="50%"}
+**Alter-to-alter file** (one row per perceived tie among alters)
+
+```{r}
+data.frame(
+  alterid1 = c(2044, 2044),
+  alterid2 = c(2047, 2051),
+  egoid = c(101, 101),
+  wave = c(1, 1)
+) |> kbl()
+```
+:::
+:::
+
+Illustrative rows. The alter-to-alter file holds only ties among ego's own alters, not the full network.
+
+---
+
+## Name Interpreters: What You Can Measure
+
+```{r}
+data.frame(
+  Category = c(
+    "Sociodemographic",
+    "Relational",
+    "Sentiment and affect",
+    "Exchange and support",
+    "Duration",
+    "Similarity",
+    "Other traits"
+  ),
+  Examples = c(
+    "Sex or gender, age, race, years of education, religion",
+    "Family, friend, co-worker, roommate; relationship to an organization; frequency of contact",
+    "Closeness, trust, listing position, negative sentiments",
+    "Financial help, comfort, advice, social support, topics discussed",
+    "How long ego has known the alter",
+    "Shared tastes, attitudes, or activities (cultural matching)",
+    "Health, happiness, activity, sleep (NetHealth)"
+  ),
+  check.names = FALSE
+) |> kbl()
+```
+
+Subjective closeness is considered a reliable indicator of tie strength.
+
+---
+
+## Sample Interpreter Questions
+
+```{r}
+data.frame(
+  Construct = c("Sex of contacts", "Race and ethnicity", "Relationship",
+                "Closeness", "Support", "Duration", "Similarity"),
+  `Sample question` = c(
+    "Please indicate the sex of each of your contacts.",
+    "Check the categories that describe each contact.",
+    "What is their relationship to you?",
+    "Are you especially close, merely close, less than close, or distant?",
+    "Check the contacts who have provided each type of support.",
+    "How long have you known each person?",
+    "Overall, how similar are each of your contacts to you?"
+  ),
+  `Response format` = c(
+    "Female / male, one per alter",
+    "Checkbox grid, one row per alter",
+    "Parent, sibling, friend, acquaintance, neighbor, and so on",
+    "Four-level scale",
+    "Checkboxes: financial need, comfort, company, advice",
+    "Whole years",
+    "Ten-point scale"
+  ),
+  check.names = FALSE
+) |> kbl()
+```
+
+---
+
+## Cultural Matching: Shared Activities
+
+Ego lists up to five activities they enjoy. For each alter, the survey records whether that alter also enjoys each one. The matching count is the number of listed activities the alter shares.
+
+```{r}
+data.frame(
+  Alter = c("A1", "A2", "A3", "A4"),
+  Hiking = c("\u2713", "", "\u2713", "\u2713"),
+  Cycling = c("\u2713", "\u2713", "", ""),
+  Soccer = c("", "", "", "\u2713"),
+  Gym = c("\u2713", "", "", "\u2713"),
+  Swimming = c("", "\u2713", "\u2713", ""),
+  Matches = c(3, 2, 2, 3)
+) |> kbl(align = "lcccccc")
+```
+
+Illustrative entries. The matching count is the measure of similarity that a study would then relate to tie persistence.
+
+---
+
+## Ties Among Alters
+
+::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| fig-width: 4.8
+#| fig-height: 4.2
+#| fig-align: center
+draw_net(aa = ties_aa[0, ]) +
+  labs(title = "Ego-alter ties only")
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig-width: 4.8
+#| fig-height: 4.2
+#| fig-align: center
+draw_net() +
+  labs(title = "With alter-to-alter ties")
+```
+:::
+:::
+
+Clustering in the ego network is a property of the alter-to-alter ties, which only the optional fourth step collects.
+
+---
+
+## Alternatives: Position Generators
+
+::: {.columns}
+::: {.column width="48%"}
+<div style="font-size: 88%;">
+
+Position generators ask whether ego knows anyone in a list of occupations.
+
+- High criterion and face validity; quick to administer
+- Occupational labels are easy to understand
+- Easily standardized with occupational census codes
+- Suited to social capital and resource access
+- Simple metrics: number of positions, prestige range, top rank
+- Can be followed by a position interpreter for the tie to each position
+
+</div>
+:::
+
+::: {.column width="52%"}
+```{r}
+data.frame(
+  Job = c("Lawyer", "Mechanic", "Teacher", "Police officer"),
+  `Know anyone?` = c("Yes", "No", "Yes", "No"),
+  `Years known` = c(3, "", 10, ""),
+  Relationship = c("Relative", "", "Acquaintance", ""),
+  Closeness = c("Very close", "", "Close", ""),
+  check.names = FALSE
+) |> kbl(align = "lcccc")
+```
+
+Illustrative format after Lin (1999). Responses are invented.
+:::
+:::
+
+---
+
+## Position Generator: Worked Example
+
+::: {.columns}
+::: {.column width="58%"}
+```{r}
+pg_A |>
+  transform(years = ifelse(is.na(years), "", years),
+            relation = ifelse(is.na(relation), "", relation),
+            closeness = ifelse(is.na(closeness), "", closeness),
+            know = ifelse(know, "Yes", "No")) |>
+  setNames(c("Occupation", "Know anyone?", "Years", "Relationship", "Closeness")) |>
+  kbl(align = "lcccc")
+```
+:::
+
+::: {.column width="42%"}
+<div style="font-size: 88%;">
+
+- The eight occupations are the instrument; the same list is read to every respondent.
+- Respondent A knows someone in five of the eight.
+- Follow-up items are asked only for accessed positions, so blank rows carry no further data.
+
+</div>
+:::
+:::
+
+---
+
+## Computing Respondent A's Metrics
+
+```{r}
+m <- pg_metrics(pg_A)
+data.frame(
+  Metric = c("Positions accessed", "Relationship types", "Mean years known", "Share close"),
+  Calculation = c(
+    sprintf("%d of %d occupations", m$P, m$J),
+    paste(tolower(m$types), collapse = ", "),
+    sprintf("(%s) / %d", paste(m$years, collapse = " + "), m$P),
+    sprintf("%d of %d accessed positions are very close or close", m$n_close, m$P)
+  ),
+  Value = c(
+    sprintf("%d (%.1f%%)", m$P, 100 * m$P / m$J),
+    as.character(length(m$types)),
+    sprintf("%.1f", m$ybar),
+    sprintf("%.0f%%", 100 * m$n_close / m$P)
+  ),
+  check.names = FALSE
+) |> kbl(align = "lll")
+```
+
+The access rate is the count divided by the list length, $\frac{5}{8} = 0.625$. A prestige range would require linking each accessed occupation to an external prestige score, which this example does not include.
+
+---
+
+## Comparing Two Respondents
+
+::: {.columns}
+::: {.column width="58%"}
+```{r}
+mA <- pg_metrics(pg_A)
+mB <- pg_metrics(pg_B)
+vals <- function(x) c(
+  sprintf("%d", x$P),
+  sprintf("%.1f%%", 100 * x$P / x$J),
+  sprintf("%d", length(x$types)),
+  sprintf("%.1f", x$ybar),
+  sprintf("%.0f%%", 100 * x$n_close / x$P)
+)
+data.frame(
+  Metric = c("Positions accessed", "Share of list", "Relationship types",
+             "Mean years known", "Share close"),
+  `Respondent A` = vals(mA),
+  `Respondent B` = vals(mB),
+  check.names = FALSE
+) |> kbl(align = "lcc")
+```
+:::
+
+::: {.column width="42%"}
+<div style="font-size: 88%;">
+
+- Respondent B reaches fewer occupations, but every accessed tie is kin and very close.
+- Respondent A reaches more occupations through a wider mix of relations.
+- The counts do not say which access is more useful; that depends on what each position can provide.
+- The list length sets the scale, so compare rates within one instrument.
+
+</div>
+:::
+:::
+
+---
+
+## Alternatives: Resource Generators
+
+::: {.columns}
+::: {.column width="52%"}
+```{r}
+data.frame(
+  `Do you know anyone who...` = c(
+    "Can repair a car or bike",
+    "Owns a car",
+    "Can play an instrument",
+    "Is active in a political party"
+  ),
+  `Yes` = c("\u2713", "\u2713", "", "\u2713"),
+  `Access: acquaintance` = c("", "", "", "\u2713"),
+  `Access: friend` = c("\u2713", "", "", ""),
+  `Access: family` = c("", "\u2713", "", ""),
+  `And yourself?` = c("", "\u2713", "", ""),
+  check.names = FALSE
+) |> kbl(align = "lcccccc")
+```
+
+Illustrative format after Van der Gaag and Snijders (2003).
+:::
+
+::: {.column width="48%"}
+<div style="font-size: 88%;">
+
+- Combines the practicality of the position generator with the detail of the name generator
+- Captures several dimensions of social support and connectivity
+- Supports standardization of social capital measures across life domains
+- Simple metrics: number, popularity, and range of resources accessed
+- Links resources to role relations empirically
+
+</div>
+:::
+:::
+
+---
+
+## Resource Generator: Worked Example
+
+::: {.columns}
+::: {.column width="62%"}
+```{r}
+rg_table(rg_C, rg_C_self) |> kbl(align = "lccc")
+```
+:::
+
+::: {.column width="38%"}
+<div style="font-size: 86%;">
+
+- Respondent C names contacts A1 to A4 and sorts each resource by who provides it.
+- A2 provides the car, and C also owns one.
+- Moving help comes through two contacts, A1 and A4.
+
+</div>
+:::
+:::
+
+---
+
+## Computing Respondent C's Metrics
+
+```{r}
+mC <- rg_metrics(rg_C)
+data.frame(
+  Metric = c("Resources accessed", "Contacts used", "Access events",
+             "Relation types", "Share through family", "Events per contact"),
+  Calculation = c(
+    sprintf("%d of %d resources through alters", mC$R, mC$K),
+    "distinct contacts named in access",
+    "one row per resource-contact pair",
+    "distinct relation types among contacts",
+    sprintf("%d of %d events are family", mC$n_fam, mC$events),
+    sprintf("%d events / %d contacts", mC$events, mC$contacts)
+  ),
+  Value = c(
+    sprintf("%d (%.1f%%)", mC$R, 100 * mC$R / mC$K),
+    as.character(mC$contacts),
+    as.character(mC$events),
+    as.character(length(mC$types)),
+    sprintf("%.0f%%", 100 * mC$n_fam / mC$events),
+    sprintf("%.1f", mC$events / mC$contacts)
+  ),
+  check.names = FALSE
+) |> kbl(align = "lll")
+```
+
+The car appears in both calculations: it counts as an alter-provided resource, while ego's own ownership is recorded separately in the "And yourself?" column.
+
+---
+
+## Comparing Two Respondents: Breadth and Dependence
+
+::: {.columns}
+::: {.column width="58%"}
+```{r}
+mD <- rg_metrics(rg_D)
+rg_vals <- function(x) c(
+  sprintf("%d (%.1f%%)", x$R, 100 * x$R / x$K),
+  as.character(x$contacts),
+  as.character(length(x$types)),
+  sprintf("%.0f%%", 100 * x$n_fam / x$events),
+  sprintf("%.1f", x$events / x$contacts)
+)
+data.frame(
+  Metric = c("Resources accessed", "Contacts used", "Relation types",
+             "Share through family", "Events per contact"),
+  `Respondent C` = rg_vals(mC),
+  `Respondent D` = rg_vals(mD),
+  check.names = FALSE
+) |> kbl(align = "lcc")
+```
+:::
+
+::: {.column width="42%"}
+<div style="font-size: 86%;">
+
+- Respondent C spreads access across four contacts and three relation types, with no contact providing more than two resources.
+- Respondent D reaches half the resources, all through one family member, so that access depends on a single tie.
+- The metrics describe breadth and dependence. They do not show how useful each resource is.
+- As with the position generator, the resource list is the instrument, so compare rates within one list.
+
+</div>
+:::
+:::
+
+---
+
+## Visual Network Scales: Open or Clustered
+
+Respondents choose which picture best approximates how interconnected their close friends are. Each diagram is a stylized, redrawn example, not respondent data.
+
+```{r}
+#| fig-width: 10.6
+#| fig-height: 3.0
+#| fig-align: center
+set.seed(3719)
+pairs <- t(combn(alter_ids, 2))
+ord <- pairs[sample(nrow(pairs)), ]
+density_titles <- c("1. None", "2. A few", "3. About half", "4. Most", "5. All")
+density_counts <- c(0, 5, 10, 16, 21)
+density_panels <- Map(function(k, ttl) {
+  aa_k <- data.frame(from = ord[seq_len(k), 1], to = ord[seq_len(k), 2])
+  draw_net(aa = aa_k) + labs(title = ttl)
+}, density_counts, density_titles)
+wrap_plots(density_panels, nrow = 1)
+```
+
+Panels differ only in how many of the 21 possible alter pairs are tied.
+
+---
+
+## Visual Network Scales: Bridging
+
+::: {.columns}
+::: {.column width="56%"}
+```{r}
+#| fig-width: 6.0
+#| fig-height: 4.6
+#| fig-align: center
+draw_net(nd = bridge_nodes, aa = bridge_ties,
+         keep = c("a", "b", "c", "d", "e", "f")) +
+  labs(title = "Ego bridges two groups")
+```
+:::
+
+::: {.column width="44%"}
+<div style="font-size: 90%;">
+
+Respondents rate how many bridging positions they occupy among close friends.
+
+</div>
+
+```{r}
+data.frame(
+  Rating = 1:5,
+  Meaning = c(
+    "I do not occupy any bridging positions",
+    "",
+    "",
+    "",
+    "I occupy many bridging positions"
+  )
+) |> kbl(align = "cl")
+```
+:::
+:::
+
+---
+
+## Visual Network Scales: Perceived Position Change
+
+Respondents rate how their position in the organization's network has changed since last year.
+
+```{r}
+data.frame(
+  Rating = 1:5,
+  Meaning = c(
+    "I have moved more toward the periphery of the network",
+    "",
+    "My position in the network has remained about the same",
+    "",
+    "I have moved more toward the center of the network"
+  )
+) |> kbl(align = "cl")
+```
+
+These scales measure perceptions. The respondent's report of their position is the data, and it need not match the structure that a researcher would compute.
+
+---
+
+## Social Capital in Ego Networks
+
+- Researchers often want to know how well connected a person is
+- One criterion is how far a person can draw on resources embedded in their relations; this is social capital
+- Social capital is a natural outgrowth of the exchange approach to name generators
+- Position and resource generators measure accessed social capital, which invites a different measurement perspective
+
+---
+
+## Summary of Alternative Approaches
+
+```{r}
+data.frame(
+  Approach = c("Name generator and interpreter", "Position generator",
+               "Resource generator", "Visual network scales",
+               "Cognitive social structures"),
+  Elicits = c(
+    "Named alters and their traits",
+    "Access to occupations",
+    "Access to resources, and through whom",
+    "Perceived network position",
+    "Perceived ties among others (see chapter 29)"
+  ),
+  `Typical use` = c(
+    "Core ego networks; NetHealth",
+    "Social capital",
+    "Social capital and support",
+    "Perceptions of openness and centrality",
+    "Perceived structure beyond direct ties"
+  ),
+  check.names = FALSE
+) |> kbl()
+```
+
+---
+
+## Key Takeaways
+
+- Surveys are the best approach for ego networks, and the four steps structure any survey.
+- The name generator decides who gets named; the interpreters decide what you learn about them.
+- Generators built on role labels, affect, interaction, and exchange produce different networks.
+- Alter-to-alter ties are optional but are the only way to measure clustering within the ego network.
+- Perceptual scales measure how the ego sees the network, which can differ from the network the researcher observes.
