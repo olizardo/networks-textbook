@@ -16,7 +16,7 @@ This repository contains the source code for an introductory textbook on social 
 - `networks.bib`: Bibliography file containing references/citations for the textbook.
 - `renv.lock` / `renv/`: R environment lockfile and project library.
 - `slides/`: Reveal.js slide decks for course lectures. Rendered into `_sites/slides/` during publishing.
-- `homeworks/`: Course homework assignments (`homework{1..9}.qmd`). **Legacy location (2026-09-23 migration):** the primary homework sources now live in the sibling repo `../SOCIOL-111/homeworks/`; this directory is a fallback that the Canvas sync script reads only if the sibling copy is absent. Rendered locally using `./render_homeworks.sh` and synced directly to UCLA Bruin Learn (Canvas LMS). Homeworks are explicitly excluded from public web publishing.
+- `homeworks/`: Course homework assignments (`homework{1..9}.qmd`). **Legacy location (2026-09-23 migration):** the primary homework sources now live in the sibling repo `../SOCIOL 111/homeworks/`; this directory is a fallback that the Canvas sync script reads only if the sibling copy is absent. Rendered locally using `./render_homeworks.sh` and synced directly to UCLA Bruin Learn (Canvas LMS). Homeworks are explicitly excluded from public web publishing.
 - `scraps/`: Drafts, retired chapters, and working fragments excluded from the book build.
 
 ## Chapter Inventory
@@ -150,20 +150,25 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 
 ### 2. Homework Authoring & Canvas LMS Sync
 Homework assignments are delivered privately to students via UCLA Bruin Learn (Canvas LMS) rather than published on the open web:
-1. **Edit assignment:** Modify `homework{1..9}.qmd` in the sibling repo's `homeworks/` directory (`../SOCIOL-111/homeworks/`) — the primary source since 2026-09-23. If the sibling repo is not checked out on the current machine, this repo's legacy `homeworks/` copy is the fallback (or `--remote`; per-machine checkout status lives in user memory).
+1. **Edit assignment:** Modify `homework{1..9}.qmd` in the sibling repo's `homeworks/` directory (`../SOCIOL 111/homeworks/`) — the primary source since 2026-09-23. If the sibling repo is not checked out on the current machine, this repo's legacy `homeworks/` copy is the fallback (or `--remote`; per-machine checkout status lives in user memory).
 2. **Render locally:** From this repo, run `./render_homeworks.sh [hw_number]`
    ```bash
    ./render_homeworks.sh 1       # Render Homework 1
    ./render_homeworks.sh         # Render all Homeworks (1-9)
    ```
    This generates `homeworks/homework{i}.html` and diagram figures in `homeworks/homework{i}_files/figure-html/`.
-3. **Sync to Bruin Learn:** From the sibling repository (`../SOCIOL-111`, hyphenated folder name):
+3. **Sync to Bruin Learn:** From the sibling repository (actual folder name on disk: `../SOCIOL 111`, with a space):
    ```bash
    python3 sync_homeworks_to_canvas.py --dry-run --hw 1   # Preview changes
    python3 sync_homeworks_to_canvas.py --hw 1             # Push update live
    ```
    *Note:* The sync script resolves homework sources in order: the sibling repo's own `homeworks/` directory (primary), then this local checkout (`../networks-textbook`, the legacy fallback — also settable via the `NETWORKS_TEXTBOOK_DIR` env var), then GitHub. Pass `--remote` to force fetching from GitHub if needed.
 4. **Security & Privacy:** Homework assignments and answer keys must never be published to `_sites/` or exposed on the public site. The legacy numeric suffix hack (`*-5562048*`) and `render_homeworks.ps1` have been retired.
+
+### 2b. Course Glue: One Window, One Command (added 2026-11-05)
+The class spans two repos — `../networks-textbook` (public, auto-deploys) and `../SOCIOL 111` (private; **folder name has a space, no hyphen**). Glue lives at the neutral `ACADEMICS` level, outside both repos:
+- **`../course`** (bash, executable): `course status` (git status for both repos), `course push "message"` (commits **tracked changes only** — untracked files are listed but never auto-added, per the big-media lesson — then pushes each repo that has changes), and `course hw N [live]` (renders homework N via `./render_homeworks.sh`, then Canvas-syncs from the sibling; dry-run unless `live`).
+- **`../SOCIOL-111.code-workspace`**: Positron multi-root workspace with both repos as named roots ("textbook (public)" / "SOCIOL 111 (private)") — open this to see and edit both folders in one window.
 
 ### 3. Continuous Integration & Deployment (CI/CD)
 The `.github/workflows/publish.yml` pipeline runs on `ubuntu-latest` upon push to `main`:
@@ -282,7 +287,7 @@ curl -X POST -H "Authorization: Bearer $TOKEN" \
   --data-urlencode "published=true" \
   "https://bruinlearn.ucla.edu/api/v1/courses/238980/discussion_topics"
 ```
-Verify the creation response's `is_announcement: true` (the documented `announcement` param is silently ignored — plain discussion fallback requires delete-and-recreate). This matches section "G. Posting Announcements" in `../SOCIOL-111/AGENTS.md`, which is the canonical doc for Bruin Learn operations.
+Verify the creation response's `is_announcement: true` (the documented `announcement` param is silently ignored — plain discussion fallback requires delete-and-recreate). This matches section "G. Posting Announcements" in `../SOCIOL 111/AGENTS.md`, which is the canonical doc for Bruin Learn operations.
 
 **Route pitfalls (verified 2026-10-13):**
 - `POST /api/v1/courses/:id/announcements`, and `POST`/`GET .../discussions` return a 404 HTML "Page Not Found" page with this token. An HTML 404 here is a wrong-route symptom, not an auth/CSRF problem — don't retry with token tricks.
