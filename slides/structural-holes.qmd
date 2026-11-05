@@ -261,18 +261,27 @@ p_hier <- det_plot(c("Ego", "q", "a", "b", "c"), e_hier, l_hier,
 # 9. Idea generation: broker between two information pools
 idea_nodes <- data.frame(name = c("A1", "A2", "A3", "B1", "B2", "B3", "B"),
                          grp = c(rep("pA", 3), rep("pB", 3), "brok"))
-idea_edges <- data.frame(from = rep("B", 6), to = c("A1", "A2", "A3", "B1", "B2", "B3"))
+idea_edges <- data.frame(
+  from = c(rep("B", 6), "A1", "A1", "A2", "B1", "B1", "B2"),
+  to   = c("A1", "A2", "A3", "B1", "B2", "B3", "A2", "A3", "A3", "B2", "B3", "B3"),
+  tie  = c(rep("broker", 6), rep("within", 6))
+)
 g_idea <- tbl_graph(nodes = idea_nodes, edges = idea_edges, directed = FALSE)
-l_idea <- rbind(cbind(-1.4, c(0.8, 0, -0.8)), cbind(1.4, c(0.8, 0, -0.8)), c(0, 0))
+# Triangles make each pool a dense cluster; the broker reaches all six
+l_idea <- rbind(c(-1.7, 0.6), c(-2.2, -0.35), c(-1.2, -0.35),
+                c(1.7, 0.6), c(2.2, -0.35), c(1.2, -0.35), c(0, 0))
 p_idea <- ggraph(g_idea, layout = "manual", x = l_idea[,1], y = l_idea[,2]) +
-  geom_edge_link(color = "grey75", width = 1.4) +
+  annotate("rect", xmin = -2.6, xmax = -0.8, ymin = -0.6, ymax = 0.95, fill = "steelblue", alpha = 0.10) +
+  annotate("rect", xmin = 0.8, xmax = 2.6, ymin = -0.6, ymax = 0.95, fill = "forestgreen", alpha = 0.10) +
+  geom_edge_link(aes(color = tie), width = 1.4) +
+  scale_edge_color_manual(values = c(broker = "grey70", within = "grey40"), guide = "none") +
   geom_node_point(aes(color = grp), size = 14, show.legend = FALSE) +
   geom_node_text(aes(label = name), size = 7, fontface = "bold", color = "white") +
   scale_color_manual(values = c(pA = "steelblue", pB = "forestgreen", brok = "firebrick")) +
-  annotate("text", x = -1.4, y = 1.35, label = "Group A's pool", size = 5, fontface = "bold", color = "steelblue") +
-  annotate("text", x = 1.4, y = 1.35, label = "Group B's pool", size = 5, fontface = "bold", color = "forestgreen") +
+  annotate("text", x = -1.7, y = 1.2, label = "Group A's pool", size = 5, fontface = "bold", color = "steelblue") +
+  annotate("text", x = 1.7, y = 1.2, label = "Group B's pool", size = 5, fontface = "bold", color = "forestgreen") +
   theme_graph() +
-  coord_cartesian(xlim = c(-1.9, 1.9), ylim = c(-1.05, 1.55), clip = "off")
+  coord_cartesian(xlim = c(-2.7, 2.7), ylim = c(-0.8, 1.45), clip = "off")
 
 # 10. Stylized constraint-reward gradient (Empirical Findings slide)
 p_reward <- ggplot(data.frame(x = c(0, 1)), aes(x)) +
@@ -332,7 +341,7 @@ p_wk <- ggraph(g_wk, layout = "manual", x = l_wk[,1], y = l_wk[,2]) +
 
 - Gaps between disconnected actors are opportunities for **control** and **information flow**.
 
-- Ronald Burt's **Structural Holes Theory (SHT)** (1992, 1995) formalizes these gaps as a key source of **social capital**.
+- Ronald Burt's **Structural Holes Theory (SHT)** (1992) formalizes these gaps as a key source of **social capital**.
 :::
 
 ::: {.column width="48%"}
@@ -425,7 +434,7 @@ p_sh2
 
 ## Twin Benefits of Structural Holes
 
-Burt (1995): bridging structural holes pays off in two distinct currencies.
+Burt (1992): bridging structural holes pays off in two distinct currencies.
 
 ::: {.columns}
 ::: {.column width="50%"}
