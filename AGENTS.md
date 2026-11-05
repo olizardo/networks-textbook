@@ -126,6 +126,7 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/matrix-advanced.qmd` | Advanced Network Matrices |
 | `slides/ego-metrics.qmd` | Measuring Ego Networks |
 | `slides/ego-homogeneity.qmd` | Theories of Ego Network Homogeneity and Diversity |
+| `slides/ego-collect.qmd` | Collecting Ego-Network Data |
 | `slides/cognitive-social-structures.qmd` | Cognitive Social Structures |
 | `slides/affiliation-networks.qmd` | Affiliation Networks |
 | `slides/centrality.qmd` | Centrality in Networks |
