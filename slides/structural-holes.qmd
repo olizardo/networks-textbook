@@ -284,19 +284,237 @@ p_idea <- ggraph(g_idea, layout = "manual", x = l_idea[,1], y = l_idea[,2]) +
   coord_cartesian(xlim = c(-2.7, 2.7), ylim = c(-0.8, 1.45), clip = "off")
 
 # 10. Stylized constraint-reward gradient (Empirical Findings slide)
-p_reward <- ggplot(data.frame(x = c(0, 1)), aes(x)) +
-  stat_function(fun = function(x) 1.05 - 0.85 * x, color = "steelblue", linewidth = 1.6) +
-  scale_y_continuous(limits = c(0, 1.45), breaks = NULL, labels = NULL) +
+set.seed(8642)
+n_reward <- 60
+constraint_draw <- runif(n_reward)
+df_reward <- data.frame(
+  constraint = constraint_draw,
+  reward = 1.05 - 0.85 * constraint_draw + rnorm(n_reward, sd = 0.08)
+)
+p_reward <- ggplot(df_reward, aes(x = constraint, y = reward)) +
+  geom_point(color = "grey35", size = 2, alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, color = "steelblue", linewidth = 1.6) +
+  scale_y_continuous(breaks = NULL, labels = NULL) +
   scale_x_continuous(limits = c(-0.2, 1.2), breaks = c(0, 1),
                      labels = c("Low\n(open network)", "High\n(closed network)")) +
   labs(x = "Network constraint", y = "Organizational rewards") +
-  annotate("text", x = 0.03, y = 1.38, label = "Brokers: higher salary,\nfaster promotion,\nbetter evaluations",
+  annotate("text", x = -0.15, y = 1.68, vjust = 1, label = "Brokers: higher salary,\nfaster promotion,\nbetter evaluations",
            hjust = 0, size = 4.6, fontface = "bold", color = "firebrick", lineheight = 0.95) +
   theme_minimal(base_size = 15) +
   theme(panel.grid = element_blank(),
         axis.title = element_text(face = "bold"),
         axis.text.x = element_text(face = "bold"),
         plot.margin = margin(5, 12, 5, 12))
+
+# 10b. Obstfeld matrix motifs: A-B-C triad for each strategy x structure cell
+l_obi <- matrix(c(-1.05, 0.0,   # A
+                   0.00, 0.90,  # B
+                   1.05, 0.0),  # C
+                ncol = 2, byrow = TRUE)
+obstfeld_motif <- function(closed, mode) {
+  edges <- data.frame(
+    from = c("A", "B"), to = c("B", "C"),
+    ecol = "steelblue", elty = "solid", ewidth = 1.7
+  )
+  caption <- switch(mode,
+    conduit = if (closed) "B synthesizes the A–C exchange" else "B transfers between A and C",
+    gaudens = if (closed) "B cultivates conflict" else "B keeps A and C apart",
+    iungens = if (closed) "B coordinates collaboration" else "B introduces A and C")
+  if (closed || mode == "iungens") {
+    ac <- switch(mode,
+      conduit = c("grey55", "solid", 1.7),
+      gaudens = c("firebrick", "solid", 1.7),
+      iungens = c("forestgreen", if (closed) "solid" else "dashed", 1.9))
+    edges <- rbind(edges, data.frame(
+      from = "A", to = "C",
+      ecol = ac[1], elty = ac[2], ewidth = as.numeric(ac[3])))
+  }
+  g <- tbl_graph(
+    nodes = data.frame(name = c("A", "B", "C")),
+    edges = edges, directed = FALSE)
+  p <- ggraph(g, layout = "manual", x = l_obi[, 1], y = l_obi[, 2]) +
+    geom_edge_link(aes(color = ecol, linetype = elty, width = ewidth),
+                   lineend = "round") +
+    scale_edge_color_identity() +
+    scale_edge_linetype_identity() +
+    scale_edge_width_identity() +
+    geom_node_point(aes(color = name), size = 9, show.legend = FALSE) +
+    geom_node_text(aes(label = name), size = 4.6, fontface = "bold", color = "white") +
+    scale_color_manual(values = c(A = "tan2", B = "firebrick", C = "tan2")) +
+    theme_graph() +
+    coord_cartesian(xlim = c(-1.35, 1.35), ylim = c(-0.28, 1.05), clip = "off")
+  if (!closed && mode == "gaudens") {
+    p <- p + annotate("text", x = 0, y = -0.02, label = "✕",
+                      size = 9, fontface = "bold", color = "firebrick")
+  }
+  p
+}
+
+# 10c. Information overlap spectrum: three bandwidth panels (full-width slide figure)
+make_overlap_panel <- function(title, ecol, elty, ewidth, sets1, sets2) {
+  nodes <- data.frame(
+    name = c("Ego", "1", "2"),
+    role = c("ego", "alter", "alter"))
+  edges <- data.frame(
+    from = c("Ego", "Ego"), to = c("1", "2"),
+    ecol = ecol, elty = elty, ewidth = ewidth)
+  g <- tbl_graph(nodes, edges, directed = FALSE)
+  lo <- matrix(c(0.00, 1.05,   # Ego
+                 -0.95, 0.00,  # 1
+                 0.95, 0.00),  # 2
+               ncol = 2, byrow = TRUE)
+  ggraph(g, layout = "manual", x = lo[, 1], y = lo[, 2]) +
+    geom_edge_link(aes(color = ecol, linetype = elty, width = ewidth),
+                   lineend = "round") +
+    scale_edge_color_identity() +
+    scale_edge_linetype_identity() +
+    scale_edge_width_identity() +
+    geom_node_point(aes(color = role), size = 13, show.legend = FALSE) +
+    geom_node_text(aes(label = name), size = 5.6, fontface = "bold", color = "white") +
+    scale_color_manual(values = c(ego = "firebrick", alter = "steelblue")) +
+    annotate("text", x = -0.95, y = -0.62, label = sets1, size = 4.3) +
+    annotate("text", x = 0.95, y = -0.62, label = sets2, size = 4.3) +
+    ggtitle(title) +
+    theme_graph() +
+    theme(plot.title = element_text(face = "bold", size = 15, hjust = 0.5,
+                                    margin = margin(b = 2))) +
+    coord_cartesian(xlim = c(-1.45, 1.45), ylim = c(-0.85, 1.45), clip = "off")
+}
+p_overlap <-
+  make_overlap_panel("No overlap\n(low-BW ties work)", "#228B22", "solid", 3,
+                     "1: [1, 2, 3, 4]", "2: [5, 6, 7, 8]") |
+  make_overlap_panel("Some overlap\n(low-BW ties weaken)", "#E69F00", "dashed", 2.6,
+                     "1: [1, 2, 3, 4]", "2: [3, 4, 5, 6]") |
+  make_overlap_panel("Total overlap\n(high-BW ties needed)", "#B22222", "solid", 4.5,
+                     "1: [1, 2, 3, 4]", "2: [1, 2, 3, 4]")
+
+# 10d. Closure math: novelty per message x message volume (Same Closure Does Both)
+df_closure <- data.frame(
+  structure = factor(rep(c("Open network", "Closed (cohesive) network"), each = 3),
+                     levels = c("Open network", "Closed (cohesive) network")),
+  measure = factor(rep(c("Novelty\nper message", "Messages\nper month", "Total novelty\nreceived"), 2),
+                   levels = c("Novelty\nper message", "Messages\nper month", "Total novelty\nreceived")),
+  level = c(0.85, 0.25, 0.28, 0.30, 0.90, 0.80),
+  tag = c("High", "Low", "Low", "Low", "High", "High")
+)
+p_closure_math <- ggplot(df_closure, aes(measure, level, fill = measure)) +
+  geom_col(width = 0.7, show.legend = FALSE) +
+  geom_text(aes(label = tag), vjust = -0.6, size = 5, fontface = "bold") +
+  annotate("text", x = 1.5, y = 0.55, label = "×", size = 9, fontface = "bold") +
+  annotate("text", x = 2.5, y = 0.55, label = "=", size = 9, fontface = "bold") +
+  facet_wrap(~structure, nrow = 2) +
+  scale_fill_manual(values = c("#4682B4", "#E69F00", "#8C6BB1")) +
+  scale_y_continuous(breaks = NULL, labels = NULL, expand = expansion(mult = c(0, 0.3))) +
+  theme_minimal(base_size = 14) +
+  theme(panel.grid = element_blank(),
+        strip.text = element_text(face = "bold", size = 14),
+        axis.title = element_blank(),
+        axis.text.x = element_text(face = "bold", size = 12))
+
+# 10e. Refresh-rate sawtooth (Stale News)
+refresh_df <- function(contacts, tau, tmax = 12) {
+  t <- seq(0, tmax, length.out = 800)
+  last <- vapply(t, function(tt) max(contacts[contacts <= tt]), numeric(1))
+  data.frame(t = t, fresh = exp(-(t - last) / tau))
+}
+df_refresh <- rbind(
+  cbind(refresh_df(c(0, 4, 9), tau = 1.6), tie = "Weak tie (rare contact)"),
+  cbind(refresh_df(seq(0, 12, by = 0.5), tau = 1.0), tie = "Strong tie (frequent contact)")
+)
+pts_refresh <- rbind(
+  data.frame(t = c(0, 4, 9), fresh = 1, tie = "Weak tie (rare contact)"),
+  data.frame(t = seq(0, 12, by = 0.5), fresh = 1, tie = "Strong tie (frequent contact)")
+)
+p_refresh <- ggplot(df_refresh, aes(t, fresh, color = tie)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(data = pts_refresh, size = 2.4) +
+  scale_color_manual(values = c("Weak tie (rare contact)" = "#E69F00",
+                                "Strong tie (frequent contact)" = "#4682B4"), name = NULL) +
+  scale_y_continuous(breaks = c(0.05, 0.95), labels = c("Stale", "Fresh"),
+                     limits = c(0, 1.1), expand = c(0, 0)) +
+  scale_x_continuous(breaks = seq(0, 12, 3), expand = expansion(mult = c(0.01, 0.01))) +
+  labs(x = "Time (months)", y = "Information freshness") +
+  annotate("text", x = 7.5, y = 0.35, label = "stale", size = 5.5,
+           color = "grey45", fontface = "italic") +
+  theme_minimal(base_size = 15) +
+  theme(legend.position = "top",
+        legend.text = element_text(face = "bold"),
+        axis.title = element_text(face = "bold"),
+        panel.grid.minor = element_blank())
+
+# 10f. Topic-space sampling pies (Wide World of Topics)
+df_topics <- data.frame(
+  topic = rep(1:12, 2),
+  panel = factor(rep(c("Distant weak tie\n(1 of 12 topics touched)",
+                       "Close strong tie\n(9 of 12 topics touched)"), each = 12),
+                 levels = c("Distant weak tie\n(1 of 12 topics touched)",
+                            "Close strong tie\n(9 of 12 topics touched)")),
+  touched = c(TRUE, rep(FALSE, 11), rep(TRUE, 9), rep(FALSE, 3))
+)
+p_topics <- ggplot(df_topics, aes(x = factor(1), y = 1, fill = touched)) +
+  geom_col(width = 1, color = "white", linewidth = 1.1) +
+  facet_wrap(~panel) +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = c(`TRUE` = "#4682B4", `FALSE` = "grey88"),
+                    labels = c(`FALSE` = "Not touched", `TRUE` = "Touched by conversation"),
+                    name = NULL) +
+  scale_y_continuous(breaks = NULL, labels = NULL) +
+  scale_x_discrete(labels = NULL) +
+  theme_void(base_size = 14) +
+  theme(strip.text = element_text(face = "bold", size = 13),
+        strip.text.x = element_text(margin = margin(2, 0, 2, 0)),
+        legend.position = "bottom",
+        legend.text = element_text(size = 12))
+
+# 10g. Evidence: stylized predictor comparison (What the Evidence Shows)
+df_evid <- data.frame(
+  predictor = c("Network diversity\n(distinct alters & pools)",
+                "Channel bandwidth\n(interaction volume)"),
+  strength = c(0.55, 0.95),
+  tag = c("Weaker predictor", "Stronger predictor")
+)
+p_evidence <- ggplot(df_evid, aes(predictor, strength, fill = predictor)) +
+  geom_col(width = 0.55, show.legend = FALSE) +
+  geom_text(aes(label = tag), vjust = -0.6, size = 5.2, fontface = "bold") +
+  scale_fill_manual(values = c(
+    "Network diversity\n(distinct alters & pools)" = "grey62",
+    "Channel bandwidth\n(interaction volume)" = "#4682B4")) +
+  scale_y_continuous(breaks = NULL, labels = NULL, limits = c(0, 1.15), expand = c(0, 0)) +
+  labs(x = NULL, y = "Predictive strength for\nnovel information received",
+       title = "Stylized relative strength — not effect sizes") +
+  theme_minimal(base_size = 15) +
+  theme(panel.grid = element_blank(),
+        plot.title = element_text(size = 13, face = "italic", color = "grey35"),
+        axis.text.x = element_text(face = "bold", size = 13),
+        axis.title.y = element_text(face = "bold", size = 13))
+
+# 10h. Information environment mini-visuals (The Information Environment Decides)
+circle_df <- function(cx, cy, r, n = 120) {
+  th <- seq(0, 2 * pi, length.out = n)
+  data.frame(x = cx + r * cos(th), y = cy + r * sin(th))
+}
+p_env_overlap <- ggplot() +
+  geom_polygon(data = circle_df(-0.35, 0, 0.75), aes(x, y), fill = "#228B22", alpha = 0.22) +
+  geom_polygon(data = circle_df(0.35, 0, 0.75), aes(x, y), fill = "#228B22", alpha = 0.22) +
+  geom_path(data = circle_df(-0.35, 0, 0.75), aes(x, y), color = "#228B22", linewidth = 1.1) +
+  geom_path(data = circle_df(0.35, 0, 0.75), aes(x, y), color = "#228B22", linewidth = 1.1) +
+  coord_equal(xlim = c(-1.4, 1.4), ylim = c(-1.05, 1.05)) +
+  theme_void()
+p_env_refresh <- ggplot(df_refresh, aes(t, fresh, color = tie)) +
+  geom_line(linewidth = 1.1, show.legend = FALSE) +
+  scale_color_manual(values = c("#E69F00", "#4682B4")) +
+  scale_y_continuous(breaks = NULL, labels = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal(base_size = 12) +
+  theme(panel.grid = element_blank())
+p_env_topics <- ggplot(subset(df_topics, grepl("Close strong", panel)),
+                       aes(x = factor(1), y = 1, fill = touched)) +
+  geom_col(width = 1, color = "white", linewidth = 1) +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = c(`TRUE` = "#4682B4", `FALSE` = "grey88")) +
+  theme_void() +
+  theme(legend.position = "none")
 
 # 11. Gould & Fernandez triad: Source -> Broker -> Target
 g_gfr <- tbl_graph(nodes = data.frame(name = c("A", "B", "C")),
@@ -413,20 +631,20 @@ p_sh
 
 ::: {.columns}
 ::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-height: 4.2
-#| fig-width: 4.6
-p_sh2
-```
-:::
-
-::: {.column width="55%"}
 - Same two groups, same red broker — but now a **second channel** (the red tie 3–6) crosses the gap.
 
 - Information can **route around** the broker: node 9's control advantage shrinks, and the two channels carry overlapping news.
 
 - Burt's point: a broker position is valuable because it is **exclusive**. Every extra tie across a hole makes ego's contacts more **redundant** — and the hole less profitable.
+:::
+
+::: {.column width="55%"}
+```{r}
+#| echo: false
+#| fig-height: 4.8
+#| fig-width: 5.5
+p_sh2
+```
 :::
 :::
 
@@ -548,7 +766,7 @@ Burt's corporate studies (2004, 2005) compare managers who differ in network con
 #| fig-width: 5.2
 p_reward
 ```
-Stylized gradient, not data: the finding is a **negative** association between constraint and organizational reward.
+Illustrative scatter (not actual data): the finding is a **negative** association between network constraint and organizational reward.
 :::
 :::
 
@@ -557,16 +775,16 @@ Stylized gradient, not data: the finding is a **negative** association between c
 ## Idea Generation: The Broker's Creative Edge
 
 ::: {.columns}
-::: {.column width="45%"}
+::: {.column width="50%"}
 ```{r}
 #| echo: false
-#| fig-height: 3.4
-#| fig-width: 4.6
+#| fig-height: 4.6
+#| fig-width: 5.4
 p_idea
 ```
 :::
 
-::: {.column width="55%"}
+::: {.column width="50%"}
 - Why do brokers perform better? Burt (2004): they **generate better ideas**.
 
 - Densely clustered groups are **echo chambers**; each pool recycles the same assumptions.
@@ -857,21 +1075,107 @@ p_iun
 
 - Obstfeld et al. (2014): **three strategic orientations** under **two network structures** (Open vs. Closed) — action is decoupled from structural holes.
 
-**Open Network** *(Absence of an A–C tie)*:
+**Open Network** *(no tie between A and C — the hole is fully open)*:
 
-| | **Conduit** | **Tertius Gaudens** | **Tertius Iungens** |
-|:---|:---|:---|:---|
-| **Strategic Action** | **Information Transfer**:B transfers information, knowledge, or resources between A and C where they have no prior connection. | **Arbitrage & Separation**:B plays A and C against one another, or actively keeps them apart to maintain control. | **Introducing Alters**:B introduces A and C, closing the structural hole by creating a new tie. |
+::: {.columns}
+::: {.column width="32%"}
+::: {.ob-card style="border: 2px solid #4682B4; border-top: 10px solid #4682B4; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #4682B4; font-size: 1.05em;">Conduit</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.8
+#| fig-width: 2.85
+obstfeld_motif(FALSE, "conduit")
+```
+
+<p style="font-size: 76%; line-height: 1.25; margin: 0; text-align: center;"><b>Information transfer.</b> B passes information, knowledge, or resources between A and C, who have no prior connection.</p>
+:::
+:::
+
+::: {.column width="32%"}
+::: {.ob-card style="border: 2px solid #B22222; border-top: 10px solid #B22222; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #B22222; font-size: 1.05em;">Tertius Gaudens</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.8
+#| fig-width: 2.85
+obstfeld_motif(FALSE, "gaudens")
+```
+
+<p style="font-size: 76%; line-height: 1.25; margin: 0; text-align: center;"><b>Arbitrage &amp; separation.</b> B plays A and C against one another — or actively keeps them apart to maintain control.</p>
+:::
+:::
+
+::: {.column width="32%"}
+::: {.ob-card style="border: 2px solid #228B22; border-top: 10px solid #228B22; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #228B22; font-size: 1.05em;">Tertius Iungens</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.8
+#| fig-width: 2.85
+obstfeld_motif(FALSE, "iungens")
+```
+
+<p style="font-size: 76%; line-height: 1.25; margin: 0; text-align: center;"><b>Introducing alters.</b> B introduces A and C, closing the structural hole by creating a new tie.</p>
+:::
+:::
+:::
 
 ---
 
 ## The Obstfeld Matrix: Closed Networks
 
-**Closed Network** *(Presence of an A–C tie)*:
+**Closed Network** *(A and C are already tied — the hole is closed)*:
 
-| | **Conduit** | **Tertius Gaudens** | **Tertius Iungens** |
-|:---|:---|:---|:---|
-| **Strategic Action** | **Facilitated Synthesis**:B facilitates transfer between already-connected A and C and helps synthesize new knowledge. | **Divide et Impera (Divide & Rule)**:B cultivates conflict, competition, or separation between A and C. | **Coordinated Collaboration**:B coordinates new collaborative action or deepens partnership between A and C. |
+::: {.columns}
+::: {.column width="32%"}
+::: {.ob-card style="border: 2px solid #4682B4; border-top: 10px solid #4682B4; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #4682B4; font-size: 1.05em;">Conduit</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.8
+#| fig-width: 2.85
+obstfeld_motif(TRUE, "conduit")
+```
+
+<p style="font-size: 76%; line-height: 1.25; margin: 0; text-align: center;"><b>Facilitated synthesis.</b> A and C are already connected; B facilitates the transfer and helps synthesize new knowledge.</p>
+:::
+:::
+
+::: {.column width="32%"}
+::: {.ob-card style="border: 2px solid #B22222; border-top: 10px solid #B22222; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #B22222; font-size: 1.05em;">Tertius Gaudens</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.8
+#| fig-width: 2.85
+obstfeld_motif(TRUE, "gaudens")
+```
+
+<p style="font-size: 76%; line-height: 1.25; margin: 0; text-align: center;"><b>Divide et impera.</b> B cultivates conflict, competition, or separation between already-tied A and C.</p>
+:::
+:::
+
+::: {.column width="32%"}
+::: {.ob-card style="border: 2px solid #228B22; border-top: 10px solid #228B22; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #228B22; font-size: 1.05em;">Tertius Iungens</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.8
+#| fig-width: 2.85
+obstfeld_motif(TRUE, "iungens")
+```
+
+<p style="font-size: 76%; line-height: 1.25; margin: 0; text-align: center;"><b>Coordinated collaboration.</b> B coordinates new collaborative action or deepens the A–C partnership.</p>
+:::
+:::
+:::
 
 ---
 
@@ -907,14 +1211,16 @@ p_iun
 
 ## The Same Closure Does Both
 
-- Novelty received over time = **novelty per message** × **number of messages**.
+- Novelty received over time = **novelty per message** × **number of messages**:
 
-- Cohesive networks do two things at once:
+```{r}
+#| echo: false
+#| fig-height: 3.4
+#| fig-width: 10.6
+p_closure_math
+```
 
-  - Make alters' knowledge **redundant** (less novelty per message).
-  - Make ties **stronger and chattier** (many more messages).
-
-- Open networks do the reverse: **novel pools** behind **rarely used channels**.
+- Cohesive (closed) networks make knowledge **redundant** but ties **chattier** — and **volume wins**. Open networks do the reverse: **novel pools** behind **rarely used channels**.
 
 - **Social distance is inverse bandwidth** — the more socially distant the contact, the less you communicate.
 
@@ -922,21 +1228,37 @@ p_iun
 
 ## Why Strong Ties Talk So Much
 
-- **They want to tell you.** Trust and reciprocity make close contacts volunteer information; a weak-tie alter passes the good stuff to *their* close ties before honoring your ask.
+::: {.columns}
+::: {.column width="50%"}
+::: {.st-card style="border: 2px solid #4682B4; border-top: 8px solid #4682B4; border-radius: 10px; padding: 6px 12px;"}
+<b style="color: #4682B4;">They want to tell you</b>
 
-- **They know what you need.** Close ties know your interests and projects, so they route relevant news to you unprompted — "knowing who knows what."
+<p style="font-size: 80%; line-height: 1.3; margin: 2px 0 0 0;">Trust and reciprocity make close contacts volunteer information; a weak-tie alter passes the good stuff to <em>their</em> close ties before honoring your ask.</p>
+:::
 
-- **They can transfer complex things.** A weak tie can tell you a job exists; it takes a helping relationship to actually teach you what you need to do it.
+::: {.st-card style="border: 2px solid #228B22; border-top: 8px solid #228B22; border-radius: 10px; padding: 6px 12px; margin-top: 10px;"}
+<b style="color: #228B22;">They can transfer complex things</b>
 
----
+<p style="font-size: 80%; line-height: 1.3; margin: 2px 0 0 0;">A weak tie can tell you a job exists; it takes a helping relationship to actually teach you how to do it.</p>
+:::
+:::
 
-## Why Strong Ties Talk So Much (continued)
+::: {.column width="50%"}
+::: {.st-card style="border: 2px solid #B22222; border-top: 8px solid #B22222; border-radius: 10px; padding: 6px 12px;"}
+<b style="color: #B22222;">They know what you need</b>
 
-- **They create ideas with you.** New knowledge is built through back-and-forth collaboration — which rarely happens with a contact you email once a year.
+<p style="font-size: 80%; line-height: 1.3; margin: 2px 0 0 0;">Close ties know your interests and projects, so they route relevant news unprompted — “knowing who knows what.”</p>
+:::
 
-- **Shared worlds multiply topics.** Homophily means many overlapping interests, so conversation covers more ground instead of circling the same topics.
+::: {.st-card style="border: 2px solid #E69F00; border-top: 8px solid #E69F00; border-radius: 10px; padding: 6px 12px; margin-top: 10px;"}
+<b style="color: #B8860B;">They create ideas with you</b>
 
-- Together: five reasons the snapshot view **undercounts** what strong ties deliver.
+<p style="font-size: 80%; line-height: 1.3; margin: 2px 0 0 0;">New knowledge is built through back-and-forth collaboration — which rarely happens with a contact you email once a year.</p>
+:::
+:::
+:::
+
+<p style="background: #f1f5f9; border-left: 5px solid #8C6BB1; border-radius: 6px; padding: 8px 14px; font-size: 82%; margin-top: 12px;"><b>Shared worlds multiply topics.</b> Homophily gives close contacts overlapping interests, so conversation covers more ground instead of circling the same topics. Together: five reasons the snapshot view <b>undercounts</b> what strong ties deliver.</p>
 
 ---
 
@@ -944,9 +1266,52 @@ p_iun
 
 - Which tie wins depends on three features of the **information environment**:
 
-  - **Overlap** — how much your contacts' knowledge overlaps.
-  - **Refresh rate** — how fast information changes over time.
-  - **Topic space** — how many different topics there are to know about.
+::: {.columns}
+::: {.column width="32%"}
+::: {.ie-card style="border: 2px solid #228B22; border-top: 10px solid #228B22; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #228B22; font-size: 1.05em;">Overlap</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.45
+#| fig-width: 2.7
+p_env_overlap
+```
+
+<p style="font-size: 78%; line-height: 1.25; margin: 0; text-align: center;">How much your contacts' knowledge <b>overlaps</b></p>
+:::
+:::
+
+::: {.column width="32%"}
+::: {.ie-card style="border: 2px solid #E69F00; border-top: 10px solid #E69F00; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #B8860B; font-size: 1.05em;">Refresh rate</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.45
+#| fig-width: 2.7
+p_env_refresh
+```
+
+<p style="font-size: 78%; line-height: 1.25; margin: 0; text-align: center;">How fast information <b>changes</b> over time</p>
+:::
+:::
+
+::: {.column width="32%"}
+::: {.ie-card style="border: 2px solid #4682B4; border-top: 10px solid #4682B4; border-radius: 10px; padding: 2px 8px 4px 8px; text-align: center;"}
+<b style="color: #4682B4; font-size: 1.05em;">Topic space</b>
+
+```{r}
+#| echo: false
+#| fig-height: 1.45
+#| fig-width: 2.7
+p_env_topics
+```
+
+<p style="font-size: 78%; line-height: 1.25; margin: 0; text-align: center;">How many different <b>topics</b> there are to know</p>
+:::
+:::
+:::
 
 ---
 
@@ -993,44 +1358,57 @@ p_iun
 
 ## The Information Overlap Spectrum
 
-::: {.columns}
-::: {.column width="45%"}
-- **Tie Preferences and Overlap**:
-  - The choice between low-bandwidth and high-bandwidth ties depends on the **degree of information overlap** among contacts:
-  - **No Overlap**: Low-bandwidth ties are highly effective.
-  - **Some Overlap**: Low-bandwidth ties start losing their efficiency.
-  - **Total Overlap**: Low-bandwidth ties are worse; high-bandwidth channels are preferred to transfer complex details quickly.
+::: {.nonincremental}
+
+- The choice between **low-bandwidth** and **high-bandwidth** ties depends on the **degree of information overlap** among your contacts:
+
+- **No overlap**: low-bandwidth ties are highly effective — each alter brings wholly different knowledge.
+
+- **Some overlap**: low-bandwidth ties start losing their efficiency.
+
+- **Total overlap**: low-bandwidth ties are worse; **high-bandwidth** channels are preferred to transfer complex details quickly.
+
 :::
 
-::: {.column width="55%"}
-![](../images/dbt-overlap-spectrum.png){fig-align="center" width="660px"}
-:::
-:::
+```{r}
+#| echo: false
+#| fig-height: 3.0
+#| fig-width: 10.6
+p_overlap
+```
 
 ---
 
 
 ## Stale News: The Refresh Rate
 
-- **Information changes over time.** A job lead that arrives two weeks late is not a lead anymore.
+- **Information changes over time**: a job lead that arrives two weeks late is not a lead anymore.
 
-- Weak ties communicate rarely, so their "novel" information often arrives with **delay**; strong ties refresh their news constantly.
+- Weak ties communicate rarely, so their "novel" information often arrives **stale**; strong ties refresh their news constantly.
 
-- **The trading-floor case**: a tight clique of traders all know the same things — but those things change by the minute, so every conversation still delivers novelty.
+```{r}
+#| echo: false
+#| fig-height: 3.2
+#| fig-width: 10.6
+p_refresh
+```
 
-- Fast-changing environments favor **high-bandwidth cohesive ties**, however redundant the group looks in a snapshot.
+- **The trading-floor case**: a tight clique of traders all know the same things — but those things change by the minute, so every conversation still delivers novelty. **Fast-changing environments favor high-bandwidth cohesive ties**, however redundant the group looks in a snapshot.
 
 ---
 
 ## The Wide World of Topics
 
-- Every conversation samples only a **slice** of what your contact knows.
+- Every conversation samples only a **slice** of what your contact knows; a thick, high-bandwidth channel collects **more slices**.
 
-- The more topics your contacts know about, the more slices a thick channel collects — high bandwidth samples more of the world.
+```{r}
+#| echo: false
+#| fig-height: 3.4
+#| fig-width: 10.6
+p_topics
+```
 
-- When the world of relevant topics is small, an occasional update from a distant contact can cover it.
-
-- **Large topic spaces favor high-bandwidth ties; small ones favor diverse weak ties.**
+- A **small** topic world can be covered by a distant weak tie's occasional update; a **large** topic space needs the high-volume sampling of a strong tie. **Large topic spaces favor high-bandwidth ties; small ones favor diverse weak ties.**
 
 ---
 
@@ -1038,13 +1416,16 @@ p_iun
 
 - Aral and Van Alstyne observed the **actual content of e-mail** flowing through an executive recruiting firm — among the first studies to watch information itself move through a network.
 
-- **Findings**:
+```{r}
+#| echo: false
+#| fig-height: 3.2
+#| fig-width: 10.6
+p_evidence
+```
 
-  - Both network diversity and channel bandwidth predict novel information — but **bandwidth is the stronger predictor of total novelty** received.
+- **Bandwidth is the stronger predictor of total novelty** received. Diversity pays less when contacts' information **overlaps**, and more when topics are **numerous** and information **refreshes quickly**.
 
-  - Diversity pays less when contacts' information **overlaps**; bandwidth pays more when topics are **numerous** and information **refreshes quickly**.
-
-  - Recruiters who received more novel information generated **more revenue** and completed projects faster.
+- Recruiters who received more novel information generated **more revenue** and completed projects faster.
 
 ---
 
