@@ -10,23 +10,23 @@ set.seed(42)
 p_clust <- ggraph(g_clust, layout = 'circle') +
   geom_edge_link(color = "firebrick", width = 2) +
   geom_node_point(color = "firebrick", size = 15) +
-  geom_node_text(aes(label = name), color = "white", fontface = "bold", size = 3) +
+  geom_node_text(aes(label = name), color = "white", fontface = "bold", size = 2.5) +
   labs(title = "Clustered Network\n(Strong, High-Bandwidth Ties)") +
   theme_void() +
-  theme(plot.title = element_text(face = "bold", size = 11, hjust = 0.5))
+  theme(plot.title = element_text(face = "bold", size = 13, hjust = 0.5))
 
 # Unclustered
 g_unclust <- graph_from_literal(Ego-Alter1, Ego-Alter2, Ego-Alter3)
 p_unclust <- ggraph(g_unclust, layout = 'star') +
   geom_edge_link(color = "steelblue", width = 0.8, linetype = "dashed") +
   geom_node_point(color = "steelblue", size = 15) +
-  geom_node_text(aes(label = name), color = "white", fontface = "bold", size = 3) +
+  geom_node_text(aes(label = name), color = "white", fontface = "bold", size = 2.5) +
   labs(title = "Unclustered Network\n(Weak, Low-Bandwidth Ties)") +
   theme_void() +
-  theme(plot.title = element_text(face = "bold", size = 11, hjust = 0.5))
+  theme(plot.title = element_text(face = "bold", size = 13, hjust = 0.5))
 
-p1_combined <- grid.arrange(p_clust, p_unclust, ncol = 2)
-ggsave("images/dbt-clustering-bandwidth.png", p1_combined, width = 7, height = 3.5, dpi = 300)
+p1_combined <- grid.arrange(p_clust, p_unclust, nrow = 2)
+ggsave("images/dbt-clustering-bandwidth.png", p1_combined, width = 4.5, height = 5.6, dpi = 300)
 print("Saved images/dbt-clustering-bandwidth.png")
 
 
