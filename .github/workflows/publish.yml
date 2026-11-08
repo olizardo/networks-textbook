@@ -20,6 +20,14 @@ concurrency:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+    env:
+      # CI installs the package set explicitly via r-lib/actions/setup-r-dependencies
+      # (below) into the site library. The renv autoloader in .Rprofile must NOT
+      # activate there: when it does, setup-r-dependencies detects an renv project
+      # and expects `pak` to already exist in the project renv library, which a
+      # freshly cached library for a new R version does not have ("no package
+      # called 'pak'"). Local/interactive sessions are unaffected by this env var.
+      RENV_CONFIG_AUTOLOADER_ENABLED: false
 
     steps:
       - name: Check out repository
