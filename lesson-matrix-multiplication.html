@@ -757,13 +757,13 @@ window.Quarto = {
   </ul></li>
   <li><a href="#multiplying-a-vector-times-a-matrix-and-vice-versa" id="toc-multiplying-a-vector-times-a-matrix-and-vice-versa" class="nav-link" data-scroll-target="#multiplying-a-vector-times-a-matrix-and-vice-versa"><span class="header-section-number">17.7</span> Multiplying a Vector Times a Matrix (and Vice Versa)</a>
   <ul class="collapse">
-  <li><a href="#row-vector-times-matrix" id="toc-row-vector-times-matrix" class="nav-link" data-scroll-target="#row-vector-times-matrix"><span class="header-section-number">17.7.1</span> 1. Row Vector Times Matrix</a></li>
-  <li><a href="#matrix-times-column-vector" id="toc-matrix-times-column-vector" class="nav-link" data-scroll-target="#matrix-times-column-vector"><span class="header-section-number">17.7.2</span> 2. Matrix Times Column Vector</a></li>
+  <li><a href="#row-vector-times-matrix" id="toc-row-vector-times-matrix" class="nav-link" data-scroll-target="#row-vector-times-matrix"><span class="header-section-number">17.7.1</span> Row Vector Times Matrix</a></li>
+  <li><a href="#matrix-times-column-vector" id="toc-matrix-times-column-vector" class="nav-link" data-scroll-target="#matrix-times-column-vector"><span class="header-section-number">17.7.2</span> Matrix Times Column Vector</a></li>
   </ul></li>
   <li><a href="#sec-allones" id="toc-sec-allones" class="nav-link" data-scroll-target="#sec-allones"><span class="header-section-number">17.8</span> Matrix Times the “All Ones” Vector: Summing Row and Columns</a>
   <ul class="collapse">
-  <li><a href="#row-vector-of-all-ones-mathbf1_1-times-n" id="toc-row-vector-of-all-ones-mathbf1_1-times-n" class="nav-link" data-scroll-target="#row-vector-of-all-ones-mathbf1_1-times-n"><span class="header-section-number">17.8.1</span> 1. Row Vector of All Ones (<span class="math inline">\(\mathbf{1}_{1 \times n}\)</span>)</a></li>
-  <li><a href="#column-vector-of-all-ones-mathbf1t_n-times-1" id="toc-column-vector-of-all-ones-mathbf1t_n-times-1" class="nav-link" data-scroll-target="#column-vector-of-all-ones-mathbf1t_n-times-1"><span class="header-section-number">17.8.2</span> 2. Column Vector of All Ones (<span class="math inline">\(\mathbf{1}^T_{n \times 1}\)</span>)</a></li>
+  <li><a href="#row-vector-of-all-ones-mathbf1_1-times-n" id="toc-row-vector-of-all-ones-mathbf1_1-times-n" class="nav-link" data-scroll-target="#row-vector-of-all-ones-mathbf1_1-times-n"><span class="header-section-number">17.8.1</span> Row Vector of All Ones (<span class="math inline">\(\mathbf{1}_{1 \times n}\)</span>)</a></li>
+  <li><a href="#column-vector-of-all-ones-mathbf1t_n-times-1" id="toc-column-vector-of-all-ones-mathbf1t_n-times-1" class="nav-link" data-scroll-target="#column-vector-of-all-ones-mathbf1t_n-times-1"><span class="header-section-number">17.8.2</span> Column Vector of All Ones (<span class="math inline">\(\mathbf{1}^T_{n \times 1}\)</span>)</a></li>
   </ul></li>
   <li><a href="#sec-identitymat" id="toc-sec-identitymat" class="nav-link" data-scroll-target="#sec-identitymat"><span class="header-section-number">17.9</span> The Identity Matrix</a></li>
   <li><a href="#sec-commonneighbors" id="toc-sec-commonneighbors" class="nav-link" data-scroll-target="#sec-commonneighbors"><span class="header-section-number">17.10</span> Matrix Multiplication and Common Neighbors</a></li>
@@ -798,26 +798,20 @@ window.Quarto = {
 <hr>
 <section id="sec-multrules" class="level2" data-number="17.1">
 <h2 data-number="17.1" class="anchored" data-anchor-id="sec-multrules"><span class="header-section-number">17.1</span> Matrix Multiplication Rules</h2>
-<p>First, we must understand the conditions under which two matrices can be multiplied:</p>
-<ul>
-<li><strong>Conformability</strong>: You can always multiply two matrices <em>as long as the number of columns of the first matrix equals the number of rows of the second matrix</em>. To check this, line up their dimensions side-by-side:</li>
-</ul>
+<p>First, we must understand the conditions under which two matrices can be multiplied. You can always multiply two matrices <em>as long as the number of columns of the first matrix equals the number of rows of the second matrix</em>. To check this condition, we line up the dimensions of the two matrices side-by-side, as in</p>
 <p><span class="math display">\[
 \mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}
 \]</span></p>
-<ul>
-<li><strong>Inner Dimensions</strong>: The two “fives” in bold are called the <strong>inner dimensions</strong>. The “three” on the left and the “six” on the right are called the <strong>outer dimensions</strong>. Matrix multiplication is defined <em>only if their inner dimensions are equal</em>. When they match, the matrices are <strong>conformable</strong>; otherwise, they are <strong>non-conformable</strong> and cannot be multiplied.</li>
-<li><strong>Order Matters</strong>: Unlike numbers, where the order of multiplication does not matter (<span class="math inline">\(4 \times 3 = 3 \times 4\)</span>), matrix multiplication is <strong>non-commutative</strong>. For almost all matrices <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{B}\)</span>:</li>
-</ul>
+<p>The two “fives” in bold are called the <strong>inner dimensions</strong> of the product. The “three” on the left and the “six” on the right are called the <strong>outer dimensions</strong>. Matrix multiplication is defined <em>only if the inner dimensions are equal</em>. When they match, we say the matrices are <strong>conformable</strong> and the multiplication can proceed. When they do not match, the matrices are <strong>non-conformable</strong> and cannot be multiplied.</p>
+<p>Multiplication is also order-sensitive in a way that ordinary number multiplication is not. With numbers, the order of the factors does not matter, since <span class="math inline">\(4 \times 3 = 3 \times 4\)</span>. Matrix multiplication, however, is <strong>non-commutative</strong>. For almost all matrices <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{B}\)</span>,</p>
 <p><span class="math display">\[
 \mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}
 \]</span></p>
-<ul>
-<li><strong>Resulting Dimensions</strong>: The resulting product matrix will always have dimensions equal to the <strong>outer dimensions</strong> of the two multipliers:</li>
-</ul>
+<p>so the order in which we write the factors matters, and it matters a great deal when we get to the network applications below. Finally, whenever we multiply two conformable matrices, the resulting product matrix always has dimensions equal to the <strong>outer dimensions</strong> of the two multipliers. So for the example above,</p>
 <p><span id="eq-matmult0"><span class="math display">\[
 \mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}
 \tag{17.1}\]</span></span></p>
+<p>the product <span class="math inline">\(\mathbf{C}\)</span> has three rows (inherited from <span class="math inline">\(\mathbf{A}\)</span>) and six columns (inherited from <span class="math inline">\(\mathbf{B}\)</span>).</p>
 <hr>
 </section>
 <section id="sec-mattrans" class="level2" data-number="17.2">
@@ -860,7 +854,7 @@ window.Quarto = {
 </section>
 <section id="sec-matmultex" class="level2" data-number="17.4">
 <h2 data-number="17.4" class="anchored" data-anchor-id="sec-matmultex"><span class="header-section-number">17.4</span> Numerical Multiplication Examples</h2>
-<p>Let’s see some numeric examples of how matrix multiplication works. <a href="#tbl-trans" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-trans</span></a> displays an original matrix <span class="math inline">\(\mathbf{A}\)</span> and its transpose <span class="math inline">\(\mathbf{A}^T\)</span>.</p>
+<p>Let’s work through some numeric examples to see how the mechanics of matrix multiplication play out in practice. <a href="#tbl-trans" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-trans</span></a> displays an original matrix <span class="math inline">\(\mathbf{A}\)</span> and its transpose <span class="math inline">\(\mathbf{A}^T\)</span>.</p>
 <div id="tbl-trans" class="quarto-layout-panel anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-trans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -869,7 +863,7 @@ Table&nbsp;17.1: A matrix and its transpose
 <div aria-describedby="tbl-trans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
 <div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-trans" style="flex-basis: 50.0%;justify-content: center;">
-<div id="tbl-trans-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-trans-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-trans-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) Original Matrix (A).
@@ -911,7 +905,7 @@ Table&nbsp;17.1: A matrix and its transpose
 </div>
 </div>
 <div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-trans" style="flex-basis: 50.0%;justify-content: center;">
-<div id="tbl-trans-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-trans-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-trans-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Transposed Matrix (A^T).
@@ -1007,17 +1001,16 @@ Table&nbsp;17.2: Square matrix resulting from multiplying a matrix by its transp
 </figure>
 </div>
 </div>
-<p>Where do these numbers come from? Let’s trace a couple of cells: 1. <strong>Cell (Row 1, Column 1) = 50</strong>: We multiply the elements of the <em>first row</em> of <span class="math inline">\(\mathbf{A}\)</span> (<span class="math inline">\(\{3, 4, 5\}\)</span>) by the corresponding elements of the <em>first column</em> of <span class="math inline">\(\mathbf{A}^T\)</span> (<span class="math inline">\(\{3, 4, 5\}\)</span>), and sum them up:</p>
+<p>Where do these numbers come from? To find any given cell of the product, we multiply the elements of the corresponding <em>row</em> of the first matrix by the corresponding elements of the corresponding <em>column</em> of the second matrix, and then sum the results. Let’s trace a couple of cells to see the process at work.</p>
+<p>The cell at Row 1, Column 1 of the product equals 50. We obtain it by multiplying the elements of the <em>first row</em> of <span class="math inline">\(\mathbf{A}\)</span> (<span class="math inline">\(\{3, 4, 5\}\)</span>) by the corresponding elements of the <em>first column</em> of <span class="math inline">\(\mathbf{A}^T\)</span> (<span class="math inline">\(\{3, 4, 5\}\)</span>), and summing the products</p>
 <p><span class="math display">\[
-   (3 \times 3) + (4 \times 4) + (5 \times 5) = 9 + 16 + 25 = 50
-   \]</span></p>
-<ol start="2" type="1">
-<li><p><strong>Cell (Row 4, Column 2) = 74</strong>: We multiply the elements of the <em>fourth row</em> of <span class="math inline">\(\mathbf{A}\)</span> (<span class="math inline">\(\{5, 3, 4\}\)</span>) by the corresponding elements of the <em>second column</em> of <span class="math inline">\(\mathbf{A}^T\)</span> (<span class="math inline">\(\{7, 9, 3\}\)</span>), and sum them:</p>
+(3 \times 3) + (4 \times 4) + (5 \times 5) = 9 + 16 + 25 = 50
+\]</span></p>
+<p>The cell at Row 4, Column 2 equals 74. Here we multiply the elements of the <em>fourth row</em> of <span class="math inline">\(\mathbf{A}\)</span> (<span class="math inline">\(\{5, 3, 4\}\)</span>) by the corresponding elements of the <em>second column</em> of <span class="math inline">\(\mathbf{A}^T\)</span> (<span class="math inline">\(\{7, 9, 3\}\)</span>), and sum</p>
 <p><span class="math display">\[
 (5 \times 7) + (3 \times 9) + (4 \times 3) = 35 + 27 + 12 = 74
-\]</span></p></li>
-</ol>
-<p>We repeat this process for all 25 cells to obtain the complete product matrix. Note that the resulting product matrix <span class="math inline">\(\mathbf{B}\)</span> is <strong>symmetric</strong> (<span class="math inline">\(b_{ij} = b_{ji}\)</span>).</p>
+\]</span></p>
+<p>We repeat this row-times-column process for all 25 cells to obtain the complete product matrix. Note that the resulting product matrix <span class="math inline">\(\mathbf{B}\)</span> is <strong>symmetric</strong>, with <span class="math inline">\(b_{ij} = b_{ji}\)</span>. Whenever we multiply a matrix by its own transpose, the product is always symmetric, a fact that will matter when we apply this operation to social networks below.</p>
 <p>Reversing the order and multiplying <span class="math inline">\(\mathbf{A}^T \times \mathbf{A}\)</span> yields a smaller <span class="math inline">\(3 \times 3\)</span> square matrix, as shown in <a href="#tbl-prod2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-prod2</span></a>:</p>
 <div class="cell" data-tbl-cap-location="bottom">
 <div id="tbl-prod2" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
@@ -1073,7 +1066,7 @@ Festinger, Leon. 1949. <span>“The Analysis of Sociograms Using Matrix Algebra.
 <div aria-describedby="tbl-pows-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
 <div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-pows" style="flex-basis: 100.0%;justify-content: center;">
-<div id="tbl-pows-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-pows-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-pows-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) Original adjacency matrix (A).
@@ -1289,7 +1282,7 @@ Festinger, Leon. 1949. <span>“The Analysis of Sociograms Using Matrix Algebra.
 </div>
 <div class="quarto-layout-row">
 <div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-pows" style="flex-basis: 100.0%;justify-content: center;">
-<div id="tbl-pows-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-pows-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-pows-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Adjacency matrix squared (A^2).
@@ -1505,7 +1498,7 @@ Festinger, Leon. 1949. <span>“The Analysis of Sociograms Using Matrix Algebra.
 </div>
 <div class="quarto-layout-row">
 <div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-pows" style="flex-basis: 100.0%;justify-content: center;">
-<div id="tbl-pows-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-pows-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-pows-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (c) Adjacency matrix cubed (A^3).
@@ -1727,19 +1720,13 @@ Table&nbsp;17.4: An adjacency matrix and its powers.
 </div>
 <section id="the-squared-adjacency-matrix-mathbfa2" class="level3" data-number="17.5.1">
 <h3 data-number="17.5.1" class="anchored" data-anchor-id="the-squared-adjacency-matrix-mathbfa2"><span class="header-section-number">17.5.1</span> The Squared Adjacency Matrix (<span class="math inline">\(\mathbf{A}^2\)</span>)</h3>
-<p>What do the entries in <a href="#tbl-pows-2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-pows-2</span></a> mean?</p>
-<ul>
-<li><strong>Off-Diagonal Entries</strong>: The value in cell <span class="math inline">\(a^2_{ij}\)</span> tells us the exact number of <strong>walks of length 2</strong> between node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span> (see <a href="#sec-indirect" class="quarto-xref"><span class="quarto-unresolved-ref">sec-indirect</span></a>). For example, <span class="math inline">\(a^2_{AB} = 2\)</span>. Looking at <a href="#fig-rel-1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-rel-1</span></a>, we see that <span class="math inline">\(A\)</span> can reach <span class="math inline">\(B\)</span> via exactly two walks of length 2: <span class="math inline">\(\{AC, CB\}\)</span> and <span class="math inline">\(\{AD, DB\}\)</span>. Similarly, <span class="math inline">\(a^2_{AC} = 1\)</span>, representing the walk <span class="math inline">\(\{AD, DC\}\)</span>.</li>
-<li><strong>Diagonal Entries</strong>: The diagonal entry <span class="math inline">\(a^2_{ii}\)</span> counts the number of walks of length 2 that begin and end with node <span class="math inline">\(i\)</span>. Since a walk of length 2 that goes from <span class="math inline">\(i \to j \to i\)</span> in an undirected graph simply represents traversing an edge and returning, the diagonal of <span class="math inline">\(\mathbf{A}^2\)</span> is equal to the <strong>degree</strong> of each node!</li>
-</ul>
+<p>What do the entries in <a href="#tbl-pows-2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-pows-2</span></a> mean? Each off-diagonal entry <span class="math inline">\(a^2_{ij}\)</span> tells us the exact number of <strong>walks of length 2</strong> between node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span> (see <a href="#sec-indirect" class="quarto-xref"><span class="quarto-unresolved-ref">sec-indirect</span></a>). For example, <span class="math inline">\(a^2_{AB} = 2\)</span>. Looking at <a href="#fig-rel-1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-rel-1</span></a>, we see that <span class="math inline">\(A\)</span> can reach <span class="math inline">\(B\)</span> via exactly two walks of length 2, <span class="math inline">\(\{AC, CB\}\)</span> and <span class="math inline">\(\{AD, DB\}\)</span>. Similarly, <span class="math inline">\(a^2_{AC} = 1\)</span>, representing the single walk <span class="math inline">\(\{AD, DC\}\)</span>.</p>
+<p>The diagonal entries have their own interpretation. The diagonal entry <span class="math inline">\(a^2_{ii}\)</span> counts the number of walks of length 2 that begin and end at node <span class="math inline">\(i\)</span>. Since a walk of length 2 that goes from <span class="math inline">\(i \to j \to i\)</span> in an undirected graph simply represents traversing an edge and returning along it, each of node <span class="math inline">\(i\)</span>’s edges contributes exactly one such walk. As a result, the diagonal of <span class="math inline">\(\mathbf{A}^2\)</span> is equal to the <strong>degree</strong> of each node.</p>
 </section>
 <section id="the-cubed-adjacency-matrix-mathbfa3" class="level3" data-number="17.5.2">
 <h3 data-number="17.5.2" class="anchored" data-anchor-id="the-cubed-adjacency-matrix-mathbfa3"><span class="header-section-number">17.5.2</span> The Cubed Adjacency Matrix (<span class="math inline">\(\mathbf{A}^3\)</span>)</h3>
-<p>What do the entries in <a href="#tbl-pows-3" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-pows-3</span></a> mean?</p>
-<ul>
-<li><strong>Off-Diagonal Entries</strong>: Tell us the exact number of <strong>walks of length 3</strong> linking each pair of nodes. For instance, <span class="math inline">\(a^3_{HF} = 1\)</span>. Looking at the graph, this corresponds to the walk <span class="math inline">\(\{HG, GE, EF\}\)</span>.</li>
-<li><strong>Diagonal Entries</strong>: Count the number of walks of length 3 that begin and end at the same node (which is a <strong>cycle of length 3</strong>). A cycle of length 3 is structurally equivalent to a <strong>clique of size 3 (a triangle)</strong>! The diagonal entry <span class="math inline">\(a^3_{ii}\)</span> counts exactly <em>twice</em> the number of triangles node <span class="math inline">\(i\)</span> belongs to (once going clockwise, and once counterclockwise). Thus, dividing the diagonal entries of <span class="math inline">\(\mathbf{A}^3\)</span> by two tells us exactly <strong>how many triangles (cliques of size 3) each node belongs to</strong>. For instance, node <span class="math inline">\(K\)</span> belongs to no triangles, so <span class="math inline">\(a^3_{KK} = 0\)</span>.</li>
-</ul>
+<p>The entries of <a href="#tbl-pows-3" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-pows-3</span></a> follow the same logic one step up the ladder. Each off-diagonal entry tells us the exact number of <strong>walks of length 3</strong> linking each pair of nodes. For instance, <span class="math inline">\(a^3_{HF} = 1\)</span>, which corresponds to the walk <span class="math inline">\(\{HG, GE, EF\}\)</span> in the graph.</p>
+<p>The diagonal entries of <span class="math inline">\(\mathbf{A}^3\)</span> count the number of walks of length 3 that begin and end at the same node. Such a walk is a <strong>cycle of length 3</strong>, and a cycle of length 3 is structurally equivalent to a <strong>clique of size 3 (a triangle)</strong>. The diagonal entry <span class="math inline">\(a^3_{ii}\)</span> counts exactly <em>twice</em> the number of triangles node <span class="math inline">\(i\)</span> belongs to, once going around each triangle clockwise and once counterclockwise. Dividing the diagonal entries of <span class="math inline">\(\mathbf{A}^3\)</span> by two therefore tells us exactly <strong>how many triangles each node belongs to</strong>. For instance, node <span class="math inline">\(K\)</span> belongs to no triangles, so <span class="math inline">\(a^3_{KK} = 0\)</span>.</p>
 <div class="cell fig-cap-location-bottom">
 <div class="cell-output-display">
 <div id="fig-pows" class="quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="bottom">
@@ -1760,7 +1747,7 @@ Figure&nbsp;17.1: Graph with weighted edges representing the number of indirect 
 </section>
 <section id="sec-matvecs" class="level2" data-number="17.6">
 <h2 data-number="17.6" class="anchored" data-anchor-id="sec-matvecs"><span class="header-section-number">17.6</span> Matrix Multiplication of Vectors</h2>
-<p>Recall that a <strong>vector</strong> is a sequence of numbers of a given length. A vector is actually just a special case of a matrix: * <strong>Row Vector</strong>: A matrix with <em>one row</em> and as many columns as the vector’s length (<span class="math inline">\(\mathbf{a}_{1 \times n}\)</span>). * <strong>Column Vector</strong>: A matrix with <em>one column</em> and as many rows as the vector’s length (<span class="math inline">\(\mathbf{a}^T_{n \times 1}\)</span>).</p>
+<p>Recall that a <strong>vector</strong> is a sequence of numbers of a given length. A vector is actually just a special case of a matrix. A <strong>row vector</strong> is a matrix with <em>one row</em> and as many columns as the vector’s length, written <span class="math inline">\(\mathbf{a}_{1 \times n}\)</span>. A <strong>column vector</strong> is a matrix with <em>one column</em> and as many rows as the vector’s length, written <span class="math inline">\(\mathbf{a}^T_{n \times 1}\)</span>.</p>
 <p>An example of a row vector <span class="math inline">\(\mathbf{a} = \{2, 4, 7, 2, 4\}\)</span> of dimensions <span class="math inline">\(1 \times 5\)</span> is shown in <a href="#tbl-vecmat" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-vecmat</span></a>, and its <span class="math inline">\(5 \times 1\)</span> transpose column vector <span class="math inline">\(\mathbf{a}^T\)</span> is shown in <a href="#tbl-transvec" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-transvec</span></a>.</p>
 <div class="cell" data-tbl-cap-location="bottom">
 <div id="tbl-vecmat" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
@@ -1824,18 +1811,14 @@ Table&nbsp;17.6: A column vector represented as a 5 X 1 matrix (the transpose of
 </div>
 <section id="vector-multiplication-rules" class="level3" data-number="17.6.1">
 <h3 data-number="17.6.1" class="anchored" data-anchor-id="vector-multiplication-rules"><span class="header-section-number">17.6.1</span> Vector Multiplication Rules</h3>
-<ul>
-<li><strong>Row Vector times Column Vector</strong>: Since this matches a matrix times its transpose, the product is always defined. The output is always a <span class="math inline">\(1 \times 1\)</span> “matrix,” which is a single number (a <strong>scalar</strong>):</li>
-</ul>
+<p>When we multiply a <strong>row vector times a column vector</strong>, the product matches a matrix times its transpose, so it is always defined. The output is always a <span class="math inline">\(1 \times 1\)</span> “matrix,” which is just a single number, called a <strong>scalar</strong></p>
 <p><span id="eq-vecmult1"><span class="math display">\[
 \mathbf{a}_{1 \times 5} \times \mathbf{a}^T_{5 \times 1} = b_{1 \times 1}
 \tag{17.4}\]</span></span></p>
 <p><span class="math display">\[
 (2 \times 2) + (4 \times 4) + (7 \times 7) + (2 \times 2) + (4 \times 4) = 4 + 16 + 49 + 4 + 16 = 89
 \]</span></p>
-<ul>
-<li><strong>Column Vector times Row Vector</strong>: Reversing the order multiplies a <span class="math inline">\(5 \times 1\)</span> column vector by a <span class="math inline">\(1 \times 5\)</span> row vector, yielding a <span class="math inline">\(5 \times 5\)</span> square matrix (shown in <a href="#tbl-transvec2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-transvec2</span></a>):</li>
-</ul>
+<p>Reversing the order and taking the <strong>column vector times the row vector</strong> multiplies a <span class="math inline">\(5 \times 1\)</span> column vector by a <span class="math inline">\(1 \times 5\)</span> row vector, yielding a <span class="math inline">\(5 \times 5\)</span> square matrix (shown in <a href="#tbl-transvec2" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-transvec2</span></a>)</p>
 <p><span id="eq-vecmult2"><span class="math display">\[
 \mathbf{a}^T_{5 \times 1} \times \mathbf{a}_{1 \times 5} = \mathbf{B}_{5 \times 5}
 \tag{17.5}\]</span></span></p>
@@ -1898,10 +1881,10 @@ Table&nbsp;17.7: Square matrix resulting from multiplying a column vector by a r
 </section>
 <section id="multiplying-a-vector-times-a-matrix-and-vice-versa" class="level2" data-number="17.7">
 <h2 data-number="17.7" class="anchored" data-anchor-id="multiplying-a-vector-times-a-matrix-and-vice-versa"><span class="header-section-number">17.7</span> Multiplying a Vector Times a Matrix (and Vice Versa)</h2>
-<p>We can multiply a vector times a matrix (and a matrix times a vector) following the standard rules of conformability:</p>
+<p>We can multiply a vector times a matrix (and a matrix times a vector) following the standard rules of conformability, and the results are useful enough in network analysis to work through both directions.</p>
 <section id="row-vector-times-matrix" class="level3" data-number="17.7.1">
-<h3 data-number="17.7.1" class="anchored" data-anchor-id="row-vector-times-matrix"><span class="header-section-number">17.7.1</span> 1. Row Vector Times Matrix</h3>
-<p>Multiplying a <span class="math inline">\(1 \times n\)</span> row vector by an <span class="math inline">\(n \times m\)</span> matrix yields another <strong>row vector</strong> of dimensions <span class="math inline">\(1 \times m\)</span>:</p>
+<h3 data-number="17.7.1" class="anchored" data-anchor-id="row-vector-times-matrix"><span class="header-section-number">17.7.1</span> Row Vector Times Matrix</h3>
+<p>Multiplying a <span class="math inline">\(1 \times n\)</span> row vector by an <span class="math inline">\(n \times m\)</span> matrix yields another <strong>row vector</strong> of dimensions <span class="math inline">\(1 \times m\)</span></p>
 <p><span id="eq-matvec"><span class="math display">\[
 \mathbf{b}_{1 \times 4} \times \mathbf{A}_{4 \times 4} = \mathbf{c}_{1 \times 4}
 \tag{17.6}\]</span></span></p>
@@ -1910,7 +1893,7 @@ Table&nbsp;17.7: Square matrix resulting from multiplying a column vector by a r
 <figure class="quarto-float quarto-float-tbl figure">
 <div aria-describedby="tbl-vecmat1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div id="tbl-vecmat1-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-vecmat1-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-vecmat1-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) 1 X 4 row vector (b)
@@ -1933,7 +1916,7 @@ Table&nbsp;17.7: Square matrix resulting from multiplying a column vector by a r
 </div>
 </div>
 <div class="cell-output-display">
-<div id="tbl-vecmat1-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-vecmat1-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-vecmat1-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) 4 X 4 square matrix (A)
@@ -1974,7 +1957,7 @@ Table&nbsp;17.7: Square matrix resulting from multiplying a column vector by a r
 </div>
 </div>
 <div class="cell-output-display">
-<div id="tbl-vecmat1-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-vecmat1-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-vecmat1-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (c) 1 X 4 product row vector (c)
@@ -2005,8 +1988,8 @@ Table&nbsp;17.8: Row vector resulting from multiplying a row vector by a square 
 </div>
 </section>
 <section id="matrix-times-column-vector" class="level3" data-number="17.7.2">
-<h3 data-number="17.7.2" class="anchored" data-anchor-id="matrix-times-column-vector"><span class="header-section-number">17.7.2</span> 2. Matrix Times Column Vector</h3>
-<p>Multiplying an <span class="math inline">\(m \times n\)</span> matrix by an <span class="math inline">\(n \times 1\)</span> column vector yields another <strong>column vector</strong> of dimensions <span class="math inline">\(m \times 1\)</span>:</p>
+<h3 data-number="17.7.2" class="anchored" data-anchor-id="matrix-times-column-vector"><span class="header-section-number">17.7.2</span> Matrix Times Column Vector</h3>
+<p>Multiplying an <span class="math inline">\(m \times n\)</span> matrix by an <span class="math inline">\(n \times 1\)</span> column vector yields another <strong>column vector</strong> of dimensions <span class="math inline">\(m \times 1\)</span></p>
 <p><span id="eq-matvec3"><span class="math display">\[
 \mathbf{A}_{5 \times 5} \times \mathbf{b}_{5 \times 1} = \mathbf{c}_{5 \times 1}
 \tag{17.7}\]</span></span></p>
@@ -2015,10 +1998,10 @@ Table&nbsp;17.8: Row vector resulting from multiplying a row vector by a square 
 </section>
 <section id="sec-allones" class="level2" data-number="17.8">
 <h2 data-number="17.8" class="anchored" data-anchor-id="sec-allones"><span class="header-section-number">17.8</span> Matrix Times the “All Ones” Vector: Summing Row and Columns</h2>
-<p>In matrix algebra, the <strong>all ones vector</strong> (symbol: <span class="math inline">\(\mathbf{1}\)</span>) is a special vector consisting entirely of ones. It has an incredibly useful property in social network analysis: <strong>it acts as a summation tool</strong>.</p>
+<p>In matrix algebra, the <strong>all ones vector</strong> (symbol: <span class="math inline">\(\mathbf{1}\)</span>) is a special vector consisting entirely of ones. It has an incredibly useful property in social network analysis, because it acts as a summation tool.</p>
 <section id="row-vector-of-all-ones-mathbf1_1-times-n" class="level3" data-number="17.8.1">
-<h3 data-number="17.8.1" class="anchored" data-anchor-id="row-vector-of-all-ones-mathbf1_1-times-n"><span class="header-section-number">17.8.1</span> 1. Row Vector of All Ones (<span class="math inline">\(\mathbf{1}_{1 \times n}\)</span>)</h3>
-<p>If you multiply the <span class="math inline">\(1 \times n\)</span> row vector of all ones by any square adjacency matrix <span class="math inline">\(\mathbf{A}\)</span>, the product is a row vector containing the <strong>column sums</strong> of the matrix (equivalent to the <strong>indegrees</strong> of each node in a directed graph!):</p>
+<h3 data-number="17.8.1" class="anchored" data-anchor-id="row-vector-of-all-ones-mathbf1_1-times-n"><span class="header-section-number">17.8.1</span> Row Vector of All Ones (<span class="math inline">\(\mathbf{1}_{1 \times n}\)</span>)</h3>
+<p>If you multiply the <span class="math inline">\(1 \times n\)</span> row vector of all ones by any square adjacency matrix <span class="math inline">\(\mathbf{A}\)</span>, the product is a row vector containing the <strong>column sums</strong> of the matrix (equivalent to the <strong>indegrees</strong> of each node in a directed graph!)</p>
 <p><span id="eq-allones1"><span class="math display">\[
 \mathbf{1}_{1 \times 5} \times \mathbf{A}_{5 \times 5} = \mathbf{b}_{1 \times 5}
 \tag{17.8}\]</span></span></p>
@@ -2027,7 +2010,7 @@ Table&nbsp;17.8: Row vector resulting from multiplying a row vector by a square 
 <figure class="quarto-float quarto-float-tbl figure">
 <div aria-describedby="tbl-allones1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div id="tbl-allones1-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-allones1-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones1-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) 1 X 5 all ones row vector
@@ -2051,7 +2034,7 @@ Table&nbsp;17.8: Row vector resulting from multiplying a row vector by a square 
 </div>
 </div>
 <div class="cell-output-display">
-<div id="tbl-allones1-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-allones1-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones1-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) 5 X 5 square binary matrix
@@ -2103,7 +2086,7 @@ Table&nbsp;17.8: Row vector resulting from multiplying a row vector by a square 
 </div>
 </div>
 <div class="cell-output-display">
-<div id="tbl-allones1-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-allones1-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones1-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (c) 1 X 5 product row vector (Column Sums / Indegrees)
@@ -2135,8 +2118,8 @@ Table&nbsp;17.9: Row vector resulting from multiplying the all ones row vector b
 </div>
 </section>
 <section id="column-vector-of-all-ones-mathbf1t_n-times-1" class="level3" data-number="17.8.2">
-<h3 data-number="17.8.2" class="anchored" data-anchor-id="column-vector-of-all-ones-mathbf1t_n-times-1"><span class="header-section-number">17.8.2</span> 2. Column Vector of All Ones (<span class="math inline">\(\mathbf{1}^T_{n \times 1}\)</span>)</h3>
-<p>If you multiply a square adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> by the <span class="math inline">\(n \times 1\)</span> column vector of all ones, the product is a column vector containing the <strong>row sums</strong> of the matrix (equivalent to the <strong>outdegrees</strong> of each node!):</p>
+<h3 data-number="17.8.2" class="anchored" data-anchor-id="column-vector-of-all-ones-mathbf1t_n-times-1"><span class="header-section-number">17.8.2</span> Column Vector of All Ones (<span class="math inline">\(\mathbf{1}^T_{n \times 1}\)</span>)</h3>
+<p>If you multiply a square adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> by the <span class="math inline">\(n \times 1\)</span> column vector of all ones, the product is a column vector containing the <strong>row sums</strong> of the matrix (equivalent to the <strong>outdegrees</strong> of each node!)</p>
 <p><span id="eq-allones2"><span class="math display">\[
 \mathbf{A}_{5 \times 5} \times \mathbf{1}^T_{5 \times 1} = \mathbf{b}_{5 \times 1}
 \tag{17.9}\]</span></span></p>
@@ -2145,7 +2128,7 @@ Table&nbsp;17.9: Row vector resulting from multiplying the all ones row vector b
 <div aria-describedby="tbl-allones2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
 <div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-allones2" style="flex-basis: 33.3%;justify-content: center;">
-<div id="tbl-allones2-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-allones2-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones2-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) 5 X 5 square binary matrix
@@ -2197,7 +2180,7 @@ Table&nbsp;17.9: Row vector resulting from multiplying the all ones row vector b
 </div>
 </div>
 <div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-allones2" style="flex-basis: 33.3%;justify-content: center;">
-<div id="tbl-allones2-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-allones2-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones2-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) 5 X 1 all ones column vector
@@ -2229,7 +2212,7 @@ Table&nbsp;17.9: Row vector resulting from multiplying the all ones row vector b
 </div>
 </div>
 <div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="tbl-allones2" style="flex-basis: 33.3%;justify-content: center;">
-<div id="tbl-allones2-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-allones2-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-allones2-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (c) 5 X 1 product column vector (Row Sums / Outdegrees)
@@ -2560,18 +2543,14 @@ Table&nbsp;17.12: Adjacency matrix multiplied by its transpose (A x A^T).
 </figure>
 </div>
 </div>
-<p>This resulting matrix <span class="math inline">\(\mathbf{B}\)</span> contains two incredibly valuable pieces of network information:</p>
-<ol type="1">
-<li><strong>Diagonal Entries (<span class="math inline">\(b_{ii}\)</span>)</strong>: The diagonal entries count the <strong>degree</strong> of each node. This is because multiplying row <span class="math inline">\(i\)</span> by column <span class="math inline">\(i\)</span> (which is identical in a symmetric matrix) squares each binary entry and sums them, giving the total number of neighbors node <span class="math inline">\(i\)</span> has.</li>
-<li><strong>Off-Diagonal Entries (<span class="math inline">\(b_{ij}\)</span>)</strong>: The off-diagonal entries count <strong>the exact number of common neighbors shared by node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span></strong>!</li>
-</ol>
+<p>This resulting matrix <span class="math inline">\(\mathbf{B}\)</span> contains two incredibly valuable pieces of network information. The diagonal entries <span class="math inline">\(b_{ii}\)</span> count the <strong>degree</strong> of each node. This is because multiplying row <span class="math inline">\(i\)</span> by column <span class="math inline">\(i\)</span> (which are identical in a symmetric matrix) squares each binary entry and sums them, giving the total number of neighbors node <span class="math inline">\(i\)</span> has. Meanwhile, the off-diagonal entries <span class="math inline">\(b_{ij}\)</span> count <strong>the exact number of common neighbors shared by node <span class="math inline">\(i\)</span> and node <span class="math inline">\(j\)</span></strong>.</p>
 <p>Let’s trace why this happens. Look at <span class="math inline">\(b_{AC} = 1\)</span> (Row A, Column C). This entry is obtained by multiplying the first row of the adjacency matrix (representing <span class="math inline">\(A\)</span>’s connections) by the third column of the adjacency matrix (representing <span class="math inline">\(C\)</span>’s connections), as shown in <a href="#tbl-commex" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-commex</span></a>:</p>
 <div class="cell" data-tbl-cap-location="bottom">
 <div id="tbl-commex" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="bottom">
 <figure class="quarto-float quarto-float-tbl figure">
 <div aria-describedby="tbl-commex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div id="tbl-commex-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-commex-1" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-commex-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) Node A's connection vector (row 1)
@@ -2618,7 +2597,7 @@ Table&nbsp;17.12: Adjacency matrix multiplied by its transpose (A x A^T).
 </div>
 </div>
 <div class="cell-output-display">
-<div id="tbl-commex-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-commex-2" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-commex-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Node C's connection vector (column 3)
@@ -2665,7 +2644,7 @@ Table&nbsp;17.12: Adjacency matrix multiplied by its transpose (A x A^T).
 </div>
 </div>
 <div class="cell-output-display">
-<div id="tbl-commex-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<div id="tbl-commex-3" class="table table-striped table-hover table-condensed table-responsive quarto-float quarto-figure quarto-figure-center anchored" style="width: auto !important; margin-left: auto; margin-right: auto;" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-commex-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (c) Cell-by-cell product (A x C)
@@ -2721,20 +2700,6 @@ Table&nbsp;17.13: Adjacency vector multiplication tracing common neighbors
 <p>The cell-by-cell product vector shown in <a href="#tbl-commex-3" class="quarto-xref">Table&nbsp;<span class="quarto-unresolved-ref">tbl-commex-3</span></a> contains a “1” <em>only</em> in the position corresponding to node <span class="math inline">\(D\)</span>. Because both <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span> are connected to <span class="math inline">\(D\)</span>, the product of their ties to <span class="math inline">\(D\)</span> is <span class="math inline">\(1 \times 1 = 1\)</span>. For any node they do not both share as a neighbor, the product is 0.</p>
 <p>Summing up this product vector yields <span class="math inline">\(1\)</span>, confirming that <strong>node <span class="math inline">\(D\)</span> is the single, shared common neighbor between <span class="math inline">\(A\)</span> and <span class="math inline">\(C\)</span></strong>.</p>
 <p>Thus, multiplying an adjacency matrix by its transpose is the formal algebraic way to map out all <strong>common neighbors</strong> in a network!</p>
-<hr>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Associated Assignment on Bruin Learn
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Now that you have completed this topic, you are ready to complete <strong><a href="https://bruinlearn.ucla.edu/courses/238980/assignments/2036329">Homework 3: Ego Networks, Weak Ties &amp; Matrix Operations</a></strong> on UCLA Bruin Learn!</p>
-</div>
-</div>
 
 
 
