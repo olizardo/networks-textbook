@@ -20,26 +20,27 @@ We will begin by laying out the mathematical rules of matrix multiplication befo
 
 ## Matrix Multiplication Rules {#sec-multrules}
 
-First, we must understand the conditions under which two matrices can be multiplied:
-
-* **Conformability**: You can always multiply two matrices *as long as the number of columns of the first matrix equals the number of rows of the second matrix*. To check this, line up their dimensions side-by-side:
+First, we must understand the conditions under which two matrices can be multiplied. You can always multiply two matrices *as long as the number of columns of the first matrix equals the number of rows of the second matrix*. To check this condition, we line up the dimensions of the two matrices side-by-side, as in
 
 $$
 \mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6}
 $$
 
-* **Inner Dimensions**: The two "fives" in bold are called the **inner dimensions**. The "three" on the left and the "six" on the right are called the **outer dimensions**. Matrix multiplication is defined *only if their inner dimensions are equal*. When they match, the matrices are **conformable**; otherwise, they are **non-conformable** and cannot be multiplied.
-* **Order Matters**: Unlike numbers, where the order of multiplication does not matter ($4 \times 3 = 3 \times 4$), matrix multiplication is **non-commutative**. For almost all matrices $\mathbf{A}$ and $\mathbf{B}$:
+The two "fives" in bold are called the **inner dimensions** of the product. The "three" on the left and the "six" on the right are called the **outer dimensions**. Matrix multiplication is defined *only if the inner dimensions are equal*. When they match, we say the matrices are **conformable** and the multiplication can proceed. When they do not match, the matrices are **non-conformable** and cannot be multiplied.
+
+Multiplication is also order-sensitive in a way that ordinary number multiplication is not. With numbers, the order of the factors does not matter, since $4 \times 3 = 3 \times 4$. Matrix multiplication, however, is **non-commutative**. For almost all matrices $\mathbf{A}$ and $\mathbf{B}$,
 
 $$
 \mathbf{A} \times \mathbf{B} \neq \mathbf{B} \times \mathbf{A}
 $$
 
-* **Resulting Dimensions**: The resulting product matrix will always have dimensions equal to the **outer dimensions** of the two multipliers:
+so the order in which we write the factors matters, and it matters a great deal when we get to the network applications below. Finally, whenever we multiply two conformable matrices, the resulting product matrix always has dimensions equal to the **outer dimensions** of the two multipliers. So for the example above,
 
 $$
 \mathbf{A}_{3 \times \mathbf{5}} \times \mathbf{B}_{\mathbf{5} \times 6} = \mathbf{C}_{3 \times 6}
 $$ {#eq-matmult0}
+
+the product $\mathbf{C}$ has three rows (inherited from $\mathbf{A}$) and six columns (inherited from $\mathbf{B}$).
 
 ---
 
@@ -97,7 +98,7 @@ $$
 
 ## Numerical Multiplication Examples {#sec-matmultex}
 
-Let's see some numeric examples of how matrix multiplication works. @tbl-trans displays an original matrix $\mathbf{A}$ and its transpose $\mathbf{A}^T$.
+Let's work through some numeric examples to see how the mechanics of matrix multiplication play out in practice. @tbl-trans displays an original matrix $\mathbf{A}$ and its transpose $\mathbf{A}^T$.
 
 ```{r}
 #| label: tbl-trans 
@@ -144,22 +145,21 @@ kbl(B_mat, align = "c", format = "html") %>%
     row_spec(1, extra_css = "border-top: 0.75px solid;") 
 ```
 
-Where do these numbers come from? Let's trace a couple of cells:
-1. **Cell (Row 1, Column 1) = 50**:
-   We multiply the elements of the *first row* of $\mathbf{A}$ ($\{3, 4, 5\}$) by the corresponding elements of the *first column* of $\mathbf{A}^T$ ($\{3, 4, 5\}$), and sum them up:
-   
-   $$
-   (3 \times 3) + (4 \times 4) + (5 \times 5) = 9 + 16 + 25 = 50
-   $$
+Where do these numbers come from? To find any given cell of the product, we multiply the elements of the corresponding *row* of the first matrix by the corresponding elements of the corresponding *column* of the second matrix, and then sum the results. Let's trace a couple of cells to see the process at work.
 
-2. **Cell (Row 4, Column 2) = 74**:
-   We multiply the elements of the *fourth row* of $\mathbf{A}$ ($\{5, 3, 4\}$) by the corresponding elements of the *second column* of $\mathbf{A}^T$ ($\{7, 9, 3\}$), and sum them:
-   
-   $$
-   (5 \times 7) + (3 \times 9) + (4 \times 3) = 35 + 27 + 12 = 74
-   $$
+The cell at Row 1, Column 1 of the product equals 50. We obtain it by multiplying the elements of the *first row* of $\mathbf{A}$ ($\{3, 4, 5\}$) by the corresponding elements of the *first column* of $\mathbf{A}^T$ ($\{3, 4, 5\}$), and summing the products
 
-We repeat this process for all 25 cells to obtain the complete product matrix. Note that the resulting product matrix $\mathbf{B}$ is **symmetric** ($b_{ij} = b_{ji}$).
+$$
+(3 \times 3) + (4 \times 4) + (5 \times 5) = 9 + 16 + 25 = 50
+$$
+
+The cell at Row 4, Column 2 equals 74. Here we multiply the elements of the *fourth row* of $\mathbf{A}$ ($\{5, 3, 4\}$) by the corresponding elements of the *second column* of $\mathbf{A}^T$ ($\{7, 9, 3\}$), and sum
+
+$$
+(5 \times 7) + (3 \times 9) + (4 \times 3) = 35 + 27 + 12 = 74
+$$
+
+We repeat this row-times-column process for all 25 cells to obtain the complete product matrix. Note that the resulting product matrix $\mathbf{B}$ is **symmetric**, with $b_{ij} = b_{ji}$. Whenever we multiply a matrix by its own transpose, the product is always symmetric, a fact that will matter when we apply this operation to social networks below.
 
 Reversing the order and multiplying $\mathbf{A}^T \times \mathbf{A}$ yields a smaller $3 \times 3$ square matrix, as shown in @tbl-prod2:
 
@@ -230,19 +230,16 @@ Let's explore this using the 12-person "hanging out" network shown in @fig-rel-1
 ```
 
 ### The Squared Adjacency Matrix ($\mathbf{A}^2$)
-What do the entries in @tbl-pows-2 mean?
 
-* **Off-Diagonal Entries**: The value in cell $a^2_{ij}$ tells us the exact number of **walks of length 2** between node $i$ and node $j$ (see @sec-indirect).
-  For example, $a^2_{AB} = 2$. Looking at @fig-rel-1, we see that $A$ can reach $B$ via exactly two walks of length 2: $\{AC, CB\}$ and $\{AD, DB\}$. Similarly, $a^2_{AC} = 1$, representing the walk $\{AD, DC\}$.
-* **Diagonal Entries**: The diagonal entry $a^2_{ii}$ counts the number of walks of length 2 that begin and end with node $i$. Since a walk of length 2 that goes from $i \to j \to i$ in an undirected graph simply represents traversing an edge and returning, the diagonal of $\mathbf{A}^2$ is equal to the **degree** of each node!
+What do the entries in @tbl-pows-2 mean? Each off-diagonal entry $a^2_{ij}$ tells us the exact number of **walks of length 2** between node $i$ and node $j$ (see @sec-indirect). For example, $a^2_{AB} = 2$. Looking at @fig-rel-1, we see that $A$ can reach $B$ via exactly two walks of length 2, $\{AC, CB\}$ and $\{AD, DB\}$. Similarly, $a^2_{AC} = 1$, representing the single walk $\{AD, DC\}$.
+
+The diagonal entries have their own interpretation. The diagonal entry $a^2_{ii}$ counts the number of walks of length 2 that begin and end at node $i$. Since a walk of length 2 that goes from $i \to j \to i$ in an undirected graph simply represents traversing an edge and returning along it, each of node $i$'s edges contributes exactly one such walk. As a result, the diagonal of $\mathbf{A}^2$ is equal to the **degree** of each node.
 
 ### The Cubed Adjacency Matrix ($\mathbf{A}^3$)
-What do the entries in @tbl-pows-3 mean?
 
-* **Off-Diagonal Entries**: Tell us the exact number of **walks of length 3** linking each pair of nodes. For instance, $a^3_{HF} = 1$. Looking at the graph, this corresponds to the walk $\{HG, GE, EF\}$.
-* **Diagonal Entries**: Count the number of walks of length 3 that begin and end at the same node (which is a **cycle of length 3**). 
-  A cycle of length 3 is structurally equivalent to a **clique of size 3 (a triangle)**! The diagonal entry $a^3_{ii}$ counts exactly *twice* the number of triangles node $i$ belongs to (once going clockwise, and once counterclockwise).
-  Thus, dividing the diagonal entries of $\mathbf{A}^3$ by two tells us exactly **how many triangles (cliques of size 3) each node belongs to**. For instance, node $K$ belongs to no triangles, so $a^3_{KK} = 0$.
+The entries of @tbl-pows-3 follow the same logic one step up the ladder. Each off-diagonal entry tells us the exact number of **walks of length 3** linking each pair of nodes. For instance, $a^3_{HF} = 1$, which corresponds to the walk $\{HG, GE, EF\}$ in the graph.
+
+The diagonal entries of $\mathbf{A}^3$ count the number of walks of length 3 that begin and end at the same node. Such a walk is a **cycle of length 3**, and a cycle of length 3 is structurally equivalent to a **clique of size 3 (a triangle)**. The diagonal entry $a^3_{ii}$ counts exactly *twice* the number of triangles node $i$ belongs to, once going around each triangle clockwise and once counterclockwise. Dividing the diagonal entries of $\mathbf{A}^3$ by two therefore tells us exactly **how many triangles each node belongs to**. For instance, node $K$ belongs to no triangles, so $a^3_{KK} = 0$.
 
 ```{r}
 #| label: fig-pows
@@ -271,9 +268,7 @@ What do the entries in @tbl-pows-3 mean?
 
 ## Matrix Multiplication of Vectors {#sec-matvecs}
 
-Recall that a **vector** is a sequence of numbers of a given length. A vector is actually just a special case of a matrix:
-* **Row Vector**: A matrix with *one row* and as many columns as the vector's length ($\mathbf{a}_{1 \times n}$).
-* **Column Vector**: A matrix with *one column* and as many rows as the vector's length ($\mathbf{a}^T_{n \times 1}$).
+Recall that a **vector** is a sequence of numbers of a given length. A vector is actually just a special case of a matrix. A **row vector** is a matrix with *one row* and as many columns as the vector's length, written $\mathbf{a}_{1 \times n}$. A **column vector** is a matrix with *one column* and as many rows as the vector's length, written $\mathbf{a}^T_{n \times 1}$.
 
 An example of a row vector $\mathbf{a} = \{2, 4, 7, 2, 4\}$ of dimensions $1 \times 5$ is shown in @tbl-vecmat, and its $5 \times 1$ transpose column vector $\mathbf{a}^T$ is shown in @tbl-transvec.
 
@@ -300,7 +295,8 @@ An example of a row vector $\mathbf{a} = \{2, 4, 7, 2, 4\}$ of dimensions $1 \ti
 ```
 
 ### Vector Multiplication Rules
-* **Row Vector times Column Vector**: Since this matches a matrix times its transpose, the product is always defined. The output is always a $1 \times 1$ "matrix," which is a single number (a **scalar**):
+
+When we multiply a **row vector times a column vector**, the product matches a matrix times its transpose, so it is always defined. The output is always a $1 \times 1$ "matrix," which is just a single number, called a **scalar**
 
 $$
 \mathbf{a}_{1 \times 5} \times \mathbf{a}^T_{5 \times 1} = b_{1 \times 1}
@@ -310,7 +306,7 @@ $$
 (2 \times 2) + (4 \times 4) + (7 \times 7) + (2 \times 2) + (4 \times 4) = 4 + 16 + 49 + 4 + 16 = 89
 $$
 
-* **Column Vector times Row Vector**: Reversing the order multiplies a $5 \times 1$ column vector by a $1 \times 5$ row vector, yielding a $5 \times 5$ square matrix (shown in @tbl-transvec2):
+Reversing the order and taking the **column vector times the row vector** multiplies a $5 \times 1$ column vector by a $1 \times 5$ row vector, yielding a $5 \times 5$ square matrix (shown in @tbl-transvec2)
 
 $$
 \mathbf{a}^T_{5 \times 1} \times \mathbf{a}_{1 \times 5} = \mathbf{B}_{5 \times 5}
@@ -332,10 +328,10 @@ $$ {#eq-vecmult2}
 
 ## Multiplying a Vector Times a Matrix (and Vice Versa)
 
-We can multiply a vector times a matrix (and a matrix times a vector) following the standard rules of conformability:
+We can multiply a vector times a matrix (and a matrix times a vector) following the standard rules of conformability, and the results are useful enough in network analysis to work through both directions.
 
-### 1. Row Vector Times Matrix
-Multiplying a $1 \times n$ row vector by an $n \times m$ matrix yields another **row vector** of dimensions $1 \times m$:
+### Row Vector Times Matrix
+Multiplying a $1 \times n$ row vector by an $n \times m$ matrix yields another **row vector** of dimensions $1 \times m$
 
 $$
 \mathbf{b}_{1 \times 4} \times \mathbf{A}_{4 \times 4} = \mathbf{c}_{1 \times 4}
@@ -367,8 +363,8 @@ $$ {#eq-matvec}
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-### 2. Matrix Times Column Vector
-Multiplying an $m \times n$ matrix by an $n \times 1$ column vector yields another **column vector** of dimensions $m \times 1$:
+### Matrix Times Column Vector
+Multiplying an $m \times n$ matrix by an $n \times 1$ column vector yields another **column vector** of dimensions $m \times 1$
 
 $$
 \mathbf{A}_{5 \times 5} \times \mathbf{b}_{5 \times 1} = \mathbf{c}_{5 \times 1}
@@ -378,10 +374,10 @@ $$ {#eq-matvec3}
 
 ## Matrix Times the "All Ones" Vector: Summing Row and Columns {#sec-allones}
 
-In matrix algebra, the **all ones vector** (symbol: $\mathbf{1}$) is a special vector consisting entirely of ones. It has an incredibly useful property in social network analysis: **it acts as a summation tool**.
+In matrix algebra, the **all ones vector** (symbol: $\mathbf{1}$) is a special vector consisting entirely of ones. It has an incredibly useful property in social network analysis, because it acts as a summation tool.
 
-### 1. Row Vector of All Ones ($\mathbf{1}_{1 \times n}$)
-If you multiply the $1 \times n$ row vector of all ones by any square adjacency matrix $\mathbf{A}$, the product is a row vector containing the **column sums** of the matrix (equivalent to the **indegrees** of each node in a directed graph!):
+### Row Vector of All Ones ($\mathbf{1}_{1 \times n}$)
+If you multiply the $1 \times n$ row vector of all ones by any square adjacency matrix $\mathbf{A}$, the product is a row vector containing the **column sums** of the matrix (equivalent to the **indegrees** of each node in a directed graph!)
 
 $$
 \mathbf{1}_{1 \times 5} \times \mathbf{A}_{5 \times 5} = \mathbf{b}_{1 \times 5}
@@ -413,8 +409,8 @@ $$ {#eq-allones1}
                   bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-### 2. Column Vector of All Ones ($\mathbf{1}^T_{n \times 1}$)
-If you multiply a square adjacency matrix $\mathbf{A}$ by the $n \times 1$ column vector of all ones, the product is a column vector containing the **row sums** of the matrix (equivalent to the **outdegrees** of each node!):
+### Column Vector of All Ones ($\mathbf{1}^T_{n \times 1}$)
+If you multiply a square adjacency matrix $\mathbf{A}$ by the $n \times 1$ column vector of all ones, the product is a column vector containing the **row sums** of the matrix (equivalent to the **outdegrees** of each node!)
 
 $$
 \mathbf{A}_{5 \times 5} \times \mathbf{1}^T_{5 \times 1} = \mathbf{b}_{5 \times 1}
@@ -499,10 +495,7 @@ Let's calculate this product for our running 12-person hangout network. The resu
     kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-This resulting matrix $\mathbf{B}$ contains two incredibly valuable pieces of network information:
-
-1. **Diagonal Entries ($b_{ii}$)**: The diagonal entries count the **degree** of each node. This is because multiplying row $i$ by column $i$ (which is identical in a symmetric matrix) squares each binary entry and sums them, giving the total number of neighbors node $i$ has.
-2. **Off-Diagonal Entries ($b_{ij}$)**: The off-diagonal entries count **the exact number of common neighbors shared by node $i$ and node $j$**!
+This resulting matrix $\mathbf{B}$ contains two incredibly valuable pieces of network information. The diagonal entries $b_{ii}$ count the **degree** of each node. This is because multiplying row $i$ by column $i$ (which are identical in a symmetric matrix) squares each binary entry and sums them, giving the total number of neighbors node $i$ has. Meanwhile, the off-diagonal entries $b_{ij}$ count **the exact number of common neighbors shared by node $i$ and node $j$**.
 
 Let's trace why this happens. Look at $b_{AC} = 1$ (Row A, Column C). This entry is obtained by multiplying the first row of the adjacency matrix (representing $A$'s connections) by the third column of the adjacency matrix (representing $C$'s connections), as shown in @tbl-commex:
 
@@ -534,12 +527,3 @@ The cell-by-cell product vector shown in @tbl-commex-3 contains a "1" *only* in 
 Summing up this product vector yields $1$, confirming that **node $D$ is the single, shared common neighbor between $A$ and $C$**. 
 
 Thus, multiplying an adjacency matrix by its transpose is the formal algebraic way to map out all **common neighbors** in a network!
-
----
-
-
-
-::: {.callout-tip}
-## Associated Assignment on Bruin Learn
-Now that you have completed this topic, you are ready to complete **[Homework 3: Ego Networks, Weak Ties & Matrix Operations](https://bruinlearn.ucla.edu/courses/238980/assignments/2036329)** on UCLA Bruin Learn!
-:::

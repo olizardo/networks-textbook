@@ -56,11 +56,7 @@ For instance, if you compare the undirected graphs @fig-connected1-1 and @fig-co
 
 When we remove the $DF$ edge the resulting graph $G(b)$ is now disconnected. There is no way we can trace a path connecting any of the vertices in the $\{F, G, H, I\}$ subset with any of the vertices in the $\{A, B, C, D, E\}$ subset. This is different from @fig-connected1-1, where we can trace a finite path between any two vertices, even if it is very long. 
 
-Thus, we can come up with a formal definition of **graph connectivity**:
-
-- A graph is **connected** if there exists a (finite) path between each pair of nodes.
-
-- A graph is **disconnected** if there does not exist a path connecting every pair of nodes.
+Thus, we can come up with a formal definition of **graph connectivity**. A graph is **connected** if there exists a (finite) path between each pair of nodes. By contrast, a graph is **disconnected** if there does not exist a path connecting every pair of nodes.
 
 Note that a graph is disconnected even if there is just one pair of nodes that cannot reach each other. In @fig-connected1-2, for instance, the graph is disconnected because there is no path connecting any node in the $\{F, G, H, I\}$ subset to any node in the $\{A, B, C, D, E\}$ subset.
 
@@ -172,10 +168,7 @@ The same would happen if we removed just one of the red edges from @fig-connecte
 
 As you might imagine, the smallest edge connectivity a connected graph can have is $\lambda(G) = 1$. A graph with edge-connectivity 1 has a special edge called a **bridge**. This is the *single* edge whose removal disconnects a graph with edge-connectivity equal to 1. 
 
-For instance, in @fig-connected1-1, the $DF$ edge is a bridge. When a graph is like the one shown in @fig-connected1-1 and has a bridge (such as $DF$), that edge has two interesting properties [@buckleyharary90, p. 17]. 
-
-1. First, if an edge is a bridge in graph $G$, then that edge does not lie on any cycle of $G$ (as defined in @sec-indirect). That means that $DF$ in @fig-connected1-1 does not lie on any cycle of $G$. 
-2. Second, if an edge is a bridge, then there is at least one pair of nodes *i* and *j* such that the bridge is an edge on *every* path linking *i* and *j*. In @fig-connected1-1, clearly condition (2) is the case for every node in the subset $\{F, G, H, I\}$ relative to nodes in the subset $\{A, B, C, D, E\}$. Every path linking nodes in the first subset to nodes in the second subset has to include the bridge $DF$. 
+For instance, in @fig-connected1-1, the $DF$ edge is a bridge. When a graph is like the one shown in @fig-connected1-1 and has a bridge (such as $DF$), that edge has two interesting properties [@buckleyharary90, p. 17]. First, if an edge is a bridge in graph $G$, then that edge does not lie on any cycle of $G$ (as defined in @sec-indirect). That means that $DF$ in @fig-connected1-1 does not lie on any cycle of $G$. Second, if an edge is a bridge, then there is at least one pair of nodes *i* and *j* such that the bridge is an edge on *every* path linking *i* and *j*. In @fig-connected1-1, the second property clearly holds for every node in the subset $\{F, G, H, I\}$ relative to nodes in the subset $\{A, B, C, D, E\}$. Every path linking nodes in the first subset to nodes in the second subset has to include the bridge $DF$.
 
 ## Node Connectivity {#sec-nodecon}
 
@@ -393,12 +386,9 @@ Connectivity in directed graphs (digraphs) is more complex than in undirected gr
 To account for this asymmetry, graph theory distinguishes between three different hierarchical levels of connectivity for directed graphs: **weak connectivity**, **unilateral connectivity**, and **strong connectivity**.
 
 ### Pairwise Connectivity States
-To understand the connectivity of a whole directed graph, we must first look at the connectivity between individual pairs of nodes. For any pair of nodes $u$ and $v$ in a directed network, they can exist in one of several states:
+To understand the connectivity of a whole directed graph, we must first look at the connectivity between individual pairs of nodes. For any pair of nodes $u$ and $v$ in a directed network, they can exist in one of several states.
 
-1. **Pairwise Weakly Connected:** Node $u$ and $v$ are connected by at least one **semipath** (connected if we ignore the arrow directions). They are part of the same general network, but there is no directed path starting from either node that can reach the other.
-2. **Pairwise Unilaterally Connected:** A directed path exists from $u \rightarrow v$ **OR** from $v \rightarrow u$. Information or influence can flow from one person to the other, but it is a one-way street; there is no mutual exchange.
-3. **Pairwise Strongly Connected:** A directed path exists from $u \rightarrow v$ **AND** from $v \rightarrow u$. Both nodes can mutually reach each other (mutual reachability), although the paths in each direction may use completely different intermediate nodes or channels.
-4. **Pairwise Recursively Connected:** A directed path exists from $u \rightarrow v$ and $v \rightarrow u$, **AND** the directed path in both directions shares the exact same set of intermediate nodes. The relationship can be traversed back-and-forth along the same closed, mutually symmetric cycle.
+The pair is **pairwise weakly connected** when nodes $u$ and $v$ are connected by at least one **semipath** (connected if we ignore the arrow directions). They are part of the same general network, but there is no directed path starting from either node that can reach the other. The pair is **pairwise unilaterally connected** when a directed path exists from $u \rightarrow v$ **OR** from $v \rightarrow u$. Information or influence can flow from one person to the other, but it is a one-way street, with no mutual exchange. The pair is **pairwise strongly connected** when a directed path exists from $u \rightarrow v$ **AND** from $v \rightarrow u$. Both nodes can mutually reach each other (mutual reachability), although the paths in each direction may use completely different intermediate nodes or channels. Finally, the pair is **pairwise recursively connected** when a directed path exists from $u \rightarrow v$ and $v \rightarrow u$, **AND** the directed path in both directions shares the exact same set of intermediate nodes. The relationship can be traversed back and forth along the same closed, mutually symmetric cycle.
 
 ### Whole Graph Connectivity
 
@@ -488,24 +478,8 @@ In @fig-weak, there is no directed path from node 5 to node 7, nor is there a di
 
 ### Directed Components
 
-Just as undirected graphs are divided into connected components, directed graphs can be decomposed into:
+Just as undirected graphs are divided into connected components, directed graphs can be decomposed into **weakly connected components (WCCs)**, which are subgraphs that are connected when we ignore edge direction, and **strongly connected components (SCCs)**, which are subgraphs within which *every* node is mutually reachable from every other node.
 
-* **Weakly Connected Components (WCCs)**: Subgraphs that are connected when we ignore edge direction.
-* **Strongly Connected Components (SCCs)**: Subgraphs within which *every* node is mutually reachable from every other node.
-
-Decomposing @fig-directed yields:
-* **One Weakly Connected Component**: All nodes $\{A, B, C, D, E, F, G\}$ are part of a single, unified WCC.
-* **Four Strongly Connected Components**:
-  1. The close-knit core of mutually reachable nodes: $\{A, B, D, F\}$. Within this subgraph, you can trace a directed path from any node to any other node (e.g., $A \rightarrow F \rightarrow A$, and $B \leftrightarrow D$).
-  2. The singleton receiver component: $\{C\}$.
-  3. The singleton transmitter component: $\{E\}$.
-  4. The singleton transmitter component: $\{G\}$.
+Decomposing @fig-directed yields one weakly connected component, in which all nodes $\{A, B, C, D, E, F, G\}$ are part of a single, unified WCC, and four strongly connected components. The first SCC is the close-knit core of mutually reachable nodes $\{A, B, D, F\}$, within which you can trace a directed path from any node to any other node (e.g., $A \rightarrow F \rightarrow A$, and $B \leftrightarrow D$). The remaining three SCCs are singleton components, one receiver $\{C\}$ and two transmitters $\{E\}$ and $\{G\}$.
 
 Decomposing networks into strongly and weakly connected components has powerful applications. For example, in an information flow or gossip network, a **strongly connected component** represents a "rumor mill" where information can diffuse rapidly and completely to all members. On the other hand, nodes outside the SCC (like receivers or transmitters) either act as pure information sinks or pure information sources.
-
-
-
-::: {.callout-tip}
-## Associated Assignment on Bruin Learn
-Now that you have completed this topic, you are ready to complete **[Homework 2: From Graph to Matrix & Connectivity](https://bruinlearn.ucla.edu/courses/238980/assignments/2036328)** on UCLA Bruin Learn!
-:::
