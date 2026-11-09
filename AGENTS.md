@@ -249,7 +249,7 @@ Credentials: `CANVAS_API_TOKEN`, `CANVAS_URL` in `~/.Renviron` (strict `KEY=valu
 - **Adding chapters:** follow the naming convention and add the file to `_quarto.yml` under `book: chapters:`.
 - **LaTeX matrix rows:** inside `$$\begin{pmatrix}...\end{pmatrix}$$` separate rows with exactly `\\`; `\\\\` renders empty rows that double matrix height.
 - **Slide figure sizing:** match chunk `fig-width` to the displayed column width (e.g., `fig-width: 3.5` for a ~263px half-column) so text renders ~1:1.
-- **Canvas assignment links:** when a lesson ends a topic with a homework, add `::: {.callout-tip} ## Associated Assignment on Bruin Learn ... :::`.
+- **No homework or Canvas assignment links in the textbook:** Canvas assignment IDs and due dates change each term, so do not add "Associated Assignment" callouts or links to homework pages.
 - **Slide image references:** decks reference root images as `../images/<filename>`; `images/` is registered under `project.resources` in `_quarto.yml`.
 - **R execution:** use `renv::restore(prompt = FALSE)` (the prompt doesn't render in the Positron console and looks like a hang).
 - **Context:** educational resource — keep explanations clear and accessible to students.
