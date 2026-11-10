@@ -52,13 +52,19 @@ dense_pairs <- mk_pairs("ab", "ag", "ah", "bc", "be", "bg", "bh",
 # Effective-size example 2 (sparse alter-alter ties): 7 ties, ES = 6.25
 sparse_pairs <- mk_pairs("ab", "ag", "ah", "bh", "gh", "de", "ef")
 
+# Effective-size limits: no ties (max) and complete alter-alter graph (min), m = 28
+complete_pairs <- mk_pairs(apply(combn(alt_names, 2), 2, paste, collapse = ""))
+
 # Attribute figures (composition / homophily / diversity) use the pure star — no alter-alter ties, since those measures don't depend on them
 kin_pairs     <- mk_pairs()
 same_pairs    <- mk_pairs()
 diverse_pairs <- mk_pairs()
 
 # Clustering worked examples
-clustered_pairs   <- mk_pairs("ab", "ac", "bc", "fg", "fh", "gh", "df")  # 2 triangles + bridge, m = 7
+clustered_pairs   <- mk_pairs("ab", "ac", "ad", "bc", "bd", "cd",       # K4 clique 1
+                              "ef", "eg", "eh", "fg", "fh", "gh",       # K4 clique 2
+                              "de", "bf", "cg", "ah", "be")             # 5 cross-circle ties, m = 17
+mid_pairs         <- mk_pairs("ab", "ac", "bc", "fg", "fh", "gh", "df")  # 2 triangles + bridge, m = 7
 unclustered_pairs <- mk_pairs("ab", "cd", "ef", "gh")                    # disjoint pairs, m = 4
 
 # ---- Plot helper -------------------------------------------------------------
@@ -121,16 +127,31 @@ es_calc <- function(pairs, n_alter = 8) {
 }
 
 # ---- Adjacency matrix table --------------------------------------------------
-adj_kable <- function(pairs) {
+adj_kable <- function(pairs, highlight_m = FALSE) {
   A <- matrix(0, length(alt_names), length(alt_names),
               dimnames = list(alt_names, alt_names))
   for (i in seq_len(nrow(pairs))) {
     A[pairs$from[i], pairs$to[i]] <- 1
     A[pairs$to[i], pairs$from[i]] <- 1
   }
-  knitr::kable(A, format = "html", escape = FALSE) |>
-    kable_styling(font_size = 18, bootstrap_options = "condensed", full_width = FALSE) |>
-    column_spec(1, bold = TRUE)
+  if (highlight_m) {
+    D <- A
+    for (i in seq_along(alt_names)) {
+      for (j in seq_along(alt_names)) {
+        if (j > i && A[i, j] == 1) {
+          D[i, j] <- cell_spec("1", background = "darkorchid",
+                               color = "white", bold = TRUE)
+        }
+      }
+    }
+    knitr::kable(D, format = "html", escape = FALSE) |>
+      kable_styling(font_size = 18, bootstrap_options = "condensed", full_width = FALSE) |>
+      column_spec(1, bold = TRUE)
+  } else {
+    knitr::kable(A, format = "html", escape = FALSE) |>
+      kable_styling(font_size = 18, bootstrap_options = "condensed", full_width = FALSE) |>
+      column_spec(1, bold = TRUE)
+  }
 }
 
 # ---- Attribute label vectors (real-demographic register, HW7 style) ---------
@@ -144,6 +165,14 @@ kin_labels    <- c(a = "Kin", b = "Kin", c = "Non-kin", d = "Non-kin",
 race_pal   <- c(White = "steelblue", Black = "darkorange",
                 Asian = "forestgreen", Hispanic = "purple")
 gender_pal <- c(Man = "steelblue", Woman = "darkorange", Nonbinary = "forestgreen")
+
+# Homophily (negative E-I) example: ego is Black, 6 Black alters, 2 White (c, g)
+race_labels_h <- c(a = "Black", b = "Black", c = "White", d = "Black",
+                   e = "Black", f = "Black", g = "White", h = "Black")
+
+# Low-diversity example: ego is Black, 7 White alters, 1 Black (f)
+race_labels_l <- c(a = "White", b = "White", c = "White", d = "White",
+                   e = "White", f = "Black", g = "White", h = "White")
 
 # ---- Blau index for the diversity example (White 3, Black 2, Asian 2, Hispanic 1)
 blau <- function(counts) {
@@ -291,46 +320,44 @@ knitr::kable(menu, format = "html", align = "lccc") |>
 
 ## Size
 
-::: {.columns}
-::: {.column style="width: 30%;"}
 <div style="font-size: 90%;">
 
-- Tells us whether your ego network is **large or small**.
-
-. . .
-
-- Given by either:
-
-  - The number of **ego-alter ties**
-  - The number of **alters**
-
-. . .
-
-- Here: $S = 6$.
+- Tells us whether your ego network is **large or small** — the number of **alters** (equivalently, ego-alter ties).
 
 </div>
-:::
 
-::: {.column style="width: 35%;"}
+::: {.columns}
+::: {.column style="width: 33%;"}
 ```{r}
 #| echo: false
-#| fig-width: 3.6
-#| fig-height: 3.6
-ego_plot(mk_pairs("ab"), alters = letters[1:6])
-```
-
-**Size = 6**
-:::
-
-::: {.column style="width: 35%;"}
-```{r}
-#| echo: false
-#| fig-width: 3.6
-#| fig-height: 3.6
+#| fig-width: 3.5
+#| fig-height: 3.5
 ego_plot(mk_pairs(), alters = c("b", "f"))
 ```
 
-**Size = 2**
+**Small: Size = 2**
+:::
+
+::: {.column style="width: 33%;"}
+```{r}
+#| echo: false
+#| fig-width: 3.5
+#| fig-height: 3.5
+ego_plot(mk_pairs(), alters = letters[1:5])
+```
+
+**Medium: Size = 5**
+:::
+
+::: {.column style="width: 33%;"}
+```{r}
+#| echo: false
+#| fig-width: 3.5
+#| fig-height: 3.5
+ego_plot(mk_pairs(), alters = alt_names)
+```
+
+**Large: Size = 8**
 :::
 :::
 
@@ -385,10 +412,10 @@ ego_plot(dense_pairs, alters = alt_names)
 ```{r}
 #| echo: false
 #| results: asis
-cat(adj_kable(dense_pairs))
+cat(adj_kable(dense_pairs, highlight_m = TRUE))
 ```
 
-$n = 8$ alters; $m = 14$ alter-alter ties.
+- $n = 8$ alters; $m = 14$ ties. Each tie appears twice in the matrix (above and below the diagonal); the shaded 1s count each tie once: $m = 28/2 = 14$.
 :::
 :::
 
@@ -412,14 +439,68 @@ ego_plot(sparse_pairs, alters = alt_names)
 ```{r}
 #| echo: false
 #| results: asis
-cat(adj_kable(sparse_pairs))
+cat(adj_kable(sparse_pairs, highlight_m = TRUE))
 ```
 
-- Same size ($S = 8$), but less redundancy: the sparse network has the **larger effective size**.
+- The shaded 1s give $m = 14/2 = 7$. Same size ($S = 8$), but less redundancy: the sparse network has the **larger effective size**.
 :::
 :::
 
 $$ES = 8 - \frac{14}{8} = 8 - 1.75 = 6.25$$
+
+---
+
+## Effective Size: The Maximum
+
+::: {.columns}
+::: {.column style="width: 45%;"}
+```{r}
+#| echo: false
+#| fig-width: 4.4
+#| fig-height: 4.4
+ego_plot(kin_pairs, alters = alt_names)
+```
+:::
+
+::: {.column style="width: 55%;"}
+```{r}
+#| echo: false
+#| results: asis
+cat(adj_kable(kin_pairs))
+```
+
+- **No alter-alter ties at all** ($m = 0$): a pure star. No alter is redundant, so nothing gets discounted.
+:::
+:::
+
+$$ES = 8 - \frac{0}{8} = 8 = S$$
+
+---
+
+## Effective Size: The Minimum
+
+::: {.columns}
+::: {.column style="width: 45%;"}
+```{r}
+#| echo: false
+#| fig-width: 4.4
+#| fig-height: 4.4
+ego_plot(complete_pairs, alters = alt_names)
+```
+:::
+
+::: {.column style="width: 55%;"}
+```{r}
+#| echo: false
+#| results: asis
+cat(adj_kable(complete_pairs))
+```
+
+- **Every alter knows every other** ($m = 28 = \binom{8}{2}$): all alters are mutually redundant, so the whole circle acts like a single effective contact.
+:::
+:::
+
+$$ES = 8 - \frac{56}{8} = 8 - 7 = 1$$
 
 ---
 
@@ -575,6 +656,38 @@ ego_plot(same_pairs, alters = alt_names,
 
 ---
 
+## Homophily: A Homophilous Example
+
+::: {.columns}
+::: {.column style="width: 42%;"}
+<div style="font-size: 90%;">
+
+- Flip the pattern: ego (Black) now has **6 Black** alters and **2 White** alters (c and g).
+
+$$EI = \frac{2 - 6}{2 + 6} = \frac{-4}{8} = -0.5$$
+
+. . .
+
+- Same magnitude as before, but on the **homophily** side: ego's ties lean **internal**.
+
+</div>
+:::
+
+::: {.column style="width: 58%;"}
+```{r}
+#| echo: false
+#| fig-width: 5.2
+#| fig-height: 5.2
+ego_plot(same_pairs, alters = alt_names,
+         labels = race_labels_h, pal = race_pal,
+         ego_label = "Black",
+         node_legend = TRUE)
+```
+:::
+:::
+
+---
+
 ## Diversity: Blau's Index
 
 ::: {.columns}
@@ -623,17 +736,21 @@ ego_plot(diverse_pairs, alters = alt_names,
 
 - Eight alters: 3 White, 2 Black, 2 Asian, 1 Hispanic.
 
-$$H = 1 - \left(\tfrac{3}{8}^2 + \tfrac{2}{8}^2 + \tfrac{1}{8}^2 + \tfrac{2}{8}^2\right)$$
+. . .
 
-$$H = 1 - 0.28 = 0.72$$
+- **Step 1**, proportions of alters in each group: $p_{\text{W}} = \tfrac{3}{8} = 0.375$, $p_{\text{B}} = \tfrac{2}{8} = 0.250$, $p_{\text{A}} = \tfrac{2}{8} = 0.250$, $p_{\text{H}} = \tfrac{1}{8} = 0.125$.
 
 . . .
 
-- **Interpretation**:
+- **Steps 2–3**, square each proportion, sum, and subtract from 1.0:
 
-  - A completely homogeneous ego network has $H = 0$ — no diversity among alters.
-  - The more diverse the ego network, the closer $H$ is to 1.0.
-  - $H$ is at a maximum ($H_{max} = 1 - 1/k$) when alters are spread evenly across $k$ groups. With $k = 4$: $H_{max} = 0.75$, so $H/H_{max} = 0.96$.
+<div class="math-dense" style="font-size: 100%;">
+
+$$H = 1 - \left(0.375^2 + 0.250^2 + 0.250^2 + 0.125^2\right)$$
+
+$$= 1 - 0.281 = 0.72$$
+
+</div>
 
 </div>
 :::
@@ -647,6 +764,82 @@ ego_plot(diverse_pairs, alters = alt_names,
          labels = race_labels, pal = race_pal,
          ego_label = "Black",
          node_legend = TRUE, legend_nrow = 2)
+```
+:::
+:::
+
+---
+
+## Diversity: Interpreting $H$
+
+::: {.columns}
+::: {.column style="width: 42%;"}
+<div style="font-size: 90%;">
+
+- A completely homogeneous ego network has $H = 0$ — no diversity among alters.
+
+. . .
+
+- The more diverse the ego network, the closer $H$ is to 1.0.
+
+. . .
+
+- $H$ is at a maximum ($H_{max} = 1 - 1/k$) when alters are spread evenly across $k$ groups. With $k = 4$: $H_{max} = 0.75$, so $H/H_{max} = 0.96$.
+
+</div>
+:::
+
+::: {.column style="width: 58%;"}
+```{r}
+#| echo: false
+#| fig-width: 5.2
+#| fig-height: 5.2
+ego_plot(diverse_pairs, alters = alt_names,
+         labels = race_labels, pal = race_pal,
+         ego_label = "Black",
+         node_legend = TRUE, legend_nrow = 2)
+```
+:::
+:::
+
+---
+
+## Diversity: A Low-Diversity Example
+
+::: {.columns}
+::: {.column style="width: 42%;"}
+<div style="font-size: 90%;">
+
+- Reverse the pattern: ego (Black) now has **7 White** alters and **1 Black** alter (f). Only $k = 2$ groups are present.
+
+. . .
+
+- **Step 1**: $p_{\text{W}} = \tfrac{7}{8} = 0.875$, $p_{\text{B}} = \tfrac{1}{8} = 0.125$.
+
+- **Steps 2–3**:
+
+<div class="math-dense" style="font-size: 100%;">
+
+$$H = 1 - \left(0.875^2 + 0.125^2\right) = 1 - 0.781 = 0.22$$
+
+</div>
+
+. . .
+
+- Far below the $H = 0.72$ of the diverse network. With $k = 2$: $H_{max} = 0.5$, so $H/H_{max} = 0.44$ — alters crowd into one group.
+
+</div>
+:::
+
+::: {.column style="width: 58%;"}
+```{r}
+#| echo: false
+#| fig-width: 5.2
+#| fig-height: 5.2
+ego_plot(same_pairs, alters = alt_names,
+         labels = race_labels_l, pal = race_pal,
+         ego_label = "Black",
+         node_legend = TRUE)
 ```
 :::
 :::
@@ -695,13 +888,13 @@ ego_plot(clustered_pairs, alters = alt_names, show_ego_ties = FALSE)
 ::: {.column style="width: 42%;"}
 <div style="font-size: 90%;">
 
-- $n = 8$ alters; $m = 7$ alter-alter ties.
+- $n = 8$ alters; $m = 17$ alter-alter ties.
 
-$$CC_i = \frac{2 \times 7}{8 \times 7} = \frac{14}{56} = 0.25$$
+$$CC_i = \frac{2 \times 17}{8 \times 7} = \frac{34}{56} = 0.61$$
 
 . . .
 
-- The ties are **concentrated**: two tight triangles of mutual friends, joined by a single bridge.
+- The ties are **concentrated**: two dense friend circles — everyone knows everyone within their circle — plus a handful of cross-circle ties.
 
 . . .
 
@@ -728,13 +921,13 @@ ego_plot(clustered_pairs, alters = alt_names, show_ego_ties = FALSE)
 ::: {.column style="width: 42%;"}
 <div style="font-size: 90%;">
 
-- Same number of alters ($n = 8$), but only $m = 4$ alter-alter ties.
+- Same number of alters ($n = 8$), but only $m = 7$ alter-alter ties.
 
-$$CC_i = \frac{2 \times 4}{8 \times 7} = \frac{8}{56} = 0.14$$
+$$CC_i = \frac{2 \times 7}{8 \times 7} = \frac{14}{56} = 0.25$$
 
 . . .
 
-- The ties are **scattered**: four disjoint pairs, no triangles at all.
+- The ties are **thinner**: two tight triangles of mutual friends, joined by a single bridge.
 
 . . .
 
@@ -748,7 +941,7 @@ $$CC_i = \frac{2 \times 4}{8 \times 7} = \frac{8}{56} = 0.14$$
 #| echo: false
 #| fig-width: 5.2
 #| fig-height: 5.2
-ego_plot(unclustered_pairs, alters = alt_names, show_ego_ties = FALSE)
+ego_plot(mid_pairs, alters = alt_names, show_ego_ties = FALSE)
 ```
 :::
 :::

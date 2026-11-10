@@ -136,6 +136,7 @@ No slide may scroll vertically; split rather than shrink fonts aggressively.
 - Per-deck helper functions are documented in each deck's setup chunk, not here.
 - **kable pitfalls:** `knitr::kable` silently DROPS sequential integer rownames (1:n), so `column_spec(n+1)` goes out of bounds and fails the render; use an explicit label column (LETTERS rownames are kept). Apply `column_spec` BEFORE `row_spec` so the row color wins the intersection. `match()` on empty `active` → guard with `length(ai) && !is.na(ai)`.
 - **ggplot pitfalls:** `annotate()` ignores `nudge_x` (bake offsets into x); `scale_linewidth_identity` fails on character values (use two `geom_segment` layers); use compact P1/P2 tags above nodes to avoid label collisions.
+- **ggraph arc routing (2026-11-10):** `geom_edge_arc()` silently IGNORES `curvature`/`strength` given through `aes()` ("Ignoring unknown aesthetics" — suppressed by `warning = FALSE`), so per-edge curvature mapping does nothing; all edges render at the default `strength = 1`. Arc variation must be done with **one `geom_edge_arc` layer per constant `strength`**, filtering with the deck's `data = function(l) { e <- get_edges()(l); e[...] }` pattern. `get_edges()` returns `from`/`to` as **integer vertex indices, not node names** — filter on indices. Positive `strength` bows left of the travel direction (up for left-to-right edges); sign per layer may need one visual iteration.
 
 ### 7. Bruin Learn (Canvas)
 Canvas API rules live in `../SOCIOL 111/AGENTS.md`. The one procedure used from this repo is the slide-link swap:
