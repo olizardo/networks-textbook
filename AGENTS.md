@@ -55,7 +55,7 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/structural-holes.qmd` | Burt's Theory of Structural Holes |
 | `slides/chains-of-affection.qmd` | Chains of Affection |
 | `slides/balance-signed-graphs.qmd` | Balance Theory and Signed Graphs |
-| `slides/valenced-interactions.qmd` | Theories of Valenced Interactions |
+| `slides/valenced-interactions.qmd` | Theories of Valenced Interactions (Karma, Status, Solidarity, and Dominance in Sentiment Networks) |
 | `slides/small-world.qmd` | The Small World Phenomenon |
 | `slides/diffusion-of-innovations.qmd` | Diffusion of Innovations (draft; not yet pushed) |
 
@@ -157,13 +157,14 @@ Canvas API rules live in `../SOCIOL 111/AGENTS.md`. The one procedure used from 
 - **Bitmap QA gap:** the QA scripts measure layout only; view every regenerated PNG (read tool) before calling a figure fixed.
 - **Rounding in worked examples:** carry three decimals and compute final ratios from unrounded intermediates (H/H_max = 0.611/0.667 = 0.92, not 0.61/0.67 = 91%).
 - **Figure provenance (rule):** every static PNG referenced in `slides/*.qmd` MUST have a committed generating script (`images/make_<name>.R`, run from repo root). Exempt: third-party/photographic assets (`aig-interlocks-2004.jpg`, `body.jpg`, `brain.jpg`, `got.png`, `usairport.png`). Commit generating code alongside any redrawn PNG.
-- **Schematic-figure captions:** stylized/schematic charts or networks get an italic caption saying they are not the study's data.
+- **Schematic-figure captions (removed 2026-11-10 per Omar):** do NOT add "schematic example / not data from a particular study" boilerplate captions — Omar finds they add nothing, and all such notices were swept from the decks. Keep only provenance notes that do real work (e.g., measured-midpoint sourcing in diffusion, "not effect sizes" clarifications, invented-response-format disclosures).
 - **Measured-midpoint schematics:** S-curve schematics (`images/make_diffusion_schematic.R`) anchor only each curve's 50% midpoint to a cited measured value. Curve steepness is illustrative and must be labeled as such. Each series' denominator goes in its legend label. A series with no measured 50% point is left out.
 - **Census sourcing:** prefer primary Census tables. When a value comes from a secondary reproduction or a web summary, flag it in the sources table rather than presenting it as Census data.
 - **Bibliography keys:** use `burt92` (*Structural Holes*, 1992), not the old `burt95`.
 - **Git hygiene:** never blanket `git add .` (large binaries slip in; GitHub rejects files >100 MB).
 
 ## Open Items
+- **Valenced-interactions deck expanded (2026-11-10):** new Part 4 "Dominance Hierarchies" (10 slides: transitivity, vacuous transitivity, pecking order, seven dominance triads, attribute- vs interaction-based models, winner/loser/bystander effects) ported from chapter 44, inserted after Solidarity and before the summary (renumbered Part 5); comparison table gained a Dominance row. Passes overflow and size audits. NOT yet pushed — GitHub Pages (and the Lesson 15 Canvas iframe) still serve the old deck until push. The Google Slides lectured deck's Papachristos gang-violence section is still absent from the repo deck. Also 2026-11-10: Size slide rebuilt as three pure-star examples (S = 2/5/8), effective-size gained Max/Min slides and shaded upper-triangle 1s showing where m comes from, homophily gained a negative-EI example, diversity gained Step 1–3 detail (split into two slides) and a low-diversity example, clustering examples rebuilt (K4 circles, CC = 0.61 vs 0.25).
 - **Diffusion Canvas swap:** Lesson 18 page and module item 8300738 still embed Google Slides. Swap both to `slides/diffusion-of-innovations` once GitHub Pages serves the deck.
 - **Diffusion chapter render:** chapter 46 has an opening section (Figure 1, Table 1). Only that chapter was rendered; run a full book render before the site is updated.
 - **Diffusion sources:** the automobile (1948) and radio (1932) midpoints rest on secondary summaries. Electricity and telephone values come from Census reproductions, not the original PDFs. Verify before publication.
