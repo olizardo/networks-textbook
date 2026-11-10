@@ -618,13 +618,13 @@ edges <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors = 
     f_from = nodes$faction[match(from, nodes$name)],
     f_to = nodes$faction[match(to, nodes$name)],
     sign = ifelse(f_from == f_to, "+", "-"),
-    # Fan the 9 cross-faction chords into arcs: top row bows up, bottom row bows down
-    curve = ifelse(sign == "-", c(0.45, 0.35, 0.25, 0.12, 0.0, -0.12, -0.25, -0.35, -0.45), 0)
   )
 g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
 lay <- matrix(c(-1.5, 1.1, -1.5, -1.1, -2.5, 0, 1.5, 1.1, 1.5, -1.1, 2.5, 0), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
-  geom_edge_arc(aes(color = sign, linetype = sign, strength = curve), width = 2, alpha = 0.8) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "+" | e$from == 1, ] }, width = 2, alpha = 0.8, strength = 0.35) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from == 3, ] }, width = 2, alpha = 0.8, strength = -0.15) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from == 2, ] }, width = 2, alpha = 0.8, strength = -0.2) +
   geom_node_point(aes(fill = faction), size = 22, color = "white", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "white") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
@@ -773,9 +773,6 @@ edges <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors = 
     f_from = nodes$faction[match(from, nodes$name)],
     f_to = nodes$faction[match(to, nodes$name)],
     sign = ifelse(f_from == f_to, "+", "-"),
-    # Bundle cross-cluster negative edges into one arc "bus" per cluster pair
-    pair = paste0(f_from, f_to),
-    curve = ifelse(sign == "-", c("12" = 0.25, "13" = -0.25, "23" = 0.25)[pair], 0)
   )
 g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
 lay <- matrix(c(
@@ -784,7 +781,8 @@ lay <- matrix(c(
   1.0, -0.6, 1.9, -1.3, 0.8, -1.5    # Cluster 3 (bottom right)
 ), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
-  geom_edge_arc(aes(color = sign, linetype = sign, strength = curve), width = 1.8, alpha = 0.7) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "+" | !(e$from %in% 1:3 & e$to %in% 7:9), ] }, width = 1.8, alpha = 0.7, strength = -0.25) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from %in% 1:3 & e$to %in% 7:9, ] }, width = 1.8, alpha = 0.7, strength = 0.25) +
   geom_node_point(aes(fill = faction), size = 16, color = "white", shape = 21, stroke = 1.5) +
   geom_node_text(aes(label = name), fontface = "bold", size = 4.5, color = "white") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
@@ -859,11 +857,11 @@ edges_b <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors 
     sign = ifelse(f_from == f_to, "+", "-")
   )
 lay_b <- matrix(c(-1.5, 1.1, -1.5, -1.1, -2.5, 0, 1.5, 1.1, 1.5, -1.1, 2.5, 0), ncol = 2, byrow = TRUE)
-edges_b <- edges_b %>%
-  mutate(curve = ifelse(sign == "-", c(0.45, 0.35, 0.25, 0.12, 0.0, -0.12, -0.25, -0.35, -0.45), 0))
 g_b <- graph_from_data_frame(edges_b, directed = FALSE, vertices = nodes_b)
 p_bal <- ggraph(g_b, layout = lay_b) +
-  geom_edge_arc(aes(color = sign, linetype = sign, strength = curve), width = 1.2, alpha = 0.6) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "+" | e$from == 1, ] }, width = 1.2, alpha = 0.6, strength = 0.35) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from == 3, ] }, width = 1.2, alpha = 0.6, strength = -0.15) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from == 2, ] }, width = 1.2, alpha = 0.6, strength = -0.2) +
   geom_node_point(aes(fill = faction), size = 14, color = "white", shape = 21, stroke = 1.2) +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
@@ -877,9 +875,7 @@ edges_c <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors 
   mutate(
     f_from = nodes_c$faction[match(from, nodes_c$name)],
     f_to = nodes_c$faction[match(to, nodes_c$name)],
-    sign = ifelse(f_from == f_to, "+", "-"),
-    pair = paste0(f_from, f_to),
-    curve = ifelse(sign == "-", c("12" = 0.25, "13" = -0.25, "23" = 0.25)[pair], 0)
+    sign = ifelse(f_from == f_to, "+", "-")
   )
 g_c <- graph_from_data_frame(edges_c, directed = FALSE, vertices = nodes_c)
 lay_c <- matrix(c(
@@ -889,7 +885,8 @@ lay_c <- matrix(c(
 ), ncol = 2, byrow = TRUE)
 
 p_clust <- ggraph(g_c, layout = lay_c) +
-  geom_edge_arc(aes(color = sign, linetype = sign, strength = curve), width = 1.2, alpha = 0.6) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "+" | !(e$from %in% 1:3 & e$to %in% 7:9), ] }, width = 1.2, alpha = 0.6, strength = -0.25) +
+  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from %in% 1:3 & e$to %in% 7:9, ] }, width = 1.2, alpha = 0.6, strength = 0.25) +
   geom_node_point(aes(fill = faction), size = 12, color = "white", shape = 21, stroke = 1.2) +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
