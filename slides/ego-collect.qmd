@@ -495,73 +495,6 @@ The GSS item elicits **core discussion networks**: first fielded in the 1985 GSS
 
 ---
 
-## A Data Collection Case: NetHealth
-
-::: {.columns}
-::: {.column width="52%"}
-<div style="font-size: 90%;">
-
-- Interaction-based name generator, up to 20 alters
-- Eight survey waves
-- Wave 3 began feeding back wave N-1 names after subjects listed people
-- Phone number and email are collected to match alters across respondents
-- Uses: alter counts for family, pre-ND, and post-ND friends; comparing tie-strength measures; comparing perceived and actual networks; change over time in ego-network traits
-
-</div>
-:::
-
-::: {.column width="48%"}
-```{r}
-#| fig-width: 5.0
-#| fig-height: 3.6
-#| fig-align: center
-data.frame(
-  Ego = c(101, 101, 101, 101, 102),
-  Alter = c(2044, 2047, 2051, 2060, 2044),
-  Wave = c(1, 1, 2, 2, 1)
-) |>
-  kbl(col.names = c("egoid", "alterid", "wave"))
-```
-
-Long-format name generator file (illustrative rows, not NetHealth data).
-:::
-:::
-
----
-
-## Storing Ego-Network Data
-
-::: {.columns}
-::: {.column width="50%"}
-**Name-generator file** (one row per ego-alter nomination)
-
-```{r}
-data.frame(
-  egoid = c(101, 101, 101, 102),
-  alterid = c(2044, 2047, 2051, 2044),
-  wave = c(1, 1, 1, 1)
-) |> kbl()
-```
-:::
-
-::: {.column width="50%"}
-**Alter-to-alter file** (one row per perceived tie among alters)
-
-```{r}
-data.frame(
-  alterid1 = c(2044, 2044),
-  alterid2 = c(2047, 2051),
-  egoid = c(101, 101),
-  wave = c(1, 1)
-) |> kbl()
-```
-:::
-:::
-
-Illustrative rows. The alter-to-alter file holds only ties among ego's own alters, not the full network.
-
----
-
 ## Name Interpreters: What You Can Measure
 
 ```{r}
@@ -582,14 +515,14 @@ data.frame(
     "Money, comfort, advice, support",
     "How long ego has known the alter",
     "Shared tastes, attitudes, activities",
-    "Health, happiness, activity (NetHealth)"
+    "Health, happiness, activity"
   ),
   check.names = FALSE
 ) |>
   kable() |>
-  kable_styling(font_size = 20, full_width = FALSE) |>
-  column_spec(1, width = "16em", bold = TRUE) |>
-  column_spec(2, width = "30em")
+  kable_styling(font_size = 26, full_width = FALSE) |>
+  column_spec(1, width = "18em", bold = TRUE) |>
+  column_spec(2, width = "36em")
 ```
 
 Subjective closeness is considered a reliable indicator of tie strength.
@@ -1011,22 +944,75 @@ data.frame(
 
 ## Visual Network Scales: Perceived Position Change
 
-Respondents rate how their position in the organization's network has changed since last year.
+Respondents rate how their position in the network has changed since last year. The panels show the same stylized network with ego near the periphery (left) and at the center of the core (right).
+
+```{r}
+#| fig-width: 10.6
+#| fig-height: 2.7
+#| fig-align: center
+# Dense core (a-f) plus loosely attached periphery alters (g, h, i).
+# Coordinates live inside a wide window whose aspect matches the strip canvas.
+pos_nd <- data.frame(
+  id = c("a", "b", "c", "d", "e", "f", "g", "h", "i"),
+  x  = c(0, 1.0, 1.1, 0.2, -0.9, -1.1, 3.3, -2.2, 3.1),
+  y  = c(0.55, 0.30, -0.35, -0.75, -0.45, 0.25, 0.60, -0.75, -0.60)
+)
+pos_aa <- data.frame(
+  from = c("a", "a", "b", "b", "c", "c", "d", "d", "e", "e", "f"),
+  to   = c("b", "f", "c", "f", "d", "b", "e", "c", "f", "d", "e")
+)
+pos_periph <- data.frame(
+  from = c("g", "g", "i", "i", "h", "h"),
+  to   = c("a", "b", "c", "d", "e", "f")
+)
+draw_pos <- function(egox, egoy, ego_ties, ttl) {
+  nd <- rbind(data.frame(id = "EGO", x = egox, y = egoy), pos_nd)
+  aa <- rbind(pos_aa, pos_periph)
+  s  <- nd[match(aa$from, nd$id), c("x", "y")]
+  tg <- nd[match(aa$to, nd$id), c("x", "y")]
+  core_edges <- data.frame(x = s$x, y = s$y, xend = tg$x, yend = tg$y)
+  et <- nd[match(c("EGO", ego_ties), nd$id), c("x", "y")]
+  ego_edges <- data.frame(x = et$x[1], y = et$y[1],
+                          xend = et$x[-1], yend = et$y[-1])
+  edges <- rbind(ego_edges, core_edges)
+  nd$pfill <- ifelse(nd$id == "EGO", "#2C3E50", "grey85")
+  nd$lab   <- ifelse(nd$id == "EGO", "white", "black")
+  nd$psize <- ifelse(nd$id == "EGO", 15, 10)
+  nd$tsize <- ifelse(nd$id == "EGO", 4, 4.2)
+  ggplot() +
+    geom_segment(data = edges, aes(x = x, y = y, xend = xend, yend = yend),
+                 colour = "grey30", linewidth = 0.8) +
+    geom_point(data = nd, aes(x = x, y = y, fill = pfill, size = psize),
+               shape = 21, colour = "grey30") +
+    geom_text(data = nd, aes(x = x, y = y, label = id, colour = lab, size = tsize),
+              fontface = "bold") +
+    scale_fill_identity() +
+    scale_colour_identity() +
+    scale_size_identity() +
+    coord_cartesian(xlim = c(-4.0, 3.6), ylim = c(-1.05, 0.88)) +
+    theme_void() +
+    theme(plot.title = element_text(hjust = 0.5, size = 13)) +
+    labs(title = ttl)
+}
+wrap_plots(
+  draw_pos(-3.5, -0.70, c("h", "e"), "1. Toward the periphery"),
+  draw_pos(0.05, -0.05, pos_nd$id, "5. Toward the center"),
+  nrow = 1
+)
+```
 
 ```{r}
 data.frame(
-  Rating = 1:5,
+  Rating = c(1, 3, 5),
   Meaning = c(
     "I have moved more toward the periphery of the network",
-    "",
     "My position in the network has remained about the same",
-    "",
     "I have moved more toward the center of the network"
   )
 ) |> kbl(align = "cl")
 ```
 
-These scales measure perceptions. The respondent's report of their position is the data, and it need not match the structure that a researcher would compute.
+These scales measure perceptions — the respondent's report of their position is the data, and it need not match the structure a researcher would compute. *Stylized illustration; not data from a particular study.*
 
 ---
 
@@ -1054,7 +1040,7 @@ data.frame(
     "Perceived ties among others (see chapter 29)"
   ),
   `Typical use` = c(
-    "Core ego networks; NetHealth",
+    "Core ego networks",
     "Social capital",
     "Social capital and support",
     "Perceptions of openness and centrality",
@@ -1063,9 +1049,10 @@ data.frame(
   check.names = FALSE
 ) |>
   kable() |>
-  kable_styling(font_size = 20, full_width = FALSE) |>
-  column_spec(1, width = "18em", bold = TRUE) |>
-  column_spec(2, width = "44em")
+  kable_styling(font_size = 24, full_width = FALSE) |>
+  column_spec(1, width = "17em", bold = TRUE) |>
+  column_spec(2, width = "38em") |>
+  column_spec(3, width = "24em")
 ```
 
 ---
