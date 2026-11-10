@@ -52,13 +52,14 @@ dense_pairs <- mk_pairs("ab", "ag", "ah", "bc", "be", "bg", "bh",
 # Effective-size example 2 (sparse alter-alter ties): 7 ties, ES = 6.25
 sparse_pairs <- mk_pairs("ab", "ag", "ah", "bh", "gh", "de", "ef")
 
-# Clustering worked example: 7 alter-alter ties in a chain
-chain_pairs <- mk_pairs("ab", "bc", "cd", "de", "ef", "fg", "gh")
+# Attribute figures (composition / homophily / diversity) use the pure star — no alter-alter ties, since those measures don't depend on them
+kin_pairs     <- mk_pairs()
+same_pairs    <- mk_pairs()
+diverse_pairs <- mk_pairs()
 
-# Composition / homophily / diversity examples
-kin_pairs     <- mk_pairs("ab", "cd", "ef", "gh")  # alter-alter ties for the comp figure
-same_pairs    <- mk_pairs("ab", "cd", "ef")        # alter-alter ties for homophily figure
-diverse_pairs <- mk_pairs("ab", "bc", "de", "fg")  # alter-alter ties for diversity figure
+# Clustering worked examples
+clustered_pairs   <- mk_pairs("ab", "ac", "bc", "fg", "fh", "gh", "df")  # 2 triangles + bridge, m = 7
+unclustered_pairs <- mk_pairs("ab", "cd", "ef", "gh")                    # disjoint pairs, m = 4
 
 # ---- Plot helper -------------------------------------------------------------
 ego_plot <- function(pairs, alters = alt_names, labels = NULL, pal = NULL,
@@ -132,7 +133,19 @@ adj_kable <- function(pairs) {
     column_spec(1, bold = TRUE)
 }
 
-# ---- Blau index for the diversity example (groups: 3, 2, 1, 2 of 8) ----------
+# ---- Attribute label vectors (real-demographic register, HW7 style) ---------
+# Ego identifies as Black and as a Man.
+race_labels   <- c(a = "White", b = "Black", c = "White", d = "Asian",
+                   e = "Hispanic", f = "Black", g = "White", h = "Asian")
+gender_labels <- c(a = "Man", b = "Man", c = "Woman", d = "Man",
+                   e = "Nonbinary", f = "Man", g = "Man", h = "Woman")
+kin_labels    <- c(a = "Kin", b = "Kin", c = "Non-kin", d = "Non-kin",
+                   e = "Kin", f = "Kin", g = "Kin", h = "Non-kin")
+race_pal   <- c(White = "steelblue", Black = "darkorange",
+                Asian = "forestgreen", Hispanic = "purple")
+gender_pal <- c(Man = "steelblue", Woman = "darkorange", Nonbinary = "forestgreen")
+
+# ---- Blau index for the diversity example (White 3, Black 2, Asian 2, Hispanic 1)
 blau <- function(counts) {
   p <- counts / sum(counts)
   H <- 1 - sum(p^2)
@@ -167,8 +180,8 @@ blau <- function(counts) {
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
+#| fig-width: 5.5
+#| fig-height: 5.5
 ego_plot(base_pairs, alters = alt_names)
 ```
 :::
@@ -204,8 +217,8 @@ ego_plot(base_pairs, alters = alt_names)
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
+#| fig-width: 5.5
+#| fig-height: 5.5
 ego_plot(base_pairs, alters = alt_names)
 ```
 :::
@@ -243,8 +256,8 @@ There are four pieces of information we need to compute the basic ego-network pr
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
+#| fig-width: 5.5
+#| fig-height: 5.5
 ego_plot(base_pairs, alters = alt_names)
 ```
 :::
@@ -265,9 +278,9 @@ menu <- data.frame(
   check.names = FALSE
 )
 knitr::kable(menu, format = "html", align = "lccc") |>
-  kable_styling(font_size = 20, bootstrap_options = "condensed", full_width = FALSE) |>
-  column_spec(1, width = "14em") |>
-  column_spec(2:4, width = "10em")
+  kable_styling(font_size = 26, bootstrap_options = "condensed", full_width = FALSE) |>
+  column_spec(1, width = "16em") |>
+  column_spec(2:4, width = "12em")
 ```
 
 . . .
@@ -420,7 +433,7 @@ $$ES = 8 - \frac{14}{8} = 8 - 1.75 = 6.25$$
 
 . . .
 
-- Given by the **proportion of alters** who belong to a category: kin, neighbors, co-workers; gender, race, education.
+- Given by the **proportion of alters** who belong to a category: kin, friends, neighbors, co-workers; gender, race, education.
 
 . . .
 
@@ -436,12 +449,49 @@ $$Prop(Kin) = \frac{\text{number of kin alters}}{S}$$
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
+#| fig-width: 5.2
+#| fig-height: 5.2
 ego_plot(kin_pairs, alters = alt_names,
-         labels = c(a = "Kin", b = "Kin", c = "Non-kin", d = "Non-kin",
-                    e = "Kin", f = "Kin", g = "Kin", h = "Non-kin"),
+         labels = kin_labels,
          pal = c(Kin = "darkorange", "Non-kin" = "steelblue"),
+         node_legend = TRUE)
+```
+:::
+:::
+
+---
+
+## Composition: Another Example
+
+::: {.columns}
+::: {.column style="width: 42%;"}
+<div style="font-size: 90%;">
+
+- Composition can be computed for **any category** the alters fall into.
+
+. . .
+
+- The same network by **gender identity**:
+
+  - $Prop(Men) = 5/8 = 0.63$
+  - $Prop(Women) = 2/8 = 0.25$
+  - $Prop(Nonbinary) = 1/8 \approx 0.13$
+
+. . .
+
+- Same take: the network is **predominantly male**.
+
+</div>
+:::
+
+::: {.column style="width: 58%;"}
+```{r}
+#| echo: false
+#| fig-width: 5.2
+#| fig-height: 5.2
+ego_plot(kin_pairs, alters = alt_names,
+         labels = gender_labels,
+         pal = gender_pal,
          node_legend = TRUE)
 ```
 :::
@@ -459,11 +509,11 @@ ego_plot(kin_pairs, alters = alt_names,
 
 . . .
 
-- $E$ = number of **"External"** alters (different from you).
+- Example: ego identifies as **Black**. Alters shaded the **same color as ego** share ego's identity ("internal"); all others are "external."
 
 . . .
 
-- $I$ = number of **"Internal"** alters (same as you).
+- $E$ = number of **"External"** alters (different from you); $I$ = number of **"Internal"** alters (same as you).
 
 </div>
 :::
@@ -471,12 +521,11 @@ ego_plot(kin_pairs, alters = alt_names,
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.7
-#| fig-height: 4.7
+#| fig-width: 4.6
+#| fig-height: 4.6
 ego_plot(same_pairs, alters = alt_names,
-         labels = c(a = "Same", b = "Same", c = "Same", d = "Same", e = "Same",
-                    f = "Different", g = "Different", h = "Different"),
-         pal = c(Same = "steelblue", Different = "darkorange"),
+         labels = race_labels, pal = race_pal,
+         ego_label = "Black",
          node_legend = TRUE)
 ```
 :::
@@ -492,9 +541,9 @@ $$EI = \frac{E - I}{E + I}$$
 ::: {.column style="width: 42%;"}
 <div style="font-size: 90%;">
 
-- Here: $E = 3$, $I = 5$.
+- Here: $E = 6$, $I = 2$ (alters **b** and **f** are Black, like ego).
 
-$$EI = \frac{3 - 5}{3 + 5} = \frac{-2}{8} = -0.25$$
+$$EI = \frac{6 - 2}{6 + 2} = \frac{4}{8} = +0.5$$
 
 . . .
 
@@ -506,7 +555,7 @@ $$EI = \frac{3 - 5}{3 + 5} = \frac{-2}{8} = -0.25$$
 
 . . .
 
-- **EI = 0**: no preference — equal numbers of internal and external ties.
+- **EI = 0**: no preference — equal numbers of internal and external ties. Here, ego's ties lean **external**.
 
 </div>
 :::
@@ -514,12 +563,11 @@ $$EI = \frac{3 - 5}{3 + 5} = \frac{-2}{8} = -0.25$$
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
+#| fig-width: 5.2
+#| fig-height: 5.2
 ego_plot(same_pairs, alters = alt_names,
-         labels = c(a = "Same", b = "Same", c = "Same", d = "Same", e = "Same",
-                    f = "Different", g = "Different", h = "Different"),
-         pal = c(Same = "steelblue", Different = "darkorange"),
+         labels = race_labels, pal = race_pal,
+         ego_label = "Black",
          node_legend = TRUE)
 ```
 :::
@@ -555,16 +603,12 @@ $$H = 1 - \sum_{k} p_k^2$$
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
+#| fig-width: 5.2
+#| fig-height: 5.2
 ego_plot(diverse_pairs, alters = alt_names,
-         labels = c(a = "Group 1", b = "Group 1", c = "Group 1",
-                    d = "Group 2", e = "Group 2",
-                    f = "Group 3",
-                    g = "Group 4", h = "Group 4"),
-         pal = c("Group 1" = "steelblue", "Group 2" = "darkorange",
-                 "Group 3" = "forestgreen", "Group 4" = "purple"),
-         node_legend = TRUE)
+         labels = race_labels, pal = race_pal,
+         ego_label = "Black",
+         node_legend = TRUE, legend_nrow = 2)
 ```
 :::
 :::
@@ -577,7 +621,7 @@ ego_plot(diverse_pairs, alters = alt_names,
 ::: {.column style="width: 42%;"}
 <div style="font-size: 90%;">
 
-- Eight alters: 3 in Group 1, 2 in Group 2, 1 in Group 3, 2 in Group 4.
+- Eight alters: 3 White, 2 Black, 2 Asian, 1 Hispanic.
 
 $$H = 1 - \left(\tfrac{3}{8}^2 + \tfrac{2}{8}^2 + \tfrac{1}{8}^2 + \tfrac{2}{8}^2\right)$$
 
@@ -597,15 +641,11 @@ $$H = 1 - 0.28 = 0.72$$
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
+#| fig-width: 5.2
+#| fig-height: 5.2
 ego_plot(diverse_pairs, alters = alt_names,
-         labels = c(a = "Group 1", b = "Group 1", c = "Group 1",
-                    d = "Group 2", e = "Group 2",
-                    f = "Group 3",
-                    g = "Group 4", h = "Group 4"),
-         pal = c("Group 1" = "steelblue", "Group 2" = "darkorange",
-                 "Group 3" = "forestgreen", "Group 4" = "purple"),
+         labels = race_labels, pal = race_pal,
+         ego_label = "Black",
          node_legend = TRUE, legend_nrow = 2)
 ```
 :::
@@ -640,16 +680,16 @@ $$CC_i = \frac{2m}{n(n-1)}$$
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
-ego_plot(chain_pairs, alters = alt_names, show_ego_ties = FALSE)
+#| fig-width: 5.2
+#| fig-height: 5.2
+ego_plot(clustered_pairs, alters = alt_names, show_ego_ties = FALSE)
 ```
 :::
 :::
 
 ---
 
-## Clustering: Worked Example
+## Clustering: A Clustered Example
 
 ::: {.columns}
 ::: {.column style="width: 42%;"}
@@ -661,7 +701,7 @@ $$CC_i = \frac{2 \times 7}{8 \times 7} = \frac{14}{56} = 0.25$$
 
 . . .
 
-- More alter-alter connections increase ego's clustering coefficient; fewer decrease it.
+- The ties are **concentrated**: two tight triangles of mutual friends, joined by a single bridge.
 
 . . .
 
@@ -673,9 +713,42 @@ $$CC_i = \frac{2 \times 7}{8 \times 7} = \frac{14}{56} = 0.25$$
 ::: {.column style="width: 58%;"}
 ```{r}
 #| echo: false
-#| fig-width: 4.9
-#| fig-height: 4.9
-ego_plot(chain_pairs, alters = alt_names, show_ego_ties = FALSE)
+#| fig-width: 5.2
+#| fig-height: 5.2
+ego_plot(clustered_pairs, alters = alt_names, show_ego_ties = FALSE)
+```
+:::
+:::
+
+---
+
+## Clustering: A Less Clustered Example
+
+::: {.columns}
+::: {.column style="width: 42%;"}
+<div style="font-size: 90%;">
+
+- Same number of alters ($n = 8$), but only $m = 4$ alter-alter ties.
+
+$$CC_i = \frac{2 \times 4}{8 \times 7} = \frac{8}{56} = 0.14$$
+
+. . .
+
+- The ties are **scattered**: four disjoint pairs, no triangles at all.
+
+. . .
+
+- Same-size ego networks can differ sharply in how **concentrated** their alter-alter ties are — and the clustering coefficient picks this up.
+
+</div>
+:::
+
+::: {.column style="width: 58%;"}
+```{r}
+#| echo: false
+#| fig-width: 5.2
+#| fig-height: 5.2
+ego_plot(unclustered_pairs, alters = alt_names, show_ego_ties = FALSE)
 ```
 :::
 :::
