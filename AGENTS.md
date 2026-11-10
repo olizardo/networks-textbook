@@ -18,96 +18,11 @@ This repository contains the source code for an introductory textbook on social 
 - `networks.bib`: Bibliography file containing references/citations for the textbook.
 - `renv.lock` / `renv/`: R environment lockfile and project library.
 - `slides/`: Reveal.js slide decks for course lectures. Rendered into `_sites/slides/` during publishing.
-- `homeworks/`: Course homework assignments (`homework{1..9}.qmd`). **Legacy location:** the primary homework sources now live in the sibling repo `../SOCIOL 111/homeworks/`; this directory is a fallback that the Canvas sync script reads only if the sibling copy is absent. Rendered locally using `./render_homeworks.sh` and synced directly to UCLA Bruin Learn (Canvas LMS). Homeworks are explicitly excluded from public web publishing.
+- `homeworks/`: legacy fallback copies of homework sources. Primary sources live in `../SOCIOL 111/homeworks/`. Homeworks and answer keys are excluded from public publishing.
 - `scraps/`: Drafts, retired chapters, and working fragments excluded from the book build.
 
 ## Chapter Inventory
-Ordered per `book: chapters:` in `_quarto.yml`. Titles are pulled from each file's first `#` heading or YAML `title:` field — regenerate this table if chapters are added, renamed, or reordered rather than hand-editing it.
-
-**Introduction to Networks**
-| File | Title |
-|---|---|
-| `01-theory-what-are-networks.qmd` | What Are Networks? |
-| `02-theory-what-are-social-networks.qmd` | What is A *Social* Network? |
-| `03-theory-ties-bound.qmd` | Social Ties and Network Boundaries |
-| `04-theory-tie-strength.qmd` | Tie Strength |
-| `05-theory-multiplex.qmd` | Multiplex Networks |
-
-**Networks and Graphs**
-| File | Title |
-|---|---|
-| `06-graphs-intro.qmd` | Introduction to Graphs |
-| `07-graphs-ties.qmd` | Types of Ties and Their Graphs |
-| `08-graphs-dyads-triads.qmd` | Dyads and Triads |
-| `09-graphs-metrics.qmd` | Basic Graph Metrics |
-| `10-graphs-directed.qmd` | Directed Graphs |
-| `11-graphs-paths.qmd` | Indirect Connections |
-| `12-graphs-connectivity.qmd` | Graph Connectivity |
-| `13-graphs-trees.qmd` | Tree Graphs |
-
-**Networks and Matrices**
-| File | Title |
-|---|---|
-| `14-matrix-intro.qmd` | Introduction to Matrices |
-| `15-matrix-network.qmd` | The Social Network Matrices |
-| `16-matrix-operations.qmd` | Basic Matrix Operations |
-| `17-matrix-multiplication.qmd` | Matrix Multiplication and its Applications |
-
-**Centrality and Status**
-| File | Title |
-|---|---|
-| `18-sna-degree-centrality.qmd` | Centralities based on Degree |
-| `19-sna-closeness.qmd` | Centralities based on the Geodesic Distance |
-| `20-sna-betweenness.qmd` | Centralities based on Shortest Paths |
-| `21-sna-bigthree.qmd` | The "Big Three" Centrality Metrics |
-| `22-sna-eigenvector.qmd` | Getting Centrality from Others |
-| `23-sna-status.qmd` | Status |
-| `24-sna-hubs-and-authorities.qmd` | Hubs and Authorities |
-
-**Two-Mode & Ego Networks**
-| File | Title |
-|---|---|
-| `25-sna-affiliation-networks.qmd` | Affiliation Networks |
-| `26-sna-ego-networks.qmd` | Ego Network Metrics |
-| `27-sna-ego-collect.qmd` | Collecting Ego-Network Data |
-| `28-sna-ego-homo.qmd` | Theories of Ego Network Homogeneity and Diversity |
-| `29-sna-network-cognition.qmd` | Network Cognition and Cognitive Social Structures |
-
-**Subgroups and Blocks**
-| File | Title |
-|---|---|
-| `30-sna-groups-cliques.qmd` | Clique Analysis |
-| `31-sna-groups-cohesive.qmd` | Cohesive Subsets |
-| `32-sna-struct-equiv.qmd` | Equivalence and Similarity |
-| `33-sna-advanced-equiv.qmd` | Automorphic and Regular Equivalence |
-| `34-sna-local-similarity.qmd` | Local Node Similarities |
-| `35-sna-blockmodeling.qmd` | Blockmodeling |
-
-**Network Theory: Ties and Circles**
-| File | Title |
-|---|---|
-| `36-theory-dunbar.qmd` | Dunbar's Theory of Social Circles |
-| `37-theory-swt.qmd` | The Strength of Weak Ties |
-| `38-theory-sht.qmd` | Structural Holes and Brokerage |
-| `39-theory-smt.qmd` | Simmelian Tie Theory |
-
-**Network Theory: Balance and Hierarchy**
-| File | Title |
-|---|---|
-| `40-theory-balance-dyadic.qmd` | Dyadic Balance |
-| `41-theory-balance-triadic.qmd` | Triadic Balance |
-| `42-theory-balance-struct.qmd` | Structural Balance |
-| `43-theory-valenced-interactions.qmd` | Theories of Valenced Interactions |
-| `44-theory-hierarchies.qmd` | Dominance Hierarchies |
-
-**Network Theory: Dynamics and Diffusion**
-| File | Title |
-|---|---|
-| `45-theory-cycle-avoidance.qmd` | Micro Rules and Macro Structure: Four-Cycle Avoidance |
-| `46-theory-diffusion.qmd` | The Diffusion of Innovations |
-| `47-theory-small-world.qmd` | The Small World Phenomenon |
-
-Front/back matter: `index.qmd`, `references.qmd`.
+Chapter order lives in `_quarto.yml` (`book: chapters:`); titles come from each file's first `#` heading or YAML `title:`. Do not maintain a separate table here.
 
 ## Slide Deck Inventory
 Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto.yml`), each roughly paired with one or more chapters above.
@@ -142,22 +57,15 @@ Slide decks in `slides/` are standalone Reveal.js decks (not ordered by `_quarto
 | `slides/balance-signed-graphs.qmd` | Balance Theory and Signed Graphs |
 | `slides/valenced-interactions.qmd` | Theories of Valenced Interactions |
 | `slides/small-world.qmd` | The Small World Phenomenon |
+| `slides/diffusion-of-innovations.qmd` | Diffusion of Innovations (draft; not yet pushed) |
 
 ## Core Workflows
 
 ### 1. Rendering the Textbook
 - `quarto render`; only chapters under `book: chapters:` render, to `_sites/`.
 
-### 2. Homework Authoring & Canvas LMS Sync
-1. **Edit:** `homework{1..9}.qmd` in the sibling repo `../SOCIOL 111/homeworks/` (primary source). This repo's `homeworks/` is the legacy fallback (or use `--remote`; per-machine checkout status lives in user memory).
-2. **Render** from this repo: `./render_homeworks.sh 1` (one) or `./render_homeworks.sh` (all 1–9) → `homeworks/homework{i}.html` + `homeworks/homework{i}_files/figure-html/`.
-3. **Sync** from `../SOCIOL 111` (folder name has a space): `python3 sync_homeworks_to_canvas.py --dry-run --hw 1`, then without `--dry-run`. Source resolution order: sibling `homeworks/` → `../networks-textbook` (or `NETWORKS_TEXTBOOK_DIR`) → GitHub; `--remote` forces GitHub.
-4. **Privacy:** homeworks and answer keys must never reach `_sites/` or the public site. The `*-5562048*` suffix hack and `render_homeworks.ps1` are retired.
-
-### 2b. Course Glue (two repos, one window)
-Glue lives at the `ACADEMICS` level, outside both repos (`../networks-textbook` public/auto-deploys; `../SOCIOL 111` private):
-- **`../course`** (bash): `course status` (git status both repos); `course push "message"` (commits **tracked changes only** — untracked files are listed, never auto-added — then pushes each changed repo); `course hw N [live]` (render homework N, then Canvas-sync; dry-run unless `live`).
-- **`../SOCIOL-111.code-workspace`**: Positron multi-root workspace ("textbook (public)" / "SOCIOL 111 (private)").
+### 2. Homework and Canvas Work
+Homework authoring, Canvas sync, quizzes, and course glue are owned by `../SOCIOL 111/AGENTS.md`. Rule for this repo: homeworks and answer keys never reach `_sites/` or the public site.
 
 ### 3. CI/CD (`.github/workflows/publish.yml`, on push to `main`, `ubuntu-latest`)
 1. Pre-render validation: `python check_book_refs.py` (cross-refs in active chapters) and `python check_book_citations.py` (bib keys exist in `networks.bib`); both fail the build.
@@ -224,26 +132,15 @@ No slide may scroll vertically; split rather than shrink fonts aggressively.
 - Wide figures in narrow columns: shrink the ggsave canvas (e.g., 6.6→4.0in) to scale in-figure text up. Strip internal titles/subtitles from figures; slide text carries them.
 
 ### 6. Deck Helper Conventions
-- **Persistent examples:** every slide discussing the worked example keeps it visible in a side column. Pin layouts (`create_layout(gr, "stress")` coords, or fixed circular coords, passed via `layout = "manual"`) so a graph looks identical on every slide; FR layouts cram the 19-node graph. Drop graph-legend bullets ("Red = C; green = friends").
-- Highlight colors: light red `#F5B7B1` = active/left-matrix row; light blue `#AED6F1` = right-matrix column; green `#ABEBC6` / forestgreen = focal "answer" node; tan = others/intermediates.
-- **centrality.qmd:** `kbl2(df, font = 18, hl)` splits node/score tables into side-by-side halves; `hl` does CELL-level highlight via `cell_spec()` + `escape = FALSE` (NOT `row_spec`, which shades both halves); uses `row.names = FALSE` (named vectors → duplicate rowname column). Matrix kbl calls (M19, dw8, dd8, dmat19) keep rownames. `g8()`/`g19()` take `hl` (red) and `hl2` (forestgreen). `k5 <- make_full_graph(5)` in setup.
-- **matrix-multiplication.qmd:** `g6(catmap, ...)` (6-node party graph; red/blue focus, green shared friends, tan others), `kb6(m, font = 18)`; traced-cell slides keep FULL input matrices as MathJax `pmatrix` with the active row/column `\color`-highlighted (kable can't fit a side column), calculation full-width below. Directed example: matrix `DIR`, `gd()` helper (3.5mm closed arrowheads, end_cap 6mm, pentagon `l_coords_5dir`). `CP2 <- P %*% P` in setup.
-- **matrix-advanced.qmd:** `reach_kbl(filled, active)` (5×5 reachability build, `?` unfilled, diagonal `--`, font 20), `weak_reach_kbl()` (from `distances(gr_weak, mode="out")`), `overlap_kbl(highlight = list(c("X","Y")))` (overlap = (A²)ᵢⱼ / (kᵢ + kⱼ − (A²)ᵢⱼ)), `plot_pair_flavor(nodes, edges, highlight, recip)`, `plot_neighbors_highlight`. Directed distance graph uses `layout_coords_5` (same digraph as Part 1); the undirected layout is exclusive to the undirected graph.
-- **affiliation-networks.qmd:** `aff_kbl(filled, active, font = 18)` row-by-row build with `row_spec` highlight via `match()`.
-- **structural-holes.qmd:** `obstfeld_motif()` (knitr 3.3 × 1.6in), `p_env_overlap/refresh/topics` cards (3.3 × 1.45in).
-- **ego-collect.qmd:** `draw_net()` with fixed coordinates for alters a–g; illustrative tables `pg_A`/`pg_B`, `rg_C`/`rg_D`; all example responses labeled invented. Restoring the source deck's visual-scale figures would require a citation.
-- **kable pitfalls:** `knitr::kable` silently DROPS sequential integer rownames (1:n), so `column_spec(n+1)` goes out of bounds and fails the render — use an explicit label column (LETTERS rownames are kept). Apply `column_spec` BEFORE `row_spec` so the row color wins the intersection. `match()` on empty `active` → guard with `length(ai) && !is.na(ai)`.
+- Highlight colors: light red `#F5B7B1` = active/left-matrix row; light blue `#AED6F1` = right-matrix column; green `#ABEBC6` / forestgreen = focal answer node; tan = others and intermediates.
+- Per-deck helper functions are documented in each deck's setup chunk, not here.
+- **kable pitfalls:** `knitr::kable` silently DROPS sequential integer rownames (1:n), so `column_spec(n+1)` goes out of bounds and fails the render; use an explicit label column (LETTERS rownames are kept). Apply `column_spec` BEFORE `row_spec` so the row color wins the intersection. `match()` on empty `active` → guard with `length(ai) && !is.na(ai)`.
 - **ggplot pitfalls:** `annotate()` ignores `nudge_x` (bake offsets into x); `scale_linewidth_identity` fails on character values (use two `geom_segment` layers); use compact P1/P2 tags above nodes to avoid label collisions.
 
-### 7. Bruin Learn (Canvas) API
-Credentials: `CANVAS_API_TOKEN`, `CANVAS_URL` in `~/.Renviron` (strict `KEY=value` lines — no spaces around `=`, no quotes — or the sync script silently misses them). Course ID `238980`. Canonical Bruin Learn docs: `../SOCIOL 111/AGENTS.md` (section G for announcements).
-- **Announcements:** `POST /api/v1/courses/238980/discussion_topics`, **form-encoded** (`--data-urlencode`): `title`, `message` (HTML), `is_announcement=true`, `published=true`. Verify the response's `is_announcement: true`; the documented `announcement` param is silently ignored (fallback = delete and recreate).
-- **Wrong routes:** `POST .../announcements` and `POST`/`GET .../discussions` return a 404 HTML page — a route symptom, not auth/CSRF.
-- `POST /modules/:id/reorder` is CSRF-protected and always fails with a Bearer token; reposition with `PUT /modules/:module_id/items/:item_id` + `{"module_item": {"position": N}}`.
-- New module items default to `published: false`; publish via `PUT .../items/:item_id` `{"module_item": {"published": true}}`.
-- GET on assignments and module items works — confirm dates/order from the live API before telling students.
-- **Swap a slide link:** slide items are `ExternalUrl`; find IDs via `GET /api/v1/courses/238980/modules?include[]=items`, then `PUT .../modules/:module_id/items/:item_id` with form `module_item[external_url]=<url>`; published state is preserved; confirm with GET. Mapping: item 8300732 "Slides: Ego Network Metrics" → `https://olizardo.github.io/networks-textbook/slides/ego-metrics`; item 8300733 "Slides: Collecting Ego Network Data" (module 1938344) → `.../slides/ego-collect`.
-- **Submission checks from R:** `httr2` is NOT in the textbook renv; use base R `download.file(url, out, headers = c(Authorization = paste('Bearer', token)))` + `jsonlite::fromJSON()`. `system2('curl', ...)` splits the auth header unless each arg is `shQuote`d.
+### 7. Bruin Learn (Canvas)
+Canvas API rules live in `../SOCIOL 111/AGENTS.md`. The one procedure used from this repo is the slide-link swap:
+- Slide items are `ExternalUrl`. Find IDs via `GET /api/v1/courses/238980/modules?include[]=items`, then `PUT .../modules/:module_id/items/:item_id` with form `module_item[external_url]=<url>`. Published state is preserved; confirm with GET.
+- Canvas lesson pages that embed slides use an `iframe` to the GitHub Pages deck URL plus an "Open slides" link. Swap both when changing a deck.
 
 ## AI Agent Guidelines
 - **Adding chapters:** follow the naming convention and add the file to `_quarto.yml` under `book: chapters:`.
@@ -260,21 +157,20 @@ Credentials: `CANVAS_API_TOKEN`, `CANVAS_URL` in `~/.Renviron` (strict `KEY=valu
 - **Rounding in worked examples:** carry three decimals and compute final ratios from unrounded intermediates (H/H_max = 0.611/0.667 = 0.92, not 0.61/0.67 = 91%).
 - **Figure provenance (rule):** every static PNG referenced in `slides/*.qmd` MUST have a committed generating script (`images/make_<name>.R`, run from repo root). Exempt: third-party/photographic assets (`aig-interlocks-2004.jpg`, `body.jpg`, `brain.jpg`, `got.png`, `usairport.png`). Commit generating code alongside any redrawn PNG.
 - **Schematic-figure captions:** stylized/schematic charts or networks get an italic caption saying they are not the study's data.
+- **Measured-midpoint schematics:** S-curve schematics (`images/make_diffusion_schematic.R`) anchor only each curve's 50% midpoint to a cited measured value. Curve steepness is illustrative and must be labeled as such. Each series' denominator goes in its legend label. A series with no measured 50% point is left out.
+- **Census sourcing:** prefer primary Census tables. When a value comes from a secondary reproduction or a web summary, flag it in the sources table rather than presenting it as Census data.
 - **Bibliography keys:** use `burt92` (*Structural Holes*, 1992), not the old `burt95`.
 - **Git hygiene:** never blanket `git add .` (large binaries slip in; GitHub rejects files >100 MB).
 
 ## Open Items
-- **Push pending — Fischer slides in `slides/ego-collect.qmd`** (two slides after "Famous Name Generators", from repo-root `fiischer.pdf`, McCallister & Fischer 1978). QA-clean, not pushed; pushing deploys them (Canvas item 8300733 already points at the deck).
-- **structural-holes floor fixes** (`obstfeld_motif` 3.3×1.6, `p_env_*` 3.3×1.45) may still be uncommitted — check `git status`. The user's new figure content (sawtooth, pies, predictor bars, motif cards) has not been screenshot-reviewed. Consider pairing the Obstfeld open and closed matrices in one table.
-- **Stale `images/ego-metrics-ei.png`:** prints H/H_max = 91% (rounded inputs); slides say 0.92. Regenerate (no source script).
-- **`images/hofstra-minority-paradox.png`:** title "Core vs. Extended" over a network-size axis is wrong (captioned as stylized; no source script).
-- **Ego-metrics deck:** slide 2 says "E-I Homophily Index" vs. "Homogeneity (E-I)" in summary/figure; the deck's 6-alter worked example differs from chapter 26's 7-alter example.
-- **Ego-homogeneity deck:** "Majors & activities" (foci figure) vs. "course areas" (text); remaining overclaims ("automatically," "mathematically forced," "mathematically dilutes"); add a bridge linking McPherson's baseline/inbreeding to choice/induced homophily; "Positive Affiliation Contagion" vs. "Indirect Contagion" naming.
-- **Quiz 3 / ego-homogeneity scope:** Quiz 3 Lesson 11 slots (15–18) draw only from slides up to "Feld's Rule: How Segregated Foci Drive Homogeneity" (~line 289); don't extend items past it without re-checking lecture progress. Quiz 3 grade release Wed Nov 11 via `release_quiz_grades.py --quiz 3` (SOCIOL 111 repo).
-- **Citations to verify:** `burt05`, `obstfeld05`, `krackhardt88`, `simmel08`, `simmel50` (added from memory); Feld (1982) attribution for "Feld's rule"; Hofstra sample figures (N = 2,810, ~1.1 million ties).
-- **Remaining ungenerated statics:** `ego-metrics-ei.png` and `hofstra-minority-paradox.png` still lack generating scripts, in violation of the provenance rule.
-- **Canvas:** item 8300738 "Slides: Diffusion of Innovations" (module 1938348, Week 10) still points to Google Slides; swap once a deployed deck exists.
-- **`ppt_slides/Collecting Ego Network Data.pptx`** is untracked (not committed).
-- **what-are-networks `embed-resources: true`:** decide whether to keep it or drop it so QA tooling can measure the deck.
-- **Stray root `.pptx`** (`Affiliation Networks .pptx`, `Centrality.pptx`): delete, gitignore, or keep? Also a stray `_sites/slides/graph-connectivity.qmd` from a retired deck.
-- **Repo weight (~402 MB tracked):** `_freeze/` 122 MB and `ppt_slides/` 101 MB are the big targets if weight ever matters; also `WandF.pdf` 15 MB, `homeworks/` 10 MB.
+- **Diffusion Canvas swap:** Lesson 18 page and module item 8300738 still embed Google Slides. Swap both to `slides/diffusion-of-innovations` once GitHub Pages serves the deck.
+- **Diffusion chapter render:** chapter 46 has an opening section (Figure 1, Table 1). Only that chapter was rendered; run a full book render before the site is updated.
+- **Diffusion sources:** the automobile (1948) and radio (1932) midpoints rest on secondary summaries. Electricity and telephone values come from Census reproductions, not the original PDFs. Verify before publication.
+- **Ego-metrics deck:** slide 2 says "E-I Homophily Index"; the summary says "Homogeneity (E-I)" (around line 184).
+- **Ego-homogeneity deck:** "Majors & activities" (figure label, line ~92) vs. "course areas" (line ~328); overclaims at lines ~242 ("automatically"), ~390 ("mathematically forced"), and ~490 ("mathematically dilutes"); "Positive Affiliation Contagion" (line ~365) vs. the "Indirect Contagion" heading (line ~360).
+- **Ungenerated statics:** `images/ego-metrics-ei.png` (prints H/H_max = 91%; slides say 0.92) and `images/hofstra-minority-paradox.png` (wrong axis title) have no generating script, which violates the provenance rule.
+- **Citations to verify:** `burt05`, `obstfeld05`, `krackhardt88`, `simmel08`, `simmel50` (added from memory); Feld (1982) attribution; Hofstra sample figures (N = 2,810, ~1.1 million ties).
+- **what-are-networks:** `embed-resources: true` (line 13) makes the deck unmeasurable by the audit. Decide whether to drop it.
+- **Stray root files:** `Affiliation Networks .pptx` and `Centrality.pptx` are untracked clutter. Delete, gitignore, or keep.
+- **Glossary and navbar homework references:** `glossary.qmd` has about 51 plain-text "Homework N" references, and `_quarto.yml` links the navbar to Bruin Learn Assignments and Syllabus pages. Decide whether to remove both.
+- **Repo weight:** `_freeze/`, `ppt_slides/`, `WandF.pdf`, and `homeworks/` are the large tracked items if weight matters.
