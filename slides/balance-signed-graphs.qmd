@@ -230,9 +230,9 @@ g <- graph_from_data_frame(edges, directed = TRUE)
 lay <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
 rownames(lay) <- c("a", "b")
 ggraph(g, layout = lay) +
-  geom_edge_parallel(aes(color = type, linetype = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Similarity S", ] }, width = 2, sep = unit(4, "mm"),
-                     end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
-  geom_edge_parallel(aes(color = type, linetype = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Dislike D", ] }, width = 2, sep = unit(4, "mm"),
+  # One layer for both tie types: sep only separates edges WITHIN a layer,
+  # so per-type layers would draw the two a-b edges exactly on top of each other.
+  geom_edge_parallel(aes(color = type, linetype = type), width = 2, sep = unit(4, "mm"),
                      arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
                      end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
   geom_node_point(size = 22, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
@@ -617,18 +617,20 @@ edges <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors = 
   mutate(
     f_from = nodes$faction[match(from, nodes$name)],
     f_to = nodes$faction[match(to, nodes$name)],
-    sign = ifelse(f_from == f_to, "+", "-")
+    sign = ifelse(f_from == f_to, "+", "-"),
+    # Fan the 9 cross-faction chords into arcs: top row bows up, bottom row bows down
+    curve = ifelse(sign == "-", c(0.45, 0.35, 0.25, 0.12, 0.0, -0.12, -0.25, -0.35, -0.45), 0)
   )
 g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
-lay <- matrix(c(-1.5, 0.8, -1.5, -0.8, -2.5, 0, 1.5, 0.8, 1.5, -0.8, 2.5, 0), ncol = 2, byrow = TRUE)
+lay <- matrix(c(-1.5, 1.1, -1.5, -1.1, -2.5, 0, 1.5, 1.1, 1.5, -1.1, 2.5, 0), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 2, alpha = 0.8) +
+  geom_edge_arc(aes(color = sign, linetype = sign, strength = curve), width = 2, alpha = 0.8) +
   geom_node_point(aes(fill = faction), size = 22, color = "white", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "white") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
   scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid")) +
-  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-1.3, 1.3), clip = "off") +
+  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-1.6, 1.6), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -685,16 +687,16 @@ $$M = \begin{pmatrix}
 #| fig.width: 6
 #| fig.height: 5
 edges <- data.frame(
-  from = c("Start", "Node B", "Node C", "End"),
-  to   = c("Node B", "Node C", "End", "Start"),
+  from = c("Start", "B", "C", "End"),
+  to   = c("B", "C", "End", "Start"),
   sign = c("+", "-", "+", "-")
 )
 g <- graph_from_data_frame(edges, directed = FALSE)
 lay <- matrix(c(-1.5, 0.8, -1.5, -0.8, 1.5, -0.8, 1.5, 0.8), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
   geom_edge_link(aes(color = sign, linetype = sign), width = 2.5) +
-  geom_node_point(aes(fill = name %in% c("Start", "Node B")), size = 20, color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 4.5, color = "#2c3e50") +
+  geom_node_point(aes(fill = name %in% c("Start", "B")), size = 20, color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
   scale_fill_manual(values = c("TRUE" = "#93c5fd", "FALSE" = "#c084fc")) +
@@ -770,22 +772,25 @@ edges <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors = 
   mutate(
     f_from = nodes$faction[match(from, nodes$name)],
     f_to = nodes$faction[match(to, nodes$name)],
-    sign = ifelse(f_from == f_to, "+", "-")
+    sign = ifelse(f_from == f_to, "+", "-"),
+    # Bundle cross-cluster negative edges into one arc "bus" per cluster pair
+    pair = paste0(f_from, f_to),
+    curve = ifelse(sign == "-", c("12" = 0.25, "13" = -0.25, "23" = 0.25)[pair], 0)
   )
 g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
 lay <- matrix(c(
-  -0.35, 2.0, -0.65, 1.5, 0, 1.5,  # Cluster 1
-  -1.0, 0.5, -1, 0, -0.65, -0.2,   # Cluster 2
-  0.5, -0.5, 0, -0.5, 0.5, 0       # Cluster 3
+  -1.0, 2.4, -1.9, 1.7, -0.1, 1.7,   # Cluster 1 (top)
+  -3.0, -0.6, -2.1, -1.3, -3.2, -1.5, # Cluster 2 (bottom left)
+  1.0, -0.6, 1.9, -1.3, 0.8, -1.5    # Cluster 3 (bottom right)
 ), ncol = 2, byrow = TRUE)
 ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 1.8, alpha = 0.7) +
-  geom_node_point(aes(fill = faction), size = 20, color = "white", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "white") +
+  geom_edge_arc(aes(color = sign, linetype = sign, strength = curve), width = 1.8, alpha = 0.7) +
+  geom_node_point(aes(fill = faction), size = 16, color = "white", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 4.5, color = "white") +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
   scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid", "3" = "goldenrod")) +
-  coord_fixed(xlim = c(-1.4, 0.9), ylim = c(-0.9, 2.4), clip = "off") +
+  coord_fixed(xlim = c(-3.8, 2.5), ylim = c(-2.2, 3.0), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -853,16 +858,17 @@ edges_b <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors 
     f_to = nodes_b$faction[match(to, nodes_b$name)],
     sign = ifelse(f_from == f_to, "+", "-")
   )
+lay_b <- matrix(c(-1.5, 1.1, -1.5, -1.1, -2.5, 0, 1.5, 1.1, 1.5, -1.1, 2.5, 0), ncol = 2, byrow = TRUE)
+edges_b <- edges_b %>%
+  mutate(curve = ifelse(sign == "-", c(0.45, 0.35, 0.25, 0.12, 0.0, -0.12, -0.25, -0.35, -0.45), 0))
 g_b <- graph_from_data_frame(edges_b, directed = FALSE, vertices = nodes_b)
-lay_b <- matrix(c(-1.5, 0.8, -1.5, -0.8, -2.5, 0, 1.5, 0.8, 1.5, -0.8, 2.5, 0), ncol = 2, byrow = TRUE)
-
 p_bal <- ggraph(g_b, layout = lay_b) +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 1.2, alpha = 0.6) +
+  geom_edge_arc(aes(color = sign, linetype = sign, strength = curve), width = 1.2, alpha = 0.6) +
   geom_node_point(aes(fill = faction), size = 14, color = "white", shape = 21, stroke = 1.2) +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
   scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid")) +
-  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-1.3, 1.3), clip = "off") +
+  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-1.6, 1.6), clip = "off") +
   theme_slides() + theme(legend.position = "none") + ggtitle("Structural Balance (2 Factions)")
 
 nodes_c <- data.frame(name = LETTERS[1:9], faction = c(rep("1", 3), rep("2", 3), rep("3", 3)))
@@ -871,23 +877,28 @@ edges_c <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors 
   mutate(
     f_from = nodes_c$faction[match(from, nodes_c$name)],
     f_to = nodes_c$faction[match(to, nodes_c$name)],
-    sign = ifelse(f_from == f_to, "+", "-")
+    sign = ifelse(f_from == f_to, "+", "-"),
+    pair = paste0(f_from, f_to),
+    curve = ifelse(sign == "-", c("12" = 0.25, "13" = -0.25, "23" = 0.25)[pair], 0)
   )
 g_c <- graph_from_data_frame(edges_c, directed = FALSE, vertices = nodes_c)
 lay_c <- matrix(c(
-  -0.35, 2.0, -0.65, 1.5, 0, 1.5,  # Cluster 1
-  -1.0, 0.5, -1, 0, -0.65, -0.2,   # Cluster 2
-  0.5, -0.5, 0, -0.5, 0.5, 0       # Cluster 3
+  -1.0, 2.4, -1.9, 1.7, -0.1, 1.7,   # Cluster 1 (top)
+  -3.0, -0.6, -2.1, -1.3, -3.2, -1.5, # Cluster 2 (bottom left)
+  1.0, -0.6, 1.9, -1.3, 0.8, -1.5    # Cluster 3 (bottom right)
 ), ncol = 2, byrow = TRUE)
 
 p_clust <- ggraph(g_c, layout = lay_c) +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 1.2, alpha = 0.6) +
-  geom_node_point(aes(fill = faction), size = 14, color = "white", shape = 21, stroke = 1.2) +
+  geom_edge_arc(aes(color = sign, linetype = sign, strength = curve), width = 1.2, alpha = 0.6) +
+  geom_node_point(aes(fill = faction), size = 12, color = "white", shape = 21, stroke = 1.2) +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
   scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid", "3" = "goldenrod")) +
-  coord_fixed(xlim = c(-1.4, 0.9), ylim = c(-0.9, 2.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none") + ggtitle("Clusterability (k Clusters)")
+  coord_fixed(xlim = c(-3.8, 2.5), ylim = c(-2.2, 3.0), clip = "off") +
+  theme_slides() +
+  theme(legend.position = "none", plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"),
+        plot.margin = margin(10, 18, 10, 10)) +
+  ggtitle("Clusterability (k Clusters)")
 
 p_bal + p_clust + plot_layout(nrow = 1)
 ```
