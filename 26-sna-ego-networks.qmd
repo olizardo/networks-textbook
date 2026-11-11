@@ -8,11 +8,11 @@
 ```
 
 ## Ego Graphs 
-Consider Figure @fig-undirected again. If we solved the **boundary specification problem**, then this could be considered an example of a **whole network**. All the relevant actors and social ties are included. However, sometimes, we do not have that information. Instead, what we have is network data collected from your perspective. For instance, let us say that instead of collecting information on all the actors depicted in Figure @fig-undirected, we *only* interviewed actor *D* and asked them to name the people they spend time with and to tell us about the relationships among those people. 
+Consider @fig-undirected again. If we solved the **boundary specification problem**, then this could be considered an example of a **whole network**. All the relevant actors and social ties are included. However, sometimes, we do not have that information. Instead, what we have is network data collected from your perspective. For instance, let us say that instead of collecting information on all the actors depicted in @fig-undirected, we *only* interviewed actor *D* and asked them to name the people they spend time with and to tell us about the relationships among those people. 
 
 In that case, we would have ended up with a graph that looks like  @fig-egograph. This is called a **simple ego graph**. Ego graphs are also referred to as **centered graphs** [@freeman82], because they are graphs that are centered around a focal node, namely, you (the ego). The reason we call it "simple" is that the ego graph, just like the overall graph of which it is a subgraph, contains only undirected, binary (present or absent) edges, and no loops (self-edges), which are the conditions that define **simple graphs** (see @sec-graphtheory).
 
-Note that in the ego graph shown as Figure @fig-egograph, all nodes are a subset of the original graph, and all edges are also a subset of the original graph shown in Figure @fig-undirected. So if $G_D$ if node *D*'s ego graph, and $G$ is the original undirected graph, then $G_D = (E_D, V_D)$, $E_D \subset E$ and  $V_D \subset V$.^[The mathematical symbol for subset is $\subset$.] 
+Note that in the ego graph shown as @fig-egograph, all nodes are a subset of the original graph, and all edges are also a subset of the original graph shown in @fig-undirected. So if $G_D$ if node *D*'s ego graph, and $G$ is the original undirected graph, then $G_D = (E_D, V_D)$, $E_D \subset E$ and  $V_D \subset V$.^[The mathematical symbol for subset is $\subset$.] 
 
 ```{r}
 #| label: fig-egograph
@@ -50,26 +50,28 @@ Note that in the ego graph shown as Figure @fig-egograph, all nodes are a subset
 ## Ego Networks
 Ego graphs are useful for representing **egocentric networks**---often shortened to just **ego networks** or even **ego nets**---also called **personal networks**. These are a particular type of network that represents a set of social relations from the perspective of a focal person (you). 
 
-In the point and line graph representation of an ego-network, you, or **ego**, which is the Latin word for "self", are usually represented at the center of the graph surrounded by your contacts; these are referred by the Latin word for "others," namely, **alters**. Ego networks typically contain links indicating relationships between alters from your perspective. 
+In a point and line graph of an ego network, you sit at the center and get the Latin word for "self," namely **ego**. Your contacts surround you and get the Latin word for "others," namely **alters**. Ego networks also record the relationships among those alters, as you see them.
 
-As a matter of historical fact, it is likely that the first person to use the ego network as an analytical tool was the anthropologist [J. Clyde Mitchell](https://en.wikipedia.org/wiki/J._Clyde_Mitchell), who called it a **reticulum**. According to Michell, a reticulum consisted of "the direct links radiating from a particular Ego to other individuals in a situation, and the links which connect those individuals who are directly tied to Ego, and one another" [@mitchell69], which is precisely what is meant by an ego network.
+::: {.callout-tip appearance="minimal" icon="💡"}
+**Fun fact.** It is likely that the first person to use the ego network as an analytical tool was the anthropologist [Bruce Kapferer](https://en.wikipedia.org/wiki/Bruce_Kapferer), a student of [J. Clyde Mitchell](https://en.wikipedia.org/wiki/J._Clyde_Mitchell), who called it a **reticulum**. According to Kapferer, a reticulum consisted of "the direct links radiating from a particular Ego to other individuals in a situation, and the links which connect those individuals who are directly tied to Ego, to one another" [@kapferer69, 182], which is precisely what is meant by an ego network.
+:::
 
-In the typical ego network diagram, *D* is the ego node (shown in tan in Figure @fig-egograph) and is depicted as the center of the ego graph. The alter nodes are *A*, *B*, *C*, *E*, and *F* (shown in red in Figure @fig-egograph) are shown as "satellites" orbiting the ego node. 
+In @fig-egograph, *D* is the ego, shown in tan at the center. The alters are *A*, *B*, *C*, *E*, and *F*, shown in red as satellites orbiting ego.
 
-Figure @fig-egograph also shows that, in an ego network, there are *two* kinds of edges we may be interested in and need to keep separate. First there are **ego-to-alter** edges (shown in blue in Figure @fig-egograph)), indicating the alters ego is connected to. In an ego network, ego-to-alter links are **obligatory**, meaning they should all be present. Thus, if, like in Figure @fig-egograph, there are five alters depicted, there should also be five ego-to-alter links. As you can see, that is indeed the case: $\{DA, DB, DC, DE, DF\}$. 
+@fig-egograph also shows the *two* kinds of edge we need to keep separate. The **ego-to-alter** edges, in blue, run from ego to each alter. These are **obligatory**, since every alter by definition has a tie to ego, so five alters means five ego-to-alter edges, and here they are, $\{DA, DB, DC, DE, DF\}$.
 
-Second, there are **alter-to-alter** links (shown in purple in @fig-egograph) indicating relationships between alters that do not involve ego, but that *only* include other nodes that are connected to ego via ego-to-alter links. These are optional in the sense that they may or may not exist. While in an ego network, the ego is *necessarily* connected to its alters; alters may or may not be connected to one another. Thus, in Figure @fig-egograph, there are five alter-to-alter links, namely, $\{AC, AB, AE, BC, CE\}$, but these are not all the possible ones that could exist. For instance, alters *E* and *F* are a null (disconnected) dyad in the ego graph, and so are alters *E* and *F*. Later in the lesson, we will show you how to compute the maximum number of expected connections in an ego network so as to compare them to the ones we actually observe (hint: it has something to do with the formula for graph density). 
+The **alter-to-alter** edges, in purple, join alters to one another without running through ego. Unlike ego-to-alter edges, these are optional. Ego is *necessarily* tied to each alter, but two alters may or may not know each other. Here there are five alter-to-alter edges, $\{AC, AB, AE, BC, CE\}$, and clearly not every possible pair is present, since *B* and *F* are a null (disconnected) dyad, and so are *E* and *F*. Later in the lesson we show you how to work out the maximum number of such ties, so you can compare the ones you observe against what you might have seen (hint: the formula for graph density). 
 
-For example, if you were to ask someone to name their friends (or any other type of alter), they will tell you who their friends are. They could even tell you whether two of their friends know one another or not. However, they typically will not be able to tell you about the *entirety* of each of their alters' networks (e.g., every person known by their alters and the connections between these others). Thus, while in Figure @fig-undirected, we have a graph of the **whole network**, in the ego-network case, such as Figure @fig-egograph, we are only getting a small part of the overall social network, centered on a single person.^[Reminder: Smaller clumps of a larger social network are also known as **subgraphs**]
+For example, if you were to ask someone to name their friends (or any other type of alter), they will tell you who their friends are. They could even tell you whether two of their friends know one another or not. However, they typically will not be able to tell you about the *entirety* of each of their alters' networks (e.g., every person known by their alters and the connections between these others). Thus, while in @fig-undirected, we have a graph of the **whole network**, in the ego-network case, such as @fig-egograph, we are only getting a small part of the overall social network, centered on a single person.^[Reminder: Smaller clumps of a larger social network are also known as **subgraphs**]
 
 ## What Ego Networks Tell Us
 While it might seem like we are unable to do much with ego-networks, that is definitely not the case! While having data on only one person’s ego would not tell scholars much, when we have tens, hundreds, or thousands of ego-networks we are able to analyze systematic differences in the ways different types of people structure their social worlds [@marsden87], or, as is more likely from a sociological perspective, have it structured for them by social forces beyond their direct control. 
 
 For example, if all the students in the class fill out ego-networks of their friends and family, could we find that certain types of people have more friends? Do people with more family members have more friends, or fewer? Are the friends of some people more likely to be friends with one another? Do some people have all women or all people of the same race or ethnicity in their ego-networks? 
 
-These are empirical questions that, when scholars creatively compare egocentric networks, we can potentially answer. Research does not have to rely on a single type of relationship when collecting network data, and this would be one such case: combining egocentric networks of both friendship and family ties into a single personal network of emotional support or another socially meaningful exchange. 
+These are empirical questions that, when scholars creatively compare egocentric networks, we can potentially answer. Research does not have to rely on a single type of relationship when collecting network data, and this would be one such case, since combining egocentric networks of both friendship and family ties into a single personal network of emotional support or another socially meaningful exchange. 
 
-Once we have collected ego network data using the standard battery of **name generators** and **name interpreters**, we may be interested in computing **metrics** that characterize each personal (ego) network in terms of specific **ego network properties** of interest. There are four pieces of information we need to compute all the relevant ego network properties. These are:
+Once we have collected ego network data using the standard battery of **name generators** and **name interpreters**, we may be interested in computing **metrics** that characterize each personal (ego) network in terms of specific **ego network properties** of interest. There are five pieces of information we need to compute all the relevant ego network properties.
 
 - The number of **ego-to-alter** ties
 - The number of **alters**
@@ -77,9 +79,10 @@ Once we have collected ego network data using the standard battery of **name gen
 - **Sociodemographic characteristics of ego** (e.g., age, gender identity, racial identity, etc.)
 - **Sociodemographic characteristics of alter** (e.g., age, gender identity, racial identity, etc.).
 
-Given this information, there are four main types of ego-network properties we might be interested in. These are:
+With that information in hand, there are five main types of ego-network property we might care about.
 
 - **Size**: Total number of ego-alter ties
+- **Effective size**: Size net of redundant alter-to-alter ties
 - **Diversity**: Variation in alter attributes
 - **Homogeneity**: Ties to alter same/different from ego
 - **Composition**: Proportion of certain types of alter ties
@@ -90,6 +93,7 @@ Table tbl-ego-net-props lists each ego-network property with a brief definition 
 | | Ego-alter ties | Alter-Alter Ties | Ego Attributes | Alter Attributes |
 | :---: | :---: | :---: | :---: | :---: |
 | **Size** | X | | | | 
+| **Effective size** | X | X | | |  
 | **Homogeneity** | X | | X | X |  
 | **Diversity** | | | | X | 
 | **Composition** | | | | X | 
@@ -119,7 +123,7 @@ $$
   S(Ego) = |E_{ea}|
 $${#eq-egosize2}
 
-Thus, in the example shown in Figure @fig-egograph:
+Thus, in the example shown in @fig-egograph:
 
 $$
   S(Ego) = |N(Ego)| = |\{A, B, C, E, F\}| = 5
@@ -131,35 +135,61 @@ $$
   S(Ego) = |E_{ea}| = |\{DA, DB, DC, DE, DF\}| = 5
 $$
 
+## Ego Network Effective Size
+Size treats every alter as if it buys you something new. They do not. When two of your friends know each other, they tend to reach the same people and carry the same news, so the second friend adds less than the first one did. **Effective size** is size with that redundancy taken out. We get it by subtracting the average degree of the alter-to-alter subgraph, that is, the average number of alters each alter is connected to.
+
+$$
+  ES(Ego) = S(Ego) - \frac{2m}{n}
+$${#eq-effsize}
+
+where $m$ is the number of alter-to-alter ties and $n$ is the number of alters. Each alter loses a slice of its contribution in proportion to how tightly the alters around it are bound up with one another.
+
+@fig-egograph makes this concrete. Ego there has $S = 5$ alters, and the alter-to-alter set $\{AC, AB, AE, BC, CE\}$ gives $m = 5$:
+
+$$
+  ES(Ego) = 5 - \frac{2 \times 5}{5} = 5 - 2 = 3
+$$
+
+Ego names five people, but only three of them bring something the others do not, because the alters here are fairly well connected to one another.
+
+The two extremes are worth holding in mind. If no two alters know each other ($m = 0$), ego's network is a pure star, nothing is redundant, and $ES$ equals $S$. If every alter knows every other alter ($m = \binom{5}{2} = 10$), the whole circle behaves like a single contact and $ES$ falls to $ES = 5 - 10 = 1$. Real ego networks sit in between, and where a network lands tells you how much fresh reach each alter actually buys.
+
+## Ego Network Composition
+Composition shifts from *how many* alters you have to *who* they are. A **composition** measure is the share of alters who fall into some socially meaningful category.
+
+$$
+  Prop(C) = \frac{\text{number of alters in category } C}{S(Ego)}
+$${#eq-composition}
+
+Kin versus non-kin is the classic choice, but the category could just as easily be friends, neighbors, co-workers, or any sociodemographic grouping such as gender or race. Take @fig-egograph and suppose *A*, *C*, and *F* are kin of ego while *B* and *E* are friends.
+
+$$
+  Prop(Kin) = \frac{3}{5} = 0.60
+$$
+
+Three-fifths of ego's contacts are family, so this is a kin-heavy personal network, and the friend share is simply the remainder, $0.40$. Composition is the raw material for the homophily measures that follow, which ask not just what proportion of alters fall in a category but whether those alters match ego's own position.
+
 ## Ego Network Homophily
-Another property of ego networks we may be interested in measuring is **homogeneity**. That is, we may want to ask: Do people connect with others who are similar to them, or with those who are different? People can be similar or different from others in an infinity of ways. Sociologists are primarily interested in similarity or difference along lines of social position or social categories. For instance, in human societies, *gender* is an important marker of social position, as is racial identification, class identification, age, occupation, or educational attainment. 
+Sometimes the question is not who your alters are but whether they resemble you. This is **homogeneity**, and it asks whether people connect to others like themselves or to others who differ. There are endless ways two people can be alike, and sociologists concentrate on the ones that mark social position or social categories, such as gender, racial identification, class, age, occupation, or educational attainment.
 
-**Homophily** is the idea that people with similar personal or social traits will tend to have relationships with each other compared to having relationships with those unlike themselves. Etymologically, the word is a simple combination of *homo*, meaning same, and *philia*, meaning love or liking. Thus, homophily is literally a love of the same. Many languages have some phrase capturing this propensity, and in English it is often idiomatically expressed as "birds of a feather flock together" [@mcpherson01]
+**Homophily** names the tendency for people with similar traits to end up in relationships with each other rather than with people unlike themselves. The word is a simple combination of *homo*, meaning same, and *philia*, meaning love or liking, so homophily is literally a love of the same. Many languages have a phrase for the propensity, and English usually reaches for "birds of a feather flock together" [@mcpherson01].
  
-The theory of homophily holds that, all else being equal, people tend to associate with others who are similar to them. As we have seen before, there are various reasons for this, both psychological (people prefer similarity) and sociological (social contexts induce people to link with similar others).
+All else equal, people do tend to pair off with similar others, and there are both psychological reasons for this (we like similarity) and sociological ones (our contexts push us toward similar people).
 
-### Fun Facts:
-
-Many languages have idioms for **homophily** as a social phenomenon. Just a few include:
-
- - **Japanese**- Raccoon dogs from the same den (*Onaji ana no mujina*)
-
- - **French**- Those who resemble each other assemble together (*Qui se ressemble s'assemble*)
-
- - **Italian**- God makes them then couples them (*Dio li fa e poi li accoppia*)
-
-Have an idiom from another language for homophily? Let us know so we can include it!
+::: {.callout-tip appearance="minimal" icon="💡"}
+**Fun fact.** Many languages have an idiom for homophily as a social phenomenon. In Japanese, raccoon dogs from the same den (*Onaji ana no mujina*). In French, those who resemble each other assemble together (*Qui se ressemble s'assemble*). In Italian, God makes them and then couples them (*Dio li fa e poi li accoppia*). Have an idiom from another language? Let us know and we will add it.
+:::
 
 ## EI Homophily Index
-The EI homophily index is one of the most useful ways to think about homophily in an ego-network. The EI homophily index is a relative measure of homophily because it does not account for the underlying population, as would be required for an expected rate. Although it might be nice to calculate an expected rate, researchers can often do interesting things even without this data.  
+The EI index is one of the most useful ways to think about homophily in an ego network, and it is easy to compute. It is a *relative* measure, in that it does not adjust for the population alters are drawn from, which you would need in order to work out an expected rate. Researchers often find plenty to say without that baseline.
 
-The EI homophily index is a measure of *in- and out-group preference.* One simply subtracts the number of internal ties from the number of external ties, divided by the total number of ties. This measure thus uses information on ego-to-alter ties and both ego and alter characteristics.
+The index captures *in-group versus out-group preference*. Subtract the internal ties from the external ties and divide by the total. The measure uses ego-to-alter ties together with the characteristics of both ego and alter.
 
 $$
   EI=\frac{External-Internal}{External+Internal}
 $${#eq-EI}
 
-Thus, an EI score of -1 means complete homophily- the individual only has relationships with actors of the same "type" as they themselves are. An EI score of 1 means complete heterophily- all the alters are of a different "type" than they themselves are. Finally, an EI score of 0 means that an equal number of alters are of both the same "type" as the ego, and different types. 
+An EI of $-1$ means complete homophily, since every tie runs to someone of ego's own "type." An EI of $+1$ means complete heterophily, with every alter of a different type. A score of zero means ego's alters split evenly between the two.
 
 
 ```{r}
@@ -183,22 +213,22 @@ Thus, an EI score of -1 means complete homophily- the individual only has relati
     p
 ```
 
-To calculate the EI score for the above ego, we must first ask along what dimension of homophily we are interested in. This must be done to reflect our research question. Let us, however, presume that we are interested in the relationship between gender identification and friendship networks. We might ask whether the friendship networks of high schoolers are changing over time. If we had older data on friendships, say, from 40 years ago, we could compare them with friendship networks among high school students today.
+To compute an EI score we first have to settle on a dimension of homophily, and that choice follows from the research question. Suppose we care about gender identification and friendship. We might ask whether the friendship networks of high schoolers have changed over time, and with data from forty years ago we could compare them with the friendships of students today.
 
-An example of an ego network in which the nodes are classified by gender identification is shown in Figure @fig-eiexamp. In the figure, nodes that identify as men are shown in green, those that identify as women are orange, and those that identify as nonbinary are blue. Notice that the ego in this case identifies as a man. Also, notice that the ego has four alters who also identify as men, two who identify as women, and one non-binary alter. Thus, the ego node has four ego-to-alter ties that connect it to alters who are in the same category as itself on the social attribute of interest. These are **internal ties** because they connect the ego to people who are similar to him (shown in teal). The ego also has three ego-to-alter ties that are not the same as the ego in terms of interest, regardless of whether they belong to different classifications. These are **external** ties, because they connect the ego to people who are different from him (shown in red). 
+@fig-eiexamp classifies the alters of an ego network by gender identification, with men in green, women in orange, and nonbinary people in blue. Ego here identifies as a man, and he has four alters who also identify as men, two who identify as women, and one nonbinary alter. The four ties running to people in his own category are **internal** ties, shown in teal. The three ties running to people outside it are **external** ties, shown in red.
 
-Given this information, the EI index for the ego in Figure @fig-eiexamp can be computed as:
+Given this information, the EI index for the ego in @fig-eiexamp can be computed as:
 
 $$
   EI=\frac{External-Internal}{External+Internal}=\frac{3-4}{3+4}=\frac{-1}{7}=-0.14
 $$
 
-This gives us an EI score just below zero, indicating a slight preference for associating with others of similar gender identity. The EI score ranges from -1.0 to +1.0. EI scores below zero (and approaching -1) indicate a tendency towards homophily (associating with similar others). EI scores above zero (and approaching 1.0) indicate a tendency towards associating with *dissimilar* others. [This also has a Latin name: **heterophily**.] Finally, an EI score around zero suggests that the ego-network is balanced, with an equal number of similar and dissimilar alters. 
+An EI just below zero means a slight preference for alters of similar gender identity. The score runs from $-1$ to $+1$. Values below zero signal homophily, values above zero signal a pull toward *dissimilar* others, which has its own Latin name, **heterophily**, and values near zero describe a network balanced between the two.
 
 ## Ego Network Diversity
 We may be interested in how **diverse** ego's contacts are. Do they all belong to the same social group, or is the ego connected to a wide range of contacts? Note that the only piece of information we need here concerns the characteristics of the ego's contacts. We do not need to know anything about ego to know how diverse their networks are. So the connection between diversity and ego's characteristics is *empirical* rather than definitional.^[For instance, we can ask: Do women have more diverse ego networks than men? Do Hispanics have more diverse ego networks than white people?]
 
-The most popular measure of diversity for ego networks is **Blau's heterogeneity index** (H). Quite simply, H is the sum of the squares of the percentage (p) of the ego's network belonging to particular groups, subtracted from one:
+The most popular measure of diversity for ego networks is **Blau's heterogeneity index** ($H$). It is one minus the sum of the squared shares of ego's alters in each group.
 
 $$
   H = 1-\sum_{k}p_k^{2}
@@ -206,15 +236,15 @@ $${#eq-blaudiv}
 
 Unlike in the EI homophily index, ego's own group membership does not matter. A woman with only men friends would have an H-index of 0, just as a woman with only female friends would also have an H-index of 0. An H-index of zero simply means that there is no diversity in the types of friends the ego has. Conversely, an H-index score approaching 1 implies greater heterogeneity, or diversity, in an ego's network relations. For instance, someone with an equal number of male and female friends would have an H-index of 0.5 with respect to gender diversity, and a woman with one-third women friends, one-third men friends, and one-third nonbinary friends would have an H-index of about 0.67, the maximum for three categories. 
 
-Remember that, to compute ego network diversity, we need to pick which characteristic we are measuring gender diversity on. For instance, an ego network can be non-diverse with respect to race (each of ego's alters is of the same race), but be very diverse with respect to education (ego has contacts from a wide range of educational backgrounds). So there is no such thing as a "diverse" ego network in general (or a non-diverse one). You always have to specify what *social characteristic* you are talking about. So there is ego-network diversity with respect to gender identification, which is different from that with respect to the racial identity of alters, and so on. 
+Diversity only means something once you fix a characteristic. An ego network can be homogeneous with respect to race, where every alter is of the same race, and quite diverse with respect to education, where ego's contacts span a wide range of schooling. There is no such thing as a "diverse" ego network in general, or a non-diverse one, since you always have to say which *social characteristic* you mean. Diversity with respect to gender identification is a different quantity from diversity with respect to the racial identity of alters.
 
-For instance, we may want to know how diverse the ego network is with respect to alters' gender identification, as we considered in the previous example. Thus, for the H diversity index of the ego network shown in Figure @fig-eiexamp, the first step is to identify the different groups the alters in the ego's network belong to, defined by gender. As we saw, this spans three groups: men, women, and nonbinary. So to figure out ego's diversity with respect to gender using @eq-blaudiv, we would have to compute:
+Take gender identification in @fig-eiexamp. Ego's alters fall into three groups, men, women, and nonbinary, so @eq-blaudiv asks us to sum the squared shares of those three.
 
 $$
   H = 1- (p^2_{men} + p^2_{women} + p^2_{nonbinary})
 $$
 
-As shown above, the ego's network has ties to three groups we are interested in, as this is where many gender identities are found. The next step is to determine what percentage of each group is part of the ego's network. Once this is done, a little bit of math solves for the H-index score. So we know that the ego has four alters who identify as men. This means that $p_{male} = \frac{4}{7}$. Four out of the seven contacts in ego's network are men. Writing this quantity for all three gender identification groups in ego's network yields:
+Four of ego's seven alters are men, so $p_{men} = 4/7$, and the other two shares follow the same way, $p_{women} = 2/7$ and $p_{nonbinary} = 1/7$. Writing all three out gives:
 
 $$
   \begin{split}
@@ -227,9 +257,9 @@ $$
 $$
 
 
-The resulting H index is 0.57. We might ask, "What does this mean?" Well, we can compare this score to some extreme hypothetical cases. For instance, if Ego's contacts were all of the same gender identification, then there would be *no* diversity in the ego-network. In this case, the H-index would take its minimum value of 0, meaning that all of a person's friends are in the same group. The fact that the H-index is substantially above zero indicates that there's considerable gender diversity in this ego network. 
+What does an $H$ of 0.57 mean? The usual answer comes from comparing it with the extremes. If ego's contacts were all of the same gender identification there would be *no* diversity, and $H$ would take its minimum value of zero. A score well above zero means considerable gender diversity in this ego network.
 
-The H-index increases (approaching 1) the more diverse a person's ego network becomes. The H index reaches its maximum when people from different groups are *equally* represented in Ego's network. For instance, a maximally diverse ego-network with respect to gender identity would contain equal numbers of men, women, and nonbinary people. So, if Ego has six friends, they would have maximum gender diversity if they have two women friends, two men friends, and two nonbinary identifying friends. 
+$H$ climbs toward 1 as a person's ego network becomes more diverse, and it hits its ceiling when the groups are *equally* represented. A maximally diverse ego network with respect to gender identity would have equal numbers of men, women, and nonbinary people, so an ego with six friends would need two of each.
 
 Technically, the maximum H is given by [@solanas_etal12]: 
 
@@ -237,18 +267,18 @@ $$
   H_{max} = 1 - \frac{1}{k}
 $$ {#eq-hmax}
 
-Where $k$ is the number of categories of the sociodemographic dimension being considered. In the gender identification example $k=3$, but if we were studying ego-network diversity along different demographics (e.g., race or education), $k$ would be a larger number. 
+Here $k$ is the number of categories on the dimension we are considering. Gender identification gives $k = 3$, while other dimensions such as race or education will usually have more categories and therefore a higher ceiling.
 
-So, to return to our example, is $H= 0.57$ a large number? Well, let's compare it to the maximum value it could take. With $k=3$ gender categories, the maximum H is given by:
+Is 0.57 large? Compare it with the maximum for three categories.
 
 $$
   H_{max} = 1 - \frac{1}{3} =  1 - 0.33 = 0.67
 $$
 
-We can divide the observed $H$ by this hypothetical maximum to see how close Ego is to the ideal of a maximally diverse network with respect to gender. This gives us $\frac{H}{H_{max}} = \frac{0.57}{0.67} = 0.85$. So this means that Ego's network is pretty diverse (at 85% percent maximum diversity), but has a bit more room to grow to reach maximum diversity!
+Dividing the observed $H$ by that ceiling shows how close ego comes to a maximally diverse network, $\frac{H}{H_{max}} = \frac{0.57}{0.67} = 0.85$. Ego's gender diversity is thus 85 percent of what is possible, a diverse network with a little room left to grow.
 
 ## Clustering Coefficient
-By definition, everyone knows the ego, but to what extent do someone’s friends know each other? For ego-networks, the tendency of the ego's friends to be friends with one another is called **clustering**, and this ego network property is measured via the **clustering coefficient** ($CC$). Consider Figure @fig-egograph, again. In that ego graph, we can see that some of the ego's alters know each other, but others do not. 
+By definition, everyone knows the ego, but to what extent do someone’s friends know each other? For ego-networks, the tendency of the ego's friends to be friends with one another is called **clustering**, and this ego network property is measured via the **clustering coefficient** ($CC$). Consider @fig-egograph, again. In that ego graph, we can see that some of the ego's alters know each other, but others do not. 
 
 The $CC$ is calculated by computing the **density** of the subgraph among alters that remains when ego and the edges that are incident on ego (e.g., the ego-to-alter edges) are removed. This can range from zero (none of ego's alters are connected to one another) to one (all of ego's alters are friends with each other) or some fraction in between (for instance, a CC of 0.5 means that 50% of the total possible number of relationships between ego's alters are present). 
 
@@ -258,13 +288,13 @@ $$
   CC_i = \frac{2m}{n(n-1)}
 $${#eq-cc}
 
-Where $n$ is the size of the ego network (number of alters) and $m$ is the number of **alter-to-alter** edges among alters surrounding the ego. Thus, as noted, the clustering coefficient calculation ignores the ego and the ego-to-alter edges.
+Here $n$ is the size of the ego network (the number of alters) and $m$ is the number of **alter-to-alter** edges among the alters surrounding ego. As noted, the calculation ignores ego and the ego-to-alter edges.
 
-We can compute the clustering coefficient for the ego network depicted in Figure @fig-egograph, because we know that $n$ = 5 and $m$ = 4. We then plug in these values into @eq-cc, which gives us:
+@fig-egograph has $n = 5$ alters and $m = 5$ alter-to-alter edges, which we plug into @eq-cc to get:
 
 $$
-  CC_i = \frac{2m}{n(n-1)}=\frac{2 \times 4}{5 \times (5-1)}=\frac{8}{5 \times 4} = \frac{8}{20}=\frac{2}{5}=0.40
+  CC_i = \frac{2m}{n(n-1)}=\frac{2 \times 5}{5 \times (5-1)}=\frac{10}{5 \times 4} = \frac{10}{20}=\frac{1}{2}=0.50
 $$ 
 
-Because the resulting clustering coefficient is $0.40$, we can conclude that $40\%$ of all possible ties among the ego's alters exist. Another way of putting it is that, if we were to pick two of ego's alters at random, the *probability* that the two would be part of a connected dyad is $p = 0.40$. With multiple egos, we might thus be able to compare their personal networks to build theories about how the social world operates.
+A clustering coefficient of $0.50$ means half of all possible ties among ego's alters exist. Put differently, if you picked two of ego's alters at random, the chance they form a connected dyad is $p = 0.50$. Once we have several egos, we can compare their personal networks and build theories about how the social world works.
 
