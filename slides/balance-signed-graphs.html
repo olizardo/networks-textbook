@@ -152,14 +152,13 @@
 <div class="columns">
 <div class="column" style="width:50%;">
 <ul>
-<li class="fragment">In social life, relationships are not just present or absent; they are also <strong>emotional</strong> and <strong>evaluative</strong>.</li>
-<li class="fragment">We study these using <strong>sentiment networks</strong>, which model liking, disliking, conflict, and cooperation.</li>
+<li class="fragment">Relationships are not just present or absent; they carry emotional <strong>valence</strong>.</li>
 <li class="fragment"><strong>Balance Theory</strong> is the foundational framework linking:
 <ul>
 <li class="fragment">Local, psychological micro-motives.</li>
 <li class="fragment">Global, macro-structural network patterns (like polarization).</li>
 </ul></li>
-<li class="fragment">Today we will cover: Dyadic Balance, Triadic Balance, Structural Balance, and Clusterability.</li>
+<li class="fragment">Today we will cover: Dyadic Balance, Triadic Balance, Structural Balance, Clusterability, and Ranked Clusterability.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -188,6 +187,7 @@
 <li class="fragment">Positive links (<span class="math inline">\(E^+\)</span>) and negative links (<span class="math inline">\(E^-\)</span>).</li>
 </ul></li>
 <li class="fragment">These networks represent stable social attitudes rather than fleeting events.</li>
+<li class="fragment">We can represent them with a <strong>signed adjacency matrix</strong>: <span class="math inline">\(+1\)</span> for positive ties, <span class="math inline">\(-1\)</span> for negative ties, <span class="math inline">\(0\)</span> for no tie (coming up in Part 3).</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -238,7 +238,6 @@
 <li class="fragment">Proximity breeds interaction, which breeds similarity, which in turn breeds liking, support, and advice.</li>
 </ul></li>
 <li class="fragment">Relationships transition from uniplex (single-stranded) to multiplex.</li>
-<li class="fragment">Multiple/reciprocal arrows use <strong>parallel edges</strong> to prevent overlapping.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -267,7 +266,6 @@
 <li class="fragment">Break the similarity tie (e.g., quit the job).</li>
 <li class="fragment">Transform the dislike into liking (e.g., adapt to like the co-worker).</li>
 </ul></li>
-<li class="fragment">Multiple/reciprocal arrows use <strong>parallel edges</strong> to prevent overlapping.</li>
 </ul>
 </div><div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
@@ -518,7 +516,6 @@
 <li class="fragment">Imagine you (P) have a brother (O1) who is a passionate Democrat (<span class="math inline">\(+\)</span>) and a sister (O2) who strongly opposes them (<span class="math inline">\(-\)</span>).</li>
 <li class="fragment">Because you have positive bonds with both, you find yourself cross-pressured regarding the Democrats (Q).</li>
 <li class="fragment">This pressure produces <strong>social ambivalence</strong>, often leading individuals to identify as moderates or <strong>independents</strong> with no strong partisan affiliation.</li>
-<li class="fragment">Labels inside nodes are kept short (<strong>You</strong>, <strong>Bro</strong>, <strong>Sis</strong>, <strong>Dems</strong>) for a perfect fit.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -573,13 +570,13 @@
 <div class="column" style="width:55%;">
 <ul>
 <li class="fragment">Discovered by mathematicians Dorwin <strong>Cartwright</strong> and Frank <strong>Harary</strong> in 1956.</li>
-<li class="fragment"><strong>Theorem</strong>: If a complete signed graph contains <em>only</em> balanced triads, then the entire graph is balanced.</li>
-<li class="fragment"><strong>The Partition Rule</strong>: Any completely balanced signed graph can be divided into exactly <strong>two polarized factions</strong> such that:
+<li class="fragment"><strong>Theorem (Cartwright–Harary Structure Theorem)</strong>: A signed graph — <em>complete or incomplete</em> — is balanced if and only if its nodes can be partitioned into exactly <strong>two polarized factions</strong> such that:
 <ol type="1">
-<li class="fragment">Only positive links exist <em>within</em> each faction.</li>
-<li class="fragment">Only negative links exist <em>between</em> the two factions.</li>
+<li class="fragment">All positive links exist <em>within</em> each faction.</li>
+<li class="fragment">All negative links exist <em>between</em> the two factions.</li>
 </ol></li>
 <li class="fragment">Shows that structural balance is equivalent to perfect <strong>group polarization</strong>.</li>
+<li class="fragment">For <em>complete</em> graphs, the test is simple: a complete signed graph is balanced if and only if <strong>every triad is balanced</strong> (the triad test is the complete-graph shortcut).</li>
 </ul>
 </div><div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
@@ -602,6 +599,7 @@
 <li class="fragment">Rearrange the rows and columns of the <strong>signed adjacency matrix</strong> such that nodes in the same faction are adjacent.</li>
 <li class="fragment">This permutation yields a <strong>block-diagonal signed matrix</strong>.</li>
 <li class="fragment">Inside the diagonal blocks, cells are <span class="math inline">\(+1\)</span> (internal cohesion), whereas off-diagonal blocks are entirely <span class="math inline">\(-1\)</span> (external conflict).</li>
+<li class="fragment">The 3 × 3 blocks below mirror the two three-person factions in the previous slide’s graph.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <h3 id="faction-block-diagonal-matrix">Faction Block-Diagonal Matrix</h3>
@@ -625,7 +623,7 @@
 <li class="fragment">Partitioning has direct, rigid consequences for paths and cycles in complete graphs:</li>
 <li class="fragment"><strong>Cycles</strong>: <em>All cycles in a balanced signed graph must have a positive sign product.</em>
 <ul>
-<li class="fragment">Staying inside a group utilizes only positive links.</li>
+<li class="fragment">Staying inside a group uses only positive links.</li>
 <li class="fragment">Spanning across groups requires crossing the boundary an <em>even</em> number of times, multiplying an even number of negative signs to yield a positive product.</li>
 </ul></li>
 <li class="fragment"><strong>Paths</strong>:
@@ -646,16 +644,75 @@
 </div>
 </div></div>
 </section>
+<section id="checking-for-balance-with-matrix-powers" class="slide level2">
+<h2>Checking for Balance with Matrix Powers</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<ul>
+<li class="fragment">How can we test balance in a large network without drawing every cycle?</li>
+<li class="fragment">Raise the signed adjacency matrix <span class="math inline">\(\mathbf{A}\)</span> to the <span class="math inline">\(p\)</span>-th power.</li>
+<li class="fragment">Each diagonal entry <span class="math inline">\(a_{ii}^{(p)}\)</span> sums the sign products of all <strong>closed walks</strong> of length <span class="math inline">\(p\)</span> starting and ending at node <span class="math inline">\(i\)</span>.</li>
+<li class="fragment"><strong>The test</strong>: If the graph is balanced, every diagonal entry of <span class="math inline">\(\mathbf{A}^p\)</span> is <strong>non-negative</strong> for all <span class="math inline">\(p\)</span> up to the number of nodes.</li>
+<li class="fragment">A single negative diagonal entry reveals a negative cycle of length <span class="math inline">\(p\)</span> — and the graph is unbalanced.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<h3 id="the-test-in-symbols">The test in symbols</h3>
+<p><span class="math display">\[a_{ii}^{(p)} \geq 0 \; \text{for all } i,\; p = 1, \dots, g\]</span></p>
+<p>If any entry is negative:</p>
+<p><span class="math display">\[a_{ii}^{(p)} &lt; 0 \implies \text{unbalanced cycle}\]</span></p>
+<ul>
+<li>No need to enumerate cycles — the matrix does the counting.</li>
+<li>A practical check for real, messy networks.</li>
+</ul>
+</div></div>
+</section>
+<section id="measuring-partial-balance" class="slide level2">
+<h2>Measuring Partial Balance</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<ul>
+<li class="fragment">Real networks are almost never <em>perfectly</em> balanced, so we measure the <strong>degree</strong> of balance.</li>
+<li class="fragment"><strong>Cycle Index of Balance</strong>: the share of all cycles whose sign product is positive. <span class="math display">\[\text{Cycle Index} = \frac{PC}{TC}\]</span></li>
+<li class="fragment">Ranges from 0 (completely unbalanced) to 1 (perfectly balanced).</li>
+<li class="fragment"><strong>Line Index of Balance</strong> (Harary 1959): the minimum number of edge signs that must be flipped to make the graph perfectly balanced.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<ul>
+<li>A large network with a Line Index of 1 or 2 is extremely close to complete balance.</li>
+<li>Even when cycle-counting finds dozens of unbalanced cycles, a small Line Index says the polarized structure is nearly there.</li>
+<li>Short cycles matter more psychologically, so weighted versions (Henley, Horsfall &amp; De Soto 1969) give triads extra weight.</li>
+</ul>
+</div></div>
+</section>
+<section id="directed-balance-semicycles" class="slide level2">
+<h2>Directed Balance: Semicycles</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<ul>
+<li class="fragment">Real sentiment ties are often <strong>asymmetric</strong> — you like someone who dislikes you.</li>
+<li class="fragment">Restricting balance to strict <strong>directed cycles</strong> (arrows all pointing the same way) would miss most tension: Your friend Alex dislikes Jordan, yet you like both. No directed cycle exists, but the tension is real.</li>
+<li class="fragment"><strong>Semipath</strong>: a path that <em>ignores</em> arrow direction.</li>
+<li class="fragment"><strong>Semicycle</strong>: a closed semipath (a cycle in the underlying undirected graph).</li>
+<li class="fragment"><strong>A signed digraph is balanced</strong> if and only if <strong>every semicycle has a positive sign</strong> (an even number of negative arcs).</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<ul>
+<li>The Cartwright–Harary partition rule carries over unchanged: positive arcs within factions, negative arcs between them.</li>
+<li>One rule-violating positive tie across factions injects unbalanced semicycles into the whole network.</li>
+<li>This is the directed version of everything we just did with cycles.</li>
+</ul>
+</div></div>
+</section>
 <section id="empirical-case-study-political-blogs" class="slide level2">
 <h2>Empirical Case Study: Political Blogs</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <ul>
-<li class="fragment">Balanced states are <strong>not</strong> inherently “harmonious” or socially desirable.</li>
-<li class="fragment">They describe stable <strong>polarization and conflict</strong>.</li>
-<li class="fragment"><strong>Adamic &amp; Glance (2005)</strong> examined the hyperlinking network of political bloggers during the 2004 election.</li>
-<li class="fragment">Discovered two massive, highly connected factions (Liberals and Conservatives).</li>
-<li class="fragment">Bloggers linked supportive-positive links inside their group, but hostile-negative links across the political divide, establishing an <strong>echo chamber</strong> structure.</li>
+<li class="fragment">Balanced states describe stable <strong>polarization and conflict</strong>, not harmony.</li>
+<li class="fragment"><strong>Adamic &amp; Glance (2005)</strong> examined the hyperlink network of 2004-election political bloggers.</li>
+<li class="fragment">Two highly connected factions (Liberals, Conservatives); dense internal linking, sparse cross-group linking — an <strong>echo chamber</strong>.</li>
+<li class="fragment">The hyperlink data are <em>unsigned</em>; the figure’s negative ties illustrate the predicted structure, not measured hostility.</li>
+<li class="fragment">Balance explains why polarized factions are <strong>stable</strong> — and a balanced state need not be a “good” one.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -706,8 +763,8 @@
 <ul>
 <li class="fragment">Classical balance considers a triad with three negative ties (everyone hating everyone else) to be <em>unbalanced</em>.</li>
 <li class="fragment">Davis argued that in highly factionalized contexts, it is perfectly stable for three individuals from completely different, competing groups to dislike one another.</li>
-<li class="fragment"><strong>The Clustering Criterion</strong>: A graph is <strong>clusterable</strong> if and only if it contains <strong>no triads with exactly one negative tie</strong>.</li>
-<li class="fragment">Permitted triads under Davis: all-positive (<span class="math inline">\(+1\)</span>), two-negatives (<span class="math inline">\(+1\)</span>), or all-negatives (<span class="math inline">\(-1\)</span>).</li>
+<li class="fragment"><strong>The Clustering Criterion (Davis 1967)</strong>: A graph is <strong>clusterable</strong> if and only if it contains <strong>no cycle of any length with exactly one negative tie</strong>.</li>
+<li class="fragment">For <em>complete</em> graphs this reduces to a triad test: no triad with exactly one negative tie. All-positive, two-negative, and all-negative triads are all permitted.</li>
 </ul>
 </div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -719,6 +776,28 @@
 </div>
 </div>
 </div>
+</div></div>
+</section>
+<section id="ranked-clusterability-bridging-balance-and-hierarchy" class="slide level2">
+<h2>Ranked Clusterability: Bridging Balance and Hierarchy</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<ul>
+<li class="fragment">Balance and clusterability both assume <em>horizontal</em>, symmetric sentiment structures.</li>
+<li class="fragment">Real groups often have <strong>vertical hierarchies</strong> — status, dominance, prestige.</li>
+<li class="fragment"><strong>Ranked Clusterability</strong> (Davis &amp; Leinhardt 1972): clusters that are themselves <em>hierarchically ordered</em>.
+<ul>
+<li class="fragment"><strong>Within clusters</strong>: horizontal, positive ties (peer solidarity).</li>
+<li class="fragment"><strong>Between clusters</strong>: vertical ties. Positive ties point <em>up</em> the hierarchy (deference); negative or null ties point down or across unranked clusters.</li>
+</ul></li>
+<li class="fragment">This is the mathematical bridge from balance theory to status and <strong>dominance hierarchies</strong>.</li>
+</ul>
+</div><div class="column" style="width:45%;">
+<ul>
+<li>Think of an office: peers are mutual friends, everyone looks up to the executives, discipline flows downward.</li>
+<li>Same local logic (no odd cycles of negativity), but the factions are now <em>stacked</em>, not side by side.</li>
+<li>Coming up next: theories of valenced interactions, including dominance hierarchies in detail.</li>
+</ul>
 </div></div>
 </section>
 <section id="summary-structural-balance-vs.-clusterability" class="slide level2">
