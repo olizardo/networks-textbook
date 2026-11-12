@@ -72,8 +72,8 @@ edge_layer <- function(width = 2.2) {
 }
 edge_scales <- function() {
   list(
-    scale_edge_color_manual(values = c("+" = pos_col, "-" = neg_col)),
-    scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33"))
+    scale_edge_color_manual(values = c("+" = pos_col, "-" = neg_col, "±" = "#7d3c98")),
+    scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33", "±" = "13"))
   )
 }
 
@@ -165,6 +165,8 @@ $$\alpha S \beta \rightarrow \alpha R \beta$$
 
 ## Dyadic Balance: Reading the Principle
 
+::: {.columns}
+::: {.column width="42%"}
 ::: {.incremental}
 - $\alpha S \beta \rightarrow \alpha R \beta$ reads: **"A tie of type $S$ between $\alpha$ and $\beta$ leads to a tie of type $R$ between $\alpha$ and $\beta$."**
 - This applies to **every combination** of similarities and interactions.
@@ -172,10 +174,12 @@ $$\alpha S \beta \rightarrow \alpha R \beta$$
   - People tend to **like** the people they **spend time with**.
   - People tend to **help** people who **belong to the same groups** as them.
 :::
+:::
 
+::: {.column width="58%"}
 ```{r}
-#| fig.width: 6
-#| fig.height: 2.6
+#| fig.width: 4.6
+#| fig.height: 3.5
 # Similarity tie feeding an interaction tie (alpha S beta -> alpha R beta)
 e <- data.frame(from = c("α", "β"), to = c("β", "α"), type = c("S", "R"))
 g <- graph_from_data_frame(e, directed = TRUE)
@@ -183,7 +187,7 @@ lay <- circ_lay(c("α", "β"))
 S_idx <- function(l) { ed <- get_edges()(l); ed[ed$type == "S", ] }
 R_idx <- function(l) { ed <- get_edges()(l); ed[ed$type == "R", ] }
 ggraph(g, layout = lay) +
-  geom_edge_arc(data = S_idx, aes(color = type), width = 2.4, strength = 0.35,
+  geom_edge_arc(data = S_idx, aes(color = type), width = 2.4, strength = -0.35,
                 end_cap = circle(11, "mm"), start_cap = circle(11, "mm")) +
   geom_edge_arc(data = R_idx, aes(color = type), width = 2.4, strength = -0.35,
                 end_cap = circle(11, "mm"), start_cap = circle(11, "mm")) +
@@ -195,9 +199,11 @@ ggraph(g, layout = lay) +
   geom_node_text(aes(label = name), fontface = "bold", size = 8, color = "#2c3e50") +
   scale_edge_color_manual(values = c("S" = "#2980b9", "R" = pos_col),
                           labels = c("S = similarity tie", "R = interaction tie")) +
-  coord_fixed(xlim = c(-0.9, 0.9), ylim = c(-1.0, 1.0), clip = "off") +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-1.0, 1.0), clip = "off") +
   theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
+:::
+:::
 
 ---
 
@@ -394,140 +400,6 @@ ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
 :::
 :::
 
----
-
-## Signed Graphs: Matrix Representation
-
-::: {.columns}
-::: {.column width="48%"}
-```{r}
-#| fig.width: 4.2
-#| fig.height: 4.2
-ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
-  edge_layer(1.9) + edge_scales() +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
-  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
-```
-:::
-
-::: {.column width="52%"}
-::: {.incremental}
-- The adjacency matrix of a signed graph works just like before, with three steps.
-- **Step 1**: draw the empty grid, with `--` on the diagonal.
-:::
-
-<div class="table-dense" style="font-size: 95%;">
-
-```{r}
-sg5_m0 <- matrix("", 5, 5, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
-diag(sg5_m0) <- "--"
-signed_kbl(sg5_m0, color_cells = FALSE)
-```
-
-</div>
-:::
-:::
-
----
-
-## Matrix Representation: Fill in the Positive Links
-
-::: {.columns}
-::: {.column width="48%"}
-```{r}
-#| fig.width: 4.2
-#| fig.height: 4.2
-ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
-  edge_layer(1.9) + edge_scales() +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
-  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
-```
-:::
-
-::: {.column width="52%"}
-::: {.incremental}
-- **Step 2**: put a **1** in a cell if the two nodes are linked by a **positive** line.
-:::
-
-<div class="table-dense" style="font-size: 95%;">
-
-```{r}
-sg5_m1 <- matrix("", 5, 5, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
-diag(sg5_m1) <- "--"
-for (pr in list(c("A","D"), c("B","C"), c("B","E"), c("C","E"))) {
-  sg5_m1[pr[1], pr[2]] <- sg5_m1[pr[2], pr[1]] <- "1"
-}
-signed_kbl(sg5_m1, color_cells = TRUE)
-```
-
-</div>
-:::
-:::
-
----
-
-## Matrix Representation: Fill in the Negative Links
-
-::: {.columns}
-::: {.column width="48%"}
-```{r}
-#| fig.width: 4.2
-#| fig.height: 4.2
-ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
-  edge_layer(1.9) + edge_scales() +
-  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
-  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
-```
-:::
-
-::: {.column width="52%"}
-::: {.incremental}
-- **Step 3**: put a **−1** in a cell if the two nodes are linked by a **negative** line, and a **0** if they are not adjacent.
-:::
-
-<div class="table-dense" style="font-size: 95%;">
-
-```{r}
-sg5_mf <- matrix("0", 5, 5, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
-diag(sg5_mf) <- "--"
-for (pr in list(c("A","D"), c("B","C"), c("B","E"), c("C","E"))) {
-  sg5_mf[pr[1], pr[2]] <- sg5_mf[pr[2], pr[1]] <- "1"
-}
-for (pr in list(c("A","C"), c("C","D"), c("D","E"))) {
-  sg5_mf[pr[1], pr[2]] <- sg5_mf[pr[2], pr[1]] <- "-1"
-}
-signed_kbl(sg5_mf, color_cells = TRUE)
-```
-
-</div>
-:::
-:::
-
----
-
-## Symmetric Cells Have the Same Value
-
-<div class="table-dense" style="font-size: 95%;">
-
-```{r}
-signed_kbl(sg5_mf, color_cells = TRUE)
-```
-
-</div>
-
-::: {.incremental}
-- Because the graph is undirected, the matrix is a **symmetric valued matrix**: symmetric cells have the same value!
-- For example $a_{3,1} = a_{1,3} = -1$ (the negative A–C link).
-- And $a_{5,2} = a_{2,5} = 1$ (the positive B–E link).
-:::
-
----
 
 # Part 3: Triadic Balance Theory
 
@@ -842,6 +714,20 @@ $$+1 \times +1 = +1 \qquad +1 \times -1 = -1 \qquad -1 \times -1 = +1$$
 
 ## Unbalanced Triads Have a Negative Product
 
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+triad_panel(c("+", "+", "-"), "(+, +, −)") +
+  triad_panel(c("+", "-", "+"), "(+, −, +)") +
+  triad_panel(c("-", "+", "+"), "(−, +, +)") +
+  triad_panel(c("-", "-", "-"), "(−, −, −)") +
+  plot_layout(nrow = 2)
+```
+:::
+
+::: {.column width="52%"}
 ::: {.incremental}
 - If you multiply the signs of the edges of each **unbalanced** triad, you get a **negative** number. Try it!
 - $(+1_{PO}) \times (+1_{OQ}) \times (-1_{PQ}) = -1_{POQ}$
@@ -849,17 +735,35 @@ $$+1 \times +1 = +1 \qquad +1 \times -1 = -1 \qquad -1 \times -1 = +1$$
 - $(-1_{PO}) \times (+1_{OQ}) \times (+1_{PQ}) = -1_{POQ}$
 - $(-1_{PO}) \times (-1_{OQ}) \times (-1_{PQ}) = -1_{POQ}$
 :::
+:::
+:::
 
 ---
 
 ## Balanced Triads Have a Positive Product
 
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+triad_panel(c("-", "+", "-"), "(−, +, −)") +
+  triad_panel(c("+", "-", "-"), "(+, −, −)") +
+  triad_panel(c("-", "-", "+"), "(−, −, +)") +
+  triad_panel(c("+", "+", "+"), "(+, +, +)") +
+  plot_layout(nrow = 2)
+```
+:::
+
+::: {.column width="52%"}
 ::: {.incremental}
 - Conversely, if you multiply the signs of the edges of each **balanced** triad, you get a **positive** number.
 - $(-1_{PO}) \times (+1_{OQ}) \times (-1_{PQ}) = +1_{POQ}$
 - $(+1_{PO}) \times (-1_{OQ}) \times (-1_{PQ}) = +1_{POQ}$
 - $(-1_{PO}) \times (-1_{OQ}) \times (+1_{PQ}) = +1_{POQ}$
 - $(+1_{PO}) \times (+1_{OQ}) \times (+1_{PQ}) = +1_{POQ}$
+:::
+:::
 :::
 
 ---
@@ -892,11 +796,12 @@ $$+1 \times +1 = +1 \qquad +1 \times -1 = -1 \qquad -1 \times -1 = +1$$
 ```{r}
 #| fig.width: 4.4
 #| fig.height: 4.4
-# P likes both friends; Friend 1 likes Taylor, Friend 2 dislikes Taylor
+# P likes both friends; Friend 1 likes Taylor, Friend 2 dislikes Taylor;
+# P's tie to Taylor is ambivalent (±)
 xp_e <- data.frame(
-  from = c("P", "P", "Friend 1", "Friend 2"),
-  to   = c("Friend 1", "Friend 2", "Taylor", "Taylor"),
-  sign = c("+", "+", "+", "-")
+  from = c("P", "P", "Friend 1", "Friend 2", "P"),
+  to   = c("Friend 1", "Friend 2", "Taylor", "Taylor", "Taylor"),
+  sign = c("+", "+", "+", "-", "±")
 )
 xp <- graph_from_data_frame(xp_e, directed = TRUE)
 xp_lay <- rbind(c(0, 1.05), c(-0.95, -0.35), c(0.95, -0.35), c(0, -1.0))
@@ -952,14 +857,15 @@ xp_plot()
 - If a triad is balanced, then it is so **from every member's point of view**.
 - We just need to change the interpretation!
 - Take this balanced triad and rotate the "you" position around the triangle.
-- From the bottom node: "a friend of an enemy is an enemy."
-- From the lower-right node: "an enemy of an enemy is a friend."
-- From the top node: "an enemy of a friend is an enemy."
 :::
 
+---
+
+## Rotating the "You" Position
+
 ```{r}
-#| fig.width: 6.6
-#| fig.height: 3.4
+#| fig.width: 10.2
+#| fig.height: 4.6
 # Same balanced undirected triad; the focal "you" node rotates
 rot_fig <- function(focal, ttl) {
   e <- data.frame(from = c("n1", "n1", "n2"), to = c("n2", "n3", "n3"),
@@ -971,18 +877,18 @@ rot_fig <- function(focal, ttl) {
   labs[setdiff(c("n1", "n2", "n3"), focal)] <- others
   V(g)$lab <- unname(labs[V(g)$name])
   ggraph(g, layout = lay) +
-    edge_layer(2) + edge_scales() +
-    geom_node_point(aes(fill = lab), size = 17, color = "#2c3e50", shape = 21, stroke = 1.6) +
+    edge_layer(2.4) + edge_scales() +
+    geom_node_point(aes(fill = lab), size = 22, color = "#2c3e50", shape = 21, stroke = 1.8) +
     scale_fill_manual(values = c("P" = "#F5B7B1", "O" = "#ecf0f1", "Q" = "#ecf0f1")) +
-    geom_node_text(aes(label = lab), fontface = "bold", size = 6, color = "#2c3e50") +
+    geom_node_text(aes(label = lab), fontface = "bold", size = 8, color = "#2c3e50") +
     coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-0.95, 1.3), clip = "off") +
     theme_slides() + theme(legend.position = "none",
-                           plot.title = element_text(size = 10, face = "bold")) +
+                           plot.title = element_text(size = 14, face = "bold")) +
     ggtitle(ttl)
 }
-rot_fig("n3", "P at the bottom") +
-  rot_fig("n1", "P at the lower left") +
-  rot_fig("n2", "P at the upper right")
+rot_fig("n3", "From the lower-left node: \"a friend of an enemy is an enemy\"") +
+  rot_fig("n1", "From the top node: \"an enemy of an enemy is a friend\"") +
+  rot_fig("n2", "From the lower-right node: \"an enemy of a friend is an enemy\"")
 ```
 
 ---
@@ -1023,12 +929,11 @@ ggraph(g, layout = circ_lay(c("A", "B", "C"))) +
 ::: {.columns}
 ::: {.column width="50%"}
 ::: {.incremental}
-- Signed graphs are a special kind of graph featuring:
+- Here is a signed graph with its edge sets named explicitly:
   - One set of vertices $V = \{A, B, C, D, E, F\}$, so $|V| = 6$.
   - Positive links: $E^+ = \{AC, AE, AF, CF, CE\}$, so $|E^+| = 5$.
   - Negative links: $E^- = \{AB, BC, BD, CD, DF, EF\}$, so $|E^-| = 6$.
 - The graph is $G = \{V, E^+, E^-\}$.
-- Two sets are disjoint when they don't share any members (their intersection is the empty set $\emptyset$).
 :::
 :::
 
@@ -1073,19 +978,15 @@ ggraph(sg6, layout = circ_lay(LETTERS[1:6])) +
 
 ::: {.column width="52%"}
 ::: {.incremental}
-- The adjacency matrix of a signed graph works just like before.
+- The adjacency matrix of a signed graph works just like an ordinary adjacency matrix, except each entry records the **sign** of the tie.
 - **Step 1**: draw the empty grid with `--` on the diagonal.
 :::
-
-<div class="table-dense" style="font-size: 95%;">
 
 ```{r}
 sg6_m0 <- matrix("", 6, 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 diag(sg6_m0) <- "--"
-signed_kbl(sg6_m0, color_cells = FALSE)
+signed_kbl(sg6_m0, font = 24, color_cells = FALSE)
 ```
-
-</div>
 :::
 :::
 
@@ -1112,18 +1013,14 @@ ggraph(sg6, layout = circ_lay(LETTERS[1:6])) +
 - **Step 2**: put a **1** where nodes are linked by a positive line.
 :::
 
-<div class="table-dense" style="font-size: 95%;">
-
 ```{r}
 sg6_m1 <- matrix("", 6, 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 diag(sg6_m1) <- "--"
 for (pr in list(c("A","C"), c("A","E"), c("A","F"), c("C","F"), c("C","E"))) {
   sg6_m1[pr[1], pr[2]] <- sg6_m1[pr[2], pr[1]] <- "1"
 }
-signed_kbl(sg6_m1, color_cells = TRUE)
+signed_kbl(sg6_m1, font = 24, color_cells = TRUE)
 ```
-
-</div>
 :::
 :::
 
@@ -1150,8 +1047,6 @@ ggraph(sg6, layout = circ_lay(LETTERS[1:6])) +
 - **Step 3**: put a **−1** where nodes are linked by a negative line, and a **0** where nodes are not adjacent.
 :::
 
-<div class="table-dense" style="font-size: 95%;">
-
 ```{r}
 sg6_mf <- matrix("0", 6, 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 diag(sg6_mf) <- "--"
@@ -1161,11 +1056,23 @@ for (pr in list(c("A","C"), c("A","E"), c("A","F"), c("C","F"), c("C","E"))) {
 for (pr in list(c("A","B"), c("B","C"), c("B","D"), c("C","D"), c("D","F"), c("E","F"))) {
   sg6_mf[pr[1], pr[2]] <- sg6_mf[pr[2], pr[1]] <- "-1"
 }
-signed_kbl(sg6_mf, color_cells = TRUE)
+signed_kbl(sg6_mf, font = 24, color_cells = TRUE)
+```
+:::
+:::
+
+---
+
+## Symmetric Cells Have the Same Value
+
+```{r}
+signed_kbl(sg6_mf, font = 24, color_cells = TRUE)
 ```
 
-</div>
-:::
+::: {.incremental}
+- Because the graph is undirected, the matrix is a **symmetric valued matrix**: symmetric cells have the same value!
+- For example $a_{1,3} = a_{3,1} = 1$ (the positive A–C link).
+- And $a_{2,4} = a_{4,2} = -1$ (the negative B–D link).
 :::
 
 ---
@@ -1367,10 +1274,21 @@ signed_kbl(comp_m, color_cells = TRUE)
 ## Adding New Nodes Preserves the Polarization Pattern
 
 ::: {.columns}
-::: {.column width="50%"}
+::: {.column width="36%"}
+::: {.incremental}
+- Adding new nodes to the structure does not change the group polarization pattern, **as long as their relationships to every other node are balanced**.
+- New nodes **H** and **I** (yellow) join.
+- I makes friends with C, D, and E.
+- H makes friends with A, B, and F.
+- Then they balance out the rest of the relationships with the other side.
+- **Still polarized!**
+:::
+:::
+
+::: {.column width="64%"}
 ```{r}
-#| fig.width: 4.4
-#| fig.height: 4.4
+#| fig.width: 6.4
+#| fig.height: 3.4
 # Add H (joins A, B, F side) and I (joins C, D, E side)
 ext_e <- rbind(
   comp_e,
@@ -1382,7 +1300,8 @@ ext_e <- rbind(
 )
 ext <- graph_from_data_frame(ext_e, directed = FALSE)
 ord8 <- c("A", "B", "F", "H", "C", "D", "E", "I")
-ext_map <- c(fac_map, "H" = "#AED6F1", "I" = "#F5B7B1")
+# New nodes H and I in yellow so they stand out
+ext_map <- c(fac_map, "H" = "#F9E79F", "I" = "#F9E79F")
 # Two camp layout: faction 1 on the left, faction 2 on the right
 ext_lay <- rbind(
   c(-0.50,  0.80), c(-0.95,  0.30), c(-0.95, -0.40), c(-0.50, -0.85),
@@ -1390,6 +1309,27 @@ ext_lay <- rbind(
 )
 rownames(ext_lay) <- ord8
 colnames(ext_lay) <- c("x", "y")
+new_stroke <- function(g) ifelse(V(g)$name %in% c("H", "I"), 2.4, 1.4)
+before_panel <- ggraph(comp, layout = circ_lay(c("A", "B", "F", "C", "D", "E"))) +
+  edge_layer(1.9) + edge_scales() +
+  geom_node_point(size = 12, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.4) +
+  scale_fill_manual(values = fac_map) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 4.4, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none",
+                         plot.title = element_text(size = 12, face = "bold")) +
+  ggtitle("Before: 6 nodes")
+after_panel <- ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
+  edge_layer(1.9) + edge_scales() +
+  geom_node_point(size = 12, aes(fill = name), color = "#2c3e50", shape = 21,
+                  stroke = new_stroke(ext)) +
+  scale_fill_manual(values = ext_map) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 4.4, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none",
+                         plot.title = element_text(size = 12, face = "bold")) +
+  ggtitle("After: add H and I (yellow)")
+# Original-style single-panel plot used by later slides
 ext_plot <- function(node_size = 13, lab = 4.6, edge_w = 2) {
   ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
     edge_layer(edge_w) + edge_scales() +
@@ -1399,18 +1339,8 @@ ext_plot <- function(node_size = 13, lab = 4.6, edge_w = 2) {
     coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
     theme_slides() + theme(legend.position = "none")
 }
-ext_plot()
+before_panel + after_panel + plot_layout(nrow = 1)
 ```
-:::
-
-::: {.column width="50%"}
-::: {.incremental}
-- Adding new nodes to the structure does not change the group polarization pattern, **as long as their relationships to every other node are balanced**.
-- I makes friends with C, D, and E.
-- H makes friends with A, B, and F.
-- Then they balance out the rest of the relationships with the other side.
-- **Still polarized!**
-:::
 :::
 :::
 
@@ -1465,9 +1395,17 @@ path_idx <- function(l) {
   key <- paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
   ed[key %in% name_key(path_pairs), ]
 }
-ext_plot(node_size = 13, lab = 4.6, edge_w = 1.6) +
-  geom_edge_link(data = path_idx, color = "#E67E22", width = 3.2,
-                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm"))
+# Muted base edges so the highlighted path stands out
+ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
+  geom_edge_link(color = "grey72", width = 1.4,
+                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+  geom_edge_link(data = path_idx, color = "#E67E22", width = 3.4,
+                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+  geom_node_point(size = 13, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.4) +
+  scale_fill_manual(values = ext_map) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 4.6, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 
@@ -1503,9 +1441,17 @@ cyc_idx <- function(l) {
   key <- paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
   ed[key %in% name_key(cyc_pairs), ]
 }
-ext_plot(node_size = 13, lab = 4.6, edge_w = 1.6) +
-  geom_edge_link(data = cyc_idx, color = "#E67E22", width = 3.2,
-                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm"))
+# Muted base edges so the highlighted cycles stand out
+ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
+  geom_edge_link(color = "grey72", width = 1.4,
+                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+  geom_edge_link(data = cyc_idx, color = "#E67E22", width = 3.4,
+                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+  geom_node_point(size = 13, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.4) +
+  scale_fill_manual(values = ext_map) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 4.6, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 
@@ -1538,26 +1484,30 @@ ext_plot(node_size = 13, lab = 4.6, edge_w = 1.6) +
 
 ---
 
-## Building a Clusterable Network from Triads
+## Building a Clusterable Network, Step 1: Positive Links Within Clusters
 
+::: {.columns}
+::: {.column width="42%"}
 ::: {.incremental}
 - Suppose we build a network whose triangles come in only three types:
   - **All-positive** triads (everybody inside a cluster likes everybody else in it).
   - **Two-negative** triads (two cluster-mates against an outsider).
   - **All-negative** triads (one node from each of three clusters).
-- Then we give the nodes names: $\{a, d, e\}$, $\{c, g\}$, and $\{b, f, h\}$.
-- And now we connect them up!
+- **Step 1**: draw the **positive** links inside each of three clusters: $\{a, d, e\}$, $\{c, g, i\}$, and $\{b, f, h\}$.
+:::
 :::
 
+::: {.column width="58%"}
 ```{r}
-#| fig.width: 4.2
-#| fig.height: 3.3
-# 8-node clusterable signed graph: clusters {a,d,e}, {c,g}, {b,f,h}
+#| fig.width: 5.2
+#| fig.height: 4.8
+# 9-node clusterable signed graph: clusters {a,d,e}, {c,g,i}, {b,f,h}
 cl_pairs <- function(g1, sign) {
   do.call(rbind, lapply(seq_along(g1)[-1], function(k)
     data.frame(from = g1[k], to = g1[1], sign = sign)))
 }
-three_clus <- list(c("a","d","e"), c("c","g"), c("b","f","h"))
+clus_nodes <- c("a", "b", "c", "d", "e", "f", "g", "h", "i")
+three_clus <- list(c("a","d","e"), c("c","g","i"), c("b","f","h"))
 clus_e <- rbind(
   cl_pairs(three_clus[[1]], "+"),
   cl_pairs(three_clus[[2]], "+"),
@@ -1567,47 +1517,77 @@ clus_e <- rbind(
   comp_pairs(three_clus[[2]], three_clus[[3]], "-")
 )
 clus <- graph_from_data_frame(clus_e, directed = FALSE)
-ordcl <- c("a", "d", "e", "c", "g", "b", "f", "h")
 cl_map <- c("a" = "#AED6F1", "d" = "#AED6F1", "e" = "#AED6F1",
-            "c" = "#ABEBC6", "g" = "#ABEBC6",
+            "c" = "#ABEBC6", "g" = "#ABEBC6", "i" = "#ABEBC6",
             "b" = "#F5B7B1", "f" = "#F5B7B1", "h" = "#F5B7B1")
-# Three-cluster layout: each cluster drawn as a tight local triangle/dyad
-clus_lay <- rbind(
-  c(-0.85,  0.65), c(-0.30,  0.95), c(-0.95, -0.05),
-  c( 1.00,  0.70), c( 0.75, -0.05),
-  c(-0.15, -0.60), c( 0.55, -1.00), c( 0.95, -0.50)
-)
-rownames(clus_lay) <- ordcl
-colnames(clus_lay) <- c("x", "y")
-clus_plot <- function(node_size = 14, lab = 5, edge_w = 2.2) {
+# Three-cluster layout: each cluster a tight triangle around its centroid
+mk_clus_lay <- function(cx, cy, names, r = 0.38) {
+  ang <- pi/2 - (0:(length(names) - 1)) * (2 * pi / length(names))
+  m <- cbind(x = cx + r * cos(ang), y = cy + r * sin(ang))
+  rownames(m) <- names
+  m
+}
+clus_lay <- rbind(mk_clus_lay(-1.05,  0.90, three_clus[[1]], r = 0.34),
+                  mk_clus_lay( 1.05,  0.90, three_clus[[2]], r = 0.34),
+                  mk_clus_lay( 0.00, -1.05, three_clus[[3]], r = 0.34))
+pos_idx <- function(l) { ed <- get_edges()(l); ed[ed$sign == "+", ] }
+clus_plot <- function(node_size = 15, lab = 6, edge_w = 1.7) {
   ggraph(clus, layout = clus_lay[V(clus)$name, , drop = FALSE]) +
     edge_layer(edge_w) + edge_scales() +
-    geom_node_point(size = node_size, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.5) +
+    geom_node_point(size = node_size, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.6) +
     scale_fill_manual(values = cl_map) +
     geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
-    coord_fixed(xlim = c(-1.25, 1.30), ylim = c(-1.25, 1.25), clip = "off") +
+    coord_fixed(xlim = c(-1.60, 1.60), ylim = c(-1.55, 1.45), clip = "off") +
     theme_slides() + theme(legend.position = "none")
 }
+# Step 1 view: positive links only
+ggraph(clus, layout = clus_lay[V(clus)$name, , drop = FALSE]) +
+  geom_edge_link(data = pos_idx, color = pos_col, width = 2.4,
+                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+  geom_node_point(size = 16, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.6) +
+  scale_fill_manual(values = cl_map) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.60, 1.60), ylim = c(-1.55, 1.45), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+:::
+
+---
+
+## Building a Clusterable Network, Step 2: Negative Links Between Clusters
+
+::: {.columns}
+::: {.column width="42%"}
+::: {.incremental}
+- **Step 2**: connect **every** pair of nodes in **different** clusters with a **negative** link.
+- Every cluster is now a positive island in a sea of negatives.
+- The graph is complete: every pair of nodes is tied, positively or negatively.
+:::
+:::
+
+::: {.column width="58%"}
+```{r}
+#| fig.width: 5.2
+#| fig.height: 4.8
 clus_plot()
 ```
+:::
+:::
 
 ---
 
 ## The Adjacency Matrix of the Clusterable Network
 
-<div class="table-dense" style="font-size: 95%;">
-
 ```{r}
-clus_m <- matrix("-1", 8, 8, dimnames = list(ordcl, ordcl))
+clus_m <- matrix("-1", 9, 9, dimnames = list(clus_nodes, clus_nodes))
 diag(clus_m) <- "--"
-for (pr in list(c("a","d"), c("a","e"), c("d","e"), c("c","g"),
+for (pr in list(c("a","d"), c("a","e"), c("d","e"), c("c","g"), c("c","i"), c("g","i"),
                 c("b","f"), c("b","h"), c("f","h"))) {
   clus_m[pr[1], pr[2]] <- clus_m[pr[2], pr[1]] <- "1"
 }
-signed_kbl(clus_m, font = 18, color_cells = TRUE)
+signed_kbl(clus_m, color_cells = TRUE)
 ```
-
-</div>
 
 ::: {.incremental}
 - Positives ($+1$, green) sit inside each of the three clusters; negatives ($-1$, red) sit between them.
@@ -1621,9 +1601,9 @@ signed_kbl(clus_m, font = 18, color_cells = TRUE)
 ::: {.columns}
 ::: {.column width="50%"}
 ```{r}
-#| fig.width: 4.4
+#| fig.width: 4.6
 #| fig.height: 4.4
-clus_plot(node_size = 14, lab = 5, edge_w = 1.9)
+clus_plot(node_size = 14, lab = 5.5, edge_w = 2)
 ```
 :::
 
@@ -1631,7 +1611,7 @@ clus_plot(node_size = 14, lab = 5, edge_w = 1.9)
 ::: {.incremental}
 - Davis shows that the nodes partition into three clusters:
   - **Cluster 1**: $\{a, d, e\}$
-  - **Cluster 2**: $\{c, g\}$
+  - **Cluster 2**: $\{c, g, i\}$
   - **Cluster 3**: $\{b, f, h\}$
 - Positive links within clusters, negative links between them.
 - The all-negative triads (like $\{a, b, c\}$, one node from each cluster) are what keep this from being strictly **balanced** — but it is perfectly **clusterable**.
@@ -1643,13 +1623,9 @@ clus_plot(node_size = 14, lab = 5, edge_w = 1.9)
 
 ## The Cluster Structure in the Reordered Matrix
 
-<div class="table-dense" style="font-size: 95%;">
-
 ```{r}
-signed_kbl(clus_m, font = 18, color_cells = TRUE)
+signed_kbl(clus_m, color_cells = TRUE)
 ```
-
-</div>
 
 ::: {.incremental}
 - Reordering rows and columns by cluster exposes **three positive blocks on the diagonal**.
