@@ -126,18 +126,18 @@ mk_karma <- function(focal, out, inn, sign, edge_col, node_fill, node_col, ttl, 
   g <- graph_from_data_frame(edges, directed = TRUE)
   # Focal center; outgoing alters right, incoming alters left.
   # Wide spacing so the arrows show real shafts, not just arrowheads.
-  lay <- rbind(c(0, 0), c(5.5, 1), c(5.5, -1), c(-5.5, 1), c(-5.5, -1))
+  lay <- rbind(c(0, 0), c(4, 1.2), c(4, -1.2), c(-4, 1.2), c(-4, -1.2))
   rownames(lay) <- c(focal, out, inn)
   lt <- ifelse(sign[1] == "+", "solid", "33")
   ggraph(g, layout = lay) +
-    geom_edge_link(aes(color = sign, linetype = sign), width = 2.2,
-                   arrow = arrow(length = unit(2.8, "mm"), type = "closed"),
-                   end_cap = circle(6, "mm"), start_cap = circle(6, "mm")) +
-    geom_node_point(size = 13, fill = node_fill, color = node_col, shape = 21, stroke = 1.5) +
+    geom_edge_link(aes(color = sign, linetype = sign), width = 2,
+                   arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                   end_cap = circle(7, "mm"), start_cap = circle(7, "mm")) +
+    geom_node_point(size = 14, fill = node_fill, color = node_col, shape = 21, stroke = 1.5) +
     geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
     scale_edge_color_manual(values = setNames(rep(edge_col, length(sign)), sign)) +
     scale_edge_linetype_manual(values = setNames(rep(lt, length(sign)), sign)) +
-    coord_fixed(xlim = c(-6.2, 6.2), ylim = c(-1.8, 1.8), clip = "off") +
+    coord_fixed(xlim = c(-4.8, 4.8), ylim = c(-2.0, 2.0), clip = "off") +
     theme_slides() + theme(legend.position = "none") +
     ggtitle(ttl) + labs(subtitle = sub)
 }
@@ -231,18 +231,18 @@ mk_cycle <- function(focal, out, inn, negative, ttl) {
     to   = c(out, focal, focal)
   )
   g <- graph_from_data_frame(edges, directed = TRUE)
-  lay <- rbind(c(0, 0), c(5.5, 1), c(5.5, -1), c(-5.5, 1), c(-5.5, -1))
+  lay <- rbind(c(0, 0), c(4, 1.2), c(4, -1.2), c(-4, 1.2), c(-4, -1.2))
   rownames(lay) <- c(focal, out, inn)
   fill <- if (negative) "#f8d7da" else "#d4edda"
   border <- if (negative) "#dc3545" else "#28a745"
   ecol <- if (negative) "#e74c3c" else "#2ecc71"
   ggraph(g, layout = lay) +
     geom_edge_link(color = ecol, linetype = if (negative) "33" else "solid",
-                   width = 2, arrow = arrow(length = unit(2.8, "mm"), type = "closed"),
-                   end_cap = circle(6, "mm"), start_cap = circle(6, "mm")) +
-    geom_node_point(size = 14, fill = fill, color = border, shape = 21, stroke = 1.5) +
+                   width = 1.8, arrow = arrow(length = unit(3, "mm"), type = "closed"),
+                   end_cap = circle(7, "mm"), start_cap = circle(7, "mm")) +
+    geom_node_point(size = 15, fill = fill, color = border, shape = 21, stroke = 1.5) +
     geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-    coord_fixed(xlim = c(-6.2, 6.2), ylim = c(-1.8, 1.8), clip = "off") +
+    coord_fixed(xlim = c(-4.8, 4.8), ylim = c(-2.0, 2.0), clip = "off") +
     theme_slides() + theme(legend.position = "none") +
     ggtitle(ttl) + labs(subtitle = if (negative) "sends hostility, receives hostility"
                                 else "sends kindness, receives kindness")
@@ -437,10 +437,8 @@ g2 <- graph_from_data_frame(edges2, directed = TRUE)
 # Clean tower: A on top, subordinates in a row below. Deference (+) and
 # dominance (-) arcs get SEPARATE layers; a uniform strength bows up- and
 # down-traveling arcs to opposite sides so the two directions never overlap.
-# ggraph matches layout rows to vertices POSITIONALLY (alphabetical order
-# B, C, D, E, A), so A's coordinates go in the LAST row.
-lay2 <- rbind(c(-2.4, -0.4), c(-0.8, -0.4), c(0.8, -0.4), c(2.4, -0.4), c(0, 2.2))
-rownames(lay2) <- c("B", "C", "D", "E", "A")
+lay2 <- rbind(c(0, 2.2), c(-1.8, -0.4), c(-0.6, -0.4), c(0.6, -0.4), c(1.8, -0.4))
+rownames(lay2) <- c("A", "B", "C", "D", "E")
 
 p2 <- ggraph(g2, layout = lay2) +
   geom_edge_arc(aes(color = sign, linetype = sign),
@@ -454,14 +452,14 @@ p2 <- ggraph(g2, layout = lay2) +
   geom_node_point(aes(fill = name == "A"), size = 16, color = "#2c3e50", shape = 21, stroke = 1.5) +
   geom_node_text(aes(label = name),
                  data = function(l) { n <- get_nodes()(l); n[n$name == "A", ] },
-                 fontface = "bold", size = 5, color = "#2c3e50", nudge_y = 0.8) +
+                 fontface = "bold", size = 5, color = "#2c3e50", nudge_y = 0.45) +
   geom_node_text(aes(label = name),
                  data = function(l) { n <- get_nodes()(l); n[n$name != "A", ] },
                  fontface = "bold", size = 5, color = "#2c3e50", nudge_y = -0.45) +
   scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
   scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
   scale_fill_manual(values = c("TRUE" = "gold", "FALSE" = "#ecf0f1")) +
-  coord_fixed(xlim = c(-3.2, 3.2), ylim = c(-1.6, 3.0), clip = "off") +
+  coord_fixed(xlim = c(-2.6, 2.6), ylim = c(-1.6, 3.0), clip = "off") +
   theme_slides() + theme(legend.position = "none") + ggtitle("Status Hierarchy")
 
 p1 + p2 + plot_layout(nrow = 1)
@@ -610,11 +608,11 @@ g <- graph_from_data_frame(edges, directed = TRUE)
 lay <- rbind(c(-1.4, 1.4), c(1.4, 1.4), c(-1.4, -1.4), c(1.4, -1.4))
 rownames(lay) <- c("A", "B", "C", "D")
 ggraph(g, layout = lay) +
-  geom_edge_parallel(aes(color = type, linetype = type),
+  geom_edge_parallel(aes(color = type),
                      data = function(l) { e <- get_edges()(l); e[e$type == "Solidarity", ] },
                      arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
                      width = 2, sep = unit(3.5, "mm"), end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
-  geom_edge_arc(aes(color = type, linetype = type),
+  geom_edge_arc(aes(color = type),
                 data = function(l) { e <- get_edges()(l); e[e$type == "Deference", ] },
                 arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
                 strength = 0.25, width = 2, end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
