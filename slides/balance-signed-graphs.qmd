@@ -20,6 +20,7 @@ library(tidygraph)
 library(igraph)
 library(dplyr)
 library(patchwork)
+library(kableExtra)
 
 # Custom transparent theme for slides
 theme_slides <- function(base_size = 12) {
@@ -36,7 +37,6 @@ theme_slides <- function(base_size = 12) {
   )
 }
 
-# Set global chunk options
 knitr::opts_chunk$set(
   echo = FALSE,
   warning = FALSE,
@@ -45,14 +45,85 @@ knitr::opts_chunk$set(
   dev = "png",
   dev.args = list(bg = "transparent")
 )
+
+pos_col <- "forestgreen"
+neg_col <- "firebrick"
+
+# Circle layout: nodes placed clockwise starting at 12 o'clock
+circ_lay <- function(names, start = pi/2) {
+  n <- length(names)
+  ang <- start - (0:(n - 1)) * (2 * pi / n)
+  m <- cbind(x = cos(ang), y = sin(ang))
+  rownames(m) <- names
+  m
+}
+
+# Node fill colors by membership map; unmapped nodes get the default
+fill_vec <- function(names, map, default = "#ecf0f1") {
+  out <- rep(default, length(names)); names(out) <- names
+  hit <- intersect(names, names(map)); out[hit] <- map[hit]
+  out
+}
+
+# Standard signed-edge layer + scales for an undirected signed graph
+edge_layer <- function(width = 2.2) {
+  geom_edge_link(aes(color = sign, linetype = sign), width = width,
+                 end_cap = circle(10, "mm"), start_cap = circle(10, "mm"))
+}
+edge_scales <- function() {
+  list(
+    scale_edge_color_manual(values = c("+" = pos_col, "-" = neg_col)),
+    scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33"))
+  )
+}
+
+# P-O-Q triad panel (edge order P-O, O-Q, P-Q); directed sentiments
+triad_panel <- function(signs, ttl = NULL, node_size = 14, lab = 5) {
+  e <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = signs)
+  g <- graph_from_data_frame(e, directed = TRUE)
+  ggraph(g, layout = circ_lay(c("P", "O", "Q"))) +
+    geom_edge_link(aes(color = sign, linetype = sign),
+                   arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                   width = 1.8, end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+    geom_node_point(size = node_size, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.4) +
+    geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
+    edge_scales() +
+    coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-0.95, 1.3), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 9)) +
+    ggtitle(ttl)
+}
+
+# kable helper for signed adjacency matrices; colors +1 green, -1 red
+signed_kbl <- function(m, font = 20, color_cells = TRUE) {
+  mm <- m
+  if (color_cells) {
+    mm[] <- vapply(m, function(v) {
+      dplyr::case_when(
+        v == "1"  ~ cell_spec(v, background = "#ABEBC6"),
+        v == "-1" ~ cell_spec(v, background = "#F5B7B1"),
+        TRUE ~ v
+      )
+    }, "")
+    dim(mm) <- dim(m); dimnames(mm) <- dimnames(m)
+  }
+  knitr::kable(mm, format = "html", escape = FALSE) |>
+    kable_styling(font_size = font, full_width = FALSE, position = "center")
+}
+
+# Complete signed graph between/within named groups
+comp_pairs <- function(g1, g2, sign) {
+  do.call(rbind, lapply(g1, function(i) do.call(rbind, lapply(g2, function(j)
+    data.frame(from = i, to = j, sign = sign)))))
+}
 ```
 
-# Part 1: The Relational Basis of Valenced Networks & Dyadic Balance
+# Part 1: Dyadic Balance Theory
 
 ---
 
 ## Balance Theory and Signed Graphs
-### The Local and Global Dynamics of Sentiment Networks
+### The Local and Global Dynamics of Valenced Networks
 
 ::: {.columns}
 ::: {.column width="50%"}
@@ -61,7 +132,7 @@ knitr::opts_chunk$set(
 - **Balance Theory** is the foundational framework linking:
   - Local, psychological micro-motives.
   - Global, macro-structural network patterns (like polarization).
-- Today we will cover: Dyadic Balance, Triadic Balance, Structural Balance, Clusterability, and Ranked Clusterability.
+- Today we will cover: Dyadic Balance, Signed Graphs, Triadic Balance, Structural Balance, and Clusterability.
 :::
 :::
 
@@ -69,213 +140,428 @@ knitr::opts_chunk$set(
 ```{r}
 #| fig.width: 5
 #| fig.height: 5
-edges <- data.frame(from = c("A", "B", "C"), to = c("B", "C", "A"), sign = c("+", "+", "-"))
-g <- graph_from_data_frame(edges, directed = FALSE)
-lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 2.5, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
+triad_panel(c("+", "+", "-"), node_size = 20, lab = 6)
 ```
 :::
 :::
 
 ---
 
-## The Anatomy of Sentiment Networks
+## Dyadic Balance: From Similarities to Interactions
 
-::: {.columns}
-::: {.column width="50%"}
 ::: {.incremental}
-- **Valenced ties** are links representing positive ($+$) or negative ($-$) feelings, evaluations, or behaviors.
-  - *Positive valence*: Liking, helping, admiring, loving.
-  - *Negative valence*: Hating, bullying, fighting, distrusting.
-- A **signed graph** features a set of vertices $V$ and two disjoint sets of edges:
-  - Positive links ($E^+$) and negative links ($E^-$).
-- These networks represent stable social attitudes rather than fleeting events.
-- We can represent them with a **signed adjacency matrix**: $+1$ for positive ties, $-1$ for negative ties, $0$ for no tie (coming up in Part 3).
-:::
-:::
+- Ideas of dyadic balance were first described in a famous paper written by **Fritz Heider** in 1946.
+- Ties differ based on whether they are based on:
+  - **Similarities**.
+  - **Interactions**.
+- The basic principle is that people seek balance between similarities and interactions.
+  - People tend to interact with people who are similar to them.
+- If $\alpha$ and $\beta$ are two people, $S$ is a tie based on similarity and $R$ is a tie based on interaction:
 
-::: {.column width="50%"}
-```{r}
-#| fig.width: 5
-#| fig.height: 4.5
-edges <- data.frame(from = c("Ego", "Ego"), to = c("A1", "A2"), sign = c("+", "-"))
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(0, 0, -1, -1, 1, -1), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 end_cap = circle(12, "mm"), start_cap = circle(12, "mm"), width = 2.5) +
-  geom_node_point(aes(fill = name), size = 24, color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  scale_fill_manual(values = c("Ego" = "#fff", "A1" = "#d4edda", "A2" = "#f8d7da")) +
-  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.4, 0.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
-```
-:::
+$$\alpha S \beta \rightarrow \alpha R \beta$$
 :::
 
 ---
 
-## Fritz Heider's Dyadic Balance
+## Dyadic Balance: Reading the Principle
 
-::: {.columns}
-::: {.column width="55%"}
 ::: {.incremental}
-- Developed by social psychologist **Fritz Heider** (1946) to examine how ties cohere within a single pair.
-- Distinction between:
-  - **Symmetric ties**: Relations implied by similarity or co-membership (e.g., sharing a workspace).
-  - **Asymmetric ties**: Directional sentiments (e.g., liking).
-- **First Proposition**: Similarity breeds liking. Sharing co-membership or space breeds positive asymmetric ties ($aSb \implies aLb$).
-- Forms a **positive feedback loop**: We spend more time with those we like ($aLb \implies aSb$).
-:::
+- $\alpha S \beta \rightarrow \alpha R \beta$ reads: **"A tie of type $S$ between $\alpha$ and $\beta$ leads to a tie of type $R$ between $\alpha$ and $\beta$."**
+- This applies to **every combination** of similarities and interactions.
+- Examples:
+  - People tend to **like** the people they **spend time with**.
+  - People tend to **help** people who **belong to the same groups** as them.
 :::
 
-::: {.column width="45%"}
 ```{r}
-#| fig.width: 5.5
-#| fig.height: 4.5
-edges <- data.frame(
-  from = c("a1", "a2"), 
-  to = c("b1", "b2"), 
-  type = c("Symmetric Co-membership", "Asymmetric Liking")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(-0.8, 1, 0.8, 1, -0.8, -0.8, 0.8, -0.8), ncol = 2, byrow = TRUE)
+#| fig.width: 6
+#| fig.height: 2.6
+# Similarity tie feeding an interaction tie (alpha S beta -> alpha R beta)
+e <- data.frame(from = c("α", "β"), to = c("β", "α"), type = c("S", "R"))
+g <- graph_from_data_frame(e, directed = TRUE)
+lay <- circ_lay(c("α", "β"))
+S_idx <- function(l) { ed <- get_edges()(l); ed[ed$type == "S", ] }
+R_idx <- function(l) { ed <- get_edges()(l); ed[ed$type == "R", ] }
 ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Symmetric Co-membership", ] },
-                 end_cap = circle(10, "mm"), start_cap = circle(10, "mm"), width = 2) +
-  geom_edge_link(aes(color = type), data = function(layout) { edges <- get_edges()(layout); edges[edges$type == "Asymmetric Liking", ] },
-                 arrow = arrow(length = unit(4, "mm"), type = "closed"),
-                 end_cap = circle(10, "mm"), start_cap = circle(10, "mm"), width = 2) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = c("a", "b", "a", "b")), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("Symmetric Co-membership" = "#2980b9", "Asymmetric Liking" = "forestgreen")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-1.2, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
-```
-:::
-:::
-
----
-
-## Proximity, Similarity, and Multiplexity
-
-::: {.columns}
-::: {.column width="50%"}
-::: {.incremental}
-- Over time, people accumulate multiple types of ties, leading to **multiplex ties** ("multistranded" connections).
-- **Principle of Propinquity** (Newcomb 1956): Sharing physical space or social contexts automatically facilitates acquaintance and liking.
-  - Proximity breeds interaction, which breeds similarity, which in turn breeds liking, support, and advice.
-- Relationships transition from uniplex (single-stranded) to multiplex.
-:::
-:::
-
-::: {.column width="50%"}
-```{r}
-#| fig.width: 5.5
-#| fig.height: 4.5
-edges <- data.frame(
-  from = c("A", "A", "B", "A"),
-  to   = c("B", "B", "A", "B"),
-  type = c("Co-workers", "Liking", "Liking", "Lunch Partner")
-)
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
-rownames(lay) <- c("A", "B")
-ggraph(g, layout = lay) +
-  geom_edge_parallel(aes(color = type, linetype = type), width = 2, sep = unit(4, "mm"),
-                     arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
-                     end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("Co-workers" = "#7f8c8d", "Liking" = "forestgreen", "Lunch Partner" = "#d35400")) +
-  coord_fixed(xlim = c(-0.5, 2.5), ylim = c(-0.6, 0.6), clip = "off") +
-  theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
-```
-:::
-:::
-
----
-
-## Dyadic Balance and Cognitive Tension
-
-::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- **Second Proposition**: We strive to maintain positive asymmetric ties with those we are similar to.
-- Situations where similarity is paired with dislike ($aSb \land aDb$) are **unbalanced**.
-  - Creates **cognitive inconsistency** and an unpleasant state of **affective tension** (e.g., hating a forced co-worker).
-- **Resolution of Imbalance**:
-  - Break the similarity tie (e.g., quit the job).
-  - Transform the dislike into liking (e.g., adapt to like the co-worker).
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| fig.width: 5
-#| fig.height: 4.5
-edges <- data.frame(from = c("a", "a"), to = c("b", "b"), type = c("Similarity S", "Dislike D"))
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(0, 0, 2, 0), ncol = 2, byrow = TRUE)
-rownames(lay) <- c("a", "b")
-ggraph(g, layout = lay) +
-  # One layer for both tie types: sep only separates edges WITHIN a layer,
-  # so per-type layers would draw the two a-b edges exactly on top of each other.
-  geom_edge_parallel(aes(color = type, linetype = type), width = 2, sep = unit(4, "mm"),
-                     arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
-                     end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
-  geom_node_point(size = 22, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
+  geom_edge_arc(data = S_idx, aes(color = type), width = 2.4, strength = 0.35,
+                end_cap = circle(11, "mm"), start_cap = circle(11, "mm")) +
+  geom_edge_arc(data = R_idx, aes(color = type), width = 2.4, strength = -0.35,
+                end_cap = circle(11, "mm"), start_cap = circle(11, "mm")) +
+  geom_edge_arc(data = R_idx, width = 2.4, strength = -0.35, show.legend = FALSE,
+                color = pos_col,
+                arrow = arrow(length = unit(4, "mm"), type = "closed"),
+                end_cap = circle(11, "mm"), start_cap = circle(11, "mm")) +
+  geom_node_point(size = 22, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = name), fontface = "bold", size = 8, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("Similarity S" = "#3498db", "Dislike D" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("Similarity S" = "solid", "Dislike D" = "33")) +
-  coord_fixed(xlim = c(-0.5, 2.5), ylim = c(-0.6, 0.6), clip = "off") +
+  scale_edge_color_manual(values = c("S" = "#2980b9", "R" = pos_col),
+                          labels = c("S = similarity tie", "R = interaction tie")) +
+  coord_fixed(xlim = c(-0.9, 0.9), ylim = c(-1.0, 1.0), clip = "off") +
   theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
+```
+
+---
+
+## What Counts as Similarities and Interactions?
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- **Similarities**
+  - Propinquity (same place).
+  - Homophily (same social category).
+  - Co-memberships (same social groups).
+:::
+:::
+
+::: {.column width="50%"}
+::: {.incremental}
+- **Interactions**
+  - Communicating with.
+  - Liking.
+  - Helping.
+:::
+:::
+:::
+
+::: {.incremental}
+- Reference: Borgatti, S. P., Mehra, A., Brass, D. J., & Labianca, G. (2009). Network analysis in the social sciences. *Science*, 323(5916), 892–895.
+:::
+
+---
+
+## Worked Example: Spending Time and Liking
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- **Balanced**: Simbi and Keryl spend time together **and** like each other.
+  - Similarity and interaction point the same way.
+- **Unbalanced**: Simbi and Keryl spend time together, but the liking is one-sided.
+  - A similarity paired with a missing or hostile interaction creates tension.
+- Balance theory predicts the tension gets resolved: the liking becomes mutual, or the time spent together dries up.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| fig.width: 4.6
+#| fig.height: 4.4
+# Two dyads: mutual liking (balanced) vs one-sided liking (unbalanced)
+dyad_panel <- function(mutual, ttl) {
+  e <- data.frame(from = c("Simbi", "Keryl"), to = c("Keryl", "Simbi"))
+  g <- graph_from_data_frame(e[if (mutual) c(1, 2) else 1, ], directed = TRUE)
+  lay <- circ_lay(c("Simbi", "Keryl"))
+  like_S2K <- function(l) { ed <- get_edges()(l)
+    ed[ed$from == match("Simbi", V(g)$name) & ed$to == match("Keryl", V(g)$name), ] }
+  like_K2S <- function(l) { ed <- get_edges()(l)
+    ed[ed$from == match("Keryl", V(g)$name), ] }
+  p <- ggraph(g, layout = lay) +
+    geom_edge_arc(data = like_S2K, width = 2, strength = 0.35, color = pos_col,
+                  arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                  end_cap = circle(11, "mm"), start_cap = circle(11, "mm"))
+  if (mutual) {
+    p <- p + geom_edge_arc(data = like_K2S, width = 2, strength = 0.35, color = pos_col,
+                  arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                  end_cap = circle(11, "mm"), start_cap = circle(11, "mm"))
+  }
+  p +
+    geom_edge_arc(width = 2.4, strength = 0, color = "#2980b9",
+                  end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+    geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+    geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+    coord_fixed(xlim = c(-0.8, 0.8), ylim = c(-1.05, 1.5), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 10, face = "bold")) +
+    ggtitle(ttl)
+}
+dyad_panel(TRUE, "Balanced") + dyad_panel(FALSE, "Unbalanced")
+```
+
+::: {.incremental}
+- Solid green: liking (directed). Blue: spend time with (symmetric).
+:::
+:::
+:::
+
+---
+
+## Worked Example: Same Groups and Helping
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- **Balanced**: Simbi and Keryl belong to the same groups **and** help each other.
+- **Unbalanced**: They share group memberships, but the helping only flows one way.
+- Same logic, different content: any symmetric similarity tie wants to be matched by reciprocal interaction ties.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| fig.width: 4.6
+#| fig.height: 4.4
+# Same structure: shared group (symmetric) + help (directed)
+help_panel <- function(mutual, ttl) {
+  e <- data.frame(from = c("Simbi", "Keryl"), to = c("Keryl", "Simbi"))
+  g <- graph_from_data_frame(e[if (mutual) c(1, 2) else 1, ], directed = TRUE)
+  lay <- circ_lay(c("Simbi", "Keryl"))
+  help_S2K <- function(l) { ed <- get_edges()(l)
+    ed[ed$from == match("Simbi", V(g)$name) & ed$to == match("Keryl", V(g)$name), ] }
+  help_K2S <- function(l) { ed <- get_edges()(l)
+    ed[ed$from == match("Keryl", V(g)$name), ] }
+  p <- ggraph(g, layout = lay) +
+    geom_edge_arc(data = help_S2K, width = 2, strength = 0.35, color = pos_col,
+                  arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                  end_cap = circle(11, "mm"), start_cap = circle(11, "mm"))
+  if (mutual) {
+    p <- p + geom_edge_arc(data = help_K2S, width = 2, strength = 0.35, color = pos_col,
+                  arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                  end_cap = circle(11, "mm"), start_cap = circle(11, "mm"))
+  }
+  p +
+    geom_edge_arc(width = 2.4, strength = 0, color = "#2980b9",
+                  end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+    geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+    geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+    coord_fixed(xlim = c(-0.8, 0.8), ylim = c(-1.05, 1.5), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 10, face = "bold")) +
+    ggtitle(ttl)
+}
+help_panel(TRUE, "Balanced") + help_panel(FALSE, "Unbalanced")
+```
+
+::: {.incremental}
+- Solid green: help (directed). Blue: same group (symmetric).
+:::
+:::
+:::
+
+---
+
+## The Cycle Runs Both Ways: From Interactions to Similarities
+
+::: {.incremental}
+- After the first cycle of similarities leading to interactions, **interactions can lead to further similarities**: $\alpha R \beta \rightarrow \alpha S \beta$.
+- People tend to **think like** (share the opinions and attitudes of) the people they interact with.
+- People tend to adopt the same **tastes and fashions** as the people in the same organizations as them.
+- People tend to **spend time with** the people they like.
+- Similarities and interactions feed each other in a continuing loop.
+:::
+
+---
+
+# Part 2: Signed Graphs
+
+---
+
+## Signed Graphs
+
+::: {.columns}
+::: {.column width="52%"}
+::: {.incremental}
+- Signed graphs are a special kind of graph featuring:
+  - One set of vertices $V$.
+  - **Two disjoint sets of edges**:
+    - Positive links ($E^+$).
+    - Negative links ($E^-$).
+- The graph is written $G = \{V, E^+, E^-\}$.
+- Two sets are **disjoint** when they don't share any members (their intersection is the empty set $\emptyset$).
+- Signed graphs can be either **directed or undirected**.
+:::
+:::
+
+::: {.column width="48%"}
+```{r}
+#| label: fig-sg5
+#| fig.width: 4.4
+#| fig.height: 4.4
+# Five-node undirected signed graph
+sg5_e <- data.frame(
+  from = c("A", "A", "B", "B", "C", "C", "D"),
+  to   = c("C", "D", "C", "E", "D", "E", "E"),
+  sign = c("-", "+", "+", "+", "-", "+", "-")
+)
+sg5 <- graph_from_data_frame(sg5_e, directed = FALSE)
+ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
+  edge_layer() + edge_scales() +
+  geom_node_point(size = 17, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.7) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none") +
+  ggtitle("Undirected signed graph")
 ```
 :::
 :::
 
 ---
 
-# Part 2: Triadic Balance Theory
+## Signed Graphs: Matrix Representation
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
+  edge_layer(1.9) + edge_scales() +
+  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- The adjacency matrix of a signed graph works just like before, with three steps.
+- **Step 1**: draw the empty grid, with `--` on the diagonal.
+:::
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+sg5_m0 <- matrix("", 5, 5, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
+diag(sg5_m0) <- "--"
+signed_kbl(sg5_m0, color_cells = FALSE)
+```
+
+</div>
+:::
+:::
 
 ---
 
-## Fritz Heider’s P-O-Q Triad
+## Matrix Representation: Fill in the Positive Links
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
+  edge_layer(1.9) + edge_scales() +
+  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- **Step 2**: put a **1** in a cell if the two nodes are linked by a **positive** line.
+:::
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+sg5_m1 <- matrix("", 5, 5, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
+diag(sg5_m1) <- "--"
+for (pr in list(c("A","D"), c("B","C"), c("B","E"), c("C","E"))) {
+  sg5_m1[pr[1], pr[2]] <- sg5_m1[pr[2], pr[1]] <- "1"
+}
+signed_kbl(sg5_m1, color_cells = TRUE)
+```
+
+</div>
+:::
+:::
+
+---
+
+## Matrix Representation: Fill in the Negative Links
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
+  edge_layer(1.9) + edge_scales() +
+  geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- **Step 3**: put a **−1** in a cell if the two nodes are linked by a **negative** line, and a **0** if they are not adjacent.
+:::
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+sg5_mf <- matrix("0", 5, 5, dimnames = list(LETTERS[1:5], LETTERS[1:5]))
+diag(sg5_mf) <- "--"
+for (pr in list(c("A","D"), c("B","C"), c("B","E"), c("C","E"))) {
+  sg5_mf[pr[1], pr[2]] <- sg5_mf[pr[2], pr[1]] <- "1"
+}
+for (pr in list(c("A","C"), c("C","D"), c("D","E"))) {
+  sg5_mf[pr[1], pr[2]] <- sg5_mf[pr[2], pr[1]] <- "-1"
+}
+signed_kbl(sg5_mf, color_cells = TRUE)
+```
+
+</div>
+:::
+:::
+
+---
+
+## Symmetric Cells Have the Same Value
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+signed_kbl(sg5_mf, color_cells = TRUE)
+```
+
+</div>
+
+::: {.incremental}
+- Because the graph is undirected, the matrix is a **symmetric valued matrix**: symmetric cells have the same value!
+- For example $a_{3,1} = a_{1,3} = -1$ (the negative A–C link).
+- And $a_{5,2} = a_{2,5} = 1$ (the positive B–E link).
+:::
+
+---
+
+# Part 3: Triadic Balance Theory
+
+---
+
+## Balance Theory
+
+::: {.incremental}
+- Balance theory is a **social psychological theory** designed to explain expected triadic configurations in sentiment networks.
+- Sentiment networks are built from **valenced ties** (e.g., positive or negative).
+- There are **four building blocks** in balance theory.
+:::
+
+---
+
+## Building Block 1: A Person (P)
 
 ::: {.columns}
 ::: {.column width="55%"}
 ::: {.incremental}
-- To analyze triads, Heider extended dyadic balance to three distinct elements: the **P-O-Q Triad**.
-- **Person (P)**: The focal individual from whose cognitive perspective the triad is analyzed.
-- **Other (O)**: Towards whom P holds a directed sentiment.
-- **Third Party / Object (Q)**: Another actor, group, organization, or abstract cultural idea.
-- Sentiments are modeled via **directed, signed edges** ($+$ or $-$) going from P to O, P to Q, and O to Q.
+- The **person (P)**.
+- We "look" at the triad from this person's point of view.
 :::
 :::
 
 ::: {.column width="45%"}
 ```{r}
-#| fig.width: 5
-#| fig.height: 5
-edges <- data.frame(from = c("P", "P", "O"), to = c("O", "Q", "Q"), type = c("sentiment", "sentiment", "sentiment"))
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(arrow = arrow(length = unit(4, "mm"), type = "closed"), width = 1.8, 
-                 color = "#7f8c8d", end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
-  geom_node_point(aes(fill = name), size = 24, color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
-  scale_fill_manual(values = c("P" = "#d4edda", "O" = "#ecf0f1", "Q" = "#f8d7da")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
+#| fig.width: 3.4
+#| fig.height: 3.6
+g <- make_empty_graph(n = 0) + vertices("P")
+ggraph(g, layout = cbind(x = 0, y = 0)) +
+  geom_node_point(size = 26, fill = "#d4edda", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 8, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1, 1), ylim = c(-1, 1), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -283,141 +569,217 @@ ggraph(g, layout = lay) +
 
 ---
 
-## The Mathematics of Triadic Balance
+## Building Block 2: An Object (O)
 
 ::: {.columns}
-::: {.column width="50%"}
+::: {.column width="55%"}
 ::: {.incremental}
-- A triad is **balanced** if the product of its three edge signs is positive:
-  $$\text{Sign}(P, O) \times \text{Sign}(O, Q) \times \text{Sign}(P, Q) = +1$$
-- **Simplified Identification Rule**: A triad is balanced if it has an **even number of negative links** (exactly zero or two).
-- Balanced configurations are stable and represent **harmonious sentiments**, creating no cognitive tension.
+- An **object (O)** towards which the focal person has some kind of sentiment.
+- The sentiment can be positive or negative.
 :::
 :::
 
-::: {.column width="50%"}
-| Edge P-O | Edge O-Q | Edge P-Q | Product | State |
-| :---: | :---: | :---: | :---: | :---: |
-| $+$ | $+$ | $+$ | $+1$ | **Balanced** |
-| $-$ | $-$ | $+$ | $+1$ | **Balanced** |
-| $+$ | $-$ | $-$ | $+1$ | **Balanced** |
-| $-$ | $+$ | $-$ | $+1$ | **Balanced** |
-| $+$ | $+$ | $-$ | $-1$ | **Unbalanced** |
-| $-$ | $+$ | $+$ | $-1$ | **Unbalanced** |
-| $+$ | $-$ | $+$ | $-1$ | **Unbalanced** |
-| $-$ | $-$ | $-$ | $-1$ | **Unbalanced** |
-:::
-:::
-
----
-
-## Balanced Triads: The 4 Stable Configurations
-
-::: {.columns}
-::: {.column width="50%"}
-<div style="font-size: 85%;">
-::: {.incremental}
-1. **"A friend of a friend is a friend"** ($+ \times + \times + = +1$)
-   - *Example*: You (P) and friend (O) both like the same classmate (Q).
-2. **"An enemy of an enemy is a friend"** ($- \times - \times + = +1$)
-   - *Example*: You (P) and ally (Q) form a bond against a mutual rival (O).
-3. **"A friend of an enemy is an enemy"** ($- \times + \times - = +1$)
-   - *Example*: Your rival (O) has a close friend (Q); you start to dislike Q.
-4. **"An enemy of a friend is an enemy"** ($+ \times - \times - = +1$)
-   - *Example*: Your country ally (O) declares war on country (Q); you also oppose Q.
-:::
-</div>
-:::
-
-::: {.column width="50%"}
+::: {.column width="45%"}
 ```{r}
-#| fig.width: 6
-#| fig.height: 5
-# Uses patchwork to keep layouts independent and perfectly uncropped
-edges1 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("+", "+", "+"))
-g1 <- graph_from_data_frame(edges1, directed = TRUE)
-edges2 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("-", "-", "+"))
-g2 <- graph_from_data_frame(edges2, directed = TRUE)
-lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
-
-p1 <- ggraph(g1, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none") + ggtitle("Friend of Friend")
-
-p2 <- ggraph(g2, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none") + ggtitle("Enemy of Enemy")
-
-p1 + p2 + plot_layout(nrow = 1)
+#| fig.width: 3.6
+#| fig.height: 3.6
+e <- data.frame(from = "P", to = "O")
+g <- graph_from_data_frame(e, directed = TRUE)
+ggraph(g, layout = circ_lay(c("P", "O"))) +
+  geom_edge_link(arrow = arrow(length = unit(4, "mm"), type = "closed"),
+                 width = 2, color = "#7f8c8d",
+                 end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
+  geom_node_point(size = 24, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 8, color = "#2c3e50") +
+  coord_fixed(xlim = c(-0.85, 0.85), ylim = c(-1.05, 1.05), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
 ```
 :::
 :::
 
 ---
 
-## Unbalanced Triads: The 4 Unstable Configurations
+## Building Block 3: A Third Party (Q)
+
+::: {.columns}
+::: {.column width="55%"}
+::: {.incremental}
+- A **third party (Q)** towards which both the person and the other also have some kind of sentiment.
+- Q does not have to be a real person! It could be **any object**.
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| fig.width: 3.6
+#| fig.height: 3.8
+e <- data.frame(from = c("P", "O"), to = c("O", "Q"))
+g <- graph_from_data_frame(e, directed = TRUE)
+ggraph(g, layout = circ_lay(c("P", "O", "Q"))) +
+  geom_edge_link(arrow = arrow(length = unit(4, "mm"), type = "closed"),
+                 width = 2, color = "#7f8c8d",
+                 end_cap = circle(11, "mm"), start_cap = circle(11, "mm")) +
+  geom_node_point(size = 22, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.2, 1.2), ylim = c(-1.0, 1.3), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+:::
+
+---
+
+## Building Block 4: Directed Signed Edges
+
+::: {.columns}
+::: {.column width="52%"}
+::: {.incremental}
+- A set of **directed signed edges** indicating positive (solid green) or negative (dashed red) sentiments:
+  - From P to O.
+  - From P to Q.
+  - From O to Q.
+- This configuration reads: Person (P) likes Other (O); Other (O) likes the third party (Q); but Person (P) dislikes the third party.
+:::
+:::
+
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+triad_panel(c("+", "+", "-"), node_size = 18, lab = 6)
+```
+:::
+:::
+
+---
+
+## The Triad in Everyday Terms
 
 ::: {.columns}
 ::: {.column width="50%"}
-<div style="font-size: 85%;">
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.0
+triad_panel(c("+", "+", "-"), node_size = 18, lab = 6)
+```
+
 ::: {.incremental}
-1. **"A friend of my friend is my enemy"** ($+ \times + \times - = -1$)
-   - *Example*: Friend (O) likes (Q), whom you (P) dislike.
-2. **"An enemy of a friend is a friend"** ($+ \times - \times + = -1$)
-   - *Example*: Partner (O) hates Marvel movies (Q), which you (P) love.
-3. **"A friend of an enemy is a friend"** ($- \times + \times + = -1$)
-   - *Example*: You (P) and your rival (O) are both attracted to the same person (Q).
-4. **"An enemy of my enemy is also my enemy"** ($- \times - \times - = -1$)
-   - *Example*: You (P) dislike both the Yankees (O) and Red Sox (Q).
+- **Sounds dicey!**
+- You (P) have a friend (O) who likes another classmate (Q) whom you dislike.
 :::
-</div>
 :::
 
 ::: {.column width="50%"}
 ```{r}
+#| fig.width: 4.2
+#| fig.height: 4.0
+triad_panel(c("+", "+", "+"), node_size = 18, lab = 6)
+```
+
+::: {.incremental}
+- **Everything's fine!**
+- You (P) have a friend (O) who likes another classmate (Q) whom you also like.
+:::
+:::
+:::
+
+---
+
+## The Triad in Everyday Terms (continued)
+
+::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.0
+triad_panel(c("-", "+", "-"), node_size = 18, lab = 6)
+```
+
+::: {.incremental}
+- **Seems fine?**
+- You (P) have an enemy (O) who likes another classmate (Q) whom you also dislike.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.0
+triad_panel(c("+", "-", "+"), node_size = 18, lab = 6)
+```
+
+::: {.incremental}
+- **Trouble in paradise!**
+- You (P) love Marvel movies (Q), but your long-time partner O (whom you like, duh!) hates them.
+:::
+:::
+:::
+
+---
+
+## The Eight Configurations
+
+::: {.incremental}
+- There are eight (8) configurations, featuring one-way directed links from:
+  - Person (P) to Other (O).
+  - Person (P) to Third Party (Q).
+  - Other (O) to Third Party (Q).
+- Four of them are **balanced**; four are **unbalanced**.
+:::
+
+---
+
+## Balanced Configurations
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
 #| fig.width: 6
 #| fig.height: 5
-# Uses patchwork to keep layouts independent and perfectly uncropped
-edges1 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("+", "+", "-"))
-g1 <- graph_from_data_frame(edges1, directed = TRUE)
-edges2 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("-", "-", "-"))
-g2 <- graph_from_data_frame(edges2, directed = TRUE)
-lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
-
-p1 <- ggraph(g1, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none") + ggtitle("Friend is Enemy")
-
-p2 <- ggraph(g2, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none") + ggtitle("All Enemies")
-
-p1 + p2 + plot_layout(nrow = 1)
+triad_panel(c("+", "+", "+"), "(+, +, +)") +
+  triad_panel(c("-", "-", "+"), "(−, −, +)") +
+  triad_panel(c("-", "+", "-"), "(−, +, −)") +
+  triad_panel(c("+", "-", "-"), "(+, −, −)") +
+  plot_layout(nrow = 2)
 ```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- In each balanced configuration, the sentiments cohere.
+- **"A friend of a friend is a friend."**
+- **"An enemy of an enemy is a friend."**
+- **"A friend of an enemy is an enemy."**
+- **"An enemy of a friend is an enemy."**
+:::
+:::
+:::
+
+---
+
+## Unbalanced Configurations
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+triad_panel(c("+", "+", "-"), "(+, +, −)") +
+  triad_panel(c("+", "-", "+"), "(+, −, +)") +
+  triad_panel(c("-", "+", "+"), "(−, +, +)") +
+  triad_panel(c("-", "-", "-"), "(−, −, −)") +
+  plot_layout(nrow = 2)
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- In each unbalanced configuration, the sentiments collide.
+- **"A friend of my friend is my enemy."**
+- **"An enemy of a friend is a friend."**
+- **"A friend of an enemy is a friend."**
+- **"An enemy of my enemy is also my enemy."**
+:::
 :::
 :::
 
@@ -426,50 +788,90 @@ p1 + p2 + plot_layout(nrow = 1)
 ## Tension and Change
 
 ::: {.columns}
-::: {.column width="50%"}
+::: {.column width="52%"}
 ::: {.incremental}
-- Unbalanced configurations produce psychological discomfort, making them **socially unstable**.
-- This discomfort acts as an **engine of change**, driving social networks to transition toward balanced configurations.
-- Transition occurs when the focal actor (P) changes the **sign/valence** of their ties to resolve tension.
-- Balanced configurations, having no tension, are stable **equilibrium states**.
+- The basic idea is that **unbalanced configurations will tend to transition to balanced configurations**.
+- Unbalanced configurations produce **tension in P**, leading them to change their sentiments toward O or Q to generate balance.
+- Balanced configurations are stable **equilibrium states**.
 :::
 :::
 
-::: {.column width="50%"}
+::: {.column width="48%"}
 ```{r}
-#| fig.width: 6
-#| fig.height: 5
-edges1 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("+", "+", "-"))
-g1 <- graph_from_data_frame(edges1, directed = TRUE)
-
-edges2 <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = c("+", "+", "+"))
-g2 <- graph_from_data_frame(edges2, directed = TRUE)
-
-lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
-
-p1 <- ggraph(g1, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none") + ggtitle("Unbalanced (Tension)")
-
-p2 <- ggraph(g2, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = c("P", "O", "Q")), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none") + ggtitle("Resolved (Balance)")
-
-p1 + p2 + plot_layout(nrow = 1)
+#| fig.width: 4.4
+#| fig.height: 4.4
+# Unbalanced (+, +, -) transitions to balanced (+, +, +)
+g1 <- graph_from_data_frame(data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"),
+                                       sign = c("+", "+", "-")), directed = TRUE)
+g2 <- graph_from_data_frame(data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"),
+                                       sign = c("+", "+", "+")), directed = TRUE)
+lay3 <- circ_lay(c("P", "O", "Q"))
+tp <- function(g, ttl) {
+  ggraph(g, layout = lay3) +
+    geom_edge_link(aes(color = sign, linetype = sign),
+                   arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                   width = 1.8, end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+    geom_node_point(size = 15, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+    geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+    edge_scales() +
+    coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-0.95, 1.3), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 10, face = "bold")) +
+    ggtitle(ttl)
+}
+tp(g1, "Unbalanced") + tp(g2, "Balanced")
 ```
 :::
+:::
+
+---
+
+## The Mathematics of Balance Theory
+
+::: {.incremental}
+- Remember the rules of **sign multiplication** from basic algebra?
+
+$$+1 \times +1 = +1 \qquad +1 \times -1 = -1 \qquad -1 \times -1 = +1$$
+:::
+
+::: {.incremental}
+- They apply to balance theory!
+:::
+
+---
+
+## Unbalanced Triads Have a Negative Product
+
+::: {.incremental}
+- If you multiply the signs of the edges of each **unbalanced** triad, you get a **negative** number. Try it!
+- $(+1_{PO}) \times (+1_{OQ}) \times (-1_{PQ}) = -1_{POQ}$
+- $(+1_{PO}) \times (-1_{OQ}) \times (+1_{PQ}) = -1_{POQ}$
+- $(-1_{PO}) \times (+1_{OQ}) \times (+1_{PQ}) = -1_{POQ}$
+- $(-1_{PO}) \times (-1_{OQ}) \times (-1_{PQ}) = -1_{POQ}$
+:::
+
+---
+
+## Balanced Triads Have a Positive Product
+
+::: {.incremental}
+- Conversely, if you multiply the signs of the edges of each **balanced** triad, you get a **positive** number.
+- $(-1_{PO}) \times (+1_{OQ}) \times (-1_{PQ}) = +1_{POQ}$
+- $(+1_{PO}) \times (-1_{OQ}) \times (-1_{PQ}) = +1_{POQ}$
+- $(-1_{PO}) \times (-1_{OQ}) \times (+1_{PQ}) = +1_{POQ}$
+- $(+1_{PO}) \times (+1_{OQ}) \times (+1_{PQ}) = +1_{POQ}$
+:::
+
+---
+
+## A Link Between Mathematics and the Logic of Social Relations
+
+::: {.incremental}
+- **"A friend of a friend is a friend"**: $+1_{PO} \times +1_{OQ} \times +1_{PQ} = +1_{POQ}$
+- **"An enemy of an enemy is a friend"**: $-1_{PO} \times -1_{OQ} \times +1_{PQ} = +1_{POQ}$
+- **"A friend of an enemy is an enemy"**: $-1_{PO} \times +1_{OQ} \times -1_{PQ} = +1_{POQ}$
+- **"An enemy of a friend is an enemy"**: $+1_{PO} \times -1_{OQ} \times -1_{PQ} = +1_{POQ}$
+- Every folk rule for balanced sentiment is a sign product equal to $+1$.
 :::
 
 ---
@@ -477,34 +879,175 @@ p1 + p2 + plot_layout(nrow = 1)
 ## Cross-Pressure
 
 ::: {.columns}
-::: {.column width="55%"}
+::: {.column width="52%"}
 ::: {.incremental}
-- **Cross-pressure** (Davis 1963) occurs when an individual experiences conflicting social relations, leaving them caught between opposing forces.
-- When P is positively tied to O1 and O2 ($+$, $+$), but O1 likes Q and O2 dislikes Q.
-- According to balance theory, P is forced to develop an **ambivalent attitude** ($+/-$) toward Q.
-- To resolve this tension, P must either distance themselves from one friend or convince them to reconcile.
+- Because we have multiple social relations, we are sometimes **caught between worlds**.
+- This is called **cross-pressure**.
+- Example: having two friends with **different attitudes towards the same object**.
+- Balance theory predicts that P will have an **ambivalent** attitude toward the object.
 :::
 :::
 
-::: {.column width="45%"}
+::: {.column width="48%"}
 ```{r}
-#| fig.width: 5
-#| fig.height: 5
-edges <- data.frame(
-  from = c("P", "P", "O1", "O2", "P"),
-  to   = c("O1", "O2", "Q", "Q", "Q"),
-  sign = c("+", "+", "+", "-", "?")
+#| fig.width: 4.4
+#| fig.height: 4.4
+# P likes both friends; Friend 1 likes Taylor, Friend 2 dislikes Taylor
+xp_e <- data.frame(
+  from = c("P", "P", "Friend 1", "Friend 2"),
+  to   = c("Friend 1", "Friend 2", "Taylor", "Taylor"),
+  sign = c("+", "+", "+", "-")
 )
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(0, 1, -1, 0, 1, 0, 0, -1), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
-  geom_node_point(size = 22, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.5) +
+xp <- graph_from_data_frame(xp_e, directed = TRUE)
+xp_lay <- rbind(c(0, 1.05), c(-0.95, -0.35), c(0.95, -0.35), c(0, -1.0))
+rownames(xp_lay) <- c("P", "Friend 1", "Friend 2", "Taylor")
+xp_plot <- function() {
+  ggraph(xp, layout = xp_lay) +
+    geom_edge_link(aes(color = sign, linetype = sign),
+                   arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                   width = 1.8, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+    geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
+    geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
+    edge_scales() +
+    coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-1.4, 1.45), clip = "off") +
+    theme_slides() + theme(legend.position = "none")
+}
+xp_plot()
+```
+:::
+:::
+
+---
+
+## Resolving Cross-Pressure
+
+::: {.columns}
+::: {.column width="52%"}
+::: {.incremental}
+- To achieve balance and remove the ambivalence, P can:
+  - **Change** their own attitude toward Friend 1 or Friend 2.
+  - **Convince** either Friend 1 or Friend 2 to change their attitude toward the object.
+- The same tension-and-resolution logic that works triad by triad also works for whole networks. That is where we go next.
+:::
+:::
+
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+xp_plot()
+```
+:::
+:::
+
+---
+
+# Part 4: Structural Balance
+
+---
+
+## From Triadic Balance to Structural Balance
+
+::: {.incremental}
+- If a triad is balanced, then it is so **from every member's point of view**.
+- We just need to change the interpretation!
+- Take this balanced triad and rotate the "you" position around the triangle.
+- From the bottom node: "a friend of an enemy is an enemy."
+- From the lower-right node: "an enemy of an enemy is a friend."
+- From the top node: "an enemy of a friend is an enemy."
+:::
+
+```{r}
+#| fig.width: 6.6
+#| fig.height: 3.4
+# Same balanced undirected triad; the focal "you" node rotates
+rot_fig <- function(focal, ttl) {
+  e <- data.frame(from = c("n1", "n1", "n2"), to = c("n2", "n3", "n3"),
+                  sign = c("-", "-", "+"))
+  g <- graph_from_data_frame(e, directed = FALSE)
+  lay <- circ_lay(c("n1", "n2", "n3"))
+  labs <- c("n1" = "O", "n2" = "Q", "n3" = "P")
+  others <- setdiff(c("O", "Q"), "P")
+  labs[setdiff(c("n1", "n2", "n3"), focal)] <- others
+  V(g)$lab <- unname(labs[V(g)$name])
+  ggraph(g, layout = lay) +
+    edge_layer(2) + edge_scales() +
+    geom_node_point(aes(fill = lab), size = 17, color = "#2c3e50", shape = 21, stroke = 1.6) +
+    scale_fill_manual(values = c("P" = "#F5B7B1", "O" = "#ecf0f1", "Q" = "#ecf0f1")) +
+    geom_node_text(aes(label = lab), fontface = "bold", size = 6, color = "#2c3e50") +
+    coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-0.95, 1.3), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 10, face = "bold")) +
+    ggtitle(ttl)
+}
+rot_fig("n3", "P at the bottom") +
+  rot_fig("n1", "P at the lower left") +
+  rot_fig("n2", "P at the upper right")
+```
+
+---
+
+## Balance as a Triad-Level Property, Regardless of Perspective
+
+::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+e <- data.frame(from = c("A", "A", "B"), to = c("B", "C", "C"),
+                sign = c("-", "+", "-"))
+g <- graph_from_data_frame(e, directed = FALSE)
+ggraph(g, layout = circ_lay(c("A", "B", "C"))) +
+  edge_layer(2.4) + edge_scales() +
+  geom_node_point(size = 20, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-1.1, 1.3), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+
+::: {.column width="50%"}
+::: {.incremental}
+- This means we can define balance as a **triad-level property regardless of "perspective."**
+- For node A: "friends of enemies are enemies."
+- For nodes B and C: "enemies of friends are enemies."
+- **The triad is balanced for everyone!**
+:::
+:::
+:::
+
+---
+
+## A Signed Graph with Named Edge Sets
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Signed graphs are a special kind of graph featuring:
+  - One set of vertices $V = \{A, B, C, D, E, F\}$, so $|V| = 6$.
+  - Positive links: $E^+ = \{AC, AE, AF, CF, CE\}$, so $|E^+| = 5$.
+  - Negative links: $E^- = \{AB, BC, BD, CD, DF, EF\}$, so $|E^-| = 6$.
+- The graph is $G = \{V, E^+, E^-\}$.
+- Two sets are disjoint when they don't share any members (their intersection is the empty set $\emptyset$).
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 4.4
+#| fig.height: 4.4
+sg6_e <- rbind(
+  data.frame(from = c("A", "A", "A", "A", "C", "C", "C", "D", "E"),
+             to   = c("B", "C", "E", "F", "D", "E", "F", "F", "F"),
+             sign = c("-", "+", "+", "+", "-", "+", "+", "-", "-")),
+  data.frame(from = c("B", "B"), to = c("C", "D"), sign = c("-", "-"))
+)
+sg6 <- graph_from_data_frame(sg6_e, directed = FALSE)
+ggraph(sg6, layout = circ_lay(LETTERS[1:6])) +
+  edge_layer() + edge_scales() +
+  geom_node_point(size = 16, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
   geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "?" = "goldenrod")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed", "?" = "dotted")) +
-  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.4, 1.4), clip = "off") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -512,79 +1055,227 @@ ggraph(g, layout = lay) +
 
 ---
 
-## Cross-Pressure in Real-Life: Politics
+## Building Its Adjacency Matrix, Step 1
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+ggraph(sg6, layout = circ_lay(LETTERS[1:6])) +
+  edge_layer(1.9) + edge_scales() +
+  geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- The adjacency matrix of a signed graph works just like before.
+- **Step 1**: draw the empty grid with `--` on the diagonal.
+:::
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+sg6_m0 <- matrix("", 6, 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+diag(sg6_m0) <- "--"
+signed_kbl(sg6_m0, color_cells = FALSE)
+```
+
+</div>
+:::
+:::
+
+---
+
+## Building Its Adjacency Matrix, Step 2
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+ggraph(sg6, layout = circ_lay(LETTERS[1:6])) +
+  edge_layer(1.9) + edge_scales() +
+  geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- **Step 2**: put a **1** where nodes are linked by a positive line.
+:::
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+sg6_m1 <- matrix("", 6, 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+diag(sg6_m1) <- "--"
+for (pr in list(c("A","C"), c("A","E"), c("A","F"), c("C","F"), c("C","E"))) {
+  sg6_m1[pr[1], pr[2]] <- sg6_m1[pr[2], pr[1]] <- "1"
+}
+signed_kbl(sg6_m1, color_cells = TRUE)
+```
+
+</div>
+:::
+:::
+
+---
+
+## Building Its Adjacency Matrix, Step 3
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+ggraph(sg6, layout = circ_lay(LETTERS[1:6])) +
+  edge_layer(1.9) + edge_scales() +
+  geom_node_point(size = 14, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none")
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- **Step 3**: put a **−1** where nodes are linked by a negative line, and a **0** where nodes are not adjacent.
+:::
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+sg6_mf <- matrix("0", 6, 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+diag(sg6_mf) <- "--"
+for (pr in list(c("A","C"), c("A","E"), c("A","F"), c("C","F"), c("C","E"))) {
+  sg6_mf[pr[1], pr[2]] <- sg6_mf[pr[2], pr[1]] <- "1"
+}
+for (pr in list(c("A","B"), c("B","C"), c("B","D"), c("C","D"), c("D","F"), c("E","F"))) {
+  sg6_mf[pr[1], pr[2]] <- sg6_mf[pr[2], pr[1]] <- "-1"
+}
+signed_kbl(sg6_mf, color_cells = TRUE)
+```
+
+</div>
+:::
+:::
+
+---
+
+## Structural Balance Applies to Complete Signed Graphs
 
 ::: {.columns}
 ::: {.column width="50%"}
 ::: {.incremental}
-- Political preferences provide a classic illustration of cross-pressure.
-- Imagine you (P) have a brother (O1) who is a passionate Democrat ($+$) and a sister (O2) who strongly opposes them ($-$).
-- Because you have positive bonds with both, you find yourself cross-pressured regarding the Democrats (Q).
-- This pressure produces **social ambivalence**, often leading individuals to identify as moderates or **independents** with no strong partisan affiliation.
+- Structural Balance Theory applies to **complete signed graphs**.
+- A complete signed graph is a graph in which **every node is connected to every other** by either a positive line or a negative line.
+- No zeros anywhere off the diagonal.
 :::
 :::
 
 ::: {.column width="50%"}
 ```{r}
-#| fig.width: 5
-#| fig.height: 5
-edges <- data.frame(
-  from = c("You", "You", "Bro", "Sis", "You"),
-  to   = c("Bro", "Sis", "Dems", "Dems", "Dems"),
-  sign = c("+", "+", "+", "-", "?")
+#| fig.width: 4.4
+#| fig.height: 4.4
+# Complete signed graph: factions {A, B, F} and {C, D, E}
+comp_e <- rbind(
+  comp_pairs(c("A","B","F"), c("A","B","F"), "+"),
+  comp_pairs(c("C","D","E"), c("C","D","E"), "+"),
+  comp_pairs(c("A","B","F"), c("C","D","E"), "-")
 )
-g <- graph_from_data_frame(edges, directed = TRUE)
-lay <- matrix(c(0, 1, -1, 0, 1, 0, 0, -1), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), arrow = arrow(length = unit(4, "mm"), type = "closed"), 
-                 width = 2, end_cap = circle(14, "mm"), start_cap = circle(14, "mm")) +
-  geom_node_point(size = 24, fill = "#fdfd96", color = "#f8e71c", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "?" = "goldenrod")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "dashed", "?" = "dotted")) +
-  coord_fixed(xlim = c(-1.5, 1.5), ylim = c(-1.4, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
+comp <- graph_from_data_frame(comp_e, directed = FALSE)
+fac_map <- c("A" = "#AED6F1", "B" = "#AED6F1", "F" = "#AED6F1",
+             "C" = "#F5B7B1", "D" = "#F5B7B1", "E" = "#F5B7B1")
+comp_plot <- function(node_size = 15, lab = 5.5, edge_w = 2.2) {
+  ggraph(comp, layout = circ_lay(c("A", "B", "F", "C", "D", "E"))) +
+    edge_layer(edge_w) + edge_scales() +
+    geom_node_point(size = node_size, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.5) +
+    scale_fill_manual(values = fac_map) +
+    geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
+    coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+    theme_slides() + theme(legend.position = "none")
+}
+comp_plot() + labs(title = "Complete undirected signed graph") +
+  theme_slides() + theme(legend.position = "none",
+                         plot.title = element_text(size = 11, face = "bold"))
 ```
 :::
 :::
 
 ---
 
-# Part 3: Structural Balance Theory & Whole-Network Polarization
+## The Complete Signed Graph as a Matrix
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+ord6 <- c("A", "B", "F", "C", "D", "E")
+comp_m <- matrix("-1", 6, 6, dimnames = list(ord6, ord6))
+diag(comp_m) <- "--"
+for (pr in list(c("A","B"), c("A","F"), c("B","F"), c("C","D"), c("C","E"), c("D","E"))) {
+  comp_m[pr[1], pr[2]] <- comp_m[pr[2], pr[1]] <- "1"
+}
+signed_kbl(comp_m, color_cells = TRUE)
+```
+
+</div>
+
+::: {.incremental}
+- Every off-diagonal cell is filled: $+1$ within each group, $-1$ between the groups.
+- Every one of the $\binom{6}{3} = 20$ triples is a triad we can check.
+:::
 
 ---
 
-## Structural Balance at the Network Level
+## Balance as a Whole-Network Property
+
+::: {.incremental}
+- When a whole signed graph **only contains balanced triads**, then the graph is also **balanced**.
+- Balance can be a **whole-network property**!
+- A signed graph in which every triple is balanced is called a **balanced signed graph**.
+- Checking twenty triads by hand sounds tedious — there is a shortcut.
+:::
+
+---
+
+## The Triad-Checking Shortcut
+
+::: {.incremental}
+- **Trick**: a triad is **balanced** if it has either **zero or two negative** links.
+- A triad is **unbalanced** if the number of negative links is **odd** (one or three).
+- This follows directly from sign multiplication: the product of the edge signs is positive exactly when an even number of them is negative.
+:::
+
+---
+
+## Checking the Complete Graph, Triad by Triad
 
 ::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- Balance theory can be scaled up from individual cognitive triads to the **whole network** level.
-- This extension is known as **Structural Balance Theory**.
-- In its original formulation, it applies to **complete signed graphs**, where every pair of actors is connected by either a positive or negative link.
-- In a **signed adjacency matrix** representation of a signed graph:
-  - Positive links are represented by $+1$.
-  - Negative links are represented by $-1$.
-  - Non-adjacent nodes are represented by $0$.
-:::
+::: {.column width="50%"}
+```{r}
+#| fig.width: 4.2
+#| fig.height: 4.2
+comp_plot(node_size = 14, lab = 5, edge_w = 1.9)
+```
 :::
 
-::: {.column width="45%"}
-```{r}
-#| fig.width: 5
-#| fig.height: 5
-set.seed(422)
-g <- play_erdos_renyi(n = 5, p = 1, directed = FALSE)
-E(g)$sign <- c("+", "-", "+", "+", "-", "+", "-", "+", "-", "+")
-ggraph(g, layout = "circle") +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 2) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = 1:5), fontface = "bold", size = 5.5, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  coord_fixed(xlim = c(-1.4, 1.4), ylim = c(-1.4, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
-```
+::: {.column width="50%"}
+::: {.incremental}
+- ABF triad: three positive links. **Balanced!**
+- ABC triad: one positive (A–B), two negative. **Balanced!**
+- CDF triad: C–D positive, C–F and D–F negative. **Balanced!**
+- BEF triad: B–F positive, B–E and E–F negative. **Balanced!**
+- ACE triad: A–C and A–E negative, C–E positive. **Balanced!**
+- And so on for all the triads. Every one checks out.
+:::
 :::
 :::
 
@@ -593,404 +1284,375 @@ ggraph(g, layout = "circle") +
 ## The Fundamental Theorem of Structural Balance
 
 ::: {.columns}
-::: {.column width="55%"}
+::: {.column width="52%"}
 ::: {.incremental}
-- Discovered by mathematicians Dorwin **Cartwright** and Frank **Harary** in 1956.
-- **Theorem (Cartwright–Harary Structure Theorem)**: A signed graph — *complete or incomplete* — is balanced if and only if its nodes can be partitioned into exactly **two polarized factions** such that:
-  1. All positive links exist *within* each faction.
-  2. All negative links exist *between* the two factions.
-- Shows that structural balance is equivalent to perfect **group polarization**.
-- For *complete* graphs, the test is simple: a complete signed graph is balanced if and only if **every triad is balanced** (the triad test is the complete-graph shortcut).
+- The fundamental theorem of structural balance was discovered by the mathematicians **Dorwin Cartwright and Frank Harary** in 1956.
+- It states that when a graph is balanced, it can be **split into two groups** such that there are:
+  - Only **positive links within** groups.
+  - Only **negative links between** groups.
+- **Balance is not necessarily good!** Structural balance is equivalent to perfect **group polarization**.
 :::
 :::
 
-::: {.column width="45%"}
+::: {.column width="48%"}
 ```{r}
-#| fig.width: 6
-#| fig.height: 5
-nodes <- data.frame(name = LETTERS[1:6], faction = c(rep("1", 3), rep("2", 3)))
-edges <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors = FALSE) %>%
-  filter(from < to) %>%
-  mutate(
-    f_from = nodes$faction[match(from, nodes$name)],
-    f_to = nodes$faction[match(to, nodes$name)],
-    sign = ifelse(f_from == f_to, "+", "-"),
-  )
-g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
-lay <- matrix(c(-1.5, 1.1, -1.5, -1.1, -2.5, 0, 1.5, 1.1, 1.5, -1.1, 2.5, 0), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "+" | e$from == 1, ] }, width = 2, alpha = 0.8, strength = 0.35) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from == 3, ] }, width = 2, alpha = 0.8, strength = -0.15) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from == 2, ] }, width = 2, alpha = 0.8, strength = -0.2) +
-  geom_node_point(aes(fill = faction), size = 22, color = "white", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "white") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid")) +
-  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-1.6, 1.6), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
+#| fig.width: 4.2
+#| fig.height: 4.2
+comp_plot(node_size = 14, lab = 5, edge_w = 1.9)
 ```
 :::
 :::
 
 ---
 
-## Signed Matrices & Faction Detection
+## Seeing the Blocks: Reorder the Matrix
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+signed_kbl(comp_m, color_cells = TRUE)
+```
+
+</div>
+
+::: {.incremental}
+- We can see the two-group structure if we **rearrange the rows and columns** of the signed adjacency matrix.
+- Put the friends of A first (A, B, F), then the enemies of A (C, D, E).
+:::
+
+---
+
+## The Block-Diagonal Structure
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+signed_kbl(comp_m, color_cells = TRUE)
+```
+
+</div>
+
+::: {.incremental}
+- In the reordered matrix the positives cluster into two **blocks on the diagonal**.
+- The off-diagonal blocks are all negative.
+- This is the matrix signature of perfect polarization: two camps, positive inside, hostile across.
+:::
+
+---
+
+## Structural Balance in Everyday Life
 
 ::: {.columns}
 ::: {.column width="50%"}
 ::: {.incremental}
-- How can we mathematically recover and identify factions in a balanced network?
-- Rearrange the rows and columns of the **signed adjacency matrix** such that nodes in the same faction are adjacent.
-- This permutation yields a **block-diagonal signed matrix**.
-- Inside the diagonal blocks, cells are $+1$ (internal cohesion), whereas off-diagonal blocks are entirely $-1$ (external conflict).
-- The 3 × 3 blocks below mirror the two three-person factions in the previous slide's graph.
+- **P** (a liberal retweeter), **O** (a liberal tweeter), **Q** (a liberal tweet):
+  - All sentiments positive. A balanced triad.
+- **P** (a conservative retweeter), **O** (a conservative tweeter), **Q** (a conservative tweet):
+  - Also all positive. Another balanced triad.
 :::
 :::
 
 ::: {.column width="50%"}
-### Faction Block-Diagonal Matrix
-$$M = \begin{pmatrix}
-  \begin{array}{ccc|ccc}
-    \mathbf{+} & \mathbf{+} & \mathbf{+} & - & - & - \\
-    \mathbf{+} & \mathbf{+} & \mathbf{+} & - & - & - \\
-    \mathbf{+} & \mathbf{+} & \mathbf{+} & - & - & - \\ \hline
-    - & - & - & \mathbf{+} & \mathbf{+} & \mathbf{+} \\
-    - & - & - & \mathbf{+} & \mathbf{+} & \mathbf{+} \\
-    - & - & - & \mathbf{+} & \mathbf{+} & \mathbf{+}
-  \end{array}
-\end{pmatrix}$$
+::: {.incremental}
+- **P** (a liberal retweeter), **O** (a conservative tweeter), **Q** (a conservative tweet):
+  - Negative sentiments all around. An unbalanced triad.
+- In a balanced platform, liberal accounts retweet liberal content and conservative accounts retweet conservative content, and each side disparages the other's.
+- Balance at the triad level aggregates into **echo chambers** at the network level.
+:::
 :::
 :::
 
 ---
 
-## Cycles and Paths in Balanced Graphs
+## Adding New Nodes Preserves the Polarization Pattern
 
 ::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- Partitioning has direct, rigid consequences for paths and cycles in complete graphs:
-- **Cycles**: *All cycles in a balanced signed graph must have a positive sign product.*
-  - Staying inside a group uses only positive links.
-  - Spanning across groups requires crossing the boundary an *even* number of times, multiplying an even number of negative signs to yield a positive product.
-- **Paths**:
-  - Paths ending in the *same* group have a **positive product**.
-  - Paths ending in *different* groups have a **negative product** (due to odd boundary crossings).
-:::
-:::
-
-::: {.column width="45%"}
+::: {.column width="50%"}
 ```{r}
-#| fig.width: 6
-#| fig.height: 5
-edges <- data.frame(
-  from = c("Start", "B", "C", "End"),
-  to   = c("B", "C", "End", "Start"),
-  sign = c("+", "-", "+", "-")
+#| fig.width: 4.4
+#| fig.height: 4.4
+# Add H (joins A, B, F side) and I (joins C, D, E side)
+ext_e <- rbind(
+  comp_e,
+  comp_pairs(c("H"), c("A","B","F"), "+"),
+  comp_pairs(c("H"), c("C","D","E","I"), "-"),
+  comp_pairs(c("I"), c("C","D","E"), "+"),
+  comp_pairs(c("I"), c("A","B","F"), "-"),
+  data.frame(from = "H", to = "I", sign = "-")
 )
-g <- graph_from_data_frame(edges, directed = FALSE)
-lay <- matrix(c(-1.5, 0.8, -1.5, -0.8, 1.5, -0.8, 1.5, 0.8), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 2.5) +
-  geom_node_point(aes(fill = name %in% c("Start", "B")), size = 20, color = "#2c3e50", shape = 21, stroke = 1.8) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  scale_fill_manual(values = c("TRUE" = "#93c5fd", "FALSE" = "#c084fc")) +
-  coord_fixed(xlim = c(-2.0, 2.0), ylim = c(-1.3, 1.3), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
+ext <- graph_from_data_frame(ext_e, directed = FALSE)
+ord8 <- c("A", "B", "F", "H", "C", "D", "E", "I")
+ext_map <- c(fac_map, "H" = "#AED6F1", "I" = "#F5B7B1")
+# Two camp layout: faction 1 on the left, faction 2 on the right
+ext_lay <- rbind(
+  c(-0.50,  0.80), c(-0.95,  0.30), c(-0.95, -0.40), c(-0.50, -0.85),
+  c( 0.50,  0.80), c( 0.95,  0.30), c( 0.95, -0.40), c( 0.50, -0.85)
+)
+rownames(ext_lay) <- ord8
+colnames(ext_lay) <- c("x", "y")
+ext_plot <- function(node_size = 13, lab = 4.6, edge_w = 2) {
+  ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
+    edge_layer(edge_w) + edge_scales() +
+    geom_node_point(size = node_size, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.4) +
+    scale_fill_manual(values = ext_map) +
+    geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
+    coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+    theme_slides() + theme(legend.position = "none")
+}
+ext_plot()
 ```
-:::
-:::
-
----
-
-## Checking for Balance with Matrix Powers
-
-::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- How can we test balance in a large network without drawing every cycle?
-- Raise the signed adjacency matrix $\mathbf{A}$ to the $p$-th power.
-- Each diagonal entry $a_{ii}^{(p)}$ sums the sign products of all **closed walks** of length $p$ starting and ending at node $i$.
-- **The test**: If the graph is balanced, every diagonal entry of $\mathbf{A}^p$ is **non-negative** for all $p$ up to the number of nodes.
-- A single negative diagonal entry reveals a negative cycle of length $p$ — and the graph is unbalanced.
-:::
-:::
-
-::: {.column width="45%"}
-### The test in symbols
-$$a_{ii}^{(p)} \geq 0 \; \text{for all } i,\; p = 1, \dots, g$$
-
-If any entry is negative:
-
-$$a_{ii}^{(p)} < 0 \implies \text{unbalanced cycle}$$
-
-- No need to enumerate cycles — the matrix does the counting.
-- A practical check for real, messy networks.
-:::
-:::
-
----
-
-## Measuring Partial Balance
-
-::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- Real networks are almost never *perfectly* balanced, so we measure the **degree** of balance.
-- **Cycle Index of Balance**: the share of all cycles whose sign product is positive.
-$$\text{Cycle Index} = \frac{PC}{TC}$$
-- Ranges from 0 (completely unbalanced) to 1 (perfectly balanced).
-- **Line Index of Balance** (Harary 1959): the minimum number of edge signs that must be flipped to make the graph perfectly balanced.
-:::
-:::
-
-::: {.column width="45%"}
-- A large network with a Line Index of 1 or 2 is extremely close to complete balance.
-- Even when cycle-counting finds dozens of unbalanced cycles, a small Line Index says the polarized structure is nearly there.
-- Short cycles matter more psychologically, so weighted versions (Henley, Horsfall & De Soto 1969) give triads extra weight.
-:::
-:::
-
----
-
-## Directed Balance: Semicycles
-
-::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- Real sentiment ties are often **asymmetric** — you like someone who dislikes you.
-- Restricting balance to strict **directed cycles** (arrows all pointing the same way) would miss most tension: Your friend Alex dislikes Jordan, yet you like both. No directed cycle exists, but the tension is real.
-- **Semipath**: a path that *ignores* arrow direction.
-- **Semicycle**: a closed semipath (a cycle in the underlying undirected graph).
-- **A signed digraph is balanced** if and only if **every semicycle has a positive sign** (an even number of negative arcs).
-:::
-:::
-
-::: {.column width="45%"}
-- The Cartwright–Harary partition rule carries over unchanged: positive arcs within factions, negative arcs between them.
-- One rule-violating positive tie across factions injects unbalanced semicycles into the whole network.
-- This is the directed version of everything we just did with cycles.
-:::
-:::
-
----
-
-## Empirical Case Study: Political Blogs
-
-::: {.columns}
-::: {.column width="50%"}
-::: {.incremental}
-- Balanced states describe stable **polarization and conflict**, not harmony.
-- **Adamic & Glance (2005)** examined the hyperlink network of 2004-election political bloggers.
-- Two highly connected factions (Liberals, Conservatives); dense internal linking, sparse cross-group linking — an **echo chamber**.
-- The hyperlink data are *unsigned*; the figure's negative ties illustrate the predicted structure, not measured hostility.
-- Balance explains why polarized factions are **stable** — and a balanced state need not be a "good" one.
-:::
 :::
 
 ::: {.column width="50%"}
+::: {.incremental}
+- Adding new nodes to the structure does not change the group polarization pattern, **as long as their relationships to every other node are balanced**.
+- I makes friends with C, D, and E.
+- H makes friends with A, B, and F.
+- Then they balance out the rest of the relationships with the other side.
+- **Still polarized!**
+:::
+:::
+:::
+
+---
+
+## Properties of Balanced Signed Graphs
+
+::: {.incremental}
+- Balanced signed graphs have some interesting properties. If a graph $G$ is balanced:
+  - **Any subgraph of $G$ is also balanced.**
+  - **All paths between the same pair of nodes have the same sign** as the link between them.
+  - **Cycles of any length are always positive** (an even number of negative edges).
+:::
+
 ```{r}
-#| fig.width: 6
-#| fig.height: 5
-set.seed(422)
-g1 <- play_erdos_renyi(n = 6, p = 0.8, directed = FALSE)
-g2 <- play_erdos_renyi(n = 6, p = 0.8, directed = FALSE)
-g <- disjoint_union(g1, g2)
-V(g)$faction <- c(rep("Liberal", 6), rep("Conservative", 6))
-g <- add_edges(g, c(1,7, 3,9, 5,11))
-E(g)$sign <- c(rep("+", ecount(g)-3), rep("-", 3))
-ggraph(g, layout = "kk") +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 2, alpha = 0.8) +
-  geom_node_point(aes(fill = faction), size = 14, color = "white", shape = 21, stroke = 1.5) +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  scale_fill_manual(values = c("Liberal" = "#3b82f6", "Conservative" = "#ef4444")) +
-  coord_fixed(clip = "off") +
-  theme_slides() + theme(legend.position = "none")
+#| fig.width: 6.2
+#| fig.height: 3.2
+# Two balanced subgraphs of the complete signed graph
+sub_panel <- function(nodes, ttl) {
+  sg <- induced_subgraph(comp, nodes)
+  ggraph(sg, layout = circ_lay(nodes)) +
+    edge_layer(2) + edge_scales() +
+    geom_node_point(size = 15, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.5) +
+    scale_fill_manual(values = fac_map) +
+    geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
+    coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 10, face = "bold")) +
+    ggtitle(ttl)
+}
+sub_panel(c("A", "C", "E"), "Subgraph {A, C, E}: balanced") +
+  sub_panel(c("A", "B", "F"), "Subgraph {A, B, F}: balanced")
 ```
-:::
-:::
 
 ---
 
-# Part 4: Clusterability and Multi-Group Partitioning
-
----
-
-## Beyond Two Factions: Davis's Theorem
+## The Sign of a Path
 
 ::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- Cartwright & Harary's model splits networks into exactly *two* opposing factions.
-- This is too restrictive for many real-world networks, such as school cliques, gangs, or multi-party politics.
-- In 1967, sociologist **James Davis** introduced his **Clusterability Theorem**.
-- He generalized structural balance so that a network could fragment into **any number of distinct clusters** ($k \ge 1$), rather than just two.
-:::
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.4
+#| fig.height: 4.4
+# Highlight the path F - B - A - C - I
+path_pairs <- list(c("F","B"), c("B","A"), c("A","C"), c("C","I"))
+name_key <- function(pairs) {
+  vapply(pairs, function(p) paste(sort(p), collapse = "|"), "")
+}
+path_idx <- function(l) {
+  ed <- get_edges()(l)
+  nm <- V(ext)$name
+  key <- paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
+  ed[key %in% name_key(path_pairs), ]
+}
+ext_plot(node_size = 13, lab = 4.6, edge_w = 1.6) +
+  geom_edge_link(data = path_idx, color = "#E67E22", width = 3.2,
+                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm"))
+```
 :::
 
-::: {.column width="45%"}
-```{r}
-#| fig.width: 6
-#| fig.height: 5
-nodes <- data.frame(name = LETTERS[1:9], faction = c(rep("1", 3), rep("2", 3), rep("3", 3)))
-edges <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors = FALSE) %>%
-  filter(from < to) %>%
-  mutate(
-    f_from = nodes$faction[match(from, nodes$name)],
-    f_to = nodes$faction[match(to, nodes$name)],
-    sign = ifelse(f_from == f_to, "+", "-"),
-  )
-g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
-lay <- matrix(c(
-  -1.0, 2.4, -1.9, 1.7, -0.1, 1.7,   # Cluster 1 (top)
-  -3.0, -0.6, -2.1, -1.3, -3.2, -1.5, # Cluster 2 (bottom left)
-  1.0, -0.6, 1.9, -1.3, 0.8, -1.5    # Cluster 3 (bottom right)
-), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "+" | !(e$from %in% 1:3 & e$to %in% 7:9), ] }, width = 1.8, alpha = 0.7, strength = -0.25) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from %in% 1:3 & e$to %in% 7:9, ] }, width = 1.8, alpha = 0.7, strength = 0.25) +
-  geom_node_point(aes(fill = faction), size = 16, color = "white", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 4.5, color = "white") +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid", "3" = "goldenrod")) +
-  coord_fixed(xlim = c(-3.8, 2.5), ylim = c(-2.2, 3.0), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
-```
+::: {.column width="52%"}
+::: {.incremental}
+- The **sign of a path** is the **product of the signs** of each edge in it.
+- $F$ and $I$ have a negative connection.
+- All paths connecting F and I are **negative**:
+  - F–B–A–C–I: $(+1)(+1)(-1)(+1) = -1$
+  - F–B–E–I: $(+1)(-1)(+1) = -1$
+- Positively connected nodes like E and C have **all positive paths**:
+  - E–I–C: $(+1)(+1) = +1$
+  - E–D–C: $(+1)(+1) = +1$
+:::
 :::
 :::
 
 ---
 
-## The All-Negative Triad Rule
+## Cycles Are Always Positive
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 4.4
+#| fig.height: 4.4
+# Highlight two cycles: A-C-B (triangle) and A-C-D-E-B (5-cycle)
+cyc_pairs <- list(c("A","C"), c("C","B"), c("B","A"),
+                  c("C","D"), c("D","E"), c("E","B"))
+cyc_idx <- function(l) {
+  ed <- get_edges()(l)
+  nm <- V(ext)$name
+  key <- paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
+  ed[key %in% name_key(cyc_pairs), ]
+}
+ext_plot(node_size = 13, lab = 4.6, edge_w = 1.6) +
+  geom_edge_link(data = cyc_idx, color = "#E67E22", width = 3.2,
+                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm"))
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- In a balanced signed graph, **cycles of any length are always positive**.
+- 3-cycle A–C–B: $(-1)(-1)(+1) = +1$
+- 5-cycle A–C–D–E–B: $(-1)(+1)(+1)(-1)(+1) = +1$
+- Equivalent statement: every cycle contains an **even number of negative edges**.
+:::
+:::
+:::
+
+---
+
+# Part 5: From Balance to Clustering
+
+---
+
+## Clustering Is a Weaker Criterion Than Balance
+
+::: {.incremental}
+- Balance demands two groups. But real signed networks often have **more than two** clusters.
+- **Davis's insight**: clustering is a **weaker criterion** than balance.
+- A signed graph is **clusterable** when we can partition the nodes into clusters such that:
+  - Positive links fall **within** clusters.
+  - Negative links fall **between** clusters.
+- The all-negative triad — unbalanced under strict balance — is now **allowed**.
+:::
+
+---
+
+## Building a Clusterable Network from Triads
+
+::: {.incremental}
+- Suppose we build a network whose triangles come in only three types:
+  - **All-positive** triads (everybody inside a cluster likes everybody else in it).
+  - **Two-negative** triads (two cluster-mates against an outsider).
+  - **All-negative** triads (one node from each of three clusters).
+- Then we give the nodes names: $\{a, d, e\}$, $\{c, g\}$, and $\{b, f, h\}$.
+- And now we connect them up!
+:::
+
+```{r}
+#| fig.width: 4.2
+#| fig.height: 3.3
+# 8-node clusterable signed graph: clusters {a,d,e}, {c,g}, {b,f,h}
+cl_pairs <- function(g1, sign) {
+  do.call(rbind, lapply(seq_along(g1)[-1], function(k)
+    data.frame(from = g1[k], to = g1[1], sign = sign)))
+}
+three_clus <- list(c("a","d","e"), c("c","g"), c("b","f","h"))
+clus_e <- rbind(
+  cl_pairs(three_clus[[1]], "+"),
+  cl_pairs(three_clus[[2]], "+"),
+  cl_pairs(three_clus[[3]], "+"),
+  comp_pairs(three_clus[[1]], three_clus[[2]], "-"),
+  comp_pairs(three_clus[[1]], three_clus[[3]], "-"),
+  comp_pairs(three_clus[[2]], three_clus[[3]], "-")
+)
+clus <- graph_from_data_frame(clus_e, directed = FALSE)
+ordcl <- c("a", "d", "e", "c", "g", "b", "f", "h")
+cl_map <- c("a" = "#AED6F1", "d" = "#AED6F1", "e" = "#AED6F1",
+            "c" = "#ABEBC6", "g" = "#ABEBC6",
+            "b" = "#F5B7B1", "f" = "#F5B7B1", "h" = "#F5B7B1")
+# Three-cluster layout: each cluster drawn as a tight local triangle/dyad
+clus_lay <- rbind(
+  c(-0.85,  0.65), c(-0.30,  0.95), c(-0.95, -0.05),
+  c( 1.00,  0.70), c( 0.75, -0.05),
+  c(-0.15, -0.60), c( 0.55, -1.00), c( 0.95, -0.50)
+)
+rownames(clus_lay) <- ordcl
+colnames(clus_lay) <- c("x", "y")
+clus_plot <- function(node_size = 14, lab = 5, edge_w = 2.2) {
+  ggraph(clus, layout = clus_lay[V(clus)$name, , drop = FALSE]) +
+    edge_layer(edge_w) + edge_scales() +
+    geom_node_point(size = node_size, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.5) +
+    scale_fill_manual(values = cl_map) +
+    geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
+    coord_fixed(xlim = c(-1.25, 1.30), ylim = c(-1.25, 1.25), clip = "off") +
+    theme_slides() + theme(legend.position = "none")
+}
+clus_plot()
+```
+
+---
+
+## The Adjacency Matrix of the Clusterable Network
+
+<div class="table-dense" style="font-size: 95%;">
+
+```{r}
+clus_m <- matrix("-1", 8, 8, dimnames = list(ordcl, ordcl))
+diag(clus_m) <- "--"
+for (pr in list(c("a","d"), c("a","e"), c("d","e"), c("c","g"),
+                c("b","f"), c("b","h"), c("f","h"))) {
+  clus_m[pr[1], pr[2]] <- clus_m[pr[2], pr[1]] <- "1"
+}
+signed_kbl(clus_m, font = 18, color_cells = TRUE)
+```
+
+</div>
+
+::: {.incremental}
+- Positives ($+1$, green) sit inside each of the three clusters; negatives ($-1$, red) sit between them.
+- Triads entirely within a cluster are all-positive; triads spanning two clusters have two negatives; triads spanning all three are all-negative.
+:::
+
+---
+
+## Davis Shows That the Graph Has Three Clusters
 
 ::: {.columns}
 ::: {.column width="50%"}
-::: {.incremental}
-- Classical balance considers a triad with three negative ties (everyone hating everyone else) to be *unbalanced*.
-- Davis argued that in highly factionalized contexts, it is perfectly stable for three individuals from completely different, competing groups to dislike one another.
-- **The Clustering Criterion (Davis 1967)**: A graph is **clusterable** if and only if it contains **no cycle of any length with exactly one negative tie**.
-- For *complete* graphs this reduces to a triad test: no triad with exactly one negative tie. All-positive, two-negative, and all-negative triads are all permitted.
-:::
+```{r}
+#| fig.width: 4.4
+#| fig.height: 4.4
+clus_plot(node_size = 14, lab = 5, edge_w = 1.9)
+```
 :::
 
 ::: {.column width="50%"}
-```{r}
-#| fig.width: 5
-#| fig.height: 5
-edges <- data.frame(from = c("A", "B", "C"), to = c("B", "C", "A"), sign = c("-", "-", "-"))
-g <- graph_from_data_frame(edges, directed = FALSE)
-lay <- matrix(c(0, 1, -0.86, -0.5, 0.86, -0.5), ncol = 2, byrow = TRUE)
-ggraph(g, layout = lay) +
-  geom_edge_link(aes(color = sign, linetype = sign), width = 2.5, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
-  geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("-" = "33")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-0.9, 1.4), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
-```
+::: {.incremental}
+- Davis shows that the nodes partition into three clusters:
+  - **Cluster 1**: $\{a, d, e\}$
+  - **Cluster 2**: $\{c, g\}$
+  - **Cluster 3**: $\{b, f, h\}$
+- Positive links within clusters, negative links between them.
+- The all-negative triads (like $\{a, b, c\}$, one node from each cluster) are what keep this from being strictly **balanced** — but it is perfectly **clusterable**.
+:::
 :::
 :::
 
 ---
 
-## Ranked Clusterability: Bridging Balance and Hierarchy
+## The Cluster Structure in the Reordered Matrix
 
-::: {.columns}
-::: {.column width="55%"}
-::: {.incremental}
-- Balance and clusterability both assume *horizontal*, symmetric sentiment structures.
-- Real groups often have **vertical hierarchies** — status, dominance, prestige.
-- **Ranked Clusterability** (Davis & Leinhardt 1972): clusters that are themselves *hierarchically ordered*.
-  - **Within clusters**: horizontal, positive ties (peer solidarity).
-  - **Between clusters**: vertical ties. Positive ties point *up* the hierarchy (deference); negative or null ties point down or across unranked clusters.
-- This is the mathematical bridge from balance theory to status and **dominance hierarchies**.
-:::
-:::
+<div class="table-dense" style="font-size: 95%;">
 
-::: {.column width="45%"}
-- Think of an office: peers are mutual friends, everyone looks up to the executives, discipline flows downward.
-- Same local logic (no odd cycles of negativity), but the factions are now *stacked*, not side by side.
-- Coming up next: theories of valenced interactions, including dominance hierarchies in detail.
-:::
-:::
-
----
-
-## Summary: Structural Balance vs. Clusterability
-
-::: {.columns}
-::: {.column width="40%"}
-::: {.incremental}
-- **Structural Balance (Cartwright-Harary 1956)**:
-  - Local rule: Triads cannot have an odd number of negative ties.
-  - Global topology: Splits the network into exactly **two factions**.
-- **Clusterability (Davis 1967)**:
-  - Local rule: Relaxes constraints by permitting all-negative triads (no triads with exactly one negative tie).
-  - Global topology: Splits the network into **any number of clusters ($k \ge 1$)**.
-:::
-:::
-
-::: {.column width="60%"}
 ```{r}
-#| fig.width: 8
-#| fig.height: 5
-# Visual summary comparing structural balance vs clusterability side-by-side
-nodes_b <- data.frame(name = LETTERS[1:6], faction = c(rep("1", 3), rep("2", 3)))
-edges_b <- expand.grid(from = LETTERS[1:6], to = LETTERS[1:6], stringsAsFactors = FALSE) %>%
-  filter(from < to) %>%
-  mutate(
-    f_from = nodes_b$faction[match(from, nodes_b$name)],
-    f_to = nodes_b$faction[match(to, nodes_b$name)],
-    sign = ifelse(f_from == f_to, "+", "-")
-  )
-lay_b <- matrix(c(-1.5, 1.1, -1.5, -1.1, -2.5, 0, 1.5, 1.1, 1.5, -1.1, 2.5, 0), ncol = 2, byrow = TRUE)
-g_b <- graph_from_data_frame(edges_b, directed = FALSE, vertices = nodes_b)
-p_bal <- ggraph(g_b, layout = lay_b) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "+" | e$from == 1, ] }, width = 1.2, alpha = 0.6, strength = 0.35) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from == 3, ] }, width = 1.2, alpha = 0.6, strength = -0.15) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from == 2, ] }, width = 1.2, alpha = 0.6, strength = -0.2) +
-  geom_node_point(aes(fill = faction), size = 14, color = "white", shape = 21, stroke = 1.2) +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid")) +
-  coord_fixed(xlim = c(-3.0, 3.0), ylim = c(-1.6, 1.6), clip = "off") +
-  theme_slides() + theme(legend.position = "none") + ggtitle("Structural Balance (2 Factions)")
-
-nodes_c <- data.frame(name = LETTERS[1:9], faction = c(rep("1", 3), rep("2", 3), rep("3", 3)))
-edges_c <- expand.grid(from = LETTERS[1:9], to = LETTERS[1:9], stringsAsFactors = FALSE) %>%
-  filter(from < to) %>%
-  mutate(
-    f_from = nodes_c$faction[match(from, nodes_c$name)],
-    f_to = nodes_c$faction[match(to, nodes_c$name)],
-    sign = ifelse(f_from == f_to, "+", "-")
-  )
-g_c <- graph_from_data_frame(edges_c, directed = FALSE, vertices = nodes_c)
-lay_c <- matrix(c(
-  -1.0, 2.4, -1.9, 1.7, -0.1, 1.7,   # Cluster 1 (top)
-  -3.0, -0.6, -2.1, -1.3, -3.2, -1.5, # Cluster 2 (bottom left)
-  1.0, -0.6, 1.9, -1.3, 0.8, -1.5    # Cluster 3 (bottom right)
-), ncol = 2, byrow = TRUE)
-
-p_clust <- ggraph(g_c, layout = lay_c) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "+" | !(e$from %in% 1:3 & e$to %in% 7:9), ] }, width = 1.2, alpha = 0.6, strength = -0.25) +
-  geom_edge_arc(aes(color = sign, linetype = sign), data = function(l) { e <- get_edges()(l); e[e$sign == "-" & e$from %in% 1:3 & e$to %in% 7:9, ] }, width = 1.2, alpha = 0.6, strength = 0.25) +
-  geom_node_point(aes(fill = faction), size = 12, color = "white", shape = 21, stroke = 1.2) +
-  scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33")) +
-  scale_fill_manual(values = c("1" = "steelblue", "2" = "darkorchid", "3" = "goldenrod")) +
-  coord_fixed(xlim = c(-3.8, 2.5), ylim = c(-2.2, 3.0), clip = "off") +
-  theme_slides() +
-  theme(legend.position = "none", plot.title = element_text(size = 12, face = "bold", hjust = 0.5, color = "#2c3e50"),
-        plot.margin = margin(10, 18, 10, 10)) +
-  ggtitle("Clusterability (k Clusters)")
-
-p_bal + p_clust + plot_layout(nrow = 1)
+signed_kbl(clus_m, font = 18, color_cells = TRUE)
 ```
-:::
+
+</div>
+
+::: {.incremental}
+- Reordering rows and columns by cluster exposes **three positive blocks on the diagonal**.
+- Every off-diagonal block is negative.
+- Balance gives two camps; clusterability generalizes the same logic to **any number of clusters**.
 :::

@@ -1,0 +1,249 @@
+/* UCLA Theme for Reveal.js Slides */
+
+/* Define core Reveal.js variables with UCLA colors */
+:root {
+  --r-main-color: #333333; /* Dark gray for standard text for readability */
+  --r-heading-color: #005587; /* UCLA Darker Blue for headers */
+  --r-link-color: #2774AE; /* UCLA Blue for links */
+  --r-link-color-hover: #003B5C; /* Darkest Blue for hover */
+  --r-selection-background-color: #FFD100; /* UCLA Gold for text selection */
+  --r-selection-color: #003B5C;
+}
+
+/* Ensure all headings use the UCLA Darker Blue and don't force uppercase */
+.reveal h1, 
+.reveal h2, 
+.reveal h3, 
+.reveal h4, 
+.reveal h5, 
+.reveal h6 {
+  color: var(--r-heading-color);
+  text-transform: none; 
+  font-weight: 600;
+}
+
+/* Use UCLA Gold for list bullets to provide a nice accent */
+.reveal ul li::marker {
+  color: #FFD100;
+}
+
+/* Set the progress bar at the bottom to UCLA Gold */
+.reveal .progress {
+  color: #FFD100;
+}
+
+/* Set the navigation controls to UCLA Blue */
+.reveal .controls {
+  color: #2774AE;
+}
+
+/* Styling for blockquotes with a UCLA Blue tint and Gold border */
+.reveal blockquote {
+  border-left: 5px solid #FFD100;
+  background-color: rgba(39, 116, 174, 0.05);
+  padding: 15px 20px;
+  font-style: italic;
+}
+
+/* Highlight inline code with UCLA Blue */
+.reveal code {
+  color: #2774AE;
+}
+
+/* Add this new rule to the end of the file */
+.reveal .columns {
+  display: flex;
+  align-items: center; /* This is the magic part */
+}
+
+/* Add this new rule to the end of the file */
+.reveal .columns {
+  display: flex;
+  align-items: center; /* This is the magic part */
+}
+
+/* Custom utility classes in case you want to manually style text */
+.ucla-blue {
+  color: #2774AE;
+}
+
+.ucla-gold {
+  color: #FFD100;
+}
+
+
+/* Global Typography & Spacing Optimization to Prevent Vertical Overflow in 16:9 Slides */
+.reveal {
+  font-size: 34px; /* Highly optimized base size for widescreen presentation devices */
+}
+
+.reveal p, 
+.reveal li {
+  font-size: 0.85em; /* Scales down lists and paragraphs to fit within 720px slide height */
+  line-height: 1.35; /* Crisp, readable line height that conserves vertical space */
+  margin-bottom: 0.4em;
+}
+
+.reveal h2 {
+  font-size: 1.4em; /* Proportional, punchy slide headers */
+  margin-bottom: 0.5em;
+}
+
+.reveal h3 {
+  font-size: 1.15em;
+  margin-bottom: 0.4em;
+}
+
+/* Ensure columns and figures align and scale beautifully without squishing */
+.reveal .columns {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reveal .columns .column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Automatic vertical scrollbar safety net for exceptionally long content */
+.reveal .slide.scrollable {
+  overflow-y: auto !important;
+}
+
+/* Opt-out for slides whose content is sized to fit (e.g. the Dunbar circle
+   reveals): hard-disable vertical scrolling even if Reveal marks them
+   scrollable. Declared after the rule above so it wins the !important tie. */
+.reveal .slide.no-scroll {
+  overflow-y: hidden !important;
+}
+
+/* Stacked fragment plots: overlay each fragment on the base figure
+   (used to cycle path highlights in graph-paths-walks.qmd) */
+.reveal .path-stack {
+  position: relative;
+}
+
+.reveal .path-stack .path-frag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* Compact tables for dense definition slides */
+.reveal .compact-table table {
+  font-size: 0.85em;
+}
+
+.reveal .compact-table td,
+.reveal .compact-table th {
+  padding: 0.3em 0.5em;
+}
+
+/* Minimum size floor for display math (matrices). The 0.85em prose shrink
+   above must not cascade into matrices, and neither should smaller
+   containers (callouts, .smaller). Display math never renders below the
+   deck's 34px base font; any larger inherited size is preserved. Enforced
+   by tools/audit_slide_sizes.py. */
+.reveal .math.display {
+  font-size: max(1em, 34px);
+}
+
+/* Dense slides: content may shrink to fit (overflow QA policy, AGENTS.md
+   workflow 5). Inside an explicitly marked dense wrapper, display math
+   follows the wrapper's font-size like other content, but never below
+   20.8px (72% of the 28.9px prose size — the established dense floor). */
+.reveal .math-dense .math.display {
+  font-size: max(1em, 20.8px);
+}
+
+/* Minimum size floor for tables. kableExtra writes font-size INLINE on the
+   <table> element, so flooring the table itself would either lose to the
+   inline style or (with !important) clobber larger authored sizes. Flooring
+   the CELLS in em units works: 1em inside a cell resolves to the table's
+   authored inline size, so max(1em, 18px) preserves tables authored at
+   18px+ and lifts only smaller ones to the floor. Enforced by
+   audit_slide_sizes.py's table check. */
+.reveal td,
+.reveal th {
+  font-size: max(1em, 18px);
+}
+
+/* Dense opt-out for secondary tables in narrow columns (the established
+   one-off-16 convention): wrap the table's container in .table-dense and
+   the floor drops to 16px. */
+.reveal .table-dense td,
+.reveal .table-dense th {
+  font-size: max(1em, 16px);
+}
+
+/* Consistent vertical alignment across slides.
+   Reveal.js vertically centers each slide by default, so slides with
+   different content heights shift figures slightly between transitions.
+   Top-aligning every slide fixes this across all decks using this theme. */
+.reveal .slides > section,
+.reveal .slides > section > section {
+  top: 0 !important;
+}
+
+/* Matrix triangle-highlight fragments (e.g., Diagonal vs. Off-Diagonal slide).
+   Cells stay visible but dimmed until their fragment fires, then take on
+   the region color (red = diagonal, blue = upper, green = lower). */
+.reveal .slides .fragment.tri-cell {
+  opacity: 1;
+  visibility: inherit;
+  color: #b0b6bd;
+  transition: all 0.25s ease;
+}
+.reveal .slides .fragment.tri-cell.visible {
+  color: inherit;
+  font-weight: 600;
+}
+.reveal .slides .fragment.tri-cell.visible.tri-diag {
+  color: #c0392b;
+  background-color: rgba(192, 57, 43, 0.08);
+}
+.reveal .slides .fragment.tri-cell.visible.tri-upper {
+  color: #1b64d1;
+  background-color: rgba(27, 100, 209, 0.08);
+}
+.reveal .slides .fragment.tri-cell.visible.tri-lower {
+  color: #1e8449;
+  background-color: rgba(30, 132, 73, 0.08);
+}
+
+.reveal .tri-table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  font-size: 0.95em;
+}
+.reveal .tri-table th,
+.reveal .tri-table td {
+  border: 1px solid #ccd3da;
+  padding: 0.35em 0.9em;
+  text-align: center;
+}
+.reveal .tri-table thead th {
+  background-color: #f1f5f9;
+}
+
+/* Stabilize figure position across consecutive slides: an intro paragraph
+   directly before a columns block gets a fixed minimum height (2 lines),
+   so figures don't drift when intros wrap to 1 vs 2 lines. */
+.reveal .slides section > p:has(+ div.columns) {
+  min-height: 3.2em;
+}
+
+/* kableExtra::scroll_box fixes (2026-10-27 audit): its inline style sets
+   overflow-x: scroll (scrollbar rendered even when the table fits) and a
+   1px border on a width:100% div without border-box (2px overflow past
+   the container). Both fixed here; the border-box rule also removes the
+   2px horizontal overflow that made scrollable slides h-scroll. */
+.reveal div[style*="overflow-x: scroll"] {
+  overflow-x: auto !important;
+}
+.reveal div[style*="border: 1px solid #ddd"][style*="width:100%"] {
+  box-sizing: border-box !important;
+}
