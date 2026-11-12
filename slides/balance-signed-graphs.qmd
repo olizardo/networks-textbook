@@ -199,7 +199,7 @@ ggraph(g, layout = lay) +
   geom_node_text(aes(label = name), fontface = "bold", size = 8, color = "#2c3e50") +
   scale_edge_color_manual(values = c("S" = "#2980b9", "R" = pos_col),
                           labels = c("S = similarity tie", "R = interaction tie")) +
-  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-1.0, 1.0), clip = "off") +
+  coord_fixed(xlim = c(-1.3, 1.3), ylim = c(-1.2, 1.2), clip = "off") +
   theme_slides() + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 :::
@@ -463,7 +463,7 @@ ggraph(g, layout = circ_lay(c("P", "O"))) +
                  end_cap = circle(12, "mm"), start_cap = circle(12, "mm")) +
   geom_node_point(size = 24, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.8) +
   geom_node_text(aes(label = name), fontface = "bold", size = 8, color = "#2c3e50") +
-  coord_fixed(xlim = c(-0.85, 0.85), ylim = c(-1.05, 1.05), clip = "off") +
+  coord_fixed(xlim = c(-0.85, 0.85), ylim = c(-1.15, 1.15), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -873,8 +873,10 @@ rot_fig <- function(focal, ttl) {
   g <- graph_from_data_frame(e, directed = FALSE)
   lay <- circ_lay(c("n1", "n2", "n3"))
   labs <- c("n1" = "O", "n2" = "Q", "n3" = "P")
-  others <- setdiff(c("O", "Q"), "P")
-  labs[setdiff(c("n1", "n2", "n3"), focal)] <- others
+  # Rotate labels around the triangle so P lands on the focal node
+  rot <- function(l) c("n1" = unname(l["n3"]), "n2" = unname(l["n1"]), "n3" = unname(l["n2"]))
+  k <- switch(focal, n1 = 1, n2 = 2, n3 = 0)
+  for (i in seq_len(k)) labs <- rot(labs)
   V(g)$lab <- unname(labs[V(g)$name])
   ggraph(g, layout = lay) +
     edge_layer(2.4) + edge_scales() +
@@ -883,12 +885,12 @@ rot_fig <- function(focal, ttl) {
     geom_node_text(aes(label = lab), fontface = "bold", size = 8, color = "#2c3e50") +
     coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-0.95, 1.3), clip = "off") +
     theme_slides() + theme(legend.position = "none",
-                           plot.title = element_text(size = 14, face = "bold")) +
+                           plot.title = element_text(size = 12, face = "bold")) +
     ggtitle(ttl)
 }
-rot_fig("n3", "From the lower-left node: \"a friend of an enemy is an enemy\"") +
-  rot_fig("n1", "From the top node: \"an enemy of an enemy is a friend\"") +
-  rot_fig("n2", "From the lower-right node: \"an enemy of a friend is an enemy\"")
+rot_fig("n3", "From the lower-left node:\n\"a friend of an enemy is an enemy\"") +
+  rot_fig("n1", "From the top node:\n\"an enemy of an enemy is a friend\"") +
+  rot_fig("n2", "From the lower-right node:\n\"an enemy of a friend is an enemy\"")
 ```
 
 ---
@@ -1353,26 +1355,43 @@ before_panel + after_panel + plot_layout(nrow = 1)
   - **Any subgraph of $G$ is also balanced.**
   - **All paths between the same pair of nodes have the same sign** as the link between them.
   - **Cycles of any length are always positive** (an even number of negative edges).
+- Each panel below shows the **full graph** $G$; the highlighted triad is the **subgraph** being checked.
 :::
 
 ```{r}
 #| fig.width: 6.2
 #| fig.height: 3.2
-# Two balanced subgraphs of the complete signed graph
+# Two balanced triads shown IN CONTEXT: full complete graph, triad highlighted
+sg_keys <- function(ns) apply(combn(sort(ns), 2), 2, paste, collapse = "|")
+sub_idx <- function(l, keys) {
+  ed <- get_edges()(l)
+  nm <- V(comp)$name
+  key <- paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
+  ed[key %in% keys, ]
+}
 sub_panel <- function(nodes, ttl) {
-  sg <- induced_subgraph(comp, nodes)
-  ggraph(sg, layout = circ_lay(nodes)) +
-    edge_layer(2) + edge_scales() +
-    geom_node_point(size = 15, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.5) +
-    scale_fill_manual(values = fac_map) +
-    geom_node_text(aes(label = name), fontface = "bold", size = 5.5, color = "#2c3e50") +
-    coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  keys <- sg_keys(nodes)
+  in_sg <- V(comp)$name %in% nodes
+  ggraph(comp, layout = circ_lay(c("A", "B", "F", "C", "D", "E"))) +
+    geom_edge_link(color = "grey80", width = 1.1,
+                   end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+    geom_edge_link(data = function(l) sub_idx(l, keys),
+                   aes(color = sign, linetype = sign), width = 2.2,
+                   end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+    edge_scales() +
+    geom_node_point(size = 13, aes(fill = name), shape = 21,
+                    color = ifelse(in_sg, "#2c3e50", "grey70"),
+                    stroke = ifelse(in_sg, 2.2, 1.2)) +
+    scale_fill_manual(values = fac_map, guide = "none") +
+    geom_node_text(aes(label = name), fontface = "bold", size = 4.6,
+                   color = ifelse(in_sg, "#2c3e50", "grey60")) +
+    coord_fixed(xlim = c(-1.4, 1.4), ylim = c(-1.35, 1.4), clip = "off") +
     theme_slides() + theme(legend.position = "none",
-                           plot.title = element_text(size = 10, face = "bold")) +
+                           plot.title = element_text(size = 11, face = "bold")) +
     ggtitle(ttl)
 }
-sub_panel(c("A", "C", "E"), "Subgraph {A, C, E}: balanced") +
-  sub_panel(c("A", "B", "F"), "Subgraph {A, B, F}: balanced")
+sub_panel(c("A", "C", "E"), "Within G, subgraph {A, C, E}\nis balanced") +
+  sub_panel(c("A", "B", "F"), "Within G, subgraph {A, B, F}\nis balanced")
 ```
 
 ---
@@ -1384,28 +1403,7 @@ sub_panel(c("A", "C", "E"), "Subgraph {A, C, E}: balanced") +
 ```{r}
 #| fig.width: 4.4
 #| fig.height: 4.4
-# Highlight the path F - B - A - C - I
-path_pairs <- list(c("F","B"), c("B","A"), c("A","C"), c("C","I"))
-name_key <- function(pairs) {
-  vapply(pairs, function(p) paste(sort(p), collapse = "|"), "")
-}
-path_idx <- function(l) {
-  ed <- get_edges()(l)
-  nm <- V(ext)$name
-  key <- paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
-  ed[key %in% name_key(path_pairs), ]
-}
-# Muted base edges so the highlighted path stands out
-ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
-  geom_edge_link(color = "grey72", width = 1.4,
-                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
-  geom_edge_link(data = path_idx, color = "#E67E22", width = 3.4,
-                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
-  geom_node_point(size = 13, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.4) +
-  scale_fill_manual(values = ext_map) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 4.6, color = "#2c3e50") +
-  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
+ext_plot()
 ```
 :::
 
@@ -1432,26 +1430,7 @@ ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
 ```{r}
 #| fig.width: 4.4
 #| fig.height: 4.4
-# Highlight two cycles: A-C-B (triangle) and A-C-D-E-B (5-cycle)
-cyc_pairs <- list(c("A","C"), c("C","B"), c("B","A"),
-                  c("C","D"), c("D","E"), c("E","B"))
-cyc_idx <- function(l) {
-  ed <- get_edges()(l)
-  nm <- V(ext)$name
-  key <- paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
-  ed[key %in% name_key(cyc_pairs), ]
-}
-# Muted base edges so the highlighted cycles stand out
-ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
-  geom_edge_link(color = "grey72", width = 1.4,
-                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
-  geom_edge_link(data = cyc_idx, color = "#E67E22", width = 3.4,
-                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
-  geom_node_point(size = 13, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.4) +
-  scale_fill_manual(values = ext_map) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 4.6, color = "#2c3e50") +
-  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
-  theme_slides() + theme(legend.position = "none")
+ext_plot()
 ```
 :::
 
@@ -1503,8 +1482,9 @@ ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
 #| fig.height: 4.8
 # 9-node clusterable signed graph: clusters {a,d,e}, {c,g,i}, {b,f,h}
 cl_pairs <- function(g1, sign) {
-  do.call(rbind, lapply(seq_along(g1)[-1], function(k)
-    data.frame(from = g1[k], to = g1[1], sign = sign)))
+  idx <- combn(seq_along(g1), 2, simplify = FALSE)
+  do.call(rbind, lapply(idx, function(p)
+    data.frame(from = g1[p[1]], to = g1[p[2]], sign = sign)))
 }
 clus_nodes <- c("a", "b", "c", "d", "e", "f", "g", "h", "i")
 three_clus <- list(c("a","d","e"), c("c","g","i"), c("b","f","h"))
@@ -1527,9 +1507,9 @@ mk_clus_lay <- function(cx, cy, names, r = 0.38) {
   rownames(m) <- names
   m
 }
-clus_lay <- rbind(mk_clus_lay(-1.05,  0.90, three_clus[[1]], r = 0.34),
-                  mk_clus_lay( 1.05,  0.90, three_clus[[2]], r = 0.34),
-                  mk_clus_lay( 0.00, -1.05, three_clus[[3]], r = 0.34))
+clus_lay <- rbind(mk_clus_lay(-1.20,  1.05, three_clus[[1]], r = 0.52),
+                  mk_clus_lay( 1.20,  1.05, three_clus[[2]], r = 0.52),
+                  mk_clus_lay( 0.00, -1.25, three_clus[[3]], r = 0.52))
 pos_idx <- function(l) { ed <- get_edges()(l); ed[ed$sign == "+", ] }
 clus_plot <- function(node_size = 15, lab = 6, edge_w = 1.7) {
   ggraph(clus, layout = clus_lay[V(clus)$name, , drop = FALSE]) +
@@ -1537,7 +1517,7 @@ clus_plot <- function(node_size = 15, lab = 6, edge_w = 1.7) {
     geom_node_point(size = node_size, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.6) +
     scale_fill_manual(values = cl_map) +
     geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
-    coord_fixed(xlim = c(-1.60, 1.60), ylim = c(-1.55, 1.45), clip = "off") +
+    coord_fixed(xlim = c(-1.85, 1.85), ylim = c(-1.85, 1.75), clip = "off") +
     theme_slides() + theme(legend.position = "none")
 }
 # Step 1 view: positive links only
@@ -1547,7 +1527,7 @@ ggraph(clus, layout = clus_lay[V(clus)$name, , drop = FALSE]) +
   geom_node_point(size = 16, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.6) +
   scale_fill_manual(values = cl_map) +
   geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "#2c3e50") +
-  coord_fixed(xlim = c(-1.60, 1.60), ylim = c(-1.55, 1.45), clip = "off") +
+  coord_fixed(xlim = c(-1.85, 1.85), ylim = c(-1.85, 1.75), clip = "off") +
   theme_slides() + theme(legend.position = "none")
 ```
 :::
@@ -1586,12 +1566,15 @@ for (pr in list(c("a","d"), c("a","e"), c("d","e"), c("c","g"), c("c","i"), c("g
                 c("b","f"), c("b","h"), c("f","h"))) {
   clus_m[pr[1], pr[2]] <- clus_m[pr[2], pr[1]] <- "1"
 }
+# Cluster-contiguous ordering for the reveal slide
+clus_ord <- c("a", "d", "e", "c", "g", "i", "b", "f", "h")
 signed_kbl(clus_m, color_cells = TRUE)
 ```
 
 ::: {.incremental}
 - Positives ($+1$, green) sit inside each of the three clusters; negatives ($-1$, red) sit between them.
 - Triads entirely within a cluster are all-positive; triads spanning two clusters have two negatives; triads spanning all three are all-negative.
+- In alphabetical order, though, the matrix **looks like noise**: the green cells are scattered, with no visible pattern.
 :::
 
 ---
@@ -1624,11 +1607,12 @@ clus_plot(node_size = 14, lab = 5.5, edge_w = 2)
 ## The Cluster Structure in the Reordered Matrix
 
 ```{r}
-signed_kbl(clus_m, color_cells = TRUE)
+signed_kbl(clus_m[clus_ord, clus_ord], color_cells = TRUE)
 ```
 
 ::: {.incremental}
-- Reordering rows and columns by cluster exposes **three positive blocks on the diagonal**.
+- Same matrix, with rows and columns reordered cluster by cluster: $\{a, d, e\}$, $\{c, g, i\}$, $\{b, f, h\}$.
+- Reordering exposes **three positive blocks on the diagonal**.
 - Every off-diagonal block is negative.
 - Balance gives two camps; clusterability generalizes the same logic to **any number of clusters**.
 :::
