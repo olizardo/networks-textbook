@@ -92,12 +92,29 @@ jobs:
       - name: Determine changed slide decks
         id: changed-slides
         run: |
-          ZERO_SHA="0000000000000000000000000000000000000000"
-          if [ "${{ github.event.before }}" != "$ZERO_SHA" ] && git cat-file -e "${{ github.event.before }}" 2>/dev/null; then
-            CHANGED=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- 'slides/*.qmd')
-          else
-            # No usable base commit (first push, force-push, etc.) - render everything to be safe.
+          # Diff against the LAST SUCCESSFULLY DEPLOYED commit, recorded in a
+          # marker file on the gh-pages branch. Diffing against
+          # github.event.before silently drops decks whose deploying run was
+          # cancelled by the concurrency guard: the superseded run never
+          # deploys, and the next run's before..sha diff no longer lists
+          # those decks. The marker only advances when a run deploys, so a
+          # cancelled run's decks are picked up by the next deploy.
+          BASE=""
+          if git show origin/gh-pages:.deploy-marker >/dev/null 2>&1; then
+            BASE=$(git show origin/gh-pages:.deploy-marker | tr -d '[:space:]')
+            if [ -n "$BASE" ] && git cat-file -e "$BASE^{commit}" 2>/dev/null \
+               && git merge-base --is-ancestor "$BASE" "${{ github.sha }}" 2>/dev/null; then
+              echo "Deploying changes since last successful deploy: $BASE"
+            else
+              # Force-push, marker for an unrelated history, etc. — render everything.
+              BASE=""
+            fi
+          fi
+          if [ -z "$BASE" ]; then
+            echo "No valid deploy marker found; rendering all decks."
             CHANGED=$(git ls-files 'slides/*.qmd')
+          else
+            CHANGED=$(git diff --name-only "$BASE" "${{ github.sha }}" -- 'slides/*.qmd')
           fi
           echo "Changed/rendered slide decks:"
           echo "$CHANGED"
@@ -126,6 +143,9 @@ jobs:
           mkdir -p _sites/slides
           cp -r slides/* _sites/slides/
 
+      - name: Record deploy marker
+        run: echo "${{ github.sha }}" > _sites/.deploy-marker
+
       - name: Audit slide sizes (size floor)
         # Measures rendered matrices/figures in headless Chrome against the
         # minimum-size floors in audit_slide_sizes.py (math >= 34px, figures
@@ -151,4 +171,6 @@ jobs:
           publish_dir: ./_sites
           # Preserve previously-deployed slide decks that weren't re-rendered
           # this run (since only changed decks are rebuilt, not all of them).
+          # The .deploy-marker file (written fresh above) is replaced each
+          # successful deploy and records the deployed commit SHA.
           keep_files: true
