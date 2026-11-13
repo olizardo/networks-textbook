@@ -100,6 +100,8 @@ jobs:
           # those decks. The marker only advances when a run deploys, so a
           # cancelled run's decks are picked up by the next deploy.
           BASE=""
+          # Make sure origin/gh-pages is current even if the checkout fetch raced.
+          git fetch --quiet origin gh-pages 2>/dev/null || true
           if git show origin/gh-pages:.deploy-marker >/dev/null 2>&1; then
             BASE=$(git show origin/gh-pages:.deploy-marker | tr -d '[:space:]')
             if [ -n "$BASE" ] && git cat-file -e "$BASE^{commit}" 2>/dev/null \
