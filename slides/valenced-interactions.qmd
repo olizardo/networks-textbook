@@ -20,6 +20,7 @@ library(tidygraph)
 library(igraph)
 library(dplyr)
 library(patchwork)
+library(kableExtra)
 
 # Custom transparent theme for slides
 theme_slides <- function(base_size = 12) {
@@ -268,6 +269,7 @@ p1 + p2 + plot_layout(nrow = 1)
 ::: {.column width="55%"}
 ::: {.incremental}
 - **Status Theory** proposes that sentiments towards an alter are heavily driven by how *others* feel about them.
+- It extends the triadic balance logic from the previous lecture.
 - This represents a social **prestige alignment** mechanism:
   - If someone is liked by many, you align your sentiment and like them too.
   - If someone is disliked by many, you align your sentiment and dislike them.
@@ -385,12 +387,16 @@ ggraph(g, layout = lay) +
 :::
 
 ::: {.column width="50%"}
-| Outgoing Tie Sign | Target Status | Impact on Sender's Status |
-| :---: | :---: | :---: |
-| **Positive ($+$)** | High Status | **Gain (+)** |
-| **Negative ($-$)** | Low Status | **Gain (+)** |
-| **Positive ($+$)** | Low Status | **Loss (-)** |
-| **Negative ($-$)** | High Status | **Loss (-)** |
+```{r}
+#| results: asis
+out_tbl <- data.frame(
+    `Outgoing tie` = c("Positive (+)", "Negative (−)", "Positive (+)", "Negative (−)"),
+    `Target status` = c("High", "Low", "Low", "High"),
+    `Sender's status` = c("Gain (+)", "Gain (+)", "Loss (−)", "Loss (−)"),
+    check.names = FALSE
+)
+kable_styling(knitr::kable(out_tbl, booktabs = TRUE, align = "ccc"), font_size = 20)
+```
 :::
 :::
 
@@ -571,11 +577,17 @@ ggraph(g_n, layout = "manual", x = x, y = y) +
 :::
 
 ::: {.column width="50%"}
-| Actor A Status | Actor B Status | Position Match | Predicted Sentiment |
-| :---: | :---: | :---: | :---: |
-| High Status | High Status | **Similar** | **Solidarity (+)** |
-| Low Status | Low Status | **Similar** | **Solidarity (+)** |
-| High Status | Low Status | **Different** | **Hostility (-)** |
+```{r}
+#| results: asis
+pos_tbl <- data.frame(
+    `Actor A` = c("High status", "Low status", "High status"),
+    `Actor B` = c("High status", "Low status", "Low status"),
+    `Position match` = c("Similar", "Similar", "Different"),
+    `Predicted sentiment` = c("Solidarity (+)", "Solidarity (+)", "Hostility (−)"),
+    check.names = FALSE
+)
+kable_styling(knitr::kable(pos_tbl, booktabs = TRUE, align = "cccc"), font_size = 18)
+```
 :::
 :::
 
@@ -839,15 +851,23 @@ ggraph(g_p, layout = "manual", x = x, y = y) +
 
 ## Seven Triad Types in Dominance Networks
 
-| Triad | Structure | Meaning |
-| :--- | :--- | :--- |
-| **Null (003)** | No ties | No competition yet |
-| **Single edge (012)** | A → B | The starting point for iterative competition |
-| **Double-dominant (021D)** | A → B, A → C | Signature of **winner effects** |
-| **Double-loser (021U)** | A → C, B → C | Signature of **loser effects** |
-| **Pass-along (021C)** | A → B → C, no A–C tie | Transitivity not yet resolved |
-| **Transitive (030T)** | A → B, B → C, A → C | The "expected" triad under a linear order |
-| **Cycle (030C)** | A → B, B → C, C → A | The violation — no clear hierarchy |
+```{r}
+#| results: asis
+triad_tbl <- data.frame(
+    Triad = c("Null (003)", "Single edge (012)", "Double-dominant (021D)",
+              "Double-loser (021U)", "Pass-along (021C)", "Transitive (030T)",
+              "Cycle (030C)"),
+    Structure = c("No ties", "A → B", "A → B, A → C", "A → C, B → C",
+                  "A → B → C, no A–C tie", "A → B, B → C, A → C",
+                  "A → B, B → C, C → A"),
+    Meaning = c("No competition yet", "The starting point for iterative competition",
+                "Signature of winner effects", "Signature of loser effects",
+                "Transitivity not yet resolved", "The expected triad under a linear order",
+                "The violation — no clear hierarchy"),
+    check.names = FALSE
+)
+kable_styling(knitr::kable(triad_tbl, booktabs = TRUE, align = "lll"), font_size = 22)
+```
 
 ---
 
@@ -931,8 +951,8 @@ nodes_i <- data.frame(name = c("A", "B", "C"),
 edges_i <- data.frame(
   from = c("A", "A", "C"),
   to   = c("B", "C", "B"),
-  type = c("Time 1: A defeats B", "Winner / Bystander",
-           "Loser / Bystander")
+  type = c("A beats B (observed)", "A beats C (bystander)",
+           "C beats B (bystander)")
 )
 g_i <- graph_from_data_frame(edges_i, directed = TRUE, vertices = nodes_i)
 ggraph(g_i, layout = "manual", x = x, y = y) +
@@ -942,15 +962,16 @@ ggraph(g_i, layout = "manual", x = x, y = y) +
                  width = 1.6) +
   geom_node_point(size = 17, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
   geom_node_text(aes(label = name), fontface = "bold", size = 7, color = "#2c3e50") +
-  scale_edge_color_manual(values = c("Time 1: A defeats B" = "#2c3e50",
-                                     "Winner / Bystander" = "forestgreen",
-                                     "Loser / Bystander" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("Time 1: A defeats B" = "solid",
-                                        "Winner / Bystander" = "dashed",
-                                        "Loser / Bystander" = "33")) +
+  scale_edge_color_manual(values = c("A beats B (observed)" = "#2c3e50",
+                                     "A beats C (bystander)" = "forestgreen",
+                                     "C beats B (bystander)" = "firebrick")) +
+  scale_edge_linetype_manual(values = c("A beats B (observed)" = "solid",
+                                        "A beats C (bystander)" = "dashed",
+                                        "C beats B (bystander)" = "33")) +
   coord_fixed(xlim = c(-1.6, 1.6), ylim = c(-1.4, 1.7), clip = "off") +
   theme_slides() +
-  theme(legend.position = "bottom", legend.text = element_text(size = 10))
+  theme(legend.position = "bottom", legend.title = element_blank(),
+        legend.text = element_text(size = 10))
 ```
 :::
 
@@ -1036,28 +1057,26 @@ bystander_panel(c("A", "A"), c("B", "C"), "A C",
 
 ---
 
-## Comparison of Karma, Status, and Solidarity
+## Comparison of Karma, Status, Solidarity, and Dominance
 
-::: {.columns}
-::: {.column width="45%"}
-::: {.incremental}
-- Compare how distinct social-psychological principles drive micro-motives.
-- Each theory assumes different levels of agency and structural awareness:
-  - **Karma**: Matches the valence a node sends with the valence it receives — from the network, not dyad by dyad.
-  - **Status**: Aligns sentiments with prestige hierarchies (prestige seeking).
-  - **Solidarity**: Aligns sentiments with others in the same status position (horizontal classes).
-:::
-:::
+- Each theory posits a different micro-motive, and each implies its own local pattern and global structure.
 
-::: {.column width="55%"}
-| Theory | Core Micro-Mechanism | Expected Local Pattern | Expected Global Structure |
-| :--- | :---: | :---: | :---: |
-| **Karma** | Direct Reciprocity | Virtuous/Vicious Loops | Positive/Negative Regions |
-| **Status** | Prestige Alignment | Deference / Dominance | Centralized Hierarchies |
-| **Solidarity** | Same-Status Alignment | Horizontal Mutual Ties | Horizontally Cohesive Classes |
-| **Dominance** | Agonistic Competition | Transitive Triads | Linear Dominance Orders |
-:::
-:::
+```{r}
+#| results: asis
+cmp_tbl <- data.frame(
+    `Theory` = c("Karma", "Status", "Solidarity", "Dominance"),
+    `Micro-mechanism` = c("Match what you send with what you receive",
+                          "Align with others' sentiments (prestige)",
+                          "Align with actors in the same position",
+                          "Win, and let others watch"),
+    `Local pattern` = c("Virtuous / vicious loops", "Deference / dominance",
+                        "Horizontal mutual ties", "Transitive triads"),
+    `Global structure` = c("Positive / negative regions", "Centralized hierarchies",
+                           "Cohesive horizontal classes", "Linear dominance order"),
+    check.names = FALSE
+)
+kable_styling(knitr::kable(cmp_tbl, booktabs = TRUE, align = "llll"), font_size = 18)
+```
 
 ---
 
