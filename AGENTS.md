@@ -175,6 +175,7 @@ Canvas API rules live in `../SOCIOL 111/AGENTS.md`. The one procedure used from 
 - **Bibliography keys:** use `burt92` (*Structural Holes*, 1992), not the old `burt95`.
 - **Cross-reference hygiene (2026-11-11):** never write "Figure @fig-…", "Table @tbl-…", "Equation @eq-…", or "Section @sec-…" — Quarto renders the reference itself as "Figure N"/"Table N", so the word duplicates. Use the bare reference ("@fig-egograph shows…", "shown in @tbl-terms"). Swept across all active chapters 2026-11-11 (27 fixes); verify with `grep -rnE "\b(Figures?|Tables?|Figs?\.|Tabs?\.|Sections?|Equations?)\s+@" *.qmd`.
 - **Build steps in decks (Omar, 2026-11-17):** when a build's figure changes step to step, put each step on its own slide — but each slide carries **only its new line**. Never re-list the accumulated bullets, and show a shared framing bullet ("Cliques can overlap for two reasons…", "A clique is a complete subgraph…") **once**, on the first slide of the run. Repeating the full list with `.incremental` re-animates text the room already read; the subgroups deck had ~60 of 134 slides doing exactly this.
+- **No deploy polling (Omar, 2026-11-17):** never block a session waiting on GitHub Actions — push, report the commit SHA, and stop there. Omar verifies the live site himself; long `sleep`/`gh run watch` loops stall the conversation.
 - **Git hygiene:** never blanket `git add .` (large binaries slip in; GitHub rejects files >100 MB).
 
 ## Open Items
