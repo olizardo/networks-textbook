@@ -73,7 +73,7 @@ edge_layer <- function(width = 2.2) {
 edge_scales <- function() {
   list(
     scale_edge_color_manual(values = c("+" = pos_col, "-" = neg_col, "±" = "#7d3c98")),
-    scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33", "±" = "13"))
+    scale_edge_linetype_manual(values = c("+" = "solid", "-" = "solid", "±" = "13"))
   )
 }
 
@@ -84,6 +84,24 @@ triad_panel <- function(signs, ttl = NULL, node_size = 14, lab = 5) {
   ggraph(g, layout = circ_lay(c("P", "O", "Q"))) +
     geom_edge_link(aes(color = sign, linetype = sign),
                    arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
+                   width = 1.8, end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+    geom_node_point(size = node_size, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.4) +
+    geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
+    edge_scales() +
+    coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-0.95, 1.3), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 9)) +
+    ggtitle(ttl)
+}
+
+# Undirected version: same triangle, no arrowheads (one tie per pair)
+utriad_panel <- function(signs, ttl = NULL, node_size = 14, lab = 5,
+                         nms = c("P", "O", "Q")) {
+  e <- data.frame(from = c("P", "O", "P"), to = c("O", "Q", "Q"), sign = signs)
+  g <- graph_from_data_frame(e, directed = FALSE)
+  V(g)$name <- nms
+  ggraph(g, layout = circ_lay(nms)) +
+    geom_edge_link(aes(color = sign, linetype = sign),
                    width = 1.8, end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
     geom_node_point(size = node_size, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.4) +
     geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
@@ -428,7 +446,7 @@ ggraph(sg5, layout = circ_lay(c("A", "B", "C", "D", "E"))) +
 ::: {.column width="45%"}
 ```{r}
 #| fig.width: 3.4
-#| fig.height: 3.6
+#| fig.height: 3.7
 g <- make_empty_graph(n = 0) + vertices("P")
 ggraph(g, layout = cbind(x = 0, y = 0)) +
   geom_node_point(size = 26, fill = "#d4edda", color = "#2c3e50", shape = 21, stroke = 1.8) +
@@ -454,7 +472,7 @@ ggraph(g, layout = cbind(x = 0, y = 0)) +
 ::: {.column width="45%"}
 ```{r}
 #| fig.width: 3.6
-#| fig.height: 3.6
+#| fig.height: 3.7
 e <- data.frame(from = "P", to = "O")
 g <- graph_from_data_frame(e, directed = TRUE)
 ggraph(g, layout = circ_lay(c("P", "O"))) +
@@ -657,6 +675,33 @@ triad_panel(c("+", "+", "-"), "(+, +, −)") +
 
 ---
 
+## The Undirected Case: Four Configurations
+
+::: {.columns}
+::: {.column width="48%"}
+```{r}
+#| fig.width: 6
+#| fig.height: 5
+utriad_panel(c("+", "+", "+"), "(+, +, +)") +
+  utriad_panel(c("-", "-", "+"), "(−, −, +)") +
+  utriad_panel(c("+", "+", "-"), "(+, +, −)") +
+  utriad_panel(c("-", "-", "-"), "(−, −, −)") +
+  plot_layout(nrow = 2)
+```
+:::
+
+::: {.column width="52%"}
+::: {.incremental}
+- Drop the arrowheads, so each pair has a single tie, and the count halves: **eight → four** configurations.
+- Two are **balanced**: all positive, or two negatives (top row).
+- Two are **unbalanced**: one negative, or all three negative (bottom row).
+- The rule is unchanged: an even number of negative ties (zero or two) is balanced.
+:::
+:::
+:::
+
+---
+
 ## Tension and Change
 
 ::: {.columns}
@@ -794,23 +839,43 @@ triad_panel(c("-", "+", "-"), "(−, +, −)") +
 
 ::: {.column width="48%"}
 ```{r}
-#| fig.width: 4.4
-#| fig.height: 4.4
+#| fig.width: 4.8
+#| fig.height: 4.8
 # P likes both friends; Friend 1 likes Taylor, Friend 2 dislikes Taylor;
-# P's tie to Taylor is ambivalent (±)
+# P's tie to Taylor is drawn as TWO parallel edges (+ and -) for ambivalence
 xp_e <- data.frame(
-  from = c("P", "P", "Friend 1", "Friend 2", "P"),
-  to   = c("Friend 1", "Friend 2", "Taylor", "Taylor", "Taylor"),
-  sign = c("+", "+", "+", "-", "±")
+  from = c("P", "P", "Friend 1", "Friend 2", "P", "P"),
+  to   = c("Friend 1", "Friend 2", "Taylor", "Taylor", "Taylor", "Taylor"),
+  sign = c("+", "+", "+", "-", "+", "-")
 )
 xp <- graph_from_data_frame(xp_e, directed = TRUE)
 xp_lay <- rbind(c(0, 1.05), c(-0.95, -0.35), c(0.95, -0.35), c(0, -1.0))
 rownames(xp_lay) <- c("P", "Friend 1", "Friend 2", "Taylor")
 xp_plot <- function() {
+  # vertex order from first appearance in xp_e: P=1, Friend 1=2, Friend 2=3, Taylor=4
+  pt_arrow <- arrow(length = unit(3.5, "mm"), type = "closed")
+  # Two STRAIGHT parallel P->Taylor edges: shift each straight segment sideways
+  # (perpendicular = horizontal here) by +/- d so they don't overlap.
+  pt_parallel <- function(sgn, d) {
+    geom_edge_link(data = function(l) {
+      ed <- get_edges()(l)
+      ed <- ed[ed$from == 1 & ed$to == 4 & ed$sign == sgn, ]
+      ed$x <- ed$x + d
+      ed$xend <- ed$xend + d
+      ed
+    },
+    aes(color = sign, linetype = sign), arrow = pt_arrow,
+    width = 1.8, end_cap = circle(10, "mm"), start_cap = circle(10, "mm"))
+  }
   ggraph(xp, layout = xp_lay) +
-    geom_edge_link(aes(color = sign, linetype = sign),
-                   arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
-                   width = 1.8, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+    geom_edge_link(data = function(l) {
+      ed <- get_edges()(l)
+      ed[!(ed$from == 1 & ed$to == 4), ]
+    },
+    aes(color = sign, linetype = sign), arrow = pt_arrow,
+    width = 1.8, end_cap = circle(10, "mm"), start_cap = circle(10, "mm")) +
+    pt_parallel("+", 0.07) +
+    pt_parallel("-", -0.07) +
     geom_node_point(size = 18, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.6) +
     geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
     edge_scales() +
@@ -838,8 +903,8 @@ xp_plot()
 
 ::: {.column width="48%"}
 ```{r}
-#| fig.width: 4.2
-#| fig.height: 4.2
+#| fig.width: 4.6
+#| fig.height: 4.6
 xp_plot()
 ```
 :::
@@ -864,7 +929,7 @@ xp_plot()
 ## Rotating the "You" Position
 
 ```{r}
-#| fig.width: 10.2
+#| fig.width: 7.4
 #| fig.height: 4.6
 # Same balanced undirected triad; the focal "you" node rotates
 rot_fig <- function(focal, ttl) {
@@ -1276,21 +1341,26 @@ signed_kbl(comp_m, color_cells = TRUE)
 ## Adding New Nodes Preserves the Polarization Pattern
 
 ::: {.columns}
-::: {.column width="36%"}
+::: {.column width="50%"}
 ::: {.incremental}
-- Adding new nodes to the structure does not change the group polarization pattern, **as long as their relationships to every other node are balanced**.
+- Adding new nodes does not change the polarization pattern, **as long as their relationships to every other node are balanced**.
 - New nodes **H** and **I** (yellow) join.
-- I makes friends with C, D, and E.
-- H makes friends with A, B, and F.
-- Then they balance out the rest of the relationships with the other side.
-- **Still polarized!**
 :::
 :::
 
-::: {.column width="64%"}
+::: {.column width="50%"}
+::: {.incremental}
+- I makes friends with C, D, and E; H makes friends with A, B, and F.
+- Then they balance out the rest of the relationships with the other side. **Still polarized!**
+:::
+:::
+:::
+
 ```{r}
-#| fig.width: 6.4
-#| fig.height: 3.4
+#| label: addnodes
+#| fig.width: 7.4
+#| fig.height: 3.7
+#| output: false
 # Add H (joins A, B, F side) and I (joins C, D, E side)
 ext_e <- rbind(
   comp_e,
@@ -1311,9 +1381,24 @@ ext_lay <- rbind(
 )
 rownames(ext_lay) <- ord8
 colnames(ext_lay) <- c("x", "y")
+# Layered edges for dense complete-graph figures: negatives UNDER, positives OVER
+edge_layer_2 <- function(width = 1.9) {
+  list(
+    geom_edge_link(data = function(l) {
+      ed <- get_edges()(l)
+      ed[ed$sign == "-", ]
+    }, aes(color = sign, linetype = sign), width = width,
+    end_cap = circle(9, "mm"), start_cap = circle(9, "mm")),
+    geom_edge_link(data = function(l) {
+      ed <- get_edges()(l)
+      ed[ed$sign == "+", ]
+    }, aes(color = sign, linetype = sign), width = width,
+    end_cap = circle(9, "mm"), start_cap = circle(9, "mm"))
+  )
+}
 new_stroke <- function(g) ifelse(V(g)$name %in% c("H", "I"), 2.4, 1.4)
 before_panel <- ggraph(comp, layout = circ_lay(c("A", "B", "F", "C", "D", "E"))) +
-  edge_layer(1.9) + edge_scales() +
+  edge_layer_2(1.9) + edge_scales() +
   geom_node_point(size = 12, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.4) +
   scale_fill_manual(values = fac_map) +
   geom_node_text(aes(label = name), fontface = "bold", size = 4.4, color = "#2c3e50") +
@@ -1322,7 +1407,7 @@ before_panel <- ggraph(comp, layout = circ_lay(c("A", "B", "F", "C", "D", "E")))
                          plot.title = element_text(size = 12, face = "bold")) +
   ggtitle("Before: 6 nodes")
 after_panel <- ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
-  edge_layer(1.9) + edge_scales() +
+  edge_layer_2(1.9) + edge_scales() +
   geom_node_point(size = 12, aes(fill = name), color = "#2c3e50", shape = 21,
                   stroke = new_stroke(ext)) +
   scale_fill_manual(values = ext_map) +
@@ -1343,8 +1428,8 @@ ext_plot <- function(node_size = 13, lab = 4.6, edge_w = 2) {
 }
 before_panel + after_panel + plot_layout(nrow = 1)
 ```
-:::
-:::
+
+<div style="text-align: center;"><img src="balance-signed-graphs_files/figure-revealjs/addnodes-1.png" width="720"></div>
 
 ---
 
@@ -1399,24 +1484,69 @@ sub_panel(c("A", "C", "E"), "Within G, subgraph {A, C, E}\nis balanced") +
 ## The Sign of a Path
 
 ::: {.columns}
-::: {.column width="48%"}
+::: {.column width="46%"}
 ```{r}
-#| fig.width: 4.4
-#| fig.height: 4.4
-ext_plot()
+#| fig.width: 4.6
+#| fig.height: 4.6
+# Highlight the two example paths from F to I (orange edges); mute the rest
+sg_paths <- list(c("F", "B", "A", "C", "I"), c("F", "B", "E", "I"))
+pkeys <- unique(unlist(lapply(sg_paths, function(p)
+  apply(cbind(p[-length(p)], p[-1]), 1, function(x) paste(sort(x), collapse = "|")))))
+edge_key <- function(l) {
+  ed <- get_edges()(l)
+  nm <- V(ext)$name
+  paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
+}
+hi <- c("F", "I")
+ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
+  geom_edge_link(color = "grey72", width = 1.1,
+                 end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+  geom_edge_link(data = function(l) {
+    ed <- get_edges()(l)
+    k <- edge_key(l)
+    ed[k %in% pkeys, ]
+  },
+                 aes(color = sign, linetype = sign), width = 2.6,
+                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+  edge_scales() +
+  geom_node_point(size = 13,
+                  aes(fill = name), shape = 21,
+                  color = "#2c3e50",
+                  stroke = ifelse(V(ext)$name %in% hi, 2.6, 1.4)) +
+  scale_fill_manual(values = c(ext_map, "F" = "#ABEBC6", "I" = "#ABEBC6"),
+                    guide = "none") +
+  geom_node_text(aes(label = name), fontface = "bold", size = 4.6,
+                 color = ifelse(V(ext)$name %in% hi, "forestgreen", "#2c3e50")) +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none",
+                         plot.title = element_text(size = 11, face = "bold")) +
+  ggtitle("The two paths from F to I (thick)")
 ```
 :::
 
-::: {.column width="52%"}
+::: {.column width="54%"}
 ::: {.incremental}
-- The **sign of a path** is the **product of the signs** of each edge in it.
-- $F$ and $I$ have a negative connection.
-- All paths connecting F and I are **negative**:
-  - F–B–A–C–I: $(+1)(+1)(-1)(+1) = -1$
-  - F–B–E–I: $(+1)(-1)(+1) = -1$
-- Positively connected nodes like E and C have **all positive paths**:
-  - E–I–C: $(+1)(+1) = +1$
-  - E–D–C: $(+1)(+1) = +1$
+- The **sign of a path** is the **product of the signs** of its edges.
+- $F$ and $I$ sit on opposite sides, so their direct tie is negative.
+- Tracing both routes between them, **every path multiplies out to −1**:
+:::
+
+```{r}
+#| echo: false
+#| results: asis
+path_tbl <- data.frame(
+  Path = c("F–B–A–C–I", "F–B–E–I"),
+  `Signs along the path` = c("(+1) × (+1) × (−1) × (+1)", "(+1) × (−1) × (+1)"),
+  Product = c("−1", "−1"),
+  check.names = FALSE
+)
+knitr::kable(path_tbl, format = "html", align = "llc") |>
+  kable_styling(font_size = 20, full_width = FALSE, position = "center")
+```
+
+::: {.incremental}
+- An **odd number of negative edges** along the path means a negative path.
+- Contrast: same-side pairs like $E$ and $C$ have **all-positive paths** (E–I–C, E–D–C), matching their positive tie.
 :::
 :::
 :::
@@ -1426,20 +1556,61 @@ ext_plot()
 ## Cycles Are Always Positive
 
 ::: {.columns}
-::: {.column width="48%"}
+::: {.column width="46%"}
 ```{r}
-#| fig.width: 4.4
-#| fig.height: 4.4
-ext_plot()
+#| fig.width: 4.6
+#| fig.height: 4.6
+# Highlight two cycles (a 4-cycle and a 5-cycle) on the full graph
+sg_cycles <- list(c("A", "B", "E", "F", "A"), c("A", "C", "D", "E", "B", "A"))
+ckeys <- unique(unlist(lapply(sg_cycles, function(p)
+  apply(cbind(p[-length(p)], p[-1]), 1, function(x) paste(sort(x), collapse = "|")))))
+ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
+  geom_edge_link(color = "grey72", width = 1.1,
+                 end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+  geom_edge_link(data = function(l) {
+    ed <- get_edges()(l)
+    k <- edge_key(l)
+    ed[k %in% ckeys, ]
+  },
+  aes(color = sign, linetype = sign), width = 2.6,
+  end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+  edge_scales() +
+  geom_node_point(size = 13,
+                  aes(fill = name), shape = 21,
+                  color = "#2c3e50",
+                  stroke = ifelse(V(ext)$name == "A", 2.6, 1.4)) +
+  scale_fill_manual(values = c(ext_map, "A" = "#ABEBC6"), guide = "none") +
+  geom_node_text(aes(label = name), fontface = "bold", size = 4.6,
+                 color = ifelse(V(ext)$name == "A", "forestgreen", "#2c3e50")) +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+  theme_slides() + theme(legend.position = "none",
+                         plot.title = element_text(size = 11, face = "bold")) +
+  ggtitle("A 4-cycle and a 5-cycle (thick)")
 ```
 :::
 
-::: {.column width="52%"}
+::: {.column width="54%"}
 ::: {.incremental}
-- In a balanced signed graph, **cycles of any length are always positive**.
-- 3-cycle A–C–B: $(-1)(-1)(+1) = +1$
-- 5-cycle A–C–D–E–B: $(-1)(+1)(+1)(-1)(+1) = +1$
-- Equivalent statement: every cycle contains an **even number of negative edges**.
+- A **cycle** is a path that **starts and ends at the same node**.
+- In a balanced signed graph, **cycles of any length are always positive** — they contain an **even number of negative edges** (zero or two).
+- Each cycle below is written as a closed walk, beginning and ending at $A$:
+:::
+
+```{r}
+#| echo: false
+#| results: asis
+cycle_tbl <- data.frame(
+  Cycle = c("A–B–E–F–A", "A–C–D–E–B–A"),
+  `Signs along the cycle` = c("(+1) × (−1) × (−1) × (+1)", "(−1) × (+1) × (+1) × (−1) × (+1)"),
+  Product = c("+1", "+1"),
+  check.names = FALSE
+)
+knitr::kable(cycle_tbl, format = "html", align = "llc") |>
+  kable_styling(font_size = 20, full_width = FALSE, position = "center")
+```
+
+::: {.incremental}
+- Both cycles have **exactly two** negative edges — an even count — so both multiply out to $+1$.
 :::
 :::
 :::
@@ -1459,6 +1630,43 @@ ext_plot()
   - Positive links fall **within** clusters.
   - Negative links fall **between** clusters.
 - The all-negative triad — unbalanced under strict balance — is now **allowed**.
+:::
+
+---
+
+## The Three Allowed Triads
+
+::: {.columns}
+::: {.column width="33%"}
+```{r}
+#| fig.width: 3.2
+#| fig.height: 3.2
+utriad_panel(c("+", "+", "+"), "All positive", nms = c("A", "B", "C"))
+```
+:::
+
+::: {.column width="33%"}
+```{r}
+#| fig.width: 3.2
+#| fig.height: 3.2
+utriad_panel(c("-", "-", "+"), "Two negative", nms = c("A", "B", "C"))
+```
+:::
+
+::: {.column width="33%"}
+```{r}
+#| fig.width: 3.2
+#| fig.height: 3.2
+utriad_panel(c("-", "-", "-"), "All negative", nms = c("A", "B", "C"))
+```
+:::
+:::
+
+::: {.incremental}
+- **All positive**: three mutual friends — one cluster.
+- **Two negative**: A and B are linked to each other and both dislike C — two clusters, with C alone on the other side.
+- **All negative**: three mutual enemies — each sits in its own cluster.
+- In every allowed triad, the **negative ties (solid red) cross between clusters**, and positive ties stay **within** a cluster.
 :::
 
 ---
