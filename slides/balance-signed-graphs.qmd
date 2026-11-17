@@ -950,12 +950,13 @@ rot_fig <- function(focal, ttl) {
     geom_node_text(aes(label = lab), fontface = "bold", size = 8, color = "#2c3e50") +
     coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-0.95, 1.3), clip = "off") +
     theme_slides() + theme(legend.position = "none",
-                           plot.title = element_text(size = 12, face = "bold")) +
+                           plot.title = element_text(size = 10.5, face = "bold",
+                                                     lineheight = 1.05)) +
     ggtitle(ttl)
 }
-rot_fig("n3", "From the lower-left node:\n\"a friend of an enemy is an enemy\"") +
-  rot_fig("n1", "From the top node:\n\"an enemy of an enemy is a friend\"") +
-  rot_fig("n2", "From the lower-right node:\n\"an enemy of a friend is an enemy\"")
+rot_fig("n3", "From the lower-left node:\n\"a friend of an enemy\nis an enemy\"") +
+  rot_fig("n1", "From the top node:\n\"an enemy of an enemy\nis a friend\"") +
+  rot_fig("n2", "From the lower-right node:\n\"an enemy of a friend\nis an enemy\"")
 ```
 
 ---
@@ -1314,25 +1315,94 @@ signed_kbl(comp_m, color_cells = TRUE)
 
 ---
 
-## Structural Balance in Everyday Life
+## Structural Balance in Everyday Life: Balanced Triads
 
 ::: {.columns}
-::: {.column width="50%"}
+::: {.column width="48%"}
 ::: {.incremental}
+- Think of retweeting on social media as a signed tie.
 - **P** (a liberal retweeter), **O** (a liberal tweeter), **Q** (a liberal tweet):
   - All sentiments positive. A balanced triad.
-- **P** (a conservative retweeter), **O** (a conservative tweeter), **Q** (a conservative tweet):
+- **P'** (a conservative retweeter), **O'** (a conservative tweeter), **Q'** (a conservative tweet):
   - Also all positive. Another balanced triad.
 :::
 :::
 
-::: {.column width="50%"}
+::: {.column width="52%"}
+```{r}
+#| label: echo-balanced
+#| fig.width: 5.4
+#| fig.height: 3.2
+# Two all-positive camp triads side by side; blue = liberal, red = conservative
+camp_triad <- function(ids, ttl) {
+  e <- data.frame(from = ids[c(1, 1, 2)], to = ids[c(2, 3, 3)], sign = "+")
+  g <- graph_from_data_frame(e, directed = FALSE)
+  lay <- circ_lay(ids)
+  fills <- c("P" = "#AED6F1", "O" = "#AED6F1", "Q" = "#ecf0f1",
+             "P'" = "#F5B7B1", "O'" = "#F5B7B1", "Q'" = "#ecf0f1")
+  ggraph(g, layout = lay) +
+    geom_edge_link(aes(color = sign, linetype = sign), width = 1.6,
+                   end_cap = circle(7, "mm"), start_cap = circle(7, "mm")) +
+    edge_scales() +
+    geom_node_point(size = 16, aes(fill = name), color = "#2c3e50",
+                    shape = 21, stroke = 1.6) +
+    scale_fill_manual(values = fills) +
+    geom_node_text(aes(label = name), fontface = "bold", size = 5.5,
+                   color = "#2c3e50") +
+    coord_fixed(xlim = c(-1.25, 1.25), ylim = c(-1.1, 1.3), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 10.5, face = "bold")) +
+    ggtitle(ttl)
+}
+camp_triad(c("P", "O", "Q"), "Liberal camp: all positive") +
+  camp_triad(c("P'", "O'", "Q'"), "Conservative camp: all positive")
+```
+:::
+:::
+
+---
+
+## Structural Balance in Everyday Life: The Cross-Camp Triad
+
+::: {.columns}
+::: {.column width="48%"}
 ::: {.incremental}
-- **P** (a liberal retweeter), **O** (a conservative tweeter), **Q** (a conservative tweet):
-  - Negative sentiments all around. An unbalanced triad.
-- In a balanced platform, liberal accounts retweet liberal content and conservative accounts retweet conservative content, and each side disparages the other's.
+- **P** (a liberal retweeter) meets **O'** (a conservative tweeter) and **Q'** (a conservative tweet):
+  - P disparages both: two negative ties.
+  - But O' endorses Q': one positive tie.
+  - **An unbalanced triad** (one negative).
+- Balance pushes P away from the conservative camp: liberal accounts retweet liberal content and disparage conservative content (and vice versa).
 - Balance at the triad level aggregates into **echo chambers** at the network level.
 :::
+:::
+
+::: {.column width="52%"}
+```{r}
+#| label: echo-cross
+#| fig.width: 4.2
+#| fig.height: 4.0
+# P (liberal) vs the conservative pair: two negatives, one positive
+xc_e <- data.frame(from = c("P", "P", "O'"), to = c("O'", "Q'", "Q'"),
+                   sign = c("-", "-", "+"))
+xc <- graph_from_data_frame(xc_e, directed = FALSE)
+xc_lay <- rbind(c(-1.0, -0.55), c(1.0, 0.55), c(0.0, 1.05))
+rownames(xc_lay) <- c("P", "O'", "Q'")
+colnames(xc_lay) <- c("x", "y")
+fills_xc <- c("P" = "#AED6F1", "O'" = "#F5B7B1", "Q'" = "#ecf0f1")
+ggraph(xc, layout = xc_lay[V(xc)$name, , drop = FALSE]) +
+  geom_edge_link(aes(color = sign, linetype = sign), width = 1.8,
+                 end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+  edge_scales() +
+  geom_node_point(size = 18, aes(fill = name), color = "#2c3e50",
+                  shape = 21, stroke = 1.7) +
+  scale_fill_manual(values = fills_xc) +
+  geom_node_text(aes(label = name), fontface = "bold", size = 6,
+                 color = "#2c3e50") +
+  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-0.95, 1.5), clip = "off") +
+  theme_slides() + theme(legend.position = "none",
+                         plot.title = element_text(size = 10.5, face = "bold")) +
+  ggtitle("Cross-camp triad: unbalanced")
+```
 :::
 :::
 
@@ -1481,46 +1551,48 @@ sub_panel(c("A", "C", "E"), "Within G, subgraph {A, C, E}\nis balanced") +
 
 ---
 
-## The Sign of a Path
+## The Sign of a Path: Nodes in Different Clusters
 
 ::: {.columns}
 ::: {.column width="46%"}
 ```{r}
 #| fig.width: 4.6
 #| fig.height: 4.6
-# Highlight the two example paths from F to I (orange edges); mute the rest
-sg_paths <- list(c("F", "B", "A", "C", "I"), c("F", "B", "E", "I"))
-pkeys <- unique(unlist(lapply(sg_paths, function(p)
-  apply(cbind(p[-length(p)], p[-1]), 1, function(x) paste(sort(x), collapse = "|")))))
+# Highlight example paths (thick colored edges); mute the rest of the graph
 edge_key <- function(l) {
   ed <- get_edges()(l)
   nm <- V(ext)$name
   paste(pmin(nm[ed$from], nm[ed$to]), pmax(nm[ed$from], nm[ed$to]), sep = "|")
 }
-hi <- c("F", "I")
-ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
-  geom_edge_link(color = "grey72", width = 1.1,
-                 end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
-  geom_edge_link(data = function(l) {
-    ed <- get_edges()(l)
-    k <- edge_key(l)
-    ed[k %in% pkeys, ]
-  },
-                 aes(color = sign, linetype = sign), width = 2.6,
-                 end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
-  edge_scales() +
-  geom_node_point(size = 13,
-                  aes(fill = name), shape = 21,
-                  color = "#2c3e50",
-                  stroke = ifelse(V(ext)$name %in% hi, 2.6, 1.4)) +
-  scale_fill_manual(values = c(ext_map, "F" = "#ABEBC6", "I" = "#ABEBC6"),
-                    guide = "none") +
-  geom_node_text(aes(label = name), fontface = "bold", size = 4.6,
-                 color = ifelse(V(ext)$name %in% hi, "forestgreen", "#2c3e50")) +
-  coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
-  theme_slides() + theme(legend.position = "none",
-                         plot.title = element_text(size = 11, face = "bold")) +
-  ggtitle("The two paths from F to I (thick)")
+path_fig <- function(pair, paths, ttl) {
+  pkeys <- unique(unlist(lapply(paths, function(p)
+    apply(cbind(p[-length(p)], p[-1]), 1, function(x) paste(sort(x), collapse = "|")))))
+  ggraph(ext, layout = ext_lay[V(ext)$name, , drop = FALSE]) +
+    geom_edge_link(color = "grey72", width = 1.1,
+                   end_cap = circle(8, "mm"), start_cap = circle(8, "mm")) +
+    geom_edge_link(data = function(l) {
+      ed <- get_edges()(l)
+      k <- edge_key(l)
+      ed[k %in% pkeys, ]
+    },
+                   aes(color = sign, linetype = sign), width = 2.6,
+                   end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
+    edge_scales() +
+    geom_node_point(size = 13,
+                    aes(fill = name), shape = 21,
+                    color = "#2c3e50",
+                    stroke = ifelse(V(ext)$name %in% pair, 2.6, 1.4)) +
+    scale_fill_manual(values = c(ext_map, setNames(rep("#ABEBC6", 2), pair)),
+                      guide = "none") +
+    geom_node_text(aes(label = name), fontface = "bold", size = 4.6,
+                   color = ifelse(V(ext)$name %in% pair, "forestgreen", "#2c3e50")) +
+    coord_fixed(xlim = c(-1.35, 1.35), ylim = c(-1.3, 1.35), clip = "off") +
+    theme_slides() + theme(legend.position = "none",
+                           plot.title = element_text(size = 11, face = "bold")) +
+    ggtitle(ttl)
+}
+path_fig(c("F", "I"), list(c("F", "B", "A", "C", "I"), c("F", "B", "E", "I")),
+         "The two paths from F to I (thick)")
 ```
 :::
 
@@ -1546,7 +1618,46 @@ knitr::kable(path_tbl, format = "html", align = "llc") |>
 
 ::: {.incremental}
 - An **odd number of negative edges** along the path means a negative path.
-- Contrast: same-side pairs like $E$ and $C$ have **all-positive paths** (E–I–C, E–D–C), matching their positive tie.
+:::
+:::
+:::
+
+---
+
+## The Sign of a Path: Nodes in the Same Cluster
+
+::: {.columns}
+::: {.column width="46%"}
+```{r}
+#| fig.width: 4.6
+#| fig.height: 4.6
+path_fig(c("E", "C"), list(c("E", "I", "C"), c("E", "D", "C")),
+         "The two paths from E to C (thick)")
+```
+:::
+
+::: {.column width="54%"}
+::: {.incremental}
+- Now contrast $E$ and $C$, who sit on the **same side**, so their direct tie is positive.
+- Tracing both routes between them, **every path multiplies out to +1**:
+:::
+
+```{r}
+#| echo: false
+#| results: asis
+path_tbl2 <- data.frame(
+  Path = c("E–I–C", "E–D–C"),
+  `Signs along the path` = c("(+1) × (+1)", "(+1) × (+1)"),
+  Product = c("+1", "+1"),
+  check.names = FALSE
+)
+knitr::kable(path_tbl2, format = "html", align = "llc") |>
+  kable_styling(font_size = 20, full_width = FALSE, position = "center")
+```
+
+::: {.incremental}
+- An **even number of negative edges** (zero here) means a positive path.
+- Either way, **every path between a pair of nodes carries the same sign as their direct tie** — a hallmark of balance.
 :::
 :::
 :::
@@ -1639,7 +1750,7 @@ knitr::kable(cycle_tbl, format = "html", align = "llc") |>
 ::: {.columns}
 ::: {.column width="33%"}
 ```{r}
-#| fig.width: 3.2
+#| fig.width: 3.3
 #| fig.height: 3.2
 utriad_panel(c("+", "+", "+"), "All positive", nms = c("A", "B", "C"))
 ```
@@ -1647,7 +1758,7 @@ utriad_panel(c("+", "+", "+"), "All positive", nms = c("A", "B", "C"))
 
 ::: {.column width="33%"}
 ```{r}
-#| fig.width: 3.2
+#| fig.width: 3.3
 #| fig.height: 3.2
 utriad_panel(c("-", "-", "+"), "Two negative", nms = c("A", "B", "C"))
 ```
@@ -1655,7 +1766,7 @@ utriad_panel(c("-", "-", "+"), "Two negative", nms = c("A", "B", "C"))
 
 ::: {.column width="33%"}
 ```{r}
-#| fig.width: 3.2
+#| fig.width: 3.3
 #| fig.height: 3.2
 utriad_panel(c("-", "-", "-"), "All negative", nms = c("A", "B", "C"))
 ```
@@ -1664,9 +1775,9 @@ utriad_panel(c("-", "-", "-"), "All negative", nms = c("A", "B", "C"))
 
 ::: {.incremental}
 - **All positive**: three mutual friends — one cluster.
-- **Two negative**: A and B are linked to each other and both dislike C — two clusters, with C alone on the other side.
+- **Two negative**: A and B like each other, both dislike C — two clusters, C alone.
 - **All negative**: three mutual enemies — each sits in its own cluster.
-- In every allowed triad, the **negative ties (solid red) cross between clusters**, and positive ties stay **within** a cluster.
+- In every allowed triad, negative ties (solid red) **cross between clusters**; positive ties stay **within**.
 :::
 
 ---
@@ -1680,7 +1791,7 @@ utriad_panel(c("-", "-", "-"), "All negative", nms = c("A", "B", "C"))
   - **All-positive** triads (everybody inside a cluster likes everybody else in it).
   - **Two-negative** triads (two cluster-mates against an outsider).
   - **All-negative** triads (one node from each of three clusters).
-- **Step 1**: draw the **positive** links inside each of three clusters: $\{a, d, e\}$, $\{c, g, i\}$, and $\{b, f, h\}$.
+- **Step 1**: draw the **positive** links inside each of three clusters: $\{b, g, l\}$, $\{a, d, h, j\}$, and $\{c, e, f, i, k\}$ — clusters can be **any size**.
 :::
 :::
 
@@ -1688,14 +1799,14 @@ utriad_panel(c("-", "-", "-"), "All negative", nms = c("A", "B", "C"))
 ```{r}
 #| fig.width: 5.2
 #| fig.height: 4.8
-# 9-node clusterable signed graph: clusters {a,d,e}, {c,g,i}, {b,f,h}
+# 12-node clusterable signed graph: clusters {b,g,l} (3), {a,d,h,j} (4), {c,e,f,i,k} (5)
 cl_pairs <- function(g1, sign) {
   idx <- combn(seq_along(g1), 2, simplify = FALSE)
   do.call(rbind, lapply(idx, function(p)
     data.frame(from = g1[p[1]], to = g1[p[2]], sign = sign)))
 }
-clus_nodes <- c("a", "b", "c", "d", "e", "f", "g", "h", "i")
-three_clus <- list(c("a","d","e"), c("c","g","i"), c("b","f","h"))
+clus_nodes <- letters[1:12]
+three_clus <- list(c("b","g","l"), c("a","d","h","j"), c("c","e","f","i","k"))
 clus_e <- rbind(
   cl_pairs(three_clus[[1]], "+"),
   cl_pairs(three_clus[[2]], "+"),
@@ -1705,23 +1816,24 @@ clus_e <- rbind(
   comp_pairs(three_clus[[2]], three_clus[[3]], "-")
 )
 clus <- graph_from_data_frame(clus_e, directed = FALSE)
-cl_map <- c("a" = "#AED6F1", "d" = "#AED6F1", "e" = "#AED6F1",
-            "c" = "#ABEBC6", "g" = "#ABEBC6", "i" = "#ABEBC6",
-            "b" = "#F5B7B1", "f" = "#F5B7B1", "h" = "#F5B7B1")
-# Three-cluster layout: each cluster a tight triangle around its centroid
+cl_map <- c("b" = "#AED6F1", "g" = "#AED6F1", "l" = "#AED6F1",
+            "a" = "#ABEBC6", "d" = "#ABEBC6", "h" = "#ABEBC6", "j" = "#ABEBC6",
+            "c" = "#F5B7B1", "e" = "#F5B7B1", "f" = "#F5B7B1",
+            "i" = "#F5B7B1", "k" = "#F5B7B1")
+# Three-cluster layout: each cluster a tight ring around its centroid; bigger cluster, bigger ring
 mk_clus_lay <- function(cx, cy, names, r = 0.38) {
   ang <- pi/2 - (0:(length(names) - 1)) * (2 * pi / length(names))
   m <- cbind(x = cx + r * cos(ang), y = cy + r * sin(ang))
   rownames(m) <- names
   m
 }
-clus_lay <- rbind(mk_clus_lay(-1.20,  1.05, three_clus[[1]], r = 0.52),
+clus_lay <- rbind(mk_clus_lay(-1.15,  1.05, three_clus[[1]], r = 0.62),
                   mk_clus_lay( 1.20,  1.05, three_clus[[2]], r = 0.52),
-                  mk_clus_lay( 0.00, -1.25, three_clus[[3]], r = 0.52))
+                  mk_clus_lay( 0.00, -1.30, three_clus[[3]], r = 0.42))
 pos_idx <- function(l) { ed <- get_edges()(l); ed[ed$sign == "+", ] }
-clus_plot <- function(node_size = 15, lab = 6, edge_w = 1.7) {
+clus_plot <- function(node_size = 13, lab = 5, edge_w = 1.4) {
   ggraph(clus, layout = clus_lay[V(clus)$name, , drop = FALSE]) +
-    edge_layer(edge_w) + edge_scales() +
+    edge_layer_2(edge_w) + edge_scales() +
     geom_node_point(size = node_size, aes(fill = name), color = "#2c3e50", shape = 21, stroke = 1.6) +
     scale_fill_manual(values = cl_map) +
     geom_node_text(aes(label = name), fontface = "bold", size = lab, color = "#2c3e50") +
@@ -1768,21 +1880,41 @@ clus_plot()
 ## The Adjacency Matrix of the Clusterable Network
 
 ```{r}
-clus_m <- matrix("-1", 9, 9, dimnames = list(clus_nodes, clus_nodes))
+clus_m <- matrix("-1", 12, 12, dimnames = list(clus_nodes, clus_nodes))
 diag(clus_m) <- "--"
-for (pr in list(c("a","d"), c("a","e"), c("d","e"), c("c","g"), c("c","i"), c("g","i"),
-                c("b","f"), c("b","h"), c("f","h"))) {
+# Positive cells = all within-cluster pairs, derived from the cluster list
+pos_pairs <- do.call(rbind, lapply(three_clus, function(cl) {
+  p <- combn(cl, 2)
+  data.frame(from = p[1, ], to = p[2, ])
+}))
+for (i in seq_len(nrow(pos_pairs))) {
+  pr <- unlist(pos_pairs[i, ])
   clus_m[pr[1], pr[2]] <- clus_m[pr[2], pr[1]] <- "1"
 }
 # Cluster-contiguous ordering for the reveal slide
-clus_ord <- c("a", "d", "e", "c", "g", "i", "b", "f", "h")
-signed_kbl(clus_m, color_cells = TRUE)
+clus_ord <- c("b", "g", "l", "a", "d", "h", "j", "c", "e", "f", "i", "k")
 ```
 
+::: {.columns}
+::: {.column width="58%"}
+<div class="table-dense">
+
+```{r}
+#| echo: false
+#| results: asis
+cat(as.character(signed_kbl(clus_m, font = 16, color_cells = TRUE)))
+```
+
+</div>
+:::
+
+::: {.column width="42%"}
 ::: {.incremental}
 - Positives ($+1$, green) sit inside each of the three clusters; negatives ($-1$, red) sit between them.
 - Triads entirely within a cluster are all-positive; triads spanning two clusters have two negatives; triads spanning all three are all-negative.
 - In alphabetical order, though, the matrix **looks like noise**: the green cells are scattered, with no visible pattern.
+:::
+:::
 :::
 
 ---
@@ -1794,17 +1926,17 @@ signed_kbl(clus_m, color_cells = TRUE)
 ```{r}
 #| fig.width: 4.6
 #| fig.height: 4.4
-clus_plot(node_size = 14, lab = 5.5, edge_w = 2)
+clus_plot(node_size = 11, lab = 4.6, edge_w = 1.6)
 ```
 :::
 
 ::: {.column width="50%"}
 ::: {.incremental}
 - Davis shows that the nodes partition into three clusters:
-  - **Cluster 1**: $\{a, d, e\}$
-  - **Cluster 2**: $\{c, g, i\}$
-  - **Cluster 3**: $\{b, f, h\}$
-- Positive links within clusters, negative links between them.
+  - **Cluster 1**: $\{b, g, l\}$ — three nodes
+  - **Cluster 2**: $\{a, d, h, j\}$ — four nodes
+  - **Cluster 3**: $\{c, e, f, i, k\}$ — five nodes
+- Clusters can be **any size**; positive links run within clusters, negative links between them.
 - The all-negative triads (like $\{a, b, c\}$, one node from each cluster) are what keep this from being strictly **balanced** — but it is perfectly **clusterable**.
 :::
 :::
@@ -1814,13 +1946,25 @@ clus_plot(node_size = 14, lab = 5.5, edge_w = 2)
 
 ## The Cluster Structure in the Reordered Matrix
 
+::: {.columns}
+::: {.column width="58%"}
+<div class="table-dense">
+
 ```{r}
-signed_kbl(clus_m[clus_ord, clus_ord], color_cells = TRUE)
+#| echo: false
+#| results: asis
+cat(as.character(signed_kbl(clus_m[clus_ord, clus_ord], font = 16, color_cells = TRUE)))
 ```
 
+</div>
+:::
+
+::: {.column width="42%"}
 ::: {.incremental}
-- Same matrix, with rows and columns reordered cluster by cluster: $\{a, d, e\}$, $\{c, g, i\}$, $\{b, f, h\}$.
+- Same matrix, with rows and columns reordered cluster by cluster: $\{b, g, l\}$, $\{a, d, h, j\}$, $\{c, e, f, i, k\}$.
 - Reordering exposes **three positive blocks on the diagonal**.
 - Every off-diagonal block is negative.
 - Balance gives two camps; clusterability generalizes the same logic to **any number of clusters**.
+:::
+:::
 :::
