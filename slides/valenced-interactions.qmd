@@ -589,7 +589,7 @@ ggraph(g_n, layout = "manual", x = x, y = y) +
 - How Solidarity networks **grow** and **stratify** over time:
   - **Horizontal Integration**: Sharing the same status position drives the creation of reciprocal positive ties within the same tier (clique formation).
   - **Class Cohesion**: Solidarity processes stabilize clusters into horizontal social classes (e.g., unions, associations, exclusive clubs).
-  - **Vertical Hostility**: Cross-tier positive ties are severed, and negative ties (deference/dominance) solidify vertical boundaries.
+  - **Vertical Hostility**: Cross-tier *bonding* is severed. What remains across tiers is asymmetric — deference flowing up to the elite, dominance flowing down.
   - **Clique Stratification**: The network evolves into a horizontally integrated, vertically polarized system.
 :::
 :::
@@ -689,7 +689,8 @@ One tie per pair (antisymmetric, complete) — but arranged as a **cycle**, whic
 - If A dominates B, and B dominates C, then A also dominates C — just like $A > B$ and $B > C$ imply $A > C$.
 - In a directed network: if A is above B, A is above everyone B is above.
 - A linear dominance order must be transitive — the A → C arc **has to exist**.
-- An **intransitive triad** has the full chain A → B → C but the A → C tie is missing or reversed — it actively violates transitivity.
+- An **intransitive triad** has the full chain A → B → C but the A → C tie *reversed* (C → A) — the closure is contradicted, not merely absent.
+- A merely *absent* A → C tie is a different case, the **pass-along** triad, which we return to below.
 :::
 :::
 
@@ -972,18 +973,46 @@ ggraph(g_i, layout = "manual", x = x, y = y) +
 ::: {.columns}
 ::: {.column width="55%"}
 ::: {.incremental}
-- Three chickens: a **strong** one, a **moderately strong** one, and a **weak** one.
-- The strong chicken fights and defeats the moderately strong chicken — which suffers injury and lost confidence.
-- The weak chicken only *watched*. But now it can defeat the moderately strong chicken — something it could not do before.
+- Three chickens: **A** is strong, **B** is moderately strong, **C** is weak.
+- A fights and defeats B — which suffers injury and lost confidence.
+- C only *watched*. Yet it can now defeat B, something it could not do before.
+- C's new tie is a **bystander update**. It never fought A, and it never beat B before.
 - The final hierarchy is not a readout of abilities alone; it is shaped by the **order in which contests occur**.
 :::
 :::
 
 ::: {.column width="45%"}
-::: {.incremental}
-- The figure on the previous slide shows exactly this starting point: a **single-edge triad** (A defeated B; C watched).
-- Bystander updating converts that single-edge triad into either a **double-dominant** triad (C never beats A) or a **double-loser** triad (C now beats B).
-:::
+```{r}
+#| fig.width: 4.4
+#| fig.height: 5.2
+# The two ways bystander updating can resolve the observed fight A -> B
+bystander_panel <- function(frm, to, new_key, title) {
+    nd <- data.frame(name = c("A", "B", "C"), x = c(0, -1, 1), y = c(1.2, -0.8, -0.8))
+    ed <- data.frame(from = frm, to = to)
+    ed$type <- ifelse(paste(ed$from, ed$to) == new_key,
+                      "Bystander update", "Observed fight")
+    g <- graph_from_data_frame(ed, directed = TRUE, vertices = nd)
+    ggraph(g, layout = "manual", x = x, y = y) +
+        geom_edge_link(aes(color = type, linetype = type),
+                       arrow = arrow(length = unit(4.5, "mm"), type = "closed"),
+                       end_cap = circle(8.5, "mm"), start_cap = circle(8.5, "mm"), width = 1.5) +
+        geom_node_point(size = 15.5, fill = "#ecf0f1", color = "#2c3e50", shape = 21, stroke = 1.5) +
+        geom_node_text(aes(label = name), fontface = "bold", size = 6.2, color = "#2c3e50") +
+        scale_edge_color_manual(values = c("Observed fight" = "#2c3e50",
+                                           "Bystander update" = "darkorange"), drop = FALSE) +
+        scale_edge_linetype_manual(values = c("Observed fight" = "solid",
+                                              "Bystander update" = "dashed"), drop = FALSE) +
+        coord_fixed(xlim = c(-1.7, 1.7), ylim = c(-1.4, 1.9), clip = "off") +
+        labs(title = title) +
+        theme_slides() +
+        theme(legend.position = "none",
+              plot.title = element_text(size = 15, face = "bold", hjust = 0.5))
+}
+bystander_panel(c("A", "A"), c("B", "C"), "A C",
+                "C defers to A: double-dominant") /
+    bystander_panel(c("A", "C"), c("B", "B"), "C B",
+                    "C beats B: double-loser")
+```
 :::
 :::
 
@@ -1014,7 +1043,7 @@ ggraph(g_i, layout = "manual", x = x, y = y) +
 ::: {.incremental}
 - Compare how distinct social-psychological principles drive micro-motives.
 - Each theory assumes different levels of agency and structural awareness:
-  - **Karma**: Focuses strictly on dyadic reciprocity (actions sent vs. received).
+  - **Karma**: Matches the valence a node sends with the valence it receives — from the network, not dyad by dyad.
   - **Status**: Aligns sentiments with prestige hierarchies (prestige seeking).
   - **Solidarity**: Aligns sentiments with others in the same status position (horizontal classes).
 :::
