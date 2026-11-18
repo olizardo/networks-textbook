@@ -486,78 +486,115 @@ p1 + p2 + plot_layout(nrow = 1)
 ::: {.columns}
 ::: {.column width="50%"}
 ::: {.incremental}
-- Central idea: *"Those in similar positions stick together!"*
-- Actors who **send and receive the same valence** of ties are similarly situated — and come to direct positive ties at one another.
-- Shared position is measured by the valence of the ties actors send and receive (both popular, or both unpopular).
+- Central idea: *"People in the same position in the valenced interaction network are likely to link via positive ties."*
+- **Time 1**: Ego and Other already occupy the same position — each sends (+) and receives (+) ties from distinct alters (the popular "in-crowd").
+- **Time 2**: The shared position generates a new positive tie between them — **status solidarity**: *"Cool kids stick together!"*
 :::
 :::
 
 ::: {.column width="50%"}
 ```{r}
-#| fig.width: 5
-#| fig.height: 5
-# Positive-sphere solidarity: actors who all send AND receive positive ties
-# bond with each other (mutual + exchange within the cluster)
-nodes_s <- data.frame(name = c("A", "B", "C"),
-                      x = c(0, -1.2, 1.2), y = c(1.2, -0.8, -0.8))
-edges_s <- data.frame(
-  from = rep(c("A", "A", "B"), 2),
-  to   = rep(c("B", "C", "C"), 2),
-  sign = "+"
-)
-g_s <- graph_from_data_frame(edges_s, directed = TRUE, vertices = nodes_s)
-ggraph(g_s, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(aes(color = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
-                     width = 2, sep = unit(4, "mm"), end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
-  geom_node_point(size = 20, fill = "gold", color = "white", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "black") +
-  scale_edge_color_manual(values = c("+" = "forestgreen")) +
-  coord_fixed(xlim = c(-2.2, 2.2), ylim = c(-1.9, 2.1), clip = "off") +
-  theme_slides() + theme(legend.position = "none") +
-  ggtitle("Popular actors exchange (+) ties") +
-  labs(subtitle = "everyone sends (+) and receives (+)")
+#| fig.width: 5.5
+#| fig.height: 5.2
+# Solidarity figures follow the reference-deck Time 1 -> Time 2 template:
+# Time 1 shows Ego and Other in the SAME position (same-valence exchange with
+# distinct alters, no tie between them); Time 2 adds the new POSITIVE tie
+# between them. Node-level correspondence, never dyadic reciprocity with alters.
+lay_std <- list(Ego = c(-1.6, 0), Other = c(1.6, 0),
+                A = c(-4.4, 1.2), B = c(-4.4, -1.2),
+                C = c(4.4, 1.2), D = c(4.4, -1.2))
+
+solid_panel <- function(edges, lay, fill_map, ttl, new_edge = FALSE) {
+  if (new_edge) edges <- rbind(edges, data.frame(from = "Ego", to = "Other", sign = "+", new = "new"))
+  g <- graph_from_data_frame(edges, directed = TRUE)
+  lm <- do.call(rbind, lay[V(g)$name]); rownames(lm) <- V(g)$name
+  ggraph(g, layout = lm) +
+    geom_edge_link(aes(color = sign, linetype = sign), width = 2.2,
+                   arrow = arrow(length = unit(2.8, "mm"), type = "closed"),
+                   end_cap = circle(7, "mm"), start_cap = circle(7, "mm"),
+                   data = function(l) { e <- get_edges()(l); e[e$new != "new", ] }) +
+    geom_edge_link(aes(color = new), width = 3.2,
+                   arrow = arrow(length = unit(4, "mm"), type = "closed"),
+                   end_cap = circle(8, "mm"), start_cap = circle(8, "mm"),
+                   data = function(l) { e <- get_edges()(l); e[e$new == "new", ] }) +
+    scale_edge_color_manual(values = c("+" = "forestgreen", "-" = "firebrick", "new" = "forestgreen"), guide = "none") +
+    scale_edge_linetype_manual(values = c("+" = "solid", "-" = "33"), guide = "none") +
+    geom_node_point(aes(fill = name), size = 14, color = "white", shape = 21, stroke = 1.5) +
+    geom_node_text(aes(label = name), fontface = "bold", size = 5, color = "#2c3e50") +
+    scale_fill_manual(values = fill_map, guide = "none") +
+    coord_fixed(xlim = c(-5.3, 5.3), ylim = c(-2.3, 2.3), clip = "off") +
+    theme_slides() + theme(legend.position = "none", plot.title = element_text(size = 12)) +
+    ggtitle(ttl)
+}
+mk_solid <- function(edges, fill_map, ttl, sub) {
+  solid_panel(edges, lay_std, fill_map, "Time 1") /
+  solid_panel(edges, lay_std, fill_map, "Time 2", new_edge = TRUE) +
+  plot_annotation(title = ttl, subtitle = sub,
+    theme = theme(plot.title = element_text(size = 14, face = "bold"),
+                  plot.subtitle = element_text(size = 11)))
+}
+
+e_pos <- data.frame(from = c("A", "Ego", "C", "Other"), to = c("Ego", "B", "Other", "D"),
+                    sign = "+", new = "old")
+mk_solid(e_pos,
+         c(Ego = "#fdfd96", Other = "#fdfd96", A = "#d5d8dc", B = "#d5d8dc", C = "#d5d8dc", D = "#d5d8dc"),
+         "Status Solidarity: The In-Crowd",
+         "both send (+) and receive (+) — so a (+) tie forms")
 ```
 :::
 :::
 
 ---
 
-## Solidarity on the Negative Side
+## Solidarity on the Negative Side: The Downtrodden
 
 ::: {.columns}
 ::: {.column width="50%"}
 ::: {.incremental}
-- The same logic holds at the bottom of the status order: actors who **send and receive negative ties** cluster together.
-- Shared unpopularity motivates bonding among the downtrodden (*"misery loves company"*).
-- Negative-sphere clusters mirror the positive-sphere cliques — solidarity built out of shared hostile exchange.
+- The same logic holds at the bottom of the status order: actors who **send and receive negative ties** are similarly situated (**karma solidarity**).
+- Shared unpopularity motivates **positive** bonding between them — *"misery loves company."*
+- Note: the solidarity tie is itself positive, even though the shared position is built entirely out of negative exchange.
 :::
 :::
 
 ::: {.column width="50%"}
 ```{r}
-#| fig.width: 5
-#| fig.height: 5
-# Negative-sphere solidarity: actors who all send AND receive negative ties
-# also bond with each other (mutual - exchange within the cluster)
-nodes_n <- data.frame(name = c("D", "E", "F"),
-                      x = c(0, -1.2, 1.2), y = c(1.2, -0.8, -0.8))
-edges_n <- data.frame(
-  from = rep(c("D", "D", "E"), 2),
-  to   = rep(c("E", "F", "F"), 2),
-  sign = "-"
-)
-g_n <- graph_from_data_frame(edges_n, directed = TRUE, vertices = nodes_n)
-ggraph(g_n, layout = "manual", x = x, y = y) +
-  geom_edge_parallel(aes(color = sign, linetype = sign), arrow = arrow(length = unit(3.5, "mm"), type = "closed"),
-                     width = 2, sep = unit(4, "mm"), end_cap = circle(9, "mm"), start_cap = circle(9, "mm")) +
-  geom_node_point(size = 20, fill = "darkorange", color = "white", shape = 21, stroke = 1.5) +
-  geom_node_text(aes(label = name), fontface = "bold", size = 6, color = "black") +
-  scale_edge_color_manual(values = c("-" = "firebrick")) +
-  scale_edge_linetype_manual(values = c("-" = "33")) +
-  coord_fixed(xlim = c(-2.2, 2.2), ylim = c(-1.9, 2.1), clip = "off") +
-  theme_slides() + theme(legend.position = "none") +
-  ggtitle("Downtrodden actors exchange (-) ties") +
-  labs(subtitle = "everyone sends (-) and receives (-)")
+#| fig.width: 5.5
+#| fig.height: 5.2
+e_neg <- data.frame(from = c("A", "Ego", "C", "Other"), to = c("Ego", "B", "Other", "D"),
+                    sign = "-", new = "old")
+mk_solid(e_neg,
+         c(Ego = "#f5b7b1", Other = "#f5b7b1", A = "#d5d8dc", B = "#d5d8dc", C = "#d5d8dc", D = "#d5d8dc"),
+         "Unpopularity Solidarity: The Downtrodden",
+         "both send (−) and receive (−) — yet a (+) tie forms")
+```
+:::
+:::
+
+---
+
+## Karma Solidarity: Bullies Stick Together
+
+::: {.columns}
+::: {.column width="50%"}
+::: {.incremental}
+- Solidarity can also form around the **negative-sender** position: actors who spread hostility occupy the same spot in the network.
+- Bullies direct (−) ties at their targets — and form a **positive** bond with each other.
+- Same-position actors close ranks; their targets (grey) receive the hostility but are outside the solidarity tie.
+:::
+:::
+
+::: {.column width="50%"}
+```{r}
+#| fig.width: 5.5
+#| fig.height: 5.2
+e_bully <- data.frame(from = c("Ego", "Ego", "Other", "Other"),
+                      to = c("A", "B", "C", "D"),
+                      sign = "-", new = "old")
+mk_solid(e_bully,
+         c(Ego = "#f8d7da", Other = "#f8d7da", A = "#d5d8dc", B = "#d5d8dc", C = "#d5d8dc", D = "#d5d8dc"),
+         "Karma Solidarity: Bullies Stick Together",
+         "both spread (−) ties at targets — and bond (+) with each other")
 ```
 :::
 :::
