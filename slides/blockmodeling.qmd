@@ -228,7 +228,7 @@ kbl(cor_6_3, format = "html", align = "c") %>%
   - Three high-degree hub nodes ($A$, $B$, $C$).
   - Sets of identical peripheral leaf nodes connected to each hub.
   - A highly central node $D$ bridging hubs.
-  - Two peripheral nodes $U, V$ connected only to $S$.
+  - Two peripheral nodes $U, V$ connected only to $T$ (which also bridges to $E$).
 - Let's see how CONCOR recursively partitions this graph.
 :::
 :::
@@ -253,9 +253,9 @@ ggraph(gr_big, layout = 'kk') +
 
 ## Step 1: First Split (Two Giant Blocks)
 
-- Running CONCOR on the whole 22-node network splits it into two massive blocks:
-  - **Block 1**: $\{V, U, S, H, G, F, E, T, C, A, B\}$ (Colored Red)
-  - **Block 2**: $\{R, Q, P, O, N, M, L, K, J, D, I\}$ (Colored Blue)
+- Running CONCOR on the whole 22-node network (ten iterations until every entry hits exactly $\pm 1$) splits it into two massive blocks:
+  - **Block 1**: $\{A, B, C, E, F, G, H, I, T, U, V\}$ (Colored Red)
+  - **Block 2**: $\{D, J, K, L, M, N, O, P, Q, R, S\}$ (Colored Blue)
 
 ```{r}
 #| echo: false
@@ -272,25 +272,32 @@ ggraph(gr_big, layout = 'kk') +
 
 ---
 
-## Step 2: Going Deeper (The Hierarchical Partition)
+## Step 2: Going Deeper (Block 1)
 
 ::: {.incremental}
-- Running CONCOR recursively on the induced subgraphs of each block yields nested subdivisions:
-  - **Block 1 Splits**:
-    - **Block 1a** (Core hub/bridge): $\{A, B, C, S, U, V\}$
-    - **Block 1b** (A's peripheral leaves): $\{E, F, G, H, T\}$
-  - **Block 2 Splits**:
-    - **Block 2a** (B's peripheral leaves): $\{I, J, K, L, M\}$
-    - **Block 2b** (C's peripheral leaves): $\{N, O, P, Q, R\}$
-    - **Block 2c** (Unique central bridge): $\{D\}$ (Occupies a block entirely by itself!)
-- Further splits on Block 1a isolate $\{U, V\}$, and divide the remaining $\{A, B, C, S\}$ into $\{A, S\}$ and $\{B, C\}$.
+- Running CONCOR on Block 1's submatrix splits it into two sub-blocks:
+  - **Block 1a** (A's peripheral leaves): $\{E, F, G, H, I\}$
+  - **Block 1b** (hubs and satellites): $\{A, B, C, T, U, V\}$
+- Block 1b splits again into $\{U, V\}$ (the pendant pair) and $\{A, B, C, T\}$
+- One final split separates $\{A, T\}$ from $\{B, C\}$
+:::
+
+---
+
+## Step 3: Going Deeper (Block 2)
+
+::: {.incremental}
+- Running CONCOR on Block 2's submatrix splits it into **three** sub-blocks:
+  - **Block 2a** (B's peripheral leaves): $\{J, K, L, M, N\}$
+  - **Block 2b** (C's peripheral leaves): $\{O, P, Q, R, S\}$
+  - **Block 2c** (the central bridge): $\{D\}$ — only structurally similar to itself ($d^{corr} = 0$), so it occupies a block entirely by itself!
 :::
 
 ---
 
 ## Final Seven-Block Partition
 
-- The final, elegant block partition reveals how role structures are naturally isolated:
+- The final, verified partition — seven blocks, all 22 nodes accounted for:
 
 ```{r}
 #| echo: false
@@ -305,50 +312,52 @@ ggraph(gr_big, layout = 'kk') +
   theme_graph() + coord_cartesian(clip = "off")
 ```
 
+- $\{A, T\}$ · $\{B, C\}$ · $\{D\}$ · $\{E, F, G, H, I\}$ · $\{J, K, L, M, N\}$ · $\{O, P, Q, R, S\}$ · $\{U, V\}$
+
 ---
 
-## The Blocked Adjacency Matrix (Blocks 1–3)
+## The Blocked Adjacency Matrix (Blocks 1–4)
 
 ```{r}
 #| echo: false
 adj_mat_big <- matrix(as_adjacency_matrix(gr_big), nrow = length(V(gr_big)))
 rownames(adj_mat_big) <- V(gr_big)$name
 colnames(adj_mat_big) <- V(gr_big)$name
-final_blocks_order <- c("I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "T", "E", "F", "G", "H", "B", "C", "A", "S", "U", "V", "D")
+final_blocks_order <- c("A", "T", "B", "C", "D",
+                        "E", "F", "G", "H", "I",
+                        "J", "K", "L", "M", "N",
+                        "O", "P", "Q", "R", "S",
+                        "U", "V")
 blocked_adj <- adj_mat_big[final_blocks_order, final_blocks_order]
 
-kbl(blocked_adj[1:15, ], align = "c", format = "html") %>%
-  column_spec(1, bold = TRUE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 20) %>%
-  row_spec(5, extra_css = "border-bottom: 2px solid black;") %>%
-  row_spec(10, extra_css = "border-bottom: 2px solid black;") %>%
-  row_spec(15, extra_css = "border-bottom: 2px solid black;") %>%
-  column_spec(6, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(11, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(16, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(18, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(20, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(22, extra_css = "border-right: 2px solid black;")
-```
-
----
-
-## The Blocked Adjacency Matrix (Blocks 4–7)
-
-```{r}
-#| echo: false
-kbl(blocked_adj[16:22, ], align = "c", format = "html") %>%
+kbl(blocked_adj[1:11, ], align = "c", format = "html") %>%
   column_spec(1, bold = TRUE) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 20) %>%
   row_spec(2, extra_css = "border-bottom: 2px solid black;") %>%
   row_spec(4, extra_css = "border-bottom: 2px solid black;") %>%
-  row_spec(6, extra_css = "border-bottom: 2px solid black;") %>%
+  row_spec(5, extra_css = "border-bottom: 2px solid black;") %>%
+  row_spec(10, extra_css = "border-bottom: 2px solid black;") %>%
+  column_spec(3, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(5, extra_css = "border-right: 2px solid black;") %>%
   column_spec(6, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(11, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(16, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(18, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(20, extra_css = "border-right: 2px solid black;") %>%
-  column_spec(22, extra_css = "border-right: 2px solid black;")
+  column_spec(11, extra_css = "border-right: 2px solid black;")
+```
+
+---
+
+## The Blocked Adjacency Matrix (Blocks 5–7)
+
+```{r}
+#| echo: false
+kbl(blocked_adj[12:22, ], align = "c", format = "html") %>%
+  column_spec(1, bold = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 20) %>%
+  row_spec(4, extra_css = "border-bottom: 2px solid black;") %>%
+  row_spec(9, extra_css = "border-bottom: 2px solid black;") %>%
+  column_spec(3, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(5, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(6, extra_css = "border-right: 2px solid black;") %>%
+  column_spec(11, extra_css = "border-right: 2px solid black;")
 ```
 
 ::: {.incremental}
@@ -375,13 +384,13 @@ kbl(blocked_adj[16:22, ], align = "c", format = "html") %>%
 $$
 \mathbf{B} =
 \begin{pmatrix}
-\text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} \\
-\text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} \\
-\text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} \\
-\text{One} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} \\
-\text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{One} & \text{One} \\
-\text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{Zero} \\
-\text{Zero} & \text{Zero} & \text{Zero} & \text{One} & \text{One} & \text{Zero} & \text{Zero}
+\text{Zero} & \text{Zero} & \text{One} & \text{One} & \text{Zero} & \text{Zero} & \text{One} \\
+\text{Zero} & \text{Zero} & \text{One} & \text{Zero} & \text{One} & \text{One} & \text{Zero} \\
+\text{One} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} \\
+\text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} \\
+\text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} \\
+\text{Zero} & \text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} \\
+\text{One} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero} & \text{Zero}
 \end{pmatrix}
 $$
 
@@ -395,15 +404,16 @@ $$
 ```{r}
 #| echo: false
 image_mat <- matrix(c(
-  0, 0, 0, 1, 0, 0, 0,
-  0, 0, 0, 1, 0, 0, 0,
-  0, 0, 0, 0, 1, 0, 0,
-  1, 1, 0, 0, 0, 0, 1,
-  0, 0, 1, 0, 0, 1, 1,
-  0, 0, 0, 0, 1, 0, 0,
-  0, 0, 0, 1, 1, 0, 0
+  0, 0, 1, 1, 0, 0, 1,
+  0, 0, 1, 0, 1, 1, 0,
+  1, 1, 0, 0, 0, 0, 0,
+  1, 0, 0, 0, 0, 0, 0,
+  0, 1, 0, 0, 0, 0, 0,
+  0, 1, 0, 0, 0, 0, 0,
+  1, 0, 0, 0, 0, 0, 0
 ), nrow = 7, byrow = TRUE)
-block_names <- c("Leaves_I", "Leaves_N", "Leaves_T", "Hubs_BC", "Hubs_AS", "Leaves_UV", "Bridge_D")
+block_names <- c("Hubs {A,T}", "Hubs {B,C}", "Bridge {D}",
+                 "Leaves {E-I}", "Leaves {J-N}", "Leaves {O-S}", "Pendants {U,V}")
 rownames(image_mat) <- block_names
 colnames(image_mat) <- block_names
 

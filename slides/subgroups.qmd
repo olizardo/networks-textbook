@@ -55,10 +55,17 @@ lay12 <- data.frame(
 MUTE <- "grey78"
 
 # Plot the 12-node graph, optionally highlighting an induced subgraph.
-# Nodes in `hl` are green; edges with both ends in `hl` are orange and thicker.
+# Nodes in `hl` are green (or red via `hl_red`); edges with both ends in `hl`
+# are orange and thicker. `drop_edges` removes edges (list of 2-node vectors);
+# `g` swaps the base graph (e.g. g12x) while keeping the same layout.
 plot_g12 <- function(hl = character(), node_size = 12, lab = 6.5,
-                     edge_w = 1.1, hl_edge = "orange", hl_edges = NULL) {
-    en <- ends(g12, E(g12))
+                     edge_w = 1.1, hl_edge = "orange", hl_edges = NULL,
+                     hl_red = character(), drop_edges = NULL, g = g12) {
+    if (!is.null(drop_edges)) {
+        ids <- get_edge_ids(g, unlist(drop_edges))
+        g <- delete_edges(g, ids[ids > 0])
+    }
+    en <- ends(g, E(g))
     if (!is.null(hl_edges)) {
         key <- function(m) paste(pmin(m[,1], m[,2]), pmax(m[,1], m[,2]), sep = "-")
         targets <- key(do.call(rbind, lapply(hl_edges, function(p)
@@ -66,15 +73,16 @@ plot_g12 <- function(hl = character(), node_size = 12, lab = 6.5,
         in_hl <- key(en) %in% targets
         ecol <- ifelse(in_hl, hl_edge, MUTE)
         ewd <- ifelse(in_hl, 2.2, edge_w)
-        ncol <- rep("tan2", 12)
+        ncol <- rep("tan2", length(V(g)))
     } else {
         in_hl <- en[,1] %in% hl & en[,2] %in% hl
         ecol <- if (length(hl)) ifelse(in_hl, hl_edge, MUTE) else "steelblue"
         ewd <- if (length(hl)) ifelse(in_hl, 2.2, edge_w) else edge_w
-        ncol <- if (length(hl)) ifelse(V(g12)$name %in% hl, "forestgreen", "tan2") else "tan2"
+        ncol <- if (length(hl)) ifelse(V(g)$name %in% hl, "forestgreen", "tan2") else "tan2"
     }
-    ggraph(g12, layout = "manual", x = lay12$x[match(V(g12)$name, lay12$name)],
-           y = lay12$y[match(V(g12)$name, lay12$name)]) +
+    if (length(hl_red)) ncol <- ifelse(V(g)$name %in% hl_red, "firebrick", ncol)
+    ggraph(g, layout = "manual", x = lay12$x[match(V(g)$name, lay12$name)],
+           y = lay12$y[match(V(g)$name, lay12$name)]) +
         geom_edge_link(aes(color = ecol, width = ewd), show.legend = FALSE) +
         geom_node_point(aes(color = ncol), size = node_size) +
         geom_node_text(aes(label = name), size = lab, fontface = "bold",
@@ -85,8 +93,8 @@ plot_g12 <- function(hl = character(), node_size = 12, lab = 6.5,
 
 # Plot the graph REMAINING after removing nodes `drop` (same layout)
 plot_g12_keep <- function(keep = LETTERS[1:12], node_size = 11, lab = 6,
-                          edge_w = 1.1) {
-    sg <- induced_subgraph(g12, keep)
+                          edge_w = 1.1, g = g12) {
+    sg <- induced_subgraph(g, keep)
     sl <- lay12[match(V(sg)$name, lay12$name), ]
     ggraph(sg, layout = "manual", x = sl$x, y = sl$y) +
         geom_edge_link(color = "steelblue", width = edge_w) +
@@ -114,6 +122,60 @@ small_plot <- function(g, hl = character(), hl_red = character(),
     ncol <- ifelse(V(g)$name %in% hl_red, "firebrick",
             ifelse(V(g)$name %in% hl, "forestgreen", "tan2"))
     ggraph(g, layout = "manual", x = lay$x, y = lay$y) +
+        geom_edge_link(aes(color = ecol, width = ewd), show.legend = FALSE) +
+        geom_node_point(aes(color = ncol), size = node_size) +
+        geom_node_text(aes(label = name), size = lab, fontface = "bold",
+                       color = "white") +
+        scale_color_identity() + scale_edge_color_identity() +
+        coord_cartesian(clip = "off") + theme_graph() + theme(legend.position = "none")
+}
+
+# ---- Persistent graphs for the connectivity section (Part 5) ---------------
+# g12x: the pendant triangle {J,K,L} anchored two ways (J-L and J-D added),
+# so no single node disconnects: k-connectivity = 2 (verified: {E,F} is a
+# minimum separator; edge connectivity = 3, e.g. {BE, DF, FK}).
+g12x <- add_edges(add_edges(g12, c("J", "L")), c("J", "D"))
+stopifnot(vertex_connectivity(g12x) == 2, edge_connectivity(g12x) == 3)
+
+# gbr2: two 4-cliques {A,B,C,D} and {E,F,G,H} joined by the single bridge D-E.
+# k-connectivity = 1 (D and E are articulation nodes), edge connectivity = 1.
+gbr2 <- graph_from_data_frame(data.frame(
+    from = c("A","A","A","B","B","C","D","E","E","E","F","F","G"),
+    to   = c("B","C","D","C","D","D","E","F","G","H","G","H","H")), directed = FALSE)
+lbr2 <- data.frame(
+    name = c("A","B","C","D","E","F","G","H"),
+    x = c(-2.4, -3.1, -1.9, -0.8, 0.8, 2.1, 2.9, 1.8),
+    y = c( 1.1, -0.2, -1.2, 0.15, 0.15, 1.1, -0.2, -1.2))
+stopifnot(vertex_connectivity(gbr2) == 1, edge_connectivity(gbr2) == 1,
+          sum(vapply(seq_len(ecount(gbr2)), function(e)
+              components(delete_edges(gbr2, e))$no > 1, logical(1))) == 1)
+
+# gsh: two 4-cliques {A,B,C,D} and {D,E,F,G} sharing the single node D.
+# k-connectivity = 1 (articulation node D) but edge connectivity = 3.
+gsh <- graph_from_data_frame(data.frame(
+    from = c("A","A","A","B","B","C","D","D","D","E","E","F"),
+    to   = c("B","C","D","C","D","D","E","F","G","F","G","G")), directed = FALSE)
+lsh <- data.frame(
+    name = c("A","B","C","D","E","F","G"),
+    x = c(-2.6, -3.2, -2.0, 0, 2.6, 3.2, 2.0),
+    y = c( 1.0, -0.4, -1.2, 0, 1.0, -0.4, -1.2))
+stopifnot(vertex_connectivity(gsh) == 1, edge_connectivity(gsh) == 3)
+
+# Plot gbr2 / gsh (same visual style as the persistent-graph figures).
+plot_conn <- function(g, lay, hl = character(), hl_red = character(),
+                      hl_edge = NULL, node_size = 12, lab = 6.5, edge_w = 1.3) {
+    en <- ends(g, E(g))
+    ecol <- "steelblue"; ewd <- edge_w
+    if (!is.null(hl_edge)) {
+        key <- function(m) paste(pmin(m[,1], m[,2]), pmax(m[,1], m[,2]), sep = "-")
+        targets <- sapply(hl_edge, function(e) paste(sort(e), collapse = "-"))
+        keep <- key(en) %in% targets
+        ecol <- ifelse(keep, "orange", MUTE); ewd <- ifelse(keep, 2.2, edge_w)
+    }
+    ncol <- ifelse(V(g)$name %in% hl_red, "firebrick",
+            ifelse(V(g)$name %in% hl, "forestgreen", "tan2"))
+    sl <- lay[match(V(g)$name, lay$name), ]
+    ggraph(g, layout = "manual", x = sl$x, y = sl$y) +
         geom_edge_link(aes(color = ecol, width = ewd), show.legend = FALSE) +
         geom_node_point(aes(color = ncol), size = node_size) +
         geom_node_text(aes(label = name), size = lab, fontface = "bold",
@@ -160,11 +222,9 @@ plot_g12(node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - Why groups? Groups are the main units of **solidarity and interaction** in social systems:
   - **Primary groups** (family, support cliques)
   - **Secondary groups** (friends, workplaces, schools)
-:::
 :::
 
 ::: {.column width="45%"}
@@ -186,14 +246,12 @@ plot_g12(node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - Why groups? Groups are important sources of:
   - **Ideational homogeneity**
   - **Conformity**
   - **Influence**
   - **Information transmission**
 :::
-:::
 
 ::: {.column width="45%"}
 ```{r}
@@ -214,12 +272,10 @@ plot_g12(node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - Questions:
   - How can we **translate** the concept of a group into network terms?
   - What are the most important **group properties** from a network perspective?
   - **Cohesion**, **polarization**, **fragmentation**
-:::
 :::
 
 ::: {.column width="45%"}
@@ -295,9 +351,7 @@ plot_g12(node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - This is a subgraph!
-:::
 :::
 
 ::: {.column width="45%"}
@@ -319,9 +373,7 @@ plot_g12(hl = c("A", "B", "C"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - This is another subgraph!
-:::
 :::
 
 ::: {.column width="45%"}
@@ -374,9 +426,7 @@ plot_g12(hl = c("E", "F", "G", "H", "I"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - But **three is the smallest** a clique can be!
-:::
 :::
 
 ::: {.column width="45%"}
@@ -398,10 +448,8 @@ plot_g12(hl = c("J", "K", "L"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - In an undirected graph the **closed triad** is a clique of size three!
   - This is a clique of size three!
-:::
 :::
 
 ::: {.column width="45%"}
@@ -423,9 +471,7 @@ plot_g12(hl = c("D", "F", "K"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - This is a clique of size 4!
-:::
 :::
 
 ::: {.column width="45%"}
@@ -447,9 +493,7 @@ plot_g12(hl = c("A", "B", "C", "D"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - This is a clique of size 5!
-:::
 :::
 
 ::: {.column width="45%"}
@@ -497,9 +541,7 @@ plot_g12(hl = c("B", "C", "D", "F"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - **No!** It's missing the $BF$ and $CF$ edges
-:::
 :::
 
 ::: {.column width="45%"}
@@ -547,9 +589,7 @@ plot_g12(hl = c("A", "B", "C", "D"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{F, G, H, I\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -571,9 +611,7 @@ plot_g12(hl = c("F", "G", "H", "I"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{E, F, G, H\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -595,9 +633,7 @@ plot_g12(hl = c("E", "F", "G", "H"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{E, F, G, I\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -619,9 +655,7 @@ plot_g12(hl = c("E", "F", "G", "I"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{E, F, H, I\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -719,9 +753,7 @@ plot_g12(hl = c("A", "B", "C"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{B, C, D\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -743,9 +775,7 @@ plot_g12(hl = c("B", "C", "D"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{A, C, D\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -767,9 +797,7 @@ plot_g12(hl = c("A", "C", "D"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{A, B, D\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -791,9 +819,7 @@ plot_g12(hl = c("A", "B", "D"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - A clique of size five is made up of **five cliques of size four**!
-:::
 :::
 
 ::: {.column width="45%"}
@@ -840,9 +866,7 @@ plot_g12(hl = c("F", "G", "H", "I"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{E, F, G, H\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -864,9 +888,7 @@ plot_g12(hl = c("E", "F", "G", "H"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{E, F, G, I\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -888,9 +910,7 @@ plot_g12(hl = c("E", "F", "G", "I"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{E, F, H, I\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -912,9 +932,7 @@ plot_g12(hl = c("E", "F", "H", "I"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{E, G, H, I\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -965,11 +983,9 @@ plot_g12(hl = c("A", "B", "C", "D", "F", "K"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - Node $F$ is a member of both:
   - $\{E, F, G, H, I\}$
   - $\{D, F, K\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -991,10 +1007,8 @@ plot_g12(hl = c("D", "F", "K", "E", "G", "H", "I"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - Node $K$ is a member of both:
   - $\{F, D, K\}$ and $\{J, K, L\}$
-:::
 :::
 
 ::: {.column width="45%"}
@@ -1016,12 +1030,12 @@ plot_g12(hl = c("D", "F", "K", "J", "L"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - This means that the **intersections** of cliques are the members they share:
   - $\{A, B, C, D\} \cap \{D, F, K\} = D$
   - $\{E, F, G, H, I\} \cap \{D, F, K\} = F$
   - $\{F, D, K\} \cap \{J, K, L\} = K$
-:::
+  - $\{B, C, D\} \cap \{D, F, K\} = D$
+  - Some pairs don't overlap at all: $\{A, B, C, D\} \cap \{E, F, G, H, I\} = \varnothing$
 :::
 
 ::: {.column width="45%"}
@@ -1043,11 +1057,11 @@ plot_g12(hl = c("D", "F", "K", "J", "L"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - Cliques **nested** within other cliques share **multiple** members:
   - $\{F, G, H, I\} \cap \{E, F, G, H\} = \{F, G, H\}$
   - $\{E, F, H, I\} \cap \{E, G, H, I\} = \{E, H, I\}$
-:::
+  - $\{E, F, G, I\} \cap \{E, F, H, I\} = \{E, F, I\}$
+  - $\{A, B, C, D\} \cap \{B, C, D\} = \{B, C, D\}$
 :::
 
 ::: {.column width="45%"}
@@ -1229,9 +1243,7 @@ kbl(Cr2, format = "html", align = "c") |>
 :::
 
 ::: {.column width="16%"}
-::: {.incremental}
 - The **row sums** give the number of cliques each person belongs to!
-:::
 :::
 
 ::::
@@ -1245,13 +1257,11 @@ kbl(Cr2, format = "html", align = "c") |>
 :::: {.columns}
 
 ::: {.column width="36%"}
-::: {.incremental}
 - The rank order of the number of cliques a node belongs to is a **centrality metric** on the nodes!
   - $F$ (12 cliques) seems to be in the middle of everything!
   - $E$, $G$, $H$, $I$, $D$ are also central
   - But mainly because they belong to a **large clique**
   - $J$ and $L$ are the least central: they belong to one small clique
-:::
 :::
 
 ::: {.column width="28%"}
@@ -1538,7 +1548,7 @@ D7 <- distances(g12, v = ns7, to = ns7)
 diag(D7) <- "--"
 kbl(D7, format = "html", align = "c") |>
   column_spec(1, bold = TRUE) |>
-  kable_styling(font_size = 16, full_width = FALSE,
+  kable_styling(font_size = 18, full_width = FALSE,
                 bootstrap_options = c("condensed"))
 ```
 
@@ -1572,7 +1582,7 @@ D8 <- distances(g12, v = ns8, to = ns8)
 diag(D8) <- "--"
 kbl(D8, format = "html", align = "c") |>
   column_spec(1, bold = TRUE) |>
-  kable_styling(font_size = 16, full_width = FALSE,
+  kable_styling(font_size = 18, full_width = FALSE,
                 bootstrap_options = c("condensed"))
 ```
 
@@ -1605,7 +1615,7 @@ DG <- distances(g12, v = nsG, to = nsG)
 diag(DG) <- "--"
 kbl(DG, format = "html", align = "c") |>
   column_spec(1, bold = TRUE) |>
-  kable_styling(font_size = 16, full_width = FALSE,
+  kable_styling(font_size = 18, full_width = FALSE,
                 bootstrap_options = c("condensed"))
 ```
 
@@ -1663,12 +1673,9 @@ plot_g12(node_size = 11, lab = 6)
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-g2c <- graph_from_data_frame(data.frame(
-    from = c("A","A","B","D","D","E"), to = c("B","C","C","E","F","F")),
-    directed = FALSE)
-l2c <- matrix(c(-1.5, -2.5, -2.0, 1.5, 2.5, 2.0, 0.8, -0.8, 0, -0.8, 0.8, 0), 6, 2)
-rownames(l2c) <- LETTERS[1:6]
-small_plot(g2c, lay = l2c[V(g2c)$name, ])
+# Drop the BE, DF, DK links: {A,B,C,D} splits off from the rest
+plot_g12(drop_edges = list(c("B","E"), c("D","F"), c("D","K")),
+         node_size = 11, lab = 6)
 ```
 :::
 
@@ -1683,7 +1690,7 @@ small_plot(g2c, lay = l2c[V(g2c)$name, ])
 ::: {.column width="55%"}
 ::: {.incremental}
 - If a graph has more than one component it is by definition **disconnected**
-- These are three different components
+- Drop one more link ($FK$) and there are three different components
 :::
 :::
 
@@ -1693,13 +1700,8 @@ small_plot(g2c, lay = l2c[V(g2c)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-g3c <- graph_from_data_frame(data.frame(
-    from = c("A","A","B","D","D","E","G","G","H"),
-    to   = c("B","C","C","E","F","F","H","I","I")), directed = FALSE)
-l3c <- matrix(c(-2.5, -3.5, -3.0, 0, 1, 0.5, 2.5, 3.5, 3.0,
-                0.8, -0.8, 0, 0.8, -0.8, 0, 0.8, -0.8, 0), 9, 2)
-rownames(l3c) <- LETTERS[1:9]
-small_plot(g3c, lay = l3c[V(g3c)$name, ])
+plot_g12(drop_edges = list(c("B","E"), c("D","F"), c("D","K"), c("F","K")),
+         node_size = 11, lab = 6)
 ```
 :::
 
@@ -1724,13 +1726,9 @@ small_plot(g3c, lay = l3c[V(g3c)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-gG <- graph_from_data_frame(data.frame(
-    from = c("A","B","C","D","F","G","H","I"),
-    to   = c("B","C","D","E","G","H","F","J")), directed = FALSE)
-lG <- matrix(c(-2.5, -1.5, -0.5, 0.5, 1.5, -1.0, 0, 1.0, 2.2, 3.0,
-               0, 0.9, 0, 0.9, 0, -1.4, -2.2, -1.4, 1.2, 2.0), 10, 2)
-rownames(lG) <- LETTERS[1:10]
-small_plot(gG, hl = LETTERS[1:5], lay = lG[V(gG)$name, ])
+plot_g12(hl = c("E","F","G","H","I","J","K","L"),
+         drop_edges = list(c("B","E"), c("D","F"), c("D","K")),
+         node_size = 11, lab = 6)
 ```
 :::
 
@@ -1745,6 +1743,56 @@ small_plot(gG, hl = LETTERS[1:5], lay = lG[V(gG)$name, ])
 ::: {.column width="55%"}
 ::: {.incremental}
 - We can **disconnect a graph by removing edges**
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+plot_conn(gbr2, lbr2, node_size = 12, lab = 6.5)
+```
+:::
+
+::::
+
+---
+
+## Graph connectivity: K-Connectivity
+
+:::: {.columns}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Remove the link $DE$ and the graph splits in two!
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+plot_conn(delete_edges(gbr2, get_edge_ids(gbr2, c("D","E"))), lbr2,
+          node_size = 12, lab = 6.5)
+```
+
+<p style="text-align: center; color: #C0392B; font-weight: 600; margin-top: 0;">Oops! Disconnected!</p>
+:::
+
+::::
+
+---
+
+## Graph connectivity: K-Connectivity
+
+:::: {.columns}
+
+::: {.column width="55%"}
+::: {.incremental}
 - We can also **disconnect a graph by removing nodes**
 - It can be easier to disconnect a graph by removing nodes, because **nodes take their links with them**!
 :::
@@ -1756,11 +1804,35 @@ small_plot(gG, hl = LETTERS[1:5], lay = lG[V(gG)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-gbow <- make_graph(~ A - B, A - C, A - D, A - E, B - C, D - E)
-lbow <- matrix(c(0, 0, -1.2, 0.9, 1.2, 0.9, 0, -1.4, -0.9, -0.9, 1.0, 1.0), 5, 2)
-rownames(lbow) <- c("A","B","C","D","E")
-small_plot(gbow, hl_red = "A", lay = lbow[V(gbow)$name, ])
+plot_conn(gbr2, lbr2, node_size = 12, lab = 6.5)
 ```
+:::
+
+::::
+
+---
+
+## Graph connectivity: K-Connectivity
+
+:::: {.columns}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Remove node $D$ and the two halves are cut off from each other!
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+plot_conn(induced_subgraph(gbr2, setdiff(V(gbr2)$name, "D")), lbr2,
+          node_size = 12, lab = 6.5)
+```
+
+<p style="text-align: center; color: #C0392B; font-weight: 600; margin-top: 0;">Oops! Disconnected!</p>
 :::
 
 ::::
@@ -1786,7 +1858,7 @@ small_plot(gbow, hl_red = "A", lay = lbow[V(gbow)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-small_plot(gbow, hl_red = "A", lay = lbow[V(gbow)$name, ])
+plot_conn(gbr2, lbr2, hl_red = "D", node_size = 12, lab = 6.5)
 ```
 :::
 
@@ -1794,14 +1866,15 @@ small_plot(gbow, hl_red = "A", lay = lbow[V(gbow)$name, ])
 
 ---
 
-## Graph connectivity: K-Connectivity
+## Bridges
 
 :::: {.columns}
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- The better connected the structure, the **more nodes** we need to remove to disconnect it
-- Here $k$-connectivity = 2: remove the two shared nodes...
+- Graphs with edge connectivity equal to one have a special edge
+- This edge is called a **bridge**
+- Here edge connectivity = 1: the edge $DE$ is a bridge!
 :::
 :::
 
@@ -1811,43 +1884,7 @@ small_plot(gbow, hl_red = "A", lay = lbow[V(gbow)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-gk2 <- graph_from_data_frame(data.frame(
-    from = c("A","A","A","B","B","B","C","C","D","D","D","E","E","F","F"),
-    to   = c("B","C","D","C","D","E","D","E","E","F","G","F","G","G","C")),
-    directed = FALSE)
-lk2 <- matrix(c(-2.2, -1.0, -1.6, 0.2, 1.6, 1.0, 2.2, 0.4, -1.6, -2.2,
-                0.9, -0.4, -0.4, 0.9, -0.4, -0.4, 0.9, 1.6, 0.2), 7, 2)
-rownames(lk2) <- LETTERS[1:7]
-small_plot(gk2, hl_red = c("C", "D"), lay = lk2[V(gk2)$name, ])
-```
-:::
-
-::::
-
----
-
-## Graph connectivity: K-Connectivity
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- Here $k$-connectivity = 3: removing two nodes is not enough!
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-gk3 <- make_full_graph(5)
-V(gk3)$name <- LETTERS[1:5]
-gk3 <- delete_edges(gk3, "A|E")
-lk3 <- matrix(c(-2.0, -1.0, 0, 1.0, 2.0, 0, 1.2, 1.6, 1.2, 0), 5, 2)
-rownames(lk3) <- LETTERS[1:5]
-small_plot(gk3, hl_red = c("B", "C", "D"), lay = lk3[V(gk3)$name, ])
+plot_conn(gbr2, lbr2, hl_edge = list(c("D","E")), node_size = 12, lab = 6.5)
 ```
 :::
 
@@ -1864,7 +1901,6 @@ small_plot(gk3, hl_red = c("B", "C", "D"), lay = lk3[V(gk3)$name, ])
 - Some graphs are easy to disconnect by **removing edges** (only a few links required)
 - Others are hard to disconnect (many links must go)
 - The **edge-connectivity** of a graph is the minimum number of edges that must be removed to disconnect the graph
-- Here edge connectivity = 2: remove the two links and it is disconnected!
 :::
 :::
 
@@ -1874,43 +1910,7 @@ small_plot(gk3, hl_red = c("B", "C", "D"), lay = lk3[V(gk3)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-ge2 <- graph_from_data_frame(data.frame(
-    from = c("A","A","B","D","D","E","A","B"),
-    to   = c("B","C","C","E","F","F","D","E")), directed = FALSE)
-le2 <- matrix(c(-1.8, -2.6, -2.2, 1.8, 2.6, 2.2, 0, 0, -0.9, 0.9, -0.9, 0.9), 6, 2)
-rownames(le2) <- LETTERS[1:6]
-small_plot(ge2, hl_edge = list(c("A","D"), c("B","E")),
-           lay = le2[V(ge2)$name, ])
-```
-:::
-
-::::
-
----
-
-## Bridges
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- Graphs with edge connectivity equal to one have a special edge
-- This edge is called a **bridge**
-- Here edge connectivity = 1: this edge is a bridge!
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-gbr <- graph_from_data_frame(data.frame(
-    from = c("A","A","B","D","D","E","C"), to = c("B","C","C","E","F","F","D")),
-    directed = FALSE)
-lbr <- le2
-small_plot(gbr, hl_edge = list(c("C","D")), lay = lbr[V(gbr)$name, ])
+plot_conn(gbr2, lbr2, hl_edge = list(c("D","E")), node_size = 12, lab = 6.5)
 ```
 :::
 
@@ -1924,10 +1924,9 @@ small_plot(gbr, hl_edge = list(c("C","D")), lay = lbr[V(gbr)$name, ])
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- The $k$-connectivity of a graph is the minimum number of nodes that must be removed to disconnect the graph
 - Graphs with $k$-connectivity equal to one have a special node
 - This node is called an **articulation node**
-- Here $k$-connectivity = 1: this is an articulation node!
+- Here $k$-connectivity = 1: node $D$ is an articulation node!
 :::
 :::
 
@@ -1937,8 +1936,96 @@ small_plot(gbr, hl_edge = list(c("C","D")), lay = lbr[V(gbr)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-small_plot(gbow, hl_red = "A", lay = lbow[V(gbow)$name, ])
+plot_conn(gbr2, lbr2, hl_red = "D", node_size = 12, lab = 6.5)
 ```
+:::
+
+::::
+
+---
+
+## Adding edges can raise k-connectivity
+
+:::: {.columns}
+
+::: {.column width="55%"}
+::: {.incremental}
+- Adding edges to a graph can **increase** its $k$-connectivity
+- In the original graph, removing $K$ strands $J$ and $L$
+- Add the edges $JL$ and $JD$: now the triangle $\{J, K, L\}$ is anchored two ways, and no single node disconnects the graph
+- $k$-connectivity = 2!
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+enx <- ends(g12x, E(g12x))
+newe <- (enx[,1] == "J" & enx[,2] == "L") | (enx[,1] == "J" & enx[,2] == "D")
+ecolx <- ifelse(newe, "orange", "steelblue")
+ggraph(g12x, layout = "manual",
+       x = lay12$x[match(V(g12x)$name, lay12$name)],
+       y = lay12$y[match(V(g12x)$name, lay12$name)]) +
+    geom_edge_link(aes(color = ecolx, width = 1.2), show.legend = FALSE) +
+    geom_node_point(size = 11, color = "tan2") +
+    geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
+    scale_edge_color_identity() + coord_cartesian(clip = "off") +
+    theme_graph() + theme(legend.position = "none")
+```
+:::
+
+::::
+
+---
+
+## Graph connectivity: K-Connectivity
+
+:::: {.columns}
+
+::: {.column width="55%"}
+::: {.incremental}
+- The better connected the structure, the **more nodes** we need to remove to disconnect it
+- In the new graph $k$-connectivity = 2: remove the two nodes $E$ and $F$...
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+plot_g12(g = g12x, hl_red = c("E", "F"), node_size = 11, lab = 6)
+```
+:::
+
+::::
+
+---
+
+## Graph connectivity: K-Connectivity
+
+:::: {.columns}
+
+::: {.column width="55%"}
+::: {.incremental}
+- ...and $\{G, H, I\}$ is stranded: the graph is disconnected!
+:::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+plot_g12_keep(g = g12x, keep = setdiff(LETTERS[1:12], c("E", "F")))
+```
+
+<p style="text-align: center; color: #C0392B; font-weight: 600; margin-top: 0;">Oops! Disconnected!</p>
 :::
 
 ::::
@@ -1952,7 +2039,7 @@ small_plot(gbow, hl_red = "A", lay = lbow[V(gbow)$name, ])
 ::: {.column width="55%"}
 ::: {.incremental}
 - The $k$-connectivity and edge connectivity of a graph **do not have to be the same number**!
-- The $k$-connectivity of this graph is 1: it has an articulation node
+- The $k$-connectivity of this graph is 1: node $D$ is an articulation node
 :::
 :::
 
@@ -1962,11 +2049,7 @@ small_plot(gbow, hl_red = "A", lay = lbow[V(gbow)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-gkl <- graph_from_data_frame(data.frame(
-    from = c("A","A","B","D","D","E","C","C"),
-    to   = c("B","C","C","E","F","F","D","F")), directed = FALSE)
-lkl <- le2
-small_plot(gkl, hl_red = "C", lay = lkl[V(gkl)$name, ])
+plot_conn(gsh, lsh, hl_red = "D", node_size = 12, lab = 6.5)
 ```
 :::
 
@@ -1980,8 +2063,8 @@ small_plot(gkl, hl_red = "C", lay = lkl[V(gkl)$name, ])
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- But the **edge connectivity is 2**!
-- We need to remove a minimum of two edges to disconnect this graph
+- But the **edge connectivity is 3**!
+- We need to remove a minimum of three edges ($DE$, $DF$, $DG$) to disconnect this graph
 :::
 :::
 
@@ -1991,23 +2074,19 @@ small_plot(gkl, hl_red = "C", lay = lkl[V(gkl)$name, ])
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-small_plot(gkl, hl_red = "C", hl_edge = list(c("C","D"), c("C","F")),
-           lay = lkl[V(gkl)$name, ])
+plot_conn(gsh, lsh, hl_red = "D", hl_edge = list(c("D","E"), c("D","F"), c("D","G")),
+          node_size = 12, lab = 6.5)
 ```
 :::
 
 ::::
-
----
 
 ## Node cutsets
 
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - In a graph, any set of nodes that when removed disconnects the graph is called a **node cutset**
-:::
 :::
 
 ::: {.column width="45%"}
@@ -2029,9 +2108,7 @@ plot_g12(hl = c("E", "F"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{E, F\}$ is a node cutset for this graph
-:::
 :::
 
 ::: {.column width="45%"}
@@ -2053,9 +2130,7 @@ plot_g12_keep(setdiff(LETTERS[1:12], c("E", "F")))
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{B, D\}$ is another node cutset for this graph
-:::
 :::
 
 ::: {.column width="45%"}
@@ -2146,42 +2221,6 @@ plot_g12_keep(setdiff(LETTERS[1:12], "K"))
 
 ---
 
-## Adding even one edge can raise k-connectivity
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- Adding even one edge to a graph can **increase** its $k$-connectivity
-- Add the edge $JL$: now removing $K$ leaves $J$ and $L$ connected, and no single node disconnects the graph
-- $k$-connectivity = 2!
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-g12x <- add_edges(g12, c("J", "L"))
-enx <- ends(g12x, E(g12x))
-ecolx <- ifelse(enx[,1] == "J" & enx[,2] == "L", "orange", "steelblue")
-ggraph(g12x, layout = "manual",
-       x = lay12$x[match(V(g12x)$name, lay12$name)],
-       y = lay12$y[match(V(g12x)$name, lay12$name)]) +
-    geom_edge_link(aes(color = ecolx, width = 1.2), show.legend = FALSE) +
-    geom_node_point(size = 11, color = "tan2") +
-    geom_node_text(aes(label = name), size = 6, fontface = "bold", color = "white") +
-    scale_edge_color_identity() + coord_cartesian(clip = "off") +
-    theme_graph() + theme(legend.position = "none")
-```
-:::
-
-::::
-
----
-
 ## Edge cutsets
 
 :::: {.columns}
@@ -2212,9 +2251,7 @@ plot_g12(hl_edges = list(c("B","E"), c("D","F"), c("F","K")), node_size = 11, la
 :::: {.columns}
 
 ::: {.column width="55%"}
-::: {.incremental}
 - $\{DK, FK\}$ is also an edge cutset
-:::
 :::
 
 ::: {.column width="45%"}
@@ -2316,7 +2353,7 @@ plot_g12(hl_edges = list(c("J","K"), c("K","L")), node_size = 11, lab = 6)
 - **Menger's theorem** states that if a graph has $k$-connectivity $= n$:
   - There are at least $n$ paths that **don't share nodes** connecting every non-adjacent pair of nodes
   - The $k$-connector nodes stand on each of these paths
-- This graph has $k$-connectivity = 3 (removing the three red nodes disconnects the graph)
+- The new graph has $k$-connectivity = 2 (removing the two red nodes disconnects it)
 :::
 :::
 
@@ -2326,8 +2363,7 @@ plot_g12(hl_edges = list(c("J","K"), c("K","L")), node_size = 11, lab = 6)
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-small_plot(gk3, hl = c("A", "E"), hl_red = c("B", "C", "D"),
-           lay = lk3[V(gk3)$name, ])
+plot_g12(g = g12x, hl_red = c("E", "F"), node_size = 11, lab = 6)
 ```
 :::
 
@@ -2341,10 +2377,9 @@ small_plot(gk3, hl = c("A", "E"), hl_red = c("B", "C", "D"),
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- The two non-adjacent green nodes are indirectly connected in **three separate (node-independent) ways**!
-  - Path 1: $A \to B \to E$
-  - Path 2: $A \to C \to E$
-  - Path 3: $A \to D \to E$
+- The two non-adjacent green nodes are indirectly connected in **two separate (node-independent) ways**!
+  - Path 1: $A \to B \to E \to G$
+  - Path 2: $A \to D \to F \to G$
 - This is an important result in graph theory!
 :::
 :::
@@ -2355,7 +2390,7 @@ small_plot(gk3, hl = c("A", "E"), hl_red = c("B", "C", "D"),
 #| fig-align: "center"
 #| fig-width: 5.9
 #| fig-height: 4.3
-small_plot(gk3, hl = c("A", "E"), lay = lk3[V(gk3)$name, ])
+plot_g12(g = g12x, hl = c("A", "G"), node_size = 11, lab = 6)
 ```
 :::
 
@@ -2376,32 +2411,12 @@ small_plot(gk3, hl = c("A", "E"), lay = lk3[V(gk3)$name, ])
 
 ## Pairwise node connectivity
 
-:::: {.columns}
-
-::: {.column width="55%"}
 ::: {.incremental}
 - For any pair of non-adjacent nodes, $u$ and $v$:
 - The **pairwise node cutset** $\kappa_{uv}$ is the number of nodes that would have to be removed for them to be disconnected
 - If $\kappa_{uv} = n$, that means there are at least $n$ **node-independent paths** linking $u$ and $v$
 - Two paths are node-independent wherever the **inner nodes** in each path are different
 :::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-gk1 <- graph_from_data_frame(data.frame(from = c("U","U","a"),
-                                        to   = c("a","b","V")), directed = FALSE)
-lk1 <- matrix(c(-1.5, -0.5, 0.5, 1.5, 0, -1, 1), 4, 2)
-rownames(lk1) <- c("U", "a", "V", "b")
-small_plot(gk1, lay = lk1[V(gk1)$name, ])
-```
-:::
-
-::::
 
 ---
 
@@ -2470,13 +2485,6 @@ plot_g12(hl = c("A", "J"), node_size = 11, lab = 6)
 - $k$-connectivity (graph theory) can represent the concept of **social cohesion** (network theory):
   - The **larger** the (edge, node) cutset, the **more cohesive (integrated)** groups are with one another
   - The **smaller** the (edge, node) cutset, the **less cohesive** and more potentially **fragmented** the group structure is
-:::
-
----
-
-## Graph connectivity as social cohesion
-
-::: {.incremental}
 - The more $k$-connectivity, the more cohesive (integrated) the group
   - More people would have to be removed to disrupt the group
 - Any graph can be split into subgraphs with any given level of $k$-connectivity
@@ -2489,9 +2497,7 @@ plot_g12(hl = c("A", "J"), node_size = 11, lab = 6)
 :::: {.columns}
 
 ::: {.column width="50%"}
-::: {.incremental}
 - **$K = 0$:** this graph is already disconnected!
-:::
 :::
 
 ::: {.column width="50%"}
@@ -2574,9 +2580,7 @@ plot_coh(drop = c(5, 10), hl = c(5, 10))
 :::: {.columns}
 
 ::: {.column width="50%"}
-::: {.incremental}
 - **$K = 2$:** removing any two nodes of the four-cycle ($\{11, 12, 13, 14\}$) disconnects it
-:::
 :::
 
 ::: {.column width="50%"}
@@ -2598,9 +2602,7 @@ plot_coh(drop = c(5, 10, 11, 12), hl = c(11, 12))
 :::: {.columns}
 
 ::: {.column width="50%"}
-::: {.incremental}
 - **$K = 3$:** only the two complete subgraphs remain, the most cohesive structures in the graph
-:::
 :::
 
 ::: {.column width="50%"}
@@ -2619,23 +2621,16 @@ plot_coh(drop = c(5, 10, 11, 12, 13, 14))
 
 ---
 
-## Cohesive blocking
-
-::: {.incremental}
-- The idea of cutsets leads to the **Cohesive Blocking** approach for the identification of nested cohesive subgroups (**Moody and White 2003**):
-  1. Identify the $k$-connectivity of the input graph
-  2. Remove the $k$-cutset (vertices)
-  3. Do the same on the resulting subgraphs until no more subdivisions can be obtained
-:::
-
----
-
 ## Cohesive blocking: the input graph
 
 :::: {.columns}
 
 ::: {.column width="45%"}
 ::: {.incremental}
+- The idea of cutsets leads to the **Cohesive Blocking** approach for the identification of nested cohesive subgroups (**Moody and White 2003**):
+  1. Identify the $k$-connectivity of the input graph
+  2. Remove the $k$-cutset (vertices)
+  3. Do the same on the resulting subgraphs until no more subdivisions can be obtained
 - This 23-node graph $G$ is **1-node connected**!
 - Can you tell which node we need to remove?
 :::
@@ -2846,9 +2841,7 @@ kbl(data.frame(Members = sapply(cb_blocks, function(b) paste0("{",
 :::: {.columns}
 
 ::: {.column width="50%"}
-::: {.incremental}
 - **Step 1: start with graph $G$.** Its edge connectivity is $\lambda(G) = 3$; removing the minimum edge cutset $\{AF, AL, CP\}$ splits the graph.
-:::
 :::
 
 ::: {.column width="50%"}
@@ -2885,9 +2878,7 @@ plot_net_lambda(gr_lambda)
 :::: {.columns}
 
 ::: {.column width="50%"}
-::: {.incremental}
 - **Step 2: remove $\{AF, AL, CP\}$.** This splits the graph into a clique component $\{A, B, C, D\}$ ($\lambda = 3$) and a giant component ($\lambda = 2$).
-:::
 :::
 
 ::: {.column width="50%"}
@@ -2910,9 +2901,7 @@ plot_net_lambda(gr_l2)
 :::: {.columns}
 
 ::: {.column width="50%"}
-::: {.incremental}
 - **Step 3: remove $\{HJ, HM\}$.** This disconnects the giant component, yielding a new component and a clique of size 4.
-:::
 :::
 
 ::: {.column width="50%"}
@@ -2935,9 +2924,7 @@ plot_net_lambda(gr_l3)
 :::: {.columns}
 
 ::: {.column width="50%"}
-::: {.incremental}
 - **Step 4: remove $\{JN, IN\}$.** Disconnecting the final component reveals four cohesive subgroups of size 4 — three are cliques, and $\{I, J, K, L\}$ is missing only the $IL$ tie (but its members remain far more connected to each other than to outsiders).
-:::
 :::
 
 ::: {.column width="50%"}
@@ -3032,24 +3019,17 @@ fviz_dend(d_dend, k = 4, k_colors = "uchicago", show_labels = TRUE, cex = 1.2,
 
 ---
 
-## K-core decomposition: the onion method
-
-::: {.incremental}
-- The method of **$k$-core decomposition** helps us find well-connected cores in networks:
-  1. Begin with the **less well-connected nodes** (e.g., degree = 1)
-  2. Remove those
-  3. Continue removing nodes based on degree to reveal deeper **"shells"** (like an onion)
-  4. Find the hidden **core**!
-:::
-
----
-
 ## K-core decomposition: k = 0
 
 :::: {.columns}
 
 ::: {.column width="45%"}
 ::: {.incremental}
+- The method of **$k$-core decomposition** helps us find well-connected cores in networks:
+  1. Begin with the **less well-connected nodes** (e.g., degree = 1)
+  2. Remove those
+  3. Continue removing nodes based on degree to reveal deeper **"shells"** (like an onion)
+  4. Find the hidden **core**!
 - Start with the full 21-node network
 :::
 :::
@@ -3118,9 +3098,7 @@ plot_core()
 :::: {.columns}
 
 ::: {.column width="45%"}
-::: {.incremental}
 - Remove the least well-connected nodes first: the six pendant nodes ($P$ to $U$)
-:::
 :::
 
 ::: {.column width="55%"}
@@ -3142,9 +3120,7 @@ plot_core(keep = LETTERS[1:15], hl = LETTERS[16:21])
 :::: {.columns}
 
 ::: {.column width="45%"}
-::: {.incremental}
 - Continue peeling: the six cycle nodes ($J$ to $O$) now have the lowest degree
-:::
 :::
 
 ::: {.column width="55%"}
@@ -3166,9 +3142,7 @@ plot_core(keep = LETTERS[1:9], hl = LETTERS[10:15])
 :::: {.columns}
 
 ::: {.column width="45%"}
-::: {.incremental}
 - The next shell ($B$, $D$, $F$, $G$, $H$, $I$) comes off
-:::
 :::
 
 ::: {.column width="55%"}
