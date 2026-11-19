@@ -498,7 +498,7 @@ plot_g12(hl = c("B", "C", "D", "F"), node_size = 11, lab = 6)
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- **No!** It's missing the $BF$ edge
+- **No!** It's missing the $BF$ and $CF$ edges
 :::
 :::
 
@@ -1095,6 +1095,9 @@ Cl <- C[, big]                      # 12 x 7 large-clique affiliation matrix
 O <- t(Cl) %*% Cl
 ```
 
+:::: {.columns}
+
+::: {.column width="55%"}
 ::: {.incremental}
 - In a graph we can **enumerate all the cliques** up to the maximum clique size
 - This graph has cliques of size three, four, and five. More specifically it has:
@@ -1104,6 +1107,19 @@ O <- t(Cl) %*% Cl
 - So $16 + 6 + 1 = 23$ cliques total!
 - We can arrange this in a **Person $\times$ Clique affiliation matrix**
 :::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+plot_g12(node_size = 11, lab = 6)
+```
+:::
+
+::::
 
 ---
 
@@ -1228,7 +1244,7 @@ kbl(Cr2, format = "html", align = "c") |>
 
 :::: {.columns}
 
-::: {.column width="45%"}
+::: {.column width="36%"}
 ::: {.incremental}
 - The rank order of the number of cliques a node belongs to is a **centrality metric** on the nodes!
   - $F$ (12 cliques) seems to be in the middle of everything!
@@ -1238,14 +1254,24 @@ kbl(Cr2, format = "html", align = "c") |>
 :::
 :::
 
-::: {.column width="55%"}
+::: {.column width="28%"}
 ```{r}
 #| echo: false
 #| results: asis
 rs <- sort(rowSums(C), decreasing = TRUE)
 kbl(data.frame(Node = names(rs), Cliques = as.integer(rs)),
     format = "html", align = "lc") |>
-  kable_styling(font_size = 18, full_width = FALSE)
+  kable_styling(font_size = 16, full_width = FALSE)
+```
+:::
+
+::: {.column width="36%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 3.5
+#| fig-height: 3.5
+plot_g12(hl = "F", node_size = 11, lab = 6)
 ```
 :::
 
@@ -1438,24 +1464,54 @@ ggraph(gr_cg, layout = "manual", x = cg_lay[V(gr_cg)$name, 1],
 
 ## N-Cliques
 
+:::: {.columns}
+
+::: {.column width="55%"}
 ::: {.incremental}
 - Some subgraphs are **not complete graphs** (cliques) but they are almost there
 - They are **quasi-groups**
 - We can **relax the strict clique definition** to accommodate!
 :::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+plot_g12(node_size = 11, lab = 6)
+```
+:::
+
+::::
 
 ---
 
 ## N-Cliques
 
+:::: {.columns}
+
+::: {.column width="55%"}
 ::: {.incremental}
-- Some subgraphs are not complete graphs (cliques) but they are almost there
-- They are quasi-groups
-- We can relax the strict clique definition to accommodate!
 - An **$n$-clique** is a maximal subgraph in which each node can reach every other node **in at most $n$ steps**:
   - $$d(u, v) \le n \quad \text{for all } u, v \in V'$$
   - 2-clique, 3-clique, 4-clique, etc.
+- The seven green nodes are a candidate: no clique, but everyone close to everyone
 :::
+:::
+
+::: {.column width="45%"}
+```{r}
+#| echo: false
+#| fig-align: "center"
+#| fig-width: 5.9
+#| fig-height: 4.3
+plot_g12(hl = c("A", "B", "C", "D", "E", "F", "K"), node_size = 11, lab = 6)
+```
+:::
+
+::::
 
 ---
 
