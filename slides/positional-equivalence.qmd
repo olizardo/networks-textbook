@@ -181,25 +181,70 @@ kbl(adj_mat, format = "html", align = "c") %>%
 
 ---
 
-## Euclidean Distance Calculation: $A$ vs. $C$
+## Euclidean Distance Calculation: $A$ vs. $C$ (Step 1)
 
-- Let's calculate the Euclidean distance between $A$ ($0, 0, 1, 1, 0, 0$) and $C$ ($1, 1, 0, 0, 1, 0$):
+::: {.incremental}
+- Every node's connectivity pattern is a **row of the adjacency matrix**. Write down the vectors for the two nodes:
+:::
 
 ```{r}
 #| echo: false
 a_vec <- c(0, 0, 1, 1, 0, 0)
 c_vec <- c(1, 1, 0, 0, 1, 0)
-diff_vec <- a_vec - c_vec
-sq_vec <- diff_vec^2
-c_diff <- c("(0 - 1)", "(0 - 1)", "(1 - 0)", "(1 - 0)", "(0 - 1)", "(0 - 0)")
-calc_mat <- matrix(c(a_vec, c_vec, c_diff, diff_vec, sq_vec), nrow = 5, byrow = TRUE)
-rownames(calc_mat) <- c("Vector A", "Vector C", "A - C", "Difference", "Squared Diff")
-kbl(calc_mat, format = "html", align = "c") %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"))
+step1 <- matrix(c(a_vec, c_vec), nrow = 2, byrow = TRUE)
+rownames(step1) <- c("Vector A", "Vector C")
+kbl(step1, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 22)
 ```
 
-- Sum of squared differences: $\sum_j (a_{(A)j} - a_{(C)j})^2 = 1 + 1 + 1 + 1 + 1 + 0 = 5$
-- Euclidean Distance: $d^{Euclid}_{A, C} = \sqrt{5} \approx 2.24$
+---
+
+## Euclidean Distance Calculation: $A$ vs. $C$ (Step 2)
+
+::: {.incremental}
+- **Subtract** one vector from the other, entry by entry:
+:::
+
+```{r}
+#| echo: false
+diff_vec <- a_vec - c_vec
+step2 <- matrix(c("(0 - 1)", "(0 - 1)", "(1 - 0)", "(1 - 0)", "(0 - 1)", "(0 - 0)"),
+                nrow = 1, byrow = TRUE)
+rownames(step2) <- "A - C"
+kbl(step2, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 22)
+```
+
+---
+
+## Euclidean Distance Calculation: $A$ vs. $C$ (Step 3)
+
+::: {.incremental}
+- **Square** each difference (the signs disappear):
+:::
+
+```{r}
+#| echo: false
+sq_vec <- diff_vec^2
+step3 <- matrix(as.character(sq_vec), nrow = 1, byrow = TRUE)
+rownames(step3) <- "Squared"
+kbl(step3, format = "html", align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 22)
+```
+
+---
+
+## Euclidean Distance Calculation: $A$ vs. $C$ (Result)
+
+::: {.incremental}
+- **Add up** the squared differences, then take the **square root**:
+:::
+
+$$d^{Euclid}_{A, C} = \sqrt{1 + 1 + 1 + 1 + 1 + 0} = \sqrt{5} \approx 2.24$$
+
+::: {.incremental}
+- The nodes are **far apart** in connectivity pattern — consistent with $A$ and $C$ occupying different positions.
+:::
 
 ---
 
