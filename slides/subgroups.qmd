@@ -1650,20 +1650,19 @@ plot_g12(node_size = 11, lab = 6)
 
 ::::
 
-# Part 5: Graph Connectivity
+# Part 5: Putting Connectivity to Work
 
 ---
 
-## Graph connectivity: Components
+## Graph connectivity: Where we've been
 
 :::: {.columns}
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- A graph is **connected** if there exists a (finite) path between each pair of nodes
-- A graph is **disconnected** if there does not exist a path connecting every pair of nodes
-- A connected subgraph is called a **component**
-- These are two different components
+- You have already met **connected** and **disconnected** graphs, **components**, and the **giant component**
+- You have also seen **bridges**, **articulation nodes**, and **node** and **edge cutsets**
+- Today we put all of these ideas to work on a single graph
 :::
 :::
 
@@ -1683,162 +1682,6 @@ plot_g12(drop_edges = list(c("B","E"), c("D","F"), c("D","K")),
 
 ---
 
-## Graph connectivity: Components
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- If a graph has more than one component it is by definition **disconnected**
-- Drop one more link ($FK$) and there are three different components
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_g12(drop_edges = list(c("B","E"), c("D","F"), c("D","K"), c("F","K")),
-         node_size = 11, lab = 6)
-```
-:::
-
-::::
-
----
-
-## The giant component
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- The connected subgraph containing the **largest number of vertices** in a graph is called the **giant component**
-- This is the giant component!
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_g12(hl = c("E","F","G","H","I","J","K","L"),
-         drop_edges = list(c("B","E"), c("D","F"), c("D","K")),
-         node_size = 11, lab = 6)
-```
-:::
-
-::::
-
----
-
-## Graph connectivity: K-Connectivity
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- We can **disconnect a graph by removing edges**
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_conn(gbr2, lbr2, node_size = 12, lab = 6.5)
-```
-:::
-
-::::
-
----
-
-## Graph connectivity: K-Connectivity
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- Remove the link $DE$ and the graph splits in two!
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_conn(delete_edges(gbr2, get_edge_ids(gbr2, c("D","E"))), lbr2,
-          node_size = 12, lab = 6.5)
-```
-
-<p style="text-align: center; color: #C0392B; font-weight: 600; margin-top: 0;">Oops! Disconnected!</p>
-:::
-
-::::
-
----
-
-## Graph connectivity: K-Connectivity
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- We can also **disconnect a graph by removing nodes**
-- It can be easier to disconnect a graph by removing nodes, because **nodes take their links with them**!
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_conn(gbr2, lbr2, node_size = 12, lab = 6.5)
-```
-:::
-
-::::
-
----
-
-## Graph connectivity: K-Connectivity
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- Remove node $D$ and the two halves are cut off from each other!
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_conn(induced_subgraph(gbr2, setdiff(V(gbr2)$name, "D")), lbr2,
-          node_size = 12, lab = 6.5)
-```
-
-<p style="text-align: center; color: #C0392B; font-weight: 600; margin-top: 0;">Oops! Disconnected!</p>
-:::
-
-::::
-
----
-
 ## Graph connectivity: K-Connectivity
 
 :::: {.columns}
@@ -1849,84 +1692,6 @@ plot_conn(induced_subgraph(gbr2, setdiff(V(gbr2)$name, "D")), lbr2,
 - Here $k$-connectivity = 1
 - Some nodes are more "important" because they serve as the **connectors**
 - Can you guess what kind of centrality "connector" nodes are more likely to have?
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_conn(gbr2, lbr2, hl_red = "D", node_size = 12, lab = 6.5)
-```
-:::
-
-::::
-
----
-
-## Bridges
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- Graphs with edge connectivity equal to one have a special edge
-- This edge is called a **bridge**
-- Here edge connectivity = 1: the edge $DE$ is a bridge!
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_conn(gbr2, lbr2, hl_edge = list(c("D","E")), node_size = 12, lab = 6.5)
-```
-:::
-
-::::
-
----
-
-## Edge Connectivity
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- Some graphs are easy to disconnect by **removing edges** (only a few links required)
-- Others are hard to disconnect (many links must go)
-- The **edge-connectivity** of a graph is the minimum number of edges that must be removed to disconnect the graph
-:::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_conn(gbr2, lbr2, hl_edge = list(c("D","E")), node_size = 12, lab = 6.5)
-```
-:::
-
-::::
-
----
-
-## Articulation nodes
-
-:::: {.columns}
-
-::: {.column width="55%"}
-::: {.incremental}
-- Graphs with $k$-connectivity equal to one have a special node
-- This node is called an **articulation node**
-- Here $k$-connectivity = 1: node $D$ is an articulation node!
 :::
 :::
 
@@ -2086,74 +1851,9 @@ plot_conn(gsh, lsh, hl_red = "D", hl_edge = list(c("D","E"), c("D","F"), c("D","
 :::: {.columns}
 
 ::: {.column width="55%"}
-- In a graph, any set of nodes that when removed disconnects the graph is called a **node cutset**
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_g12(hl = c("E", "F"), node_size = 11, lab = 6)
-```
-:::
-
-::::
-
----
-
-## Node cutsets
-
-:::: {.columns}
-
-::: {.column width="55%"}
-- $\{E, F\}$ is a node cutset for this graph
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_g12_keep(setdiff(LETTERS[1:12], c("E", "F")))
-```
-:::
-
-::::
-
----
-
-## Node cutsets
-
-:::: {.columns}
-
-::: {.column width="55%"}
-- $\{B, D\}$ is another node cutset for this graph
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_g12_keep(setdiff(LETTERS[1:12], c("B", "D")))
-```
-:::
-
-::::
-
----
-
-## Node cutsets
-
-:::: {.columns}
-
-::: {.column width="55%"}
 ::: {.incremental}
-- Can you spot another node cutset?
+- A **node cutset** is any set of nodes that, when removed, disconnects the graph
+- Can you spot a node cutset in this graph?
 :::
 :::
 
@@ -2227,31 +1927,9 @@ plot_g12_keep(setdiff(LETTERS[1:12], "K"))
 
 ::: {.column width="55%"}
 ::: {.incremental}
-- In a graph, any set of **edges** that when removed disconnects the graph is called an **edge cutset**
-- In this graph $\{BE, DF, FK\}$ is an edge cutset
+- An **edge cutset** is any set of **edges** that, when removed, disconnects the graph
+- $\{DK, FK\}$ is an edge cutset for this graph
 :::
-:::
-
-::: {.column width="45%"}
-```{r}
-#| echo: false
-#| fig-align: "center"
-#| fig-width: 5.9
-#| fig-height: 4.3
-plot_g12(hl_edges = list(c("B","E"), c("D","F"), c("F","K")), node_size = 11, lab = 6)
-```
-:::
-
-::::
-
----
-
-## Edge cutsets
-
-:::: {.columns}
-
-::: {.column width="55%"}
-- $\{DK, FK\}$ is also an edge cutset
 :::
 
 ::: {.column width="45%"}
